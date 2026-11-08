@@ -709,9 +709,10 @@ def lip_ice(d, M, k=0):
     G.stroke(d, outer + inner[1:], M["ice"], 0.0, cyclic=True)
     G.stroke(d, [(x, z) for x, z in rise] + [(x, z - 0.03) for x, z in rise[::-1]], M["ice_lit"], 0.0, cyclic=True)
     G.stroke(d, chin + [(xface, zb)] + [(xface - 0.02, zb + 0.04), (0.26, zb + 0.045)], M["ice_sh"], 0.0, cyclic=True)
-    for x, L in ((0.25, 0.17), (0.17, 0.27), (0.09, 0.12)):                                    # icicles, pointed (not drips)
-        G.stroke(d, [(x - 0.026, zb + 0.005), (x + 0.026, zb + 0.005), (x + 0.004, zb - L)], M["ice_i"], I, cyclic=True)
-        G.seam(d, [(x - 0.008, zb - 0.01), (x - 0.002, zb - L * 0.6)], M["ink"])
+    for x, L, w in ((0.12, 0.24, 0.03), (0.03, 0.1, 0.022)):                                  # LEAD 15:2x: three dark, even points under
+        G.stroke(d, [(x - w, zb + 0.005), (x + w, zb + 0.005), (x + 0.006, zb - L)], M["ice_lit_i"], I, cyclic=True)   # the nose read as
+        G.stroke(d, [(x + 0.004, zb), (x + w, zb + 0.004), (x + 0.006, zb - L * 0.9)], M["ice_sh"], 0.0, cyclic=True)  # teeth: two pale,
+                                                                                              # uneven icicles set back from the nose
     G.stroke(d, outer, M["ink"], O)
     G.seam(d, inner, M["ink"])
     G.stroke(d, [(-0.2, top - 0.035), (-0.185, top - 0.05), (-0.2, top - 0.065), (-0.215, top - 0.05)], M["ice_lit_i"], I, cyclic=True)   # a glint
@@ -719,19 +720,37 @@ def lip_ice(d, M, k=0):
 
 
 def lip_tessera(d, M, k=0):
-    """The tesserae's brink: the warm-grey crust running past the edge as a folded slab - its fold ridges on top, a rounded,
-    chipped nose over the face, a lit rim, the shaded underside, dust in the grooves, two flakes falling."""
-    top = 0.04
-    outer, inner, rise, chin, xface, zb = _slab(top, 0.15, 0.38, bumps=0.01, seed=5)        # rev: 0.025 bumps read as segments
-    G.stroke(d, outer + inner[1:], M["tess"], 0.0, cyclic=True)
-    G.stroke(d, [(x, z) for x, z in rise] + [(x, z - 0.03) for x, z in rise[::-1]], M["tess_lit"], 0.0, cyclic=True)
-    G.stroke(d, chin + [(xface, zb)] + [(xface - 0.02, zb + 0.045), (0.31, zb + 0.05)], M["tess_sh"], 0.0, cyclic=True)
-    G.stroke(d, [(-0.60, zb + 0.04), (xface - 0.04, zb + 0.04), (xface, zb), (-0.60, zb)], M["tess_sh"], 0.0, cyclic=True)
-    G.stroke(d, outer, M["ink"], O)
+    """The tesserae's brink (LEAD 15:2x: the first, a flat slab jutting straight out, read as a plank): the warm-grey folded
+    crust curling down over the brink like the other lips, its slanting fold lines following the bend, a rounded nose with a
+    chip at the end of the curl, a lit rim on top, the shaded underside, dust in a groove, two flakes falling."""
+    top, th, a1 = 0.04, 0.15, 96
+    outer, inner = _hood(top, th, a1, bulge=0.02)
+    _o2, inner2 = _hood(top, th * 0.62, a1, bulge=0.02)
+    ro, ri = top - LIP_CZ + 0.02 * math.sin(math.radians(a1)) ** 2, top - LIP_CZ - th
+    ar = math.radians(a1)
+    nrm, tng = (math.sin(ar), math.cos(ar)), (math.cos(ar), -math.sin(ar))                    # radial out, along the curl
+    mid = (((ro + ri) / 2) * nrm[0], LIP_CZ + ((ro + ri) / 2) * nrm[1])
+    h = (ro - ri) / 2
+    cap = []                                                                                  # a rounded nose, one chip bitten out
+    for j in range(1, 10):
+        t = math.pi * j / 10
+        rr = h * (0.72 if j == 4 else 1.0)
+        cap.append((mid[0] + rr * (math.cos(t) * nrm[0] + 0.8 * math.sin(t) * tng[0]), mid[1] + rr * (math.cos(t) * nrm[1] + 0.8 * math.sin(t) * tng[1])))
+    shell = outer + cap + inner
+    G.stroke(d, shell, M["tess"], 0.0, cyclic=True)
+    G.stroke(d, inner2 + inner[::-1], M["tess_sh"], 0.0, cyclic=True)
+    G.stroke(d, [(x, z) for x, z in outer[:12]] + [(x, z - 0.03) for x, z in outer[11::-1]], M["tess_lit"], 0.0, cyclic=True)
+    for a in (-0.42, -0.14):                                                                  # fold lines on the flat, slanting back
+        G.seam(d, [(a, top - 0.008), (a - 0.05, top - 0.07), (a - 0.08, top - th + 0.02)], M["ink"])
+    for deg in (22, 50, 76):                                                                  # and round the bend, slanting with it
+        p0 = math.radians(deg)
+        p1 = math.radians(deg - 9)
+        G.seam(d, [((ro - 0.01) * math.sin(p0), LIP_CZ + (ro - 0.01) * math.cos(p0)),
+                   ((ri + 0.06) * math.sin((p0 + p1) / 2), LIP_CZ + (ri + 0.06) * math.cos((p0 + p1) / 2)),
+                   ((ri + 0.02) * math.sin(p1), LIP_CZ + (ri + 0.02) * math.cos(p1))], M["ink"])
+    G.stroke(d, [(-0.36, top - 0.02), (-0.32, top - 0.02), (-0.37, top - 0.08), (-0.41, top - 0.075)], M["tess_dp"], 0.0, cyclic=True)
+    G.stroke(d, outer + cap, M["ink"], O)
     G.seam(d, inner, M["ink"])
-    for x in (-0.42, -0.12, 0.16):                                                            # fold lines slanting back (rev: vertical
-        G.seam(d, [(x, top - 0.01), (x - 0.05, top - 0.06), (x - 0.09, zb + 0.03)], M["ink"])  # joints read as segments)
-        G.stroke(d, [(x - 0.012, top - 0.02), (x + 0.006, top - 0.02), (x - 0.045, top - 0.075), (x - 0.06, top - 0.07)], M["tess_dp"], 0.0, cyclic=True)
     for j, (x, z, r) in enumerate(((0.47, -0.42, 0.034), (0.51, -0.6, 0.027))):
         G.stroke(d, B._shard(x, z, r, random.Random(2001 + j), sides=5, flat=0.6), M["tess_i"], I, cyclic=True)
 

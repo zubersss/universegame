@@ -1,0 +1,316 @@
+"""B-199 (LEAD cycle 284): the item icons re-inked as v3 (49 of icons/<item>/base were v2 shaded renders: no ink, no json, seen
+in every inventory and crafting panel). Same keys, same 128x128 size: the export replaces each base_color.png in place and
+adds its json (B-128's: style v3, icon, pivot centre). Each item keeps its v2 identity (shape, colour) drawn in the house
+style: ink 2-3 / 1-1.5 px, the material colour lit top-left, its mid and deep shadow tones (D-100), drawn marks, the Earth
+palette's tones only; no faces (D-101: never two glints side by side). Batches (LEAD: ores and crystals first):
+
+  batch 1  iron, copper, nickel, aluminium, carbon, graphite, hematite, silica, solarite, deep_diamond
+
+  python -I build_icons_items_v3.py <review png>   lock-free preview: each new icon over its v2 render at 1x and at the
+                                                    32 px slot, beside the v3 icons already in (B-128's cubes, wind_anchor)
+"""
+import math
+import os
+import random
+import sys
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, HERE)
+from meridian import fakegp, v3  # noqa: E402
+
+G = fakegp.install()
+import gp_raster as GR  # noqa: E402
+
+P = v3.PALETTES["earth"]
+O, I = G.OUTER, G.INNER
+SIZE, PPU = 128, 128                              # 1 m = 128 px: the objects are ~0.8 m across
+KEY = "icons/{}/base"
+TONES = {"green": "green", "brown": "brown", "sky": "sky", "teal": "teal", "mustard": "mustard", "red": "red", "off": "offwhite"}
+
+
+def mats(gp):
+    M = {"ink": G.mat(gp, "icon_ink", fill=None)}
+    for k, slot in TONES.items():
+        h = P[slot]
+        for suf, hx in (("", h), ("_sh", v3.shadow_of(h, "earth")), ("_dp", v3.deep_of(h, "earth"))):
+            M[k + suf] = G.mat(gp, f"icon_{k}{suf}", fill=hx, ink=False)
+            M[k + suf + "_i"] = G.mat(gp, f"icon_{k}{suf}_i", fill=hx)
+    return M
+
+
+def lump(cx, cz, rx, rz, seed, n=9, jit=0.12):
+    """A faceted lump's outline in angular order (index i at about 360 i / n degrees)."""
+    rnd = random.Random(seed)
+    return [(cx + rx * (1 + rnd.uniform(-jit, jit * 0.6)) * math.cos(a), cz + rz * (1 + rnd.uniform(-jit, jit * 0.6)) * math.sin(a))
+            for a in [2 * math.pi * i / n + rnd.uniform(-0.12, 0.12) for i in range(n)]]
+
+
+def faceted(d, M, pts, base, lit, dark, cx, cz, seams=True):
+    """Fill, a lit top-left facet, a dark lower-right facet (wedges to an inner point), facet seams, the ink outline."""
+    n = len(pts)
+    ang = [math.degrees(math.atan2(z - cz, x - cx)) % 360 for x, z in pts]
+    G.stroke(d, pts, M[base], 0.0, cyclic=True)
+    li = [p for p, a in zip(pts, ang) if 75 <= a <= 215]
+    dk = [p for p, a in zip(pts, ang) if a >= 235 or a <= 10]
+    rx = max(abs(x - cx) for x, _z in pts)
+    rz = max(abs(z - cz) for _x, z in pts)
+    pin_l, pin_d = (cx - rx * 0.12, cz + rz * 0.14), (cx + rx * 0.16, cz - rz * 0.12)
+    if len(li) >= 2:
+        G.stroke(d, li + [pin_l], M[lit], 0.0, cyclic=True)
+    if len(dk) >= 2:
+        G.stroke(d, sorted(dk, key=lambda p: (math.degrees(math.atan2(p[1] - cz, p[0] - cx)) - 200) % 360) + [pin_d], M[dark], 0.0, cyclic=True)
+    if seams:
+        for p in pts[1:n:2]:
+            G.seam(d, [((p[0] + pin_l[0]) / 2, (p[1] + pin_l[1]) / 2), (p[0] * 0.8 + cx * 0.2, p[1] * 0.8 + cz * 0.2)], M["ink"])
+    G.stroke(d, pts, M["ink"], O, cyclic=True)
+
+
+def glint(d, M, x, z, s=0.03):
+    G.stroke(d, [(x, z + s), (x + s * 0.4, z), (x, z - s), (x - s * 0.4, z)], M["off_i"], I, cyclic=True)
+
+
+def prism(d, M, x0, x1, z0, tip, light, dark, lean=0.0):
+    """A pointed crystal prism, light left half, dark right half, its middle edge."""
+    xm = (x0 + x1) / 2
+    top = (xm + lean, tip)
+    sh = (x1 - x0) * 0.25
+    left = [(x0, z0), (xm, z0 - sh * 0.3), (xm + lean * 0.7, tip - sh * 1.6), top, (x0 + lean * 0.8, tip - sh * 2.2)]
+    right = [(xm, z0 - sh * 0.3), (x1, z0), (x1 + lean * 0.8, tip - sh * 2.2), top, (xm + lean * 0.7, tip - sh * 1.6)]
+    G.stroke(d, left, M[light], 0.0, cyclic=True)
+    G.stroke(d, right, M[dark], 0.0, cyclic=True)
+    G.seam(d, [(xm, z0 - sh * 0.3), (xm + lean * 0.7, tip - sh * 1.6), top], M["ink"])
+    G.stroke(d, [(x0, z0), (xm, z0 - sh * 0.3), (x1, z0), (x1 + lean * 0.8, tip - sh * 2.2), top, (x0 + lean * 0.8, tip - sh * 2.2)], M["ink"], O, cyclic=True)
+
+
+# ---------------------------------------------------------------- batch 1: ores and crystals
+
+def iron(d, M):
+    pts = lump(0.0, -0.02, 0.37, 0.3, 11)
+    faceted(d, M, pts, "red_sh", "red", "red_dp", 0.0, -0.02)
+    for j, (x, z) in enumerate(((-0.12, 0.08), (0.1, -0.08), (0.18, 0.1), (-0.06, -0.14))):   # metal grains
+        G.stroke(d, G.lumpy_ellipse(x, z, 0.03, 0.022, n=8, seed=20 + j), M["sky_i"], I, cyclic=True)
+    G.specks(d, [(-0.22, -0.04), (0.02, 0.16), (0.24, -0.12)], M["ink"])
+    glint(d, M, -0.17, 0.15)
+
+
+def copper(d, M):
+    pts = lump(0.0, -0.03, 0.38, 0.29, 12)
+    faceted(d, M, pts, "teal_sh", "teal", "teal_dp", 0.0, -0.03)
+    for j, (x, z, r) in enumerate(((-0.12, 0.04, 0.07), (0.14, -0.06, 0.06), (0.02, -0.16, 0.045))):   # copper nuggets
+        nug = G.lumpy_ellipse(x, z, r * 1.2, r, n=12, lump=0.12, seed=30 + j)
+        G.stroke(d, nug, M["mustard"], 0.0, cyclic=True)
+        G.stroke(d, [q for q in nug if q[1] < z] + [(x, z)], M["red_sh"], 0.0, cyclic=True)
+        G.stroke(d, nug, M["ink"], I, cyclic=True)
+    glint(d, M, -0.15, 0.06, 0.025)
+
+
+def nickel(d, M):
+    pts = G.lumpy_ellipse(0.0, -0.02, 0.33, 0.29, n=24, lump=0.06, seed=41)
+    G.stroke(d, pts, M["sky_sh"], 0.0, cyclic=True)
+    G.stroke(d, [q for q in pts if q[0] - q[1] * 0.6 > 0.06] + [(0.08, -0.06)], M["sky_dp"], 0.0, cyclic=True)
+    G.stroke(d, G.lumpy_ellipse(-0.1, 0.08, 0.15, 0.12, n=16, lump=0.05, seed=42), M["sky"], 0.0, cyclic=True)
+    for j, (x, z) in enumerate(((0.12, 0.08), (-0.04, -0.12), (0.16, -0.1))):                 # dimples
+        G.stroke(d, G.lumpy_ellipse(x, z, 0.035, 0.025, n=8, seed=43 + j), M["sky_dp"], 0.0, cyclic=True)
+    G.stroke(d, G.lumpy_ellipse(-0.14, 0.12, 0.05, 0.03, n=10, seed=46), M["off"], 0.0, cyclic=True)
+    G.stroke(d, pts, M["ink"], O, cyclic=True)
+
+
+def aluminium(d, M):
+    top = [(-0.3, 0.06), (0.22, 0.06), (0.36, 0.16), (-0.16, 0.16)]                          # an ingot in 3/4 view
+    front = [(-0.36, -0.16), (0.24, -0.16), (0.22, 0.06), (-0.3, 0.06)]
+    side = [(0.24, -0.16), (0.38, -0.06), (0.36, 0.16), (0.22, 0.06)]
+    G.stroke(d, front, M["off_sh"], 0.0, cyclic=True)
+    G.stroke(d, side, M["sky_sh"], 0.0, cyclic=True)
+    G.stroke(d, top, M["off"], 0.0, cyclic=True)
+    G.stroke(d, [(-0.2, -0.06), (0.1, -0.06), (0.09, 0.0), (-0.19, 0.0)], M["off_dp"], 0.0, cyclic=True)   # the stamped panel
+    for poly in (top, side):
+        G.seam(d, poly, M["ink"])
+    G.stroke(d, [(-0.36, -0.16), (0.24, -0.16), (0.38, -0.06), (0.36, 0.16), (-0.16, 0.16), (-0.3, 0.06)], M["ink"], O, cyclic=True)
+    G.seam(d, [(-0.3, 0.06), (0.22, 0.06), (0.24, -0.16)], M["ink"])
+    G.stroke(d, [(-0.12, 0.13), (0.1, 0.13), (0.11, 0.115), (-0.11, 0.115)], M["off_i"], 0.0, cyclic=True)
+
+
+def carbon(d, M):
+    pts = lump(0.0, -0.01, 0.34, 0.31, 51, n=7, jit=0.1)
+    faceted(d, M, pts, "sky_dp", "sky_sh", "brown_dp", 0.0, -0.01)
+    glint(d, M, -0.12, 0.12, 0.028)
+    G.specks(d, [(0.1, 0.05), (0.16, -0.12), (-0.08, -0.16)], M["ink"])
+
+
+def graphite(d, M):
+    for i, (dx, dz, w) in enumerate(((-0.02, -0.17, 0.36), (0.03, -0.05, 0.31), (-0.04, 0.07, 0.25))):   # stacked sheets
+        topf = [(dx - w, dz + 0.04), (dx + w - 0.08, dz + 0.04), (dx + w, dz + 0.1), (dx - w + 0.08, dz + 0.1)]
+        edge = [(dx - w, dz - 0.02), (dx + w - 0.08, dz - 0.02), (dx + w, dz + 0.04), (dx + w - 0.08, dz + 0.04), (dx - w, dz + 0.04)]
+        G.stroke(d, edge, M["sky_dp"], 0.0, cyclic=True)
+        G.stroke(d, topf, M["sky_sh"], 0.0, cyclic=True)
+        G.seam(d, [(dx - w + 0.12, dz + 0.07), (dx + w - 0.15, dz + 0.07)], M["ink"])
+        G.stroke(d, [(dx - w, dz - 0.02), (dx + w - 0.08, dz - 0.02), (dx + w, dz + 0.04), (dx + w, dz + 0.1), (dx - w + 0.08, dz + 0.1), (dx - w, dz + 0.04)],
+                 M["ink"], O if i == 0 else I, cyclic=True)
+        G.seam(d, [(dx - w, dz + 0.04), (dx + w - 0.08, dz + 0.04), (dx + w, dz + 0.1)], M["ink"])
+    glint(d, M, -0.12, 0.15, 0.022)
+
+
+def hematite(d, M):
+    balls = [(-0.17, -0.1, 0.14), (0.16, -0.12, 0.15), (0.0, 0.02, 0.19), (0.12, 0.17, 0.1)]   # a cluster of 'blueberries'
+    for j, (x, z, r) in enumerate(balls):
+        b = G.lumpy_ellipse(x, z, r, r * 0.96, n=20, lump=0.03, seed=60 + j)
+        G.stroke(d, b, M["red_dp"], 0.0, cyclic=True)
+        G.stroke(d, G.lumpy_ellipse(x - r * 0.25, z + r * 0.25, r * 0.55, r * 0.45, n=14, lump=0.03, seed=65 + j), M["red_sh"], 0.0, cyclic=True)
+        G.stroke(d, b, M["ink"], O if r > 0.12 else I, cyclic=True)
+    glint(d, M, -0.06, 0.1, 0.035)                                                            # one glint only (no pair: D-101)
+
+
+def silica(d, M):
+    peb = G.lumpy_ellipse(0.02, -0.24, 0.3, 0.1, n=18, lump=0.08, seed=71)                  # a sandy pebble at the root
+    G.stroke(d, peb, M["mustard_sh_i"], O, cyclic=True)
+    for x0, x1, tip, lean in ((-0.24, -0.08, 0.2, -0.05), (0.08, 0.24, 0.16, 0.06), (-0.1, 0.1, 0.38, 0.0)):
+        prism(d, M, x0, x1, -0.2, tip, "off", "sky_sh", lean)
+    glint(d, M, -0.03, 0.22, 0.026)
+
+
+def solarite(d, M):
+    G.stroke(d, G.lumpy_ellipse(0.0, -0.16, 0.17, 0.12, n=16, lump=0.06, seed=81), M["brown_dp_i"], O, cyclic=True)   # the dark core
+    for x0, x1, tip, lean in ((-0.3, -0.14, 0.12, -0.08), (0.14, 0.3, 0.1, 0.08), (-0.18, -0.02, 0.32, -0.03), (0.02, 0.18, 0.36, 0.04)):
+        prism(d, M, x0, x1, -0.22, tip, "mustard", "mustard_sh", lean)
+    glint(d, M, 0.08, 0.2, 0.026)
+
+
+def deep_diamond(d, M):
+    T, Bm, L, R, F = (0.0, 0.38), (0.0, -0.38), (-0.3, 0.02), (0.3, 0.02), (0.06, -0.02)
+    for tri, mat in (((T, L, F), "off"), ((T, F, R), "sky"), ((L, F, Bm), "sky_sh"), ((F, R, Bm), "sky_dp")):
+        G.stroke(d, list(tri), M[mat], 0.0, cyclic=True)
+    for a, b in ((T, F), (L, F), (F, R), (F, Bm)):
+        G.seam(d, [a, b], M["ink"])
+    G.stroke(d, [T, R, Bm, L], M["ink"], O, cyclic=True)
+    glint(d, M, -0.08, 0.16, 0.03)
+
+
+ITEMS = {"iron": iron, "copper": copper, "nickel": nickel, "aluminium": aluminium, "carbon": carbon, "graphite": graphite,
+         "hematite": hematite, "silica": silica, "solarite": solarite, "deep_diamond": deep_diamond}
+PROPS = {n: (fn, SIZE, SIZE, None, 1, False) for n, fn in ITEMS.items()}   # do_prop_sheet_set's API (a set row exports them all)
+
+
+def render_item(name):
+    gp = fakegp.FakeGP()
+    M = mats(gp)
+    d = fakegp.FakeDrawing()
+    ITEMS[name](d, M)
+    return GR.render_frame(fakegp.strokes_of(d, gp), SIZE, SIZE, PPU, (0.5, 0.5), ss=4, seed=7)
+
+
+def render_all():
+    imgs, widths = {}, {}
+    for n in ITEMS:
+        img, w = render_item(n)
+        imgs[n], widths[n] = [img], w
+    return imgs, widths
+
+
+def checks(img):
+    m = v3.EDGE_MARGIN
+    a = img[..., 3]
+    p = []
+    if a[:m].any() or a[-m:].any() or a[:, :m].any() or a[:, -m:].any():
+        p.append(f"touches the {m} px edge")
+    hit, off = v3.palette_hits(img, "earth")
+    if hit < 0.98:
+        p.append(f"palette {hit * 100:.1f}% (off {' '.join(off[:3])})")
+    return p, hit
+
+
+def export(art, imgs=None, names=None):
+    import json
+    from meridian import pngio
+    names = list(names or ITEMS)
+    if imgs is None:
+        imgs, _w = render_all()
+    problems = []
+    for n in names:
+        p, _h = checks(imgs[n][0])
+        problems += [f"{n}: {x}" for x in p]
+    if problems:
+        raise ValueError("B-199 export checks: " + "; ".join(problems))
+    out = []
+    for n in names:
+        dd = os.path.join(art, "icons", n)
+        b = pngio.write_png(os.path.join(dd, "base_color.png"), imgs[n][0])
+        with open(os.path.join(dd, "base.json"), "w", encoding="utf-8", newline="\n") as f:
+            json.dump({"key": KEY.format(n), "style": "v3", "ppu": PPU, "pivot": [0.5, 0.5], "icon": True,
+                       "note": "B-199: re-inked as v3 (replacing the v2 shaded render)"}, f, indent=2)
+            f.write("\n")
+        out.append((KEY.format(n), SIZE, SIZE, b))
+    return out, {}, []
+
+
+def main(out, imgs=None, widths=None, stamp_paths=()):
+    """Each new icon over its v2 render (read from Art before the export; after it, the exported one) at 1x, both again at
+    the 32 px slot, and the v3 icons already in for the house look."""
+    import time
+    import numpy as np
+    from meridian import pngio
+    sys.path.insert(0, os.path.dirname(HERE))
+    import review
+    if imgs is None:
+        imgs, widths = render_all()
+    ART = os.path.join(os.path.dirname(os.path.dirname(HERE)), "Assets", "_Game", "Art")
+    paper = np.array(review.PAPER, np.float32)
+    names = list(ITEMS)
+    W = 8 + len(names) * 140
+    old = {}
+    for n in names:
+        p = os.path.join(ART, "icons", n, "base_color.png")
+        old[n] = pngio.read_png_np(p) if os.path.isfile(p) else None
+
+    def small(ic):
+        f = ic.shape[0] // 32
+        return ic.reshape(32, f, 32, f, 4).astype(np.float32).mean(axis=(1, 3)).astype(np.uint8)
+
+    def row(title, items, h):
+        r = np.empty((h, W, 3), np.float32)
+        r[:] = paper
+        review._label(r, title, 8, 4, scale=1)
+        for i, (lab, ic) in enumerate(items):
+            x = 8 + i * 140
+            if ic is None:
+                continue
+            r[20:20 + ic.shape[0], x:x + ic.shape[1]] = paper * 0.9
+            review._over(r, ic, x, 20)
+            if lab:
+                review._label(r, lab, x, 20 + ic.shape[0] + 4, scale=1)
+        return r
+    rows = [row("B-199 batch 1, NEW v3 (1x)", [(n, imgs[n][0]) for n in names], 168),
+            row("the same at the 32 px slot", [("", small(imgs[n][0])) for n in names], 60),
+            row("before: the v2 render in Art" + (" (now replaced)" if stamp_paths else "") + " (1x)", [(n, old[n] if not stamp_paths else None) for n in names], 168),
+            row("before at 32 px", [("", small(old[n]) if old[n] is not None and not stamp_paths else None) for n in names], 60)]
+    ref = []
+    for n in ("soil", "tessera", "sulfide", "wind_anchor"):
+        p = os.path.join(ART, "icons", n, "base_color.png")
+        if os.path.isfile(p):
+            ref.append((n, pngio.read_png_np(p)))
+    rows.append(row("the v3 icons already in (B-128's cubes 64 px, B-197's wind_anchor), 1x", ref, 168))
+    lines = []
+    for n in names:
+        p, hit = checks(imgs[n][0])
+        lines.append(f"icons/{n}/base: palette {hit * 100:.1f}%, problems: {'; '.join(p) or 'none'}")
+    for p in stamp_paths:
+        lines.append("exported " + review.stamp_text(p))
+    foot = np.empty((30 + 16 * len(lines), W, 3), np.float32)
+    foot[:] = paper
+    for i, ln in enumerate(lines):
+        review._label(foot, ln, 6, 6 + 16 * i, scale=1)
+    img = np.vstack(rows + [foot])
+    review.draw(img, time.strftime("%m-%d %H:%M") + " " + ("exported" if stamp_paths else "design preview (lock-free, fakegp + numpy)"),
+                2, img.shape[0] - 16, (1.0, 1.0, 0.85))
+    np.clip(img, 0.0, 1.0, out=img)
+    u8 = np.empty(img.shape[:2] + (4,), np.uint8)
+    u8[..., :3] = np.rint(img * 255.0)
+    u8[..., 3] = 255
+    pngio.write_png(out, u8)
+    print("written", out, u8.shape[1], "x", u8.shape[0])
+    for ln in lines:
+        print(ln)
+
+
+if __name__ == "__main__":
+    main(sys.argv[1])
+    fakegp.restore()
