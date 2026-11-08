@@ -409,7 +409,8 @@ def v3_sheet_review(entry, meta, frames, sheet_path, out, stats, stale=None):
         "face": face,
         "twos": ("x" if not stats["problems"] else "!", "fps 12, caps"),
         "motion": ("s", sc["motion"]) if "motion" in sc else (" ", "BLENDER did not self-check"),
-        "idle": ("x", "idle loops") if any(c["name"] == "idle" and c["loop"] for c in clips) else ("!", "no looping idle"),
+        "idle": ("x", "idle loops") if any(c["name"] == "idle" and c["loop"] for c in clips) else
+                (("s", sc["idle"]) if "idle" in sc else ("!", "no looping idle")),   # B-171: effects say why (one-shot / loop)
         "original": ("s", sc["original"]) if "original" in sc else (" ", "LEAD (§9.8)"),
         "sheet": ("x" if not stats["problems"] else "!", "png + json written, validated"),
         "budget": ("x" if stats["sheet_wh"][0] <= 2048 and stats["sheet_wh"][1] <= 2048 else "!",
