@@ -8,7 +8,7 @@ Directing Build 0.5.0 = Earth on smooth ground: UNITY commits the tree → P-54 
 ## Last completed
 Cycle 281: the resume review (B-178 Mars frost judged; B-179 tundra verified; cards and queue written).
 ## Next up
-1. UNITY's commit of the 06:17 tree → check its file list (git show --stat: no Editor churn, metas only for tracked Art). 2. UNITY's batched check → U-157 (P-54's round walls in the u157 re-shoot), U-158 (HarvestTests, items per minute vs 0.4.8, D-167 (2)), U-161 (the biome frames) Done or rulings; U-156 Done on M1Loop + Transition. 3. BLENDER's frost-decor fix → judge; B-181's variant list → rule. 4. U-163's smoke → the 0.5.0 page and USER-33. 5. LeadQA: M3Inner's Solarite step onto the node path when U-159 moves Mercury (M2Soak / M3Inner compile and call RigTools.Dig unchanged today).
+1. UNITY's batched check → U-157 (P-54's round walls in the u157 re-shoot), U-158 (HarvestTests, items per minute vs 0.4.8, D-167 (2)), U-161 (the biome frames) Done or rulings; U-156 Done on M1Loop + Transition. (UNITY's tree commit c4d59ee4 checked clean 09:4x.) 2. B-181's variant list → rule; B-180's lips preview → judge. 3. B-182's Earth audit sheet → read as 0.5.0's art evidence. (B-178 Mars frost exported and verified 09:4x, 2090cb3c.) 4. U-163's smoke → the 0.5.0 page and USER-33. 5. LeadQA: M3Inner's Solarite step onto the node path when U-159 moves Mercury (M2Soak / M3Inner compile and call RigTools.Dig unchanged today).
 ## Pending decisions
 none open.
 ## Waiting on the user
