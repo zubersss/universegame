@@ -1123,7 +1123,7 @@ def do_node_icon_set(entry, preview):
         raise AssetError(f"{entry['key']}: no preview mode (python build_icons_nodes_v3.py <png> <batch>)")
     import build_icons_nodes_v3 as NI
     batches = tuple(entry.get("batches", NI.EXPORT_BATCHES))
-    names = [n for b in batches for n in NI.BATCHES[b]]
+    names = entry.get("names") or [n for b in batches for n in NI.BATCHES[b]]     # "names": the accepted part of a batch
     fakegp.install()                    # an earlier review script in this batch may have restored gp_draw.mat
     try:
         try:

@@ -362,11 +362,71 @@ def m_thrust(d, M, lv=2):
             G.stroke(d, [(s * 0.17, 0.12), (s * 0.34, -0.02), (s * 0.34, -0.12), (s * 0.2, -0.06)], M["red_sh_i"], I, cyclic=True)
 
 
+# ---------------------------------------------------------------- batch 3 (ring 3)
+def m_heatsink(d, M, lv=1):
+    """No Beam cool-down: a finned steel heat sink clamped on the teal emitter, cool teal waves rising off it."""
+    G.stroke(d, [(-0.4, -0.3), (-0.04, -0.3), (-0.04, -0.06), (-0.4, -0.06)], M["teal_sh_i"], O, cyclic=True)        # the emitter
+    G.stroke(d, [(-0.04, -0.27), (0.06, -0.24), (0.06, -0.12), (-0.04, -0.09)], M["mustard_i"], I, cyclic=True)
+    G.stroke(d, [(-0.36, -0.06), (-0.08, -0.06), (-0.08, 0.02), (-0.36, 0.02)], M["sky_sh_i"], I, cyclic=True)       # the clamp
+    for k in range(5):                                                                                                  # the fins
+        x = -0.36 + 0.065 * k
+        G.stroke(d, [(x, 0.02), (x + 0.035, 0.02), (x + 0.035, 0.26), (x, 0.26)], M["sky_i"], I, cyclic=True)
+    for k, x in enumerate((-0.3, -0.18, -0.06)):                                                                        # cool waves
+        G.stroke(d, G.hose_outline([(x + 0.03 * math.sin(i * 1.6), 0.3 + 0.035 * i) for i in range(4)], 0.03), M["teal"], 0.0, cyclic=True)
+    G.stroke(d, [(0.12, -0.2), (0.4, -0.2), (0.4, -0.14), (0.12, -0.14)], M["teal_i"], I, cyclic=True)                 # a steady beam
+
+
+def m_magnet(d, M, lv=1):
+    """Drops fly into the pack: a red horseshoe magnet (offwhite poles) drawing two ore chunks in, motion lines behind them."""
+    G.stroke(d, G.hose_outline(arc(-0.12, 0.0, 0.2, math.radians(90), math.radians(270), 16), 0.14), M["red_i"], O, cyclic=True)
+    for z in (0.2, -0.2):
+        G.stroke(d, [(-0.12, z - 0.07), (0.04, z - 0.07), (0.04, z + 0.07), (-0.12, z + 0.07)], M["off_i"], O, cyclic=True)   # the poles
+    for (x, z, s) in ((0.24, 0.12, 81), (0.3, -0.14, 82)):
+        IT.faceted(d, M, IT.lump(x, z, 0.07, 0.06, s, n=7), "brown_sh", "brown", "brown_dp", x, z)
+        for dz in (-0.03, 0.03):
+            G.stroke(d, G.hose_outline([(x + 0.1, z + dz), (x + 0.2, z + dz)], 0.02), M["sky_sh"], 0.0, cyclic=True)
+
+
+def m_sorter(d, M, lv=1):
+    """The pack sorts itself: a gem dropping in (green arrow), a plain pebble thrown out (red arrow)."""
+    G.stroke(d, [(-0.36, -0.38), (0.12, -0.38), (0.16, -0.06), (-0.4, -0.06)], M["brown_i"], O, cyclic=True)           # the bin
+    G.stroke(d, [(-0.4, -0.06), (0.16, -0.06), (0.14, -0.12), (-0.38, -0.12)], M["brown_dp"], 0.0, cyclic=True)
+    IT.faceted(d, M, [(-0.12, 0.42), (-0.02, 0.32), (-0.12, 0.2), (-0.22, 0.32)], "teal", "off", "teal_sh", -0.12, 0.31)   # the gem
+    arrow(d, M, (-0.12, 0.17), (-0.12, -0.02), 0.06, "green")
+    G.stroke(d, IT.lump(0.3, 0.08, 0.08, 0.065, 83, n=7), M["sky_sh_i"], O, cyclic=True)                             # the pebble
+    arrow(d, M, (0.12, -0.1), (0.38, -0.1), 0.055, "red")
+
+
+def m_rare(d, M, lv=1):
+    """Rare finds glint through the ground: a gem in the soil, its glint rays crossing the surface."""
+    G.stroke(d, [(-0.42, -0.4), (0.42, -0.4), (0.42, 0.06)] + [(x, 0.06 + 0.012 * math.sin(25 * x)) for x in (0.3, 0.1, -0.1, -0.3, -0.42)],
+             M["brown_i"], O, cyclic=True)
+    G.stroke(d, [(-0.42, -0.4), (0.42, -0.4), (0.42, -0.2), (-0.42, -0.2)], M["brown_sh"], 0.0, cyclic=True)
+    G.seam(d, [(-0.42, -0.2), (0.42, -0.2)], M["ink"])
+    IT.faceted(d, M, [(0.0, -0.06), (0.1, -0.16), (0.0, -0.3), (-0.1, -0.16)], "mustard", "off", "mustard_sh", 0.0, -0.17)
+    for a in (55, 75, 90, 105, 125):                                                                                    # glint rays
+        t = math.radians(a)
+        G.stroke(d, G.hose_outline([(0.15 * math.cos(t), -0.06 + 0.15 * math.sin(t)), (0.4 * math.cos(t), -0.06 + 0.4 * math.sin(t))],
+                                   0.035 if a == 90 else 0.025), M["mustard_i"], I * 0.8, cyclic=True)
+
+
+def m_skip(d, M, lv=1):
+    """The Skip Drive: a brass drive ring seen at a slant, teal fire inside it, speed lines and a chevron leaving it."""
+    for k, z in enumerate((0.16, 0.0, -0.16)):                                                                          # speed lines
+        G.stroke(d, G.hose_outline([(-0.44, z), (-0.2 - 0.04 * k, z)], 0.03), M["sky_sh"], 0.0, cyclic=True)
+    G.stroke(d, circ(-0.02, 0.0, 0.17, 36, rz=0.34), M["mustard_i"], O, cyclic=True)                                 # the ring
+    G.stroke(d, circ(-0.02, 0.0, 0.1, 30, rz=0.25), M["teal"], 0.0, cyclic=True)
+    G.stroke(d, circ(-0.02, 0.0, 0.1, 30, rz=0.25), M["ink"], I, cyclic=True)
+    G.stroke(d, G.hose_outline(arc(-0.02, 0.0, 0.135, math.radians(100), math.radians(160), 6), 0.025), M["off"], 0.0, cyclic=True)
+    G.stroke(d, [(0.16, 0.12), (0.3, 0.12), (0.44, 0.0), (0.3, -0.12), (0.16, -0.12), (0.3, 0.0)], M["off_i"], I, cyclic=True)   # the chevron
+
+
 MOTIF = {"dig_power": m_beam, "dig_brush": m_brush, "haul_pack": m_pack, "haul_dirt": m_dirt, "asc_grapple": m_grapple,
          "asc_ladder": m_ladder, "sur_scan": m_scan, "sur_depth": m_depth, "end_air": m_air, "end_fall": m_fall,
          "voy_price": m_price, "voy_hold": m_hold,
          "dig_rhythm": m_rhythm, "haul_light": m_light, "asc_jet": m_jet, "asc_climb": m_climb, "sur_preview": m_preview,
-         "end_heat": m_heat, "voy_thrust": m_thrust}
+         "end_heat": m_heat, "voy_thrust": m_thrust,
+         "dig_heatsink": m_heatsink, "haul_magnet": m_magnet, "haul_sorter": m_sorter, "sur_rare": m_rare, "voy_skip": m_skip}
 
 
 def draw_node(d, M, nid):
@@ -379,7 +439,10 @@ def draw_node(d, M, nid):
 BATCHES = {1: ["dig_power_1", "dig_brush_1", "haul_pack_1", "haul_dirt_1", "asc_grapple_1", "asc_ladder_1", "sur_scan_1", "sur_depth_1",
                "end_air_1", "end_fall_1", "voy_price_1", "voy_hold_1"],
            2: ["dig_power_2", "dig_rhythm_1", "haul_pack_2", "haul_light_1", "asc_jet_1", "asc_climb_1", "sur_scan_2", "sur_preview_1",
-               "end_air_2", "end_heat_1", "voy_thrust_2", "voy_price_2"]}
+               "end_air_2", "end_heat_1", "voy_thrust_2", "voy_price_2"],
+           3: ["dig_power_3", "dig_heatsink", "dig_brush_2", "haul_magnet_1", "haul_sorter", "haul_pack_3", "asc_jet_2", "asc_grapple_2",
+               "asc_ladder_2", "sur_scan_3", "sur_rare", "sur_preview_2", "end_air_3", "end_heat_2", "end_fall_2", "voy_hold_2", "voy_skip_1",
+               "voy_price_3"]}
 EXPORT_BATCHES = (1,)                                                                           # only LEAD-accepted batches export (1: 17:3x)
 
 
