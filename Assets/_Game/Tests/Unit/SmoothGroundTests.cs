@@ -11,7 +11,7 @@ namespace Meridian.Tests
 {
     /// <summary>
     /// U-156 (EditMode, D-161 / D-162): Earth's drawn ground stays walkable. On ten seeds, with every stamped POI's shaping in (the pad raised
-    /// or cut, its shoulders eased at 1 in 2), the surface curve the outline follows never steps more than tan 35° between neighbouring columns,
+    /// or cut, its shoulders eased at 0.65, joint where two POIs' shoulders meet), the surface curve the outline follows never steps more than tan 35° between neighbouring columns,
     /// the hidden grid never more than one tile, and each pad's middle stays flat (the Pilgrim's pad, the camp).
     /// </summary>
     public class SmoothGroundTests
@@ -34,9 +34,7 @@ namespace Meridian.Tests
                 var tops = new int[w];
                 for (int x = 0; x < w; x++)
                 {
-                    int t = gen.SurfaceHeight(x), shaped = int.MaxValue;
-                    for (int i = 0; i < pois.Count; i++) if (PoiStamp.ShapedGround(pois[i], gen, cfg.datumY, x, out int g, pads[i])) shaped = Mathf.Min(shaped, g);
-                    tops[x] = shaped != int.MaxValue ? shaped : t; // TerrainStreamer.WallTop on a smooth planet
+                    tops[x] = PoiStamp.JointGround(gen, cfg.datumY, PlanetId.Earth, x, out int g) ? g : gen.SurfaceHeight(x); // TerrainStreamer.WallTop on a smooth planet
                 }
                 System.Func<int, int> top = x => tops[((x % w) + w) % w];
                 float worst = 0f; int at = 0, worstStep = 0;

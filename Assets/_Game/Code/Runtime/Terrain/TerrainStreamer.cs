@@ -165,14 +165,10 @@ namespace Meridian.Terrain
             top = BaseGenerator.SurfaceHeight(wx);
             // U-156: on a smooth planet a stamp's shaped ground IS the column's surface, raised or cut (the curve eases a raised pad too);
             // elsewhere the back wall keeps the lower of the two, as before.
-            int shaped = int.MaxValue;
-            for (int i = 0; i < wallPois.Length; i++)
-                if (Meridian.Planet.POI.PoiStamp.ShapedGround(wallPois[i], BaseGenerator, Config.datumY, wx, out int g, wallPoiPad[i]))
-                {
-                    if (SmoothGround) shaped = Mathf.Min(shaped, g);
-                    else if (g < top) top = g;
-                }
-            if (shaped != int.MaxValue) top = shaped;
+            if (SmoothGround) { if (Meridian.Planet.POI.PoiStamp.JointGround(BaseGenerator, Config.datumY, Config.id, wx, out int joint)) top = joint; }
+            else
+                for (int i = 0; i < wallPois.Length; i++)
+                    if (Meridian.Planet.POI.PoiStamp.ShapedGround(wallPois[i], BaseGenerator, Config.datumY, wx, out int g, wallPoiPad[i]) && g < top) top = g;
             wallTops[wx] = top;
             return top;
         }

@@ -91,9 +91,13 @@ namespace Meridian.Planet.POI
                 int x = Wrap(poi.x + col, baseWorld.Width);
                 int natural = baseWorld.SurfaceHeight(x);
                 bool inStamp = col >= 0 && col < poi.Width;
-                if (!inStamp && !ShapedGround(poi, baseWorld, datumY, x, out _, gy)) continue;
                 int ground = gy;
-                if (!inStamp) ShapedGround(poi, baseWorld, datumY, x, out ground, gy);
+                if (!inStamp)
+                {
+                    // U-156: a smooth planet's shoulders are joint across neighbouring POIs (JointGround); else this POI's own shoulder.
+                    bool shaped = reachCols == SmoothMaxShoulder ? JointGround(baseWorld, datumY, poi.planet, x, out ground) : ShapedGround(poi, baseWorld, datumY, x, out ground, gy);
+                    if (!shaped) continue;
+                }
                 int fillFrom = inStamp ? bottomRow - 1 : ground;
                 // Fill: solid rock down to the natural ground (no gap under a pad or a raised shoulder).
                 for (int y = fillFrom; y > natural && y >= 0; y--)
@@ -128,5 +132,51 @@ namespace Meridian.Planet.POI
         }
 
         public static int Wrap(int x, int w) => ((x % w) + w) % w;
+
+        // U-156: the smooth planet's POIs and their pad heights, per world (main thread: the stamping and the outline both run there).
+        static IWorldGenerator jointWorld;
+        static PoiDef[] jointPois;
+        static int[] jointPads;
+
+        /// <summary>
+        /// U-156 (D-161): on a smooth planet the ground round its stamped POIs is joint, so neighbouring shoulders meet without a step: across a
+        /// stamp its own pad; elsewhere the natural surface clamped into every reaching POI's cone (its pad height ± SmoothShoulder per column off
+        /// its edge, out to SmoothMaxShoulder); cones that cannot meet split the difference. False where no cone reaches (the natural surface
+        /// stands). TerrainStreamer.WallTop and Apply both use it, so the drawn curve and the hidden grid agree.
+        /// </summary>
+        public static bool JointGround(IWorldGenerator world, int datumY, Meridian.Planets.PlanetId planet, int x, out int ground)
+        {
+            if (!ReferenceEquals(jointWorld, world))
+            {
+                var list = new System.Collections.Generic.List<PoiDef>();
+                foreach (var p in PoiCatalog.For(planet)) if (!p.Floating && p.stamp != null) list.Add(p);
+                jointPois = list.ToArray();
+                jointPads = new int[jointPois.Length];
+                for (int i = 0; i < jointPois.Length; i++) jointPads[i] = GroundY(jointPois[i], world, datumY);
+                jointWorld = world;
+            }
+            int w = world.Width;
+            x = Wrap(x, w);
+            int natural = world.SurfaceHeight(x);
+            int lo = int.MinValue, hi = int.MaxValue;
+            bool any = false;
+            for (int i = 0; i < jointPois.Length; i++)
+            {
+                var poi = jointPois[i];
+                int d = Wrap(x - poi.x, w);
+                if (d < poi.Width) { ground = jointPads[i]; return true; } // across a stamp its own pad
+                int right = d - poi.Width + 1, left = w - d, k = right <= left ? right : left;
+                if (k > SmoothMaxShoulder) continue;
+                int reach = (int)(SmoothShoulder * k);
+                any = true;
+                if (jointPads[i] - reach > lo) lo = jointPads[i] - reach;
+                if (jointPads[i] + reach < hi) hi = jointPads[i] + reach;
+            }
+            ground = natural;
+            if (!any) return false;
+            if (lo > hi) { int mid = (int)(((long)lo + hi) / 2); lo = hi = mid; }
+            ground = natural < lo ? lo : natural > hi ? hi : natural;
+            return true;
+        }
     }
 }
