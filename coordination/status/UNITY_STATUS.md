@@ -1,7 +1,7 @@
 # UNITY STATUS
-Updated: 2026-11-08 01:35 · Session: 9 (all three windows restarted ~01:27; session 8's detail is in git log)
+Updated: 2026-11-08 01:45 · Session: 9 (all three windows restarted ~01:27; session 8's detail is in git log)
 ## Current task
-Lock B's remainder: CaptureU127Jupiter 1-5 only (LEAD 01:3x: rank 1, no test re-run). Lock B's tests ran green 01:14-01:18 (MarsStageTests 3/3; the Jupiter PlayMode slice 20/20: GiantBandsPlay, Transition, InnerCreature, MenuHud, LeadQA M3Inner), in reports/unity/tests_2026-11-08.md. The restart killed the job before the captures: no u127 frames, and my heavy_unity.lock (01:14) stood with no Editor; I deleted it at 01:29. The lock-B Editor also imported B-170's five title cards: their 10 metas, the ui Addressables group (+5 addresses) and the ui atlas (+5 sprites), committed with this status. Want filed 01:35; free RAM 1.01 GB, under the 1.5 GB gate. After the captures: BLENDER's B-163 slot 1, then my lock C = Build 0.4.8 dev + release (U-142 / U-143) + the 13-leg probe (D-152) + the smoke set with the Jupiter shots.
+Lock B's remainder: CaptureU127Jupiter 1-5 only (LEAD 01:3x: rank 1, no test re-run). Lock B's tests ran green 01:14-01:18 (MarsStageTests 3/3; the Jupiter PlayMode slice 20/20: GiantBandsPlay, Transition, InnerCreature, MenuHud, LeadQA M3Inner), in reports/unity/tests_2026-11-08.md. The restart killed the job before the captures: no u127 frames, and my heavy_unity.lock (01:14) stood with no Editor; I deleted it at 01:29. The lock-B Editor also imported B-170's five title cards: their 10 metas, the ui Addressables group (+5 addresses) and the ui atlas (+5 sprites), committed with this status. Want filed 01:32; free RAM 1.01-1.15 GB, under the 1.5 GB gate. While waiting (lock-free, 01:4x): U-142's code ahead of lock C - GameInfo 0.4.8; BuildSmoke's Jupiter shots as the u127 captures frame them (smoke_23_jupiter_floe_kit with B-156's deck module staged + a Ballast tortoise, smoke_24_jupiter_storm_deck + a Stormglider, smoke_25_jupiter_deep_crush, smoke_26_jupiter_red_spot_whale per D-138) + B-170's Venus and Jupiter cards (smoke_21_titlecard_venus / _jupiter); unity_smoke.ps1 expects 35 shots (was 29; 0.4.7's run took 93 s of the 240 s cap). After the captures: BLENDER's B-163 slot 1, then my lock C = Build 0.4.8 dev + release (U-142 / U-143) + the 13-leg probe (D-152) + the smoke set with the Jupiter shots.
 ## Last completed
 U-147, U-146, U-144 (+ D-157) code; the D-156 watchdog; U-143; U-133 / U-130 / U-129 slice 1 - all compiled clean in lock A.
 ## Next up
@@ -13,7 +13,7 @@ U-126 floe caps (EditMode; its frame in u127/ next lock), U-127 slices 1–2 (co
 ## Blockers
 (none)
 ## Proposals
-(none open; P-50 and its extension yes, LEAD 15:3x)
+P-51: B-156's re-inked kit (props/common/aerostat_deck / _strut / _cell) is loaded only by CaptureU127Jupiter and the 0.4.8 smoke, which stage it as a sprite; in play the Deck piece still draws props/venus/aerostat_deck everywhere (PieceSpec has one artKey). Proposal: the Deck piece draws props/common/aerostat_deck on the four giants (a per-planet art key on PieceSpec, BaseBuilder picks it by PlanetKey), Venus unchanged; a small card after 0.4.8. Until then the owner's page should not promise a buildable kit on Jupiter.
 ## For USER_ACTIONS
 (none)
 ## Housekeeping

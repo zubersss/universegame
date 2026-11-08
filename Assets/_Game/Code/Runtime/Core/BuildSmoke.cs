@@ -3,6 +3,7 @@ using System.Collections;
 using System.IO;
 using Meridian.UI;
 using UnityEngine;
+using CloudLayout = Meridian.Terrain.CloudColumn.CloudLayout;
 
 namespace Meridian.Core
 {
@@ -278,6 +279,69 @@ namespace Meridian.Core
             var vent = Meridian.Terrain.VenusLandforms.Vents[0];
             yield return LookAt(side, (vent.x0 + vent.x1) * 0.5f, 4f, 9f);
             yield return Shot(folder, "smoke_17_venus_vent.png");
+            yield return Card(folder, Meridian.Planets.PlanetId.Venus); // U-142: B-170's card over the vent field
+
+            // U-142 (U-127): Jupiter on the cartoon stage, framed as the u127 captures frame it: a Deck 2 floe with B-156's aerostat deck module
+            // staged on it and a Ballast tortoise over it, the storm deck with a Stormglider, the Deep over the Crush Line with its CRUSH band,
+            // the Vortex Whale crossing the Great Red Spot in passing (D-138: its centre 13.5 m ahead of the surveyor in the 32 m frame, so one
+            // end shows and the flukes stay out). A floe the search misses leaves its shot out, so the count check fails the smoke.
+            yield return scenes.LoadPlanetSide(GameState.Instance.catalog.Get(Meridian.Planets.PlanetId.Jupiter));
+            side = scenes.PlanetSide;
+            if (side.hazards != null) side.hazards.enabled = false;
+            if (side.wardens != null) side.wardens.enabled = false;
+            side.creatures.autoSpawn = false;
+            side.creatures.DespawnAll();
+            int jx = side.spawnX;
+            float jh = Meridian.CameraRig.SideView.DefaultHalfHeight;
+            if (Floe(side, jx, CloudLayout.Deck2Bottom + 40, CloudLayout.Deck1Bottom - 40, out int fx, out int fy))
+            {
+                yield return Stand(side, new Vector2(fx + 2.5f, fy + 0.05f), 1.5f, jh);
+                var kit = Meridian.Art.ArtLoad.Asset<System.Collections.Generic.IList<Sprite>>("props/common/aerostat_deck");
+                yield return kit;
+                GameObject deckCard = null;
+                if (kit.Status == UnityEngine.ResourceManagement.AsyncOperations.AsyncOperationStatus.Succeeded && kit.Result != null && kit.Result.Count > 0)
+                {
+                    deckCard = new GameObject("SmokeAerostatDeck");
+                    var sr = deckCard.AddComponent<SpriteRenderer>();
+                    sr.sprite = kit.Result[0];
+                    sr.sortingOrder = 4;
+                    deckCard.transform.position = new Vector3(fx + 4.5f, fy, 0f);
+                }
+                side.creatures.Spawn(Meridian.Creatures.Species.BallastTortoise, new Vector2(fx + 8f, fy + Above(Meridian.Creatures.Species.BallastTortoise)));
+                yield return Staged(side);
+                yield return Shot(folder, "smoke_23_jupiter_floe_kit.png");
+                yield return Card(folder, Meridian.Planets.PlanetId.Jupiter); // U-142: B-170's card over the floe
+                side.creatures.DespawnAll();
+                if (deckCard != null) Destroy(deckCard);
+                if (kit.IsValid()) Meridian.Art.ArtLoad.Release(kit);
+            }
+            else Debug.Log("[MERIDIAN] smoke: no Deck 2 floe found on Jupiter");
+            if (Floe(side, jx, CloudLayout.Deck3Bottom + 40, CloudLayout.Deck2Bottom - 40, out fx, out fy))
+            {
+                yield return Stand(side, new Vector2(fx + 2.5f, fy + 0.05f), 1.5f, jh);
+                side.creatures.Spawn(Meridian.Creatures.Species.Stormglider, new Vector2(fx + 7f, fy + Above(Meridian.Creatures.Species.Stormglider)));
+                yield return Staged(side);
+                yield return Shot(folder, "smoke_24_jupiter_storm_deck.png");
+                side.creatures.DespawnAll();
+            }
+            else Debug.Log("[MERIDIAN] smoke: no Deck 3 floe found on Jupiter");
+            if (Floe(side, jx, CloudLayout.CrushLine + 4, CloudLayout.CrushLine + 60, out fx, out fy))
+            {
+                yield return Stand(side, new Vector2(fx + 2.5f, fy + 0.05f), 1.5f, jh);
+                yield return Staged(side);
+                yield return Shot(folder, "smoke_25_jupiter_deep_crush.png");
+            }
+            else Debug.Log("[MERIDIAN] smoke: no floe found over Jupiter's Crush Line");
+            if (Floe(side, CloudLayout.RedSpotCentre - 200, CloudLayout.Deck2Bottom + 40, CloudLayout.Deck1Bottom - 40, out fx, out fy))
+            {
+                yield return Stand(side, new Vector2(fx + 2.5f, fy + 0.05f), 1.5f, jh);
+                side.creatures.Spawn(Meridian.Creatures.Species.VortexWhale, new Vector2(fx + 16f, fy + 9f));
+                yield return Staged(side);
+                yield return Shot(folder, "smoke_26_jupiter_red_spot_whale.png");
+                side.creatures.DespawnAll();
+            }
+            else Debug.Log("[MERIDIAN] smoke: no Deck 2 floe found in Jupiter's Red Spot");
+            side.creatures.autoSpawn = true;
 
             scenes.SetView(ViewMode.Space);
             var craft = scenes.Space.GetComponentInChildren<Meridian.Space.SpaceShip>();
@@ -368,6 +432,41 @@ namespace Meridian.Core
             float until = Time.realtimeSinceStartup + 15f;
             while (!side.terrain.IsSettled && Time.realtimeSinceStartup < until) yield return null;
             yield return Wait(2f);
+        }
+
+        /// <summary>U-142: a floe at least 6 columns wide whose top lies in [y0, y1], searched rightward from x0 (the u127 capture's search): its left column and standing height.</summary>
+        static bool Floe(PlanetSideRoot side, int x0, int y0, int y1, out int fx, out int fy)
+        {
+            var t = side.terrain;
+            for (int x = x0; x < x0 + 1200; x++)
+                for (int y = y1; y >= y0; y--)
+                {
+                    if (!Solid(t, x, y) || Solid(t, x, y + 1)) continue;
+                    bool wide = true;
+                    for (int k = 1; k < 6 && wide; k++) wide = Solid(t, x + k, y) && !Solid(t, x + k, y + 1);
+                    if (wide) { fx = x; fy = y + 1; return true; }
+                }
+            fx = x0; fy = y1; return false;
+        }
+
+        static bool Solid(Meridian.Terrain.TerrainStreamer t, int x, int y) => Meridian.Terrain.TileId.IsSolid(t.GetTile(x, y));
+
+        static float Above(Meridian.Creatures.Species s) => Meridian.Creatures.SpeciesSpec.Get(s).size.y * 0.5f + 3f;
+
+        /// <summary>U-142: waits (up to 10 s) for the cartoon stage's crossfade and for its layers and the active storm veil to swap their placeholders for art, then 1.5 s for the creatures.</summary>
+        static IEnumerator Staged(PlanetSideRoot side)
+        {
+            var stage = side.cartoon;
+            float until = Time.realtimeSinceStartup + 10f;
+            while (stage != null && Time.realtimeSinceStartup < until)
+            {
+                bool layers = stage.Layers != null && stage.Layers.placeholders.Contains(true);
+                var veil = stage.StormLayers;
+                bool veiled = veil != null && veil.isActiveAndEnabled && veil.alpha > 0f && veil.placeholders.Contains(true);
+                if (!stage.Fading && !layers && !veiled) break;
+                yield return null;
+            }
+            yield return Wait(1.5f);
         }
 
         /// <summary>U-132 (U-124): the planet's title card held centred over its surface; skipped (no shot) when the planet has no card art.</summary>
