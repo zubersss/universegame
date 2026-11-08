@@ -518,18 +518,10 @@ def mars_canyon(seed, storm=0.0):
     # layer2: near scree slopes with boulders and pebbles (the canyon); the storm lays its dust overlay over a hazed copy of it
     # B-185 / D-169: 480 tall (was 384), its bottom 2 m under the line, the last 64 rows a tileable strip (continue_rows)
     L01 = [{"n": 0, "parallax": 0.1, "y_m": -2.0}, {"n": 1, "parallax": 0.35, "y_m": -1.0}]
-    if storm > 0:                                                                             # the overlay first: its rng draws as before
-        Ho = 768 + 96
-        ov_rgb, ov_a = mars_storm_overlay(rng, pal, H=Ho, hq=Ho - 2 * BG.CONTINUE_ROWS)
-        g_rgb, g_a = _canyon_near(np.random.default_rng(seed + 185), pal, haze=0.30)          # D-169: ground under the dust (own rng)
-        rgb = np.zeros((Ho, W, 3), np.float32)
-        a = np.zeros((Ho, W), np.float32)
-        rgb[Ho - g_rgb.shape[0]:], a[Ho - g_a.shape[0]:] = g_rgb, g_a
-        oa = ov_a[..., None]
-        out_a = ov_a + a * (1 - ov_a)
-        prem = ov_rgb * oa + rgb * a[..., None] * (1 - oa)                                    # straight alpha in, straight alpha out (D-147)
-        rgb = np.where(out_a[..., None] > 1e-4, prem / np.maximum(out_a[..., None], 1e-4), 0).astype(np.float32)
-        out.append(BG.tile_bottom(rgb, out_a.astype(np.float32)))
+    if storm > 0:                                                                             # LEAD 11:0x: the storm is a veil CartoonStage lays
+        Ho = 768 + 96                                                                         # over the region's own set, so no ground here: the
+        ov = mars_storm_overlay(rng, pal, H=Ho, hq=Ho - 2 * BG.CONTINUE_ROWS)                 # translucent overlay alone, its bottom 64 rows a
+        out.append(BG.tile_bottom(*ov))                                                       # tileable translucent strip (alpha kept)
         return out, L01 + [{"n": 2, "parallax": 0.7, "y_m": -2.0, "continue_rows": BG.CONTINUE_ROWS}]
     out.append(_canyon_near(rng, pal))
     return out, L01 + [{"n": 2, "parallax": 0.6, "y_m": -2.0, "continue_rows": BG.CONTINUE_ROWS}]
