@@ -1364,11 +1364,11 @@ def fill_t2(d, M, k=0):
     """Subsoil (10-40 m): denser, thinner clay bands than the topsoil, redder and darker; root threads thinning out."""
     Lf = B.FILL / PPU
     rnd = random.Random(2031)
-    _base(d, M, Lf, "soil_sh")
-    bands, z = [], 0.35
-    mats_ = ["rust", "soil_dp", "clay", "soil_sh", "rust", "soil", "soil_dp", "clay", "rust", "soil_dp"]
+    _base(d, M, Lf, "soil_dp")                                                                # rev: darker than the topsoil (the bright
+    bands, z = [], 0.35                                                                       # rust / clay bands read lighter than tier 1)
+    mats_ = ["soil_sh", "soil_dp", "rust", "soil_sh", "soil", "soil_dp", "soil_sh", "rust", "soil_dp", "soil"]
     for j, m in enumerate(mats_):
-        th = rnd.uniform(0.28, 0.6)
+        th = rnd.uniform(0.14, 0.24) if m == "rust" else rnd.uniform(0.28, 0.6)
         bands.append((z + th / 2, th, m, j % 3 == 0))
         z += th + rnd.uniform(0.12, 0.3)
         if z > Lf - 0.4:
@@ -1377,7 +1377,7 @@ def fill_t2(d, M, k=0):
     for q in range(5):                                                                        # sparse root threads
         x, z0 = rnd.uniform(0, Lf), rnd.uniform(0.5, Lf - 0.5)
         pts = [(x + 0.08 * math.sin(i * 1.3 + q), z0 - 0.12 * i) for i in range(7)]
-        B.wrapped(lambda dx, dz, pts=pts: G.stroke(d, G.hose_outline([(px + dx, pz + dz) for px, pz in pts], 0.012), M["twig"], 0.0, cyclic=True), Lf, Lf)
+        B.wrapped(lambda dx, dz, pts=pts: G.stroke(d, G.hose_outline([(px + dx, pz + dz) for px, pz in pts], 0.014), M["sand_sh"], 0.0, cyclic=True), Lf, Lf)
     B._scatter(d, M, Lf, 16, (0.0, Lf), (0.025, 0.045), "pebble_i", 2033)
     for i in range(8):
         x, z = rnd.uniform(0, Lf), rnd.uniform(0, Lf)
@@ -1395,9 +1395,9 @@ def fill_t3(d, M, k=0):
     for q in range(10):                                                                       # joints
         x, z = rnd.uniform(0, Lf), rnd.uniform(0.3, Lf - 0.3)
         B.wrapped(lambda dx, dz, x=x, z=z: G.seam(d, [(x + dx, z + dz), (x + dx + 0.03, z + dz - 0.35), (x + dx - 0.01, z + dz - 0.7)], M["ink"]), Lf, Lf)
-    for q in range(4):                                                                        # crystal veins
+    for q in range(6):                                                                        # crystal veins (rev: wider, more)
         pts = _zigzag(rnd, rnd.uniform(0, Lf), rnd.uniform(1, Lf - 1), 7, 0.35, 0.22, 0.05)
-        _vein(d, M, Lf, pts, 0.035, "lens" if q % 2 else "bone", core="bone" if q % 2 else None, cw=0.01)
+        _vein(d, M, Lf, pts, 0.05, "lens" if q % 2 else "bone", core="bone" if q % 2 else None, cw=0.01)
     B._scatter(d, M, Lf, 10, (0.0, Lf), (0.03, 0.05), "rock_lit_i", 2043)
     G.specks(d, [(rnd.uniform(0.05, Lf - 0.05), rnd.uniform(0.05, Lf - 0.05)) for _ in range(30)], M["ink"])
 
@@ -1406,16 +1406,16 @@ def fill_t4(d, M, k=0):
     """Deep (100-200 m): dark slate in thin layers, glowing mineral seams."""
     Lf = B.FILL / PPU
     rnd = random.Random(2051)
-    _base(d, M, Lf, "deep")
-    layers, z = [], 0.3
+    _base(d, M, Lf, "deep")                                                                   # rev: flat dark slate beds (thin wobbly
+    layers, z = [], 0.3                                                                       # alternating bands read as water)
     while z < Lf - 0.3:
-        th = rnd.uniform(0.18, 0.4)
-        layers.append((z + th / 2, th, "deep_sh" if len(layers) % 2 else "rock_sh", len(layers) % 4 == 0))
-        z += th + rnd.uniform(0.25, 0.6)
-    B._strata(d, M, Lf, layers, 0.04, 2052)
-    for q in range(4):                                                                        # glowing seams: mustard, a pale core
+        th = rnd.uniform(0.35, 0.7)
+        layers.append((z + th / 2, th, "deep_sh" if len(layers) % 3 else "core", len(layers) % 2 == 0))
+        z += th + rnd.uniform(0.3, 0.7)
+    B._strata(d, M, Lf, layers, 0.015, 2052)
+    for q in range(6):                                                                        # glowing seams: mustard, a pale core
         pts = _zigzag(rnd, rnd.uniform(0, Lf), rnd.uniform(1, Lf - 1), 8, 0.32, 0.12, 0.03)
-        _vein(d, M, Lf, pts, 0.03, "glow", core="spark", cw=0.009)
+        _vein(d, M, Lf, pts, 0.05, "glow", core="spark", cw=0.013)
     G.specks(d, [(rnd.uniform(0.05, Lf - 0.05), rnd.uniform(0.05, Lf - 0.05)) for _ in range(26)], M["ink"])
 
 
@@ -1423,8 +1423,8 @@ def fill_t5(d, M, k=0):
     """Core (200 m +): near-black rock, hot amber cracks with bright cores, small diamond glints."""
     Lf = B.FILL / PPU
     rnd = random.Random(2061)
-    _base(d, M, Lf, "core")
-    B._strata(d, M, Lf, [(6.6, 0.8, "deep", False), (3.4, 1.0, "core_sh", False), (1.2, 0.6, "deep", False)], 0.1, 2062)
+    _base(d, M, Lf, "core_sh")                                                                # rev: near-black (the dark brown read brown)
+    B._strata(d, M, Lf, [(6.6, 0.7, "core", False), (3.4, 0.9, "core", False), (1.2, 0.5, "deep", False)], 0.08, 2062)
     for q in range(5):                                                                        # the hot crack network
         pts = _zigzag(rnd, rnd.uniform(0, Lf), rnd.uniform(0.8, Lf - 0.8), 6, 0.3, 0.3, 0.06)
         _vein(d, M, Lf, pts, 0.035, "hot", core="glow", cw=0.012)
@@ -1516,7 +1516,7 @@ def fd_t5(k):
 
 TIER_FILLS = {2: fill_t2, 3: fill_t3, 4: fill_t4, 5: fill_t5}
 TIER_DECOR = {2: [("root_knot", fd_t2(0), 48, 40), ("clay_concretion", fd_t2(1), 40, 32), ("rusty_nodule", fd_t2(2), 32, 32)],
-              3: [("geode", fd_t3(0), 48, 40), ("crystal_spray", fd_t3(1), 32, 32), ("mica_book", fd_t3(2), 40, 24)],
+              3: [("geode", fd_t3(0), 48, 40), ("crystal_spray", fd_t3(1), 40, 40), ("mica_book", fd_t3(2), 40, 24)],
               4: [("glow_nodule", fd_t4(0), 40, 40), ("graphite_lens", fd_t4(1), 72, 24), ("obsidian_shard", fd_t4(2), 32, 32)],
               5: [("kimberlite_diamond", fd_t5(0), 48, 48), ("magma_pocket", fd_t5(1), 64, 48)]}
 SL_W, SL_H, SL_ROW = 256, 64, 40                                                              # the Surface Line strip: 4 m, its line on row 40
@@ -2259,13 +2259,14 @@ def preview_tiers(out_dir, pieces=None, out=None, footnote=None):
     ov[int(2.0 * PPU / 16)] = (0.95, 0.92, 0.85)
     overview = np.hstack([ov, ov_lab])
     # 1x: the surface and the Surface Line
-    S = np.empty((5 * PPU, Wr, 3), np.float32)
-    S[:64] = sky
-    S[64:] = column(Wr, 0.0, 4.0)
-    review._over(S, np.tile(band, (1, 2, 1))[:, :Wr], 0, 64 - B.SURF_ROW)
-    review._over(S, np.tile(line, (1, 4, 1))[:, :Wr], 0, 64 + 2 * PPU - SL_ROW)
+    top = 3 * PPU                                                                           # 3 m of sky: the surveyor stands in it
+    S = np.empty((top + 4 * PPU, Wr, 3), np.float32)
+    S[:top] = sky
+    S[top:] = column(Wr, 0.0, 4.0)
+    review._over(S, np.tile(band, (1, 2, 1))[:, :Wr], 0, top - B.SURF_ROW)
+    review._over(S, np.tile(line, (1, 4, 1))[:, :Wr], 0, top + 2 * PPU - SL_ROW)
     if sv is not None:
-        review._over(S, sv, 300, 64 - sv.shape[0] + sv_piv)
+        review._over(S, sv, 300, top - sv.shape[0] + sv_piv)
     rows.append(("the surface: B-175's band, tier 1 under it, the SURFACE LINE 2 m down (topside above it); the surveyor topside", S))
     for t, a, b in bounds:                                                                  # a window in each tier
         mid = (a + min(b, 220.0)) / 2
