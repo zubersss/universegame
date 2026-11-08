@@ -1137,12 +1137,21 @@ def preview(out_dir, planet="earth", pieces=None, out=None, footnote=None):
     for i, ln in enumerate(lines):
         review._label(foot, ln, 6, 6 + 16 * i, scale=1)
     img = np.vstack(img_rows + [P, foot])
+    del img_rows, rows, A, B, Cimg, P, foot          # the panels live on only in img (a 2300 x 1920 float image is 53 MB)
     import time
     review.draw(img, time.strftime("%m-%d %H:%M") + " " + (footnote or "curve preview (lock-free, fakegp + numpy; test profile 30 m at 1x)"), 2,
                 img.shape[0] - 16, (1.0, 1.0, 0.85))
     out = out or os.path.join(out_dir, f"review_b175_{planet}_curve_preview.png")
-    review.write(out, img)
-    print("written", out, img.shape[1], "x", img.shape[0])
+    shape = img.shape                                 # review.write's to_u8 holds three float copies: convert in place
+    np.clip(img, 0.0, 1.0, out=img)
+    img *= 255.0
+    np.rint(img, out=img)
+    u8 = np.empty(shape[:2] + (4,), np.uint8)
+    u8[..., :3] = img
+    u8[..., 3] = 255
+    del img
+    pngio.write_png(out, u8)
+    print("written", out, shape[1], "x", shape[0])
     for ln in lines:
         print(ln)
 
