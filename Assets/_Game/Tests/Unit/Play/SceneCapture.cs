@@ -3157,5 +3157,145 @@ namespace Meridian.Tests
                 Meridian.View2D.CartoonStage.Enabled = wasCartoon;
             }
         }
+
+        /// <summary>
+        /// U-127 (B-159 / B-160 / B-156): Jupiter on the cartoon stage at 1x in reports/unity/u127/: 1_floe_kit_tortoise (a Deck 2 floe with its capped
+        /// strip, the aerostat kit's deck card on it, a Ballast tortoise over it), 2_storm_deck_glider (a Deck 3 floe, a Stormglider), 3_deep_crush (a
+        /// Deep floe, the deep set's CRUSH band on the Crush Line), 4_red_spot (a floe in the Great Red Spot under the spot overlay). The whale's
+        /// crossing joins after its D-153 re-export.
+        /// </summary>
+        [UnityTest, Timeout(240000)]
+        public IEnumerator CaptureU127Jupiter()
+        {
+            var name = Environment.GetEnvironmentVariable(Variable);
+            if (string.IsNullOrEmpty(name)) Assert.Ignore($"Set {Variable} (tools/unity_capture.ps1).");
+            if (SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.Null)
+                Assert.Fail("No graphics device: run without -nographics.");
+            bool wasCartoon = Meridian.View2D.CartoonStage.Enabled;
+            Meridian.View2D.CartoonStage.Enabled = true;
+            var kitHandle = default(UnityEngine.ResourceManagement.AsyncOperations.AsyncOperationHandle<System.Collections.Generic.IList<Sprite>>);
+            GameObject kit = null;
+            try
+            {
+#if UNITY_EDITOR
+                yield return UnityEditor.SceneManagement.EditorSceneManager.LoadSceneAsyncInPlayMode(
+                    CorePath, new LoadSceneParameters(LoadSceneMode.Single));
+#endif
+                var director = UnityEngine.Object.FindAnyObjectByType<SceneDirector>();
+                float timeout = Time.realtimeSinceStartup + 30f;
+                while (!director.IsReady && Time.realtimeSinceStartup < timeout) yield return null;
+                yield return director.LoadPlanetSide(GameState.Instance.catalog.Get(Meridian.Planets.PlanetId.Jupiter));
+                var side = director.PlanetSide;
+                timeout = Time.realtimeSinceStartup + 20f;
+                while (!side.terrain.IsSettled && Time.realtimeSinceStartup < timeout) yield return null;
+                if (side.hazards != null) side.hazards.enabled = false;
+                if (side.wardens != null) side.wardens.enabled = false;
+                var creatures = side.creatures;
+                creatures.autoSpawn = false;
+                creatures.DespawnAll();
+                var stage = side.cartoon;
+                var cam = side.sideCamera;
+                var body = side.player.GetComponent<Rigidbody2D>();
+                var t = side.terrain;
+                var dir = "coordination/reports/unity/u127";
+                Directory.CreateDirectory(dir);
+
+                bool Solid(int x, int y) => Meridian.Terrain.TileId.IsSolid(t.GetTile(x, y));
+                // A floe at least 6 columns wide whose top lies in [y0, y1], searched rightward from x0: its left column and standing height.
+                bool FindFloe(int x0, int y0, int y1, out int fx, out int fy)
+                {
+                    for (int x = x0; x < x0 + 1200; x++)
+                        for (int y = y1; y >= y0; y--)
+                        {
+                            if (!Solid(x, y) || Solid(x, y + 1)) continue;
+                            bool wide = true;
+                            for (int k = 1; k < 6 && wide; k++) wide = Solid(x + k, y) && !Solid(x + k, y + 1);
+                            if (wide) { fx = x; fy = y + 1; return true; }
+                        }
+                    fx = x0; fy = y1; return false;
+                }
+                IEnumerator Carry(float x, float y)
+                {
+                    if (body != null) { body.simulated = false; body.position = new Vector2(x, y); }
+                    side.player.transform.position = new Vector3(x, y, side.player.transform.position.z);
+                    yield return null; yield return null;
+                }
+                IEnumerator Settle()
+                {
+                    float until = Time.realtimeSinceStartup + 10f;
+                    while ((stage.Fading || stage.Layers.placeholders.Contains(true)) && Time.realtimeSinceStartup < until) yield return null;
+                    until = Time.realtimeSinceStartup + 1.5f;
+                    while (Time.realtimeSinceStartup < until) yield return null;
+                }
+                IEnumerator Shot(string label)
+                {
+                    yield return Save(cam, $"{name}_{label}");
+                    File.Copy($"logs/capture_{name}_{label}.png", $"{dir}/{label}.png", true);
+                    TestContext.Out.WriteLine($"[MERIDIAN] u127 {label}: scene {stage.Scene} → {stage.Layers.SceneKey} (fallback {stage.Layers.UsedFallback}), datum {stage.Layers.datumY:F0}, camera y {cam.transform.position.y:F0}, strips {stage.Ground.MaterialsLoaded}, caps {stage.Ground.CapsShown}, spot alpha {(stage.StormLayers != null ? stage.StormLayers.alpha : 0f):F2}, plants {stage.Flora.SpriteCount}");
+                }
+                float Above(Meridian.Creatures.Species s) => Meridian.Creatures.SpeciesSpec.Get(s).size.y * 0.5f + 3f;
+
+                int sx = side.spawnX;
+                // 1. A Deck 2 floe: the kit's deck card on it, a Ballast tortoise over it.
+                if (FindFloe(sx, Meridian.Terrain.CloudColumn.CloudLayout.Deck2Bottom + 40, Meridian.Terrain.CloudColumn.CloudLayout.Deck1Bottom - 40, out int fx, out int fy))
+                {
+                    yield return Carry(fx + 2.5f, fy + 0.05f);
+                    kitHandle = Meridian.Art.ArtLoad.Asset<System.Collections.Generic.IList<Sprite>>("props/common/aerostat_deck");
+                    yield return kitHandle;
+                    if (kitHandle.Status == UnityEngine.ResourceManagement.AsyncOperations.AsyncOperationStatus.Succeeded && kitHandle.Result != null && kitHandle.Result.Count > 0)
+                    {
+                        kit = new GameObject("U127Kit");
+                        var sr = kit.AddComponent<SpriteRenderer>();
+                        sr.sprite = kitHandle.Result[0];
+                        sr.sortingOrder = 4;
+                        kit.transform.position = new Vector3(fx + 4.5f, fy, 0f);
+                    }
+                    creatures.Spawn(Meridian.Creatures.Species.BallastTortoise, new Vector2(fx + 8f, fy + Above(Meridian.Creatures.Species.BallastTortoise)));
+                    yield return Settle();
+                    yield return Shot("1_floe_kit_tortoise");
+                    creatures.DespawnAll();
+                    if (kit != null) UnityEngine.Object.Destroy(kit);
+                }
+                else TestContext.Out.WriteLine("[MERIDIAN] u127: no Deck 2 floe found");
+
+                // 2. A Deck 3 floe (the storm deck) with a Stormglider.
+                if (FindFloe(sx, Meridian.Terrain.CloudColumn.CloudLayout.Deck3Bottom + 40, Meridian.Terrain.CloudColumn.CloudLayout.Deck2Bottom - 40, out fx, out fy))
+                {
+                    yield return Carry(fx + 2.5f, fy + 0.05f);
+                    creatures.Spawn(Meridian.Creatures.Species.Stormglider, new Vector2(fx + 7f, fy + Above(Meridian.Creatures.Species.Stormglider)));
+                    yield return Settle();
+                    yield return Shot("2_storm_deck_glider");
+                    creatures.DespawnAll();
+                }
+                else TestContext.Out.WriteLine("[MERIDIAN] u127: no Deck 3 floe found");
+
+                // 3. The Deep, low over the Crush Line: the CRUSH band on the deep set's near layer.
+                if (FindFloe(sx, Meridian.Terrain.CloudColumn.CloudLayout.CrushLine + 4, Meridian.Terrain.CloudColumn.CloudLayout.CrushLine + 60, out fx, out fy))
+                {
+                    yield return Carry(fx + 2.5f, fy + 0.05f);
+                    yield return Settle();
+                    yield return Shot("3_deep_crush");
+                }
+                else TestContext.Out.WriteLine("[MERIDIAN] u127: no floe found just over the Crush Line");
+
+                // 4. A floe inside the Great Red Spot, under its overlay.
+                int spot = Meridian.Terrain.CloudColumn.CloudLayout.RedSpotCentre - 200;
+                if (FindFloe(spot, Meridian.Terrain.CloudColumn.CloudLayout.Deck2Bottom + 40, Meridian.Terrain.CloudColumn.CloudLayout.Deck1Bottom - 40, out fx, out fy))
+                {
+                    yield return Carry(fx + 2.5f, fy + 0.05f);
+                    yield return Settle();
+                    yield return Shot("4_red_spot");
+                }
+                else TestContext.Out.WriteLine("[MERIDIAN] u127: no Deck 2 floe found in the Red Spot");
+                if (body != null) body.simulated = true;
+                LogAssert.NoUnexpectedReceived();
+            }
+            finally
+            {
+                if (kit != null) UnityEngine.Object.Destroy(kit);
+                if (kitHandle.IsValid()) Meridian.Art.ArtLoad.Release(kitHandle);
+                Meridian.View2D.CartoonStage.Enabled = wasCartoon;
+            }
+        }
     }
 }

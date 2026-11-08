@@ -77,5 +77,29 @@ namespace Meridian.Tests
             Assert.IsNull(FloraRigs.JupiterBiomeFor(500, 200f), "the deep grows nothing");
             Assert.AreEqual("red_spot", FloraRigs.JupiterBiomeFor(CloudLayout.RedSpotCentre, 750f), "the Red Spot's floes: phosphor cups");
         }
+
+        /// <summary>U-127 slice 2 (B-160, Bible §7.6): the four floaters keep to their decks (by the floe under the spawn) and take their sheets by key.</summary>
+        [Test]
+        public void TheCreaturesKeepToTheirDecks()
+        {
+            Meridian.Creatures.SpawnSite At(int y) => new Meridian.Creatures.SpawnSite { x = 500, surfaceY = y, datumY = CloudLayout.Datum, worldWidth = CloudLayout.Width, planet = PlanetId.Jupiter };
+            var glider = Meridian.Creatures.SpeciesSpec.Get(Meridian.Creatures.Species.Stormglider);
+            var eel = Meridian.Creatures.SpeciesSpec.Get(Meridian.Creatures.Species.LightningEel);
+            var wasp = Meridian.Creatures.SpeciesSpec.Get(Meridian.Creatures.Species.BeltWasp);
+            var tortoise = Meridian.Creatures.SpeciesSpec.Get(Meridian.Creatures.Species.BallastTortoise);
+            foreach (var s in new[] { glider, eel, wasp, tortoise })
+            {
+                Assert.AreEqual(PlanetId.Jupiter, s.planet);
+                Assert.IsTrue(s.Flies, s.id + " floats over the floes");
+                StringAssert.StartsWith("creatures/jupiter/", s.artKey);
+            }
+            Assert.IsTrue(glider.Allows(At(1000)) && glider.Allows(At(750)) && glider.Allows(At(450)), "the glider rides every deck");
+            Assert.IsFalse(glider.Allows(At(200)), "not the deep");
+            Assert.IsTrue(eel.Allows(At(750))); Assert.IsFalse(eel.Allows(At(1000))); Assert.IsFalse(eel.Allows(At(450)));
+            Assert.IsTrue(wasp.Allows(At(1000))); Assert.IsFalse(wasp.Allows(At(750)));
+            Assert.IsTrue(tortoise.Allows(At(750)) && tortoise.Allows(At(450)), "the tortoise in Decks 2-3");
+            Assert.IsFalse(tortoise.Allows(At(1000)));
+            Assert.AreEqual(1, Meridian.Creatures.SpeciesSpec.Get(Meridian.Creatures.Species.PolarCrawler).packMin, "the older rows keep their indices");
+        }
     }
 }

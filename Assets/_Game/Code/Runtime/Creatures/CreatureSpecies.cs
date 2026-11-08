@@ -21,6 +21,8 @@ namespace Meridian.Creatures
         HadalMaw,
         // U-118 (B-142, D-126): the Mars lava-tube lurker (a den species) and the polar crawler; appended so every older index stays.
         TubeLurker, PolarCrawler,
+        // U-127 (B-160, Bible §7.6): Jupiter's floaters of the cloud decks; appended so every older index stays (the Vortex Whale follows with its re-export, D-153).
+        Stormglider, LightningEel, BeltWasp, BallastTortoise,
     }
 
     /// <summary>What a creature does about the player.</summary>
@@ -181,6 +183,21 @@ namespace Meridian.Creatures
             new SpeciesSpec { id = Species.PolarCrawler, planet = PlanetId.Mars, artKey = "creatures/mars/polar_crawler", size = new Vector2(1.4f, 0.8f),
                 wanderSpeed = 0.6f, runSpeed = 1.6f, jumpSpeed = 2f, temper = Temper.Flees, senseRange = 4f, time = ActiveTime.Any,
                 packMin = 1, packMax = 2, maxAlive = 4, placeholder = new Color(0.55f, 0.6f, 0.45f) },
+            // U-127 (B-160, Bible §7.6): Jupiter's floaters over the floes (Air habitat: they hover above the floe they spawn over). The Stormglider
+            // rides every deck's wind; the Lightning eel is Deck 2's, curious (it keeps clear: D-087, never a bite); the Belt wasps swarm Deck 1
+            // (blunt tails, no sting); the Ballast tortoise paddles slow and huge through Decks 2–3 (its husk prop comes with the hunt card).
+            new SpeciesSpec { id = Species.Stormglider, planet = PlanetId.Jupiter, artKey = "creatures/jupiter/stormglider", size = new Vector2(2.4f, 1.0f),
+                wanderSpeed = 3f, runSpeed = 8f, temper = Temper.Flees, senseRange = 9f, time = ActiveTime.Any, habitat = Habitat.Air,
+                hoverMin = 4f, hoverMax = 10f, packMin = 1, packMax = 2, maxAlive = 4, placeholder = new Color(0.93f, 0.89f, 0.8f) },
+            new SpeciesSpec { id = Species.LightningEel, planet = PlanetId.Jupiter, artKey = "creatures/jupiter/lightning_eel", size = new Vector2(1.8f, 0.5f),
+                wanderSpeed = 2.2f, runSpeed = 6f, temper = Temper.Flees, senseRange = 8f, time = ActiveTime.Any, habitat = Habitat.Air,
+                hoverMin = 2f, hoverMax = 6f, packMin = 1, packMax = 2, maxAlive = 4, placeholder = new Color(0.44f, 0.54f, 0.59f) },
+            new SpeciesSpec { id = Species.BeltWasp, planet = PlanetId.Jupiter, artKey = "creatures/jupiter/belt_wasp", size = new Vector2(0.5f, 0.4f),
+                wanderSpeed = 2.8f, runSpeed = 6f, temper = Temper.Hunts, senseRange = 10f, time = ActiveTime.Any, habitat = Habitat.Air,
+                hoverMin = 2f, hoverMax = 5f, packMin = 3, packMax = 6, maxAlive = 10, placeholder = new Color(0.77f, 0.54f, 0.31f) },
+            new SpeciesSpec { id = Species.BallastTortoise, planet = PlanetId.Jupiter, artKey = "creatures/jupiter/ballast_tortoise", size = new Vector2(4f, 2.5f),
+                wanderSpeed = 0.6f, runSpeed = 1.4f, temper = Temper.Flees, senseRange = 6f, time = ActiveTime.Any, habitat = Habitat.Air,
+                hoverMin = 4f, hoverMax = 9f, packMin = 1, packMax = 1, maxAlive = 2, placeholder = new Color(0.66f, 0.31f, 0.23f) },
         };
 
         public static SpeciesSpec Get(Species s) => All[(int)s];
@@ -201,6 +218,11 @@ namespace Meridian.Creatures
             Species.Pike or Species.Shark or Species.Squid or Species.HadalMaw => s.aboveTile == TileId.Water && s.waterDepth >= WaterDepthNeeded,
             Species.Dustskater => s.surfaceTile == TileId.Regolith,
             Species.ScreeStalker => s.surfaceTile == TileId.Regolith && s.surfaceY <= s.datumY - 12, // low ground: canyon floors
+            // U-127: by the band of the floe under the spawn (Bible §7.6): the glider in every deck, the eel in Deck 2, the wasps in Deck 1, the tortoise in Decks 2–3.
+            Species.Stormglider => JupiterBand(s) == Meridian.Terrain.CloudColumn.CloudBand.Deck1 || JupiterBand(s) == Meridian.Terrain.CloudColumn.CloudBand.Deck2 || JupiterBand(s) == Meridian.Terrain.CloudColumn.CloudBand.Deck3,
+            Species.LightningEel => JupiterBand(s) == Meridian.Terrain.CloudColumn.CloudBand.Deck2,
+            Species.BeltWasp => JupiterBand(s) == Meridian.Terrain.CloudColumn.CloudBand.Deck1,
+            Species.BallastTortoise => JupiterBand(s) == Meridian.Terrain.CloudColumn.CloudBand.Deck2 || JupiterBand(s) == Meridian.Terrain.CloudColumn.CloudBand.Deck3,
             Species.TubeLurker => (s.surfaceTile == TileId.Regolith || s.surfaceTile == TileId.Basalt) && MarsLandforms.OverTube(s.x), // U-118 (D-126): its dens sit over the lava tubes
             Species.PolarCrawler => s.surfaceTile == TileId.Ice, // U-118: the ice caps
             Species.Glassback => s.zone == MercuryZone.Twilight && !InColdTrap(s),
@@ -217,6 +239,8 @@ namespace Meridian.Creatures
         };
 
         static bool InColdTrap(SpawnSite s) => s.worldWidth > 0 && MercuryLandforms.InColdTrap(s.x, s.worldWidth);
+        /// <summary>U-127: the cloud band of the floe a Jupiter spawn site stands over (its surface height).</summary>
+        static Meridian.Terrain.CloudColumn.CloudBand JupiterBand(SpawnSite s) => Meridian.Terrain.CloudColumn.CloudLayout.BandAt(s.surfaceY);
 
         /// <summary>Whether height y lies in reach of the cloud deck (the band plus a margin).</summary>
         public static bool OnDeck(float y) => Mathf.Abs(y - VenusLandforms.DeckY) <= VenusLandforms.DeckHalfBand + 20f;
