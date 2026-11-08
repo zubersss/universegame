@@ -22,9 +22,10 @@
     {
       "n": 2,
       "parallax": 0.6,
-      "y_m": -0.5,
+      "y_m": -3.0,
+      "continue_rows": 64,
       "ground_row": 352,
-      "height_px": 384
+      "height_px": 544
     }
   ]
 }
