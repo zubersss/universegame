@@ -181,8 +181,12 @@ namespace Meridian.View2D
         double seasonSeconds; long lastSeason = long.MinValue; // U-130: Uranus's season clock
         /// <summary>The game clock the stage reads (0 without a TimeSystem).</summary>
         public double GameTime => clock != null ? clock.GameSeconds : 0;
-        /// <summary>U-130 (D-142): the Survey module's view on Uranus: the deck's survey layer0 (the methane bands) crossfades in under the same light.</summary>
-        public bool SurveyView { get; set; }
+        /// <summary>U-130 (D-142, D-154): the Survey view on Uranus: on while the Rig's Survey module is the active module (Module keys / Q / E), off
+        /// for any other; the deck's survey layer0 (the methane bands) crossfades in under the same light through the U-128 crossfade.</summary>
+        public bool SurveyView => SurveyViewFor(rigInput != null ? rigInput.module : (Meridian.Rig.RigModule)0);
+        /// <summary>D-154: the Survey view by the active module (no pulse, no ownership gate). Pure.</summary>
+        public static bool SurveyViewFor(Meridian.Rig.RigModule active) => active == Meridian.Rig.RigModule.Survey;
+        Meridian.Player.PlayerRigInput rigInput;
         Meridian.Hazards.HazardSystem hazards;
         /// <summary>Rigged plants around the camp in C0 (every FloraSpacing m, jittered).</summary>
         public const int FloraCount = 42; // D-136 (2): was 48; the camp's density is the animated-object lever (the gate read 42 Animators against 40)
@@ -231,7 +235,8 @@ namespace Meridian.View2D
             Layers.view = cam;
             planetId = config.id; planetName = config.id.ToString().ToLowerInvariant();
             worldWidth = config.worldWidth; clock = FindAnyObjectByType<TimeSystem>(); hazards = side.hazards; lastDawn = int.MinValue;
-            seasonSeconds = Meridian.Planet.UranusSeason.SeasonSeconds(config.dayLengthRealMinutes); lastSeason = long.MinValue; // U-130 // U-123: Mercury's set and strips follow the terminator's clock
+            seasonSeconds = Meridian.Planet.UranusSeason.SeasonSeconds(config.dayLengthRealMinutes); lastSeason = long.MinValue; // U-130
+            rigInput = side.player != null ? side.player.GetComponent<Meridian.Player.PlayerRigInput>() : null; // D-154: the Survey view follows the active module // U-123: Mercury's set and strips follow the terminator's clock
             float entryY = side.player != null ? side.player.transform.position.y : surfaceDatum;
             Scene = config.id == Meridian.Planets.PlanetId.Venus ? VenusSceneFor(entryY, null) // U-125: the entry's height (the surface or the deck)
                 : config.id == Meridian.Planets.PlanetId.Uranus ? UranusSceneFor(entryY, side.spawnX, worldWidth, GameTime, seasonSeconds, null, SurveyView) // U-130: the entry's band, the season's light

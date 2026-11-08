@@ -105,6 +105,15 @@ namespace Meridian.Tests
             }
         }
 
+        /// <summary>D-154: the Survey view is on while the Survey module is the active one, off for every other module.</summary>
+        [Test]
+        public void TheSurveyViewFollowsTheActiveModule()
+        {
+            Assert.IsTrue(CartoonStage.SurveyViewFor(Meridian.Rig.RigModule.Survey));
+            foreach (var m in new[] { Meridian.Rig.RigModule.Beam, Meridian.Rig.RigModule.Grapple, Meridian.Rig.RigModule.Builder })
+                Assert.IsFalse(CartoonStage.SurveyViewFor(m), m + " selected: the plain fog");
+        }
+
         [Test]
         public void TheFloesAreMethaneIceAndTheDarkHalfsSlate()
         {
