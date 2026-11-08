@@ -1,0 +1,23 @@
+{
+  "key": "terrain/mars/fill_decor_basalt_1",
+  "style": "v3",
+  "contract": "v3.2 11.9",
+  "frame_width": 128,
+  "frame_height": 64,
+  "columns": 1,
+  "gutter": 4,
+  "frames": 1,
+  "fps": 12,
+  "pivot": [
+    0.5,
+    0.5
+  ],
+  "facing": "right",
+  "ppu": 64,
+  "animations": [],
+  "upright": true,
+  "variant": "basalt",
+  "fill": "ground_fill_basalt",
+  "decor": "lava_tube",
+  "note": "B-192: a buried detail of ground_fill_basalt (D-165's pattern, for U-167): UNITY scatters it in that fill's cutaway by a position seed, never rotated; pivot centred"
+}
