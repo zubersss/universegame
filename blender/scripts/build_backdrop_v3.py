@@ -1108,6 +1108,9 @@ def mercury_coldtrap(seed):
         ell(glint, cx, g1 - rng.uniform(4, 40), rng.uniform(4, 10), rng.uniform(1.5, 3))
     stack = Stack()
     stack.append(wash32(rng, H, wm, wall, var=0.05, edge_dark=0.07, bleed=1.8))
+    y1 = np.arange(H)[:, None]                                                                # B-187 rev: not a flat wash - strata in the
+    stack.append(wash32(rng, H, _face_bands(H, walls, rng, (24, 50, 82, 118), (1.5, 4.0)) * wm, dark, var=0.03, edge_dark=0.02, bleed=1.6))  # shadow,
+    stack.append(wash32(rng, H, wm * (y1 < walls[None, :] + 4), BG._mix(ice, wall, 0.40), var=0.03, edge_dark=0.02, bleed=1.0))  # starlit frost on the ledges
     stack.append(wash32(rng, H, BG._ridge_mask(H, BG.ridge(rng, [(3, 0.5), (8, 0.5)], base=g1 - 24, amp=10)), dark, var=0.04, edge_dark=0.04, bleed=2.5))
     stack.append(tint(rng, H, glint * wm, BG._mix(ice, pal["offwhite"], 0.3), 0.8, var=0.03, edge_dark=0.05, bleed=0.8))
     out.append(finish(stack, rng, H))
@@ -1117,10 +1120,11 @@ def mercury_coldtrap(seed):
     line = BG.ridge(rng, [(3, 0.5), (8, 0.3)], base=g2, amp=4)
     ground = BG._ridge_mask(H, line)
     icep = np.zeros((H, W), np.float32)
-    for _k in range(12):                                                                      # ice-skin patches lying on the floor
-        cx, cy = rng.uniform(0, W), g2 + rng.uniform(6, 60)
-        if cy < hq - 10:
-            ell(icep, cx, cy, rng.uniform(40, 110), rng.uniform(3, 7))
+    for _k in range(18):                                                                      # ice-skin sheets lying on the floor (B-187 rev:
+        cx, cy = rng.uniform(0, W), g2 + rng.uniform(6, 56)                                   # more, wider, brighter, a lit upper rim)
+        if cy < hq - 12:
+            ell(icep, cx, cy, rng.uniform(50, 150), rng.uniform(4, 9))
+    irim = icep * (1 - np.roll(icep, 2, axis=0))                                              # each sheet's top 2 rows
     stars = np.zeros((H, W), np.float32)
     for _k in range(18):
         cx, cy = rng.uniform(0, W), g2 + rng.uniform(4, 70)
@@ -1131,7 +1135,8 @@ def mercury_coldtrap(seed):
     _seated(rocks, rshade, rcap, line, rng, 10, 10, 26, hq, cap_h=0.3)
     stack = Stack()
     stack.append(wash32(rng, H, ground, dark, var=0.06, edge_dark=0.06, bleed=2.0))
-    stack.append(wash32(rng, H, icep * ground, BG._mix(ice, dark, 0.25), var=0.04, edge_dark=0.04, bleed=1.6))
+    stack.append(wash32(rng, H, icep * ground, BG._mix(ice, dark, 0.10), var=0.04, edge_dark=0.04, bleed=1.6))
+    stack.append(wash32(rng, H, irim * ground, BG._mix(pal["offwhite"], ice, 0.30), var=0.03, edge_dark=0.0, bleed=0.9))
     stack.append(tint(rng, H, stars * ground, BG._mix(ice, pal["offwhite"], 0.5), 0.85, var=0.0, edge_dark=0.0, bleed=0.6))
     stack.append(wash32(rng, H, rocks, BG._mix(pal["brown"], pal["sky"], 0.10), var=0.05, edge_dark=0.10, bleed=1.2))
     stack.append(wash32(rng, H, rshade * rocks, pal["brown"], var=0.04, edge_dark=0.03, bleed=1.6))
@@ -1187,9 +1192,9 @@ def venus_tessera(seed):
     g2 = _gline(H, -3.0)
     hq = H - 2 * BG.CONTINUE_ROWS
     ws, x0 = [], 0.0
-    while x0 < W - 30:
-        w = rng.uniform(16, 32)
-        ws.append((x0, w, rng.uniform(2.0, 4.5)))
+    while x0 < W - 60:                                                                        # B-187 rev: crumpled ridges of unequal width
+        w = rng.uniform(44, 120)                                                              # (the even 16-32 px run, a dark slit at each
+        ws.append((x0, w, rng.uniform(5.0, 13.0)))                                            # foot, read as a dotted line)
         x0 += w
     sc = W / x0
     line = np.full(W, float(g2), np.float32)
@@ -1198,19 +1203,28 @@ def venus_tessera(seed):
         a, w = a * sc, w * sc
         xs = np.arange(int(a), int(a + w) + 1)
         line[xs % W] = g2 - h * np.sin(np.pi * np.clip((xs - a) / w, 0, 1)) ** 1.4
-        feet.append(a)
+        feet.append((a, w))
+    line = _wrap_smooth(line, 2.0)
     ground = BG._ridge_mask(H, line)
     crest = (ground * (np.arange(H)[:, None] < line[None, :] + 3)).astype(np.float32)
     gv = np.zeros((H, W), np.float32)
-    for a in feet:                                                                            # a dark slit at each ridge's foot (the groove)
-        ell(gv, a, g2 + 2, 3.5, 6)
+
+    def _fold(x, n, drop=3):                                                                  # a fold line slanting down into the crust
+        for t2 in range(n):
+            r = int(line[int(x) % W] + drop + t2)
+            if r < hq - 8:
+                gv[r, int(x - 0.45 * t2) % W] = 1.0
+    for a, w in feet:
+        _fold(a, int(rng.uniform(18, 44)))
+        if w > 70:                                                                            # a shorter one part-way along a wide ridge
+            _fold(a + w * rng.uniform(0.35, 0.65), int(rng.uniform(10, 24)), 4)
     gv *= ground
     blocks, bshade = np.zeros((H, W), np.float32), np.zeros((H, W), np.float32)
     _seated(blocks, bshade, None, line, rng, 9, 10, 24, hq)
     stack = Stack()
     stack.append(wash32(rng, H, ground, grey, var=0.06, edge_dark=0.06, bleed=2.0))
     stack.append(wash32(rng, H, crest, lit, var=0.03, edge_dark=0.02, bleed=1.0))
-    stack.append(wash32(rng, H, gv, pal["brown"], var=0.03, edge_dark=0.02, bleed=1.0))
+    stack.append(wash32(rng, H, gv, groove, var=0.03, edge_dark=0.0, bleed=1.4))
     stack.append(wash32(rng, H, blocks, BG._mix(grey, groove, 0.25), var=0.05, edge_dark=0.10, bleed=1.2))
     stack.append(wash32(rng, H, bshade * blocks, groove, var=0.04, edge_dark=0.03, bleed=1.6))
     out.append(BG.tile_bottom(*finish(stack, rng, H)))
