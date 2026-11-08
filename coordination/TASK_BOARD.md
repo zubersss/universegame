@@ -2453,7 +2453,7 @@ Goal: OWNER DIRECTION (D-162, amending D-161): digging stays, made round and car
 Accept: DigPlaceTests rewritten for the brush (a dig removes a round area, the outline stays smooth, a mound adds one, the collider follows both); SaveLoadTests: a fixture saved by 0.4.8 loads with its edits and everything else kept; captures at 1x in reports/unity/u157/: a fresh scoop, a short tunnel, a mound ramp, beside 0.4.8's square dig; every other test green; clean console.
 Files: Code/Runtime/Player/, Rig/, Items/, Crafting/, Terrain/, Save/, UI/, Tests/
 Depends: U-156
-Lead notes: Cycle 279 (04:2x): first written as "dig / place out" under D-161; the owner amended it within minutes (D-162: keep the digging, use it creatively). Lock-free code right after U-156 (same field); one check together. 06:1x (D-165): the mound brush refuses to cover a body; the migration drops a 0.4.8 save's Earth POI stamp edits and poi_stamped flags and re-stamps on the smoothed ground (SaveLoadTests covers it).
+Lead notes: Cycle 279 (04:2x): first written as "dig / place out" under D-161; the owner amended it within minutes (D-162: keep the digging, use it creatively). Lock-free code right after U-156 (same field); one check together. 06:1x (D-165): the mound brush refuses to cover a body; the migration drops a 0.4.8 save's Earth POI stamp edits and poi_stamped flags and re-stamps on the smoothed ground (SaveLoadTests covers it). Cycle 280 (06:2x): the check in (EditMode 441/441; DigPlace, InventoryPlay, SaveLoad v2, SolidRescue green; u157 frames: scoop, tunnel, mound, bridge); the mound cost accepted (D-167 (3)); P-54 YES before 0.5.0 (a 0-7 fill level per tile so stacked digs and mounds are round, migrated with the v2 saves); P-55 yes (CraftingPlay asserts the Locked card state and tint). Done on the next check with P-54's round walls in the u157 re-shoot.
 
 ### U-158 · UNITY · Ready · G1
 Goal: OWNER DIRECTION (D-161 (3), D-162 (5)): mining by resource nodes and buried finds. The Survey scan marks buried finds on every planet (ore and crystal pockets, ice lenses, relics and data caches, Warden vault doors) that the player digs up with U-157's brush, each yielding its item; and each planet's ores and materials also come from cartoon resource nodes on the surface (placed by biome with spacing, each with a harvested state and a regrow timer), worked by the Rig's tools with the same module gates as before (the Beam for Solarite, cut only in Mercury's twilight window), yielding the same item ids at a rate matching the old digging (report items per minute, before and after). Node art from B-176; placeholders until then (existing props such as props/mercury/solarite_cluster).
@@ -2482,6 +2482,13 @@ Accept: LayerFollowTests (or the nearest) +1: in each Earth biome the set's grou
 Files: Code/Runtime/View2D/BandDatum.cs, CartoonStage.cs, ParallaxLayers.cs, Tests/
 Depends: U-156
 Lead notes: Cycle 280 (05:5x): LEAD viewed u156/8_snow_050 (the plains meadow and a river band hung high, a flat brown block behind the snowy slope). For Build 0.5.0: the owner's whole complaint was blockiness. With U-157 / U-158 in one check.
+
+### U-162 · UNITY · Ready · G1
+Goal: The fleeing stag's stall at the camp crates (CreatureWallTests.AFleeingStagAtTheCampCratesTurnsAndKeepsMoving, parked since U-156's attempt 3; D-167 (6)): the trace shows the direction flipping every 0.24–0.5 s on a flat pad, faster than the 1.5 s wall-turn hold, because after a turn the decelerate / re-accelerate swing brings the body back within 0.1 m of its anchor at the next stuck check. Give the stuck detector hysteresis: blocked only after N consecutive checks with the body's speed under a threshold, and the hold after a turn extended by the turn's own deceleration time; no ground change.
+Accept: the parked test un-ignored and green (≥ 6 m moved, ≤ 3 turns); CreatureWallTests' wolf-at-wall test unchanged; the trace logged once in the report.
+Files: Code/Runtime/Creatures/, Tests/
+Depends: U-156
+Lead notes: Cycle 280 (06:2x). After Build 0.5.0; three ground-side attempts failed and the trace clears the ground.
 
 ### U-154 · UNITY · Ready · C2
 Goal: P-51 (UNITY, ruled yes in cycle 279): the Builder's aerostat pieces draw the re-inked kit on the four giants: PieceSpec gains a per-planet art key, so the Deck / Strut / Lift cell pieces draw `props/common/aerostat_{deck,strut,cell}` (B-156) on Jupiter, Saturn, Uranus and Neptune and keep `props/venus/aerostat_deck` on Venus; nothing else about the pieces changes (sizes, costs, saves).
