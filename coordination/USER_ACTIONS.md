@@ -6,7 +6,12 @@ Owner: LEAD (only the Lead edits this). Do the open items below, then tell the L
 
 ## Open
 
-(none open but the optional one below; the next playtest item comes with Build 0.5.1)
+### USER-34 — The 0.5.1 walk check (10 min)
+Open https://claude.ai/artifact/LHdbQJd7sWTNv2grcGszkG, then double-click `C:\dev\universegame\Build\MERIDIAN_0.5.1\MERIDIAN.exe`.
+1. Walk and run (A / D, Shift) up and down the hills around the camp: the walk should stay a walk all the way down.
+2. Open the inventory with Tab: every item is hand-inked.
+3. Optional: board the rocket (F), fly to Mars and walk its smooth plains, canyon and polar cap.
+Tell the Lead "0.5.1 walks right" or what still feels off.
 
 ### USER-08 — Optional: let the team run PowerShell commands without prompts (2 min)
 On Windows, Claude Code runs commands through PowerShell as well as Bash, and the
