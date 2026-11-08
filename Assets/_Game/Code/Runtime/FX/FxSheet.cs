@@ -25,6 +25,21 @@ namespace Meridian.FX
 
         FxSheet(string key) { this.key = key; }
 
+        AsyncOperationHandle handle;
+        bool released;
+
+        /// <summary>U-159 (Residency): drops a sheet that belongs to one planet's bundle (terrain/&lt;planet&gt;/dig_puff), so leaving the planet
+        /// releases the bundle; the shared fx sheets stay for the session. A later Get loads it afresh.</summary>
+        public static void Release(string key)
+        {
+            if (key == null || !cache.TryGetValue(key, out var s)) return;
+            cache.Remove(key);
+            s.released = true;
+            s.frames = null;
+            if (s.handle.IsValid()) global::Meridian.Art.ArtLoad.Release(s.handle);
+            s.handle = default;
+        }
+
         public static FxSheet Get(string key)
         {
             if (cache.TryGetValue(key, out var s)) return s;
@@ -52,9 +67,12 @@ namespace Meridian.FX
             {
                 bool exists = l.Status == AsyncOperationStatus.Succeeded && l.Result != null && l.Result.Count > 0;
                 global::Meridian.Art.ArtLoad.Release(l);
-                if (!exists) return;
-                ArtLoad.Asset<IList<Sprite>>(key).Completed += op =>
+                if (!exists || released) return;
+                var h = ArtLoad.Asset<IList<Sprite>>(key);
+                handle = h;
+                h.Completed += op =>
                 {
+                    if (released) { if (op.IsValid()) global::Meridian.Art.ArtLoad.Release(op); return; }
                     if (op.Status != AsyncOperationStatus.Succeeded || op.Result == null || op.Result.Count == 0) return;
                     var list = new Sprite[op.Result.Count];
                     foreach (var sp in op.Result)

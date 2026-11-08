@@ -165,7 +165,7 @@ namespace Meridian.Tests
             // 3. Enter Mars: Earth stays released, only Mars is resident, Mars's own sheets are tracked.
             yield return Enter(director, transitions, "mars");
             yield return ReleasedWithin5s("planet_earth");
-            Assert.IsTrue(Residency.OnlyPlanet("planet_mars"), $"only Mars resident: {Residency.ResidentGroups()}");
+            Assert.IsTrue(Residency.OnlyPlanet("planet_mars"), $"only Mars resident: {Residency.ResidentGroups()}; held: venus [{Residency.Holders("planet_venus")}], warden [{Residency.Holders("planet_warden")}], waystation [{Residency.Holders("planet_waystation")}], earth [{Residency.Holders("planet_earth")}]");
             Assert.GreaterOrEqual(Residency.CountPlanet("planet_mars"), OwnSheets(PlanetId.Mars), "Mars's own sheets tracked");
 
             // 4. Stream Mars at run speed (the ship parked mid-air meanwhile).

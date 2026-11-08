@@ -39,6 +39,18 @@ namespace Meridian.Planet.POI
         public const int MaxStep = 2;
         /// <summary>How far a shoulder may reach from the pad edge before it gives up blending (m).</summary>
         public const int MaxShoulder = 48;
+        /// <summary>U-159: column x (wrapped) lies inside another ground POI's stamp on the same planet.</summary>
+        static bool InOtherStamp(PoiDef poi, int x, int width)
+        {
+            foreach (var o in PoiCatalog.For(poi.planet))
+            {
+                if (o == poi || o.Floating || o.stamp == null) continue;
+                int d = ((x - o.x) % width + width) % width;
+                if (d < o.Width) return true;
+            }
+            return false;
+        }
+
         /// <summary>U-156: a smooth planet's shoulder grade (metres per column): under the walkable limit (tan 35°) once the curve eases it.</summary>
         public const float SmoothShoulder = 0.65f; // steeper than the natural hills' 0.6 (GroundField.SurfaceSlope), so a shoulder always meets them
         /// <summary>U-156: how far a smooth planet's shoulder may reach (columns): 0.65 over 240 columns blends 156 m.</summary>
@@ -92,6 +104,7 @@ namespace Meridian.Planet.POI
                 int natural = baseWorld.SurfaceHeight(x);
                 bool inStamp = col >= 0 && col < poi.Width;
                 int ground = gy;
+                if (!inStamp && InOtherStamp(poi, x, baseWorld.Width)) continue; // U-159: another POI's stamp owns its columns (a 240-column smooth shoulder crossed the camp and filled its soil rows with rock)
                 if (!inStamp)
                 {
                     // U-156: a smooth planet's shoulders are joint across neighbouring POIs (JointGround); else this POI's own shoulder.

@@ -276,9 +276,11 @@ namespace Meridian.Terrain
         }
 
         // U-156 / D-165 (a): on a smooth planet a buried body is lifted onto the outline (an edge outline cannot push it out).
+        // U-159: the parking (the Pilgrim and item drops held still over unloaded ground) runs on every planet; on a block planet the ship
+        // otherwise sank through its unstreamed pad once the surveyor walked ~500 m away.
         void FixedUpdate()
         {
-            if (started && SmoothGround && Config != null) SolidRescue.Tick(this);
+            if (started && Config != null) SolidRescue.Tick(this, SmoothGround);
         }
 
         void Update()

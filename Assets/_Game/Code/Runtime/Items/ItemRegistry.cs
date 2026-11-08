@@ -73,8 +73,10 @@ namespace Meridian.Items
             // U-059: the Tharsis Worm's plate (M4+): registered, no source yet.
             Add(new ItemDef { id = id++, key = "wormplate", name = "Wormplate" });
             // U-056 base pieces (B-014, B-045): their art is their icon. The float cell (B-051) is the aerostat's lift.
+            // U-159 (Residency): the deck's icon is B-069's common kit deck: an item travels, and the Venus station's prop kept planet_venus
+            // resident on every planet once a Fabricator's recipe list had shown it.
             foreach (var (key, name, art) in new[] { ("shelter_wall", "Shelter wall", "props/common/shelter_wall"), ("shelter_door", "Shelter door", "props/common/shelter_door"),
-                ("lamp", "Lamp", "props/common/lamp"), ("storage_crate", "Storage crate", "props/common/storage_crate"), ("aerostat_deck", "Aerostat deck", "props/venus/aerostat_deck") })
+                ("lamp", "Lamp", "props/common/lamp"), ("storage_crate", "Storage crate", "props/common/storage_crate"), ("aerostat_deck", "Aerostat deck", "props/common/aerostat_deck") })
                 Add(new ItemDef { id = id++, key = key, name = name, icon = art });
             // U-063: Helium-3 Condensate (Saturn), a crafting material. U-107 (D-105): the slot after it is retired (kept unused).
             Add(new ItemDef { id = id++, key = "helium3_condensate", name = "Helium-3 Condensate", icon = "icons/helium3_condensate/base" }); // B-061

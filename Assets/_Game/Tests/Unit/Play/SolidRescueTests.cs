@@ -23,7 +23,7 @@ namespace Meridian.Tests
         PlanetSideRoot side;
         PlayerController player;
 
-        IEnumerator Boot()
+        IEnumerator Boot(bool smooth = true)
         {
 #if UNITY_EDITOR
             yield return UnityEditor.SceneManagement.EditorSceneManager.LoadSceneAsyncInPlayMode(
@@ -38,7 +38,7 @@ namespace Meridian.Tests
             side.dayNight.Override = 0.5f;
             side.creatures.autoSpawn = false;
             side.creatures.DespawnAll();
-            Assert.IsTrue(side.terrain.SmoothGround, "Earth's ground is the traced outline");
+            Assert.AreEqual(smooth, side.terrain.SmoothGround, smooth ? "Earth's ground is the traced outline" : "Earth's ground is 0.4.8's blocks (GroundField.ForceBlocks)");
             for (int i = 0; i < 30; i++) yield return new WaitForFixedUpdate();
         }
 
@@ -139,6 +139,56 @@ namespace Meridian.Tests
             SolidRescue.Unregister(box);
             Object.Destroy(go);
             LogAssert.NoUnexpectedReceived();
+        }
+
+        /// <summary>
+        /// U-159: the Pilgrim is held still while the ground under it is unloaded, and let go on its pad once it streams back, on a smooth planet
+        /// and on a block one (Mercury and Venus today; here Earth under GroundField.ForceBlocks). The parking ran only with the smooth rescue:
+        /// in CaptureU159Mars's 0.4.8 pass the ship sank 90 m through its unstreamed pad, and the ground came back with it inside.
+        /// </summary>
+        [UnityTest, Timeout(180000)]
+        public IEnumerator ThePilgrimIsHeldOverUnloadedGround() => Parked(false);
+
+        [UnityTest, Timeout(180000)]
+        public IEnumerator ThePilgrimIsHeldOverUnloadedGroundOnBlocks() => Parked(true);
+
+        IEnumerator Parked(bool blocks)
+        {
+            GroundField.ForceBlocks = blocks;
+            try
+            {
+                yield return Boot(!blocks);
+                var ship = side.ship.Body;
+                Vector2 start = ship.position;
+                Assert.IsTrue(ship.simulated, "the Pilgrim stands on its pad");
+                yield return Move(start.x + 1000f); // the surveyor 1 km away: the pad's chunks stream out
+                Assert.IsFalse(side.terrain.IsCollisionReady(Mathf.FloorToInt(start.x), Mathf.FloorToInt(start.y) - 2), "the pad's ground unloaded");
+                for (int i = 0; i < 250; i++) yield return new WaitForFixedUpdate(); // 5 s
+                Assert.GreaterOrEqual(SolidRescue.Parked, 1, "the Pilgrim parked");
+                Assert.AreEqual(start.y, ship.position.y, 0.1f, "the Pilgrim held still over its unloaded pad");
+                yield return Move(start.x - 6f); // back beside it: the pad streams in
+                for (int i = 0; i < 100; i++) yield return new WaitForFixedUpdate();
+                Assert.IsTrue(ship.simulated, "let go once its ground is back");
+                Assert.AreEqual(start.y, ship.position.y, 0.15f, "on its pad again");
+                LogAssert.NoUnexpectedReceived();
+            }
+            finally { GroundField.ForceBlocks = false; }
+        }
+
+        /// <summary>The surveyor set down at x (held while its ground streams in).</summary>
+        IEnumerator Move(float x)
+        {
+            var b = player.Body;
+            b.simulated = false;
+            b.position = new Vector2(x, side.terrain.TopSolidY(Mathf.FloorToInt(x)) + 2f); player.transform.position = b.position;
+            yield return null;
+            float until = Time.realtimeSinceStartup + 20f;
+            while (!side.terrain.IsSettled && Time.realtimeSinceStartup < until) yield return null;
+            yield return new WaitForFixedUpdate();
+            b.position = new Vector2(x, side.terrain.TopSolidY(Mathf.FloorToInt(x)) + 2f); player.transform.position = b.position; // the stamps' top once loaded
+            b.linearVelocity = Vector2.zero;
+            b.simulated = true;
+            for (int i = 0; i < 30; i++) yield return new WaitForFixedUpdate();
         }
     }
 }

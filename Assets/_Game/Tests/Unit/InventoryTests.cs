@@ -35,6 +35,17 @@ namespace Meridian.Tests
                 Assert.AreEqual($"icons/{icon}/base", ItemRegistry.Get(icon)?.icon, icon);
         }
 
+        /// <summary>U-159 (Residency): an item's icon is shared art (icons/ or props/common/): items travel between planets, and a planet's own
+        /// key held for the session (ItemIcons) keeps that planet's bundle resident everywhere.</summary>
+        [Test]
+        public void ItemIconsAreSharedArt()
+        {
+            // Pending: the wind anchor has only Neptune's prop (B-161); its shared icon is asked of LEAD (U-159 report, 2026-11-08).
+            var pending = new HashSet<string> { "wind_anchor" };
+            foreach (var d in ItemRegistry.All)
+                if (d.icon != null && !pending.Contains(d.key)) Assert.IsTrue(d.icon.StartsWith("icons/") || d.icon.StartsWith("props/common/"), $"{d.key}: icon {d.icon}");
+        }
+
         [Test]
         public void AddFillsStacksThenEmptySlots()
         {

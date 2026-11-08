@@ -2464,8 +2464,10 @@ namespace Meridian.Tests
                     Meridian.Terrain.GroundField.ForceBlocks = blocks;
                     GameState.Instance.EditsFor(mars).Clear();
                     foreach (var poi in Meridian.Planet.POI.PoiCatalog.For(mars)) GameState.Instance.ClearFlag(poi.StampedFlag);
+                    TestContext.Out.WriteLine($"[MERIDIAN] u159 load Mars (blocks {blocks}) begins: rescues so far {Meridian.Terrain.SolidRescue.Rescues}");
                     yield return director.LoadPlanetSide(GameState.Instance.catalog.Get(mars));
                     side = director.PlanetSide;
+                    TestContext.Out.WriteLine($"[MERIDIAN] u159 load Mars (blocks {blocks}) loaded: rescues {Meridian.Terrain.SolidRescue.Rescues}, ship at {side.ship.Body.position}, top under it {side.terrain.TopSolidY(Mathf.FloorToInt(side.ship.Body.position.x))}");
                     float until = Time.realtimeSinceStartup + 20f;
                     while (!side.terrain.IsSettled && Time.realtimeSinceStartup < until) yield return null;
                     if (side.hazards != null) side.hazards.enabled = false;
@@ -2521,12 +2523,29 @@ namespace Meridian.Tests
                         yield return Stand(xs[i] + 0.5f);
                         string label = $"{spots[i]}_{(pass == 0 ? "050" : "048")}";
                         yield return Shot(label);
+                        TestContext.Out.WriteLine($"[MERIDIAN] u159 after {label}: rescues {Meridian.Terrain.SolidRescue.Rescues}, ship at {side.ship.Body.position}");
                         TestContext.Out.WriteLine($"[MERIDIAN] u159 {label}: x {xs[i]}, feet {side.player.Body.position.y:F2}, grounded {side.player.Grounded}, scene {(side.cartoon != null ? side.cartoon.Scene : "?")}, variant {(side.cartoon != null && side.cartoon.Smooth != null ? side.cartoon.Smooth.VariantAt(xs[i]) : -1)}");
                     }
                 }
 
-                // The smooth ground's extras: a scoop beside a node, a storm over the plains.
+                // The smooth ground's extras: the whole caldera (D-172: a dish, not a dent), a scoop beside a node, a storm over the plains.
                 yield return Load(false);
+                {
+                    int oc = Meridian.Terrain.MarsLandforms.OlympusCenter;
+                    yield return Stand(xs[3] + 0.5f);
+                    var cam = side.sideCamera;
+                    var follow = cam.GetComponent<Meridian.Player.CameraFollow>();
+                    if (follow != null) follow.enabled = false;
+                    float half = Meridian.CameraRig.SideView.HalfHeight(cam);
+                    Meridian.CameraRig.SideView.SetHalfHeight(cam, 36f);
+                    float floorY = side.terrain.SurfaceAt(oc + 0.5f), rimY = side.terrain.SurfaceAt(xs[3] + 0.5f);
+                    cam.transform.position = new Vector3(oc + 0.5f, (floorY + rimY) * 0.5f + 8f, cam.transform.position.z);
+                    yield return new WaitForSeconds(1.5f);
+                    yield return Shot("4b_caldera_dish");
+                    TestContext.Out.WriteLine($"[MERIDIAN] u159 4b_caldera_dish: rim {rimY:F1}, floor {floorY:F1} ({rimY - floorY:F1} m), {2 * Meridian.Terrain.MarsLandforms.CalderaHalfWidth} m across");
+                    Meridian.CameraRig.SideView.SetHalfHeight(cam, half);
+                    if (follow != null) { follow.enabled = true; follow.SnapToTarget(); }
+                }
                 var finds = side.finds;
                 Assert.IsTrue(finds != null && finds.Active, "Mars's nodes and finds placed (U-158 on a smooth planet)");
                 Meridian.Mining.ResourceFinds.Node node = null;

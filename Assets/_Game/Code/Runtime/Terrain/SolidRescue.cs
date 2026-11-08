@@ -96,8 +96,9 @@ namespace Meridian.Terrain
             return float.NaN;
         }
 
-        /// <summary>One pass over the registered bodies (TerrainStreamer.FixedUpdate); returns how many were lifted.</summary>
-        public static int Tick(TerrainStreamer t)
+        /// <summary>One pass over the registered bodies (TerrainStreamer.FixedUpdate); returns how many were lifted. rescue false (a block
+        /// planet, whose box colliders push a body out themselves): only the parking runs.</summary>
+        public static int Tick(TerrainStreamer t, bool rescue = true)
         {
             int lifted = 0;
             for (int k = bodies.Count - 1; k >= 0; k--)
@@ -106,6 +107,7 @@ namespace Meridian.Terrain
                 if (b == null) { bodies.RemoveAt(k); continue; }
                 if (parked.Contains(b)) { if (GroundReady(t, b)) { b.simulated = true; parked.Remove(b); } continue; }
                 if (parks.Contains(b) && b.simulated && !GroundReady(t, b)) { b.simulated = false; parked.Add(b); continue; }
+                if (!rescue) continue;
                 if (!b.simulated || b.bodyType != RigidbodyType2D.Dynamic || !b.gameObject.activeInHierarchy || b.IsSleeping()) continue;
                 if (!Bounds(b, out Bounds box)) continue;
                 // The probe: up to ½ m over the body's lowest point (a tall rocket counts as buried once its foot is, not its middle).

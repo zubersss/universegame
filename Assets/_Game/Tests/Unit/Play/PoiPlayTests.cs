@@ -57,7 +57,7 @@ namespace Meridian.Tests
                 Assert.IsTrue(state.HasFlag(poi.StampedFlag), $"{poi.id} stamped flag");
                 Assert.AreEqual(poi.props.Length, p.props.Count, $"{poi.id} props");
                 foreach (var sr in p.props) Assert.NotNull(sr.sprite, $"{poi.id}/{sr.name} has art or its placeholder");
-                Assert.IsTrue(StampIntact(poi, p.groundY, -1, -1), $"{poi.id} tiles in the terrain");
+                Assert.IsTrue(StampIntact(poi, p.groundY, -1, -1), $"{poi.id} tiles in the terrain: {lastMismatch}");
             }
             var hud = side.sideHud;
             int shown = 0;
@@ -68,6 +68,8 @@ namespace Meridian.Tests
         }
 
         /// <summary>Every stamp cell in the live terrain (edits included), except the one at (skipCol, skipRow).</summary>
+        string lastMismatch = "";
+
         bool StampIntact(PoiDef poi, int gy, int skipCol, int skipRow)
         {
             var t = director.PlanetSide.terrain;
@@ -77,7 +79,11 @@ namespace Meridian.Tests
                 if (col == skipCol && row == skipRow) continue;
                 var want = PoiStamp.CellTile(poi.stamp[row][col], poi.planet);
                 if (want == null) continue;
-                if (t.GetTile(poi.x + col, PoiStamp.RowY(poi, row, gy)) != want.Value) return false;
+                if (t.GetTile(poi.x + col, PoiStamp.RowY(poi, row, gy)) != want.Value)
+                {
+                    lastMismatch = $"cell (col {col}, row {row}) at ({poi.x + col}, {PoiStamp.RowY(poi, row, gy)}): want {want.Value}, found {t.GetTile(poi.x + col, PoiStamp.RowY(poi, row, gy))}; ground y {gy}, the column's top {t.TopSolidY(poi.x + col)}";
+                    return false;
+                }
             }
             return true;
         }
