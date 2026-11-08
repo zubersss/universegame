@@ -1521,6 +1521,13 @@ Files: blender/preview/, blender/scripts/ (dip_review)
 Depends: —
 Lead notes: Cycle 284 (16:0x). Lock-free numpy reads in a free gap; it lets LEAD judge smoke_43 against known art.
 
+### B-202 · BLENDER · Ready · G1
+Goal: Earth's underwater set (B-200's finding, b200_underwater.md: below the surface the swimmer sees the coast / plains land set tinted, meadow and flowers filling the water, and at 15 m a flat green-grey with vertical strip streaks, no depth cue): `backgrounds/earth/sea_under` in D-169's format, drawn for below the sea surface: layer0 the water column (light under the surface with soft wavering light shafts, darkening with depth toward the Hadal trench's dark); layer1 far seabed silhouettes in the haze (rock arches, kelp stands); layer2 the near seabed on the sea floor's depth (sand ripples, rocks, kelp, shells), solid to its bottom with a tileable strip (continue_rows 64); a bright wavy band of the surface seen from below on layer0's top, its own json row naming it. Earth's palette with U-040's tint in mind (it multiplies on top), the straight finish, no faces, nothing that reads as a land plant.
+Accept: one stamped preview (the swimmer at 3, 8, 15 and 40 m, with the tint as UnderwaterTint.shader applies it) accepted by LEAD before the export; log OK; seams ≤ 1 /255; ≤ 4 MB per layer.
+Files: blender/scripts/build_backdrop_v3.py (an Earth sea row), Assets/_Game/Art/backgrounds/earth/sea_under/
+Depends: —
+Lead notes: Cycle 284 (16:1x). BLENDER's top card now (list dry). U-171 shows it.
+
 ### B-201 · BLENDER · Ready · G1
 Goal: An art-side read of the next build's smoke (Mars / Mercury / Venus on smooth ground, the Earth POIs, the Warden, the inventory) when UNITY posts it: for every frame that shows your art, the key you expect at that spot and any defect you see (a wrong or fallback key (e.g. the regolith band where basalt belongs), a pivot or scale off, a seam, a missing lip, a v2 leftover), as a table in coordination/reports/blender/smoke_read_<build>.md.
 Accept: the table covers every smoke frame with your art; each defect names the frame, the key and the expected key; LEAD turns them into cards.
@@ -2708,6 +2715,13 @@ Accept: CraftingTests / InventoryTests +1 (no recipe or item named cryo_round; a
 Files: Code/Runtime/Items/ItemRegistry.cs, Crafting/CraftingDefaults.cs, Save/, Tests/
 Depends: —
 Lead notes: Cycle 284 (15:4x). Small, lock-free; check ID stability first (if ItemRegistry assigns ids by order, keep a reserved slot instead of shifting every later id). Rides U-159's check.
+
+### U-171 · UNITY · Ready · G1
+Goal: The sea from below (B-200's underwater read, b200_underwater.md; Earth's sea is the only water since D-171): over sea columns, the land set's near layer and its continued strip stop at the sea surface (no beach or meadow standing on the water at 3 m, no tinted meadow filling the water at 8 m, no strip streaks at 15 m), and below the surface the stage draws B-202's `backgrounds/earth/sea_under` (its surface band on the water line, layer2 on the sea floor's depth), crossfading with the land set at the shore over U-128's 3 m; until B-202 lands, a plain water gradient (light under the surface, darkening with depth) below it. PlanetBackdrop's wall map already flags sea columns.
+Accept: smoke_43_earth_sea plus a 3 m, a 10 m and a seabed frame re-shot with no land set below the surface; the shore frame (5_coast) unchanged above the water; BandFollowPlay or a new test +1 (over a sea column below the surface no land-set pixel); clean console.
+Files: Code/Runtime/View2D/ (CartoonStage, ParallaxLayers), Code/Runtime/Planet/PlanetBackdrop.cs, Tests/
+Depends: — (B-202 for the art; the gradient until then)
+Lead notes: Cycle 284 (16:1x). After U-167, lock-free; in the next build if B-202 is exported by then, else the one after (the gradient alone is already better than tinted meadow).
 
 ### U-154 · UNITY · Ready · C2
 Goal: P-51 (UNITY, ruled yes in cycle 279): the Builder's aerostat pieces draw the re-inked kit on the four giants: PieceSpec gains a per-planet art key, so the Deck / Strut / Lift cell pieces draw `props/common/aerostat_{deck,strut,cell}` (B-156) on Jupiter, Saturn, Uranus and Neptune and keep `props/venus/aerostat_deck` on Venus; nothing else about the pieces changes (sizes, costs, saves).
