@@ -28,16 +28,22 @@ O, I = B.O, B.I
 PPU, TAU, ART = B.PPU, B.TAU, B.ART
 L = B.BAND_W / PPU
 PLANET = "earth"
-VARIANTS = ("sand", "stone", "snow")
-BIOMES = {"sand": ["desert", "beach"], "stone": ["coast cliffs", "rocky shore"], "snow": ["taiga", "tundra"]}
+PLANET_VARIANTS = {"earth": ("sand", "stone", "snow"), "mars": ("frost",)}     # Mars's polar frost: LEAD 05:3x, for U-159
+VARIANTS = PLANET_VARIANTS[PLANET]
+BIOMES = {"sand": ["desert", "beach"], "stone": ["coast cliffs", "rocky shore"], "snow": ["taiga", "tundra"],
+          "frost": ["polar cap", "polar layered terrain"]}
 DECOR = {"sand": ["dry_tuft", "shells", "sandstone_rock"], "stone": ["lichen_boulder", "shore_pebbles", "thrift"],
-         "snow": ["snowy_shrub", "snow_rock", "dry_stalks"]}
+         "snow": ["snowy_shrub", "snow_rock", "dry_stalks"], "frost": ["frost_boulder", "ice_blocks", "frost_vent"]}
+FILL_OF = {"sand": "ground_fill_sand"}                   # a variant's own fill (the rest lie over the planet's ground_fill)
 
 
 def extra_colours():
     P = v3.PALETTES[PLANET]
     sh = lambda k: v3.shadow_of(P[k], PLANET)  # noqa: E731
     dp = lambda k: v3.deep_of(P[k], PLANET)  # noqa: E731
+    if PLANET == "mars":
+        return {"frost": P["offwhite"], "frost_sh": sh("teal"), "snow": P["offwhite"], "snow_sh": sh("teal"), "ice": P["teal"], "ice_sh": dp("teal"),
+                "rock": dp("sky"), "rock_sh": P["brown"], "rock_lit": sh("sky"), "dust": dp("red"), "vent": P["brown"], "plume": P["offwhite"]}
     return {"sand": P["mustard"], "sand_sh": sh("mustard"), "cream": P["offwhite"], "sandstone": sh("offwhite"), "rust": sh("red"),
             "shell": P["offwhite"], "shell_pink": sh("red"),
             "rock": sh("sky"), "rock_sh": dp("sky"), "rock_lit": sh("offwhite"), "lichen_y": P["mustard"], "lichen_g": P["green"],
@@ -53,7 +59,7 @@ def mats(gp):
         M[k] = G.mat(gp, f"gv_{k}", fill=h, ink=False)
         M[k + "_i"] = G.mat(gp, f"gv_{k}_i", fill=h)
     C = extra_colours()
-    for k in ("dry", "dry_sh", "cushion", "needle"):
+    for k in [k for k in ("dry", "dry_sh", "cushion", "needle") if k in C]:
         M[k + "_tuft"] = G.mat(gp, f"gv_{k}_tuft", fill=C[k], ink=True, behind=True)
     return M
 
@@ -378,14 +384,101 @@ def decor_snow(d, M, k):
         G.stroke(d, mound, M["ink"], O)
 
 
+# ---------------------------------------------------------------- Mars's polar frost (LEAD 05:3x, for U-159): ground_band_frost over the Mars fill
+
+def band_frost(d, M, k=0):
+    """Mars's polar cap: a cream CO2-frost crust in polygon-patterned hummocks (soft troughs every ~1 m, cracks down from them),
+    a grey-blue shaded underside, a layered teal water-ice deposit with dust lines, the rust regolith to a ragged edge."""
+    rnd = random.Random(1840)
+    ws = []
+    while sum(ws) < L - 0.4:
+        ws.append(rnd.uniform(0.8, 1.4))
+    ws = [w * L / sum(ws) for w in ws]
+    edges = [sum(ws[:i]) for i in range(len(ws) + 1)]
+    hs = [rnd.uniform(0.035, 0.06) for _ in ws]
+
+    def ztop(x):
+        x %= L
+        for i in range(len(ws)):
+            if edges[i] <= x <= edges[i + 1]:
+                t = min(x - edges[i], edges[i + 1] - x)
+                return 0.004 + hs[i] * min(1.0, t / 0.22) ** 0.7
+        return 0.004
+    xs = [L * i / 640 for i in range(641)]
+    top = [(x, ztop(x)) for x in xs]
+    fbot = [(x, -0.12 + B.per(x, L, 3, 51, 0.025)) for x in xs[::2]]
+    ibot = [(x, -0.31 + B.per(x, L, 3, 52, 0.035)) for x in xs[::2]]
+    soil_b = _ragged(53, -0.47)
+
+    def body(dx, _dz):
+        sh = lambda pts: [(x + dx, z) for x, z in pts]  # noqa: E731
+        G.stroke(d, sh(ibot + soil_b[::-1]), M["topsoil"], 0.0, cyclic=True)
+        G.stroke(d, sh(fbot + ibot[::-1]), M["ice"], 0.0, cyclic=True)
+        G.stroke(d, sh([(x, z + 0.04) for x, z in ibot] + ibot[::-1]), M["ice_sh"], 0.0, cyclic=True)
+        G.stroke(d, sh(top + fbot[::-1]), M["frost"], 0.0, cyclic=True)
+        G.stroke(d, sh([(x, z + 0.035) for x, z in fbot] + fbot[::-1]), M["frost_sh"], 0.0, cyclic=True)
+        G.seam(d, sh(fbot), M["ink"])
+        G.seam(d, sh(ibot), M["ink"])
+        G.stroke(d, sh(top), M["ink"], O)
+    W(body)
+    for j in range(3):                                                                        # dust lines in the layered ice
+        z0 = -0.165 - 0.045 * j
+        line = [(x, z0 + B.per(x, L, 3, 60 + j, 0.012)) for x in xs[::8]]
+        W(lambda dx, _dz, line=line: G.stroke(d, [(x + dx, z) for x, z in line] + [(x + dx, z - 0.012) for x, z in line[::-1]],
+                                              M["dust"], 0.0, cyclic=True))
+    for i, e in enumerate(edges[:-1]):                                                        # the polygon troughs' cracks
+        W(lambda dx, _dz, e=e: G.seam(d, [(e + dx, 0.004), (e + dx + 0.012, -0.05), (e + dx - 0.008, -0.10)], M["ink"]))
+    for i in range(12):                                                                       # frost sparkle
+        x, z = L * (i + rnd.random()) / 12, rnd.uniform(-0.03, -0.07)
+        W(lambda dx, _dz, x=x, z=z, s=i: G.stroke(d, G.lumpy_ellipse(x + dx, z, 0.016, 0.011, n=8, lump=0.1, seed=s), M["frost_sh"], 0.0, cyclic=True))
+    _pebbles(d, M, 6, (-0.36, -0.42), 1841)
+
+
+def decor_frost(d, M, k):
+    rnd = random.Random(1850 + k)
+    if k == 0:                                                                                # a frost-capped boulder
+        pts = _boulder(d, M, 0.0, 0.26, 1851, flat=0.8, lit=None)
+        G.seam(d, [(0.10, 0.10), (0.04, 0.02)], M["ink"])
+        topline = sorted([(x, z) for x, z in pts if z > 0.12 and abs(x) < 0.30], key=lambda p: p[0])
+        _snowcap(d, M, topline, thick=0.06)
+    elif k == 1:                                                                              # blocks of water ice
+        for j, (x, w, h, tilt) in enumerate(((-0.22, 0.13, 0.20, -0.15), (0.06, 0.17, 0.30, 0.05), (0.28, 0.11, 0.15, 0.2))):
+            c, s_ = math.cos(tilt), math.sin(tilt)
+            R = lambda px, pz: (x + px * c - pz * s_, pz * c + px * s_ + 0.0)  # noqa: E731
+            blk = [R(-w, 0.0), R(-w * 0.95, h), R(w * 0.9, h * 1.05), R(w, 0.0)]
+            G.stroke(d, blk, M["ice"], 0.0, cyclic=True)
+            G.stroke(d, [R(-w, 0.0), R(-w * 0.95, h), R(-w * 0.2, h * 0.9), R(-w * 0.25, 0.0)], M["ice_sh"], 0.0, cyclic=True)
+            G.stroke(d, [R(-w * 0.95, h), R(w * 0.9, h * 1.05), R(w * 0.8, h * 0.88), R(-w * 0.85, h * 0.85)], M["frost"], 0.0, cyclic=True)
+            G.stroke(d, blk, M["ink"], O, cyclic=True)
+            G.seam(d, [R(-w * 0.2, h * 0.9), R(-w * 0.25, 0.05)], M["ink"])
+    else:                                                                                     # a CO2 vent: a dark fan, a plume
+        fan = [(-0.04, 0.0), (0.40, 0.035), (0.44, -0.01), (0.04, -0.015)]
+        G.stroke(d, fan, M["vent"], 0.0, cyclic=True)
+        G.stroke(d, fan, M["ink"], I, cyclic=True)
+        mound = [(-0.12 + 0.24 * q / 10, 0.05 * math.sin(math.pi * q / 10)) for q in range(11)]
+        G.stroke(d, mound + [(0.12, -0.02), (-0.12, -0.02)], M["frost"], 0.0, cyclic=True)
+        G.stroke(d, mound, M["ink"], O)
+        G.stroke(d, G.lumpy_ellipse(0.0, 0.05, 0.035, 0.012, n=10, lump=0.0), M["vent_i"], I, cyclic=True)
+        for j, (x, z, r) in enumerate(((0.00, 0.17, 0.07), (0.04, 0.32, 0.085), (0.09, 0.49, 0.09), (0.15, 0.65, 0.07))):
+            G.stroke(d, G.lumpy_ellipse(x, z, r, r * 0.85, n=14, lump=0.12, seed=j), M["plume_i"], I, cyclic=True)
+
+
 # ---------------------------------------------------------------- the pieces, the render, the export API (render.py ground_strip_set)
 
 BAND_PIV = (0.0, (B.BAND_H - B.SURF_ROW) / B.BAND_H)
-PIECES = {"ground_band_sand": (B.BAND_W, B.BAND_H, BAND_PIV, 1, band_sand), "ground_band_stone": (B.BAND_W, B.BAND_H, BAND_PIV, 1, band_stone),
-          "ground_band_snow": (B.BAND_W, B.BAND_H, BAND_PIV, 1, band_snow), "ground_fill_sand": (B.FILL, B.FILL, (0.0, 0.0), 1, fill_sand),
-          "ground_decor_sand": (64, 64, (0.5, 6 / 64), 3, decor_sand), "ground_decor_stone": (64, 64, (0.5, 6 / 64), 3, decor_stone),
-          "ground_decor_snow": (64, 64, (0.5, 6 / 64), 3, decor_snow)}
-TILES = ("ground_band_sand", "ground_band_stone", "ground_band_snow", "ground_fill_sand")
+def _pieces(planet):
+    """-> (the planet's pieces {name: (w, h, pivot, frames, draw)}, its tiling pieces)."""
+    if planet == "mars":
+        return ({"ground_band_frost": (B.BAND_W, B.BAND_H, BAND_PIV, 1, band_frost), "ground_decor_frost": (64, 64, (0.5, 6 / 64), 3, decor_frost)},
+                ("ground_band_frost",))
+    return ({"ground_band_sand": (B.BAND_W, B.BAND_H, BAND_PIV, 1, band_sand), "ground_band_stone": (B.BAND_W, B.BAND_H, BAND_PIV, 1, band_stone),
+             "ground_band_snow": (B.BAND_W, B.BAND_H, BAND_PIV, 1, band_snow), "ground_fill_sand": (B.FILL, B.FILL, (0.0, 0.0), 1, fill_sand),
+             "ground_decor_sand": (64, 64, (0.5, 6 / 64), 3, decor_sand), "ground_decor_stone": (64, 64, (0.5, 6 / 64), 3, decor_stone),
+             "ground_decor_snow": (64, 64, (0.5, 6 / 64), 3, decor_snow)},
+            ("ground_band_sand", "ground_band_stone", "ground_band_snow", "ground_fill_sand"))
+
+
+PIECES, TILES = _pieces(PLANET)
 
 
 def render_piece(name, k=0, mx=1, mz=1, ss=None):
@@ -413,12 +506,20 @@ def _kn(name, k):
     return f"{name}_{k + 1}" if name.startswith("ground_decor_") else name
 
 
-KEYS = {_kn(n, k): f"terrain/earth/{_kn(n, k)}" for n, p in PIECES.items() for k in range(p[3])}
+def _keys():
+    return {_kn(n, k): f"terrain/{PLANET}/{_kn(n, k)}" for n, p in PIECES.items() for k in range(p[3])}
+
+
+KEYS = _keys()
 
 
 def use_planet(planet):
-    if planet != PLANET:
-        raise ValueError("B-178: the ground variants are Earth's")
+    """The row's planet: Earth's sand / stone / snow set (B-178) or Mars's polar frost (LEAD 05:3x)."""
+    global PLANET, VARIANTS, PIECES, TILES, KEYS
+    PLANET = planet
+    VARIANTS = PLANET_VARIANTS[planet]
+    PIECES, TILES = _pieces(planet)
+    KEYS = _keys()
 
 
 def sheets():
@@ -460,15 +561,17 @@ def sheet_meta(kn, frames):
     if kn.startswith("ground_band_"):
         v = kn.rsplit("_", 1)[1]
         meta.update({"tile_x": True, "repeat_px": B.BAND_W, "surface_row": B.SURF_ROW, "above_px": B.SURF_ROW, "below_px": B.BAND_H - B.SURF_ROW,
-                     "variant": v, "biomes": BIOMES[v], "fill": "ground_fill_sand" if v == "sand" else "ground_fill",
+                     "variant": v, "biomes": BIOMES[v], "fill": FILL_OF.get(v, "ground_fill"),
                      "mapping": "as ground_band: u = world x x 64 mod 512; v = 24 - (normal distance from the outline x 64); the sprite pivot is ON row 24",
-                     "note": f"B-178: Earth's {v} band ({', '.join(BIOMES[v])}); plains and forest keep ground_band; crossfade the two bands at a biome border"})
+                     "note": f"B-178: {PLANET.capitalize()}'s {v} band ({', '.join(BIOMES[v])}); "
+                             + ("plains and forest keep ground_band" if PLANET == "earth" else "the rest of Mars keeps ground_band (U-159)")
+                             + "; crossfade the two bands at a biome border"})
     elif kn == "ground_fill_sand":
         meta.update({"tile_x": True, "tile_y": True, "world_space": True, "standalone": True, "wrap": "repeat", "variant": "sand",
                      "mapping": "as ground_fill: u = x x 64 mod 512, v = -y x 64 mod 512; a standalone texture (Repeat wrap); strata only (D-165)"})
     else:
         v, i = kn.split("_")[2], int(kn.rsplit("_", 1)[1]) - 1
-        meta.update({"upright": True, "variant": v, "decor": DECOR[v][i], "note": f"B-178: Earth's {v} biomes' decor; scatter along the curve, never rotated"})
+        meta.update({"upright": True, "variant": v, "decor": DECOR[v][i], "note": f"B-178: {PLANET.capitalize()}'s {v} biomes' decor; scatter along the curve, never rotated"})
     problems = [p for p in v3.validate_sheet(meta, sheet.shape) if "sum of clip lengths" not in p]
     if kn not in TILES:
         m = v3.EDGE_MARGIN
@@ -538,7 +641,7 @@ def preview(out_dir, pieces=None, out=None, footnote=None):
              "decor": [pngio.read_png_np(os.path.join(E, f"ground_decor_{i + 1}_color.png")) for i in range(6)]}
     sets = {"grass": grass}
     for v in VARIANTS:
-        sets[v] = {"band": tex(pieces[f"ground_band_{v}"][0][0]), "fill": tex(pieces["ground_fill_sand"][0][0]) if v == "sand" else grass["fill"],
+        sets[v] = {"band": tex(pieces[f"ground_band_{v}"][0][0]), "fill": tex(pieces[FILL_OF[v]][0][0]) if v in FILL_OF else grass["fill"],
                    "decor": pieces[f"ground_decor_{v}"][0]}
     xs_all, z_all = B.profile()
     PH = 448
@@ -592,12 +695,13 @@ def preview(out_dir, pieces=None, out=None, footnote=None):
         return img
     side = [panel(4.0, 14.0, lambda xm, v=v: {v: 1.0}, 178 + i) for i, v in enumerate(VARIANTS)]
     gap = np.empty((PH, 0, 3), np.float32)
-    row1 = np.concatenate([side[0], gap, side[1], gap, side[2]], axis=1)
+    row1 = np.concatenate(side, axis=1)
 
     def border(xm, c=9.0, half=1.5):
         t = min(1.0, max(0.0, (xm - (c - half)) / (2 * half)))
         t = t * t * (3 - 2 * t)
-        return {"grass": 1.0 - t, "sand": t} if 0 < t < 1 else ({"grass": 1.0} if t == 0 else {"sand": 1.0})
+        v0 = VARIANTS[0]
+        return {"grass": 1.0 - t, v0: t} if 0 < t < 1 else ({"grass": 1.0} if t == 0 else {v0: 1.0})
     row2 = panel(0.0, 30.0, border, 1782)
     Wt = row2.shape[1]
     row1 = np.concatenate([row1, np.empty((PH, Wt - row1.shape[1], 3), np.float32) * 0 + review.PAPER], axis=1) if row1.shape[1] < Wt else row1[:, :Wt]
@@ -608,9 +712,10 @@ def preview(out_dir, pieces=None, out=None, footnote=None):
         P[40 + 150 * j:40 + 150 * j + 128, 8:8 + 1024] = sky
         review._over(P, np.repeat(np.repeat(b, 2, 0), 2, 1), 8, 40 + 150 * j)
         review._label(P, f"ground_band_{v} 512x64 at 2x (surface row 24): {', '.join(BIOMES[v])}", 8, 20 + 150 * j)
-    ft = pieces["ground_fill_sand"][0][0]
-    review._over(P, np.concatenate([ft, ft], axis=1)[:, :768], 1100, 40)
-    review._label(P, "ground_fill_sand 512x512 tiled in x (the seam at 512)", 1100, 20)
+    if "ground_fill_sand" in pieces:
+        ft = pieces["ground_fill_sand"][0][0]
+        review._over(P, np.concatenate([ft, ft], axis=1)[:, :768], 1100, 40)
+        review._label(P, "ground_fill_sand 512x512 tiled in x (the seam at 512)", 1100, 20)
     x = 8
     for v in VARIANTS:
         for j, fr in enumerate(pieces[f"ground_decor_{v}"][0]):
@@ -631,7 +736,10 @@ def preview(out_dir, pieces=None, out=None, footnote=None):
         lines.append(f"{name}: ink {rng(o)} / {rng(n_)} px, palette {pal:.1f}%{seam}{'; EDGE ' + str(edge) if edge else ''}")
     titles = ["sand | stone | snow: each band bent along the same 10 m (hills, a 30 deg slope) over its fill (sand: ground_fill_sand; stone, snow: "
               "ground_fill), its decor upright, the surveyor at 1x",
-              "a grass -> sand biome border at 9 m: the two bands, fills and decor crossfaded over 3 m (smoothstep), as UNITY would blend them"]
+              "a grass -> sand biome border at 9 m: the two bands, fills and decor crossfaded over 3 m (smoothstep), as UNITY would blend them"] \
+        if PLANET == "earth" else \
+        [f"{PLANET}'s {' | '.join(VARIANTS)} band bent along 10 m (hills, a 30 deg slope) over the {PLANET} ground_fill, its decor upright, the surveyor at 1x",
+         f"the {PLANET} regolith band -> {VARIANTS[0]} border at 9 m: bands and decor crossfaded over 3 m (smoothstep), as UNITY would blend them"]
     rows = []
     for t, im in zip(titles, (row1, row2)):
         lab = np.empty((22, Wt, 3), np.float32)
@@ -646,7 +754,7 @@ def preview(out_dir, pieces=None, out=None, footnote=None):
     del rows, row1, row2, side, P, foot
     import time
     review.draw(img, time.strftime("%m-%d %H:%M") + " " + (footnote or "design preview (lock-free, fakegp + numpy)"), 2, img.shape[0] - 16, (1.0, 1.0, 0.85))
-    out = out or os.path.join(out_dir, "review_b178_earth_ground_variants_preview.png")
+    out = out or os.path.join(out_dir, f"review_b178_{PLANET}_ground_variants_preview.png")
     shape = img.shape
     np.clip(img, 0.0, 1.0, out=img)
     img *= 255.0
@@ -662,5 +770,7 @@ def preview(out_dir, pieces=None, out=None, footnote=None):
 
 
 if __name__ == "__main__":
+    if len(sys.argv) > 2:
+        use_planet(sys.argv[2])
     preview(sys.argv[1])
     fakegp.restore()
