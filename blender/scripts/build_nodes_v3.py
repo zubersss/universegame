@@ -69,7 +69,14 @@ def colours(planet):
                 "capsule": P["offwhite"], "capsule_sh": sh("offwhite"), "panel": P["teal"], "lamp": P["red"], "lamp_on": P["mustard"],
                 "glint": P["offwhite"], "dark": P["brown"], "ice": P["offwhite"], "ice_sh": P["sky"],
                 "xpale": P["offwhite"], "xpale_sh": sh("offwhite")}
-    raise ValueError(f"B-176: {planet}'s nodes come after Mercury's preview")
+    if planet == "venus":                       # LEAD 05:3x: vitriol glass, sulfur; an old pressure capsule
+        return {"rock": dp("teal"), "rock_sh": P["brown"], "rock_hi": sh("teal"), "glass": P["green"], "glass_sh": sh("green"),
+                "glass_hi": P["offwhite"], "sulfur": P["mustard"], "sulfur_sh": sh("mustard"), "salt_sh": sh("mustard"),
+                "fume": P["offwhite"], "vent": P["brown"], "soil": dp("red"), "cavity": P["brown"], "cavity_sh": dp("red"),
+                "capsule": P["mustard"], "capsule_sh": sh("mustard"), "stripe": P["red"], "petal": sh("mustard"),
+                "lamp": P["red"], "lamp_on": P["offwhite"], "glint": P["offwhite"], "dark": P["brown"], "ice": P["offwhite"],
+                "ice_sh": P["sky"], "xred": P["red"], "xred_sh": sh("red"), "xpale": P["offwhite"], "xpale_sh": sh("offwhite")}
+    raise ValueError(f"B-176: no node tones for {planet}")
 
 
 def mats(gp, planet):
@@ -466,9 +473,105 @@ def draw_sunprobe(d, M, k):
         star(d, M, 0.50, 0.26, 0.07)
 
 
+# ---------------------------------------------------------------- Venus (LEAD 05:3x: vitriol glass, sulfur; a relic)
+
+def _shard_poly(bx, bz, ln, a_deg, w):
+    """An angular glass blade from (bx, bz): two base corners, a kinked side, the tip."""
+    a = math.radians(a_deg)
+    ux, uz = math.sin(a), math.cos(a)
+    nx, nz = uz * w, -ux * w
+    s1 = (bx + 0.82 * ln * ux - 0.85 * nx, bz + 0.82 * ln * uz - 0.85 * nz)                 # chisel-tipped: shoulders, then
+    tip = (bx + ln * ux + 0.25 * nx, bz + ln * uz + 0.25 * nz)                                 # an off-centre point
+    s2 = (bx + 0.66 * ln * ux + 0.95 * nx, bz + 0.66 * ln * uz + 0.95 * nz)
+    return [(bx - nx, bz - nz), s1, tip, s2, (bx + nx, bz + nz)], tip
+
+
+def _glass(d, M, bx, bz, ln, a_deg, w, ink=O):
+    pts, tip = _shard_poly(bx, bz, ln, a_deg, w)
+    G.stroke(d, pts, M["glass"], 0.0, cyclic=True)
+    G.stroke(d, [pts[0], pts[1], pts[2], (bx + 0.1 * (pts[4][0] - bx), bz + 0.1 * (pts[4][1] - bz))], M["glass_sh"], 0.0, cyclic=True)   # the shaded facet
+    a = math.radians(a_deg)
+    G.stroke(d, [(bx + 0.30 * ln * math.sin(a) + 0.25 * w * math.cos(a), bz + 0.30 * ln * math.cos(a) - 0.25 * w * math.sin(a)),
+                 (bx + 0.75 * ln * math.sin(a) + 0.12 * w * math.cos(a), bz + 0.75 * ln * math.cos(a) - 0.12 * w * math.sin(a)),
+                 (bx + 0.72 * ln * math.sin(a) + 0.30 * w * math.cos(a), bz + 0.72 * ln * math.cos(a) - 0.30 * w * math.sin(a))],
+             M["glass_hi"], 0.0, cyclic=True)                                                 # a sheen streak
+    G.stroke(d, pts, M["ink"], ink, cyclic=True)
+    G.seam(d, [(bx + 0.1 * (pts[4][0] - bx), bz + 0.1 * (pts[4][1] - bz)), tip], M["ink"])      # the facet edge
+    return tip
+
+
+def node_vitriol(d, M, state, k=0):
+    """Big green vitriol-glass shards jutting from a low basalt crag; harvested: snapped stubs."""
+    full = state != "harvested"
+    top_z = crag(d, M, 0.80, 0.50 if full else 0.40, 31)
+    shards = [(-0.42, 0.46, -32, 0.13), (0.44, 0.42, 34, 0.12), (-0.15, 0.80, -9, 0.19), (0.18, 0.64, 14, 0.17), (0.02, 0.38, 2, 0.14)]
+    spots = []
+    for x, ln, a_deg, w in shards:
+        bz = top_z(x) - 0.08
+        if full:
+            tip = _glass(d, M, x, bz, ln, a_deg, w)
+            spots.append((tip[0] * 0.92 + x * 0.08, tip[1] - 0.08))
+        else:
+            _glass(d, M, x, bz, 0.13, a_deg, w)
+    return spots
+
+
+def node_sulfur(d, M, state, k=0):
+    """A fumarole crag under a thick sulfur crust (lumpy underside), yellow sulfur crystal rosettes, a vent breathing a
+    curl of fume; harvested: a stump with a thin crust."""
+    full = state != "harvested"
+    w, h = (0.80, 0.88) if full else (0.68, 0.45)
+    top_z = crag(d, M, w, h, 32)
+    th = 0.20 if full else 0.08
+    xs = [-w * 0.93 + 1.86 * w * i / 40 for i in range(41)]
+    upper = [(x, top_z(x) + 0.035) for x in xs]
+    lower = [(x, top_z(x) - th - 0.05 * max(0.0, math.sin(10 * x + 1.2)) ** 2) for x in xs]
+    G.stroke(d, upper + lower[::-1], M["sulfur"], 0.0, cyclic=True)
+    G.stroke(d, [(x, z + 0.045) for x, z in lower] + lower[::-1], M["sulfur_sh"], 0.0, cyclic=True)
+    G.stroke(d, upper, M["ink"], O)
+    G.stroke(d, lower, M["ink"], I)
+    spots = []
+    if full:
+        for j, x in enumerate((-0.38, 0.33)):
+            spots.append(_rosette(d, M, x, top_z(x) + 0.01, 0.13, 90 + j, role="sulfur_i")[2])
+        vz = top_z(0.0) + 0.03                                                               # the vent and its fume
+        G.stroke(d, G.lumpy_ellipse(0.0, vz, 0.09, 0.035, n=14, lump=0.0), M["vent_i"], I, cyclic=True)
+        for j, (x, z, r) in enumerate(((0.03, vz + 0.11, 0.065), (0.10, vz + 0.22, 0.05), (0.05, vz + 0.31, 0.035))):
+            G.stroke(d, G.lumpy_ellipse(x, z, r, r * 0.85, n=12, lump=0.12, seed=j), M["fume_i"], I, cyclic=True)
+    return spots
+
+
+def draw_capsule(d, M, k):
+    """Venus's relic: an old brass pressure capsule half-buried in the crust, a red band, a flared petal skirt, one hatch
+    outline off-centre (no portholes: no face, D-101), the lamp on its antenna's tip."""
+    for a in (-0.9, -0.3, 0.3, 0.9):                                                          # the petal skirt behind
+        px, pz = 0.38 * math.sin(a), -0.10 - 0.06 * math.cos(a)
+        G.stroke(d, [(0.12 * math.sin(a), -0.04), (px - 0.07, pz), (px + 0.06, pz - 0.04)], M["petal_i"], I, cyclic=True)
+    ball = G.lumpy_ellipse(0.0, 0.06, 0.30, 0.29, n=32, lump=0.01, seed=11)
+    G.stroke(d, ball, M["capsule"], 0.0, cyclic=True)
+    G.stroke(d, _arc_pts(0.0, 0.06, 0.29, 0.28, math.pi * 0.95, math.pi * 1.6) + [(-0.02, 0.02)], M["capsule_sh"], 0.0, cyclic=True)
+    G.stroke(d, [(-0.30, 0.02), (0.30, 0.02), (0.30, 0.08), (-0.30, 0.08)], M["stripe"], 0.0, cyclic=True)
+    G.stroke(d, ball, M["ink"], O, cyclic=True)
+    G.seam(d, [(-0.29, 0.02), (0.29, 0.02)], M["ink"])
+    G.seam(d, [(-0.29, 0.08), (0.29, 0.08)], M["ink"])
+    G.stroke(d, [(0.08, 0.14), (0.22, 0.13), (0.21, 0.27), (0.09, 0.27)], M["ink"], I, cyclic=True)   # a hatch outline
+    G.seam(d, [(-0.05, 0.33), (-0.10, 0.48)], M["ink"], radius=O)                             # the antenna
+    lit = k > 0 and k % 2 == 1
+    G.stroke(d, G.lumpy_ellipse(-0.105, 0.51, 0.035, 0.035, n=12, lump=0.0), M["lamp_on_i" if lit else "lamp_i"], I, cyclic=True)
+    G.stroke(d, [(-0.5, -0.34), (0.5, -0.38), (0.5, -0.14), (-0.5, -0.08)], M["soil"], 0.0, cyclic=True)
+    G.seam(d, [(-0.5, -0.08), (0.5, -0.14)], M["ink"])
+    if k > 0 and k % 4 == 2:
+        star(d, M, 0.20, 0.30, 0.07)
+
+
+def _arc_pts(c, zc, rx, rz, a0, a1, n=16):
+    return [(c + rx * math.cos(a0 + (a1 - a0) * i / n), zc + rz * math.sin(a0 + (a1 - a0) * i / n)) for i in range(n + 1)]
+
+
 PLANET_NODES = {"earth": {"iron": node_iron, "copper": node_copper, "carbon": node_carbon, "silica": node_silica, "water_ice": node_water_ice},
                 "mars": {"hematite": node_hematite, "perchlorate": node_perchlorate, "water_ice": node_mars_ice},
-                "mercury": {"solarite": node_solarite, "nickel": node_nickel}}
+                "mercury": {"solarite": node_solarite, "nickel": node_nickel},
+                "venus": {"vitriol_glass": node_vitriol, "sulfur": node_sulfur}}
 NODES = PLANET_NODES["earth"]
 
 
@@ -537,6 +640,12 @@ def draw_pocket(item):
                 G.stroke(d, G.lumpy_ellipse(x, z, r, r * 0.8, n=14, lump=0.08, seed=j), M["nickel_i"], I, cyclic=True)
                 G.stroke(d, G.lumpy_ellipse(x + r * 0.3, z + r * 0.3, r * 0.3, r * 0.2, n=8, lump=0.0), M["nickel_hi"], 0.0, cyclic=True)
                 spots.append((x + r * 0.3, z + r * 0.3))
+        elif item == "vitriol_glass":                                                        # glass shards packed in the pocket
+            for j, (x, a_deg, ln) in enumerate(((-0.26, -24, 0.36), (-0.02, -6, 0.46), (0.22, 16, 0.38), (0.38, 34, 0.26))):
+                spots.append(_glass(d, M, x, -0.32, ln, a_deg, 0.09, ink=I))
+        elif item == "sulfur":                                                               # sulfur crystal rosettes
+            for j, (x, z) in enumerate(((-0.25, -0.22), (0.05, -0.26), (0.30, -0.16), (-0.05, 0.04))):
+                spots.append(_rosette(d, M, x, z, 0.16, 95 + j, role="sulfur_i")[2])
         else:                                                                                # an ice lens filling the pocket
             G.stroke(d, G.lumpy_ellipse(0.0, -0.02, 0.46, 0.30, n=24, lump=0.05, seed=9), M["ice_i"], I, cyclic=True)
             G.stroke(d, G.lumpy_ellipse(-0.1, -0.08, 0.28, 0.14, n=16, lump=0.04, seed=10), M["ice_sh"], 0.0, cyclic=True)
@@ -624,9 +733,13 @@ RELICS = {"earth": {"data_cache": (draw_cache, 96, 80, (0.5, 0.5), [("full", 1, 
                     "scan_x": (draw_x, 64, 64, (0.5, 6 / 64), [("pulse", 8, True)])},
           "mars": {"lander_beacon": (draw_beacon, 96, 96, (0.5, 0.5), [("full", 1, False), ("glint", 8, True)]),
                    "scan_x_pale": (draw_x_pale, 64, 64, (0.5, 6 / 64), [("pulse", 8, True)])},
-          "mercury": {"sunshade_probe": (draw_sunprobe, 96, 96, (0.5, 0.5), [("full", 1, False), ("glint", 8, True)])}}
-RELIC_AT = {"earth": {"data_cache": (1450, 120), "vault_door": (1700, 250), "scan_x": (660, 2)}, "mars": {"lander_beacon": (1450, 150), "scan_x_pale": (410, 2)},
-            "mercury": {"sunshade_probe": (1450, 150)}}
+          "mercury": {"sunshade_probe": (draw_sunprobe, 96, 96, (0.5, 0.5), [("full", 1, False), ("glint", 8, True)])},
+          "venus": {"pressure_capsule": (draw_capsule, 96, 96, (0.5, 0.5), [("full", 1, False), ("glint", 8, True)]),
+                    "scan_x": (draw_x, 64, 64, (0.5, 6 / 64), [("pulse", 8, True)]),
+                    "scan_x_pale": (draw_x_pale, 64, 64, (0.5, 6 / 64), [("pulse", 8, True)])}}
+RELIC_AT = {"earth": {"data_cache": (1450, 120), "vault_door": (1700, 250), "scan_x": (660, 2)}, "mars": {"lander_beacon": (1450, 150), "scan_x_pale": (1000, 2)},
+            "mercury": {"sunshade_probe": (1450, 150)},
+            "venus": {"pressure_capsule": (1450, 150), "scan_x": (1000, 2), "scan_x_pale": (1150, 2)}}
 _PC = {}
 
 
