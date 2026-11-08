@@ -106,65 +106,103 @@ def mound(d, M, w, h, seed, mat="rock"):
     return top
 
 
+def crag(d, M, w, h, seed, mat="rock"):
+    """A tall craggy outcrop (B-176 revision, LEAD 04:5x: a node reads as harvestable, 1.2-1.5 m): steep sides, a lumpy
+    crown, lit from the upper right, cracks; -> the crown's height function."""
+    rnd = random.Random(seed)
+    bumps = [(rnd.uniform(-0.6, 0.6) * w, rnd.uniform(0.04, 0.09) * h, rnd.uniform(0.18, 0.30) * w) for _ in range(3)]
+
+    def top_z(x):
+        base = h * max(0.0, 1 - (abs(x) / w) ** 2.4) ** 0.55
+        return base + sum(a * math.exp(-((x - c) / s) ** 2) for c, a, s in bumps) * (base / h)
+    xs = [-w + 2 * w * i / 40 for i in range(41)]
+    top = [(x, top_z(x)) for x in xs]
+    G.stroke(d, top + [(w, -0.02), (-w, -0.02)], M[mat], 0.0, cyclic=True)
+    G.stroke(d, [(x, z * 0.8) for x, z in top if x < -0.05 * w] + [(-0.05 * w, -0.02), (-w, -0.02)], M[mat + "_sh"], 0.0, cyclic=True)
+    G.stroke(d, top, M["ink"], O)
+    for j in range(3):                                                                       # cracks down the face
+        x0 = (-0.5 + 0.5 * j) * w + rnd.uniform(-0.05, 0.05)
+        z0 = top_z(x0) * 0.9
+        G.seam(d, [(x0, z0), (x0 + 0.04, z0 * 0.7), (x0 - 0.02, z0 * 0.45), (x0 + 0.03, z0 * 0.25)], M["ink"])
+    G.hatch(d, -w * 0.6, h * 0.3, M["ink"], n=3, length=0.09, spacing=0.03, angle_deg=60, seed=seed)
+    return top_z
+
+
+def _chunk(d, M, x, z, r, rnd, fill, shade, hi):
+    pts = _poly(x, z, r, rnd, sides=6, flat=0.85, lift=-9.0)
+    G.stroke(d, pts, M[fill], 0.0, cyclic=True)
+    G.stroke(d, [pts[2], pts[3], pts[4], (x, z)], M[shade], 0.0, cyclic=True)
+    G.stroke(d, [pts[0], pts[1], (x + r * 0.15, z + r * 0.1)], M[hi], 0.0, cyclic=True)
+    G.stroke(d, pts, M["ink"], I if r < 0.1 else O, cyclic=True)
+    G.seam(d, [(x, z), pts[1]], M["ink"])
+
+
 def node_iron(d, M, state, k=0):
-    h = 0.62 if state != "harvested" else 0.36
-    mound(d, M, 0.78, h, 11)
+    """Big rust ore faces on a tall grey crag; harvested: a stump with chip marks and one small lump."""
     rnd = random.Random(21)
+    full = state != "harvested"
+    w, h = (0.84, 1.10) if full else (0.70, 0.55)
+    top_z = crag(d, M, w, h, 11)
     spots = []
-    lumps = [(-0.36, 0.28, 0.16), (0.05, 0.42, 0.20), (0.40, 0.25, 0.15), (-0.05, 0.16, 0.12)]   # ore big enough to read at 1x
-    for j, (x, z, r) in enumerate(lumps if state != "harvested" else lumps[3:]):
-        z = min(z, h * 0.75)
-        pts = _poly(x, z, r, rnd, sides=6, flat=0.75)
-        G.stroke(d, pts, M["iron_i"], I, cyclic=True)
-        G.stroke(d, [(px - r * 0.15, pz - r * 0.15) for px, pz in pts[:3]] + [(x, z - r * 0.4)], M["iron_sh"], 0.0, cyclic=True)
-        spots.append((x + r * 0.3, z + r * 0.3))
-    if state == "harvested":
-        for x in (-0.35, 0.05, 0.38):
-            G.seam(d, [(x - 0.06, 0.2), (x, 0.24), (x + 0.06, 0.19)], M["ink"])
-    G.seam(d, [(-0.5, 0.15), (-0.2, 0.32), (0.2, 0.30), (0.5, 0.12)], M["ink"])
+    chunks = [(-0.42, 0.45, 0.20), (0.10, 0.80, 0.22), (0.45, 0.42, 0.18), (-0.15, 0.30, 0.16), (-0.30, 0.85, 0.15), (0.30, 0.95, 0.14)] \
+        if full else [(-0.15, 0.22, 0.12)]
+    for x, z, r in chunks:
+        z = min(z, top_z(x) - r * 0.6)
+        _chunk(d, M, x, z, r, rnd, "iron", "iron_sh", "rock_hi")
+        spots.append((x + r * 0.35, z + r * 0.35))
+    if not full:
+        for x in (-0.4, 0.1, 0.4):
+            G.seam(d, [(x - 0.07, top_z(x) - 0.04), (x, top_z(x) - 0.12), (x + 0.07, top_z(x) - 0.04)], M["ink"])
     return spots
 
 
 def node_copper(d, M, state, k=0):
-    h = 0.58 if state != "harvested" else 0.34
-    mound(d, M, 0.76, h, 12)
+    """A tall crag with banded malachite patches and copper nuggets; harvested: a stump with one patch."""
     rnd = random.Random(22)
+    full = state != "harvested"
+    w, h = (0.82, 1.18) if full else (0.68, 0.52)
+    top_z = crag(d, M, w, h, 12)
     spots = []
-    for j, (x, z, r) in enumerate(((-0.3, 0.30, 0.20), (0.27, 0.34, 0.18), (0.0, 0.17, 0.14))):
-        if state == "harvested" and j < 2:
-            continue
-        z = min(z, h * 0.72)
-        G.stroke(d, G.lumpy_ellipse(x, z, r, r * 0.65, n=16, lump=0.12, seed=30 + j), M["malachite_i"], I, cyclic=True)
-        for b in range(3):                                                                    # the malachite's banding
-            G.seam(d, G.bezier((x - r * 0.6, z - r * 0.1 + 0.03 * b), (x, z + r * 0.15 + 0.03 * b), (x + r * 0.6, z - r * 0.05 + 0.03 * b), n=6),
+    patches = [(-0.38, 0.40, 0.22), (0.30, 0.55, 0.24), (-0.05, 0.88, 0.20), (0.05, 0.25, 0.16)] if full else [(0.0, 0.22, 0.16)]
+    for j, (x, z, r) in enumerate(patches):
+        z = min(z, top_z(x) - r * 0.55)
+        G.stroke(d, G.lumpy_ellipse(x, z, r, r * 0.68, n=18, lump=0.12, seed=30 + j), M["malachite_i"], O, cyclic=True)
+        G.stroke(d, G.lumpy_ellipse(x - r * 0.25, z - r * 0.2, r * 0.55, r * 0.35, n=12, lump=0.08, seed=40 + j), M["malachite_sh"], 0.0, cyclic=True)
+        for b in range(4):                                                                   # the malachite's banding
+            G.seam(d, G.bezier((x - r * 0.75, z - r * 0.25 + 0.035 * b), (x, z + r * 0.12 + 0.035 * b), (x + r * 0.75, z - r * 0.2 + 0.035 * b), n=7),
                    M["ink"])
-        nug = _poly(x + r * 0.5, z + r * 0.35, r * 0.4, rnd, sides=5, flat=0.8)
-        G.stroke(d, nug, M["copper_i"], I, cyclic=True)
-        spots.append((x + r * 0.55, z + r * 0.45))
+        for n_ in range(2 if full else 1):                                                   # copper nuggets
+            nx, nz = x + r * (0.55 - 1.1 * n_), z + r * (0.45 - 0.2 * n_)
+            _chunk(d, M, nx, nz, r * 0.38, rnd, "copper", "copper_sh", "crystal")
+            spots.append((nx + 0.03, nz + 0.03))
     return spots
 
 
 def node_carbon(d, M, state, k=0):
-    """A coal seam showing in a sandstone outcrop: the black band between pale beds."""
-    w, h = 0.80, (0.66 if state != "harvested" else 0.40)
-    top = mound(d, M, w, h, 13, mat="sandrock")
-    zc = h * 0.45
-    upper = [(x, zc + 0.08 + 0.02 * math.sin(5 * x)) for x in [-w * 0.9 + 1.8 * w * i / 20 for i in range(21)]]
-    lower = [(x, zc - 0.07 + 0.02 * math.sin(4 * x + 1)) for x in [-w * 0.9 + 1.8 * w * i / 20 for i in range(21)]]
-    clip = lambda pts: [(x, min(z, h * (1 - (x / w) ** 2) ** 0.7 - 0.02)) for x, z in pts]  # noqa: E731
-    seam_pts = clip(upper) + clip(lower)[::-1]
-    G.stroke(d, seam_pts, M["coal"], 0.0, cyclic=True)
-    G.stroke(d, clip(upper), M["ink"], I)
-    G.stroke(d, clip(lower), M["ink"], I)
+    """A tall sandstone block with a thick black coal seam and black lumps on top; harvested: low, the seam cut back."""
+    rnd = random.Random(23)
+    full = state != "harvested"
+    w, h = (0.86, 0.98) if full else (0.74, 0.50)
+    top_z = crag(d, M, w, h, 13, mat="sandrock")
+    zc, th = h * 0.48, (0.13 if full else 0.07)
+    xs = [-w * 0.95 + 1.9 * w * i / 30 for i in range(31)]
+    upper = [(x, min(zc + th + 0.03 * math.sin(5 * x), top_z(x) - 0.03)) for x in xs]
+    lower = [(x, min(zc - th + 0.03 * math.sin(4 * x + 1), top_z(x) - 0.05)) for x in xs]
+    G.stroke(d, upper + lower[::-1], M["coal"], 0.0, cyclic=True)
+    G.stroke(d, upper, M["ink"], O)
+    G.stroke(d, lower, M["ink"], O)
     spots = []
-    if state != "harvested":
-        for x in (-0.4, 0.05, 0.42):                                                         # the coal's sheen
-            G.seam(d, [(x - 0.07, zc + 0.02), (x + 0.07, zc + 0.04)], M["ink"])
-            G.stroke(d, G.lumpy_ellipse(x, zc, 0.04, 0.02, n=8, lump=0.0), M["coal_hi"], 0.0, cyclic=True)
-            spots.append((x, zc + 0.02))
-    else:
-        for x in (-0.3, 0.2):
-            G.stroke(d, G.lumpy_ellipse(x, zc - 0.01, 0.12, 0.05, n=12, lump=0.1, seed=int(10 * x + 5)), M["dark"], 0.0, cyclic=True)
+    for x in (-0.45, 0.0, 0.42):                                                             # the coal's sheen
+        G.stroke(d, G.lumpy_ellipse(x, zc + th * 0.3, 0.06, 0.022, n=8, lump=0.0), M["coal_hi"], 0.0, cyclic=True)
+        spots.append((x, zc + th * 0.3))
+    if full:                                                                                 # black lumps on top
+        for x, r in ((-0.18, 0.13), (0.22, 0.10)):
+            z = top_z(x) + r * 0.45
+            pts = _poly(x, z, r, rnd, sides=6, flat=0.8, lift=top_z(x) - 0.02)
+            G.stroke(d, pts, M["coal"], 0.0, cyclic=True)
+            G.stroke(d, [pts[0], pts[1], (x + r * 0.1, z + r * 0.05)], M["coal_hi"], 0.0, cyclic=True)
+            G.stroke(d, pts, M["ink"], O, cyclic=True)
+            spots.append((x + r * 0.3, z + r * 0.3))
     return spots
 
 
