@@ -90,6 +90,25 @@ namespace Meridian.View2D
         public SceneLayout Layout { get; private set; } = SceneLayout.Default();
         public readonly List<SpriteRenderer> renderers = new List<SpriteRenderer>(5);
         public readonly List<bool> placeholders = new List<bool>(5);
+        // U-148: each strip's tile width and how many tiles it draws (3 in the walking frame; more in the wide ship frame).
+        readonly List<float> tileW = new List<float>(5);
+        readonly List<int> tileN = new List<int>(5);
+        /// <summary>U-148: layer i's tile width (m), the art's width once loaded, the placeholder's before.</summary>
+        public float TileWidth(int i) => i >= 0 && i < tileW.Count ? tileW[i] : 0f;
+        /// <summary>U-148: how many tiles layer i's strip draws now.</summary>
+        public int TileCount(int i) => i >= 0 && i < tileN.Count ? tileN[i] : 0;
+
+        /// <summary>U-148 (D-158): the tiles a strip needs so a frame `frameWidth` wide never shows its end. The strip is kept within half a tile
+        /// of the camera, so ceil(frameWidth / w) + 1, at least 3 (the walking frame's count), and odd, so the pattern keeps its phase when the
+        /// count changes. Pure.</summary>
+        public static int TilesFor(float frameWidth, float tileWidth)
+        {
+            if (tileWidth <= 0f) return 3;
+            int n = Mathf.CeilToInt(frameWidth / tileWidth) + 1;
+            if (n < 3) n = 3;
+            if ((n & 1) == 0) n++;
+            return n;
+        }
         /// <summary>U-118: the renderers' alpha (the storm veil fades in with the dust storm's intensity); applied in LateUpdate when it changes.</summary>
         public float alpha = 1f;
         /// <summary>U-118: a scroll along x added to every layer (the storm's wind), metres.</summary>
@@ -150,7 +169,7 @@ namespace Meridian.View2D
         void Build(SceneLayout layout)
         {
             foreach (var r in renderers) if (r != null) Destroy(r.gameObject);
-            renderers.Clear(); placeholders.Clear();
+            renderers.Clear(); placeholders.Clear(); tileW.Clear(); tileN.Clear();
             Layout = layout;
             for (int i = 0; i < layout.layers.Length; i++)
             {
@@ -163,6 +182,7 @@ namespace Meridian.View2D
                 sr.flipX = mirrorX; // U-144
                 renderers.Add(sr);
                 placeholders.Add(true);
+                tileW.Add(PlaceholderWidth); tileN.Add(3);
                 int index = i;
                 if (onlyLayer >= 0 && l.n != onlyLayer) { sr.enabled = false; placeholders[index] = false; continue; } // U-146: not drawn, not loaded
                 Probe<Sprite>(LayerKey(l.n), h => h.Completed += op =>
@@ -171,7 +191,9 @@ namespace Meridian.View2D
                     sr.color = new Color(1f, 1f, 1f, alpha);
                     sr.drawMode = SpriteDrawMode.Tiled;
                     sr.sprite = op.Result;
-                    sr.size = new Vector2(op.Result.bounds.size.x * 3f, op.Result.bounds.size.y);
+                    tileW[index] = op.Result.bounds.size.x;
+                    tileN[index] = TilesFor(FrameWidth(), tileW[index]);
+                    sr.size = new Vector2(tileW[index] * tileN[index], op.Result.bounds.size.y);
                     placeholders[index] = false;
                 });
             }
@@ -269,12 +291,19 @@ namespace Meridian.View2D
                 for (int i = 0; i < renderers.Count; i++) { var r = renderers[i]; if (r == null) continue; var col = r.color; col.a = alpha; r.color = col; }
                 appliedAlpha = alpha;
             }
+            float frameW = FrameWidth();
             for (int i = 0; i < renderers.Count && i < Layout.layers.Length; i++)
             {
                 var l = Layout.layers[i];
                 var sr = renderers[i];
                 if (sr == null) continue;
-                float w = sr.size.x / 3f;
+                float w = i < tileW.Count ? tileW[i] : sr.size.x / 3f;
+                if (i < tileN.Count)
+                {
+                    // U-148: the wide ship frame draws more tiles (only when the count changes: no per-frame mesh rebuild).
+                    int n = TilesFor(frameW, w);
+                    if (n != tileN[i]) { tileN[i] = n; sr.size = new Vector2(w * n, sr.size.y); }
+                }
                 float x = ParallaxMath.LayerX(c.x, l.parallax) + scrollX; // U-118: the storm's wind
                 // Keep the 3-wide strip centred on the camera: shift by whole tile widths (tileable art, no seam).
                 if (w > 0f) x += Mathf.Round((c.x - x) / w) * w;
@@ -295,6 +324,9 @@ namespace Meridian.View2D
             PlaceFill(c); // U-139: after the layers moved
         }
 
+        /// <summary>U-148: the frame's width (m) with a metre's margin either side; 0 without a camera.</summary>
+        float FrameWidth() => view != null ? Meridian.CameraRig.SideView.HalfHeight(view) * 2f * view.aspect + 2f : 0f;
+
         void Clear()
         {
             foreach (var h in handles) if (h.IsValid()) ArtLoad.Release(h);
@@ -313,7 +345,7 @@ namespace Meridian.View2D
         {
             Clear();
             foreach (var r in renderers) if (r != null) Destroy(r.gameObject);
-            renderers.Clear(); placeholders.Clear();
+            renderers.Clear(); placeholders.Clear(); tileW.Clear(); tileN.Clear();
             SceneKey = null;
         }
 

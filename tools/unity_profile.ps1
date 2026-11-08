@@ -222,6 +222,15 @@ if ($runProbe) {
         $fText = if ([double]$f.filmGpuOnMs -le 0) { 'no GPU timings from FrameTimingManager' } else { "on $($f.filmGpuOnMs) ms, off $($f.filmGpuOffMs) ms, pass $($f.filmPassMs) ms at $($f.width)${times}$($f.height)" }
         $rows += "| Film pass GPU $dot $($f.leg) (dev build) | $le 0.6 ms at 1080p (U-095) | $fText | $(if ($fok) { 'green' } else { 'red' }) |"
     }
+    # U-148 (D-158): the climb's frame times on Earth (a real pad-to-Escape-Line climb at full thrust in the player; the iris apart).
+    $climb = @()
+    if ($buildOk -and (Test-Path $probeOut)) { $climb = @(Get-Content $probeOut | Where-Object { $_.Trim() } | ForEach-Object { $_ | ConvertFrom-Json } | Where-Object { $null -ne $_.climbP99Ms }) }
+    if ($climb.Count -eq 0) { $rows += "| Climb $dot Earth (dev build) | p99 $le 20 ms, no frame > 50 ms outside the iris (U-148) | no climb probe result | red |"; $memRed = $true }
+    foreach ($c in $climb) {
+        $cok = ([double]$c.climbP99Ms -le 20) -and ([int]$c.climbOver50 -eq 0) -and ([int]$c.climbFrames -gt 60) -and $c.reachedSpace
+        if (-not $cok) { $memRed = $true }
+        $rows += "| Climb $dot Earth (dev build) | p99 $le 20 ms, no frame > 50 ms outside the iris (U-148) | $($c.climbFrames) frames in $($c.climbSeconds) s to $($c.topSpeed) m/s: p99 $($c.climbP99Ms) ms, worst $($c.climbWorstMs) ms, $($c.climbOver50) over 50 ms; the iris $($c.irisFrames) frames, longest $($c.irisWorstMs) ms; in Space $($c.reachedSpace) | $(if ($cok) { 'green' } else { 'red' }) |"
+    }
     if (Test-Path $report) {
         $text = Get-Content $report -Raw -Encoding UTF8
         $cut = $text.IndexOf("`n## Memory in the development player")
@@ -230,7 +239,7 @@ if ($runProbe) {
     } else {
         Set-Content -Path $report -Value (($rows -join "`n") + "`n") -Encoding UTF8 -NoNewline
     }
-    $rows | Where-Object { $_ -like '| Memory*' -or $_ -like '| Residency*' -or $_ -like '| Film*' -or $_ -like '| Planet load*' -or $_ -like '| Transition*' -or $_ -like '| Bundles*' -or $_ -like '| Sprite atlases*' -or $_ -like '| Return*' -or $_ -like '| Mip*' -or $_ -like '| Boot*' -or $_ -like '| Creep*' -or $_ -like '| Heap*' } | ForEach-Object { Write-Host $_ }
+    $rows | Where-Object { $_ -like '| Memory*' -or $_ -like '| Residency*' -or $_ -like '| Film*' -or $_ -like '| Planet load*' -or $_ -like '| Transition*' -or $_ -like '| Bundles*' -or $_ -like '| Sprite atlases*' -or $_ -like '| Return*' -or $_ -like '| Mip*' -or $_ -like '| Boot*' -or $_ -like '| Creep*' -or $_ -like '| Heap*' -or $_ -like '| Climb*' } | ForEach-Object { Write-Host $_ }
 }
 
 if ($SkipGate) { if ($memRed -or -not $buildOk) { Write-Host 'BUILD MEMORY RED'; exit 1 } else { Write-Host 'BUILD MEMORY GREEN'; exit (Complete-Release) } }

@@ -97,7 +97,53 @@ namespace Meridian.Perf
                 if (director.PlanetSide == null) { Finish($"entry into {body} did not load a planet"); yield break; }
                 yield return Leg(planetLeg, director.PlanetSide.sideCamera, prevGroup, ownGroup, transitions.LastEntrySeconds);
             }
+            // U-148 (D-158): after the thirteen legs (so their memory figures stay comparable), a real climb on Earth timed frame by frame.
+            yield return ClimbLeg("Climb Earth");
             Finish(null);
+        }
+
+        /// <summary>
+        /// U-148 (D-158): the climb's frame times on Earth (at Earth again 2): boarded on the pad, 1.5 s for the ship frame to settle, then full
+        /// thrust to the Escape Line; every frame's unscaled time until the launch iris starts, the iris's frames apart (its longest reported).
+        /// One JSON line, judged by tools/unity_profile.ps1: p99 ≤ 20 ms and no frame over 50 ms outside the iris.
+        /// </summary>
+        IEnumerator ClimbLeg(string where)
+        {
+            var side = director.PlanetSide;
+            if (side == null || side.ship == null) { lines.AppendLine($"{{\"leg\":\"{where}\",\"climbError\":\"no ship\"}}"); yield break; }
+            var ship = side.ship;
+            ship.GetComponent<ShipBoarding>().ForceAboard();
+            ship.externalInput = true;
+            ship.intent = default;
+            float until = Time.realtimeSinceStartup + 1.5f;
+            while (Time.realtimeSinceStartup < until) yield return null;
+            var climb = new List<float>(4096);
+            float irisWorst = 0f, top = 0f, t0 = Time.realtimeSinceStartup;
+            int irisFrames = 0;
+            bool iris = false;
+            ship.intent.thrust = 1f;
+            float deadline = t0 + 150f;
+            while (Time.realtimeSinceStartup < deadline)
+            {
+                yield return null;
+                float ms = Time.unscaledDeltaTime * 1000f;
+                if (transitions.Busy) { iris = true; irisFrames++; irisWorst = Mathf.Max(irisWorst, ms); continue; }
+                if (iris) break; // the iris is over: in Space
+                climb.Add(ms);
+                if (ship != null && ship.Body != null) top = Mathf.Max(top, ship.Body.linearVelocity.magnitude);
+            }
+            var sorted = climb.ToArray();
+            Array.Sort(sorted);
+            float p99 = sorted.Length > 0 ? sorted[Mathf.Min(sorted.Length - 1, sorted.Length * 99 / 100)] : 0f;
+            float worst = sorted.Length > 0 ? sorted[sorted.Length - 1] : 0f;
+            int over50 = 0;
+            foreach (var ms in sorted) if (ms > 50f) over50++;
+            float seconds = 0f;
+            foreach (var ms in climb) seconds += ms / 1000f;
+            var ci = System.Globalization.CultureInfo.InvariantCulture;
+            lines.AppendLine($"{{\"leg\":\"{where}\",\"climbFrames\":{climb.Count},\"climbSeconds\":{seconds.ToString("F1", ci)},\"topSpeed\":{top.ToString("F1", ci)}," +
+                             $"\"climbP99Ms\":{p99.ToString("F1", ci)},\"climbWorstMs\":{worst.ToString("F1", ci)},\"climbOver50\":{over50}," +
+                             $"\"irisFrames\":{irisFrames},\"irisWorstMs\":{irisWorst.ToString("F1", ci)},\"reachedSpace\":{(GameState.Instance.view == ViewMode.Space ? "true" : "false")}}}");
         }
 
         /// <summary>Boards the Pilgrim, climbs through the Escape Line (a real launch), then parks the space ship outside the planet's well.</summary>

@@ -86,8 +86,9 @@ namespace Meridian.View2D
         public const string StarsKey = "backgrounds/space/starfield/layer0";
         /// <summary>The starfield's scroll factor (its Space-scene parallax, starfield.json).</summary>
         public const float StarsParallax = 0.05f;
-        /// <summary>Rows of the strip mesh, each BandM tall: the frame plus a spare row above and below (a taller frame stretches them).</summary>
-        public const int Rows = 20;
+        /// <summary>Rows of the strip mesh, each BandM tall: the frame plus a spare row above and below (a taller frame stretches them). U-148: 72, so the
+        /// widest ship frame (60 m × 1.04 + spares) keeps 1 m rows and the fade at the painted edge stays as fine as on foot.</summary>
+        public const int Rows = 72;
         /// <summary>The top band of layer0 whose mean colour the sky continues (its top BandPx rows under the two edge texels: 1 m at PPU 64); also the strip's row height.</summary>
         public const int BandPx = 64;
         public const float BandM = BandPx / 64f;
@@ -307,13 +308,15 @@ namespace Meridian.View2D
             PlaceStars(view.transform.position.x, cameraY);
         }
 
-        /// <summary>A 3 × 3 tile block of the starfield kept within half a tile of the camera, scrolling at StarsParallax in both axes.</summary>
+        /// <summary>A tile block of the starfield (3 × 3 on foot; U-148: as many odd tiles as the wide ship frame needs) kept within half a tile
+        /// of the camera, scrolling at StarsParallax in both axes.</summary>
         void PlaceStars(float cameraX, float cameraY)
         {
             var sp = stars.sprite;
             float w = sp.bounds.size.x, h = sp.bounds.size.y;
             if (w <= 0f || h <= 0f) return;
-            var size = new Vector2(w * 3f, h * 3f);
+            float halfH = SideView.HalfHeight(view);
+            var size = new Vector2(w * ParallaxLayers.TilesFor(halfH * 2f * view.aspect + 2f, w), h * ParallaxLayers.TilesFor(halfH * 2f + 2f, h));
             if (stars.size != size) stars.size = size;
             float cx = ParallaxMath.LayerX(cameraX, StarsParallax);
             cx += Mathf.Round((cameraX - cx) / w) * w;

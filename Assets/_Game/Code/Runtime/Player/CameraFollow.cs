@@ -33,6 +33,8 @@ namespace Meridian.Player
         public StageCamera Stage { get; } = new StageCamera();
         /// <summary>The player's own zoom as a frame height (m); the wheel changes it in 1 m steps.</summary>
         public float BaseFrame { get; private set; } = SideView.DefaultHalfHeight * 2f;
+        /// <summary>U-148 (D-158): the ship frame's base aboard (m); the wheel moves it in 1 m steps between StageCamera.ShipFrameMin and ShipFrameMax.</summary>
+        public float ShipBase { get; private set; } = StageCamera.ShipFrame;
 
         /// <summary>U-093/U-094: a target that moved farther than this in one frame was teleported (a load, a wake, a test): the camera snaps, so the terrain streaming around it follows at once.</summary>
         public const float Teleport = 15f;
@@ -98,8 +100,12 @@ namespace Meridian.Player
                 float scroll = mouse.scroll.ReadValue().y;
                 if (Mathf.Abs(scroll) > 0.01f)
                 {
-                    BaseFrame = Mathf.Clamp(BaseFrame - Mathf.Sign(scroll) * 1f, minSize * 2f, maxSize * 2f);
-                    if (!StageActive) SideView.SetHalfHeight(cam, BaseFrame * 0.5f);
+                    if (StageActive && Vehicle != null) ShipBase = Mathf.Clamp(ShipBase - Mathf.Sign(scroll) * 1f, StageCamera.ShipFrameMin, StageCamera.ShipFrameMax); // U-148: aboard
+                    else
+                    {
+                        BaseFrame = Mathf.Clamp(BaseFrame - Mathf.Sign(scroll) * 1f, minSize * 2f, maxSize * 2f);
+                        if (!StageActive) SideView.SetHalfHeight(cam, BaseFrame * 0.5f);
+                    }
                 }
             }
             if (!StageActive)
@@ -143,16 +149,21 @@ namespace Meridian.Player
             if (ship != null && ship.Body != null)
             {
                 // U-107: aboard, the frame follows the hull's centre with look-ahead along its velocity (§5.1 rules).
-                var c = ship.Body.position + Meridian.Ship.RocketFlight.UpAxis(ship.Tilt) * (Meridian.Ship.SideShip.Height * 0.5f - Meridian.Ship.SideShip.SkidDrop);
+                // U-148 (D-158 (1)): the centre of the hull as drawn: the transform's interpolated pose (Rigidbody2D Interpolate; the tilt is
+                // interpolated too, RocketFlight sets the spin), not Body.position, the 50 Hz step that juddered against the hull at 60 fps.
+                var st = ship.transform;
+                var pivot = (Vector2)st.position;
+                var c = pivot + (Vector2)st.up * (Meridian.Ship.SideShip.Height * 0.5f - Meridian.Ship.SideShip.SkidDrop);
                 var sv = ship.Body.linearVelocity;
                 return new StageInput
                 {
                     playerX = c.x, playerY = c.y, facing = sv.x < 0f ? -1 : 1, speedX = sv.x, speedY = sv.y,
-                    grounded = ship.Grounded, floorY = FloorUnder(ship.Body.position + Vector2.down * Meridian.Ship.SideShip.SkidDrop),
-                    baseFrame = BaseFrame, dt = dt, vehicle = true,
+                    grounded = ship.Grounded, floorY = FloorUnder(pivot + Vector2.down * Meridian.Ship.SideShip.SkidDrop),
+                    baseFrame = ShipBase, dt = dt, vehicle = true, altitude = ship.Grounded ? 0f : ship.AltitudeAboveGround,
                 };
             }
-            var feet = player.Body != null ? player.Body.position : (Vector2)target.position;
+            // U-148: the walking surveyor's interpolated pose too (the transform, not Body.position).
+            var feet = (Vector2)(player != null ? player.transform.position : target.position);
             var v = player.Body != null ? player.Body.linearVelocity : Vector2.zero;
             return new StageInput
             {

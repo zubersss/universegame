@@ -1830,6 +1830,115 @@ namespace Meridian.Tests
         }
 
         /// <summary>
+        /// U-148 (D-158 (2)): the ship frame → coordination/reports/unity/u148/: 1_earth_pad_30m (boarded 1.5 s: the 30 m frame, the hull low
+        /// in it, sky ahead), 2_earth_climb_45m (mid-climb with the climb held at 60 m/s for a moment, so the frame reaches its 45 m speed width
+        /// as a faster mark would; Earth's Mk1 tops out near 42 m/s), 3_mars_climb (Mars mid-climb). Each shot asserts every painted strip spans
+        /// the frame's width (no set edge) and logs the frame, the tile counts and the sky's span.
+        /// </summary>
+        [UnityTest, Timeout(300000)]
+        public IEnumerator CaptureU148Climb()
+        {
+            var name = Environment.GetEnvironmentVariable(Variable);
+            if (string.IsNullOrEmpty(name)) Assert.Ignore($"Set {Variable} (tools/unity_capture.ps1).");
+            if (SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.Null)
+                Assert.Fail("No graphics device: run without -nographics.");
+            bool wasCartoon = Meridian.View2D.CartoonStage.Enabled;
+            Meridian.View2D.CartoonStage.Enabled = true;
+            try
+            {
+#if UNITY_EDITOR
+                yield return UnityEditor.SceneManagement.EditorSceneManager.LoadSceneAsyncInPlayMode(
+                    CorePath, new LoadSceneParameters(LoadSceneMode.Single));
+#endif
+                var director = UnityEngine.Object.FindAnyObjectByType<SceneDirector>();
+                float timeout = Time.realtimeSinceStartup + 30f;
+                while ((!director.IsReady || !director.PlanetSide.terrain.IsSettled) && Time.realtimeSinceStartup < timeout) yield return null;
+                var dir = "coordination/reports/unity/u148";
+                Directory.CreateDirectory(dir);
+
+                IEnumerator Board(PlanetSideRoot side)
+                {
+                    if (side.hazards != null) side.hazards.enabled = false;
+                    if (side.dayNight != null) side.dayNight.Override = 0.45f;
+                    side.creatures.autoSpawn = false;
+                    side.creatures.DespawnAll();
+                    var stage = side.cartoon;
+                    float until = Time.realtimeSinceStartup + 15f;
+                    while (stage != null && stage.Layers != null && stage.Layers.placeholders.Contains(true) && Time.realtimeSinceStartup < until) yield return null;
+                    side.ship.GetComponent<Meridian.Ship.ShipBoarding>().ForceAboard();
+                    side.ship.externalInput = true;
+                    side.ship.intent = default;
+                    for (int i = 0; i < 75; i++) yield return new WaitForFixedUpdate(); // 1.5 s: the boarding ease to the ship frame
+                }
+                IEnumerator Shot(PlanetSideRoot side, string label)
+                {
+                    yield return null;
+                    var cam = side.sideCamera;
+                    var follow = cam.GetComponent<Meridian.Player.CameraFollow>();
+                    var layers = side.cartoon != null ? side.cartoon.Layers : null;
+                    float halfW = cam.orthographicSize * cam.aspect, cx = cam.transform.position.x;
+                    var tiles = new System.Text.StringBuilder();
+                    if (layers != null)
+                        for (int i = 0; i < layers.renderers.Count; i++)
+                        {
+                            var sr = layers.renderers[i];
+                            if (sr == null || !sr.enabled) continue;
+                            tiles.Append($" L{i} {layers.TileCount(i)}×{layers.TileWidth(i):F0} m");
+                            Assert.LessOrEqual(sr.bounds.min.x, cx - halfW + 0.01f, $"{label}: layer {i}'s strip reaches the frame's left edge");
+                            Assert.GreaterOrEqual(sr.bounds.max.x, cx + halfW - 0.01f, $"{label}: layer {i}'s strip reaches the frame's right edge");
+                        }
+                    yield return Save(cam, $"{name}_{label}");
+                    File.Copy($"logs/capture_{name}_{label}.png", $"{dir}/{label}.png", true);
+                    var sky = side.cartoon != null ? side.cartoon.Sky : null;
+                    TestContext.Out.WriteLine($"[MERIDIAN] u148 {label}: frame {cam.orthographicSize * 2f:F1} m (stage {follow.Stage.Frame:F1}, base {follow.ShipBase:F0}), speed {side.ship.Body.linearVelocity.magnitude:F1} m/s, alt {side.ship.AltitudeAboveGround:F1} m, hull centre {(follow.Stage.Y - (side.ship.transform.position.y + Meridian.Ship.SideShip.Height * 0.5f - Meridian.Ship.SideShip.SkidDrop)):F1} m under the camera; tiles{tiles}; sky span {(sky != null ? sky.Span : 0f):F0} m");
+                }
+
+                // 1. Earth on the pad: the 30 m ship frame.
+                var earth = director.PlanetSide;
+                yield return Board(earth);
+                yield return Shot(earth, "1_earth_pad_30m");
+                Assert.AreEqual(Meridian.CameraRig.StageCamera.ShipFrame, earth.sideCamera.orthographicSize * 2f, 0.5f, "the 30 m ship frame on the pad");
+
+                // 2. Earth mid-climb at the 45 m frame: full thrust to 35 % of the climb, then the climb held at 60 m/s until the frame is 45 m wide
+                // (or 75 % of the climb).
+                var ship = earth.ship;
+                float datum = earth.Config.datumY, esc = earth.Config.escapeAltitude;
+                ship.intent = new Meridian.Ship.ShipSideIntent { thrust = 1f };
+                timeout = Time.realtimeSinceStartup + 120f;
+                while (ship.Body.position.y < datum + esc * 0.35f && Time.realtimeSinceStartup < timeout) yield return new WaitForFixedUpdate();
+                var follow1 = earth.sideCamera.GetComponent<Meridian.Player.CameraFollow>();
+                while (follow1.Stage.Frame < Meridian.CameraRig.StageCamera.ShipFrameFast - 0.5f && ship.Body.position.y < datum + esc * 0.75f && Time.realtimeSinceStartup < timeout)
+                {
+                    ship.Body.linearVelocity = new Vector2(0f, Meridian.CameraRig.StageCamera.ShipFastSpeed);
+                    yield return new WaitForFixedUpdate();
+                }
+                yield return Shot(earth, "2_earth_climb_45m");
+                Assert.GreaterOrEqual(earth.sideCamera.orthographicSize * 2f, Meridian.CameraRig.StageCamera.ShipFrameFast - 1f, "the frame near its 45 m speed width");
+                ship.intent = default;
+                ship.Body.linearVelocity = Vector2.zero;
+                ship.Body.simulated = false;
+
+                // 3. Mars mid-climb (its own Mk1 climb, nothing held).
+                yield return director.LoadPlanetSide(GameState.Instance.catalog.Get(Meridian.Planets.PlanetId.Mars));
+                var mars = director.PlanetSide;
+                timeout = Time.realtimeSinceStartup + 20f;
+                while (!mars.terrain.IsSettled && Time.realtimeSinceStartup < timeout) yield return null;
+                yield return Board(mars);
+                var mship = mars.ship;
+                mship.intent = new Meridian.Ship.ShipSideIntent { thrust = 1f };
+                timeout = Time.realtimeSinceStartup + 120f;
+                while (mship.Body.position.y < mars.Config.datumY + mars.Config.escapeAltitude * 0.45f && Time.realtimeSinceStartup < timeout) yield return new WaitForFixedUpdate();
+                yield return Shot(mars, "3_mars_climb");
+                mship.intent = default;
+                LogAssert.NoUnexpectedReceived();
+            }
+            finally
+            {
+                Meridian.View2D.CartoonStage.Enabled = wasCartoon;
+            }
+        }
+
+        /// <summary>
         /// U-104: the cartoon HUD at 1080p → coordination/reports/unity/u104/: on foot beside the ship (the three dials, the
         /// suit rows, the markers, every string in Patrick Hand) and aboard just under the Escape Line (the ship rows, the
         /// painted dotted line with its lettered sign). The overlay canvases draw through the side camera for the shots.

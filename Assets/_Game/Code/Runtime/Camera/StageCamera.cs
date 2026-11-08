@@ -14,6 +14,8 @@ namespace Meridian.CameraRig
         public float dt;
         /// <summary>U-107: flying the ship. playerX/Y are then the hull's centre and speedX/Y its velocity.</summary>
         public bool vehicle;
+        /// <summary>U-148: aboard, the skids' height over the ground (m; 0 on the pad, +∞ with no ground under them): the pad framing fades out with it.</summary>
+        public float altitude;
     }
 
     /// <summary>
@@ -38,6 +40,38 @@ namespace Meridian.CameraRig
         public const float BumpShake = 0.15f, ShakeTime = 0.10f;
         // U-107 (§5.1 rules on the ship): the frame leads the hull along its velocity and keeps it inside the middle band.
         public const float VehicleLookTime = 0.6f, VehicleFollowTime = 0.25f;
+        /// <summary>U-148 (D-158): the look-ahead never leads the hull by more than this fraction of the frame (0.6 s of a 42 m/s climb was 25 m,
+        /// past the middle band, so the band clamp held the camera on every frame of a fast climb).</summary>
+        public const float VehicleLookFrame = 0.2f;
+        /// <summary>U-148 (D-158 (2)): the ship's own frame: 30 m aboard (the 11.4 m hull at ~40 % of it, sky ahead), widening with speed to
+        /// 45 m at ShipFastSpeed and above; the wheel sets the base between ShipFrameMin and ShipFrameMax aboard.</summary>
+        public const float ShipFrame = 30f, ShipFrameFast = 45f, ShipFastSpeed = 60f, ShipFrameMin = 24f, ShipFrameMax = 60f;
+        /// <summary>U-148: the frame follows speed with a 0.8 s SmoothDamp (never a pop); boarding and stepping out ease it over ~1 s.</summary>
+        public const float ShipFrameTime = 0.8f, BoardFrameTime = 0.3f;
+        /// <summary>U-148: on the pad the frame's bottom sits FloorBelow under the ground (the stage-floor rule); it hands over to the hull-led
+        /// frame over this many metres of the skids' altitude.</summary>
+        public const float PadHoldAltitude = 12f;
+
+        /// <summary>U-148: the ship frame for a wheel base and a speed: base + (45 − 30) × speed / 60 (capped at 60 m/s), within [24, 60]. Pure.</summary>
+        public static float ShipFrameFor(float baseFrame, float speed)
+            => Mathf.Clamp(baseFrame + (ShipFrameFast - ShipFrame) * Mathf.Clamp01(speed / ShipFastSpeed), ShipFrameMin, ShipFrameMax);
+
+        /// <summary>U-148: the look-ahead along the velocity, 0.6 s of it, capped at VehicleLookFrame × the frame. Pure, no allocation.</summary>
+        public static Vector2 VehicleLook(float speedX, float speedY, float frame)
+        {
+            var look = new Vector2(speedX, speedY) * VehicleLookTime;
+            float cap = VehicleLookFrame * frame, m = look.magnitude;
+            return m > cap && m > 0f ? look * (cap / m) : look;
+        }
+
+        /// <summary>U-148: how much of the pad framing still holds at a skid altitude: 1 on the pad, 0 from PadHoldAltitude up or with no ground
+        /// under the hull; smoothstep between.</summary>
+        public static float PadHold(float altitude)
+        {
+            if (float.IsInfinity(altitude) || float.IsNaN(altitude)) return 0f;
+            float k = Mathf.Clamp01(1f - altitude / PadHoldAltitude);
+            return k * k * (3f - 2f * k);
+        }
 
         public float X { get; private set; }
         public float Y { get; private set; }
@@ -51,6 +85,12 @@ namespace Meridian.CameraRig
         float rel, relVel, look, lookVel;
         float floorS, floorVel, yVel;
         bool haveFloor, landedFollow, wasVehicle;
+        // U-148: aboard, the camera is the hull's interpolated centre plus a smoothed offset (relX, relY), so the hull's place in the frame
+        // changes only as smoothly as the offset; the frame size eases (frameVel), fast while boarding / stepping out.
+        float relY, frameVel;
+        bool frameEasing;
+        /// <summary>U-148: true while the frame eases between the walking and the ship frames after boarding or stepping out.</summary>
+        public bool FrameEasing => frameEasing;
         float heldFloor; // the floor the frame was last set from: a floor that dropped below it holds the frame
         float fallTop;
         float shakeT, shakeAmp;
@@ -59,11 +99,12 @@ namespace Meridian.CameraRig
         public void Snap(in StageInput i)
         {
             float baseF = i.baseFrame > 0f ? i.baseFrame : DefaultFrame;
-            Frame = baseF;
-            look = 0f; lookVel = 0f; rel = 0f; relVel = 0f;
+            Frame = i.vehicle ? ShipFrameFor(baseF, Speed(i)) : baseF; frameVel = 0f; frameEasing = false;
+            look = 0f; lookVel = 0f; rel = 0f; relVel = 0f; relY = 0f;
             X = i.playerX;
             floorS = i.floorY; floorVel = 0f; haveFloor = true; heldFloor = floorS;
-            Y = i.vehicle ? i.playerY : floorS - FloorBelow + Frame * 0.5f; yVel = 0f; wasVehicle = i.vehicle;
+            Y = floorS - FloorBelow + Frame * 0.5f; yVel = 0f; wasVehicle = i.vehicle;
+            if (i.vehicle) { VehicleGoal(i, out rel, out relY); X = i.playerX + rel; Y = i.playerY + relY; } // U-148: where the ship rules settle
             FallFollowing = false; landedFollow = false; fallTop = i.playerY;
             Shake = Vector2.zero; shakeT = 0f; shakeAmp = 0f;
         }
@@ -79,8 +120,22 @@ namespace Meridian.CameraRig
         {
             float dt = Mathf.Max(1e-5f, i.dt);
             if (!haveFloor) Snap(i);
-            Frame = i.baseFrame > 0f ? i.baseFrame : DefaultFrame;
-            if (i.vehicle != wasVehicle) { relVel = 0f; yVel = 0f; lookVel = 0f; wasVehicle = i.vehicle; }
+            float baseF = i.baseFrame > 0f ? i.baseFrame : DefaultFrame;
+            if (i.vehicle != wasVehicle)
+            {
+                relVel = 0f; yVel = 0f; lookVel = 0f; frameVel = 0f; wasVehicle = i.vehicle;
+                frameEasing = true; // U-148: the walking frame and the ship frame ease into each other (~1 s), never a pop
+                if (i.vehicle) { rel = X - i.playerX; relY = Y - i.playerY; } // the offset starts where the walking camera is
+            }
+            // U-148: aboard, the frame follows the wheel base and the speed (SmoothDamp 0.8 s); on foot the wheel zoom applies at once (D-087),
+            // except while the frame eases back from the ship frame.
+            float goalF = i.vehicle ? ShipFrameFor(baseF, Speed(i)) : baseF;
+            if (frameEasing || i.vehicle)
+            {
+                Frame = Mathf.SmoothDamp(Frame, goalF, ref frameVel, frameEasing ? BoardFrameTime : ShipFrameTime, Mathf.Infinity, dt);
+                if (frameEasing && Mathf.Abs(Frame - goalF) < 0.02f) { frameEasing = false; if (!i.vehicle) { Frame = goalF; frameVel = 0f; } }
+            }
+            else Frame = goalF;
             if (i.vehicle) StepVehicle(i, dt);
             else
             {
@@ -90,22 +145,45 @@ namespace Meridian.CameraRig
             StepShake(dt);
         }
 
+        static float Speed(in StageInput i) => Mathf.Sqrt(i.speedX * i.speedX + i.speedY * i.speedY);
+
         /// <summary>
-        /// U-107: following the ship. The goal is the hull's centre plus its velocity × VehicleLookTime (look-ahead along the
-        /// velocity), reached with a 0.25 s damped follow; the hull is never let out of the middle band. The stage floor keeps
-        /// smoothing underneath, so stepping out hands back to the walking rules without a jump.
+        /// U-148: the camera's offset from the hull's centre the ship rules settle on: the look-ahead (capped at 0.2 × the frame); on and near
+        /// the pad at least the stage-floor rule's lift (the frame bottom FloorBelow under the ground, sky ahead of the hull), fading out over
+        /// PadHoldAltitude; inside the middle band.
+        /// </summary>
+        void VehicleGoal(in StageInput i, out float gx, out float gy)
+        {
+            var lookV = VehicleLook(i.speedX, i.speedY, Frame);
+            gx = lookV.x; gy = lookV.y;
+            float hold = PadHold(i.altitude);
+            if (hold > 0f)
+            {
+                float pad = floorS - FloorBelow + Frame * 0.5f - i.playerY;
+                gy = Mathf.Lerp(gy, Mathf.Max(gy, pad), hold);
+            }
+            float half = MiddleBand * 0.5f * Frame;
+            gx = Mathf.Clamp(gx, -half, half);
+            gy = Mathf.Clamp(gy, -half, half);
+        }
+
+        /// <summary>
+        /// U-107 / U-148: following the ship. The camera is the hull's centre (the interpolated pose, CameraFollow) plus an offset that eases
+        /// (0.25 s) toward VehicleGoal; the offset is clamped to the middle band, so the hull never leaves it and the clamp works on the
+        /// drawn hull, not the 50 Hz step. The stage floor keeps smoothing underneath, so stepping out hands back to the walking rules
+        /// without a jump.
         /// </summary>
         void StepVehicle(in StageInput i, float dt)
         {
             floorS = Mathf.SmoothDamp(floorS, i.floorY, ref floorVel, FloorSmoothTime, Mathf.Infinity, dt);
             heldFloor = floorS;
+            VehicleGoal(i, out float gx, out float gy);
+            rel = Mathf.SmoothDamp(rel, gx, ref relVel, VehicleFollowTime, Mathf.Infinity, dt);
+            relY = Mathf.SmoothDamp(relY, gy, ref yVel, VehicleFollowTime, Mathf.Infinity, dt);
             float half = MiddleBand * 0.5f * Frame;
-            var goal = new Vector2(i.playerX + i.speedX * VehicleLookTime, i.playerY + i.speedY * VehicleLookTime);
-            X = Mathf.SmoothDamp(X, goal.x, ref relVel, VehicleFollowTime, Mathf.Infinity, dt);
-            Y = Mathf.SmoothDamp(Y, goal.y, ref yVel, VehicleFollowTime, Mathf.Infinity, dt);
-            X = Mathf.Clamp(X, i.playerX - half, i.playerX + half);
-            Y = Mathf.Clamp(Y, i.playerY - half, i.playerY + half);
-            rel = X - i.playerX; look = 0f;
+            rel = Mathf.Clamp(rel, -half, half);
+            relY = Mathf.Clamp(relY, -half, half);
+            X = i.playerX + rel; Y = i.playerY + relY; look = 0f;
             FallFollowing = false; landedFollow = false; fallTop = i.playerY;
         }
 

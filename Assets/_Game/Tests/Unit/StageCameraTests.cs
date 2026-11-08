@@ -168,5 +168,103 @@ namespace Meridian.Tests
             Assert.Greater(cam.Y, y0 + 9f, "the frame followed the floor up");
             Assert.LessOrEqual(maxSpeed, StageCamera.VerticalMaxSpeed + 0.01f, "vertical motion ≤ 6 m/s");
         }
+
+        // ---- U-148 (D-158): the ship frame, the capped look-ahead, the pad hold, the strip tiles ----
+
+        static StageInput Aboard(float centreY, float floor, float vx, float vy, float altitude) => new StageInput
+        {
+            playerX = 100f, playerY = centreY, facing = 1, speedX = vx, speedY = vy, grounded = altitude <= 0f, floorY = floor,
+            baseFrame = StageCamera.ShipFrame, dt = Dt, vehicle = true, altitude = altitude,
+        };
+
+        [Test]
+        public void U148_TheShipFrameIs30mAndWidensWithSpeedTo45m()
+        {
+            Assert.AreEqual(30f, StageCamera.ShipFrameFor(StageCamera.ShipFrame, 0f), 1e-4f, "30 m standing");
+            Assert.AreEqual(37.5f, StageCamera.ShipFrameFor(StageCamera.ShipFrame, 30f), 1e-4f, "half way at 30 m/s");
+            Assert.AreEqual(45f, StageCamera.ShipFrameFor(StageCamera.ShipFrame, 60f), 1e-4f, "45 m at 60 m/s");
+            Assert.AreEqual(45f, StageCamera.ShipFrameFor(StageCamera.ShipFrame, 200f), 1e-4f, "and no wider from speed");
+            Assert.AreEqual(60f, StageCamera.ShipFrameFor(58f, 60f), 1e-4f, "the wheel's range caps it at 60 m");
+            Assert.AreEqual(24f, StageCamera.ShipFrameFor(10f, 0f), 1e-4f, "and floors it at 24 m");
+        }
+
+        [Test]
+        public void U148_TheLookAheadIsCappedAtAFifthOfTheFrame()
+        {
+            var slow = StageCamera.VehicleLook(0f, 5f, 30f);
+            Assert.AreEqual(3f, slow.y, 1e-4f, "0.6 s of 5 m/s");
+            var fast = StageCamera.VehicleLook(0f, 42f, 40f);
+            Assert.AreEqual(8f, fast.magnitude, 1e-3f, "0.6 s of 42 m/s (25 m) capped at 0.2 × 40 m");
+            var diag = StageCamera.VehicleLook(30f, 30f, 30f);
+            Assert.AreEqual(6f, diag.magnitude, 1e-3f, "the cap is on the vector");
+            Assert.AreEqual(diag.x, diag.y, 1e-4f, "along the velocity");
+            Assert.Less(StageCamera.VehicleLookFrame, StageCamera.MiddleBand * 0.5f, "the capped goal sits inside the middle band");
+        }
+
+        [Test]
+        public void U148_ThePadHoldFadesOutOverTwelveMetres()
+        {
+            Assert.AreEqual(1f, StageCamera.PadHold(0f), 1e-4f, "on the pad");
+            Assert.AreEqual(0.5f, StageCamera.PadHold(StageCamera.PadHoldAltitude * 0.5f), 1e-4f, "half way");
+            Assert.AreEqual(0f, StageCamera.PadHold(StageCamera.PadHoldAltitude), 1e-4f, "gone at 12 m");
+            Assert.AreEqual(0f, StageCamera.PadHold(float.PositiveInfinity), 1e-4f, "no ground under the hull");
+        }
+
+        [Test]
+        public void U148_OnThePadTheHullSitsLowWithSkyAhead()
+        {
+            // The hull's centre 3.9 m over the pad (11.4 / 2 − 1.8): the frame bottom 3 m under the pad, the hull in the lower part.
+            var cam = new StageCamera();
+            cam.Snap(Aboard(323.9f, 320f, 0f, 0f, 0f));
+            Assert.AreEqual(30f, cam.Frame, 1e-4f);
+            Assert.AreEqual(320f - StageCamera.FloorBelow + 15f, cam.Y, 1e-3f, "the stage-floor rule on the pad");
+            Assert.Greater(cam.Y, 323.9f, "sky ahead of the hull");
+        }
+
+        [Test]
+        public void U148_BoardingEasesTheFrameWithoutAPopAndAFastClimbNeverHitsTheBand()
+        {
+            var cam = Settled(100f, 320f);
+            Assert.AreEqual(StageCamera.DefaultFrame, cam.Frame, 1e-4f);
+            float prev = cam.Frame, maxStep = 0f;
+            int steps = 0;
+            for (; steps < 240; steps++) // 2 s aboard on the pad
+            {
+                cam.Step(Aboard(323.9f, 320f, 0f, 0f, 0f));
+                maxStep = Mathf.Max(maxStep, Mathf.Abs(cam.Frame - prev));
+                prev = cam.Frame;
+            }
+            Assert.AreEqual(30f, cam.Frame, 0.05f, "the 30 m ship frame after boarding");
+            Assert.Less(maxStep, 0.5f, "no pop: under 0.5 m of frame per 1/120 s step");
+            Assert.IsFalse(cam.FrameEasing, "the boarding ease is over");
+
+            // A climb at 42 m/s: the camera's offset from the hull eases toward the capped look-ahead and stays clear of the band edge.
+            float y = 323.9f, half = StageCamera.MiddleBand * 0.5f;
+            float worst = 0f;
+            for (int n = 0; n < 1200; n++) // 10 s
+            {
+                float v = Mathf.Min(42f, n * Dt * 8f);
+                y += v * Dt;
+                cam.Step(Aboard(y, 320f, 0f, v, y - 323.9f));
+                if (n > 240) worst = Mathf.Max(worst, Mathf.Abs(cam.Y - y) / cam.Frame);
+            }
+            Assert.Less(worst, half - 0.02f, $"the hull clear of the middle band's edge at speed ({worst:F3} of the frame)");
+            Assert.Greater(cam.Frame, 38f, "the frame widened with the climb");
+
+            // Stepping out eases back to the walking frame.
+            for (int n = 0; n < 240; n++) cam.Step(Standing(100f, y - 3.9f));
+            Assert.AreEqual(StageCamera.DefaultFrame, cam.Frame, 0.05f, "back to the walking frame");
+        }
+
+        [Test]
+        public void U148_StripsDrawEnoughOddTilesForTheWidestFrame()
+        {
+            float walk = 16.875f * 16f / 9f + 2f, ship = 60f * 16f / 9f + 2f;
+            Assert.AreEqual(3, Meridian.View2D.ParallaxLayers.TilesFor(walk, 32f), "3 tiles on foot (unchanged)");
+            int n = Meridian.View2D.ParallaxLayers.TilesFor(ship, 32f);
+            Assert.AreEqual(1, n & 1, "odd: the pattern keeps its phase");
+            Assert.GreaterOrEqual((n - 1) * 32f, ship, "a strip kept within half a tile of the camera covers the 60 m frame");
+            Assert.AreEqual(3, Meridian.View2D.ParallaxLayers.TilesFor(ship, 0f), "no width: the old 3");
+        }
     }
 }
