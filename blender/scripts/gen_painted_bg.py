@@ -118,6 +118,14 @@ def tile_bottom(rgb, a, rows=CONTINUE_ROWS):
     return rgb, a
 
 
+def feather_top(rgb, a, rows=48):
+    """B-188 (LEAD 12:0x, smoke_42): an opaque layer's top edge (every far sky layer) showed as a hard pale line when it came
+    into view with the camera low; fade its top `rows` rows to transparent (smoothstep), the colour kept (straight alpha)."""
+    t = np.arange(rows, dtype=np.float32) / (rows - 1)
+    a[:rows] = a[:rows] * (t * t * (3 - 2 * t))[:, None]
+    return rgb, a
+
+
 def _ridge_mask(H, line, soft=1.5):
     y = np.arange(H)[:, None] + 0.5
     return np.clip((y - line[None, :]) / soft + 0.5, 0, 1)
@@ -152,7 +160,7 @@ def earth_plains(seed):
     stack.append(wash(rng, H, _ridge_mask(H, far), _mix(pal["teal"], pal["sky"], 0.55), var=0.05, edge_dark=0.06, bleed=3.0))
     rgb, a = _composite(stack)
     rgb = straighten(rgb, a)                                  # D-147
-    out.append((rgb * paper(rng, H)[..., None], a))
+    out.append(feather_top(rgb * paper(rng, H)[..., None], a))   # B-188: the sky's top edge feathered
 
     # layer1: 2048 x 512, rolling green hills + tree blobs, transparent sky
     H = 512

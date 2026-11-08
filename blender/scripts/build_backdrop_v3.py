@@ -196,7 +196,7 @@ def earth_forest(seed):
                 r = rng.uniform(0.35, 0.6) * hmax
                 ell(m, cx, top - r * 0.5, r * 0.8, r * 0.75)
         stack.append(wash32(rng, H, m, col, var=0.05, edge_dark=0.07, bleed=2.5))
-    out.append(finish(stack, rng, H))
+    out.append(BG.feather_top(*finish(stack, rng, H)))   # B-188: the sky's top edge feathered
 
     # layer1: the tree line, 640 tall: understorey band, trunks, round crowns and tiered firs, crown shade
     H = 640
@@ -337,7 +337,7 @@ def earth_coast(seed):
         L = rng.uniform(6, 22) * (0.5 + (cy - hz) / (H - hz))
         rect(spark, cx - L, cx + L, cy, cy + 2)
     stack.append(wash32(rng, H, spark, BG._mix(pal["offwhite"], pal["sky"], 0.2), var=0.03, edge_dark=0.0, bleed=0.8))
-    out.append(finish(stack, rng, H))
+    out.append(BG.feather_top(*finish(stack, rng, H)))   # B-188: the sky's top edge feathered
 
     # layer1: 512 tall: nearer sea with foam crests, one grassy cliff headland and two sea stacks
     H = 512
@@ -492,7 +492,7 @@ def mars_canyon(seed, storm=0.0):
     stack.append(wash32(rng, H, strata(H, near, rng, 450, 1000, 7, (6, 12)), hz(BG._mix(pal["red"], pal["brown"], 0.30), 0.25), var=0.04, edge_dark=0.03, bleed=2.5))
     floor = BG._ridge_mask(H, BG.ridge(rng, [(4, 0.6), (9, 0.4)], base=960, amp=8))
     stack.append(wash32(rng, H, floor, hz(BG._mix(pal["sky"], pal["mustard"], 0.30)), var=0.04, edge_dark=0.03, bleed=6.0))
-    out.append(finish(stack, rng, H))
+    out.append(BG.feather_top(*finish(stack, rng, H)))   # B-188: the sky's top edge feathered
 
     # layer1: nearer stepped walls (three terraced tiers), umber ledge shadows, gullies
     H = 640
@@ -599,7 +599,7 @@ def mars_storm(seed):
 # ---------------------------------------------------------------- B-186 (LEAD 10:5x): Mars polar cap and Tharsis, B-179's pattern in D-169's format
 
 D169_LAYERS = [{"n": 0, "parallax": 0.1, "y_m": -2.0}, {"n": 1, "parallax": 0.35, "y_m": -1.0},
-               {"n": 2, "parallax": 0.6, "y_m": -2.0, "continue_rows": BG.CONTINUE_ROWS}]   # layer2 480 tall: its line on row 352
+               {"n": 2, "parallax": 0.6, "y_m": -3.0, "continue_rows": BG.CONTINUE_ROWS}]   # B-188: layer2 544 tall, its line on row 352, plain below 416
 
 
 def _d169_meta(out):
@@ -645,7 +645,7 @@ def mars_polar(seed):
     stack.append(wash32(rng, H, strata(H, farm, rng, hz - 150, hz - 20, 6, (4, 8)), BG._mix(ice, hazec, 0.45), var=0.03, edge_dark=0.02, bleed=2.5))
     plain = BG._ridge_mask(H, BG.ridge(rng, [(4, 0.6), (9, 0.4)], base=hz - 8, amp=4))
     stack.append(wash32(rng, H, plain, BG._mix(frost, hazec, 0.15), var=0.03, edge_dark=0.03, bleed=3.0))
-    out.append(finish(stack, rng, H))
+    out.append(BG.feather_top(*finish(stack, rng, H)))   # B-188: the sky's top edge feathered
     # layer1: the nearer cap scarp
     H = 512
     g1 = _gline(H, -1.0)
@@ -660,8 +660,8 @@ def mars_polar(seed):
     stack.append(wash32(rng, H, apron, BG._mix(frost, pal["teal"], 0.10), var=0.04, edge_dark=0.05, bleed=2.5))
     out.append(finish(stack, rng, H))
     # layer2: the near cap (480 tall, the line on row 352)
-    H = 384 + 96
-    g2 = _gline(H, -2.0)
+    H = 384 + 160
+    g2 = _gline(H, -3.0)
     hq = H - 2 * BG.CONTINUE_ROWS
     ws, x0 = [], 0.0
     while x0 < W - 40:
@@ -728,7 +728,7 @@ def mars_tharsis(seed):
     stack.append(tint(rng, H, rimm, BG._mix(pal["offwhite"], pal["sky"], 0.35), 0.5, var=0.0, edge_dark=0.0, bleed=1.5))   # the lit rim
     plain = BG._ridge_mask(H, BG.ridge(rng, [(4, 0.6), (9, 0.4)], base=hz - 10, amp=5))
     stack.append(wash32(rng, H, plain, BG._mix(BG._mix(rust, pal["sky"], 0.45), hazec, 0.15), var=0.04, edge_dark=0.03, bleed=4.0))
-    out.append(finish(stack, rng, H))
+    out.append(BG.feather_top(*finish(stack, rng, H)))   # B-188: the sky's top edge feathered
     # layer1: the nearer flank with stacked lava-flow lobes
     H = 512
     g1 = _gline(H, -1.0)
@@ -748,8 +748,8 @@ def mars_tharsis(seed):
     stack.append(wash32(rng, H, lobe_lit * lobes, BG._mix(bas_lit, pal["sky"], 0.30), var=0.04, edge_dark=0.02, bleed=1.5))
     out.append(finish(stack, rng, H))
     # layer2: the near lava (480 tall, the line on row 352)
-    H = 384 + 96
-    g2 = _gline(H, -2.0)
+    H = 384 + 160
+    g2 = _gline(H, -3.0)
     hq = H - 2 * BG.CONTINUE_ROWS
     ws, x0 = [], 0.0
     while x0 < W - 60:
@@ -824,7 +824,7 @@ def mars_plains(seed):
         ell(devil, dx + 14 * math.sin(t * 9), 640 - 300 * t, 8 + 30 * t, 8)               # (over layer1's transparency it went dark)
     stack.append(tint(rng, H, devil, BG._mix(pal["sky"], pal["offwhite"], 0.55), 0.4, var=0.03, edge_dark=0.0, bleed=5.0))
     stack.append(wash32(rng, H, edge, BG._mix(pal["sky"], pal["mustard"], 0.30), var=0.04, edge_dark=0.03, bleed=6.0))
-    out.append(finish(stack, rng, H))
+    out.append(BG.feather_top(*finish(stack, rng, H)))   # B-188: the sky's top edge feathered
     # layer1: the rolling rust plain
     H = 640
     stack = Stack()
@@ -943,7 +943,7 @@ def mercury_scene(seed, mode="day"):
     rim, bowl, shade = crater_field(rng, H, far, 9, 30, 70, 0.6)
     stack.append(wash32(rng, H, rim, BG._mix(lit, dark, 0.25), var=0.04, edge_dark=0.06, bleed=1.6))
     stack.append(wash32(rng, H, bowl, BG._mix(lit, dark, 0.55), var=0.04, edge_dark=0.04, bleed=1.6))
-    out.append(finish(stack, rng, H))
+    out.append(BG.feather_top(*finish(stack, rng, H)))   # B-188: the sky's top edge feathered
     # layer1: nearer crater rims, the blinding regolith with hard shadows
     H = 640
     stack = Stack()
@@ -1018,7 +1018,7 @@ def mercury_coldtrap(seed):
     stack.append(wash32(rng, H, crest, BG._mix(pal["offwhite"], pal["mustard"], 0.35), var=0.03, edge_dark=0.02, bleed=1.2))  # the grazing sun
     floor0 = BG._ridge_mask(H, BG.ridge(rng, [(4, 0.6), (9, 0.4)], base=hz - 10, amp=5))
     stack.append(wash32(rng, H, floor0, dark, var=0.04, edge_dark=0.03, bleed=3.0))
-    out.append(finish(stack, rng, H))
+    out.append(BG.feather_top(*finish(stack, rng, H)))   # B-188: the sky's top edge feathered
     H = 512
     g1 = _gline(H, -1.0)
     walls = terrace(notch(BG.ridge(rng, [(2, 0.45), (6, 0.35), (13, 0.2)], base=g1 - 190, amp=40), rng, 5, 30, 60), 22)
@@ -1032,8 +1032,8 @@ def mercury_coldtrap(seed):
     stack.append(wash32(rng, H, BG._ridge_mask(H, BG.ridge(rng, [(3, 0.5), (8, 0.5)], base=g1 - 24, amp=10)), dark, var=0.04, edge_dark=0.04, bleed=2.5))
     stack.append(tint(rng, H, glint * wm, BG._mix(ice, pal["offwhite"], 0.3), 0.8, var=0.03, edge_dark=0.05, bleed=0.8))
     out.append(finish(stack, rng, H))
-    H = 384 + 96
-    g2 = _gline(H, -2.0)
+    H = 384 + 160
+    g2 = _gline(H, -3.0)
     hq = H - 2 * BG.CONTINUE_ROWS
     line = BG.ridge(rng, [(3, 0.5), (8, 0.3)], base=g2, amp=4)
     ground = BG._ridge_mask(H, line)
@@ -1086,7 +1086,7 @@ def venus_tessera(seed):
     for j, (base, amp, t) in enumerate(((hz - 150, 26, 0.55), (hz - 80, 22, 0.38))):           # two far ridge belts, nearer = less haze
         belt = BG.ridge(rng, [(3, 0.4), (9, 0.35), (23, 0.25)], base=base, amp=amp)
         stack.append(wash32(rng, H, BG._ridge_mask(H, belt), BG._mix(grey, pal["sky"], t), var=0.04, edge_dark=0.05, bleed=2.0))
-    out.append(finish(stack, rng, H))
+    out.append(BG.feather_top(*finish(stack, rng, H)))   # B-188: the sky's top edge feathered
     H = 512
     g1 = _gline(H, -1.0)
     stack = Stack()
@@ -1104,8 +1104,8 @@ def venus_tessera(seed):
                 grooves[min(int(belt[int(cx) % W] + 8 + t2), H - 1), int(cx - 0.4 * t2) % W] = 1.0
         stack.append(wash32(rng, H, grooves * m, BG._mix(groove, pal["sky"], t), var=0.03, edge_dark=0.0, bleed=1.4))
     out.append(finish(stack, rng, H))
-    H = 384 + 96
-    g2 = _gline(H, -2.0)
+    H = 384 + 160
+    g2 = _gline(H, -3.0)
     hq = H - 2 * BG.CONTINUE_ROWS
     ws, x0 = [], 0.0
     while x0 < W - 30:
@@ -1284,7 +1284,7 @@ def venus_surface(seed):
     stack.append(tint(rng, H, haze, pal["offwhite"], 0.25, var=0.04, edge_dark=0.0, bleed=10.0))
     far = BG.ridge(rng, [(2, 0.5), (5, 0.3), (11, 0.2)], base=840, amp=30)
     stack.append(wash32(rng, H, BG._ridge_mask(H, far), BG._mix(pal["brown"], pal["sky"], 0.35), var=0.04, edge_dark=0.05, bleed=2.0))
-    out.append(finish(stack, rng, H))
+    out.append(BG.feather_top(*finish(stack, rng, H)))   # B-188: the sky's top edge feathered
     # layer1: black glassy basalt plains and tesserae ridges, lit from below by vent glows
     H = 640
     stack = Stack()
@@ -2145,7 +2145,7 @@ def _neptune_fn(deck):
 # The B-133 manner (washes, paper, no ink); NEW for U-161: each layer's painted ground line sits at row H + y_m x 64 (the walking
 # surface when the layer is bottom-anchored by y_m), and everything below it is solid ground, so a layer can continue down.
 
-B179_LAYERS = [{"n": 0, "parallax": 0.1, "y_m": -2.0}, {"n": 1, "parallax": 0.35, "y_m": -1.0}, {"n": 2, "parallax": 0.6, "y_m": -0.5}]
+B179_LAYERS = [{"n": 0, "parallax": 0.1, "y_m": -2.0}, {"n": 1, "parallax": 0.35, "y_m": -1.0}, {"n": 2, "parallax": 0.6, "y_m": -3.0, "continue_rows": BG.CONTINUE_ROWS}]   # B-188: layer2 544 tall, its line on row 352
 
 
 def _gline(H, y_m):
@@ -2320,7 +2320,7 @@ def earth_desert(seed):
     for k in range(6):
         ell(shimmer, rng.uniform(0, W), hz - 6, rng.uniform(160, 320), 5, val=0.45)
     stack.append(wash32(rng, H, shimmer, pal["offwhite"], var=0.02, edge_dark=0.0, bleed=3.0))
-    out.append(finish(stack, rng, H))
+    out.append(BG.feather_top(*finish(stack, rng, H)))   # B-188: the sky's top edge feathered
 
     # layer1: nearer striped mesas, then a dune line with distant plants; solid sand below its line
     H = 512
@@ -2348,8 +2348,8 @@ def earth_desert(seed):
     out.append(finish(stack, rng, H))
 
     # layer2: the near dunes: a back dune, the ground line on the walking surface, original plants, rocks, ripples
-    H = 384
-    gl = _gline(H, -0.5)
+    H = 384 + 160                                                                              # B-188: the line stays on row 352, 3 m of plain ground under it
+    gl = _gline(H, -3.0)
     back = BG._ridge_mask(H, BG.ridge(rng, [(2, 0.5), (4, 0.35), (9, 0.15)], base=gl - 60, amp=30))
     line = BG.ridge(rng, [(3, 0.5), (8, 0.3)], base=gl, amp=5)
     ground = BG._ridge_mask(H, line)
@@ -2379,7 +2379,7 @@ def earth_desert(seed):
              wash32(rng, H, bud, pal["red"], var=0.04, edge_dark=0.10, bleed=1.0),
              wash32(rng, H, rock, BG._mix(pal["red"], pal["brown"], 0.40), var=0.05, edge_dark=0.10, bleed=1.2),
              wash32(rng, H, ground, BG._mix(pal["mustard"], pal["offwhite"], 0.32), var=0.05, edge_dark=0.04, bleed=1.5)]
-    out.append(finish(stack, rng, H))
+    out.append(BG.tile_bottom(*finish(stack, rng, H)))   # B-188: the last 64 rows tileable (plain ground only below row 416)
     return out, [dict(L, ground_row=_gline(rgb.shape[0], L["y_m"])) for L, (rgb, _a) in zip(B179_LAYERS, out)]
 
 
@@ -2409,7 +2409,7 @@ def earth_taiga(seed):
               wash32(rng, H, caps, BG._mix(pal["offwhite"], pal["sky"], 0.25), var=0.03, edge_dark=0.03, bleed=2.0),
               wash32(rng, H, fringe, BG._mix(BG._mix(pal["teal"], pal["green"], 0.4), pal["sky"], 0.45), var=0.05, edge_dark=0.06, bleed=2.0),
               wash32(rng, H, BG._ridge_mask(H, BG.ridge(rng, [(4, 0.5)], base=hz + 2, amp=4)), snow, var=0.03, edge_dark=0.02, bleed=2.0)]
-    out.append(finish(stack, rng, H))
+    out.append(BG.feather_top(*finish(stack, rng, H)))   # B-188: the sky's top edge feathered
 
     # layer1: snowy spruce ranks, a frozen lake along their foot, the snow bank below
     H = 640
@@ -2441,8 +2441,8 @@ def earth_taiga(seed):
     out.append(finish(stack, rng, H))
 
     # layer2: near drifts on the walking surface, snow-rimmed saplings, snowy rocks, a few bare twigs
-    H = 384
-    gl = _gline(H, -0.5)
+    H = 384 + 160                                                                              # B-188: the line stays on row 352, 3 m of plain ground under it
+    gl = _gline(H, -3.0)
     drifts = BG._ridge_mask(H, BG.ridge(rng, [(3, 0.5), (7, 0.3), (13, 0.1)], base=gl - 22, amp=14))
     line = BG.ridge(rng, [(3, 0.5), (8, 0.3)], base=gl, amp=5)
     ground = BG._ridge_mask(H, line)
@@ -2466,7 +2466,7 @@ def earth_taiga(seed):
              wash32(rng, H, rocks, BG._mix(pal["teal"], pal["brown"], 0.45), var=0.05, edge_dark=0.10, bleed=1.2),
              wash32(rng, H, caps, snow, var=0.03, edge_dark=0.03, bleed=1.0),
              wash32(rng, H, ground, snow, var=0.04, edge_dark=0.04, bleed=1.5)]
-    out.append(finish(stack, rng, H))
+    out.append(BG.tile_bottom(*finish(stack, rng, H)))   # B-188: the last 64 rows tileable (plain ground only below row 416)
     return out, [dict(L, ground_row=_gline(rgb.shape[0], L["y_m"])) for L, (rgb, _a) in zip(B179_LAYERS, out)]
 
 
@@ -2516,7 +2516,7 @@ def earth_tundra(seed):
     hills = BG._ridge_mask(H, BG.ridge(rng, [(1, 0.5), (3, 0.35), (7, 0.15)], base=hz - 44, amp=34))
     stack += [wash32(rng, H, hills, BG._mix(pal["offwhite"], pal["sky"], 0.30), var=0.04, edge_dark=0.14, bleed=2.5),
               wash32(rng, H, BG._ridge_mask(H, BG.ridge(rng, [(4, 0.5)], base=hz + 2, amp=4)), snow, var=0.03, edge_dark=0.02, bleed=2.0)]
-    out.append(finish(stack, rng, H))
+    out.append(BG.feather_top(*finish(stack, rng, H)))   # B-188: the sky's top edge feathered
 
     # layer1: the open snow plain in low hills, their lee sides shaded, a scatter of dark rocks
     H = 512
@@ -2546,8 +2546,8 @@ def earth_tundra(seed):
     out.append(finish(stack, rng, H))
 
     # layer2: near tundra on the walking surface: tussocks of dry grass through the snow, lichen-spotted rocks
-    H = 384
-    gl = _gline(H, -0.5)
+    H = 384 + 160                                                                              # B-188: the line stays on row 352, 3 m of plain ground under it
+    gl = _gline(H, -3.0)
     line = BG.ridge(rng, [(3, 0.5), (8, 0.3)], base=gl, amp=5)
     ground = BG._ridge_mask(H, line)
     swell = BG._ridge_mask(H, BG.ridge(rng, [(2, 0.5), (5, 0.3)], base=gl - 26, amp=14))
@@ -2572,7 +2572,7 @@ def earth_tundra(seed):
              wash32(rng, H, rocks, BG._mix(pal["teal"], pal["brown"], 0.40), var=0.05, edge_dark=0.10, bleed=1.2),
              wash32(rng, H, lichen, BG._mix(pal["mustard"], pal["red"], 0.25), var=0.04, edge_dark=0.03, bleed=0.8),
              wash32(rng, H, ground, snow, var=0.04, edge_dark=0.04, bleed=1.5)]
-    out.append(finish(stack, rng, H))
+    out.append(BG.tile_bottom(*finish(stack, rng, H)))   # B-188: the last 64 rows tileable (plain ground only below row 416)
     return out, [dict(L, ground_row=_gline(rgb.shape[0], L["y_m"])) for L, (rgb, _a) in zip(B179_LAYERS, out)]
 
 
@@ -2784,31 +2784,38 @@ def preview_dip(out_dir, scene, from_png=False, out=None, footnote=None, planet=
     except Exception:  # noqa: BLE001
         fr = None
     rows = []
-    gl = 860
-    for off_m, what in ((1.5, "the walking surface 1.5 m BELOW the set's line (a valley)"),
-                        (3.0, "3 m BELOW (a deep valley: the near layer's continue strip repeats below its edge)"),
-                        (-1.5, "the walking surface 1.5 m ABOVE the set's line (a rise)")):
-        F = np.zeros((1080, 1920, 3), np.float32)
+    skyc = np.array(v3.hex_rgb(v3.PALETTES[planet]["sky"]), np.float32) / 255.0             # the camera's background behind the far layer
+    for off_m, what, cam in ((1.5, "the walking surface 1.5 m BELOW the set's line (a valley)", 0.0),
+                             (3.0, "3 m BELOW (a deep valley: the near layer's continue strip repeats below its edge)", 0.0),
+                             (-1.5, "the walking surface 1.5 m ABOVE the set's line (a rise)", 0.0),
+                             (5.0, "the CAMERA 5 m below the line, following the surveyor (ParallaxMath.LayerY: each layer rises parallax x 5 m)", 5.0)):
+        # B-188 (LEAD 12:0x): the camera frame keeps the player 3 m under the screen centre (row 732) and lifts every layer by
+        # parallax x the camera's drop, so the layers' top edges come into view as in smoke_42; full frame (no crop)
+        gl = 732 if cam else 860
+        F = np.empty((1080, 1920, 3), np.float32)
+        F[:] = skyc
         low = None
         for img, L in zip(imgs, layers):
             h = img.shape[0]
-            y_bot = gl + int(round(-L["y_m"] * v3.PPU))
+            y_bot = gl + int(round(-L["y_m"] * v3.PPU)) - (int(round(L["parallax"] * cam * v3.PPU)) if cam else 0)
             y_top = y_bot - h
-            review._over(F, img[max(0, -y_top):h - max(0, y_bot - 1080), :1920], 0, max(0, y_top))
+            if y_bot > 0 and y_top < 1080:
+                review._over(F, img[max(0, -y_top):h - max(0, y_bot - 1080), :1920], 0, max(0, y_top))
             if L.get("continue_rows") or low is None or (y_bot > low[0] and not low[2]):
                 low = (y_bot, img, L.get("continue_rows", 0))
         if low[0] < 1080:                                 # D-169 / U-164: the near layer's strip repeats; else the lowest layer's last row
             strip = low[1][-low[2]:, :1920] if low[2] else low[1][-1:, :1920]
             review._over(F, np.tile(strip, (-(-(1080 - low[0]) // strip.shape[0]), 1, 1))[:1080 - low[0]], 0, low[0])
-        ys = gl + int(round(off_m * v3.PPU))
+        ys = gl + (0 if cam else int(round(off_m * v3.PPU)))
         F[ys:] = np.tile(fill, (3, 4, 1))[:1080 - ys, :1920, :3].astype(np.float32) / 255.0
         review._over(F, np.tile(band, (1, 4, 1))[:1080 - (ys - 24), :1920], 0, ys - 24)    # clipped at the frame's foot (the 3 m valley)
         if fr is not None:
             for x in (420, 1300):
                 review._over(F, fr, x, ys - fr.shape[0] + int(round(piv[1] * fr.shape[0])))
-        F[gl, :, :] = (0.8, 0.2, 0.2)                                                         # the set's line (its datum), a red rule
-        review._label(F, f"{planet} {scene} at 1x: {what}; the red rule is the set's line (layers by y_m), {bname} + {fname}", 6, 6)
-        rows.append(F[240:])
+        if not cam:
+            F[gl, :, :] = (0.8, 0.2, 0.2)                                                     # the set's line (its datum), a red rule
+        review._label(F, f"{planet} {scene} at 1x: {what}; " + ("" if cam else "the red rule is the set's line (layers by y_m), ") + f"{bname} + {fname}", 6, 6)
+        rows.append(F if cam else F[240:])
     img = np.vstack(rows)
     review._label(img, __import__("time").strftime("%m-%d %H:%M") + " " + (footnote or "preview (not exported)"), 2, img.shape[0] - 16)
     out = out or os.path.join(out_dir, f"review_{('b187' if scene in ('coldtrap', 'tessera') else 'b186') if scene in B186_BAND else 'b183'}_{planet}_{scene}_dip_preview.png")
