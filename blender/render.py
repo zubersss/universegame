@@ -938,6 +938,12 @@ def do_painted_bg(entry, preview):
         BB.preview_dip(PREVIEW, scene, from_png=True, out=dout, planet=planet,
                        footnote="exported " + "; ".join(f"layer{i} " + review.stamp_text(p) for i, (p, _img, _n, _s) in enumerate(info)))
         dip = f" + {os.path.basename(dout)}"
+    if entry.get("underwater_review"):                    # B-202: sea_under seen by the swimmer at 3 / 8 / 15 / 40 m (U-040's tint)
+        import build_backdrop_v3 as BB
+        uout = os.path.join(PREVIEW, f"review_{entry.get('review_name', 'sea_under')}_underwater.png")
+        BB.preview_sea_under(PREVIEW, from_png=True, out=uout,
+                             footnote="exported " + "; ".join(f"layer{i} " + review.stamp_text(p) for i, (p, _img, _n, _s) in enumerate(info)))
+        dip += f" + {os.path.basename(uout)}"
     mark_stale(entry["key"], False)
     log_line(f"OK {entry['key']} | painted {len(info)} layers "
              + ", ".join(f"layer{i} {img.shape[1]}x{img.shape[0]} {n // 1024}KB seam {s:.2f}" for i, (_p, img, n, s) in enumerate(info))
