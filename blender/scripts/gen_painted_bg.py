@@ -102,6 +102,22 @@ def straighten(rgb, a):
     return np.where(fix, rgb / np.maximum(a3, 1e-4), rgb).astype(rgb.dtype)
 
 
+CONTINUE_ROWS = 64                     # D-169: a near layer's bottom strip, vertically tileable, that UNITY repeats below it
+
+
+def tile_bottom(rgb, a, rows=CONTINUE_ROWS):
+    """D-169: make the bottom `rows` rows tile vertically and continue the rows above: strip row k = (1 - k/(rows-1)) x the
+    layer's own row k + k/(rows-1) x the row `rows` above it. Row 0 is the layer's own (it follows the painting above), the last
+    row equals the row just above the strip, so a copy stacked under the strip joins it as the painting itself does. Every
+    feature must keep out of the bottom 2 x rows (or be constant down them), or it ghosts at half strength."""
+    H = rgb.shape[0]
+    s = (np.arange(rows, dtype=np.float32) / (rows - 1))[:, None]
+    lo, up = slice(H - rows, H), slice(H - 2 * rows, H - rows)
+    rgb[lo] = rgb[lo] * (1 - s[..., None]) + rgb[up] * s[..., None]
+    a[lo] = a[lo] * (1 - s) + a[up] * s
+    return rgb, a
+
+
 def _ridge_mask(H, line, soft=1.5):
     y = np.arange(H)[:, None] + 0.5
     return np.clip((y - line[None, :]) / soft + 0.5, 0, 1)
@@ -156,8 +172,9 @@ def earth_plains(seed):
     rgb = straighten(rgb, a)                                  # D-147
     out.append((rgb * paper(rng, H)[..., None], a))
 
-    # layer2: 2048 x 384, near meadow: deeper green, dabbed grass, mustard and red flower dots
-    H = 384
+    # layer2: 2048 x 480, near meadow: deeper green, dabbed grass, mustard and red flower dots; D-169: 480 tall (was 384), its
+    # bottom at 2 m under the line (y_m -2.0), the last 64 rows a vertically tileable meadow strip (continue_rows)
+    H = 384 + 96
     mead = ridge(rng, [(3, 0.5), (8, 0.25), (16, 0.1)], base=150, amp=35)
     mm = _ridge_mask(H, mead)
     gm = np.zeros((H, W), np.float32)
@@ -185,10 +202,10 @@ def earth_plains(seed):
              wash(rng, H, fm["red"] * mm, pal["red"], var=0.05, edge_dark=0.10, bleed=1.2)]
     rgb, a = _composite(stack)
     rgb = straighten(rgb, a)                                  # D-147
-    out.append((rgb * paper(rng, H)[..., None], a))
+    out.append(tile_bottom(rgb * paper(rng, H)[..., None], a))
 
     layers = [{"n": 0, "parallax": 0.1, "y_m": -2.0}, {"n": 1, "parallax": 0.35, "y_m": -1.0},
-              {"n": 2, "parallax": 0.6, "y_m": -0.5}]
+              {"n": 2, "parallax": 0.6, "y_m": -2.0, "continue_rows": CONTINUE_ROWS}]   # D-169
     return out, layers
 
 

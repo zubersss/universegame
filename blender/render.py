@@ -930,10 +930,18 @@ def do_painted_bg(entry, preview):
     review.draw(canvas, "2x tiled, seam at the centre; surveyor at 1x", 4, H - 18, (1.0, 1.0, 0.85))
     out = os.path.join(PREVIEW, f"review_{entry.get('review_name', entry['key'].replace('/', '_'))}.png")
     review.write(out, canvas)
+    dip = ""
+    if entry.get("dip_review"):                           # D-169: the set over a 1.5 m and a 3 m valley and a rise, from the exported layers
+        import build_backdrop_v3 as BB
+        _c, _planet, scene = entry["key"].split("/")
+        dout = os.path.join(PREVIEW, f"review_{entry.get('review_name', scene)}_dip.png")
+        BB.preview_dip(PREVIEW, scene, from_png=True, out=dout,
+                       footnote="exported " + "; ".join(f"layer{i} " + review.stamp_text(p) for i, (p, _img, _n, _s) in enumerate(info)))
+        dip = f" + {os.path.basename(dout)}"
     mark_stale(entry["key"], False)
     log_line(f"OK {entry['key']} | painted {len(info)} layers "
              + ", ".join(f"layer{i} {img.shape[1]}x{img.shape[0]} {n // 1024}KB seam {s:.2f}" for i, (_p, img, n, s) in enumerate(info))
-             + f" + {entry['key'].split('/')[2]}.json | review {os.path.basename(out)} | {time.time() - t0:.1f}s | peak {peak_mb()}MB")
+             + f" + {entry['key'].split('/')[2]}.json | review {os.path.basename(out)}{dip} | {time.time() - t0:.1f}s | peak {peak_mb()}MB")
     parts = entry["key"].split("/")
     if len(parts) == 3 and parts[1] == "uranus" and parts[2].endswith("_survey"):                  # B-166: a deck's four lights are in (survey last)
         import build_backdrop_v3 as BB

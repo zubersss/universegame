@@ -235,8 +235,11 @@ def earth_forest(seed):
              wash32(rng, H, dapple, BG._mix(pal["green"], pal["mustard"], 0.45), var=0.04, edge_dark=0.03, bleed=2.0)]
     out.append(finish(stack, rng, H))
 
-    # layer2: near undergrowth, 384 tall: bushes, fern fronds, a stump and a log, bluebells
-    H = 384
+    # layer2: near undergrowth, 480 tall: bushes, fern fronds, a stump and a log, bluebells; D-169: 480 (was 384), its bottom
+    # 2 m under the line (y_m -2.0), the last 64 rows a vertically tileable meadow strip (continue_rows); nothing distinct in the
+    # bottom 128 rows (tile_bottom crossfades them)
+    H = 384 + 96
+    hq = H - 2 * BG.CONTINUE_ROWS
     line = BG.ridge(rng, [(3, 0.5), (7, 0.3), (15, 0.1)], base=200, amp=22)
     ground = BG._ridge_mask(H, line)
     bush = np.zeros((H, W), np.float32)
@@ -267,7 +270,7 @@ def earth_forest(seed):
     for c, hw0, lift in ((sx, 80.0, 16.0), (lx, 170.0, 12.0)):
         ytop = float(line[int(c) % W]) - lift
         dx = (xx - c + W / 2) % W - W / 2
-        hw = hw0 + 0.9 * np.maximum(yy - ytop, 0.0)
+        hw = hw0 + 0.9 * np.clip(yy - ytop, 0.0, hq - ytop)                                  # D-169: constant width down the strip's rows
         cap = ytop + 20.0 * np.minimum(np.abs(dx) / hw0, 1.6) ** 2
         bank = np.maximum(bank, np.clip((1.0 - np.abs(dx) / hw) * 5.0, 0, 1) * np.clip((yy - cap) / 2.0 + 0.5, 0, 1))
         seats.append(ytop)
@@ -277,7 +280,7 @@ def earth_forest(seed):
                   rng_b.uniform(30, 52), rng_b.uniform(-0.9, 0.9), bend=rng_b.choice((-0.7, 0.7)))
         for j in range(26):                                                                  # grass dabs over the bank's face
             fx = c + rng_b.uniform(-1.0, 1.0) * hw0
-            fy = ytop + rng_b.uniform(20, H - ytop - 8)
+            fy = ytop + rng_b.uniform(20, hq - ytop - 8)
             dab(front, fx, fy, rng_b.uniform(10, 18), rng_b.uniform(-0.5, 0.5))
     front *= bank
     del yy, xx
@@ -290,7 +293,9 @@ def earth_forest(seed):
     bells = np.zeros((H, W), np.float32)
     for k in range(60):
         cx = rng.uniform(0, W)
-        ell(bells, cx, line[int(cx) % W] + rng.uniform(25, 140), rng.uniform(2.5, 4.5), rng.uniform(3, 5))
+        cy, rx, ry = line[int(cx) % W] + rng.uniform(25, 140), rng.uniform(2.5, 4.5), rng.uniform(3, 5)   # the draws in their old order
+        if cy < hq - 8:                                                                       # D-169: none in the strip's rows
+            ell(bells, cx, cy, rx, ry)
     stack = [wash32(rng, H, ground, BG._mix(pal["green"], pal["brown"], 0.30), var=0.07, edge_dark=0.08),
              wash32(rng, H, bush * np.maximum(ground, 0.0) + bush * (1 - ground), BG._mix(pal["green"], pal["teal"], 0.30), var=0.07, edge_dark=0.10, bleed=2.0),
              wash32(rng, H, fern, BG._mix(pal["green"], pal["mustard"], 0.25), var=0.06, edge_dark=0.05, bleed=0.9),
@@ -299,9 +304,9 @@ def earth_forest(seed):
              wash32(rng, H, rings, BG._mix(pal["mustard"], pal["offwhite"], 0.4), var=0.04, edge_dark=0.18, bleed=1.0),
              wash32(rng_b, H, front, BG._mix(pal["green"], pal["mustard"], 0.25), var=0.06, edge_dark=0.05, bleed=0.9),
              wash32(rng, H, bells * ground, BG._mix(pal["sky"], pal["teal"], 0.35), var=0.05, edge_dark=0.10, bleed=1.0)]
-    out.append(finish(stack, rng, H))
+    out.append(BG.tile_bottom(*finish(stack, rng, H)))
     layers = [{"n": 0, "parallax": 0.1, "y_m": -2.0}, {"n": 1, "parallax": 0.35, "y_m": -1.0},
-              {"n": 2, "parallax": 0.6, "y_m": -0.5}]
+              {"n": 2, "parallax": 0.6, "y_m": -2.0, "continue_rows": BG.CONTINUE_ROWS}]                  # D-169
     return out, layers
 
 
@@ -370,8 +375,10 @@ def earth_coast(seed):
              wash32(rng, H, grass, BG._mix(pal["green"], pal["sky"], 0.15), var=0.06, edge_dark=0.08, bleed=1.2)]
     out.append(finish(stack, rng, H))
 
-    # layer2: 384 tall: dunes, marram tufts, pebbles, shells, driftwood
-    H = 384
+    # layer2: 480 tall: dunes, marram tufts, pebbles, shells; D-169: 480 (was 384), its bottom 2 m under the line (y_m -2.0), the
+    # last 64 rows a vertically tileable dune-sand strip (continue_rows); nothing distinct in the bottom 128 rows
+    H = 384 + 96
+    hq = H - 2 * BG.CONTINUE_ROWS
     line = BG.ridge(rng, [(2, 0.5), (5, 0.35), (11, 0.12)], base=190, amp=30)
     dune = BG._ridge_mask(H, line)
     flank = dune * np.clip(BG.periodic_noise(rng, H, 60, 25) * 0.8 + 0.1, 0, 1) * (np.arange(H)[:, None] > line[None, :] + 25)
@@ -387,9 +394,13 @@ def earth_coast(seed):
         cx = rng.uniform(0, W)
         cy = line[int(cx) % W] + rng.uniform(40, 170)
         if k % 3:
-            ell(bits["pebble"], cx, cy, rng.uniform(3, 6), rng.uniform(2, 4))
+            rx, ry = rng.uniform(3, 6), rng.uniform(2, 4)
+            if cy < hq - 8:                                                                   # D-169: none in the strip's rows (draws kept)
+                ell(bits["pebble"], cx, cy, rx, ry)
         else:
-            ell(bits["shell"], cx, cy, rng.uniform(3, 5), rng.uniform(2.5, 4), cut=0.3)
+            rx, ry = rng.uniform(3, 5), rng.uniform(2.5, 4)
+            if cy < hq - 8:
+                ell(bits["shell"], cx, cy, rx, ry, cut=0.3)
     for k in range(2):                                    # B-183 (LEAD 10:2x): the two thin driftwood planks floated on the dune face
         cx = rng.uniform(0, W)                            # (read as a bench / a sign); removed, their draws kept so the rng order holds
         cy = line[int(cx) % W] + rng.uniform(60, 110)
@@ -400,9 +411,9 @@ def earth_coast(seed):
              wash32(rng, H, bits["pebble"] * dune, BG._mix(pal["sky"], pal["brown"], 0.4), var=0.04, edge_dark=0.12, bleed=0.8),
              wash32(rng, H, bits["shell"] * dune, pal["offwhite"], var=0.03, edge_dark=0.10, bleed=0.8),
              wash32(rng, H, bits["wood"] * dune, BG._mix(pal["brown"], pal["offwhite"], 0.35), var=0.05, edge_dark=0.12, bleed=1.0)]
-    out.append(finish(stack, rng, H))
+    out.append(BG.tile_bottom(*finish(stack, rng, H)))
     layers = [{"n": 0, "parallax": 0.1, "y_m": -2.0}, {"n": 1, "parallax": 0.35, "y_m": -1.0},
-              {"n": 2, "parallax": 0.6, "y_m": -0.5}]
+              {"n": 2, "parallax": 0.6, "y_m": -2.0, "continue_rows": BG.CONTINUE_ROWS}]                  # D-169
     return out, layers
 
 
@@ -2340,28 +2351,39 @@ def preview(out_dir, scenes=("forest", "coast"), from_png=False):
         print(scene, ", ".join(f"layer{i} {u8[i].shape[1]}x{u8[i].shape[0]} {n // 1024} KB seam {s:.2f}" for i, (p, n, s) in enumerate(info)), "->", out)
 
 
-def preview_dip(out_dir, scene, from_png=False):
-    """B-183 (LEAD 10:2x): the Earth set with the walking surface 1.5 m BELOW its line (a valley under the set's datum: the near
-    layer's body shows above the ground) and 1.5 m ABOVE it (a rise hides the layers' lower part); B-175's grass band and fill
-    as the ground, the surveyor on it. from_png: the layers a previous preview / export wrote (no generation)."""
+def preview_dip(out_dir, scene, from_png=False, out=None, footnote=None):
+    """B-183 / D-169 (LEAD 10:2x): the Earth set with the walking surface 1.5 m and 3 m BELOW its line (valleys under the set's
+    datum: the near layer's body shows above the ground; a layer with continue_rows is continued by repeating that bottom strip,
+    as U-164 does; otherwise the lowest layer's last row) and 1.5 m ABOVE it (a rise hides the layers' lower part); B-175's grass
+    band and fill as the ground, the surveyor on it. from_png: True = the exported layers (Art), "preview" = this function's last
+    generated ones; out / footnote: the export's stamped review (render.py, rows with "dip_review")."""
     import json
     sys.path.insert(0, os.path.dirname(HERE))
     import review
     from meridian import pngio
     import preview_c2_earth_rigs as PR
-    planet = PLANET_OF[scene]
+    planet = PLANET_OF.get(scene, "earth")
     d = os.path.join(out_dir, "b183", scene)
     os.makedirs(d, exist_ok=True)
     if from_png:                                          # True: the exported layers (Art); "preview": this function's last generated ones
         src = d if from_png == "preview" else os.path.join(ART_DIR, "backgrounds", planet, scene)
-        layers = json.load(open(os.path.join(ART_DIR, "backgrounds", planet, scene, f"{scene}.json"), encoding="utf-8"))["layers"]
+        layers = json.load(open(os.path.join(src, f"{scene}.json"), encoding="utf-8"))["layers"]
         imgs = [pngio.read_png_np(os.path.join(src, f"layer{L['n']}_color.png")) for L in layers]
     else:
-        gen, layers = SCENES[(planet, scene)](SEEDS[scene])
+        fn = SCENES.get((planet, scene)) or BG.SCENES[(planet, scene)]                     # the plains live in gen_painted_bg
+        if scene in SEEDS:
+            seed = SEEDS[scene]
+        else:                                                                                 # the export row's seed (the plains: 11401)
+            assets = json.load(open(os.path.join(os.path.dirname(HERE), "manifest.json"), encoding="utf-8"))["assets"]
+            seed = next(int(e["seed"]) for e in assets if e.get("key") == f"backgrounds/{planet}/{scene}")
+        gen, layers = fn(seed)
         imgs = [BG.to_u8(rgb, a) for rgb, a in gen]
         del gen
         for img, L in zip(imgs, layers):
             pngio.write_png(os.path.join(d, f"layer{L['n']}_color.png"), img)
+            L["height_px"] = img.shape[0]
+        with open(os.path.join(d, f"{scene}.json"), "w", encoding="utf-8", newline="\n") as f:
+            json.dump({"key": f"backgrounds/{planet}/{scene}", "layers": layers}, f, indent=2)
     E = os.path.join(ART_DIR, "terrain", "earth")
     band = pngio.read_png_np(os.path.join(E, "ground_band_color.png"))
     fill = pngio.read_png_np(os.path.join(E, "ground_fill_color.png"))
@@ -2371,7 +2393,9 @@ def preview_dip(out_dir, scene, from_png=False):
         fr = None
     rows = []
     gl = 860
-    for off_m, what in ((1.5, "the walking surface 1.5 m BELOW the set's line (a valley)"), (-1.5, "the walking surface 1.5 m ABOVE the set's line (a rise)")):
+    for off_m, what in ((1.5, "the walking surface 1.5 m BELOW the set's line (a valley)"),
+                        (3.0, "3 m BELOW (a deep valley: the near layer's continue strip repeats below its edge)"),
+                        (-1.5, "the walking surface 1.5 m ABOVE the set's line (a rise)")):
         F = np.zeros((1080, 1920, 3), np.float32)
         low = None
         for img, L in zip(imgs, layers):
@@ -2379,13 +2403,14 @@ def preview_dip(out_dir, scene, from_png=False):
             y_bot = gl + int(round(-L["y_m"] * v3.PPU))
             y_top = y_bot - h
             review._over(F, img[max(0, -y_top):h - max(0, y_bot - 1080), :1920], 0, max(0, y_top))
-            if low is None or y_bot > low[0]:
-                low = (y_bot, img)
-        if low[0] < 1080:                                 # U-161: the set's lowest layer continues below its bottom edge
-            review._over(F, np.repeat(low[1][-1:, :1920], 1080 - low[0], axis=0), 0, low[0])
+            if L.get("continue_rows") or low is None or (y_bot > low[0] and not low[2]):
+                low = (y_bot, img, L.get("continue_rows", 0))
+        if low[0] < 1080:                                 # D-169 / U-164: the near layer's strip repeats; else the lowest layer's last row
+            strip = low[1][-low[2]:, :1920] if low[2] else low[1][-1:, :1920]
+            review._over(F, np.tile(strip, (-(-(1080 - low[0]) // strip.shape[0]), 1, 1))[:1080 - low[0]], 0, low[0])
         ys = gl + int(round(off_m * v3.PPU))
         F[ys:] = np.tile(fill, (3, 4, 1))[:1080 - ys, :1920, :3].astype(np.float32) / 255.0
-        review._over(F, np.tile(band, (1, 4, 1))[:, :1920], 0, ys - 24)
+        review._over(F, np.tile(band, (1, 4, 1))[:1080 - (ys - 24), :1920], 0, ys - 24)    # clipped at the frame's foot (the 3 m valley)
         if fr is not None:
             for x in (420, 1300):
                 review._over(F, fr, x, ys - fr.shape[0] + int(round(piv[1] * fr.shape[0])))
@@ -2393,10 +2418,11 @@ def preview_dip(out_dir, scene, from_png=False):
         review._label(F, f"b-183 earth {scene} at 1x: {what}; the red rule is the set's line (layers by y_m), B-175 grass band + fill", 6, 6)
         rows.append(F[240:])
     img = np.vstack(rows)
-    review._label(img, __import__("time").strftime("%m-%d %H:%M") + " preview (not exported)", 2, img.shape[0] - 16)
-    out = os.path.join(out_dir, f"review_b183_{planet}_{scene}_dip_preview.png")
+    review._label(img, __import__("time").strftime("%m-%d %H:%M") + " " + (footnote or "preview (not exported)"), 2, img.shape[0] - 16)
+    out = out or os.path.join(out_dir, f"review_b183_{planet}_{scene}_dip_preview.png")
     review.write(out, img)
     print(scene, "->", out)
+    return out
 
 
 if __name__ == "__main__":
