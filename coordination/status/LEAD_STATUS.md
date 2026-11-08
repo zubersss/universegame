@@ -11,7 +11,7 @@ Cycle 278: the resume; D-158; seven cards written (U-148..U-152, B-171, B-172); 
 ## Pending decisions
 none open (D-158's numbers are placeholders UNITY tunes and reports).
 ## Waiting on the user
-USER-08 optional. Next: USER-32 (play 0.4.8's flight) once the build is in.
+USER-08 optional. Next: USER-32 = the 0.4.8 FEEL CHECK (the owner agreed 01:4x: play only for feel: walking, jumping, digging, flying up, landing; anything still off is fixed before Saturn / Uranus / Neptune are tuned), posted once the build is in.
 ## Loop / stall watch
 Free RAM 1.01 GB at 01:3x with three freshly started sessions (no Editor, no Blender, no browsers listed): both heavy jobs wait at their gates; if it stays under 1.5 GB past ~02:30 with nothing else running, consider a D-156-style one-off with kill caps before asking the owner.
 ## Session addresses (ListAgents, 11-08 01:3x)
