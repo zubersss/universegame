@@ -29,6 +29,10 @@ namespace Meridian.FX
         public const int SpeedLineCount = 10;
         public const float LinesFrom = 8f, LinesFull = 40f, LinesAlpha = 0.55f;
         public const float VaporSeconds = 0.5f, RingSeconds = 0.6f, RingStart = 3f, RingEnd = 28f;
+        /// <summary>U-150 (B-171): the hull's centre of mass above the ship's pivot, where the vapor cone and the shock ring are pivoted.</summary>
+        public const float CentreOfMass = 6.2f;
+        /// <summary>U-150 (B-171): fx/ship/speed_lines tiles (128 × 360 px), three per edge stacked over the frame's height.</summary>
+        public const int LineTilesPerEdge = 3;
 
         public FxLoop Main { get; private set; }
         public FxLoop PodFore { get; private set; }
@@ -51,6 +55,7 @@ namespace Meridian.FX
         float vaporT = -1f, ringT = -1f;
         Vector3 ringAt;
         bool lookedForView;
+        float linesT;
         FxSheet boostSheet, linesSheet, coneSheet, ringSheet;
         static Sprite white, cone, ringShape;
         const int LinesOrder = 400;
@@ -123,16 +128,16 @@ namespace Meridian.FX
             }
             var vgo = new GameObject("FxVaporCone");
             vgo.transform.SetParent(transform, false);
-            vgo.transform.localPosition = new Vector3(0f, SideShip.Height * 0.62f - SideShip.SkidDrop, 0f);
+            vgo.transform.localPosition = new Vector3(0f, CentreOfMass, 0f); // B-171: pivoted at the hull's centre of mass
             vapor = vgo.AddComponent<SpriteRenderer>();
             vapor.sprite = cone;
-            vapor.sortingOrder = 2; // over the hull: the cloud wraps it
+            vapor.sortingOrder = 2; // B-171: in front of the hull (re-set from the rig's order in PlaceOnRig)
             vapor.enabled = false;
             var rgo = new GameObject("FxShockRing");
             rgo.transform.SetParent(transform.parent != null ? transform.parent : null, false); // the side root: it stays where the barrier broke
             ring = rgo.AddComponent<SpriteRenderer>();
             ring.sprite = ringShape;
-            ring.sortingOrder = 1;
+            ring.sortingOrder = -3; // B-171: behind the hull
             ring.enabled = false;
         }
 
@@ -184,7 +189,7 @@ namespace Meridian.FX
             vaporT = 0f;
             ringT = 0f;
             var st = side.transform;
-            ringAt = st.position + st.up * (SideShip.Height * 0.5f - SideShip.SkidDrop);
+            ringAt = st.position + st.up * CentreOfMass;
         }
 
         /// <summary>
@@ -205,6 +210,9 @@ namespace Meridian.FX
             Move(Main, ArtKeys.Ships.PilgrimPuff, origin + rig.Socket("tail_exhaust", new Vector2(0f, 0.85f)), 0f, new Vector2(1.3f, 1.3f), legsView.SquashRoot, layer, behind);
             Move(PodAft, ArtKeys.Ships.PilgrimPuff, origin + rig.Socket("attitude_l", new Vector2(-1.5f, 2.6f)), -90f, new Vector2(0.45f, 0.45f), legsView.SquashRoot, layer, behind);
             Move(PodFore, ArtKeys.Ships.PilgrimPuff, origin + rig.Socket("attitude_r", new Vector2(1.5f, 2.6f)), 90f, new Vector2(0.45f, 0.45f), legsView.SquashRoot, layer, behind);
+            // U-150 (B-171): the vapor cone in front of the hull, the shock ring behind it (and behind the puffs).
+            if (vapor != null) { vapor.sortingLayerID = layer; vapor.sortingOrder = behind + 2; }
+            if (ring != null) { ring.sortingLayerID = layer; ring.sortingOrder = behind - 1; }
         }
 
         static void Move(FxLoop loop, string key, Vector2 local, float rot, Vector2 scale, Transform parent, int layer, int order)
@@ -260,23 +268,47 @@ namespace Meridian.FX
             float speed = v.magnitude;
             SpeedLineAlpha = boost * Mathf.Clamp01((speed - LinesFrom) / (LinesFull - LinesFrom)) * LinesAlpha;
             bool show = SpeedLineAlpha > 0.01f && view != null && view.orthographic;
-            if (show && linesSheet != null && linesSheet.Ready && lines[0].sprite == white)
-                for (int i = 0; i < lines.Length; i++) lines[i].sprite = linesSheet.frames[0];
+            bool sheetLines = linesSheet != null && linesSheet.Ready;
             float halfH = show ? view.orthographicSize : 0f, halfW = halfH * (show ? view.aspect : 0f);
             var dir = speed > 0.1f ? v / speed : Vector2.up;
             float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg - 90f;
             var c = show ? (Vector2)view.transform.position : Vector2.zero;
             float len = halfH * (0.12f + 0.18f * Mathf.Clamp01(speed / LinesFull)), width = halfH * 0.006f;
+            if (show && sheetLines) linesT += Time.deltaTime;
             for (int i = 0; i < lines.Length; i++)
             {
                 var sr = lines[i];
-                if (sr.enabled != show) sr.enabled = show;
-                if (!show) continue;
+                bool on = show && (!sheetLines || i < 2 * LineTilesPerEdge);
+                if (sr.enabled != on) sr.enabled = on;
+                if (!on) continue;
+                if (sheetLines)
+                {
+                    // B-171: three 128 × 360 tiles stacked on each edge over the frame's height, the 4-frame loop drawn for the left edge and
+                    // flipped in x for the right; the speed sets their alpha.
+                    int f = linesSheet.FrameAt(linesT);
+                    if (f >= 0) sr.sprite = linesSheet.frames[f];
+                    bool right = i >= LineTilesPerEdge;
+                    int row = i % LineTilesPerEdge;
+                    var size = sr.sprite.bounds.size;
+                    float s = 2f * halfH / LineTilesPerEdge / Mathf.Max(0.01f, size.y);
+                    var rect = sr.sprite.rect;
+                    float offX = rect.width > 0f ? (0.5f - sr.sprite.pivot.x / rect.width) * size.x * s : 0f; // pivot → centre
+                    float offY = rect.height > 0f ? (0.5f - sr.sprite.pivot.y / rect.height) * size.y * s : 0f;
+                    float w = size.x * s;
+                    float cxTile = right ? c.x + halfW - w * 0.5f : c.x - halfW + w * 0.5f;
+                    float cyTile = c.y - halfH + (row + 0.5f) * 2f * halfH / LineTilesPerEdge;
+                    sr.flipX = right;
+                    sr.transform.SetPositionAndRotation(new Vector3(cxTile - (right ? -offX : offX), cyTile - offY, 0f), Quaternion.identity);
+                    sr.transform.localScale = new Vector3(s, s, 1f);
+                    sr.color = new Color(1f, 1f, 1f, Mathf.Clamp01(SpeedLineAlpha / LinesAlpha));
+                    continue;
+                }
+                // The placeholder: thin white lines streaming along the frame's edges against the hull's motion.
                 linePhase[i] = Mathf.Repeat(linePhase[i] + Time.deltaTime * speed / (2f * halfH) * 1.6f, 1f);
                 float along = (0.5f - linePhase[i]) * 2f * halfH; // from the leading edge back past the trailing one
                 var p = c + new Vector2(lineLane[i] * halfW, 0f) + dir * along;
                 sr.transform.SetPositionAndRotation(new Vector3(p.x, p.y, 0f), Quaternion.Euler(0f, 0f, angle));
-                sr.transform.localScale = sr.sprite == white ? new Vector3(width, len, 1f) : new Vector3(len / Mathf.Max(0.01f, sr.sprite.bounds.size.y), len / Mathf.Max(0.01f, sr.sprite.bounds.size.y), 1f);
+                sr.transform.localScale = new Vector3(width, len, 1f);
                 sr.color = new Color(1f, 1f, 1f, SpeedLineAlpha);
             }
 
@@ -284,31 +316,49 @@ namespace Meridian.FX
             if (vaporT >= 0f)
             {
                 vaporT += Time.deltaTime;
-                float k = vaporT / VaporSeconds;
-                if (k >= 1f) { vaporT = -1f; vapor.enabled = false; }
+                if (coneSheet != null && coneSheet.Ready)
+                {
+                    // B-171: the one-shot cone (10 frames) drawn 1:1 at the centre of mass; it ends with its clip.
+                    int f = coneSheet.FrameAt(vaporT);
+                    if (f < 0) { vaporT = -1f; vapor.enabled = false; }
+                    else { vapor.sprite = coneSheet.frames[f]; vapor.enabled = true; vapor.transform.localScale = Vector3.one; vapor.color = Color.white; }
+                }
                 else
                 {
-                    if (coneSheet != null && coneSheet.Ready) { int f = coneSheet.FrameAt(vaporT); if (f >= 0) vapor.sprite = coneSheet.frames[f]; }
-                    vapor.enabled = true;
-                    float w = SideShip.BodyWidth * (2.2f + 0.6f * k);
-                    vapor.transform.localScale = vapor.sprite == cone ? new Vector3(w, SideShip.Height * 0.55f, 1f) : Vector3.one * (w / Mathf.Max(0.01f, vapor.sprite.bounds.size.x));
-                    vapor.color = new Color(1f, 1f, 1f, 0.85f * (1f - k * k));
+                    float k = vaporT / VaporSeconds;
+                    if (k >= 1f) { vaporT = -1f; vapor.enabled = false; }
+                    else
+                    {
+                        vapor.enabled = true;
+                        float w = SideShip.BodyWidth * (2.2f + 0.6f * k);
+                        vapor.transform.localScale = new Vector3(w, SideShip.Height * 0.55f, 1f);
+                        vapor.color = new Color(1f, 1f, 1f, 0.85f * (1f - k * k));
+                    }
                 }
             }
             if (ringT >= 0f)
             {
                 ringT += Time.deltaTime;
-                float k = ringT / RingSeconds;
-                if (k >= 1f) { ringT = -1f; ring.enabled = false; }
+                ring.transform.SetPositionAndRotation(ringAt, Quaternion.identity);
+                if (ringSheet != null && ringSheet.Ready)
+                {
+                    // B-171: the one-shot ring (8 frames) drawn 1:1 where the barrier broke; it ends with its clip.
+                    int f = ringSheet.FrameAt(ringT);
+                    if (f < 0) { ringT = -1f; ring.enabled = false; }
+                    else { ring.sprite = ringSheet.frames[f]; ring.enabled = true; ring.transform.localScale = Vector3.one; ring.color = Color.white; }
+                }
                 else
                 {
-                    if (ringSheet != null && ringSheet.Ready) { int f = ringSheet.FrameAt(ringT); if (f >= 0) ring.sprite = ringSheet.frames[f]; }
-                    ring.enabled = true;
-                    float d = Mathf.Lerp(RingStart, RingEnd, 1f - (1f - k) * (1f - k)); // fast out, slowing
-                    float s = d / Mathf.Max(0.01f, ring.sprite.bounds.size.x);
-                    ring.transform.SetPositionAndRotation(ringAt, Quaternion.identity);
-                    ring.transform.localScale = new Vector3(s, s, 1f);
-                    ring.color = new Color(1f, 1f, 1f, 0.9f * (1f - k));
+                    float k = ringT / RingSeconds;
+                    if (k >= 1f) { ringT = -1f; ring.enabled = false; }
+                    else
+                    {
+                        ring.enabled = true;
+                        float d = Mathf.Lerp(RingStart, RingEnd, 1f - (1f - k) * (1f - k)); // fast out, slowing
+                        float s = d / Mathf.Max(0.01f, ring.sprite.bounds.size.x);
+                        ring.transform.localScale = new Vector3(s, s, 1f);
+                        ring.color = new Color(1f, 1f, 1f, 0.9f * (1f - k));
+                    }
                 }
             }
         }
