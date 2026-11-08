@@ -80,6 +80,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 23df7b2028e805748a5b61445c983ff5
+    m_Address: terrain/mars/fill_decor_3
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 24463fc6758ef6c47bcc60e7ad447f52
     m_Address: creatures/mars/polar_crawler
     m_ReadOnly: 0
@@ -137,6 +142,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 549abe15775854d4eaaf6def71b92111
     m_Address: backgrounds/mars/layer0
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 5757978e47220ba46ba884e97617e22b
+    m_Address: terrain/mars/fill_decor_4
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -207,6 +217,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 81fb0c4684df0bb48920256c9f0c65f1
     m_Address: creatures/mars/scree_stalker
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 83c0790adec60554fa4ecd3955ab345a
+    m_Address: terrain/mars/fill_decor_1
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -287,6 +302,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: b83076e4cb5447f4eade16b3a5745db5
     m_Address: terrain/mars/basalt
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: bbd58f302897e1e44b01e6870f50e24e
+    m_Address: terrain/mars/fill_decor_2
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

@@ -30,6 +30,16 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 06944b7e8721e914287ad775c03e25de
+    m_Address: terrain/earth/ground_decor_sand_2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 073b20b01a02d0d47842ccf163d91d77
+    m_Address: terrain/earth/ground_decor_sand_1
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 0b38927ca41ceac4180266c18d07d519
     m_Address: backgrounds/earth/skyline_far
     m_ReadOnly: 0
@@ -125,13 +135,28 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 39e6888db07440a42ac7ad78af93976c
+    m_Address: terrain/earth/ground_decor_sand_3
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 3c4ad9d9292856d419258a70a2ab2304
     m_Address: props/earth/beacon
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 3ce54c6bcc1b7934caa6635481f78b2c
+    m_Address: terrain/earth/ground_decor_snow_2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 3e54a9281c10cd64e8f437097784d041
     m_Address: terrain/earth/ground_decor_6
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 40b63f0f046b91a489b26d688766c6cb
+    m_Address: terrain/earth/ground_decor_snow_1
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -157,6 +182,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 5231d4afa4756d4478b86f814ab06356
     m_Address: creatures/earth/bear
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 537fbed5e6328be4681ae84a75b3d7ab
+    m_Address: terrain/earth/ground_decor_stone_3
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -275,6 +305,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 9a6bd36b966df864ba522b83a1e1999c
+    m_Address: terrain/earth/ground_band_sand
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 9a8ba485af298b5489fa7866ab4be415
     m_Address: creatures/earth/hadal_maw/json
     m_ReadOnly: 0
@@ -282,6 +317,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 9a8e4ad6f768bbb4ca066213c87f3bc0
     m_Address: creatures/earth/squid/animator
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 9cc22b9e071600b4aaa07a29a2e2a4ae
+    m_Address: terrain/earth/ground_decor_stone_2
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -305,8 +345,18 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a9639f2d69ac98b4fa232de900d699b5
+    m_Address: terrain/earth/ground_fill_sand
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: a9ea9fa0951184140841bb9abcbed650
     m_Address: creatures/earth/pike
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: ab81d89ee80c0724b9e51d2b9797679a
+    m_Address: terrain/earth/ground_band_stone
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -330,8 +380,23 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b9f4e5ef4c1745146940623ac06a89c0
+    m_Address: terrain/earth/fill_decor_3
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: bb1028e04e114364690914718ee963f6
     m_Address: terrain/earth/ground_decor_5
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: bf611050d1e4bdc438451d1545e8a11d
+    m_Address: terrain/earth/fill_decor_1
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: bfcba66c60655fc4c8fe14207d439cf3
+    m_Address: terrain/earth/ground_decor_stone_1
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -365,6 +430,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d587ec470df952d43bd92f83a413f8c0
+    m_Address: terrain/earth/fill_decor_4
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: da00770325ca041488daff98d611a1f4
     m_Address: terrain/earth/ground_fill
     m_ReadOnly: 0
@@ -372,6 +442,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: dbe4de67de5d94a46a1544d6770a7bda
     m_Address: props/earth/launch_gantry
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: de492c3e923dc65428544284fedfe254
+    m_Address: terrain/earth/fill_decor_2
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -385,8 +460,18 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e6db82661784184489158145f1389ce7
+    m_Address: terrain/earth/ground_band_snow
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: e72e0bd045d609a46a6c558451807c55
     m_Address: terrain/earth/water
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e8f9dd2749fa19f4da8ee9a11436e1d7
+    m_Address: terrain/earth/ground_decor_snow_3
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

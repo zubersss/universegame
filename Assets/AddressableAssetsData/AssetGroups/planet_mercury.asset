@@ -145,6 +145,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 4b595ddcc3c4ff64980c639872dcc865
+    m_Address: terrain/mercury/fill_decor_3
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 4d3b11cfba86a6a4d90ae51d67362321
     m_Address: props/mercury/solarite_cut/json
     m_ReadOnly: 0
@@ -212,6 +217,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 6e5722c3c091d284fb5b2a30737b25f4
     m_Address: flora/mercury/rigset/json
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 772621f7ced88fa489f1e9e09276356a
+    m_Address: terrain/mercury/fill_decor_2
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -305,6 +315,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: ad5bb6572f67d2946b5f6468ed8a3589
+    m_Address: terrain/mercury/fill_decor_1
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: ad7b68643ae7b334ebefd5d5e06bd947
     m_Address: terrain/mercury/ground_band
     m_ReadOnly: 0
@@ -377,6 +392,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: c766abd0730b45f4b9d7f64a66ff3132
     m_Address: props/mercury/equipment_locker
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: cbd5d4953b8eddb4d8bd2349dc849d57
+    m_Address: terrain/mercury/fill_decor_4
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

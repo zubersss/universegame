@@ -130,6 +130,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 46c43cda4c0cc874f85cfc97b775077a
+    m_Address: terrain/venus/fill_decor_2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 47b48055ddd916b4fb968acec2fa9685
     m_Address: props/venus/vent_mouth/json
     m_ReadOnly: 0
@@ -187,6 +192,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 6d35a65d09bfb164298320230dec4ce7
     m_Address: terrain/venus/ground_band
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 6dc4041b81246664ea9761345b486aed
+    m_Address: terrain/venus/fill_decor_1
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -315,6 +325,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c1d68e11f0b1aa748a9c4ac8edaf46da
+    m_Address: terrain/venus/fill_decor_4
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: c48cdb9e0f4859b4089341b4274a8527
     m_Address: creatures/venus/acidmoth
     m_ReadOnly: 0
@@ -382,6 +397,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: e916dd222dd295744b691708df18ff4c
     m_Address: creatures/venus/veil_serpent_body
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: eaf5c08310fa3c547854953226457407
+    m_Address: terrain/venus/fill_decor_3
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
