@@ -1,7 +1,7 @@
 # UNITY STATUS
-Updated: 2026-11-07 21:08 · Session: 8 (resumed 14:3x after a break; session 7's detail is in git log and coordination/status/archive/UNITY_2026-11-07.md)
+Updated: 2026-11-07 21:1x · Session: 8 (PAUSED by the owner; session 7's detail is in git log and coordination/status/archive/UNITY_2026-11-07.md)
 ## Current task
-U-127 Jupiter, slice 2 committed ahead of its check: the four B-160 floaters in the species table (Stormglider every deck, Lightning eel Deck 2, Belt wasps Deck 1, Ballast tortoise Decks 2–3; Air habitat over the floes; appended, every older index kept), JupiterStageTests +1, CaptureU127Jupiter (1_floe_kit_tortoise, 2_storm_deck_glider, 3_deep_crush, 4_red_spot; the whale crossing after its D-153 re-export). Next lock: CheckSetup import of B-159 / B-156 / B-160 (metas + the 21 + 9 + 12 orphaned v2 metas git rm) + compile + EditMode + the Jupiter PlayMode slice + CaptureU127Jupiter. Then Build 0.4.8 (the next owner build). The whale species row + its framing (D-138) land with its sheet; the tortoise husk prop with the hunt card.
+PAUSED 21:1x by the owner (via LEAD): no work, no locks, no polling, want_unity.lock removed, until the owner or LEAD says continue. Resume point, in order: (1) the D-156 compile + EditMode part after BLENDER's whale (scratchpad k_1 import with graphics + compile, k_2 EditMode; 1250 MB gate, 1000 MB tree cap, 200 MB floor; then commit the new metas: SaturnStageTests, UranusStageTests, UranusSeason, NeptuneWind, NeptuneStageTests, BuildFolderTests, WindAnchor, NeptuneWindDriver, plus B-159 / B-156 / B-160 metas and the 21 + 9 + 12 orphaned v2 metas git rm; sort the uncommitted Unity-written Generated/ atlas / Addressables files); (2) the Jupiter PlayMode slice + CaptureU127Jupiter at 1.5 GB; (3) Build 0.4.8 (U-143: release + _dev, probe per D-152, smoke on the release).
 ## Last completed
 U-127 slice 1 checked 18:13 (the D-046 foreground re-run: compile 0 / 0, EditMode 386/386). Build 0.4.7 accepted as the owner's build (D-151); U-125, U-140, U-141 Done.
 ## Next up
@@ -19,4 +19,4 @@ U-126 floe caps (EditMode; its frame in u127/ next lock), U-127 slices 1–2 (co
 ## Housekeeping
 Editor churn in the tree from the cut runs (TMP font asset, animator.controllers, UnderwaterTint.mat, link.xml.meta, two InitTestScene files): never staged; my commits list files explicitly.
 ## HeavyJobLock
-none held; want refreshed 21:08 for the D-156 part (1250 MB gate, 1000 MB tree cap: tools/unity_common.ps1 watchdog, peaks to logs/unity_peaks.log), after BLENDER's whale. Free RAM 1.18 GB at 21:08. No background waiters (LEAD 19:2x).
+none held, no want filed (paused 21:1x).
