@@ -1,0 +1,20 @@
+{
+  "key": "props/common/grapple_hook",
+  "style": "v3",
+  "frame_width": 76,
+  "frame_height": 52,
+  "columns": 1,
+  "gutter": 4,
+  "frames": 1,
+  "fps": 12,
+  "pivot": [
+    0.157895,
+    0.5
+  ],
+  "facing": "right",
+  "ppu": 64,
+  "animations": [],
+  "squash_root": false,
+  "ground_line_px": 10,
+  "note": "B-156: the giants' aerostat kit (Earth palette, the camp set's look); replaces the v2 model under this key"
+}
