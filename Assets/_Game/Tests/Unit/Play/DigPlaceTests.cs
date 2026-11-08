@@ -129,5 +129,58 @@ namespace Meridian.Tests
             File.Delete(path);
             LogAssert.NoUnexpectedReceived();
         }
+
+        /// <summary>
+        /// U-157 P-54 (D-167 (4)): dug walls are round at any size, not only a lone scoop. A 4 m tunnel of strokes on the tile centres and a second,
+        /// off-grid row above it make one hole of seven strokes; every outline point round it (the chunks' edge chains, under the surface band)
+        /// lies within BrushRadius −0.22 / +0.20 m of its nearest stroke centre (outward, the tracing rounds off the rock tips between neighbouring strokes: 0.15 m measured). Without the fill levels the walls follow the 1 m tile faces (a
+        /// lone stroke's wall at 0.5 m, a stack's straight faces on the column lines), far outside that band.
+        /// </summary>
+        [UnityTest]
+        public IEnumerator DugWallsAreRoundAtAnySize()
+        {
+            PlanetSideRoot side = null;
+            yield return Boot(s => side = s);
+            var t = side.terrain;
+            var rig = side.rig;
+            Assert.IsTrue(rig.Brush);
+            int x0 = side.spawnX + 30;
+            for (int k = 0; k < 80; k++, x0++)
+            {
+                bool clear = true;
+                for (int c = x0 - 2; c <= x0 + 6; c++) if (t.PadTop(c) != int.MinValue || t.GetTile(c, t.OriginalTop(c) + 1) == TileId.Water) clear = false;
+                if (clear) break;
+            }
+            int top = t.OriginalTop(x0);
+            var strokes = new System.Collections.Generic.List<Vector2>();
+            for (int i = 0; i < 4; i++) strokes.Add(new Vector2(x0 + 0.5f + i, top - 3.5f));
+            for (int i = 0; i < 3; i++) strokes.Add(new Vector2(x0 + 0.8f + i * 0.7f, top - 2.4f));
+            var owner = rig.owner;
+            rig.owner = null;
+            try { foreach (var p in strokes) rig.Dig(p); }
+            finally { rig.owner = owner; }
+            yield return new WaitForFixedUpdate();
+            yield return null;
+            float lo = float.MaxValue, hi = 0f; int n = 0;
+            foreach (var chunk in Object.FindObjectsByType<TerrainChunk>())
+                foreach (var e in chunk.GetComponents<EdgeCollider2D>())
+                {
+                    var pts = e.points;
+                    for (int k = 0; k < pts.Length; k++)
+                    {
+                        var w = (Vector2)e.transform.TransformPoint(pts[k] + e.offset);
+                        if (w.y > top - 1f || w.x < x0 - 3f || w.x > x0 + 7f) continue;
+                        float d = float.MaxValue;
+                        foreach (var p in strokes) d = Mathf.Min(d, (w - p).magnitude);
+                        if (d > RigTools.BrushRadius + 0.6f) continue;
+                        lo = Mathf.Min(lo, d); hi = Mathf.Max(hi, d); n++;
+                    }
+                }
+            TestContext.Out.WriteLine($"[MERIDIAN] p54 hole at x {x0}, top {top}: {n} outline points, nearest-stroke distance {lo:F3}..{hi:F3} m (brush {RigTools.BrushRadius})");
+            Assert.Greater(n, 16, "the hole's outline traced");
+            Assert.GreaterOrEqual(lo, RigTools.BrushRadius - 0.22f, "no wall pulled in onto a tile face");
+            Assert.LessOrEqual(hi, RigTools.BrushRadius + 0.2f, "no wall left standing out on a tile face");
+            LogAssert.NoUnexpectedReceived();
+        }
     }
 }

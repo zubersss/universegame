@@ -20,6 +20,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 057a10fe8d5a3824d92916d2d8b487e9
+    m_Address: props/mercury/sunshade_probe
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 075228937130f81469a18deddeafaca9
     m_Address: backgrounds/mercury/layer0_nosun
     m_ReadOnly: 0
@@ -87,6 +92,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 24fc1dc74d26acf46b23ad9734bf8d43
     m_Address: backgrounds/mercury/day/layer2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 2dbf180a072a65d4daea6fdd542bc4dc
+    m_Address: props/mercury/node_solarite/json
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -185,6 +195,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 55655e65bd02b3f4d9bfcba224a1c3f5
+    m_Address: props/mercury/pocket_nickel
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 5b4c41b7ab47d2844b680324815b9e47
     m_Address: backgrounds/mercury/twilight
     m_ReadOnly: 0
@@ -192,6 +207,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 6114434e886c1b449b3de6497678e6b4
     m_Address: props/mercury/solarite_cut
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 640f249d831ceaa43b4c5df730db7ff6
+    m_Address: props/mercury/sunshade_probe/json
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -255,6 +275,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 87b8e3c6e8fe47f48b8ba3cb89d78be7
+    m_Address: props/mercury/node_nickel/animator
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 896bdf025e7e7b941a0f7b870dbebda9
     m_Address: terrain/mercury/regolith
     m_ReadOnly: 0
@@ -262,6 +287,16 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 89903fd589c69d64b979cf7f59cf559b
     m_Address: creatures/mercury/flarewing/animator
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8af69b4ce26406e46842ee6814c9c07a
+    m_Address: props/mercury/node_solarite
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8b954d4fff2196f45b121f84cd249743
+    m_Address: props/mercury/node_nickel
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -280,13 +315,38 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 90403d62d283cee4fa208d92e81a704b
+    m_Address: props/mercury/node_nickel/json
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 906c88792d95a77479e7058fb8790104
     m_Address: terrain/mercury/ground_decor_6
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 91f1096e4dcd41c4ead3136eaaa36176
+    m_Address: props/mercury/scan_x/json
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 93573f54e0bc7a84a9a5aa07b5c9a9fc
+    m_Address: props/mercury/pocket_nickel/animator
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 95f2a44801265c5419f239b6dafee8b7
+    m_Address: props/mercury/node_solarite/animator
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 9761f11241e126840b05572478e2eb25
     m_Address: terrain/mercury/ice
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 9ce76618442290c4c86f588b86203a71
+    m_Address: props/mercury/scan_x/animator
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -385,6 +445,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c27da67c88b432645a78c8568d1ae7f1
+    m_Address: props/mercury/pocket_nickel/json
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: c4b417391d8666a4eb98804d94ef9fb8
     m_Address: props/mercury/solarite_crusted/json
     m_ReadOnly: 0
@@ -392,6 +457,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: c766abd0730b45f4b9d7f64a66ff3132
     m_Address: props/mercury/equipment_locker
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c88ac33f3d7da26429b035034fac8a62
+    m_Address: props/mercury/scan_x
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -425,6 +495,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e15dfe3d69d6bd943aa6c7f389053d8e
+    m_Address: props/mercury/pocket_solarite/animator
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: e2da079bb9f40e949aca74f414cd50e1
     m_Address: terrain/mercury/ground_fill
     m_ReadOnly: 0
@@ -437,6 +512,21 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: e97a2a044107f6245ae875147dcbe0f4
     m_Address: backgrounds/mercury/night/layer1
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: eb382ed571b20014ba7a62a9982910ca
+    m_Address: props/mercury/sunshade_probe/animator
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: eefa5ff76081ef149959a3250c0f75f5
+    m_Address: props/mercury/pocket_solarite
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: efcfd1fa147a71d49afe5440bb45e690
+    m_Address: props/mercury/pocket_solarite/json
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

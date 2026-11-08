@@ -238,9 +238,10 @@ namespace Meridian.Rig
 
         readonly System.Collections.Generic.HashSet<Vector2Int> shapeSkip = new System.Collections.Generic.HashSet<Vector2Int>();
 
-        /// <summary>U-157 (P-54, D-167 (4)): how wide the density ramp round a stroke's circle is (m): one node spacing, so the traced edge lands
-        /// on the circle of BrushRadius.</summary>
-        public const float BrushRamp = 1f;
+        /// <summary>U-157 (P-54, D-167 (4)): how wide the density ramp round a stroke's circle is (m). The traced edge crosses the circle of BrushRadius
+        /// on the grid's axes; between them the bilinear tracing pulls it in (a 1 m ramp: 0.62 m on the diagonal, a rounded diamond; 2 m: 0.755 m,
+        /// the roundest the 1 m nodes allow).</summary>
+        public const float BrushRamp = 2f;
 
         /// <summary>
         /// U-157 (P-54): the stroke's round shape in the field: every tile centre within BrushRadius + BrushRamp / 2 of p takes the density of a

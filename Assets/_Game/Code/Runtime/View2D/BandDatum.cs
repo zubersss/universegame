@@ -39,10 +39,19 @@ namespace Meridian.View2D
         /// over Blend columns into the rule.</summary>
         public const int PadHold = 24;
         int cachedX = int.MinValue; float cachedValue;
+        /// <summary>U-161: a smooth planet's walking curve (TerrainStreamer.CurveAt: where feet stand, the pads flat); null: the band rules above.</summary>
+        readonly System.Func<int, float> curve;
+        /// <summary>U-161: the curve is averaged over ±CurveHalf columns (triangular), so a set glides over the hills instead of jittering per column
+        /// (a constant slope is followed exactly; only a hilltop's curvature leaves a few centimetres).</summary>
+        public const int CurveHalf = 4;
+        /// <summary>U-161: true when the datum follows the walking curve (the stage then interpolates between columns).</summary>
+        public bool FollowsCurve => curve != null;
+        int cachedX2 = int.MinValue; float cachedValue2;
 
         public BandDatum(PlanetId planet, float planetDatum, int spawnX, float spawnSurface, int worldWidth = 0, System.Func<int, float> bandSurface = null,
-            System.Func<int, float> finalSurface = null, int[] stamps = null)
+            System.Func<int, float> finalSurface = null, int[] stamps = null, System.Func<int, float> curve = null)
         {
+            this.curve = curve;
             this.planet = planet; this.planetDatum = planetDatum; this.spawnX = spawnX; this.spawnSurface = spawnSurface; this.worldWidth = worldWidth;
             this.bandSurface = bandSurface;
             this.finalSurface = finalSurface;
@@ -60,6 +69,7 @@ namespace Meridian.View2D
         /// <summary>The stage datum at column x (unwrapped). No allocation.</summary>
         public float At(int x)
         {
+            if (curve != null) return Curved(x);
             switch (planet)
             {
                 case PlanetId.Earth: return EarthBiomes.Blended(x, earth);
@@ -93,6 +103,29 @@ namespace Meridian.View2D
             d = Mathf.Lerp(spawnSurface, d, hold);
             cachedX = x; cachedValue = d;
             return d;
+        }
+
+        /// <summary>
+        /// U-161 (U-156's 8_snow frame: the taiga's set 6 m over the smoothed ground, a flat block between): on a smooth planet the set's ground
+        /// line follows the surface the surveyor walks, the curve averaged over ±CurveHalf columns; over the ocean the water line (the curve dips
+        /// to the seabed there). The pads are flat on the curve already, so the camp frames keep the spawn surface. Two cached columns (the stage
+        /// interpolates between x and x + 1); no allocation.
+        /// </summary>
+        float Curved(int x)
+        {
+            if (x == cachedX) return cachedValue;
+            if (x == cachedX2) return cachedValue2;
+            float sum = 0f, wsum = 0f;
+            for (int k = -CurveHalf; k <= CurveHalf; k++)
+            {
+                float w = CurveHalf + 1 - Mathf.Abs(k);
+                float v = curve(x + k);
+                if (planet == PlanetId.Earth && EarthBiomes.At(x + k) == Biome.Ocean) v = Mathf.Max(v, EarthBiomes.MeanSurface(Biome.Ocean, planetDatum));
+                sum += w * v; wsum += w;
+            }
+            cachedX2 = cachedX; cachedValue2 = cachedValue;
+            cachedX = x; cachedValue = sum / wsum;
+            return cachedValue;
         }
 
         /// <summary>U-139: a band datum pulled onto a ground POI's stamped surface across its stamp, back over its shoulders (Mars; Earth untouched).</summary>

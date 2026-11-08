@@ -27,6 +27,9 @@ namespace Meridian.View2D
         {
             Meridian.Terrain.Biome.Forest => "forest",
             Meridian.Terrain.Biome.Ocean => "coast",
+            Meridian.Terrain.Biome.Desert => "desert", // U-161: B-179's sets
+            Meridian.Terrain.Biome.Taiga => "taiga",
+            Meridian.Terrain.Biome.Tundra => "tundra",
             _ => EarthScene,
         };
 
@@ -343,7 +346,7 @@ namespace Meridian.View2D
             Layers.SetOrderOffset(0);
             Layers.alpha = 1f;
             Layers.groundFill = Meridian.Planet.PlanetBackdrop.GroundColor(config.id); // U-139: ground, not black, under the set's bottom edge
-            Layers.fillFromSet = Decked(config.id); // U-153: on a decked giant the set's lowest layer goes on down instead
+            Layers.fillFromSet = Decked(config.id) || (side.terrain != null && side.terrain.SmoothGround); // U-153: on a decked giant the set's lowest layer goes on down instead; U-161: on the smooth ground too, never a flat block
             Layers.layer0Scene = Layer0Of(Scene); // U-130: the survey layer0, else the set's own
             Layers.upperScene = UpperOf(Scene); // U-133: the spot shares the storm's layers 1–2
             Layers.mirrorX = MirrorOf(Scene); // U-144
@@ -359,7 +362,8 @@ namespace Meridian.View2D
             Datum = new BandDatum(config.id, config.datumY, side.spawnX, surfaceDatum, config.worldWidth,
                 solid != null ? x => solid.BandSurfaceHeight(x) + 1f : (System.Func<int, float>)null,
                 stamped ? x => streamer.OriginalTop(x) + 1f : (System.Func<int, float>)null,
-                stamped ? BandDatum.StampsOf(config.id) : null);
+                stamped ? BandDatum.StampsOf(config.id) : null,
+                streamer != null && streamer.SmoothGround ? streamer.CurveAt : (System.Func<int, float>)null); // U-161: the set on the walking curve
             Fading = false; Crossfades = 0;
             if (Incoming != null) { Incoming.Release(); Incoming.gameObject.SetActive(false); }
             // U-118: Mars draws the dust storm as the B-141 storm set's veil over the base layers (alpha = the storm's intensity, the wind scrolls it).
@@ -501,7 +505,7 @@ namespace Meridian.View2D
         {
             int x = Mathf.FloorToInt(cameraX);
             if (cloud != null) StepFloeDatum(cameraX, Layers.view.transform.position.y, Time.deltaTime); // U-153
-            float d = Datum.At(x);
+            float d = Datum.FollowsCurve ? Mathf.Lerp(Datum.At(x), Datum.At(x + 1), cameraX - x) : Datum.At(x); // U-161: no step per column on a slope
             float baseD = DatumFor(Scene, d); // U-125: Venus's deck set hangs off the cloud deck
             SetDatum(Layers, baseD);
             if (Incoming != null && Incoming.gameObject.activeSelf) SetDatum(Incoming, DatumFor(incomingScene, d));

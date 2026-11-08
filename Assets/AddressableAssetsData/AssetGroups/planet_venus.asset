@@ -45,8 +45,18 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 1d5f06d4cba6ea0478323c798b8de6aa
+    m_Address: props/venus/pocket_vitriol_glass/json
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 1e931841007d0f14d82deaf13b335d31
     m_Address: props/venus/aerostat_deck
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 1efe01e2ca577f0439127dacd0778d90
+    m_Address: props/venus/pocket_sulfur/json
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -77,6 +87,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 2fa24b5041e05dd4690ee46dd13b59b5
     m_Address: creatures/venus/pressure_crab/animator
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 3077011b7cebec741970e354d92ca4a1
+    m_Address: props/venus/node_sulfur/json
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -150,6 +165,16 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 4ea1d1c31bdcd1545a7797f1b67b7485
+    m_Address: props/venus/pocket_sulfur
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 517d7f7a0b967614e844fdeaf483a0b6
+    m_Address: props/venus/node_vitriol_glass/json
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 52f7c2b5578451a4ba97454e429b0709
     m_Address: props/venus/railing/json
     m_ReadOnly: 0
@@ -175,6 +200,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 5bc7937bb4a7b4f43b5130d2f6f68938
+    m_Address: props/venus/scan_x/animator
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 65f50e08024d80447b9844ec33a9766e
     m_Address: creatures/venus/veil_serpent_tail
     m_ReadOnly: 0
@@ -187,6 +217,16 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 679f1cc144e93df41af02688920c4157
     m_Address: creatures/venus/veil_serpent_tail
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 6858fc9e4d2a22143a018c913ec50e7e
+    m_Address: props/venus/pocket_vitriol_glass
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 6c1738362e6dbab4b91faf41736d113f
+    m_Address: props/venus/scan_x/json
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -235,6 +275,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 7e30e45d018c9b04295c437f3d125e59
+    m_Address: props/venus/scan_x
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 7e7faf64851497740a23074faa96e0ff
     m_Address: creatures/venus/veil_serpent
     m_ReadOnly: 0
@@ -265,8 +310,28 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8d3273778a412dc4794bd8594f2783d0
+    m_Address: props/venus/node_sulfur/animator
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 913b7ad0aada57f4f953c05ba834f160
     m_Address: creatures/venus/veil_serpent_head
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 9177639b3a7e0c74b96ef1c6fa5c2687
+    m_Address: props/venus/node_vitriol_glass/animator
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 91968a1e35414e7429be25326023c232
+    m_Address: props/venus/pressure_capsule/animator
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a1ccd65cb37b0ea4abeaa93840efeeff
+    m_Address: props/venus/pressure_capsule
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -277,6 +342,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: a9ee8e9585dd6c3438d458717682dbc5
     m_Address: creatures/venus/veil_serpent_body
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: acca7e4ad0efa0845ac2aced3aca6bf5
+    m_Address: props/venus/pocket_sulfur/animator
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -330,6 +400,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c44b6c17024218c4199154b6b0e01159
+    m_Address: props/venus/node_vitriol_glass
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: c48cdb9e0f4859b4089341b4274a8527
     m_Address: creatures/venus/acidmoth
     m_ReadOnly: 0
@@ -355,6 +430,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: cf8df61b7540fd64f82ef292cb8965eb
+    m_Address: props/venus/pressure_capsule/json
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: d00082c381e657a4d933aced51dc3b76
     m_Address: creatures/venus/sulfur_drifter
     m_ReadOnly: 0
@@ -370,6 +450,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: dbff001fc36f3274cbdfae609805b4d7
+    m_Address: props/venus/node_sulfur
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: de81802b5eaf6c14b83a03d1566c78d7
     m_Address: terrain/venus/tessera
     m_ReadOnly: 0
@@ -377,6 +462,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: e3433963486ede94e9fa4b4c4eb1dd15
     m_Address: props/venus/meridian_station_door
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e3e0a14f414e9604daf4deb791fd19e0
+    m_Address: props/venus/pocket_vitriol_glass/animator
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

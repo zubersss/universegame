@@ -75,7 +75,7 @@ namespace Meridian.Tests
             for (int i = 0; i < Inventory.SlotCount; i++) if (inv[i].itemId == item && !inv[i].IsEmpty) slot = i;
             inv.Select(slot);
             inv.Add(item, 4); // 5 in the stack
-            int px = x + 3, py = t.TopSolidY(px) + 3;
+            int px = x + 2, py = t.TopSolidY(px) + 1; // U-157 P-54: on the ground 2 m off (the round scoop under the feet lowers the surveyor; the Builder reaches 5 m)
             Assert.AreEqual(TileId.Air, t.GetTile(px, py));
             Assert.IsTrue(rig.Place(new Vector2(px + 0.5f, py + 0.5f)), "Builder places from the inventory");
             // U-157 (D-162 (3)): on Earth's smooth ground the Builder piles the planet's one ground material, spending a carried ground item.
@@ -89,7 +89,7 @@ namespace Meridian.Tests
             {
                 // U-157: no block is chosen (no hotbar of blocks): with iron selected the mound still piles from the ground items carried,
                 // and the iron is never spent.
-                Assert.IsTrue(rig.Place(new Vector2(px + 0.5f, py + 1.5f)), "the mound piles from the ground items, whatever is selected");
+                Assert.IsTrue(rig.Place(new Vector2(px + 0.5f, py + 1.5f)), $"the mound piles from the ground items, whatever is selected (target {Vector2.Distance(new Vector2(px + 0.5f, py + 1.5f), player.transform.position):F2} m from the surveyor)");
                 Assert.AreEqual(3, inv.Count(item), "a ground item spent");
             }
             else Assert.IsFalse(rig.Place(new Vector2(px + 0.5f, py + 1.5f)), "iron isn't a tile");

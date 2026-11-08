@@ -179,6 +179,7 @@ namespace Meridian.Mining
             for (int x = 20, i = 0; x < w - 20; x += PocketSpacing, i++)
             {
                 int px = x + (int)(Hash01(i, 3, s) * 16f) - 8;
+                for (int k = 0; k < 4 && !Open(px); k++) px += 7; // a pad or the sea there: step along (still within the slot's spacing)
                 if (!Open(px)) continue;
                 var kind = planet == PlanetId.Earth && x % VaultSpacing < PocketSpacing && x >= VaultSpacing ? Kind.Vault
                     : relic != null && x % CacheSpacing < PocketSpacing ? Kind.Relic : Kind.Pocket;
@@ -388,6 +389,18 @@ namespace Meridian.Mining
             }
         }
 
+        /// <summary>A pocket's yield goes straight into the pack: the brush has opened a one-tile hollow, and three 0.9 m drops beside the dug
+        /// tile's own would not fit (one was squeezed into the rock and lifted by the solid rescue). Whatever the pack can't hold drops there.</summary>
+        void Give(string itemKey, int count, Vector2 at)
+        {
+            var def = Meridian.Items.ItemRegistry.Get(itemKey);
+            if (def == null) return;
+            int left = rig != null && rig.inventory != null ? rig.inventory.Add(def.id, count) : count;
+            Paid += count - left;
+            if (left > 0) Pay(itemKey, left, at);
+            if (count > left && rig != null && rig.drops != null) rig.drops.NotifyPicked(def.id);
+        }
+
         /// <summary>A Survey pulse: reveals the finds within `radius`; returns the item keys of pockets newly revealed (the scanner catalogues them).</summary>
         public List<string> Reveal(Vector2 centre, float radius)
         {
@@ -417,7 +430,7 @@ namespace Meridian.Mining
                 var state = Meridian.Core.GameState.Instance;
                 switch (p.kind)
                 {
-                    case Kind.Pocket: p.spent = true; Pay(p.item, PocketYield, new Vector2(p.x + 0.5f, p.y + 0.5f)); break;
+                    case Kind.Pocket: p.spent = true; Give(p.item, PocketYield, new Vector2(p.x + 0.5f, p.y + 0.5f)); break;
                     case Kind.Relic:
                         p.spent = true;
                         if (state != null) { state.datacores++; state.SetFlag(RelicFlag(p)); }

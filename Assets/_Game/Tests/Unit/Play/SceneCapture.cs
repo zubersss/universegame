@@ -2054,7 +2054,7 @@ namespace Meridian.Tests
                 while (!director.IsReady && Time.realtimeSinceStartup < timeout) yield return null;
                 var dir = "coordination/reports/unity/u156";
                 Directory.CreateDirectory(dir);
-                string[] spots = { "1_camp", "2_hill", "3_valley", "4_lip", "5_coast", "6_desert", "7_desert_edge", "8_snow", "9_beach" }; // 6-9: B-178's sets by biome
+                string[] spots = { "1_camp", "2_hill", "3_valley", "4_lip", "5_coast", "6_desert", "7_desert_edge", "8_snow", "9_beach", "10_tundra" }; // 6-9: B-178's sets by biome; 10: B-179's tundra set (U-161)
                 var xs = new int[spots.Length];
                 for (int pass = 0; pass < 2; pass++)
                 {
@@ -2093,6 +2093,8 @@ namespace Meridian.Tests
                         xs[5] = ds + dl / 2; xs[6] = ds;
                         Meridian.Terrain.EarthBiomes.Range(Meridian.Terrain.Biome.Taiga, out int ts, out int tl);
                         xs[7] = ts + tl / 2;
+                        Meridian.Terrain.EarthBiomes.Range(Meridian.Terrain.Biome.Tundra, out int us, out int ul);
+                        xs[9] = us + ul / 2;
                         Meridian.Terrain.EarthBiomes.Range(Meridian.Terrain.Biome.Ocean, out int os, out int ol);
                         xs[8] = coast;
                         for (int ox = os; ox < os + ol; ox++)
@@ -2100,7 +2102,7 @@ namespace Meridian.Tests
                             int g = t.OriginalTop(ox) + 1;
                             if (g > side.Config.datumY + 1 && g <= side.Config.datumY + Meridian.View2D.SmoothGround.BeachRise) { xs[8] = ox; break; }
                         }
-                        TestContext.Out.WriteLine($"[MERIDIAN] u156 spots: camp {xs[0]}, hill {xs[1]} (top {hiY}), valley {xs[2]} (top {loY}), lip {xs[3]} (curve step {steepS:F2}), coast {xs[4]}, desert {xs[5]}, desert edge {xs[6]}, snow {xs[7]}, beach {xs[8]}");
+                        TestContext.Out.WriteLine($"[MERIDIAN] u156 spots: camp {xs[0]}, hill {xs[1]} (top {hiY}), valley {xs[2]} (top {loY}), lip {xs[3]} (curve step {steepS:F2}), coast {xs[4]}, desert {xs[5]}, desert edge {xs[6]}, snow {xs[7]}, beach {xs[8]}, tundra {xs[9]}");
                     }
                     var cam = side.sideCamera;
                     var follow = cam.GetComponent<Meridian.Player.CameraFollow>();
@@ -2267,6 +2269,150 @@ namespace Meridian.Tests
             finally
             {
                 if (rig != null) rig.owner = owner;
+                Meridian.View2D.CartoonStage.Enabled = wasCartoon;
+            }
+        }
+
+        /// <summary>
+        /// U-158: Earth's nodes and finds at 1x → coordination/reports/unity/u158/: 1_node_full (an iron node beside the surveyor, B-176's sheet),
+        /// 2_node_harvested (after its three Beam strokes), 3_scan_x (a surveyed pocket in the cutaway, the X on the ground above), 4_pocket_dug (the
+        /// brush down to it: the pocket gone), 5_vault_closed / 5_vault_open (the Warden vault door surveyed, then dug to and its clip played),
+        /// 6_data_cache (a surveyed relic). The Rig's reach is lifted for the staging; the camera is parked over the buried finds.
+        /// </summary>
+        [UnityTest, Timeout(300000)]
+        public IEnumerator CaptureU158Finds()
+        {
+            var name = Environment.GetEnvironmentVariable(Variable);
+            if (string.IsNullOrEmpty(name)) Assert.Ignore($"Set {Variable} (tools/unity_capture.ps1).");
+            if (SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.Null)
+                Assert.Fail("No graphics device: run without -nographics.");
+            bool wasCartoon = Meridian.View2D.CartoonStage.Enabled;
+            Meridian.View2D.CartoonStage.Enabled = true;
+            Transform owner = null;
+            Meridian.Rig.RigTools rig = null;
+            Meridian.Player.CameraFollow follow = null;
+            try
+            {
+#if UNITY_EDITOR
+                yield return UnityEditor.SceneManagement.EditorSceneManager.LoadSceneAsyncInPlayMode(
+                    CorePath, new LoadSceneParameters(LoadSceneMode.Single));
+#endif
+                var director = UnityEngine.Object.FindAnyObjectByType<SceneDirector>();
+                float timeout = Time.realtimeSinceStartup + 30f;
+                while (!director.IsReady && Time.realtimeSinceStartup < timeout) yield return null;
+                var side = director.PlanetSide;
+                timeout = Time.realtimeSinceStartup + 20f;
+                while (!side.terrain.IsSettled && Time.realtimeSinceStartup < timeout) yield return null;
+                if (side.hazards != null) side.hazards.enabled = false;
+                if (side.dayNight != null) side.dayNight.Override = 0.45f;
+                side.creatures.autoSpawn = false;
+                side.creatures.DespawnAll();
+                var t = side.terrain;
+                var finds = side.finds;
+                Assert.IsTrue(finds != null && finds.Active, "Earth's finds placed");
+                rig = side.rig;
+                owner = rig.owner; rig.owner = null;
+                var dir = "coordination/reports/unity/u158";
+                Directory.CreateDirectory(dir);
+                var cam = side.sideCamera;
+                follow = cam.GetComponent<Meridian.Player.CameraFollow>();
+                var body = side.player.Body;
+
+                IEnumerator Stand(float x)
+                {
+                    if (follow != null) follow.enabled = true;
+                    body.simulated = false;
+                    body.position = new Vector2(x, t.TopSolidY(Mathf.FloorToInt(x)) + 2f); side.player.transform.position = body.position;
+                    yield return null;
+                    timeout = Time.realtimeSinceStartup + 15f;
+                    while (!t.IsSettled && Time.realtimeSinceStartup < timeout) yield return null;
+                    body.simulated = true;
+                    for (int k = 0; k < 50; k++) yield return new WaitForFixedUpdate();
+                    if (follow != null) follow.SnapToTarget();
+                }
+
+                void Park(float x, float y)
+                {
+                    if (follow != null) follow.enabled = false;
+                    cam.transform.position = new Vector3(x, y, cam.transform.position.z);
+                }
+
+                IEnumerator Shot(string label)
+                {
+                    for (int k = 0; k < 20; k++) yield return null;
+                    yield return Save(cam, $"{name}_{label}");
+                    File.Copy($"logs/capture_{name}_{label}.png", $"{dir}/{label}.png", true);
+                }
+
+                void Shaft(float x, float toY)
+                {
+                    for (float y = t.SurfaceAt(x) - 0.3f; y > toY; y -= 0.7f) rig.Dig(new Vector2(x, y));
+                }
+
+                // 1-2: an iron node (else the nearest node) east of the camp, full, then after its three strokes.
+                Meridian.Mining.ResourceFinds.Node node = null;
+                foreach (var n in finds.nodes)
+                {
+                    if (n.x <= side.spawnX + 30) continue;
+                    bool better = node == null || (n.item == "iron" && node.item != "iron") || ((n.item == "iron") == (node.item == "iron") && n.x < node.x);
+                    if (better) node = n;
+                }
+                Assert.NotNull(node, "a node east of the camp");
+                yield return Stand(node.x - 2.5f);
+                timeout = Time.realtimeSinceStartup + 10f;
+                while (node.view.color != Color.white && Time.realtimeSinceStartup < timeout) yield return null;
+                yield return Shot("1_node_full");
+                TestContext.Out.WriteLine($"[MERIDIAN] u158 1_node_full: {node.item} at ({node.x}, {node.y:F2}), sprite {(node.view.sprite != null ? node.view.sprite.name : "none")}, art {node.view.color == Color.white}");
+                for (int k = 0; k < Meridian.Mining.ResourceFinds.NodeCharges; k++) rig.Dig(new Vector2(node.x + 0.5f, node.y + 0.6f));
+                yield return Shot("2_node_harvested");
+                TestContext.Out.WriteLine($"[MERIDIAN] u158 2_node_harvested: charges {node.charges}, paid {finds.Paid}");
+
+                // 3-4: a shallow pocket, surveyed, then dug to.
+                Meridian.Mining.ResourceFinds.Pocket pocket = null;
+                foreach (var p in finds.pockets)
+                    if (p.kind == Meridian.Mining.ResourceFinds.Kind.Pocket && p.x > side.spawnX + 30 && t.OriginalTop(p.x) - p.y <= 5 && (pocket == null || p.x < pocket.x)) pocket = p;
+                Assert.NotNull(pocket, "a shallow pocket east of the camp");
+                yield return Stand(pocket.x - 3.5f);
+                finds.Reveal(new Vector2(pocket.x + 0.5f, pocket.y + 0.5f), 6f);
+                Park(pocket.x + 0.5f, pocket.y + 4f);
+                yield return Shot("3_scan_x");
+                TestContext.Out.WriteLine($"[MERIDIAN] u158 3_scan_x: {pocket.item} pocket at ({pocket.x}, {pocket.y}), {t.OriginalTop(pocket.x) - pocket.y} m deep, sprite {(pocket.view.sprite != null ? pocket.view.sprite.name : "none")}");
+                int paid = finds.Paid;
+                Shaft(pocket.x + 0.5f, pocket.y + 1f);
+                rig.Dig(new Vector2(pocket.x + 0.5f, pocket.y + 0.5f));
+                yield return Shot("4_pocket_dug");
+                TestContext.Out.WriteLine($"[MERIDIAN] u158 4_pocket_dug: spent {pocket.spent}, paid {finds.Paid - paid}");
+
+                // 5: the Warden vault door, surveyed, then dug to.
+                Meridian.Mining.ResourceFinds.Pocket vault = null;
+                foreach (var p in finds.pockets) if (p.kind == Meridian.Mining.ResourceFinds.Kind.Vault && (vault == null || p.x < vault.x)) vault = p;
+                Assert.NotNull(vault, "a vault door on Earth");
+                yield return Stand(vault.x - 4.5f);
+                finds.Reveal(new Vector2(vault.x + 0.5f, vault.y + 0.5f), 6f);
+                Park(vault.x + 0.5f, vault.y + 3f);
+                yield return Shot("5_vault_closed");
+                Shaft(vault.x - 1.5f, vault.y + 0.5f);
+                rig.Dig(new Vector2(vault.x - 0.5f, vault.y + 0.5f));
+                rig.Dig(new Vector2(vault.x + 0.5f, vault.y + 0.5f));
+                yield return new WaitForSeconds(1f);
+                yield return Shot("5_vault_open");
+                TestContext.Out.WriteLine($"[MERIDIAN] u158 5_vault: at ({vault.x}, {vault.y}), open frame {vault.openFrame}");
+
+                // 6: a data cache, surveyed.
+                Meridian.Mining.ResourceFinds.Pocket cache = null;
+                foreach (var p in finds.pockets) if (p.kind == Meridian.Mining.ResourceFinds.Kind.Relic && p.x > side.spawnX + 30 && (cache == null || p.x < cache.x)) cache = p;
+                Assert.NotNull(cache, "a data cache");
+                yield return Stand(cache.x - 3.5f);
+                finds.Reveal(new Vector2(cache.x + 0.5f, cache.y + 0.5f), 6f);
+                Park(cache.x + 0.5f, cache.y + 3.5f);
+                yield return Shot("6_data_cache");
+                TestContext.Out.WriteLine($"[MERIDIAN] u158 6_data_cache: at ({cache.x}, {cache.y}), {t.OriginalTop(cache.x) - cache.y} m deep");
+                LogAssert.NoUnexpectedReceived();
+            }
+            finally
+            {
+                if (rig != null) rig.owner = owner;
+                if (follow != null) follow.enabled = true;
                 Meridian.View2D.CartoonStage.Enabled = wasCartoon;
             }
         }

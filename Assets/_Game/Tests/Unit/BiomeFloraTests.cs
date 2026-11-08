@@ -56,10 +56,11 @@ namespace Meridian.Tests
             Assert.AreEqual("forest", CartoonStage.SceneFor(Biome.Forest));
             Assert.AreEqual("plains", CartoonStage.SceneFor(Biome.Plains));
             Assert.AreEqual("coast", CartoonStage.SceneFor(Biome.Ocean));
-            Assert.AreEqual("plains", CartoonStage.SceneFor(Biome.Desert), "no desert set yet: the plains");
-            Assert.AreEqual("plains", CartoonStage.SceneFor(Biome.Taiga));
-            foreach (var scene in new[] { "plains", "forest", "coast" })
-                Assert.IsTrue(System.IO.File.Exists($"Assets/_Game/Art/backgrounds/earth/{scene}/{scene}.json"), scene + " scene set exported (B-133)");
+            Assert.AreEqual("desert", CartoonStage.SceneFor(Biome.Desert), "U-161: B-179's desert set");
+            Assert.AreEqual("taiga", CartoonStage.SceneFor(Biome.Taiga));
+            Assert.AreEqual("tundra", CartoonStage.SceneFor(Biome.Tundra));
+            foreach (var scene in new[] { "plains", "forest", "coast", "desert", "taiga", "tundra" })
+                Assert.IsTrue(System.IO.File.Exists($"Assets/_Game/Art/backgrounds/earth/{scene}/{scene}.json"), scene + " scene set exported (B-133, B-179)");
         }
     }
 }

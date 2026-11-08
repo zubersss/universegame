@@ -114,5 +114,51 @@ namespace Meridian.Tests
             Assert.AreEqual(bands.At(2000), d.At(2000), 1e-4f, "away from the stamps: the bands as they were");
             Assert.AreEqual(bands.At(64), d.At(64), 1e-4f, "the camp's frames unchanged");
         }
+
+        /// <summary>
+        /// U-161 (U-156's 8_snow frame: the taiga's set 6 m over the smoothed ground): on a smooth Earth the stage datum (the sets' painted ground
+        /// line) follows the walking curve: on 3 seeds, at every land column of every biome (sampled each 7 m), within 1 m of the curve; over the
+        /// sea the water line; the camp keeps its pad surface; and the curve-following datum has no step between neighbouring columns above the
+        /// walkable slope. The desert, taiga and tundra draw their own B-179 sets.
+        /// </summary>
+        [Test]
+        public void OnTheSmoothGroundEverySetSitsOnTheWalkingCurve()
+        {
+            var cfg = UnityEditor.AssetDatabase.LoadAssetAtPath<Meridian.Planets.PlanetConfig>($"{Meridian.EditorTools.PlanetConfigAuthoring.Folder}/Earth.asset");
+            Assert.NotNull(cfg, "Earth's config");
+            int w = cfg.worldWidth;
+            foreach (int seed in new[] { 1969, 7717, 31337 })
+            {
+                var gen = new Meridian.Terrain.SolidWorldGenerator(cfg, seed);
+                var tops = new int[w];
+                for (int x = 0; x < w; x++)
+                    tops[x] = Meridian.Planet.POI.PoiStamp.JointGround(gen, cfg.datumY, Meridian.Planets.PlanetId.Earth, x, out int g) ? g : gen.SurfaceHeight(x); // TerrainStreamer.WallTop
+                System.Func<int, int> top = x => tops[((x % w) + w) % w];
+                System.Func<int, int> pad = x => Meridian.Planet.POI.PoiStamp.PadAt(gen, cfg.datumY, Meridian.Planets.PlanetId.Earth, x);
+                System.Func<int, float> curve = x => Meridian.Terrain.GroundField.Curve(x, top, pad); // TerrainStreamer.CurveAt
+                float spawn = curve(64);
+                var d = new BandDatum(Meridian.Planets.PlanetId.Earth, cfg.datumY, 64, spawn, w, null, null, null, curve);
+                Assert.IsTrue(d.FollowsCurve);
+                Assert.AreEqual(spawn, d.At(64), 0.05f, $"seed {seed}: the camp keeps its pad surface");
+                float sea = Meridian.Terrain.EarthBiomes.MeanSurface(Meridian.Terrain.Biome.Ocean, cfg.datumY);
+                var worst = new System.Collections.Generic.Dictionary<Meridian.Terrain.Biome, float>();
+                float worstStep = 0f;
+                for (int x = 0; x < w; x += 7)
+                {
+                    var b = Meridian.Terrain.EarthBiomes.At(x);
+                    float c = curve(x), v = d.At(x);
+                    if (b == Meridian.Terrain.Biome.Ocean && c < sea) { Assert.GreaterOrEqual(v, sea - 1f, $"seed {seed} x {x}: over the sea, the water line"); continue; }
+                    float err = UnityEngine.Mathf.Abs(v - c);
+                    if (!worst.TryGetValue(b, out float e) || err > e) worst[b] = err;
+                    Assert.LessOrEqual(err, 1f, $"seed {seed} x {x} ({b}): the set's ground line {v:F2} within 1 m of the walking surface {c:F2}");
+                    worstStep = UnityEngine.Mathf.Max(worstStep, UnityEngine.Mathf.Abs(d.At(x + 1) - v));
+                }
+                Assert.LessOrEqual(worstStep, Meridian.Terrain.GroundField.MaxWalkSlope + 1e-3f, $"seed {seed}: no step in the datum");
+                foreach (var kv in worst) NUnit.Framework.TestContext.Out.WriteLine($"[MERIDIAN] u161 seed {seed} {kv.Key}: worst set-to-surface gap {kv.Value:F3} m");
+            }
+            Assert.AreEqual("desert", CartoonStage.SceneFor(Meridian.Terrain.Biome.Desert));
+            Assert.AreEqual("taiga", CartoonStage.SceneFor(Meridian.Terrain.Biome.Taiga));
+            Assert.AreEqual("tundra", CartoonStage.SceneFor(Meridian.Terrain.Biome.Tundra));
+        }
     }
 }

@@ -25,8 +25,18 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 041c5072e237ac84c8d2a63e9580533a
+    m_Address: props/earth/node_copper/json
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 057ab4e1b65d75a419195a32984bc053
     m_Address: props/earth/launch_gantry
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 05c3caa188f7e5340a0d7a1dbbfd1d7f
+    m_Address: props/earth/pocket_carbon
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -45,8 +55,23 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 0e750a899d5df3f4b8c7a94b3f9ea4af
+    m_Address: props/earth/pocket_copper/json
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 0ec496b5e0700f7499bd09b7d8c4ce10
     m_Address: creatures/earth/gull/animator
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 1043d99f33b95ca4fbacbfc682c7ccc2
+    m_Address: backgrounds/earth/taiga
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 13434862c8e842644b04b929c9d8bfb2
+    m_Address: backgrounds/earth/tundra/layer2
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -80,6 +105,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 243f2e109d9d4264ea813999d31dea22
+    m_Address: props/earth/pocket_iron
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 25c79e29f799cc14e93e579bfc806963
     m_Address: creatures/earth/gull
     m_ReadOnly: 0
@@ -87,6 +117,26 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 261f03aba5f5d36429daaeee9adc4d6b
     m_Address: props/earth/beacon
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 277fde3c3d155bf4d985ca4ab07c5670
+    m_Address: props/earth/data_cache
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 27af726da74112e4ea6c97cfc6484388
+    m_Address: props/earth/node_water_ice/animator
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 28596d30c6996f4499c5f57e35c80594
+    m_Address: props/earth/pocket_iron/json
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 29d5e9e7af40e7d44aecdb5533a7898b
+    m_Address: props/earth/pocket_water_ice/animator
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -125,8 +175,18 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 3468e26c6a841f3418ae1323dd70c5c6
+    m_Address: props/earth/pocket_copper
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 35830f12702fb6446b1c5e8ff3c0ad6b
     m_Address: backgrounds/earth/forest/layer0
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 3655291dabbe74b469d5d99fb0f52551
+    m_Address: props/earth/data_cache/json
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -137,6 +197,16 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 39e6888db07440a42ac7ad78af93976c
     m_Address: terrain/earth/ground_decor_sand_3
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 3b74a432f635e174da95bc5feb720bfe
+    m_Address: props/earth/scan_x
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 3bdf465fba98dab4d98e3d7fcb4b20fc
+    m_Address: props/earth/node_iron
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -165,6 +235,31 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 4af2e84bac677774cb79cdb1a9a755e2
+    m_Address: props/earth/node_copper/animator
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 4b52662ed7ba7154ea8fa6b42cc2fbe4
+    m_Address: props/earth/node_silica/animator
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 4bd45ee47386b0a49806b8d196db91f2
+    m_Address: props/earth/pocket_silica/animator
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 4d29012c43263e8488517071d1a1b818
+    m_Address: props/earth/vault_door/json
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 4d4099b14b964234ba2428783a9a33dd
+    m_Address: props/earth/pocket_carbon/animator
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 4f8f5cdf231d6c4478486a82521d3622
     m_Address: creatures/earth/wolf
     m_ReadOnly: 0
@@ -172,6 +267,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 4fa33d17bafaa4d4b985ff9bcd4bdcfc
     m_Address: terrain/earth/stone
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 50c7987beab26be42b3c6bf1122cdcd2
+    m_Address: props/earth/pocket_iron/animator
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -215,8 +315,23 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 631b9c630d8660443ba1df316dae052c
+    m_Address: props/earth/node_water_ice/json
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 634bbb46374b8cd459f6a203fbfa4fa2
+    m_Address: props/earth/data_cache/animator
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 63e1e5ba8555e7e4bb54945380744369
     m_Address: creatures/earth/wolf/animator
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 63fe13771757a3d498e4978b4cf6e47c
+    m_Address: props/earth/node_carbon/animator
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -225,13 +340,38 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 65f139f4064a2fa45a46e71f0d2599a1
+    m_Address: props/earth/pocket_water_ice/json
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 6629bfac565018741bfe5207b9adb682
     m_Address: props/earth/launch_tower_ruin
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 6aff586f3ad8b3942ac6a5d6d08199f4
+    m_Address: props/earth/pocket_carbon/json
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 6b023e924d1f1b0448949dba1f29921b
+    m_Address: backgrounds/earth/tundra
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 6ca3de721568b514ba1b50571db07a0f
     m_Address: terrain/earth/ground_strip_stone
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 6ec9e4c322aad0d46964d569e10bbc55
+    m_Address: props/earth/node_carbon/json
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 6f2fe7e2d9bfc734ebe8d6135ac7eef8
+    m_Address: props/earth/pocket_copper/animator
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -260,6 +400,16 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 7d4cc09d399b9e141bc86f975e0c4bd5
+    m_Address: backgrounds/earth/taiga/layer0
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 7e626ab0d3ca1844680f55846130fe41
+    m_Address: backgrounds/earth/tundra/layer0
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 870497325de772c4c9a8d4f5030c41d7
     m_Address: creatures/earth/shark
     m_ReadOnly: 0
@@ -277,6 +427,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 909800c90eb027b47b63ebf49071d6cf
     m_Address: backgrounds/earth/forest/layer2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 9155973d82963fb489b40ecca28304f8
+    m_Address: props/earth/node_iron/animator
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -390,6 +545,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b2db042682357924d96e8ea89f74d0f3
+    m_Address: props/earth/node_copper
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: b5d8e227c977a0f42b786521b6c4ed58
     m_Address: backgrounds/earth/forest/layer1
     m_ReadOnly: 0
@@ -397,6 +557,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: b9f4e5ef4c1745146940623ac06a89c0
     m_Address: terrain/earth/fill_decor_3
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b9fd598a78ebbcd449223a93512bee71
+    m_Address: props/earth/node_water_ice
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -415,6 +580,36 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c0785132c71567b48a08fce1963c931a
+    m_Address: props/earth/pocket_water_ice
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c1fd2d71736b5e544be59d7c13919275
+    m_Address: props/earth/vault_door
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c2258db1e5dbf0c45b19be6a6469f1c4
+    m_Address: backgrounds/earth/taiga/layer2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c231670bbd6d9e342a1721e48fb5ca8e
+    m_Address: props/earth/node_iron/json
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c7634ba1313593b4e962ec20968075d9
+    m_Address: props/earth/node_silica/json
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c88e79f0422fa3b4e812835c17e28cca
+    m_Address: props/earth/scan_x/json
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: c8c957f1ff696b94b868b574e10aa181
     m_Address: creatures/earth/stag
     m_ReadOnly: 0
@@ -430,8 +625,18 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: cd9ff8d92c4f4e349bd25574e4102062
+    m_Address: props/earth/scan_x/animator
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: ce1706036be12064dbaae2edf123e12b
     m_Address: creatures/earth/stag/animator
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d055b7018a7ecfa41aeb1c0e7a80053e
+    m_Address: props/earth/pocket_silica/json
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -450,8 +655,23 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d72cefcdddefbed498802578149b968e
+    m_Address: props/earth/node_silica
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d7e453129e6a1f04589b5533d4489942
+    m_Address: backgrounds/earth/tundra/layer1
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: da00770325ca041488daff98d611a1f4
     m_Address: terrain/earth/ground_fill
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: dad9c95fb32e0d849a889655e010f436
+    m_Address: backgrounds/earth/taiga/layer1
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -490,8 +710,18 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: ed3ec85a99fbc6642a8494836c0579dd
+    m_Address: props/earth/vault_door/animator
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: ee34bc2cf26f4fa4883db82ca3f8d36f
     m_Address: backgrounds/earth/desert/layer2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: ef45f02388786854788871a4979d48dc
+    m_Address: props/earth/pocket_silica
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -527,6 +757,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: f8c9544f6a5153048934ae4dc29172ec
     m_Address: backgrounds/earth/skyline_far
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: fd65ecf340c611b4185eec5dee224bc7
+    m_Address: props/earth/node_carbon
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

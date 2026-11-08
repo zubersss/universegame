@@ -1752,11 +1752,181 @@ MonoBehaviour:
       start: 0
       length: 8
       loop: 1
+  - key: props/earth/data_cache
+    fps: 12
+    clips:
+    - name: full
+      start: 0
+      length: 1
+      loop: 0
+    - name: glint
+      start: 1
+      length: 8
+      loop: 1
+  - key: props/earth/node_carbon
+    fps: 12
+    clips:
+    - name: full
+      start: 0
+      length: 1
+      loop: 0
+    - name: harvested
+      start: 1
+      length: 1
+      loop: 0
+    - name: glint
+      start: 2
+      length: 8
+      loop: 1
+  - key: props/earth/node_copper
+    fps: 12
+    clips:
+    - name: full
+      start: 0
+      length: 1
+      loop: 0
+    - name: harvested
+      start: 1
+      length: 1
+      loop: 0
+    - name: glint
+      start: 2
+      length: 8
+      loop: 1
+  - key: props/earth/node_iron
+    fps: 12
+    clips:
+    - name: full
+      start: 0
+      length: 1
+      loop: 0
+    - name: harvested
+      start: 1
+      length: 1
+      loop: 0
+    - name: glint
+      start: 2
+      length: 8
+      loop: 1
+  - key: props/earth/node_silica
+    fps: 12
+    clips:
+    - name: full
+      start: 0
+      length: 1
+      loop: 0
+    - name: harvested
+      start: 1
+      length: 1
+      loop: 0
+    - name: glint
+      start: 2
+      length: 8
+      loop: 1
+  - key: props/earth/node_water_ice
+    fps: 12
+    clips:
+    - name: full
+      start: 0
+      length: 1
+      loop: 0
+    - name: harvested
+      start: 1
+      length: 1
+      loop: 0
+    - name: glint
+      start: 2
+      length: 8
+      loop: 1
+  - key: props/earth/pocket_carbon
+    fps: 12
+    clips:
+    - name: full
+      start: 0
+      length: 1
+      loop: 0
+    - name: glint
+      start: 1
+      length: 8
+      loop: 1
+  - key: props/earth/pocket_copper
+    fps: 12
+    clips:
+    - name: full
+      start: 0
+      length: 1
+      loop: 0
+    - name: glint
+      start: 1
+      length: 8
+      loop: 1
+  - key: props/earth/pocket_iron
+    fps: 12
+    clips:
+    - name: full
+      start: 0
+      length: 1
+      loop: 0
+    - name: glint
+      start: 1
+      length: 8
+      loop: 1
+  - key: props/earth/pocket_silica
+    fps: 12
+    clips:
+    - name: full
+      start: 0
+      length: 1
+      loop: 0
+    - name: glint
+      start: 1
+      length: 8
+      loop: 1
+  - key: props/earth/pocket_water_ice
+    fps: 12
+    clips:
+    - name: full
+      start: 0
+      length: 1
+      loop: 0
+    - name: glint
+      start: 1
+      length: 8
+      loop: 1
+  - key: props/earth/scan_x
+    fps: 12
+    clips:
+    - name: pulse
+      start: 0
+      length: 8
+      loop: 1
+  - key: props/earth/vault_door
+    fps: 12
+    clips:
+    - name: closed
+      start: 0
+      length: 1
+      loop: 0
+    - name: open
+      start: 1
+      length: 6
+      loop: 0
   - key: props/mars/ice_drill_rig
     fps: 12
     clips:
     - name: working
       start: 0
+      length: 8
+      loop: 1
+  - key: props/mars/lander_beacon
+    fps: 12
+    clips:
+    - name: full
+      start: 0
+      length: 1
+      loop: 0
+    - name: glint
+      start: 1
       length: 8
       loop: 1
   - key: props/mars/meridian_beacon
@@ -1766,12 +1936,156 @@ MonoBehaviour:
       start: 0
       length: 4
       loop: 1
+  - key: props/mars/node_hematite
+    fps: 12
+    clips:
+    - name: full
+      start: 0
+      length: 1
+      loop: 0
+    - name: harvested
+      start: 1
+      length: 1
+      loop: 0
+    - name: glint
+      start: 2
+      length: 8
+      loop: 1
+  - key: props/mars/node_perchlorate
+    fps: 12
+    clips:
+    - name: full
+      start: 0
+      length: 1
+      loop: 0
+    - name: harvested
+      start: 1
+      length: 1
+      loop: 0
+    - name: glint
+      start: 2
+      length: 8
+      loop: 1
+  - key: props/mars/node_water_ice
+    fps: 12
+    clips:
+    - name: full
+      start: 0
+      length: 1
+      loop: 0
+    - name: harvested
+      start: 1
+      length: 1
+      loop: 0
+    - name: glint
+      start: 2
+      length: 8
+      loop: 1
+  - key: props/mars/pocket_hematite
+    fps: 12
+    clips:
+    - name: full
+      start: 0
+      length: 1
+      loop: 0
+    - name: glint
+      start: 1
+      length: 8
+      loop: 1
+  - key: props/mars/pocket_perchlorate
+    fps: 12
+    clips:
+    - name: full
+      start: 0
+      length: 1
+      loop: 0
+    - name: glint
+      start: 1
+      length: 8
+      loop: 1
+  - key: props/mars/pocket_water_ice
+    fps: 12
+    clips:
+    - name: full
+      start: 0
+      length: 1
+      loop: 0
+    - name: glint
+      start: 1
+      length: 8
+      loop: 1
+  - key: props/mars/scan_x
+    fps: 12
+    clips:
+    - name: pulse
+      start: 0
+      length: 8
+      loop: 1
   - key: props/mars/warden_pylon
     fps: 12
     clips:
     - name: hum
       start: 0
       length: 4
+      loop: 1
+  - key: props/mercury/node_nickel
+    fps: 12
+    clips:
+    - name: full
+      start: 0
+      length: 1
+      loop: 0
+    - name: harvested
+      start: 1
+      length: 1
+      loop: 0
+    - name: glint
+      start: 2
+      length: 8
+      loop: 1
+  - key: props/mercury/node_solarite
+    fps: 12
+    clips:
+    - name: full
+      start: 0
+      length: 1
+      loop: 0
+    - name: harvested
+      start: 1
+      length: 1
+      loop: 0
+    - name: glint
+      start: 2
+      length: 8
+      loop: 1
+  - key: props/mercury/pocket_nickel
+    fps: 12
+    clips:
+    - name: full
+      start: 0
+      length: 1
+      loop: 0
+    - name: glint
+      start: 1
+      length: 8
+      loop: 1
+  - key: props/mercury/pocket_solarite
+    fps: 12
+    clips:
+    - name: full
+      start: 0
+      length: 1
+      loop: 0
+    - name: glint
+      start: 1
+      length: 8
+      loop: 1
+  - key: props/mercury/scan_x
+    fps: 12
+    clips:
+    - name: pulse
+      start: 0
+      length: 8
       loop: 1
   - key: props/mercury/shelter_door
     fps: 12
@@ -1780,6 +2094,17 @@ MonoBehaviour:
       start: 0
       length: 6
       loop: 0
+  - key: props/mercury/sunshade_probe
+    fps: 12
+    clips:
+    - name: full
+      start: 0
+      length: 1
+      loop: 0
+    - name: glint
+      start: 1
+      length: 8
+      loop: 1
   - key: props/venus/meridian_station_door
     fps: 12
     clips:
@@ -1787,6 +2112,76 @@ MonoBehaviour:
       start: 0
       length: 6
       loop: 0
+  - key: props/venus/node_sulfur
+    fps: 12
+    clips:
+    - name: full
+      start: 0
+      length: 1
+      loop: 0
+    - name: harvested
+      start: 1
+      length: 1
+      loop: 0
+    - name: glint
+      start: 2
+      length: 8
+      loop: 1
+  - key: props/venus/node_vitriol_glass
+    fps: 12
+    clips:
+    - name: full
+      start: 0
+      length: 1
+      loop: 0
+    - name: harvested
+      start: 1
+      length: 1
+      loop: 0
+    - name: glint
+      start: 2
+      length: 8
+      loop: 1
+  - key: props/venus/pocket_sulfur
+    fps: 12
+    clips:
+    - name: full
+      start: 0
+      length: 1
+      loop: 0
+    - name: glint
+      start: 1
+      length: 8
+      loop: 1
+  - key: props/venus/pocket_vitriol_glass
+    fps: 12
+    clips:
+    - name: full
+      start: 0
+      length: 1
+      loop: 0
+    - name: glint
+      start: 1
+      length: 8
+      loop: 1
+  - key: props/venus/pressure_capsule
+    fps: 12
+    clips:
+    - name: full
+      start: 0
+      length: 1
+      loop: 0
+    - name: glint
+      start: 1
+      length: 8
+      loop: 1
+  - key: props/venus/scan_x
+    fps: 12
+    clips:
+    - name: pulse
+      start: 0
+      length: 8
+      loop: 1
   - key: ships/pilgrim/puff
     fps: 12
     clips:

@@ -64,7 +64,10 @@ namespace Meridian.Tests
             Assert.AreEqual("plains", stage.Scene, "the plains set after the border");
             Assert.GreaterOrEqual(stage.Crossfades, 1, "one crossfade");
             Assert.IsFalse(stage.Fading);
-            Assert.AreEqual(side.Config.datumY + 6f, stage.Layers.datumY, 1e-3f, "the plains datum (datum + 6)");
+            Assert.IsTrue(stage.Datum.FollowsCurve, "U-161: Earth's ground is smooth, the sets follow its walking curve");
+            float cx = stage.Layers.view.transform.position.x;
+            Assert.AreEqual(side.terrain.CurveAt(Mathf.FloorToInt(cx)), stage.Layers.datumY, 1f, "U-161: the plains set's ground line within 1 m of the walking surface");
+            Assert.AreEqual(Followed(stage, cx), stage.Layers.datumY, 0.05f, "the sampler's datum between the camera's columns");
             Assert.AreEqual(0, stage.Layers.orderOffset, "the new base set sits at the base orders");
             Assert.IsFalse(stage.Incoming != null && stage.Incoming.gameObject.activeSelf, "the old set released");
             // To the coast at 2096: the coast set at the water line.
@@ -73,11 +76,19 @@ namespace Meridian.Tests
             while ((stage.Fading || stage.Scene != "coast") && Time.realtimeSinceStartup < until) yield return null;
             TestContext.Out.WriteLine($"[MERIDIAN] band follow: at x 2096 scene {stage.Scene} ({stage.Layers.SceneKey}), crossfades {stage.Crossfades}, datum {stage.Layers.datumY:F1}, placeholders {stage.Layers.placeholders.Contains(true)}");
             Assert.AreEqual("coast", stage.Scene, "the coast set on the shore (the Maw's frames)");
-            Assert.AreEqual(stage.Datum.At(2096), stage.Layers.datumY, 1e-3f, "the sampler's datum at the shore (16 columns into the band: still blending down from the desert)");
-            Assert.Greater(stage.Layers.datumY, side.Config.datumY + 1f - 1e-3f); Assert.Less(stage.Layers.datumY, side.Config.datumY + 8f);
-            Assert.AreEqual(side.Config.datumY + 1f, stage.Datum.At(2080 + 60), 1e-3f, "60 columns in: the water line");
+            cx = stage.Layers.view.transform.position.x;
+            Assert.AreEqual(Followed(stage, cx), stage.Layers.datumY, 0.05f, "the sampler's datum at the shore");
+            Assert.AreEqual(Mathf.Max(side.terrain.CurveAt(Mathf.FloorToInt(cx)), side.Config.datumY + 1f), stage.Layers.datumY, 1f, "U-161: on the shore, the walking surface or the water line");
+            Assert.GreaterOrEqual(stage.Datum.At(2080 + 60), side.Config.datumY + 1f - 1e-3f, "60 columns in: never under the water line");
             Assert.GreaterOrEqual(stage.Crossfades, 2);
             LogAssert.NoUnexpectedReceived();
+        }
+
+        /// <summary>U-161: the stage's datum between the camera's two columns (CartoonStage.FollowBand).</summary>
+        static float Followed(Meridian.View2D.CartoonStage stage, float cameraX)
+        {
+            int x = Mathf.FloorToInt(cameraX);
+            return Mathf.Lerp(stage.Datum.At(x), stage.Datum.At(x + 1), cameraX - x);
         }
     }
 }
