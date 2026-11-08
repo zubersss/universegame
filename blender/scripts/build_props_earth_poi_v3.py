@@ -190,11 +190,11 @@ def beacon(d, M, k=0):
     G.stroke(d, base, M["ink"], O, cyclic=True)
     for s in (-1, 1):                                                                   # braces from the block to the mast
         member(d, M, (0.24 * s, 0.26), (0.04 * s, 1.0), 0.018, "iron")
-    mast = G.hose_outline([(0.0, 0.26), (0.0, 1.4), (0.0, 2.6)], 0.05)
+    mast = G.hose_outline([(0.0, 0.26), (0.0, 1.4), (0.0, 2.6)], 0.075)               # the camp lamp's pole width (0.05 read as ink)
     G.stroke(d, mast, M["teal_f"], 0.0, cyclic=True)
-    G.stroke(d, G.hose_outline([(0.012, 0.26), (0.012, 2.6)], 0.018), M["teal_sh"], 0.0, cyclic=True)
+    G.stroke(d, G.hose_outline([(0.02, 0.26), (0.02, 2.6)], 0.026), M["teal_sh"], 0.0, cyclic=True)
     for z in (0.7, 1.3, 1.9):
-        G.stroke(d, box(-0.045, z - 0.03, 0.045, z + 0.03, seed=int(z * 10) + 303), M["mustard"], I, cyclic=True)
+        G.stroke(d, box(-0.058, z - 0.03, 0.058, z + 0.03, seed=int(z * 10) + 303), M["mustard"], I, cyclic=True)
     G.stroke(d, mast, M["ink"], O, cyclic=True)
     member(d, M, (0.0, 2.2), (0.15, 2.2), 0.02, "iron")                                 # a horn antenna, facing right
     G.stroke(d, [(0.14, 2.13), (0.2, 2.15), (0.32, 2.09), (0.32, 2.31), (0.2, 2.25), (0.14, 2.27)], M["mustard"], I, cyclic=True)
