@@ -236,6 +236,10 @@ namespace Meridian.View2D
         /// <summary>U-141: the ground strip's fill tile; when set the under-fill tiles it (the ground the strips stand on, not a flat dark grey), the
         /// flat groundFill colour the fallback until the strip loads.</summary>
         public Sprite groundTile;
+        /// <summary>U-153 (LEAD 02:5x): a decked giant's under-fill continues the set's lowest layer downward (its bottom rows stretched, in phase
+        /// with it) instead of the ground strip's fill tile: there is no ground under the floes.</summary>
+        public bool fillFromSet;
+        Sprite setFillFrom, setFill;
         /// <summary>How deep the ground fill reaches under the set (m): past the frame bottom from any dip the camera can drop into.</summary>
         public const float FillDepth = 200f;
         SpriteRenderer fill;
@@ -260,8 +264,27 @@ namespace Meridian.View2D
                 fill.sprite = fillSprite;
             }
             float bottom = float.MaxValue;
-            for (int i = 0; i < renderers.Count; i++) if (renderers[i] != null) bottom = Mathf.Min(bottom, renderers[i].transform.position.y);
+            SpriteRenderer lowest = null;
+            for (int i = 0; i < renderers.Count; i++) if (renderers[i] != null && renderers[i].transform.position.y < bottom) { bottom = renderers[i].transform.position.y; lowest = renderers[i]; }
             if (bottom == float.MaxValue) { fill.enabled = false; FillTop = float.NaN; return; }
+            if (fillFromSet && lowest.sprite != null && lowest.sprite != white)
+            {
+                // U-153 (LEAD 02:5x): the lowest layer's bottom rows stretched down, in phase with it: the clouds go on under the floes.
+                var sp = lowest.sprite;
+                if (setFillFrom != sp) { setFillFrom = sp; var r = sp.rect; setFill = Sprite.Create(sp.texture, new Rect(r.x, r.y + 1f, r.width, 2f), new Vector2(0.5f, 1f), sp.pixelsPerUnit, 0, SpriteMeshType.FullRect); }
+                if (fill.sprite != setFill) { fill.sprite = setFill; fill.drawMode = SpriteDrawMode.Tiled; }
+                var tint = new Color(1f, 1f, 1f, alpha);
+                if (fill.color != tint) fill.color = tint;
+                fill.flipX = lowest.flipX;
+                fill.sortingOrder = BackOrder + orderOffset - 1;
+                float rowH = 2f / sp.pixelsPerUnit;
+                FillTop = bottom + 0.05f;
+                fill.size = new Vector2(lowest.size.x, rowH);
+                fill.transform.position = new Vector3(lowest.transform.position.x, FillTop, 0f);
+                fill.transform.localScale = new Vector3(1f, FillDepth / rowH, 1f);
+                fill.enabled = true;
+                return;
+            }
             var col = groundFill.Value; col.a *= alpha;
             if (groundTile != null) { col = new Color(1f, 1f, 1f, alpha); if (fill.sprite != groundTile) { fill.sprite = groundTile; fill.drawMode = SpriteDrawMode.Tiled; } }
             else if (fill.sprite != fillSprite) { fill.sprite = fillSprite; fill.drawMode = SpriteDrawMode.Simple; }

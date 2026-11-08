@@ -208,7 +208,7 @@ namespace Meridian.Core
                     while ((pilgrim.Body.linearVelocity.magnitude < 15f || pilgrim.Boost < 0.95f) && Time.realtimeSinceStartup < until) yield return null;
                     yield return Shot(folder, "smoke_27_climb_boost.png");
                     while (booms == 0 && Time.realtimeSinceStartup < until) yield return null;
-                    if (booms > 0) { yield return Wait(0.15f); yield return Shot(folder, "smoke_28_sound_barrier.png"); }
+                    if (booms > 0) { yield return Wait(0.28f); yield return Shot(folder, "smoke_28_sound_barrier.png"); }
                     else Debug.Log("[MERIDIAN] smoke: the climb broke no sound barrier");
                     pilgrim.intent = default;
                     pilgrim.SoundBarrierBroken -= onBoom;

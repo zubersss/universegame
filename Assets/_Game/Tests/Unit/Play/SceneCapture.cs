@@ -1940,7 +1940,7 @@ namespace Meridian.Tests
 
         /// <summary>
         /// U-150 (D-158 (4)): accelerating vs cruising and the sound barrier on Earth → coordination/reports/unity/u150/: 1_earth_boost
-        /// (full thrust off the pad: the long flame, the speed lines), 2_earth_boom (0.15 s after the barrier breaks: the vapor cone round
+        /// (full thrust off the pad: the long flame, the speed lines), 2_earth_boom (0.28 s after the barrier breaks, the cone at its fullest: the vapor cone round
         /// the hull, the shock ring opening), 3_earth_cruise (near the Escape Line with the throttle holding the speed: the cruise puff, no
         /// lines). Placeholders where B-171's sheets are not in yet.
         /// </summary>
@@ -1998,7 +1998,7 @@ namespace Meridian.Tests
                 // 2. The sound barrier (Earth 30 m/s): 0.15 s after it breaks, the vapor cone and the shock ring.
                 while (booms == 0 && Time.realtimeSinceStartup < timeout) yield return new WaitForFixedUpdate();
                 Assert.AreEqual(1, booms, "the barrier broke once on the climb");
-                float until = Time.time + 0.15f;
+                float until = Time.time + 0.28f; // LEAD 02:5x: the cone at its fullest (frame 3 of 10 at 12 fps)
                 while (Time.time < until) yield return null;
                 yield return Shot("2_earth_boom");
                 Assert.IsTrue(fx.VaporShown && fx.RingShown, "the vapor cone and the shock ring show");
