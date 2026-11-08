@@ -1,21 +1,20 @@
 {
- "key": "props/earth/launch_gantry",
- "format": "glb",
- "contract": "v2.2",
- "facing": "+X in Unity (exported facing glTF -X, D-065)",
- "up": "+Y",
- "units": "m",
- "origin": "base",
- "triangles": 1404,
- "lod1_triangles": null,
- "texture": 1024,
- "maps": [
-  "color",
-  "normal",
-  "mask",
-  "emission"
- ],
- "fps": 30,
- "clips": [],
- "sockets": []
+  "key": "props/earth/launch_gantry",
+  "style": "v3",
+  "frame_width": 320,
+  "frame_height": 912,
+  "columns": 1,
+  "gutter": 4,
+  "frames": 1,
+  "fps": 12,
+  "pivot": [
+    0.5,
+    0.010965
+  ],
+  "facing": "right",
+  "ppu": 64,
+  "animations": [],
+  "squash_root": false,
+  "ground_line_px": 10,
+  "note": "B-195: replaces the v2 model (D-117); one static frame; the pivot sits on the ground line (LEAD 14:2x: full density, an exception to B-131's 512^2)"
 }
