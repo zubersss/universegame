@@ -189,6 +189,32 @@ namespace Meridian.Core
             yield return LookAt(side, coast - 10f, 8f);
             yield return Shot(folder, "smoke_4_desert_ocean.png");
 
+            // U-142 (D-158, U-148 / U-150): the climb in the ship frame: full thrust off the pad until the hull boosts at speed (the long flame,
+            // the speed lines, the frame widening), then the sound barrier breaking at Earth's 30 m/s (the vapor cone, the shock ring).
+            {
+                var pilgrim = side.ship;
+                var follow = side.sideCamera.GetComponent<Meridian.Player.CameraFollow>();
+                if (pilgrim != null && follow != null)
+                {
+                    int booms = 0;
+                    System.Action onBoom = () => booms++;
+                    pilgrim.SoundBarrierBroken += onBoom;
+                    pilgrim.GetComponent<Meridian.Ship.ShipBoarding>().ForceAboard();
+                    follow.enabled = true; // LookAt froze it
+                    follow.SnapToTarget();
+                    pilgrim.externalInput = true;
+                    pilgrim.intent = new Meridian.Ship.ShipSideIntent { thrust = 1f };
+                    float until = Time.realtimeSinceStartup + 45f;
+                    while ((pilgrim.Body.linearVelocity.magnitude < 15f || pilgrim.Boost < 0.95f) && Time.realtimeSinceStartup < until) yield return null;
+                    yield return Shot(folder, "smoke_27_climb_boost.png");
+                    while (booms == 0 && Time.realtimeSinceStartup < until) yield return null;
+                    if (booms > 0) { yield return Wait(0.15f); yield return Shot(folder, "smoke_28_sound_barrier.png"); }
+                    else Debug.Log("[MERIDIAN] smoke: the climb broke no sound barrier");
+                    pilgrim.intent = default;
+                    pilgrim.SoundBarrierBroken -= onBoom;
+                }
+            }
+
             var mars = GameState.Instance.catalog.Get(Meridian.Planets.PlanetId.Mars);
             yield return scenes.LoadPlanetSide(mars);
             side = scenes.PlanetSide;

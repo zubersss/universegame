@@ -55,7 +55,19 @@ namespace Meridian.Player
         {
             if (hooked != null) hooked.Bumped -= OnBumped;
             hooked = null;
+            HookShip(null);
         }
+
+        // U-150 (D-158 (4)): the ship being flown thumps the camera when it breaks the sound barrier.
+        Meridian.Ship.SideShip hookedShip;
+        void HookShip(Meridian.Ship.SideShip s)
+        {
+            if (hookedShip == s) return;
+            if (hookedShip != null) hookedShip.SoundBarrierBroken -= OnBoom;
+            hookedShip = s;
+            if (hookedShip != null) hookedShip.SoundBarrierBroken += OnBoom;
+        }
+        void OnBoom() => Stage.Impact(StageCamera.ThumpShake, StageCamera.ThumpTime);
 
         /// <summary>U-093: a bump shakes the frame (position only).</summary>
         void Hook()
@@ -115,6 +127,9 @@ namespace Meridian.Player
                 return;
             }
             Hook();
+            var flown = Vehicle;
+            HookShip(flown);
+            Stage.Rumble = flown != null ? flown.Rumble : 0f; // U-150: the engine rumble while boosting, position only
             Stage.Step(BuildInput(Time.deltaTime));
             Apply();
             StepsApplied++;

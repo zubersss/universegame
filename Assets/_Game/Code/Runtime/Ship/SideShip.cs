@@ -50,6 +50,25 @@ namespace Meridian.Ship
         public float AltitudeAboveGround { get; private set; }
         /// <summary>U-149: the air's density at the hull this step (ρ(h), relative to Earth's Datum; 0 on Mercury and above the Escape Line).</summary>
         public float AirDensity { get; private set; }
+
+        /// <summary>U-150 (D-158 (4)): accelerating reads differently from cruising. Boosting starts when the hull's along-track acceleration
+        /// (smoothed over ~0.15 s) passes BoostAccel under thrust in the air and ends when it falls under CruiseAccel (or the thrust stops).</summary>
+        public const float BoostAccel = 1.5f, CruiseAccel = 0.5f, AccelSmoothing = 0.15f;
+        /// <summary>U-150: the engine rumble's largest position-only camera shake (m), at full throttle, boosting, in air of density ≥ 1.</summary>
+        public const float RumbleMax = 0.08f;
+        /// <summary>U-150: the hull's acceleration along its velocity (m/s², smoothed).</summary>
+        public float AlongTrackAccel { get; private set; }
+        public bool Boosting { get; private set; }
+        /// <summary>U-150: 0..1, eases up over 0.25 s while boosting and back over 0.5 s at cruise: the flame's length, the speed lines, the rumble.</summary>
+        public float Boost { get; private set; }
+        /// <summary>U-150: the engine rumble's amplitude now (m): RumbleMax × throttle × min(ρ, 1) × Boost.</summary>
+        public float Rumble => RumbleMax * Flight.Throttle * Mathf.Min(1f, AirDensity) * Boost;
+        /// <summary>U-150: the sound barrier (the planet's speed of sound, where ρ ≥ 0.1).</summary>
+        public SoundBarrier Barrier { get; } = new SoundBarrier();
+        /// <summary>U-150: raised on the physics step the hull breaks the sound barrier.</summary>
+        public event Action SoundBarrierBroken;
+        Vector2 prevVelocity;
+        bool havePrev;
         public float LastTouchdownSpeed { get; private set; }
         /// <summary>The upright flight model (tilt, spring back, righting).</summary>
         public RocketFlight Flight { get; } = new RocketFlight();
@@ -132,6 +151,11 @@ namespace Meridian.Ship
             var v = Body.linearVelocity;
             if (Grounded && !wasGrounded) Touchdown(fallSpeed);
             fallSpeed = v.y < 0f ? -v.y : 0f;
+            // U-150: the acceleration the last physics step gave the hull (thrust, gravity, drag, contacts), along its velocity, smoothed.
+            float raw = 0f, speedNow = v.magnitude;
+            if (havePrev && speedNow > 0.5f) raw = Vector2.Dot((v - prevVelocity) / dt, v / speedNow);
+            prevVelocity = v; havePrev = true;
+            AlongTrackAccel += (raw - AlongTrackAccel) * (1f - Mathf.Exp(-dt / AccelSmoothing));
 
             // The intent is the pilot's (Update clears it when nobody is aboard) or a test's (externalInput).
             // U-149 (D-158 (3)): the thruster spools toward the intent (0.35 s up, 0.2 s down) and the air drags the hull.
@@ -143,6 +167,13 @@ namespace Meridian.Ship
             AirDensity = planet != null ? planet.AirDensityAt(Body.position.y) : 0f;
             if (AirDensity > 0f) v += RocketFlight.DragAccel(v, AirDensity) * dt; // D-106: drag only limits speed; it never stops a climb
             Body.linearVelocity = v;
+
+            // U-150: boosting vs cruising (hysteresis between BoostAccel and CruiseAccel), and the sound barrier.
+            bool thrusting = throttle > 0.05f && !Grounded;
+            if (!Boosting && thrusting && AlongTrackAccel > BoostAccel) Boosting = true;
+            else if (Boosting && (!thrusting || Mathf.Abs(AlongTrackAccel) < CruiseAccel)) Boosting = false;
+            Boost = Mathf.MoveTowards(Boost, Boosting ? 1f : 0f, dt / (Boosting ? 0.25f : 0.5f));
+            if (planet != null && Barrier.Step(v.magnitude, AirDensity, planet.SpeedOfSound)) SoundBarrierBroken?.Invoke();
 
             // Escape Line: the ship's center crossing upward (Bible §5.2 trigger).
             if (planet != null)
@@ -195,6 +226,6 @@ namespace Meridian.Ship
             return float.PositiveInfinity;
         }
 
-        public void ConfigureFor(PlanetConfig config) => planet = config;
+        public void ConfigureFor(PlanetConfig config) { planet = config; Barrier.Reset(); }
     }
 }

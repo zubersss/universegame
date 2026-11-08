@@ -1939,6 +1939,94 @@ namespace Meridian.Tests
         }
 
         /// <summary>
+        /// U-150 (D-158 (4)): accelerating vs cruising and the sound barrier on Earth → coordination/reports/unity/u150/: 1_earth_boost
+        /// (full thrust off the pad: the long flame, the speed lines), 2_earth_boom (0.15 s after the barrier breaks: the vapor cone round
+        /// the hull, the shock ring opening), 3_earth_cruise (near the Escape Line with the throttle holding the speed: the cruise puff, no
+        /// lines). Placeholders where B-171's sheets are not in yet.
+        /// </summary>
+        [UnityTest, Timeout(300000)]
+        public IEnumerator CaptureU150Boom()
+        {
+            var name = Environment.GetEnvironmentVariable(Variable);
+            if (string.IsNullOrEmpty(name)) Assert.Ignore($"Set {Variable} (tools/unity_capture.ps1).");
+            if (SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.Null)
+                Assert.Fail("No graphics device: run without -nographics.");
+            bool wasCartoon = Meridian.View2D.CartoonStage.Enabled;
+            Meridian.View2D.CartoonStage.Enabled = true;
+            try
+            {
+#if UNITY_EDITOR
+                yield return UnityEditor.SceneManagement.EditorSceneManager.LoadSceneAsyncInPlayMode(
+                    CorePath, new LoadSceneParameters(LoadSceneMode.Single));
+#endif
+                var director = UnityEngine.Object.FindAnyObjectByType<SceneDirector>();
+                float timeout = Time.realtimeSinceStartup + 30f;
+                while ((!director.IsReady || !director.PlanetSide.terrain.IsSettled) && Time.realtimeSinceStartup < timeout) yield return null;
+                var side = director.PlanetSide;
+                if (side.hazards != null) side.hazards.enabled = false;
+                side.dayNight.Override = 0.45f;
+                side.creatures.autoSpawn = false;
+                side.creatures.DespawnAll();
+                var ship = side.ship;
+                var fx = ship.GetComponent<Meridian.FX.ShipFx>();
+                Assert.NotNull(fx, "ShipFx on the Pilgrim");
+                ship.GetComponent<Meridian.Ship.ShipBoarding>().ForceAboard();
+                ship.externalInput = true;
+                ship.intent = default;
+                for (int i = 0; i < 75; i++) yield return new WaitForFixedUpdate();
+                var cam = side.sideCamera;
+                var dir = "coordination/reports/unity/u150";
+                Directory.CreateDirectory(dir);
+                int booms = 0;
+                ship.SoundBarrierBroken += () => booms++;
+                IEnumerator Shot(string label)
+                {
+                    yield return null;
+                    yield return Save(cam, $"{name}_{label}");
+                    File.Copy($"logs/capture_{name}_{label}.png", $"{dir}/{label}.png", true);
+                    TestContext.Out.WriteLine($"[MERIDIAN] u150 {label}: speed {ship.Body.linearVelocity.magnitude:F1} m/s, along-track {ship.AlongTrackAccel:F2} m/s², boost {ship.Boost:F2} ({(ship.Boosting ? "boosting" : "cruise")}), throttle {ship.Flight.Throttle:F2}, ρ {ship.AirDensity:F2}, rumble {ship.Rumble:F3} m, lines α {fx.SpeedLineAlpha:F2}, flame {fx.FlameKey} ×{fx.Main.stretchY:F2}, vapor {fx.VaporShown}, ring {fx.RingShown}, booms {booms}, frame {cam.orthographicSize * 2f:F1} m");
+                }
+
+                // 1. Full thrust off the pad until the hull is boosting at speed: the long flame and the speed lines.
+                ship.intent = new Meridian.Ship.ShipSideIntent { thrust = 1f };
+                timeout = Time.realtimeSinceStartup + 60f;
+                while ((ship.Body.linearVelocity.magnitude < 15f || ship.Boost < 0.95f) && Time.realtimeSinceStartup < timeout) yield return new WaitForFixedUpdate();
+                yield return Shot("1_earth_boost");
+                Assert.IsTrue(ship.Boosting, "boosting off the pad");
+                Assert.Greater(fx.SpeedLineAlpha, 0.05f, "the speed lines show while accelerating");
+
+                // 2. The sound barrier (Earth 30 m/s): 0.15 s after it breaks, the vapor cone and the shock ring.
+                while (booms == 0 && Time.realtimeSinceStartup < timeout) yield return new WaitForFixedUpdate();
+                Assert.AreEqual(1, booms, "the barrier broke once on the climb");
+                float until = Time.time + 0.15f;
+                while (Time.time < until) yield return null;
+                yield return Shot("2_earth_boom");
+                Assert.IsTrue(fx.VaporShown && fx.RingShown, "the vapor cone and the shock ring show");
+
+                // 3. Near the Escape Line, the throttle set each step to hold the speed (thrust = g + drag): calm.
+                float line = side.Config.EscapeLineY, hold = side.Config.datumY + side.Config.escapeAltitude * 0.72f;
+                while (ship.Body.position.y < hold && Time.realtimeSinceStartup < timeout) yield return new WaitForFixedUpdate();
+                for (int i = 0; i < 90; i++)
+                {
+                    var v = ship.Body.linearVelocity;
+                    float drag = Meridian.Ship.RocketFlight.DragK * ship.AirDensity * v.sqrMagnitude;
+                    ship.intent = new Meridian.Ship.ShipSideIntent { thrust = Mathf.Clamp01((ship.Gravity + drag) / ship.Thrust) };
+                    yield return new WaitForFixedUpdate();
+                }
+                Assert.Less(ship.Body.position.y, line, "still under the Escape Line");
+                yield return Shot("3_earth_cruise");
+                Assert.IsFalse(ship.Boosting, "cruising: not boosting");
+                Assert.Less(fx.SpeedLineAlpha, 0.02f, "the speed lines eased off");
+                ship.intent = default;
+                LogAssert.NoUnexpectedReceived();
+            }
+            finally
+            {
+                Meridian.View2D.CartoonStage.Enabled = wasCartoon;
+            }
+        }
+
+        /// <summary>
         /// U-104: the cartoon HUD at 1080p → coordination/reports/unity/u104/: on foot beside the ship (the three dials, the
         /// suit rows, the markers, every string in Patrick Hand) and aboard just under the Escape Line (the ship rows, the
         /// painted dotted line with its lettered sign). The overlay canvases draw through the side camera for the shots.

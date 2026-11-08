@@ -106,15 +106,25 @@ namespace Meridian.CameraRig
             Y = floorS - FloorBelow + Frame * 0.5f; yVel = 0f; wasVehicle = i.vehicle;
             if (i.vehicle) { VehicleGoal(i, out rel, out relY); X = i.playerX + rel; Y = i.playerY + relY; } // U-148: where the ship rules settle
             FallFollowing = false; landedFollow = false; fallTop = i.playerY;
-            Shake = Vector2.zero; shakeT = 0f; shakeAmp = 0f;
+            Shake = Vector2.zero; shakeT = 0f; shakeAmp = 0f; shakeDur = ShakeTime;
         }
 
         /// <summary>A bump (BumpShake): the larger pending amplitude wins.</summary>
-        public void Impact(float amplitude)
+        public void Impact(float amplitude) => Impact(amplitude, ShakeTime);
+
+        /// <summary>U-150: an impact lasting `seconds` (the sound barrier's thump: ThumpShake over ThumpTime); the larger pending amplitude wins.</summary>
+        public void Impact(float amplitude, float seconds)
         {
             shakeAmp = Mathf.Max(shakeAmp, amplitude);
-            shakeT = ShakeTime;
+            shakeDur = Mathf.Max(1e-3f, seconds);
+            shakeT = shakeDur;
         }
+
+        /// <summary>U-150 (D-158 (4)): the sound barrier's camera thump: position only.</summary>
+        public const float ThumpShake = 0.25f, ThumpTime = 0.15f;
+        /// <summary>U-150: a continuous position-only engine rumble (m, the largest offset), set every frame by the follow (0: none).</summary>
+        public float Rumble { get; set; }
+        float shakeDur = ShakeTime, rumbleT;
 
         public void Step(in StageInput i)
         {
@@ -249,12 +259,25 @@ namespace Meridian.CameraRig
 
         void StepShake(float dt)
         {
-            if (shakeT <= 0f) { if (Shake != Vector2.zero) Shake = Vector2.zero; return; }
-            shakeT -= dt;
-            if (shakeT <= 0f) { shakeT = 0f; shakeAmp = 0f; Shake = Vector2.zero; return; }
-            float k = shakeT / ShakeTime;             // fades out over ShakeTime
-            float ph = (ShakeTime - shakeT) * 110f;   // a few quick oscillations, no rotation
-            Shake = new Vector2(Mathf.Sin(ph), Mathf.Cos(ph * 1.37f)) * (shakeAmp * k * 0.7071f);
+            var s = Vector2.zero;
+            if (shakeT > 0f)
+            {
+                shakeT -= dt;
+                if (shakeT <= 0f) { shakeT = 0f; shakeAmp = 0f; }
+                else
+                {
+                    float k = shakeT / shakeDur;            // fades out over the impact's time
+                    float ph = (shakeDur - shakeT) * 110f;  // a few quick oscillations, no rotation
+                    s = new Vector2(Mathf.Sin(ph), Mathf.Cos(ph * 1.37f)) * (shakeAmp * k * 0.7071f);
+                }
+            }
+            if (Rumble > 0f)
+            {
+                // U-150: the engine rumble: two incommensurate tones per axis, never past Rumble metres, position only.
+                rumbleT += dt;
+                s += new Vector2(Mathf.Sin(rumbleT * 151f) + 0.5f * Mathf.Sin(rumbleT * 97f), Mathf.Cos(rumbleT * 173f) + 0.5f * Mathf.Sin(rumbleT * 113f)) * (Rumble * 0.47f);
+            }
+            if (Shake != s) Shake = s;
         }
     }
 }

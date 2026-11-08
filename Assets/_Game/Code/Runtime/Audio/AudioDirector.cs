@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace Meridian.Audio
 {
-    public enum Sfx { Jump, Land, Dig, Place, UiClick }
+    public enum Sfx { Jump, Land, Dig, Place, UiClick, Boom } // U-150: Boom appended (every older value stays)
 
     /// <summary>
     /// Plays the game's sounds (Bible §10.3, Core): pooled one-shot sources, a thrust loop and an
@@ -18,6 +18,12 @@ namespace Meridian.Audio
 
         public SceneDirector scenes;
         public AudioClip jump, land, dig, place, uiClick, thrust, ambient;
+        /// <summary>U-150 (D-158 (4)): the sonic boom; unset, SfxSynth's placeholder is built the first time it sounds.</summary>
+        public AudioClip boom;
+        /// <summary>U-150: after a boom the engine sound rises (louder, higher) and settles back over RiseSeconds.</summary>
+        public const float RiseSeconds = 0.6f, RiseVolume = 0.35f, RisePitch = 0.12f;
+        /// <summary>U-150: 1 right after a boom, back to 0 over RiseSeconds (tests read it).</summary>
+        public float Rise { get; private set; }
         [Range(0f, 1f)] public float sfxVolume = 0.8f, ambientVolume = 0.35f;
         public const int Voices = 8;
         /// <summary>Landings softer than this (m/s) make no sound.</summary>
@@ -34,6 +40,7 @@ namespace Meridian.Audio
         PlayerController player;
         TerrainStreamer terrain;
         SpaceShip ship;
+        Meridian.Ship.SideShip sideShip; // U-150: the Pilgrim on the planet: its engine and its boom
 
         void Awake()
         {
@@ -91,6 +98,8 @@ namespace Meridian.Audio
                 terrain = scenes.PlanetSide.terrain;
                 if (player != null) { player.Jumped += OnJumped; player.Landed += OnLanded; }
                 if (terrain != null) terrain.TileChanged += OnTileChanged;
+                sideShip = scenes.PlanetSide.ship;
+                if (sideShip != null) sideShip.SoundBarrierBroken += OnBoom;
             }
             if (scenes.Space != null) ship = scenes.Space.GetComponentInChildren<SpaceShip>(true);
             if (ambient != null && !ambientSource.isPlaying) ambientSource.Play();
@@ -100,7 +109,8 @@ namespace Meridian.Audio
         {
             if (player != null) { player.Jumped -= OnJumped; player.Landed -= OnLanded; }
             if (terrain != null) terrain.TileChanged -= OnTileChanged;
-            player = null; terrain = null;
+            if (sideShip != null) sideShip.SoundBarrierBroken -= OnBoom;
+            player = null; terrain = null; sideShip = null;
         }
 
         void OnDestroy()
@@ -114,12 +124,13 @@ namespace Meridian.Audio
         void OnJumped() => Play(Sfx.Jump);
         void OnLanded(float impact) { if (impact >= QuietLanding) Play(Sfx.Land, Mathf.Clamp01(impact / 12f)); }
         void OnTileChanged(int x, int y, byte oldId, byte newId) => Play(newId == TileId.Air ? Sfx.Dig : Sfx.Place);
+        void OnBoom() { Play(Sfx.Boom); Rise = 1f; }
 
         public void Play(Sfx id, float volume = 1f)
         {
             var clip = id switch
             {
-                Sfx.Jump => jump, Sfx.Land => land, Sfx.Dig => dig, Sfx.Place => place, _ => uiClick,
+                Sfx.Jump => jump, Sfx.Land => land, Sfx.Dig => dig, Sfx.Place => place, Sfx.Boom => boom != null ? boom : (boom = SfxSynth.BoomClip()), _ => uiClick,
             };
             LastPlayed = id;
             PlayCount++;
@@ -131,13 +142,23 @@ namespace Meridian.Audio
 
         void Update()
         {
-            bool thrusting = ship != null && ship.isActiveAndEnabled && ship.intent.thrust > 0f && !ship.Destroyed;
+            bool spaceThrust = ship != null && ship.isActiveAndEnabled && ship.intent.thrust > 0f && !ship.Destroyed;
+            // U-150: the Pilgrim's engine on the planet too (it had none): louder with the throttle and the boost.
+            bool sideThrust = sideShip != null && sideShip.isActiveAndEnabled && sideShip.piloted && sideShip.Flight.Throttle > 0.01f;
+            bool thrusting = spaceThrust || sideThrust;
+            Rise = Mathf.MoveTowards(Rise, 0f, Time.deltaTime / RiseSeconds);
             if (thrusting != ThrustOn)
             {
                 ThrustOn = thrusting;
                 if (thrusting && thrust != null) thrustSource.Play(); else thrustSource.Stop();
             }
-            if (thrusting) thrustSource.volume = SfxLevel * (ship.intent.boost ? 1f : 0.7f);
+            if (spaceThrust) { thrustSource.volume = SfxLevel * (ship.intent.boost ? 1f : 0.7f); thrustSource.pitch = 1f; }
+            else if (sideThrust)
+            {
+                float level = 0.45f + 0.4f * sideShip.Flight.Throttle + 0.15f * sideShip.Boost;
+                thrustSource.volume = SfxLevel * level * (1f + RiseVolume * Rise);
+                thrustSource.pitch = 1f + 0.08f * sideShip.Boost + RisePitch * Rise;
+            }
         }
     }
 }

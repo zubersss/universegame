@@ -1,5 +1,5 @@
 # Smoke-runs the built player (U-017): screenshots menu / Earth day + night / biome border / Mars canyon storm / Saturn (U-044), then checks
-# the player log for errors; U-132 adds the pause card, the settings paper and a title card per planet, the Mars hauler; U-142 adds Jupiter's floe / storm deck / Crush Line / Red Spot whale and the Venus + Jupiter cards (35 shots).
+# the player log for errors; U-132 adds the pause card, the settings paper and a title card per planet, the Mars hauler; U-142 adds Jupiter's floe / storm deck / Crush Line / Red Spot whale and the Venus + Jupiter cards; U-150 the climb boost and the sound barrier (37 shots).
 # Output: logs/smoke/*.png + coordination/reports/unity/smoke_<version>/. Owner: UNITY.
 # Usage: tools/unity_smoke.ps1 [-Version 0.1.1] [-Dev]  (default: GameInfo.Version; U-143: the release player in Build/MERIDIAN_<v>/, -Dev the development one)
 param([string]$Version = '', [switch]$Dev)
@@ -37,6 +37,6 @@ $errors | Select-Object -First 10 | ForEach-Object { Write-Host "  $($_.Line.Tri
 $report = Join-Path $RepoRoot ("coordination\reports\unity\smoke_" + $Version) # U-132: one folder per build (was per date)
 New-Item -ItemType Directory -Force $report | Out-Null
 $shots | ForEach-Object { Copy-Item $_.FullName (Join-Path $report $_.Name) -Force }
-if ($done -and $shots.Count -eq 35 -and $errors.Count -eq 0) { Write-Host "SMOKE OK: $report"; exit 0 }
+if ($done -and $shots.Count -eq 37 -and $errors.Count -eq 0) { Write-Host "SMOKE OK: $report"; exit 0 }
 Write-Host 'SMOKE FAILED'
 exit 1

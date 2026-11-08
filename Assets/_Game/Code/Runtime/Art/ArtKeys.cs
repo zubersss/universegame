@@ -34,6 +34,8 @@ namespace Meridian.Art
             /// <summary>U-103 (B-122, D-111): the drawn Pilgrim rig (parts sheet + json with the side and top plants) and its exhaust puff loop.</summary>
             public const string PilgrimRig = "ships/pilgrim/rig";
             public const string PilgrimPuff = "ships/pilgrim/puff";
+            /// <summary>U-150 (D-158 (4), B-171): the long boost flame while the hull accelerates; until it lands the puff is drawn 1.6x longer.</summary>
+            public const string PilgrimPuffBoost = "ships/pilgrim/puff_boost";
         }
 
         /// <summary>U-104 (B-121): the three HUD dials + needles on one parts sheet (its json at /json), the dotted Escape Line tile and its blank sign.</summary>
@@ -135,6 +137,10 @@ namespace Meridian.Art
             public const string BuilderGhost = "fx/builder_ghost/base";
             // U-053 (B-043)
             public const string WardenBolt = "fx/warden_bolt/base";
+            // U-150 (D-158 (4), B-171): the climb's speed lines, the sound barrier's vapor cone and shock ring (flat white placeholders until they land)
+            public const string SpeedLines = "fx/ship/speed_lines";
+            public const string VaporCone = "fx/ship/vapor_cone";
+            public const string ShockRing = "fx/ship/shock_ring";
         }
 
         public static class Props

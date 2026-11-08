@@ -13,6 +13,8 @@ namespace Meridian.FX
         public bool active;
         /// <summary>Scale of the sprite while active; `flicker` varies it a little each frame (flames).</summary>
         public float flicker;
+        /// <summary>U-150: a y stretch on top of the base scale (the boost flame drawn longer while the hull accelerates).</summary>
+        public float stretchY = 1f;
         /// <summary>Draw unlit (self-lit glow, e.g. entry heat) instead of the sheet's lit material.</summary>
         public bool unlit;
         static Material unlitMaterial;
@@ -49,6 +51,16 @@ namespace Meridian.FX
             baseScale = transform.localScale;
         }
 
+        /// <summary>U-150: switches the sheet only (the boost flame and the puff), keeping the base scale and the stretch.</summary>
+        public void SwapKey(string newKey)
+        {
+            if (key == newKey) return;
+            key = newKey;
+            sheet = FxSheet.Get(key);
+            shown = -1;
+            t = 0f;
+        }
+
         void Update()
         {
             bool on = active && sheet != null && sheet.Ready;
@@ -59,10 +71,11 @@ namespace Meridian.FX
             t += Time.deltaTime;
             int f = sheet.FrameAt(t);
             if (f >= 0 && f != shown) { shown = f; target.sprite = sheet.frames[f]; }
-            if (flicker > 0f)
+            if (flicker > 0f || stretchY != 1f || transform.localScale.y != baseScale.y)
             {
-                float k = 1f + flicker * (Mathf.PerlinNoise(Time.time * 9f, seed) - 0.5f);
-                transform.localScale = new Vector3(baseScale.x, baseScale.y * k, baseScale.z);
+                float k = flicker > 0f ? 1f + flicker * (Mathf.PerlinNoise(Time.time * 9f, seed) - 0.5f) : 1f;
+                var want = new Vector3(baseScale.x, baseScale.y * k * stretchY, baseScale.z);
+                if (transform.localScale != want) transform.localScale = want;
             }
         }
 

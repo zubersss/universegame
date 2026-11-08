@@ -66,5 +66,23 @@ namespace Meridian.Planets
 
         /// <summary>U-149: the air's density at world height y: ρ_surface·(1 − h/H)² with h above the Datum, 0 at and above the Escape Line.</summary>
         public float AirDensityAt(float y) => Meridian.Ship.RocketFlight.AirDensity(SurfaceAirDensity, y - datumY, escapeAltitude);
+
+        /// <summary>U-150 (D-158 (4)): the game's speed of sound (m/s), 0 without air. Placeholders tuned on the pure climb (spool + drag) so a
+        /// full-thrust upright climb crosses it before the Escape Line where ρ ≥ 0.1: Earth Mk1 at ~59 % of the way; Mars Mk1 and Venus Mk1
+        /// (from the station deck) low, where their thin dense layer still is; Jupiter Mk3, Saturn Mk2, Uranus Mk1, Neptune Mk2 near half way.</summary>
+        public static float SpeedOfSoundFor(PlanetId id) => id switch
+        {
+            PlanetId.Mercury => 0f,
+            PlanetId.Venus => 12f,
+            PlanetId.Earth => 30f,
+            PlanetId.Mars => 16f,
+            PlanetId.Jupiter => 80f,
+            PlanetId.Saturn => 70f,
+            PlanetId.Uranus => 40f,
+            PlanetId.Neptune => 65f,
+            _ => 0f,
+        };
+
+        public float SpeedOfSound => SpeedOfSoundFor(id);
     }
 }
