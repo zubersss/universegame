@@ -437,8 +437,8 @@ def band_frost(d, M, k=0):
     _pebbles(d, M, 6, (-0.36, -0.42), 1841)
 
 
-def _chipped(cx, cz, rx, rz, seed, rot=0.0, n=8):
-    """A chipped, rounded lump: n corners at jittered angles and radii (the chips), corner-cut twice (Chaikin), so its
+def _chipped(cx, cz, rx, rz, seed, rot=0.0, n=8, cuts=2):
+    """A chipped, rounded lump: n corners at jittered angles and radii (the chips), corner-cut `cuts` times (Chaikin), so its
     facets stay flat-ish but every corner is soft: no flat top, no vertical side, nothing that reads as a cube."""
     rnd = random.Random(seed)
     poly = []
@@ -446,7 +446,7 @@ def _chipped(cx, cz, rx, rz, seed, rot=0.0, n=8):
         a = TAU * (i + rnd.uniform(-0.3, 0.3)) / n
         q = rnd.uniform(0.88, 1.06)
         poly.append((rx * q * math.cos(a), rz * q * math.sin(a)))
-    for _ in range(2):
+    for _ in range(cuts):
         nxt = []
         for i in range(len(poly)):
             (x0, z0), (x1, z1) = poly[i], poly[(i + 1) % len(poly)]
@@ -663,18 +663,14 @@ def band_basalt(d, M, k=0):
         G.stroke(d, sh([(x, z + 0.035) for x, z in cbot] + cbot[::-1]), M["basalt_sh"], 0.0, cyclic=True)
         G.seam(d, sh(cbot), M["ink"])
     W(body)
-    for i, e in enumerate(edges[:-1]):                                                        # the joins between lobes
-        W(lambda dx, _dz, e=e: G.seam(d, [(e + dx, -0.01), (e + dx - 0.015, -0.07), (e + dx + 0.01, -0.13)], M["ink"]))
+    for i, e in enumerate(edges[:-1]):                                                        # each lobe's toe overlapping the one before it
+        W(lambda dx, _dz, e=e: G.seam(d, G.bezier((e + dx, 0.0), (e + dx - 0.02, -0.07), (e + dx - 0.16, -0.11), n=8), M["ink"]))
     W(lambda dx, _dz: G.stroke(d, [(x + dx, z) for x, z in top], M["ink"], O))
     for i, e in enumerate(edges[:-1]):                                                        # rust dust drifted into each hollow, over the line
         W(lambda dx, _dz, e=e, s=i: G.stroke(d, [(px, max(pz, -0.012)) for px, pz in G.lumpy_ellipse(e + dx, 0.0, 0.14, 0.02, n=16, lump=0.06, seed=1913 + s)],
                                              M["top_i"], I, cyclic=True))
-    for i in range(len(ws)):                                                                  # ropy folds on each lobe's face
-        cx = edges[i] + ws[i] * rnd.uniform(0.35, 0.65)
-        for j in range(3):
-            z0 = -0.035 - 0.032 * j
-            W(lambda dx, _dz, cx=cx, z0=z0, w=ws[i] * 0.16: G.seam(d, G.bezier((cx + dx - w, z0 - 0.012), (cx + dx, z0 + 0.012), (cx + dx + w, z0 - 0.012), n=7),
-                                                                   M["ink"]))
+    for i in range(len(ws)):                                                                  # (the first draw's stacked rope arcs read as vent grilles: gone)
+        rnd.uniform(0.35, 0.65)                                                               # keeps the rng sequence of the vesicles below
     for i in range(40):                                                                       # vesicles
         x, z, r = L * (i + rnd.random()) / 40, -0.035 - rnd.random() * 0.10, 0.007 + 0.007 * rnd.random()
         W(lambda dx, _dz, x=x, z=z, r=r, s=i: G.stroke(d, G.lumpy_ellipse(x + dx, z, r * 1.3, r, n=8, lump=0.1, seed=1920 + s), M["basalt_sh"], 0.0, cyclic=True))
@@ -769,10 +765,10 @@ def band_talus(d, M, k=0):
         else:
             W(lambda dx, _dz, line=line: G.seam(d, [(x + dx, z) for x, z in line], M["ink"]))
     roles = ("salmon_i", "rock_i", "top_i", "pale_i", "redbrown_i")
-    for i in range(30):                                                                       # the scree: angular shards in the crust
-        x = L * (i + rnd.random()) / 30
-        r = rnd.uniform(0.035, 0.075)
-        z = rnd.uniform(-0.07, -0.02) if i % 3 else rnd.uniform(0.0, 0.015)                  # one in three pokes up a little
+    for i in range(24):                                                                       # the scree: angular shards in the crust (>= 6 px: speckle at 1x otherwise)
+        x = L * (i + rnd.random()) / 24
+        r = rnd.uniform(0.06, 0.11)
+        z = rnd.uniform(-0.08, -0.04) if i % 3 else rnd.uniform(-0.01, 0.01)                 # one in three pokes up through the surface
         role, sides = roles[i % len(roles)], rnd.choice((4, 5, 6))                            # drawn outside the lambda: every tiling copy alike
         W(lambda dx, _dz, x=x, z=z, r=r, s=i, role=role, sides=sides: G.stroke(d, B._shard(x + dx, z, r, random.Random(2030 + s), sides=sides, flat=0.7),
                                                                                M[role], I, cyclic=True))
@@ -804,7 +800,7 @@ def _span_x(poly, z):
 
 def decor_talus(d, M, k):
     if k == 0:                                                                                # a fallen wall block, its strata tilted
-        blk = _chipped(0.0, 0.17, 0.30, 0.19, 2050, rot=0.12, n=6)
+        blk = _chipped(0.0, 0.17, 0.30, 0.19, 2050, rot=0.12, n=6, cuts=1)                   # one cut: its facets show (two read as an egg)
         blk = [(x, max(z, -0.02)) for x, z in blk]
         G.stroke(d, blk, M["salmon"], 0.0, cyclic=True)
         for j, (z, t, role) in enumerate(((0.21, 0.03, "ochre"), (0.12, 0.045, "pale"), (0.04, 0.03, "ochre"))):
