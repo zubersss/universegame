@@ -1,0 +1,31 @@
+{
+  "key": "backgrounds/venus/tessera",
+  "style": "v3",
+  "ppu": 64,
+  "anchor": "bottom",
+  "tile_x": true,
+  "layers": [
+    {
+      "n": 0,
+      "parallax": 0.1,
+      "y_m": -2.0,
+      "ground_row": 896,
+      "height_px": 1024
+    },
+    {
+      "n": 1,
+      "parallax": 0.35,
+      "y_m": -1.0,
+      "ground_row": 448,
+      "height_px": 512
+    },
+    {
+      "n": 2,
+      "parallax": 0.6,
+      "y_m": -3.0,
+      "continue_rows": 64,
+      "ground_row": 352,
+      "height_px": 544
+    }
+  ]
+}
