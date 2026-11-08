@@ -12,13 +12,13 @@ scene builder, the capped floe strips (D-137), the shared aerostat kit (B-156). 
 
 | Item | State | File |
 |---|---|---|
-| Palette | ACCEPTED (D-141): in `meridian.v3.PALETTES["saturn"]` + the ui/palettes/saturn row (exports with the first Saturn slot) | blender/scripts/build_c2_saturn_palette.py |
-| Five flora | source (1c81b527): key poses checked, palette 100 %; the full preview waits for a free gap | build_c2_saturn_plants.py |
-| Floe strips | source + checks (3bf0b75b: ice + ring rock, 10 frames each, joins <= 0.94/255, palette 100 %) | build_c2_saturn_floes.py |
-| Deck backdrops | source (96b2654b: deck1 / deck2 / deck3 / deep + the Hexagon overlay, the rings edge-on / tilted); studies need slots | build_backdrop_v3.py (saturn_scene) |
-| Creatures 1-4 | source (f3fccc69): every frame in bounds; the reviews wait for a free gap | build_creatures_saturn_v3.py |
-| Polar Hydra | Grand rig-set source (03ecb577, 7 bones, D-140); the preview waits for a free gap | build_polar_hydra_v3.py |
-| Props + ring chunks | source + review (review_b157_saturn_props_preview.png: six json valid, palette 100 %) | build_props_saturn_v3.py |
+| Palette | ACCEPTED (D-141): in `meridian.v3.PALETTES["saturn"]`; ui/palettes/saturn EXPORTED (B-163 slot 2, f3d5d294, 11-08 01:51) | blender/scripts/build_c2_saturn_palette.py |
+| Five flora | EXPORTED as flora/saturn/rigset 504x200, 26 parts (B-163 slot 2, f3d5d294); source 1c81b527 | build_c2_saturn_plants.py |
+| Floe strips | EXPORTED (B-163 slot 2, f3d5d294): floe_strip_ice / floe_strip_ring 676x152 with caps, joins 0.94 / 0.50; source 3bf0b75b | build_c2_saturn_floes.py |
+| Deck backdrops | EXPORTED straight (B-163 slot 1, 011b7de4, 11-08 01:43): deck1 / deck2 / deck3 / deep + the Hexagon, the rings edge-on / tilted; source 96b2654b | build_backdrop_v3.py (saturn_scene) |
+| Creatures 1-4 | EXPORTED (B-164, 37ba2e94, 11-08 01:54): helium_jelly, hex_drake, floe_moth, ringmite; source f3fccc69 | build_creatures_saturn_v3.py |
+| Polar Hydra | EXPORTED (B-164, 37ba2e94): a Grand rig set 1884x1392, 19 parts, 7 bones, rest / struck / lost per neck; source 03ecb577 | build_polar_hydra_v3.py |
+| Props + ring chunks | EXPORTED (B-163 slot 2, f3d5d294): ring_chunk_a / _b / _c, ring_rig, helium_trap, hexagon_wall_marker (9 v2 maps removed) | build_props_saturn_v3.py |
 
 ## 1. Palette (ACCEPTED, D-141; checked by blender/scripts/build_c2_saturn_palette.py)
 
