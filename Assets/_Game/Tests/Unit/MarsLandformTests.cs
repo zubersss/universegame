@@ -68,6 +68,30 @@ namespace Meridian.Tests
             Assert.AreEqual(TileId.Ice, g.TileAt(x, s - 4), "water ice under it");
         }
 
+        /// <summary>U-159 (D-162 (1)): on the smooth ground each skylight opens as a funnel the curve rounds: never more than 1 m between
+        /// neighbouring columns, and the drawn curve over the shaft sits at least 1.5 m under the curve beyond the funnel (no square mouth; a
+        /// skylight on a slope dips less, the 31-degree clamp holding its downhill wall).</summary>
+        [Test]
+        public void ASkylightOpensAsARoundedFunnel([Values(1969, 7)] int seed)
+        {
+            var g = new SolidWorldGenerator(Mars(), seed);
+            Assert.IsTrue(g.SmoothGround);
+            System.Func<int, int> top = x => g.SurfaceHeight(((x % 3072) + 3072) % 3072);
+            System.Func<int, int> pad = x => int.MinValue;
+            var dips = new System.Collections.Generic.List<(int, float)>();
+            foreach (var t in MarsLandforms.Tubes)
+            {
+                int sx = t.x0 + MarsLandforms.SkylightInset, r = MarsLandforms.SkylightFunnelRadius;
+                for (int x = sx - r - 6; x <= sx + MarsLandforms.SkylightWidth + r + 6; x++)
+                    Assert.LessOrEqual(System.Math.Abs(top(x + 1) - top(x)), 1, $"tube {t.x0}: a step at {x}");
+                float lip = 0.5f * (GroundField.Curve(sx - r - 2, top, pad) + GroundField.Curve(sx + MarsLandforms.SkylightWidth + r + 1, top, pad)); // past the funnel
+                float mouth = GroundField.Curve(sx + 1, top, pad);
+                TestContext.Out.WriteLine($"[MERIDIAN] seed {seed} skylight {sx}: the curve {lip - mouth:F2} m under its lip");
+                dips.Add((t.x0, lip - mouth));
+            }
+            foreach (var (x0, dip) in dips) Assert.GreaterOrEqual(dip, 1.5f, $"tube {x0}: the curve dips into the mouth");
+        }
+
         [Test]
         public void LavaTubesAreOpenTunnelsWithASkylight([Values(1969, 7)] int seed)
         {

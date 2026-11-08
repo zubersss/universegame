@@ -80,7 +80,7 @@ namespace Meridian.Tests
             var tube = Meridian.Terrain.MarsLandforms.Tubes[0];
             int tx = tube.x0 + Meridian.Terrain.MarsLandforms.SkylightInset + 6; // over the tube, past the skylight shaft
             float y = side.player.Body.position.y;
-            var stand = new Vector2(tx - 4 + 0.5f, side.terrain.TopSolidY(tx - 4) + 1.1f);
+            var stand = new Vector2(tx + 4 + 0.5f, side.terrain.TopSolidY(tx + 4) + 1.1f); // U-159: east of the den, clear of the skylight's funnel
             side.player.Body.position = stand; side.player.transform.position = stand; side.player.Body.linearVelocity = Vector2.zero;
             var follow = Object.FindAnyObjectByType<Meridian.Player.CameraFollow>();
             if (follow != null) follow.SnapToTarget();

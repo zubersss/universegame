@@ -40,6 +40,7 @@ namespace Meridian.Terrain
                         : planet == PlanetId.Mars ? MarsLandforms.Height(x, datum + (n - 0.5f) * 2f * amplitude) // U-159: the landforms, unrounded
                         : surface[x];
                 }
+                if (planet == PlanetId.Mars) MarsLandforms.RoundSkylights(raw); // U-159 (D-162 (1)): a skylight's mouth is a rounded funnel
                 var smoothed = GroundField.SmoothSurface(raw, GroundField.SmoothRadiusFor(planet), GroundField.SurfaceSlope);
                 for (int x = 0; x < width; x++) surface[x] = Clamp((int)System.Math.Round(smoothed[x]));
                 if (planet == PlanetId.Earth)

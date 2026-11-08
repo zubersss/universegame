@@ -30,6 +30,27 @@ namespace Meridian.Terrain
         /// <summary>Lava tubes: first column, last column, depth of the ceiling below the surface at the tube's middle.</summary>
         public static readonly (int x0, int x1, int depth)[] Tubes = { (300, 470, 14), (580, 760, 16), (1850, 1980, 15) };
         public const int TubeHeight = 4, SkylightWidth = 2, SkylightInset = 12;
+        /// <summary>U-159 (D-162 (1)): on the smooth ground a skylight opens as a rounded funnel, not a square shaft: the surface dips up to
+        /// SkylightFunnelDepth over SkylightFunnelRadius columns each side of the shaft's middle in the raw heights, so the smoothing and its
+        /// 31-degree clamp keep the funnel walkable, and the drawn curve rounds the dip into the lip.</summary>
+        public const int SkylightFunnelRadius = 8;   // on flat ground the curve then dips ~3.4 m into the mouth, its slope ≤ 0.44; less on a slope (the clamp). 10 opened tube 300's floor on seed 7
+        public const float SkylightFunnelDepth = 6f;
+
+        /// <summary>U-159: lowers a smooth Mars's raw heights into each skylight's funnel (SolidWorldGenerator, before the smoothing).</summary>
+        public static void RoundSkylights(float[] surface)
+        {
+            int w = surface.Length;
+            foreach (var t in Tubes)
+            {
+                float mid = t.x0 + SkylightInset + SkylightWidth * 0.5f; // the shaft's middle, between its two columns
+                for (int x = (int)mid - SkylightFunnelRadius; x < (int)mid + SkylightFunnelRadius; x++)
+                {
+                    float d = System.Math.Abs(x + 0.5f - mid) / SkylightFunnelRadius;
+                    if (d >= 1f) continue;
+                    surface[((x % w) + w) % w] -= SkylightFunnelDepth * (1f - d * d);
+                }
+            }
+        }
 
         static int Wrap(int x) => ((x % Width) + Width) % Width;
 
