@@ -2280,7 +2280,7 @@ Files: Code/Runtime/Planet/GroundStrip.cs, Tests/
 Depends: U-127, B-155
 Lead notes: Cycle 266 (D-137). Rides Jupiter's first batch. Cycle 273: READY as lock-free code (GroundStripTests for the 1-, 2- and 8-tile floes) any time after U-124's code; the Jupiter floe capture lands with U-127. 16:2x: CODE IN AND GREEN (7aaeb621; unity_check -SkipPlayMode 16:20–16:22: compile 0 / 0, EditMode 381/381 with GroundStripTests +1 for the 1-, 2- and 8-tile floes): a 10-frame strip tiles its first 8 frames and caps each floe end in the air column outside it; a floe ends where the ground beside it drops more than 3 m; 8-frame strips never cap. Done on the Jupiter floe capture with U-127 (B-159's strips).
 
-### U-127 · UNITY · Ready · C2
+### U-127 · UNITY · In Progress · C2
 Goal: Jupiter on the cartoon stage (Bible §12 C2 order 5; §7.5–7.6 the cloud-column world): the cloud-column generator's decks as the B-155 layer sets (deck1 / deck2 / deck3 / deep with the CRUSH band on layer2, the Red Spot overlay), the floe strips with caps (U-126), the aerostat kit sheets (B-156), the Jupiter creatures on sheets and the Vortex Whale as a rig-set set piece framed so no shot shows both ends (D-138), the Jupiter palette strip; the M4 Jupiter tests unchanged; the Jupiter perf rows green.
 Accept: Jupiter captures at 1x (a floe with the kit and a tortoise, the storm deck with a Stormglider, the deep with the CRUSH band, the whale crossing) matching the accepted B-155 composites; TransitionTests green; the BudgetGate Jupiter rows green.
 Files: Code/Runtime/View2D/CartoonStage.cs, Code/Runtime/Planet/, Code/Runtime/Creatures/, Tests/
