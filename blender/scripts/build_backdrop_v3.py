@@ -718,9 +718,10 @@ def mars_tharsis(seed):
     c = rng.uniform(0, W)
     xx = np.arange(W)
     dx = (xx - c + W / 2) % W - W / 2
-    dome = hz - 40 - 190 * (0.5 + 0.5 * np.cos(2 * np.pi * dx / W)) ** 1.6
-    dome = np.maximum(dome, hz - 40 - 172)                                                    # the summit plateau
-    dome = dome + 9 * np.clip(1 - np.abs(dx) / 70, 0, 1) ** 2                                 # the caldera's shallow dip
+    # B-186 rev 2: a vast shield, not a hill - broad and flat, a long flat summit with a caldera notch in it
+    dome = hz - 40 - 150 * (0.5 + 0.5 * np.cos(2 * np.pi * dx / W)) ** 0.8
+    dome = np.maximum(dome, hz - 40 - 128)                                                    # the long summit plateau
+    dome = dome + 14 * np.clip(1 - np.abs(dx) / 90, 0, 1) ** 0.5 * (np.abs(dx) < 90)          # the caldera, a steep-walled notch
     dome = dome + BG.ridge(rng, [(5, 0.6), (11, 0.4)], base=0, amp=3)
     shield = BG._ridge_mask(H, dome)
     stack.append(wash32(rng, H, shield, BG._mix(BG._mix(rust, pal["sky"], 0.55), hazec, 0.25), var=0.03, edge_dark=0.05, bleed=2.5))
@@ -734,14 +735,19 @@ def mars_tharsis(seed):
     g1 = _gline(H, -1.0)
     flank_l = g1 - 150 + 70 * np.cos(2 * np.pi * (xx - c) / W) + BG.ridge(rng, [(4, 0.6), (9, 0.4)], base=0, amp=8)
     flank = BG._ridge_mask(H, flank_l)
+    # B-186 rev 2 (the floating ellipses read as grey puddles): the flows as stacked dark bands that follow the flank, each
+    # with a scalloped lobate front (its lower edge) and a thin lit rim, rust dust between them
     lobes, lobe_lit = np.zeros((H, W), np.float32), np.zeros((H, W), np.float32)
-    for _k in range(16):
-        cx = rng.uniform(0, W)
-        cy = flank_l[int(cx) % W] + rng.uniform(25, 120)
-        rx, ry = rng.uniform(110, 230), rng.uniform(12, 22)
-        ell(lobes, cx, cy, rx, ry)
-        ell(lobe_lit, cx + rx * 0.1, cy - ry * 0.55, rx * 0.8, ry * 0.3)
+    yy1 = np.arange(H)[:, None].astype(np.float32)
+    for k, (d0, t0, lam) in enumerate(((22, 26, W / 14), (70, 30, W / 11), (124, 34, W / 9), (184, 38, W / 12))):   # whole periods per tile
+        ph = rng.uniform(0, 2 * np.pi)
+        upper = flank_l + d0 + BG.ridge(rng, [(6, 0.6), (13, 0.4)], base=0, amp=3)
+        lower = upper + t0 + 9 * np.abs(np.sin(np.pi * xx / lam + ph)) ** 0.5                 # the lobes' rounded toes
+        band = ((yy1 > upper[None, :]) & (yy1 < lower[None, :])).astype(np.float32)
+        lobes = np.maximum(lobes, band)
+        lobe_lit = np.maximum(lobe_lit, ((yy1 > upper[None, :]) & (yy1 < upper[None, :] + 4)).astype(np.float32))
     lobes *= flank
+    lobe_lit *= flank
     stack = Stack()
     stack.append(wash32(rng, H, flank, BG._mix(rust, pal["sky"], 0.30), var=0.06, edge_dark=0.07, bleed=2.0))
     stack.append(wash32(rng, H, lobes, BG._mix(basalt, pal["sky"], 0.12), var=0.05, edge_dark=0.08, bleed=1.8))
