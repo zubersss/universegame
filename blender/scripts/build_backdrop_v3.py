@@ -515,12 +515,32 @@ def mars_canyon(seed, storm=0.0):
         stack.append(wash32(rng, H, gul * m, hz(BG._mix(pal["brown"], pal["red"], 0.4), 0.05), var=0.03, edge_dark=0.0, bleed=1.2))
     out.append(finish(stack, rng, H))
 
-    # layer2: near scree slopes with boulders and pebbles (the canyon); the storm replaces it with the dust overlay
-    if storm > 0:
-        out.append(mars_storm_overlay(rng, pal))
-        return out, [{"n": 0, "parallax": 0.1, "y_m": -2.0}, {"n": 1, "parallax": 0.35, "y_m": -1.0},
-                     {"n": 2, "parallax": 0.7, "y_m": -0.5}]
-    H = 384
+    # layer2: near scree slopes with boulders and pebbles (the canyon); the storm lays its dust overlay over a hazed copy of it
+    # B-185 / D-169: 480 tall (was 384), its bottom 2 m under the line, the last 64 rows a tileable strip (continue_rows)
+    L01 = [{"n": 0, "parallax": 0.1, "y_m": -2.0}, {"n": 1, "parallax": 0.35, "y_m": -1.0}]
+    if storm > 0:                                                                             # the overlay first: its rng draws as before
+        Ho = 768 + 96
+        ov_rgb, ov_a = mars_storm_overlay(rng, pal, H=Ho, hq=Ho - 2 * BG.CONTINUE_ROWS)
+        g_rgb, g_a = _canyon_near(np.random.default_rng(seed + 185), pal, haze=0.30)          # D-169: ground under the dust (own rng)
+        rgb = np.zeros((Ho, W, 3), np.float32)
+        a = np.zeros((Ho, W), np.float32)
+        rgb[Ho - g_rgb.shape[0]:], a[Ho - g_a.shape[0]:] = g_rgb, g_a
+        oa = ov_a[..., None]
+        out_a = ov_a + a * (1 - ov_a)
+        prem = ov_rgb * oa + rgb * a[..., None] * (1 - oa)                                    # straight alpha in, straight alpha out (D-147)
+        rgb = np.where(out_a[..., None] > 1e-4, prem / np.maximum(out_a[..., None], 1e-4), 0).astype(np.float32)
+        out.append(BG.tile_bottom(rgb, out_a.astype(np.float32)))
+        return out, L01 + [{"n": 2, "parallax": 0.7, "y_m": -2.0, "continue_rows": BG.CONTINUE_ROWS}]
+    out.append(_canyon_near(rng, pal))
+    return out, L01 + [{"n": 2, "parallax": 0.6, "y_m": -2.0, "continue_rows": BG.CONTINUE_ROWS}]
+
+
+def _canyon_near(rng, pal, haze=0.0):
+    """The canyon's near scree (B-141's layer2, D-169: 480 tall, nothing distinct in the strip's rows, the bottom 64 rows
+    tileable); haze > 0 washes the colours toward the salmon sky (the dust-storm set)."""
+    H = 384 + 96
+    hq = H - 2 * BG.CONTINUE_ROWS
+    hzc = lambda c: BG._mix(c, pal["sky"], haze)  # noqa: E731
     line = BG.ridge(rng, [(3, 0.5), (7, 0.3), (15, 0.2)], base=200, amp=26)
     ground = BG._ridge_mask(H, line)
     rocks, shade, pebbles, basalt = (np.zeros((H, W), np.float32) for _ in range(4))
@@ -528,28 +548,33 @@ def mars_canyon(seed, storm=0.0):
         cx = rng.uniform(0, W)
         b = line[int(cx) % W] + rng.uniform(10, 120)
         rx, ry = rng.uniform(22, 60), rng.uniform(16, 40)
-        ell(rocks, cx, b - ry * 0.6, rx, ry, cut=0.6)
-        ell(shade, cx + rx * 0.25, b - ry * 0.35, rx * 0.8, ry * 0.55, cut=0.6)
+        if b < hq - 4:                                                                        # D-169: none in the strip's rows (draws kept)
+            ell(rocks, cx, b - ry * 0.6, rx, ry, cut=0.6)
+            ell(shade, cx + rx * 0.25, b - ry * 0.35, rx * 0.8, ry * 0.55, cut=0.6)
     for _k in range(110):
         cx = rng.uniform(0, W)
-        ell(pebbles, cx, line[int(cx) % W] + rng.uniform(8, 170), rng.uniform(3, 7), rng.uniform(2, 4))
+        cy, rx, ry = line[int(cx) % W] + rng.uniform(8, 170), rng.uniform(3, 7), rng.uniform(2, 4)
+        if cy < hq - 8:
+            ell(pebbles, cx, cy, rx, ry)
     for _k in range(18):
         cx = rng.uniform(0, W)
-        ell(basalt, cx, line[int(cx) % W] + rng.uniform(30, 150), rng.uniform(8, 16), rng.uniform(5, 10), cut=0.5)
+        cy, rx, ry = line[int(cx) % W] + rng.uniform(30, 150), rng.uniform(8, 16), rng.uniform(5, 10)
+        if cy < hq - 12:
+            ell(basalt, cx, cy, rx, ry, cut=0.5)
     stack = Stack()
-    stack.append(wash32(rng, H, ground, BG._mix(pal["red"], pal["brown"], 0.20), var=0.07, edge_dark=0.08))
-    stack.append(wash32(rng, H, rocks, BG._mix(pal["red"], pal["sky"], 0.20), var=0.06, edge_dark=0.12, bleed=1.4))
-    stack.append(wash32(rng, H, shade * rocks, BG._mix(pal["brown"], pal["red"], 0.35), var=0.04, edge_dark=0.04, bleed=2.0))
-    stack.append(wash32(rng, H, pebbles * ground, BG._mix(pal["sky"], pal["brown"], 0.40), var=0.04, edge_dark=0.10, bleed=0.8))
-    stack.append(wash32(rng, H, basalt * ground, BG._mix(pal["brown"], pal["sky"], 0.25), var=0.04, edge_dark=0.12, bleed=0.9))
-    out.append(finish(stack, rng, H))
-    return out, [{"n": 0, "parallax": 0.1, "y_m": -2.0}, {"n": 1, "parallax": 0.35, "y_m": -1.0},
-                 {"n": 2, "parallax": 0.6, "y_m": -0.5}]
+    stack.append(wash32(rng, H, ground, hzc(BG._mix(pal["red"], pal["brown"], 0.20)), var=0.07, edge_dark=0.08))
+    stack.append(wash32(rng, H, rocks, hzc(BG._mix(pal["red"], pal["sky"], 0.20)), var=0.06, edge_dark=0.12, bleed=1.4))
+    stack.append(wash32(rng, H, shade * rocks, hzc(BG._mix(pal["brown"], pal["red"], 0.35)), var=0.04, edge_dark=0.04, bleed=2.0))
+    stack.append(wash32(rng, H, pebbles * ground, hzc(BG._mix(pal["sky"], pal["brown"], 0.40)), var=0.04, edge_dark=0.10, bleed=0.8))
+    stack.append(wash32(rng, H, basalt * ground, hzc(BG._mix(pal["brown"], pal["sky"], 0.25)), var=0.04, edge_dark=0.12, bleed=0.9))
+    return BG.tile_bottom(*finish(stack, rng, H))
 
 
-def mars_storm_overlay(rng, pal, H=768):
+def mars_storm_overlay(rng, pal, H=768, hq=None):
     """The dust storm as the NEAR layer (overlays that must read through the stack go on the nearest layer): a thin
-    veil over everything, rolling billows low down with darker undersides, long drawn wind streaks; translucent."""
+    veil over everything, rolling billows low down with darker undersides, long drawn wind streaks; translucent.
+    hq (B-185 / D-169): no billow or streak reaches below this row (the tileable strip's rows), the draws kept."""
+    hq = hq or H
     y = (np.arange(H)[:, None] / H).astype(np.float32)
     ramp = np.clip((y - 0.05) / 0.45, 0, 1) * 0.18                       # the veil fades in from nothing at the top
     bill, under = np.zeros((H, W), np.float32), np.zeros((H, W), np.float32)
@@ -558,11 +583,14 @@ def mars_storm_overlay(rng, pal, H=768):
         for _j in range(4):
             x, y_ = cx + rng.uniform(-160, 160), cy + rng.uniform(-40, 40)
             rx, ry = rng.uniform(110, 220), rng.uniform(60, 120)
-            ell(bill, x, y_, rx, ry)
-            ell(under, x + rx * 0.1, y_ + ry * 0.45, rx * 0.85, ry * 0.45)
+            if y_ + ry < hq - 4:
+                ell(bill, x, y_, rx, ry)
+                ell(under, x + rx * 0.1, y_ + ry * 0.45, rx * 0.85, ry * 0.45)
     streaks = [np.zeros((H, W), np.float32) for _ in range(3)]
     for _k in range(45):
-        ell(streaks[_k % 3], rng.uniform(0, W), rng.uniform(120, 740), rng.uniform(120, 380), rng.uniform(1.5, 4.0))
+        sx, sy, srx, sry = rng.uniform(0, W), rng.uniform(120, 740), rng.uniform(120, 380), rng.uniform(1.5, 4.0)
+        if sy + sry < hq - 4:
+            ell(streaks[_k % 3], sx, sy, srx, sry)
     stack = Stack()
     stack.append(tint(rng, H, np.ones((H, W), np.float32), BG._mix(pal["sky"], pal["mustard"], 0.25), ramp, var=0.02, edge_dark=0.0, bleed=1.0))
     stack.append(tint(rng, H, bill, BG._mix(pal["sky"], pal["offwhite"], 0.35), 0.6, var=0.05, edge_dark=0.05, bleed=6.0))
@@ -823,7 +851,9 @@ def mars_plains(seed):
     stack.append(wash32(rng, H, rocks * plain, BG._mix(pal["red"], pal["brown"], 0.35), var=0.05, edge_dark=0.10, bleed=1.2))
     out.append(finish(stack, rng, H))
     # layer2: near rust ground, boulders with shade, pebbles, ripple marks, low drifting dust
-    H = 384
+    # B-185 / D-169: 480 tall (was 384), its bottom 2 m under the line, the last 64 rows a tileable strip (continue_rows)
+    H = 384 + 96
+    hq = H - 2 * BG.CONTINUE_ROWS
     line = BG.ridge(rng, [(3, 0.5), (7, 0.3), (15, 0.2)], base=210, amp=18)
     ground = BG._ridge_mask(H, line)
     rocks, shade, pebbles, ripples, dust = (np.zeros((H, W), np.float32) for _ in range(5))
@@ -831,15 +861,20 @@ def mars_plains(seed):
         cx = rng.uniform(0, W)
         b = line[int(cx) % W] + rng.uniform(10, 120)
         rx, ry = rng.uniform(20, 54), rng.uniform(14, 34)
-        ell(rocks, cx, b - ry * 0.6, rx, ry, cut=0.6)
-        ell(shade, cx + rx * 0.25, b - ry * 0.35, rx * 0.8, ry * 0.55, cut=0.6)
+        if b < hq - 4:                                                                        # D-169: none in the strip's rows (draws kept)
+            ell(rocks, cx, b - ry * 0.6, rx, ry, cut=0.6)
+            ell(shade, cx + rx * 0.25, b - ry * 0.35, rx * 0.8, ry * 0.55, cut=0.6)
     for _k in range(90):
         cx = rng.uniform(0, W)
-        ell(pebbles, cx, line[int(cx) % W] + rng.uniform(8, 170), rng.uniform(3, 7), rng.uniform(2, 4))
+        cy, rx, ry = line[int(cx) % W] + rng.uniform(8, 170), rng.uniform(3, 7), rng.uniform(2, 4)
+        if cy < hq - 8:
+            ell(pebbles, cx, cy, rx, ry)
     for _k in range(40):                                                                  # ripple marks (thin darker arcs)
         cx, cy = rng.uniform(0, W), 0.0
         cy = line[int(cx) % W] + rng.uniform(20, 160)
-        ell(ripples, cx, cy, rng.uniform(20, 46), 1.2)
+        rx = rng.uniform(20, 46)
+        if cy < hq - 8:
+            ell(ripples, cx, cy, rx, 1.2)
     for _k in range(10):                                                                  # low drifting dust
         cx = rng.uniform(0, W)
         ell(dust, cx, line[int(cx) % W] - rng.uniform(2, 14), rng.uniform(120, 260), rng.uniform(5, 10))
@@ -850,9 +885,9 @@ def mars_plains(seed):
     stack.append(wash32(rng, H, shade * rocks, BG._mix(pal["brown"], pal["red"], 0.35), var=0.04, edge_dark=0.04, bleed=2.0))
     stack.append(wash32(rng, H, pebbles * ground, BG._mix(pal["sky"], pal["brown"], 0.40), var=0.04, edge_dark=0.10, bleed=0.8))
     stack.append(tint(rng, H, dust, BG._mix(pal["sky"], pal["offwhite"], 0.3), 0.4, var=0.03, edge_dark=0.0, bleed=4.0))
-    out.append(finish(stack, rng, H))
+    out.append(BG.tile_bottom(*finish(stack, rng, H)))
     return out, [{"n": 0, "parallax": 0.1, "y_m": -2.0}, {"n": 1, "parallax": 0.35, "y_m": -1.0},
-                 {"n": 2, "parallax": 0.6, "y_m": -0.5}]
+                 {"n": 2, "parallax": 0.6, "y_m": -2.0, "continue_rows": BG.CONTINUE_ROWS}]   # B-185 / D-169
 
 
 def merc_sky(rng, pal, H, mode):
@@ -934,7 +969,9 @@ def mercury_scene(seed, mode="day"):
         stack.append(tint(rng, H, glint * BG._ridge_mask(H, near), pal["teal"], 0.9, var=0.03, edge_dark=0.1, bleed=0.8))
     out.append(finish(stack, rng, H))
     # layer2: near regolith, rocks with hard shadows; twilight: Glassreed tufts; day: heat-shimmer dabs
-    H = 384
+    # B-185 / D-169: 480 tall (was 384), its bottom 2 m under the line, the last 64 rows a tileable strip (continue_rows)
+    H = 384 + 96
+    hq = H - 2 * BG.CONTINUE_ROWS
     stack = Stack()
     line = BG.ridge(rng, [(3, 0.5), (7, 0.3), (15, 0.2)], base=210, amp=20)
     ground = BG._ridge_mask(H, line)
@@ -944,8 +981,9 @@ def mercury_scene(seed, mode="day"):
         cx = rng.uniform(0, W)
         b = line[int(cx) % W] + rng.uniform(10, 130)
         rx, ry = rng.uniform(14, 44), rng.uniform(10, 28)
-        ell(rocks, cx, b - ry * 0.6, rx, ry, cut=0.6)
-        ell(rshade, cx - rx * 0.3, b - ry * 0.3, rx * 0.75, ry * 0.5, cut=0.6)
+        if b < hq - 4:                                                                        # D-169: none in the strip's rows (draws kept)
+            ell(rocks, cx, b - ry * 0.6, rx, ry, cut=0.6)
+            ell(rshade, cx - rx * 0.3, b - ry * 0.3, rx * 0.75, ry * 0.5, cut=0.6)
     stack.append(wash32(rng, H, rocks, BG._mix(lit, pal["offwhite"], 0.2), var=0.05, edge_dark=0.12, bleed=1.2))
     stack.append(wash32(rng, H, rshade * rocks, dark, var=0.03, edge_dark=0.03, bleed=1.0))
     if mode == "twilight":
@@ -962,9 +1000,9 @@ def mercury_scene(seed, mode="day"):
             cx = rng.uniform(0, W)
             ell(shimmer, cx, line[int(cx) % W] - rng.uniform(4, 16), rng.uniform(30, 80), rng.uniform(1.5, 3))
         stack.append(tint(rng, H, shimmer, pal["offwhite"], 0.35, var=0.0, edge_dark=0.0, bleed=1.5))
-    out.append(finish(stack, rng, H))
+    out.append(BG.tile_bottom(*finish(stack, rng, H)))
     return out, [{"n": 0, "parallax": 0.1, "y_m": -2.0}, {"n": 1, "parallax": 0.35, "y_m": -1.0},
-                 {"n": 2, "parallax": 0.6, "y_m": -0.5}]
+                 {"n": 2, "parallax": 0.6, "y_m": -2.0, "continue_rows": BG.CONTINUE_ROWS}]   # B-185 / D-169
 
 
 def mercury_day(seed):
@@ -1134,7 +1172,9 @@ def venus_surface(seed):
     stack.append(tint(rng, H, glints * land, pal["offwhite"], 0.55, var=0.0, edge_dark=0.0, bleed=1.0))  # glassy sheen
     out.append(finish(stack, rng, H))
     # layer2: near basalt with glassy highlights, heat shimmer, acid-rain streaks that stop mid-air
-    H = 384
+    # B-185 / D-169: 480 tall (was 384), its bottom 2 m under the line, the last 64 rows a tileable strip (continue_rows)
+    H = 384 + 96
+    hq = H - 2 * BG.CONTINUE_ROWS
     stack = Stack()
     line = BG.ridge(rng, [(3, 0.5), (7, 0.3), (15, 0.2)], base=220, amp=20)
     ground = BG._ridge_mask(H, line)
@@ -1144,8 +1184,9 @@ def venus_surface(seed):
         cx = rng.uniform(0, W)
         b = line[int(cx) % W] + rng.uniform(10, 130)
         rx, ry = rng.uniform(16, 46), rng.uniform(10, 28)
-        ell(rocks, cx, b - ry * 0.6, rx, ry, cut=0.6)
-        ell(sheen, cx - rx * 0.25, b - ry * 0.95, rx * 0.4, ry * 0.18)
+        if b < hq - 4:                                                                        # D-169: none in the strip's rows (draws kept)
+            ell(rocks, cx, b - ry * 0.6, rx, ry, cut=0.6)
+            ell(sheen, cx - rx * 0.25, b - ry * 0.95, rx * 0.4, ry * 0.18)
     stack.append(wash32(rng, H, rocks, BG._mix(pal["brown"], pal["sky"], 0.15), var=0.05, edge_dark=0.12, bleed=1.2))
     stack.append(tint(rng, H, sheen * rocks, pal["offwhite"], 0.6, var=0.0, edge_dark=0.0, bleed=0.8))
     rain = np.zeros((H, W), np.float32)
@@ -1154,9 +1195,9 @@ def venus_surface(seed):
         for t in range(int(rng.uniform(10, 26))):
             rain[min(int(cy + t), H - 1), int(cx + 0.3 * t) % W] = 1.0
     stack.append(tint(rng, H, rain, BG._mix(pal["teal"], pal["offwhite"], 0.4), 0.5, var=0.0, edge_dark=0.0, bleed=0.6))
-    out.append(finish(stack, rng, H))
+    out.append(BG.tile_bottom(*finish(stack, rng, H)))
     return out, [{"n": 0, "parallax": 0.1, "y_m": -2.0}, {"n": 1, "parallax": 0.35, "y_m": -1.0},
-                 {"n": 2, "parallax": 0.6, "y_m": -0.5}]
+                 {"n": 2, "parallax": 0.6, "y_m": -2.0, "continue_rows": BG.CONTINUE_ROWS}]   # B-185 / D-169
 
 
 TAU_BG = 2 * math.pi
