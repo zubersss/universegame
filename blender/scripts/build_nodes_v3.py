@@ -60,8 +60,16 @@ def colours(planet):
                 "salt": P["offwhite"], "salt_sh": sh("offwhite"), "ice": P["offwhite"], "ice_sh": sh("teal"), "ice_dp": P["teal"],
                 "dust": P["red"], "dust_sh": sh("red"), "soil": dp("red"), "cavity": P["brown"], "cavity_sh": dp("red"),
                 "capsule": P["offwhite"], "capsule_sh": sh("offwhite"), "stripe": P["red"], "dish": P["teal"],
-                "lamp": P["red"], "lamp_on": P["mustard"], "glint": P["offwhite"], "dark": P["brown"]}
-    raise ValueError(f"B-176: {planet}'s nodes come after Mars's preview")
+                "lamp": P["red"], "lamp_on": P["mustard"], "glint": P["offwhite"], "dark": P["brown"],
+                "xpale": P["offwhite"], "xpale_sh": sh("offwhite")}
+    if planet == "mercury":                     # LEAD 05:3x: solarite (nodes and pockets), nickel; an old sunshade probe
+        return {"rock": sh("sky"), "rock_sh": dp("sky"), "rock_hi": P["sky"], "solar": P["mustard"], "solar_sh": sh("mustard"),
+                "solar_hi": P["offwhite"], "nickel": sh("offwhite"), "nickel_sh": dp("offwhite"), "nickel_hi": P["offwhite"],
+                "dust": P["offwhite"], "dust_sh": sh("offwhite"), "soil": sh("offwhite"), "cavity": P["brown"], "cavity_sh": dp("red"),
+                "capsule": P["offwhite"], "capsule_sh": sh("offwhite"), "panel": P["teal"], "lamp": P["red"], "lamp_on": P["mustard"],
+                "glint": P["offwhite"], "dark": P["brown"], "ice": P["offwhite"], "ice_sh": P["sky"],
+                "xpale": P["offwhite"], "xpale_sh": sh("offwhite")}
+    raise ValueError(f"B-176: {planet}'s nodes come after Mercury's preview")
 
 
 def mats(gp, planet):
@@ -358,21 +366,109 @@ def draw_beacon(d, M, k):
     G.stroke(d, [(-0.33, 0.02), (0.30, -0.14), (0.31, -0.08), (-0.31, 0.09)], M["stripe"], 0.0, cyclic=True)
     G.stroke(d, body, M["ink"], O, cyclic=True)
     G.seam(d, [(-0.33, 0.02), (0.30, -0.14)], M["ink"])
-    G.rivets(d, [(-0.18, 0.15), (0.05, 0.2), (0.2, 0.08)], M["ink"], size=0.03)
+    G.stroke(d, [(-0.30, 0.10), (-0.10, 0.07), (-0.08, 0.25), (-0.26, 0.29)], M["ink"], I, cyclic=True)   # a hatch outline, off-centre
+    G.seam(d, [(-0.28, 0.20), (-0.24, 0.19)], M["ink"])
     G.seam(d, [(0.08, 0.24), (0.16, 0.36), (0.26, 0.38)], M["ink"], radius=O)                # the bent strut
     dish = [(0.16, 0.50), (0.36, 0.30), (0.42, 0.40), (0.26, 0.56)]
     G.stroke(d, dish, M["dish_i"], O, cyclic=True)
     G.seam(d, [(0.22, 0.44), (0.35, 0.33)], M["ink"])
     lit = k > 0 and k % 2 == 1
-    G.stroke(d, G.lumpy_ellipse(-0.12, 0.22, 0.04, 0.04, n=12, lump=0.0), M["lamp_on_i" if lit else "lamp_i"], I, cyclic=True)
+    G.stroke(d, G.lumpy_ellipse(0.43, 0.57, 0.035, 0.035, n=12, lump=0.0), M["lamp_on_i" if lit else "lamp_i"], I, cyclic=True)   # on the dish's tip
     G.stroke(d, [(-0.5, -0.32), (0.5, -0.36), (0.5, -0.16), (-0.5, -0.10)], M["soil"], 0.0, cyclic=True)
     G.seam(d, [(-0.5, -0.10), (0.5, -0.16)], M["ink"])
     if k > 0 and k % 4 == 2:
-        star(d, M, 0.33, 0.45, 0.07)
+        star(d, M, 0.30, 0.42, 0.07)
+
+
+# ---------------------------------------------------------------- Mercury (LEAD 05:3x: solarite as nodes and pockets - the Beam cuts it in
+# the twilight window - and nickel; a relic)
+
+def _prism(d, M, bx, bz, ln, a_deg, w, fill, shade, cut=False):
+    """A crystal prism from (bx, bz): a lit right face, a shaded left face, the facet seam; cut = a flat beam-cut top."""
+    a = math.radians(a_deg)
+    tx, tz = bx + ln * math.sin(a), bz + ln * math.cos(a)
+    nx, nz = math.cos(a) * w, -math.sin(a) * w
+    tip = (tx + (0.05 if cut else 0.45) * w * math.sin(a), tz + (0.05 if cut else 0.45) * w * math.cos(a))
+    body = [(bx - nx, bz - nz), (tx - nx, tz - nz), tip, (tx + nx, tz + nz), (bx + nx, bz + nz)]
+    G.stroke(d, body, M[fill], 0.0, cyclic=True)
+    G.stroke(d, [(bx - nx, bz - nz), (tx - nx, tz - nz), tip, (tx, tz), (bx, bz)], M[shade], 0.0, cyclic=True)
+    G.stroke(d, body, M["ink"], O, cyclic=True)
+    G.seam(d, [(bx, bz), (tx, tz), tip], M["ink"])
+    if cut:                                                                                  # the beam's glowing cut face
+        G.stroke(d, G.lumpy_ellipse(tx, tz, w * 0.95, w * 0.35, n=12, lump=0.0, rot=-a), M["solar_hi_i"], I, cyclic=True)
+    return tx, tz
+
+
+def node_solarite(d, M, state, k=0):
+    """A cluster of golden solarite prisms from a breccia base (the B-148 solarite look, bolder); harvested: beam-cut stumps."""
+    mound(d, M, 0.68, 0.24, 16)
+    prisms = [(-0.48, 0.42, -30, 0.09), (0.47, 0.46, 28, 0.09), (-0.27, 0.74, -16, 0.12), (0.27, 0.82, 13, 0.12), (0.0, 1.02, -3, 0.15)]
+    spots = []
+    for j, (x, ln, a_deg, w) in enumerate(prisms):
+        if state == "harvested":
+            _prism(d, M, x, 0.14, 0.16 + 0.03 * (j % 2), a_deg * 0.5, w, "solar", "solar_sh", cut=True)
+        else:
+            tx, tz = _prism(d, M, x, 0.14, ln, a_deg, w, "solar", "solar_sh")
+            spots.append((tx, tz - 0.06))
+    return spots
+
+
+def node_nickel(d, M, state, k=0):
+    """A nickel-iron meteorite half-sunk in its crater rim: a rounded silver-grey lump with thumbprint dimples and a lit
+    sheen, the cream regolith rim heaped in front; harvested: a smaller chunk with chip marks."""
+    full = state != "harvested"
+    cx, cz, rx, rz = (0.0, 0.55, 0.56, 0.52) if full else (0.05, 0.30, 0.36, 0.28)
+    blob = [(x, max(z, 0.10)) for x, z in G.lumpy_ellipse(cx, cz, rx, rz, n=34, lump=0.07, seed=81)]
+    G.stroke(d, blob, M["nickel"], 0.0, cyclic=True)
+    G.stroke(d, [(x, z) for x, z in G.lumpy_ellipse(cx - rx * 0.30, cz - rz * 0.25, rx * 0.62, rz * 0.62, n=20, lump=0.05, seed=82)
+                 if z >= 0.10] or [(0, 0.1)], M["nickel_sh"], 0.0, cyclic=True)
+    G.stroke(d, G.lumpy_ellipse(cx + rx * 0.35, cz + rz * 0.5, rx * 0.28, rz * 0.12, n=12, lump=0.05, seed=83, rot=-0.5), M["nickel_hi"], 0.0,
+             cyclic=True)
+    rnd = random.Random(84)
+    for q in range(7 if full else 3):                                                        # thumbprint dimples
+        x, z = cx + rnd.uniform(-0.6, 0.6) * rx, cz + rnd.uniform(-0.45, 0.55) * rz
+        r = rnd.uniform(0.05, 0.08) * (1.0 if full else 0.8)
+        G.stroke(d, G.lumpy_ellipse(x, z, r, r * 0.8, n=12, lump=0.06, seed=q), M["nickel_sh_i"], I, cyclic=True)
+        G.stroke(d, G.lumpy_ellipse(x + r * 0.3, z + r * 0.3, r * 0.35, r * 0.25, n=8, lump=0.0), M["nickel_hi"], 0.0, cyclic=True)
+    G.stroke(d, blob, M["ink"], O, cyclic=True)
+    if not full:
+        for x in (-0.15, 0.2):
+            G.seam(d, [(x - 0.06, cz + rz * 0.6), (x, cz + rz * 0.35), (x + 0.06, cz + rz * 0.6)], M["ink"])
+    xs = [-0.86 + 1.72 * i / 30 for i in range(31)]                                            # the crater rim in front
+    rim = [(x, 0.20 * max(0.0, 1 - (x / 0.86) ** 2) ** 0.5 * (0.75 + 0.25 * math.cos(2.4 * x))) for x in xs]
+    G.stroke(d, rim + [(0.86, -0.02), (-0.86, -0.02)], M["dust"], 0.0, cyclic=True)
+    G.stroke(d, [(x, z * 0.45) for x, z in rim] + [(0.86, -0.02), (-0.86, -0.02)], M["dust_sh"], 0.0, cyclic=True)
+    G.stroke(d, rim, M["ink"], O)
+    return [(cx + rx * 0.4, cz + rz * 0.55), (cx - rx * 0.2, cz + rz * 0.7)] if full else [(cx + rx * 0.3, cz + rz * 0.5)]
+
+
+def draw_sunprobe(d, M, k):
+    """Mercury's relic: an old probe half-buried in the regolith, its curved cloth sunshade still raised, a teal solar
+    panel, its lamp blinking on the glint clip."""
+    box_ = [(-0.30, -0.16), (0.22, -0.22), (0.26, 0.16), (-0.26, 0.22)]
+    G.stroke(d, box_, M["capsule"], 0.0, cyclic=True)
+    G.stroke(d, [(-0.30, -0.16), (-0.04, -0.19), (-0.02, 0.19), (-0.26, 0.22)], M["capsule_sh"], 0.0, cyclic=True)
+    G.stroke(d, box_, M["ink"], O, cyclic=True)
+    G.seam(d, [(-0.28, 0.03), (0.24, -0.03)], M["ink"])
+    pnl = [(0.24, 0.02), (0.58, 0.14), (0.54, 0.30), (0.22, 0.16)]                             # the solar panel
+    G.stroke(d, pnl, M["panel_i"], O, cyclic=True)
+    for t in (0.33, 0.66):
+        G.seam(d, [(0.24 + 0.34 * t, 0.02 + 0.12 * t), (0.22 + 0.32 * t, 0.16 + 0.14 * t)], M["ink"])
+    shade = [(-0.42 + 0.84 * i / 16, 0.40 + 0.12 * math.sin(math.pi * i / 16)) for i in range(17)]   # the curved sunshade
+    G.stroke(d, shade + [(x, z - 0.07) for x, z in shade[::-1]], M["capsule_i"], O, cyclic=True)
+    G.seam(d, [(-0.25, 0.22), (-0.30, 0.38)], M["ink"], radius=O)
+    G.seam(d, [(0.10, 0.20), (0.12, 0.44)], M["ink"], radius=O)
+    lit = k > 0 and k % 2 == 1
+    G.stroke(d, G.lumpy_ellipse(0.56, 0.31, 0.035, 0.035, n=12, lump=0.0), M["lamp_on_i" if lit else "lamp_i"], I, cyclic=True)   # on the panel's corner
+    G.stroke(d, [(-0.5, -0.34), (0.5, -0.38), (0.5, -0.14), (-0.5, -0.08)], M["soil"], 0.0, cyclic=True)
+    G.seam(d, [(-0.5, -0.08), (0.5, -0.14)], M["ink"])
+    if k > 0 and k % 4 == 2:
+        star(d, M, 0.50, 0.26, 0.07)
 
 
 PLANET_NODES = {"earth": {"iron": node_iron, "copper": node_copper, "carbon": node_carbon, "silica": node_silica, "water_ice": node_water_ice},
-                "mars": {"hematite": node_hematite, "perchlorate": node_perchlorate, "water_ice": node_mars_ice}}
+                "mars": {"hematite": node_hematite, "perchlorate": node_perchlorate, "water_ice": node_mars_ice},
+                "mercury": {"solarite": node_solarite, "nickel": node_nickel}}
 NODES = PLANET_NODES["earth"]
 
 
@@ -432,6 +528,15 @@ def draw_pocket(item):
         elif item == "perchlorate":                                                          # salt crystal rosettes
             for j, (x, z) in enumerate(((-0.25, -0.22), (0.05, -0.26), (0.30, -0.16), (-0.05, 0.04))):
                 spots.append(_rosette(d, M, x, z, 0.16, 70 + j)[2])
+        elif item == "solarite":                                                             # golden prisms packed in the pocket
+            for j, (x, a_deg) in enumerate(((-0.26, -22), (-0.02, -4), (0.20, 14), (0.36, 32))):
+                spots.append(_prism(d, M, x, -0.30, 0.32 if j % 2 else 0.40, a_deg, 0.065, "solar", "solar_sh"))
+        elif item == "nickel":                                                               # nickel-iron nuggets
+            for j in range(6):
+                x, z, r = rnd.uniform(-0.32, 0.32), rnd.uniform(-0.22, 0.18), rnd.uniform(0.08, 0.12)
+                G.stroke(d, G.lumpy_ellipse(x, z, r, r * 0.8, n=14, lump=0.08, seed=j), M["nickel_i"], I, cyclic=True)
+                G.stroke(d, G.lumpy_ellipse(x + r * 0.3, z + r * 0.3, r * 0.3, r * 0.2, n=8, lump=0.0), M["nickel_hi"], 0.0, cyclic=True)
+                spots.append((x + r * 0.3, z + r * 0.3))
         else:                                                                                # an ice lens filling the pocket
             G.stroke(d, G.lumpy_ellipse(0.0, -0.02, 0.46, 0.30, n=24, lump=0.05, seed=9), M["ice_i"], I, cyclic=True)
             G.stroke(d, G.lumpy_ellipse(-0.1, -0.08, 0.28, 0.14, n=16, lump=0.04, seed=10), M["ice_sh"], 0.0, cyclic=True)
@@ -489,7 +594,12 @@ def draw_vault(d, M, k):
         G.stroke(d, [(0.95 * math.cos(a), 0.95 * math.sin(a)) for a in [math.pi * (1.1 + 0.3 * i / 10) for i in range(11)]], M["ink"], I)
 
 
-def draw_x(d, M, k):
+def draw_x_pale(d, M, k):
+    """scan_x_pale (LEAD 05:4x): the same X in cream with dark ink edges, for grounds where the red one vanishes (Mars...)."""
+    draw_x(d, M, k, fill="xpale", shade="xpale_sh")
+
+
+def draw_x(d, M, k, fill="xred", shade="xred_sh"):
     """The Survey scan's X painted on the ground: two crossed red brush strokes, pulsing on twos."""
     s = 1.0 + 0.10 * math.sin(TAU * k / 8)
     for sgn in (1, -1):
@@ -500,11 +610,11 @@ def draw_x(d, M, k):
         cz = 0.30
         stroke_ = [(-L * ux - w * nx, cz - L * uz - w * nz), (L * ux - w * nx * 0.7, cz + L * uz - w * nz * 0.7),
                    (L * ux + w * nx * 0.7, cz + L * uz + w * nz * 0.7), (-L * ux + w * nx, cz - L * uz + w * nz)]
-        G.stroke(d, stroke_, M["xred"], 0.0, cyclic=True)
-        G.stroke(d, [stroke_[0], stroke_[1], ((stroke_[0][0] + stroke_[1][0]) / 2, (stroke_[0][1] + stroke_[1][1]) / 2 - 0.01)], M["xred_sh"], 0.0, cyclic=True)
+        G.stroke(d, stroke_, M[fill], 0.0, cyclic=True)
+        G.stroke(d, [stroke_[0], stroke_[1], ((stroke_[0][0] + stroke_[1][0]) / 2, (stroke_[0][1] + stroke_[1][1]) / 2 - 0.01)], M[shade], 0.0, cyclic=True)
         G.stroke(d, stroke_, M["ink"], O, cyclic=True)
         G.seam(d, [(-L * ux * 0.6 + w * nx * 0.3, cz - L * uz * 0.6 + w * nz * 0.3), (L * ux * 0.5 + w * nx * 0.3, cz + L * uz * 0.5 + w * nz * 0.3)], M["ink"])   # a brush streak
-    G.stroke(d, G.lumpy_ellipse(0.0, 0.02, 0.26 * s, 0.035, n=20, lump=0.02, seed=2), M["xred_sh"], 0.0, cyclic=True)   # its shadow on the ground
+    G.stroke(d, G.lumpy_ellipse(0.0, 0.02, 0.26 * s, 0.035, n=20, lump=0.02, seed=2), M[shade], 0.0, cyclic=True)   # its shadow on the ground
 
 
 # ---------------------------------------------------------------- the table
@@ -512,8 +622,11 @@ def draw_x(d, M, k):
 RELICS = {"earth": {"data_cache": (draw_cache, 96, 80, (0.5, 0.5), [("full", 1, False), ("glint", 8, True)]),
                     "vault_door": (draw_vault, 128, 128, (0.5, 0.5), [("closed", 1, False), ("open", 6, False)]),
                     "scan_x": (draw_x, 64, 64, (0.5, 6 / 64), [("pulse", 8, True)])},
-          "mars": {"lander_beacon": (draw_beacon, 96, 96, (0.5, 0.5), [("full", 1, False), ("glint", 8, True)])}}
-RELIC_AT = {"earth": {"data_cache": (1450, 120), "vault_door": (1700, 250), "scan_x": (660, 2)}, "mars": {"lander_beacon": (1450, 150)}}
+          "mars": {"lander_beacon": (draw_beacon, 96, 96, (0.5, 0.5), [("full", 1, False), ("glint", 8, True)]),
+                   "scan_x_pale": (draw_x_pale, 64, 64, (0.5, 6 / 64), [("pulse", 8, True)])},
+          "mercury": {"sunshade_probe": (draw_sunprobe, 96, 96, (0.5, 0.5), [("full", 1, False), ("glint", 8, True)])}}
+RELIC_AT = {"earth": {"data_cache": (1450, 120), "vault_door": (1700, 250), "scan_x": (660, 2)}, "mars": {"lander_beacon": (1450, 150), "scan_x_pale": (410, 2)},
+            "mercury": {"sunshade_probe": (1450, 150)}}
 _PC = {}
 
 
