@@ -5,12 +5,12 @@ Top-down: x right, z up the screen; light from the upper right (shadow tones on 
 Units are the space view's: 64 px per unit, the v2 footprints (Waystation.Size 14 u across, centre origin; belt rocks
 drawn 4 u across, UNITY scales each instance to 2-12 u as it does the models).
 
-  waystation       896x896, idle 4 (loop)   Earth, Halcyon Freight, Earth palette in the camp-set look: a cream docking ring
+  waystation       896x896, lamps 4 (loop)  Earth, Halcyon Freight, Earth palette in the camp-set look: a cream docking ring
                    with teal panels and a lamp chase, four teal spokes, a mustard hub with a red Halcyon band and a hatch,
                    the cargo deck (brown planks, crates) to the east with a lattice crane over it, two solar wings to the
                    west, the docking collar to the south (the ship docks at Size / 2 below the centre, DockingBay) with its
                    guide lamps, a beacon mast to the north.
-  waystation_mars  896x896, idle 4 (loop)   the same plan in the Mars palette with Mars parts: a rust hexagonal hub, three
+  waystation_mars  896x896, lamps 4 (loop)  the same plan in the Mars palette with Mars parts: a rust hexagonal hub, three
                    spokes, a dish antenna to the north, dust-coloured crates.
   asteroid_01..06  256x256, idle 8 (loop)   a slow tumble about the screen's vertical axis: craters slide across the face and
                    foreshorten, the silhouette breathes between its long and short side; six shapes and stones (ochre,
@@ -352,11 +352,11 @@ def draw_rock(name):
 # ---------------------------------------------------------------- the prop table + the build_props_*_v3 API
 
 # name -> (draw fn, frame w, frame h, clip, frames, planet)
-PROPS = {n: (draw_station(n), 896, 896, "idle", 4, STATIONS[n]["planet"]) for n in STATIONS}
+PROPS = {n: (draw_station(n), 896, 896, "lamps", 4, STATIONS[n]["planet"]) for n in STATIONS}   # an idle needs 8-12 frames; 8 x 896^2 overflows 2048
 PROPS.update({n: (draw_rock(n), 256, 256, "idle", ROCK_N, "mars") for n in ROCKS})
 SELF = {
-    "waystation": "idle 4: the ring's lamps chase round (every fourth lit), the guide lamps alternate, the beacon blinks",
-    "waystation_mars": "idle 4: as the Earth station; the dish's lamp blinks",
+    "waystation": "lamps 4 (loop): the ring's lamps chase round (every fourth lit), the guide lamps alternate, the beacon blinks",
+    "waystation_mars": "lamps 4 (loop): as the Earth station; the dish's lamp blinks",
 }
 SELF.update({n: "idle 8: a slow tumble (craters slide and foreshorten, the outline breathes); UNITY plays it slowly, random phase"
              for n in ROCKS})
@@ -469,7 +469,7 @@ def main(out, imgs=None, widths=None, stamp_paths=()):
     if imgs is None:
         imgs, widths = render_all()
     bgc = np.array(v3.hex_rgb(SPACE_BG), np.float32) / 255.0
-    W = 1900
+    W = 16 + ROCK_N * (256 + 8)                        # the eight rock frames at 1x (2128 px)
     # the docked Pilgrim: the top rig (12 m) drawn at 4 u = 256 px, nose up (+z)
     top = BP.PILGRIM_RIGS[1]
     ship, _w = PR.render(top, {}, 900, 420, (0.5, 0.5), ppu=64 * 4 / 12.0)
@@ -477,16 +477,32 @@ def main(out, imgs=None, widths=None, stamp_paths=()):
     ys, xs = np.nonzero(ship[..., 3])
     ship = ship[ys.min():ys.max() + 1, xs.min():xs.max() + 1]
     sh_, sw_ = ship.shape[:2]
+    lines = []                       # the per-prop checks first (before the big image: under the 300 MB lock-free cap)
+    for name in PROPS:
+        sheet, meta, probs = sheet_meta(name, imgs[name])
+        ws = widths[name] if widths else []
+        o = [w for w in ws if w[0] >= v3.OUTER_SPLIT]
+        n_ = [w for w in ws if w[0] < v3.OUTER_SPLIT]
+        rng = lambda q: f"{min(w[1] for w in q):.1f}-{max(w[2] for w in q):.1f}" if q else "-"  # noqa: E731
+        pal = v3.palette_hits(imgs[name][0], PROPS[name][5])[0] * 100       # frame 0 (a 1796^2 sheet's check holds ~150 MB)
+        lines.append(f"{name}: sheet {sheet.shape[1]}x{sheet.shape[0]}, ink {rng(o)} / {rng(n_)} px, palette {PROPS[name][5]} "
+                     f"{pal:.1f}% (frame 0), json {'valid' if not probs else 'INVALID: ' + '; '.join(probs)[:60]}; no face")
+        del sheet
     top_h = 896 + 60 + 140
-    panel = np.tile(bgc, (top_h, W, 1)).astype(np.float32)
+    heights = [top_h, 224 + 40] + [256 + 36] * len(ROCKS) + [40 + 18 * len(PROPS)]
+    img = np.empty((sum(heights), W, 3), np.float32)
+    offs = [sum(heights[:i]) for i in range(len(heights))]
+    rows = [img[o_:o_ + h_] for o_, h_ in zip(offs, heights)]
+    panel = rows[0]
+    panel[:] = bgc
     for i, name in enumerate(("waystation", "waystation_mars")):
         x0 = 30 + i * (896 + 40)
         review._over(panel, imgs[name][0], x0, 40)
         cx, cy = x0 + 448, 40 + 448 + 7 * 64               # (0, -7 u) below the centre
         review._over(panel, ship, cx - sw_ // 2, cy - sh_ // 2)
-        review._label(panel, f"{KEY.format(name)} 896x896 (14 u) at 1x, idle frame 0; the pilgrim docked at (0, -7 u)", x0, 12)
-    rows = [panel]
-    strip = np.tile(review.PAPER, (224 + 40, W, 1)).astype(np.float32)
+        review._label(panel, f"{KEY.format(name)} 896x896 (14 u) at 1x, lamps frame 0; the pilgrim docked at (0, -7 u)", x0, 12)
+    strip = rows[1]
+    strip[:] = review.PAPER
     x = 8
     for name in ("waystation", "waystation_mars"):
         for k, im in enumerate(imgs[name]):
@@ -496,36 +512,36 @@ def main(out, imgs=None, widths=None, stamp_paths=()):
             review._label(strip, str(k), x + 2, 32)
             x += q.shape[1] + 6
         x += 24
-    review._label(strip, "idle 4 at 0.25x: the lamp chase round the ring, the guide lamps, the beacon / dish lamp", 8, 8)
-    rows.append(strip)
-    for name in ROCKS:
-        row = np.tile(review.PAPER, (256 + 36, W, 1)).astype(np.float32)
+    review._label(strip, "lamps 4 at 0.25x: the lamp chase round the ring, the guide lamps, the beacon / dish lamp", 8, 8)
+    for ri, name in enumerate(ROCKS):
+        row = rows[2 + ri]
+        row[:] = review.PAPER
         for k, im in enumerate(imgs[name]):
             xx = 8 + k * (256 + 8)
             row[28:28 + 256, xx:xx + 256] = bgc
             review._over(row, im, xx, 28)
             review._label(row, str(k), xx + 2, 30)
         review._label(row, f"{KEY.format(name)} 256x256 (4 u) idle 8 at 1x: {SELF[name][:90]}", 8, 6)
-        rows.append(row)
-    foot = np.tile(review.PAPER, (40 + 18 * len(PROPS), W, 1)).astype(np.float32)
-    for i, name in enumerate(PROPS):
-        sheet, meta, probs = sheet_meta(name, imgs[name])
-        ws = widths[name] if widths else []
-        o = [w for w in ws if w[0] >= v3.OUTER_SPLIT]
-        n_ = [w for w in ws if w[0] < v3.OUTER_SPLIT]
-        rng = lambda q: f"{min(w[1] for w in q):.1f}-{max(w[2] for w in q):.1f}" if q else "-"  # noqa: E731
-        pal = v3.palette_hits(sheet, PROPS[name][5])[0] * 100
-        review._label(foot, f"{name}: sheet {sheet.shape[1]}x{sheet.shape[0]}, ink {rng(o)} / {rng(n_)} px, palette {PROPS[name][5]} "
-                            f"{pal:.1f}%, json {'valid' if not probs else 'INVALID: ' + '; '.join(probs)[:60]}; no face", 6, 8 + 18 * i)
-    rows.append(foot)
-    img = np.vstack(rows)
+    foot = rows[-1]
+    foot[:] = review.PAPER
+    for i, ln in enumerate(lines):
+        review._label(foot, ln, 6, 8 + 18 * i)
     if stamp_paths:
         review.stamp(img, stamp_paths[0], review.stale_keys())
     else:
         import time
         review.draw(img, time.strftime("%m-%d %H:%M") + " design preview (lock-free, fakegp)", 2, img.shape[0] - 16, (1.0, 1.0, 0.85))
-    review.write(out, img)
-    print("written", out, img.shape[1], "x", img.shape[0])
+    from meridian import pngio                        # review.write's to_u8 holds three float copies: convert in place
+    shape = img.shape
+    np.clip(img, 0.0, 1.0, out=img)
+    img *= 255.0
+    np.rint(img, out=img)
+    u8 = np.empty(shape[:2] + (4,), np.uint8)
+    u8[..., :3] = img
+    u8[..., 3] = 255
+    del img, rows, panel, strip, foot, row
+    pngio.write_png(out, u8)
+    print("written", out, shape[1], "x", shape[0])
 
 
 if __name__ == "__main__":

@@ -167,10 +167,16 @@ def render_frame(strokes, fw, fh, ppu, pivot=(0.5, 0.0), ss=4, seed=0, origin_x=
     acc = np.zeros((H, W, 4), np.float32)         # premultiplied
     widths = []
 
-    def over(mask, rgb, alpha=1.0):
-        a = mask.astype(np.float32)[..., None] * alpha
-        acc[..., :3] = rgb * a + acc[..., :3] * (1 - a)
-        acc[..., 3:] = a + acc[..., 3:] * (1 - a)
+    def over(mask, rgb, alpha=1.0, box=None):
+        # B-172: composite only inside the stroke's box (both masks are zero outside it, and a zero mask
+        # leaves acc unchanged), so a many-stroke 896^2 frame no longer blends the whole buffer per stroke
+        y0, y1, x0, x1 = box if box is not None else (0, H, 0, W)
+        if y1 <= y0 or x1 <= x0:
+            return
+        a = mask[y0:y1, x0:x1].astype(np.float32)[..., None] * alpha
+        sub = acc[y0:y1, x0:x1]
+        sub[..., :3] = rgb * a + sub[..., :3] * (1 - a)
+        sub[..., 3:] = a + sub[..., 3:] * (1 - a)
     k = ppu * ss
     for st in strokes:
         xz = st["xz"]
@@ -178,19 +184,24 @@ def render_frame(strokes, fw, fh, ppu, pivot=(0.5, 0.0), ss=4, seed=0, origin_x=
         py = H * (1.0 - pivot[1]) - xz[:, 1] * k
         has_fill = st["fill"] is not None and st["cyclic"] and len(xz) >= 3
         behind = bool(st.get("behind")) and has_fill
-        if has_fill and not behind:
-            over(_poly_mask(px, py, H, W), st["fill"], st.get("fill_alpha", 1.0))
+        r = None
         if st["ink"] is not None:
             r_m = jittered_radius(xz, st["radius"].astype(np.float64), seed * 7919 + st["id"], ppu)
             r = r_m * k
+        pad = (float(r.max()) * (2 if behind else 1) if r is not None else 0.0) + 3.0
+        box = (max(int(math.floor(py.min() - pad)), 0), min(int(math.ceil(py.max() + pad)) + 1, H),
+               max(int(math.floor(px.min() - pad)), 0), min(int(math.ceil(px.max() + pad)) + 1, W))
+        if has_fill and not behind:
+            over(_poly_mask(px, py, H, W), st["fill"], st.get("fill_alpha", 1.0), box)
+        if r is not None:
             if r.max() * 2 / ss >= 0.5:       # hairline 'fill-only' strokes carry ~0 radius
                 # ink behind (small parts): a 2r capsule under the fill shows exactly 2r outside the
                 # shape, the same visible width as a centred r line, and the colour keeps its area
-                over(_ink_mask(px, py, r * (2 if behind else 1), st["cyclic"], H, W), st["ink"])
+                over(_ink_mask(px, py, r * (2 if behind else 1), st["cyclic"], H, W), st["ink"], 1.0, box)
                 nom = float(np.median(st["radius"])) * ppu * 2
                 widths.append((round(nom, 2), float(r_m.min() * ppu * 2), float(r_m.max() * ppu * 2)))
         if behind:
-            over(_poly_mask(px, py, H, W), st["fill"], st.get("fill_alpha", 1.0))
+            over(_poly_mask(px, py, H, W), st["fill"], st.get("fill_alpha", 1.0), box)
     small = acc.reshape(fh, ss, fw, ss, 4).mean(axis=(1, 3))
     a = small[..., 3:4]
     rgb = np.where(a > 1e-6, small[..., :3] / np.maximum(a, 1e-6), 0.0)
