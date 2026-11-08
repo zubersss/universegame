@@ -1,0 +1,269 @@
+{
+  "key": "creatures/uranus/diamondback_colossus",
+  "style": "v3",
+  "ppu": 64,
+  "rect_origin": "bottom_left",
+  "parts": [
+    {
+      "name": "arm_l",
+      "rect": [
+        492,
+        320,
+        212,
+        228
+      ],
+      "pivot": [
+        0.8612,
+        0.1271
+      ]
+    },
+    {
+      "name": "arm_r",
+      "rect": [
+        708,
+        320,
+        212,
+        228
+      ],
+      "pivot": [
+        0.1367,
+        0.1271
+      ]
+    },
+    {
+      "name": "body",
+      "rect": [
+        0,
+        552,
+        820,
+        460
+      ],
+      "pivot": [
+        0.5016,
+        0.4865
+      ]
+    },
+    {
+      "name": "fore_l",
+      "rect": [
+        824,
+        676,
+        136,
+        336
+      ],
+      "pivot": [
+        0.6678,
+        0.1159
+      ]
+    },
+    {
+      "name": "fore_l_reach",
+      "rect": [
+        0,
+        220,
+        152,
+        328
+      ],
+      "pivot": [
+        0.5975,
+        0.1014
+      ]
+    },
+    {
+      "name": "fore_r",
+      "rect": [
+        156,
+        220,
+        168,
+        328
+      ],
+      "pivot": [
+        0.3697,
+        0.0954
+      ]
+    },
+    {
+      "name": "fore_r_reach",
+      "rect": [
+        328,
+        220,
+        160,
+        328
+      ],
+      "pivot": [
+        0.3417,
+        0.1014
+      ]
+    },
+    {
+      "name": "head",
+      "rect": [
+        0,
+        0,
+        284,
+        216
+      ],
+      "pivot": [
+        0.4367,
+        0.1532
+      ]
+    },
+    {
+      "name": "neck",
+      "rect": [
+        288,
+        56,
+        140,
+        160
+      ],
+      "pivot": [
+        0.4512,
+        0.0348
+      ]
+    }
+  ],
+  "plants": [
+    {
+      "name": "diamondback_colossus",
+      "grand": true,
+      "scale_note": "about 24 m across at 1x: a set piece in the deep (D-140: a Grand rig, 7 bones)",
+      "bones": [
+        {
+          "name": "body",
+          "part": "body",
+          "parent": null,
+          "offset_m": [
+            0.0,
+            0.0
+          ],
+          "order": 1
+        },
+        {
+          "name": "neck",
+          "part": "neck",
+          "parent": "body",
+          "offset_m": [
+            3.6,
+            2.4
+          ],
+          "order": 2
+        },
+        {
+          "name": "head",
+          "part": "head",
+          "parent": "neck",
+          "offset_m": [
+            0.0,
+            2.0
+          ],
+          "order": 3
+        },
+        {
+          "name": "arm_l",
+          "part": "arm_l",
+          "parent": "body",
+          "offset_m": [
+            -3.4,
+            1.8
+          ],
+          "order": 0
+        },
+        {
+          "name": "fore_l",
+          "part": "fore_l",
+          "parent": "arm_l",
+          "offset_m": [
+            -2.4,
+            2.6
+          ],
+          "order": 0
+        },
+        {
+          "name": "arm_r",
+          "part": "arm_r",
+          "parent": "body",
+          "offset_m": [
+            1.0,
+            2.6
+          ],
+          "order": 4
+        },
+        {
+          "name": "fore_r",
+          "part": "fore_r",
+          "parent": "arm_r",
+          "offset_m": [
+            2.4,
+            2.6
+          ],
+          "order": 5
+        }
+      ],
+      "swaps": {
+        "fore_l": [
+          "fore_l",
+          "fore_l_reach"
+        ],
+        "fore_r": [
+          "fore_r",
+          "fore_r_reach"
+        ]
+      },
+      "slots": [
+        {
+          "slot": "fore_l",
+          "bone": "fore_l",
+          "offset_m": [
+            0.0,
+            0.0
+          ],
+          "order": 0,
+          "replaces_part": true
+        },
+        {
+          "slot": "fore_r",
+          "bone": "fore_r",
+          "offset_m": [
+            0.0,
+            0.0
+          ],
+          "order": 5,
+          "replaces_part": true
+        }
+      ],
+      "idle": {
+        "type": "sway",
+        "beat_bpm": 110,
+        "cycle_beats": 4,
+        "amplitude_deg": {
+          "body": 1,
+          "neck": 2,
+          "head": 3,
+          "arm_l": 4,
+          "fore_l": 5,
+          "arm_r": 4,
+          "fore_r": 5
+        },
+        "lag": 0.7
+      },
+      "react": {
+        "radius_m": 30.0,
+        "action": "flinch",
+        "arm_deg": -18,
+        "swap": {
+          "fore_l": "fore_l",
+          "fore_r": "fore_r"
+        }
+      },
+      "actions": {
+        "reach": {
+          "per_arm": true,
+          "arm_deg": 25,
+          "fore_deg": 20,
+          "swap_state": "reach",
+          "note": "the exposed joint is the only target (UNITY)"
+        }
+      }
+    }
+  ]
+}
