@@ -2075,13 +2075,13 @@ def earth_tundra(seed):
                        clouds=2, cloud_col=pal["offwhite"], flat=True)       # LEAD 06:1x: a bluer horizon so the white hills read
     yy = np.arange(H)[:, None].astype(np.float32)
     xx = np.arange(W)[None, :] / W
-    for j, (base, amp, length, col) in enumerate(((300, 45, 230, BG._mix(pal["green"], pal["offwhite"], 0.30)),
-                                                  (380, 35, 170, BG._mix(BG._mix(pal["green"], pal["teal"], 0.5), pal["offwhite"], 0.35)))):
+    for j, (base, amp, length, col) in enumerate(((300, 45, 230, BG._mix(BG._mix(pal["green"], pal["teal"], 0.40), pal["offwhite"], 0.55)),
+                                                  (380, 35, 170, BG._mix(pal["teal"], pal["offwhite"], 0.58)))):   # a clean pale mint, not olive
         # an aurora curtain: a soft bright lower hem, its rays fading upward (LEAD 06:1x preview: the first, hanging smears read as stains)
         c = base + amp * np.sin(2 * np.pi * (2 + j) * xx + rng.uniform(0, 6.3)) + 0.35 * amp * np.sin(2 * np.pi * (5 + j) * xx + rng.uniform(0, 6.3))
         rays = np.clip(1 - (c - yy) / length, 0, 1) * (yy <= c) + np.clip(1 - (yy - c) / 8, 0, 1) * (yy > c)
-        streak = np.clip(0.5 + 0.5 * BG.periodic_noise(rng, H, 7, 320), 0, 1)               # long vertical rays
-        stack.append(wash32(rng, H, (rays ** 1.2 * streak * 0.62).astype(np.float32), col, var=0.02, edge_dark=0.0, bleed=3.0))
+        streak = np.clip(0.62 + 0.38 * BG.periodic_noise(rng, H, 8, 320), 0, 1)              # long, soft vertical rays
+        stack.append(wash32(rng, H, (rays ** 1.2 * streak * 0.58).astype(np.float32), col, var=0.02, edge_dark=0.0, bleed=4.0))
     hills = BG._ridge_mask(H, BG.ridge(rng, [(1, 0.5), (3, 0.35), (7, 0.15)], base=hz - 44, amp=34))
     stack += [wash32(rng, H, hills, BG._mix(pal["offwhite"], pal["sky"], 0.30), var=0.04, edge_dark=0.14, bleed=2.5),
               wash32(rng, H, BG._ridge_mask(H, BG.ridge(rng, [(4, 0.5)], base=hz + 2, amp=4)), snow, var=0.03, edge_dark=0.02, bleed=2.0)]
