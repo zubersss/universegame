@@ -262,15 +262,19 @@ def superionic_ice(d, M):
 def ammonia_ice(d, M):
     G.stroke(d, G.lumpy_ellipse(0.02, -0.1, 0.16, 0.13, n=16, lump=0.08, seed=121), M["mustard_sh_i"], O, cyclic=True)   # the tan core
     for x0, x1, tip, lean in ((-0.32, -0.18, 0.06, -0.12), (0.2, 0.33, 0.08, 0.12), (-0.2, -0.06, 0.3, -0.06), (0.08, 0.2, 0.26, 0.07)):
-        prism(d, M, x0, x1, -0.24, tip, "off", "green_sh", lean)                              # frosty, faintly green shards fanning out
+        prism(d, M, x0, x1, -0.24, tip, "off", "off_sh", lean)                                # white shards fanning out (rev: green_sh read green)
     glint(d, M, -0.12, 0.2, 0.025)
 
 
 def helium3_condensate(d, M):
     body = [(-0.17, -0.26), (0.17, -0.26), (0.19, -0.2), (0.19, 0.18), (0.17, 0.24), (-0.17, 0.24), (-0.19, 0.18), (-0.19, -0.2)]
-    G.stroke(d, body, M["red_sh"], 0.0, cyclic=True)                                          # the pink condensate behind glass
-    G.stroke(d, [(0.06, -0.24), (0.17, -0.24), (0.17, 0.22), (0.06, 0.22)], M["red_dp"], 0.0, cyclic=True)
-    G.stroke(d, [(-0.12, -0.18), (-0.07, -0.18), (-0.07, 0.16), (-0.12, 0.16)], M["red"], 0.0, cyclic=True)
+    G.stroke(d, body, M["off"], 0.0, cyclic=True)                                             # the glass (rev: a solid red can)
+    G.stroke(d, [(0.08, -0.24), (0.17, -0.24), (0.17, 0.22), (0.08, 0.22)], M["off_sh"], 0.0, cyclic=True)
+    lvl = 0.06                                                                                # the pink condensate, two-thirds full
+    G.stroke(d, [(-0.19, -0.2), (0.19, -0.2), (0.19, lvl), (0.05, lvl + 0.015), (-0.19, lvl)], M["red"], 0.0, cyclic=True)
+    G.stroke(d, [(0.08, -0.2), (0.19, -0.2), (0.19, lvl), (0.08, lvl + 0.01)], M["red_sh"], 0.0, cyclic=True)
+    G.seam(d, [(-0.19, lvl), (0.05, lvl + 0.015), (0.19, lvl)], M["ink"])
+    G.stroke(d, [(-0.13, -0.14), (-0.09, -0.14), (-0.09, 0.18), (-0.13, 0.18)], M["off"], 0.0, cyclic=True)   # the glass's sheen
     for zc in (-0.27, 0.25):                                                                  # the caps
         G.stroke(d, [(-0.2, zc - 0.05), (0.2, zc - 0.05), (0.2, zc + 0.05), (-0.2, zc + 0.05)], M["sky_dp_i"], I, cyclic=True)
     G.stroke(d, [(-0.07, 0.3), (0.07, 0.3), (0.06, 0.38), (-0.06, 0.38)], M["sky_sh_i"], I, cyclic=True)   # the nozzle
