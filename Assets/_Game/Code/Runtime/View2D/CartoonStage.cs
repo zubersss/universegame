@@ -17,7 +17,7 @@ namespace Meridian.View2D
         /// <summary>P-48 (D-086 / D-099): the v4 cartoon path is the game's path on converted planets; on by default. Tests of the 3D path on Earth switch it off for their run and restore it.</summary>
         public static bool Enabled = true;
         /// <summary>The planets whose v4 art path is on when Enabled (C0: Earth).</summary>
-        public static bool Converted(Meridian.Planets.PlanetId id) => id == Meridian.Planets.PlanetId.Earth || id == Meridian.Planets.PlanetId.Mars || id == Meridian.Planets.PlanetId.Mercury || id == Meridian.Planets.PlanetId.Venus || id == Meridian.Planets.PlanetId.Jupiter; // U-118: Mars joins Earth; U-123: Mercury; U-125: Venus; U-127: Jupiter
+        public static bool Converted(Meridian.Planets.PlanetId id) => id == Meridian.Planets.PlanetId.Earth || id == Meridian.Planets.PlanetId.Mars || id == Meridian.Planets.PlanetId.Mercury || id == Meridian.Planets.PlanetId.Venus || id == Meridian.Planets.PlanetId.Jupiter || id == Meridian.Planets.PlanetId.Saturn; // U-118: Mars joins Earth; U-123: Mercury; U-125: Venus; U-127: Jupiter; U-129: Saturn
 
         public const string SurveyorKey = "characters/surveyor/side";
         public const string EarthScene = "plains";
@@ -99,6 +99,20 @@ namespace Meridian.View2D
             : scene == JupiterDeck3 ? Meridian.Terrain.CloudColumn.CloudLayout.Deck2Bottom : Meridian.Terrain.CloudColumn.CloudLayout.Deck3Bottom;
         /// <summary>U-127: the Red Spot overlay's alpha at column x: 1 inside the zone, faded out over SpotFade columns past its edge. Pure.</summary>
         public const int SpotFade = 48;
+        /// <summary>U-129: the giants that share the deck machinery (the four sets by band off each band's floor, a zone overlay): Jupiter, Saturn.</summary>
+        public static bool Decked(Meridian.Planets.PlanetId p) => p == Meridian.Planets.PlanetId.Jupiter || p == Meridian.Planets.PlanetId.Saturn;
+        /// <summary>U-129 (B-157): Saturn's North Polar Hexagon overlay (the six wind-walls on layer1, the tilted rings).</summary>
+        public const string SaturnHexagonScene = "hexagon";
+        /// <summary>A decked giant's zone overlay: Jupiter's Red Spot, Saturn's Hexagon. Pure.</summary>
+        public static string OverlayFor(Meridian.Planets.PlanetId p) => p == Meridian.Planets.PlanetId.Saturn ? SaturnHexagonScene : JupiterSpotScene;
+        /// <summary>The zone overlay's alpha at column x on a decked giant. Pure.</summary>
+        public static float OverlayAlpha(Meridian.Planets.PlanetId p, int x) => p == Meridian.Planets.PlanetId.Saturn ? HexagonAlpha(x) : SpotAlpha(x);
+        /// <summary>U-129: the Hexagon overlay's alpha: 1 inside the zone, faded over SpotFade columns past its edge. Pure.</summary>
+        public static float HexagonAlpha(int x)
+        {
+            int d = Mathf.Abs(Meridian.Terrain.CloudColumn.CloudLayout.HexagonOffset(x)) - Meridian.Terrain.CloudColumn.CloudLayout.HexagonHalfWidth;
+            return d <= 0 ? 1f : CrossfadeAlpha(SpotFade - d, SpotFade);
+        }
         public static float SpotAlpha(int x)
         {
             int d = Mathf.Abs(Meridian.Terrain.CloudColumn.CloudLayout.RedSpotOffset(x)) - Meridian.Terrain.CloudColumn.CloudLayout.RedSpotHalfWidth;
@@ -106,16 +120,16 @@ namespace Meridian.View2D
         }
         /// <summary>The set a planet falls back to while a set is not exported yet (Mars: the canyon; Mercury: the twilight; Venus: the surface; Jupiter: deck1); null: the placeholder tints. Pure.</summary>
         public static string FallbackFor(Meridian.Planets.PlanetId planet) => planet == Meridian.Planets.PlanetId.Mars ? MarsFallbackScene : planet == Meridian.Planets.PlanetId.Mercury ? MercuryFallbackScene
-            : planet == Meridian.Planets.PlanetId.Venus ? VenusFallbackScene : planet == Meridian.Planets.PlanetId.Jupiter ? JupiterFallbackScene : null;
+            : planet == Meridian.Planets.PlanetId.Venus ? VenusFallbackScene : Decked(planet) ? JupiterFallbackScene : null;
         /// <summary>U-125: a set's datum: Venus's deck set hangs off the cloud deck, every other set off the ground's band datum.</summary>
         float DatumFor(string scene, float groundDatum) => planetId == Meridian.Planets.PlanetId.Venus ? VenusDatumFor(scene, groundDatum)
-            : planetId == Meridian.Planets.PlanetId.Jupiter && JupiterFloor(scene) >= 0f ? JupiterFloor(scene) : groundDatum; // U-127: each Jupiter set off its band's floor
+            : Decked(planetId) && JupiterFloor(scene) >= 0f ? JupiterFloor(scene) : groundDatum; // U-127: each Jupiter set off its band's floor
         /// <summary>Mercury's clock for the stage: the terminator's real seconds plus the hazards' offset — the clock the creatures and the flares read, so the painted band is theirs.</summary>
         public double MercuryClock => Meridian.Terrain.MercuryTerminator.Now(clock != null ? clock.GameSeconds : 0) + (hazards != null ? hazards.mercuryClockOffset : 0);
         /// <summary>The set wanted at column x now: Earth by its band, Mars by its region, Mercury by the terminator's clock.</summary>
         string SceneNow(int x) => planetId == Meridian.Planets.PlanetId.Mercury ? MercurySceneFor(x, MercuryClock, worldWidth)
             : planetId == Meridian.Planets.PlanetId.Venus ? VenusSceneFor(Layers != null && Layers.view != null ? Layers.view.transform.position.y : 0f, Scene) // U-125: by the camera's height
-            : planetId == Meridian.Planets.PlanetId.Jupiter ? JupiterSceneFor(Layers != null && Layers.view != null ? Layers.view.transform.position.y : 0f, Scene) // U-127: by the camera's band
+            : Decked(planetId) ? JupiterSceneFor(Layers != null && Layers.view != null ? Layers.view.transform.position.y : 0f, Scene) // U-127: by the camera's band
             : SceneFor(planetId, x);
         /// <summary>U-118: the B-141 storm set over the base layers on Mars; its alpha follows the dust storm, its scroll the wind.</summary>
         public ParallaxLayers StormLayers { get; private set; }
@@ -188,7 +202,7 @@ namespace Meridian.View2D
             worldWidth = config.worldWidth; clock = FindAnyObjectByType<TimeSystem>(); hazards = side.hazards; lastDawn = int.MinValue; // U-123: Mercury's set and strips follow the terminator's clock
             float entryY = side.player != null ? side.player.transform.position.y : surfaceDatum;
             Scene = config.id == Meridian.Planets.PlanetId.Venus ? VenusSceneFor(entryY, null) // U-125: the entry's height (the surface or the deck)
-                : config.id == Meridian.Planets.PlanetId.Jupiter ? JupiterSceneFor(entryY, null) // U-127: the entry's band
+                : Decked(config.id) ? JupiterSceneFor(entryY, null) // U-127: the entry's band
                 : SceneNow(side.spawnX); // U-110 / U-118 / U-123: the spawn's band (Earth), region (Mars) or terminator zone (Mercury) picks the set
             Layers.SetOrderOffset(0);
             Layers.alpha = 1f;
@@ -219,15 +233,15 @@ namespace Meridian.View2D
                 StormLayers.ConfigureFor("mars", StormScene, surfaceDatum);
                 storm = side.dustStorm;
             }
-            else if (config.id == Meridian.Planets.PlanetId.Jupiter)
+            else if (Decked(config.id))
             {
-                // U-127: the Great Red Spot's overlay (B-155 "spot", layer1 swirl arms) over the deck set on the same veil slot, faded in by the zone.
+                // U-127 / U-129: the zone overlay (Jupiter's Red Spot "spot", Saturn's "hexagon") over the deck set on the same veil slot, faded in by the zone.
                 if (StormLayers == null) { var wgo = new GameObject("CartoonStormVeil"); wgo.transform.SetParent(transform, false); StormLayers = wgo.AddComponent<ParallaxLayers>(); StormLayers.orderOffset = StormVeilOrder; }
                 StormLayers.gameObject.SetActive(true);
                 StormLayers.view = cam;
                 StormLayers.alpha = 0f;
                 StormLayers.scrollX = 0f;
-                StormLayers.ConfigureFor("jupiter", JupiterSpotScene, DatumFor(Scene, surfaceDatum));
+                StormLayers.ConfigureFor(planetName, OverlayFor(config.id), DatumFor(Scene, surfaceDatum));
                 storm = null;
             }
             else { if (StormLayers != null) StormLayers.gameObject.SetActive(false); storm = null; }
@@ -241,7 +255,8 @@ namespace Meridian.View2D
             Flora.planet = config.id; // U-110: the biome bands pick the plants
             var floraTerrain = side.terrain;
             Flora.biomeRule = config.id == Meridian.Planets.PlanetId.Mercury ? (System.Func<int, string>)(x => Meridian.Flora.FloraRigs.MercuryBiomeFor(x, MercuryClock, worldWidth))
-                : config.id == Meridian.Planets.PlanetId.Jupiter && floraTerrain != null ? (System.Func<int, string>)(x => Meridian.Flora.FloraRigs.JupiterBiomeFor(x, floraTerrain.TopSolidY(x) + 1f)) // U-127: the floe's band, or the Red Spot
+                : config.id == Meridian.Planets.PlanetId.Jupiter && floraTerrain != null ? (System.Func<int, string>)(x => Meridian.Flora.FloraRigs.JupiterBiomeFor(x, floraTerrain.TopSolidY(x) + 1f))
+                : config.id == Meridian.Planets.PlanetId.Saturn && floraTerrain != null ? (System.Func<int, string>)(x => Meridian.Flora.FloraRigs.SaturnBiomeFor(x, floraTerrain.TopSolidY(x) + 1f)) // U-129 // U-127: the floe's band, or the Red Spot
                 : null; // U-123: by the terminator's zone when placed (Venus: BiomeNameAt, vents / plains)
             // Bible §9.6: ≤ 40 animated objects in all. The reserve is what the gate counts besides the flora: the drawn surveyor, the ship's legs rig and its
             // puff sheet, one more for a prop or critter Animator in flight (D-136 (2): the 08:46 gate read 38 flora + 4 = 42).
@@ -253,7 +268,8 @@ namespace Meridian.View2D
             Ground.view = cam; Ground.terrain = side.terrain;
             Ground.Load(config.id); // U-118: the planet's strips (Earth's four, Mars's regolith + basalt + frost, Mercury's regolith + slate)
             Ground.materialRule = config.id == Meridian.Planets.PlanetId.Mercury ? (System.Func<int, byte, int>)((x, tile) => GroundStrip.MercuryStripFor(x, MercuryClock, worldWidth)) // U-123: slate in the shadow
-                : config.id == Meridian.Planets.PlanetId.Jupiter ? (System.Func<int, byte, int>)((x, tile) => GroundStrip.JupiterStripFor(x, tile)) : null; // U-127: the Red Spot's brick floes
+                : config.id == Meridian.Planets.PlanetId.Jupiter ? (System.Func<int, byte, int>)((x, tile) => GroundStrip.JupiterStripFor(x, tile))
+                : config.id == Meridian.Planets.PlanetId.Saturn ? (System.Func<int, byte, int>)((x, tile) => GroundStrip.SaturnStripFor(tile)) : null; // U-127: the Red Spot's brick floes
             Ground.SetDecks(GroundStrip.DecksFor(config.id), GroundStrip.VenusDeck); // U-125: the deck planks along Venus's floating station (none elsewhere)
             if (Meridian.Art.ModelView.CartoonMaterial != null) foreach (var mv in side.GetComponentsInChildren<Meridian.Art.ModelView>(true)) mv.Wear(Meridian.Art.ModelView.CartoonMaterial);
             // U-101: one gull (B-113) over the camp; the director keeps it (it flees and bumps like any critter).
@@ -291,9 +307,9 @@ namespace Meridian.View2D
                 int dawn = Mathf.FloorToInt(Meridian.Terrain.MercuryTerminator.Dawn(MercuryClock, worldWidth));
                 if (dawn != lastDawn) { lastDawn = dawn; Ground.Invalidate(); }
             }
-            if (Active && planetId == Meridian.Planets.PlanetId.Jupiter && StormLayers != null && StormLayers.gameObject.activeSelf && Layers != null && Layers.view != null)
+            if (Active && Decked(planetId) && StormLayers != null && StormLayers.gameObject.activeSelf && Layers != null && Layers.view != null)
             {
-                StormLayers.alpha = SpotAlpha(Mathf.FloorToInt(Layers.view.transform.position.x)); // U-127: the Red Spot overlay inside its zone
+                StormLayers.alpha = OverlayAlpha(planetId, Mathf.FloorToInt(Layers.view.transform.position.x)); // U-127 / U-129: the zone overlay inside its zone
                 return;
             }
             if (StormLayers == null || storm == null || !StormLayers.gameObject.activeSelf) return;

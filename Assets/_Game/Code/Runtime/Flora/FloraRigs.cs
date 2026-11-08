@@ -197,6 +197,16 @@ namespace Meridian.Flora
                 : band == Meridian.Terrain.CloudColumn.CloudBand.Deck1 || band == Meridian.Terrain.CloudColumn.CloudBand.Sky ? "deck1" : null;
         }
 
+        /// <summary>U-129 (B-157): Saturn's biome names — "hexagon" inside the North Polar Hexagon, else the floe's deck (deck1 / deck2 / deck3; the
+        /// deep grows nothing). Pure.</summary>
+        public static string SaturnBiomeFor(int x, float surfaceY)
+        {
+            if (Meridian.Terrain.CloudColumn.CloudLayout.InHexagon(x)) return "hexagon";
+            var band = Meridian.Terrain.CloudColumn.CloudLayout.BandAt(surfaceY);
+            return band == Meridian.Terrain.CloudColumn.CloudBand.Deck2 ? "deck2" : band == Meridian.Terrain.CloudColumn.CloudBand.Deck3 ? "deck3"
+                : band == Meridian.Terrain.CloudColumn.CloudBand.Deck1 || band == Meridian.Terrain.CloudColumn.CloudBand.Sky ? "deck1" : null;
+        }
+
         /// <summary>U-123 (B-148): Mercury's biome names for its rig set — "polar" in a cold trap, else the terminator's zone at that clock: "day", "twilight", "night". Pure.</summary>
         public static string MercuryBiomeFor(int x, double realSeconds, int width)
         {

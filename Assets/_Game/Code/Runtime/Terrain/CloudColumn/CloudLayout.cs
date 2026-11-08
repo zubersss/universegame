@@ -32,6 +32,12 @@ namespace Meridian.Terrain.CloudColumn
         public static int RedSpotOffset(int x) { int d = ((x - RedSpotCentre) % Width + Width) % Width; return d > Width / 2 ? d - Width : d; }
         public static bool InRedSpot(int x) => Mathf.Abs(RedSpotOffset(x)) <= RedSpotHalfWidth;
 
+        /// <summary>U-129 (Bible §7.7): Saturn's North Polar Hexagon, a 900 m zone of the column (x HexagonCentre ± HexagonHalfWidth, every band):
+        /// its plants are the hexagon kinds and the stage lays B-157's hexagon overlay (the wind-walls, the tilted rings) over the deck set there.</summary>
+        public const int HexagonCentre = 1024, HexagonHalfWidth = 450;
+        public static int HexagonOffset(int x) { int d = ((x - HexagonCentre) % Width + Width) % Width; return d > Width / 2 ? d - Width : d; }
+        public static bool InHexagon(int x) => Mathf.Abs(HexagonOffset(x)) <= HexagonHalfWidth;
+
         /// <summary>Space edge above the Escape Line (the planet config owns the Escape Line itself).</summary>
         public const int SpaceEdge = 1700;
         public const int SlotW = 32, SlotH = 24;

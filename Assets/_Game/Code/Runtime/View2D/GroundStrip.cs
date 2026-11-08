@@ -40,7 +40,12 @@ namespace Meridian.View2D
         public void Invalidate() => dirty = true;
         /// <summary>The planet's strip keys (Earth's four, Mars's two; other planets Earth's until their strips exist). Pure.</summary>
         public static string[] KeysFor(Meridian.Planets.PlanetId planet) => planet == Meridian.Planets.PlanetId.Mars ? MarsKeys : planet == Meridian.Planets.PlanetId.Mercury ? MercuryKeys
-            : planet == Meridian.Planets.PlanetId.Venus ? VenusKeys : planet == Meridian.Planets.PlanetId.Jupiter ? JupiterKeys : Keys;
+            : planet == Meridian.Planets.PlanetId.Venus ? VenusKeys : planet == Meridian.Planets.PlanetId.Jupiter ? JupiterKeys : planet == Meridian.Planets.PlanetId.Saturn ? SaturnKeys : Keys;
+        /// <summary>U-129 (B-157 / B-163, D-137): Saturn's two 10-frame floe strips: the water-ice floes, the ring-rock floes (the floe cores).</summary>
+        public static readonly string[] SaturnKeys = { "terrain/saturn/floe_strip_ice", "terrain/saturn/floe_strip_ring" };
+        public const int SaturnIce = 0, SaturnRing = 1;
+        /// <summary>U-129: a Saturn floe column's strip: ring rock where the core shows on top, else the ice. Pure.</summary>
+        public static int SaturnStripFor(byte topTile) => topTile == TileId.FloeCore ? SaturnRing : SaturnIce;
         /// <summary>U-127 (B-155, D-137): Jupiter's floe strips, 10 frames each (8 tiles + the two caps): the ammonia ice skin, the hardened core,
         /// the derelicts' plating (their POIs, later), the Red Spot's brick phosphorus ice.</summary>
         public static readonly string[] JupiterKeys = { "terrain/jupiter/floe_strip_ice", "terrain/jupiter/floe_strip_core", "terrain/jupiter/floe_strip_derelict", "terrain/jupiter/floe_strip_spot" };
