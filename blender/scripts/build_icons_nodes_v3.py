@@ -327,10 +327,13 @@ def m_preview(d, M, lv=1):
 
 
 def m_heat(d, M, lv=1):
-    """Heat and pressure kept off: a teal shield before a flame (more flame held back at step 2)."""
-    for x, h in ((-0.24, 0.3 + 0.04 * lv), (0.22, 0.26 + 0.04 * lv)):
-        G.stroke(d, [(x - 0.11, -0.2), (x + 0.11, -0.2), (x + 0.06, -0.2 + h * 0.6), (x, -0.2 + h + 0.12), (x - 0.06, -0.2 + h * 0.6)], M["red_i"], I, cyclic=True)
-        G.stroke(d, [(x - 0.05, -0.2), (x + 0.05, -0.2), (x, -0.2 + h * 0.6)], M["mustard"], 0.0, cyclic=True)
+    """Heat and pressure kept off: a teal shield before one big flame rising over it (rev 17:5x: two flames either side read as
+    wings); the flame is taller at step 2."""
+    up = 0.03 * (lv - 1)                                                                                                # three tongues
+    G.stroke(d, [(-0.34, -0.36), (0.32, -0.36), (0.3, 0.1), (0.22, 0.36 + up), (0.14, 0.24), (0.04, 0.44 + up), (-0.04, 0.26),
+                 (-0.14, 0.4 + up), (-0.22, 0.2), (-0.32, 0.06)], M["red_i"], I, cyclic=True)                       # over the shield
+    G.stroke(d, [(-0.24, -0.36), (0.22, -0.36), (0.2, 0.12), (0.14, 0.3 + up), (0.08, 0.22), (0.03, 0.36 + up), (-0.03, 0.22),
+                 (-0.1, 0.32 + up), (-0.18, 0.12)], M["mustard"], 0.0, cyclic=True)
     shield = [(-0.2, 0.3), (0.18, 0.3), (0.18, 0.0), (0.12, -0.2), (-0.01, -0.36), (-0.14, -0.2), (-0.2, 0.0)]
     G.stroke(d, shield, M["teal_i"], O, cyclic=True)
     G.stroke(d, [(-0.01, 0.3), (0.18, 0.3), (0.18, 0.0), (0.12, -0.2), (-0.01, -0.36)], M["teal_sh"], 0.0, cyclic=True)
@@ -344,13 +347,14 @@ def m_thrust(d, M, lv=2):
     G.stroke(d, [(-0.16, -0.12), (0.16, -0.12), (0.0, -0.12 - fl - 0.12)], M["mustard_i"], I, cyclic=True)
     G.stroke(d, [(-0.08, -0.12), (0.08, -0.12), (0.0, -0.12 - fl)], M["red"], 0.0, cyclic=True)
     G.stroke(d, [(-0.04, -0.12), (0.04, -0.12), (0.0, -0.12 - fl * 0.5)], M["off"], 0.0, cyclic=True)
-    bell = [(-0.08, 0.18), (0.08, 0.18), (0.2, -0.12), (-0.2, -0.12)]
+    hw = lambda z: 0.07 + 0.2 * ((0.18 - z) / 0.32) ** 1.8  # noqa: E731   (rev 17:5x: a flared bell; a straight one read as a pen nib)
+    zs = [0.18 - 0.32 * i / 10 for i in range(11)]
+    bell = [(-hw(z), z) for z in zs] + [(hw(z), z) for z in reversed(zs)]
     G.stroke(d, bell, M["sky_sh_i"], O, cyclic=True)
-    G.stroke(d, [(0.0, 0.18), (0.08, 0.18), (0.2, -0.12), (0.06, -0.12)], M["sky_dp"], 0.0, cyclic=True)
+    G.stroke(d, [(0.02, z) for z in zs] + [(hw(z), z) for z in reversed(zs)], M["sky_dp"], 0.0, cyclic=True)
     G.stroke(d, bell, M["ink"], O, cyclic=True)
     for z in (0.06, -0.04):                                                                                             # bands round it
-        w = 0.08 + 0.12 * (0.18 - z) / 0.3
-        G.seam(d, [(-w + 0.01, z), (w - 0.01, z)], M["ink"])
+        G.seam(d, [(-hw(z) + 0.01, z), (hw(z) - 0.01, z)], M["ink"])
     G.stroke(d, [(-0.16, 0.18), (0.16, 0.18), (0.16, 0.3), (-0.16, 0.3)], M["mustard_i"], I, cyclic=True)            # the mount
     G.stroke(d, [(-0.06, 0.3), (0.06, 0.3), (0.06, 0.4), (-0.06, 0.4)], M["sky_i"], I, cyclic=True)
     if lv >= 3:                                                                                                          # Mk3: side vanes
