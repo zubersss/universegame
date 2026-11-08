@@ -31,6 +31,9 @@ function Test-UnityEditorRunning {
 $script:WantFile = Join-Path $LockDir 'want_unity.lock'
 $script:ReleaseStamp = Join-Path $LogDir 'unity_last_release.txt'
 $script:MinFreeGB = 1.5
+# D-156 (one-off gates, LEAD-ruled): MERIDIAN_RAM_GATE_MB lowers the gate for one run; MERIDIAN_WATCH_CAP_MB stops the Editor if its working
+# set passes the cap (MERIDIAN_WATCH_FLOOR_MB: or free RAM falls under the floor); the peak is logged to logs/unity_peaks.log. Unset: unchanged.
+if ($env:MERIDIAN_RAM_GATE_MB) { $script:MinFreeGB = [math]::Round([double]$env:MERIDIAN_RAM_GATE_MB / 1024, 2) }
 # D-037 replaced the 2-minute yield window: UNITY waits for every older request (see Enter-HeavyJobLock).
 $script:WantMaxAgeMinutes = 30      # want files older than this are ignored
 $script:MaxJobMinutes = 20          # one heavy job holds the lock at most this long
@@ -118,6 +121,34 @@ function Invoke-UnityBatch([string[]]$UnityArgs, [string]$LogName, [switch]$Grap
     $all += @('-projectPath', $RepoRoot, '-logFile', $log) + $UnityArgs
     $p = Start-Process -FilePath $exe -ArgumentList $all -PassThru -NoNewWindow
     $null = $p.Handle # cache the handle, or ExitCode reads back empty after WaitForExit
+    if ($env:MERIDIAN_WATCH_CAP_MB) {
+        # D-156 watchdog: poll each second; stop the Editor (and its workers) over the cap or under the free-RAM floor; log the peaks.
+        $cap = [int]$env:MERIDIAN_WATCH_CAP_MB
+        $floor = if ($env:MERIDIAN_WATCH_FLOOR_MB) { [int]$env:MERIDIAN_WATCH_FLOOR_MB } else { 0 }
+        $peak = 0; $treePeak = 0; $minFree = [int]::MaxValue; $why = $null
+        $until = (Get-Date).AddMinutes($MaxJobMinutes)
+        while (-not $p.WaitForExit(1000)) {
+            $p.Refresh()
+            $ws = [int]($p.WorkingSet64 / 1MB)
+            $kids = @(Get-CimInstance Win32_Process -Filter "ParentProcessId=$($p.Id)" -ErrorAction SilentlyContinue)
+            $tree = $ws + [int](($kids | Measure-Object -Property WorkingSetSize -Sum).Sum / 1MB)
+            $free = [int]((Get-CimInstance Win32_OperatingSystem).FreePhysicalMemory / 1024)
+            if ($ws -gt $peak) { $peak = $ws }; if ($tree -gt $treePeak) { $treePeak = $tree }; if ($free -lt $minFree) { $minFree = $free }
+            if ($ws -gt $cap) { $why = "the Editor at $ws MB passed the $cap MB cap" }
+            elseif ($floor -gt 0 -and $free -lt $floor) { $why = "free RAM fell to $free MB (< $floor MB)" }
+            elseif ((Get-Date) -gt $until) { $why = "over $MaxJobMinutes min (D-026)" }
+            if ($why) {
+                foreach ($k in $kids) { Stop-Process -Id $k.ProcessId -Force -ErrorAction SilentlyContinue }
+                Stop-Process -Id $p.Id -Force -ErrorAction SilentlyContinue
+                break
+            }
+        }
+        $line = "{0} {1} | Editor peak {2} MB, with its workers {3} MB, min free {4} MB | cap {5} MB{6}" -f (Get-Date).ToString("s"), $LogName, $peak, $treePeak, $minFree, $cap, $(if ($why) { " | STOPPED: $why" } else { "" })
+        Add-Content -Path (Join-Path $LogDir "unity_peaks.log") -Value $line
+        Write-Host "[watchdog] $line"
+        if ($why) { Write-Host "WATCHDOG STOP (D-156): $why"; return [pscustomobject]@{ ExitCode = 137; Log = $log } }
+        return [pscustomobject]@{ ExitCode = $p.ExitCode; Log = $log }
+    }
     # D-026: one heavy job holds the lock at most 20 min.
     if (-not $p.WaitForExit($MaxJobMinutes * 60 * 1000)) {
         Stop-Process -Id $p.Id -Force -ErrorAction SilentlyContinue
