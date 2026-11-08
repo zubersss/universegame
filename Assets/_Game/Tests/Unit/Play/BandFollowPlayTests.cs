@@ -131,6 +131,7 @@ namespace Meridian.Tests
                             for (int dx = -12; dx <= 12; dx += 2) low = Mathf.Min(low, t.CurveAt(x + dx));
                             if (low > sea && here - low > dip) { dip = here - low; best = x; }
                         }
+                        if (dip <= 0f) { TestContext.Out.WriteLine($"[MERIDIAN] u164 seed {seed} {b}: no dry dip in the band (open sea): skipped"); continue; }
                         yield return CarryTo(best);
                         float until = Time.realtimeSinceStartup + 10f;
                         while ((stage.Fading || stage.Layers.placeholders.Contains(true)) && Time.realtimeSinceStartup < until) yield return null;

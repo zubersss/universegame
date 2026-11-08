@@ -200,6 +200,9 @@ namespace Meridian.Tests
             int pockets = 0;
             foreach (var q in side.finds.pockets) if (q.kind == ResourceFinds.Kind.Pocket) pockets++;
             TestContext.Out.WriteLine($"[MERIDIAN] u158 yields per 100 m of Earth: ore tiles in the top 10 m {ore * 100f / w:F2}; node items {side.finds.nodes.Count * ResourceFinds.NodeCharges * 100f / w:F2}; pocket items {pockets * ResourceFinds.PocketYield * 100f / w:F2}; nodes {side.finds.nodes.Count}, pockets {pockets}, width {w}");
+            // D-170: the items-per-minute table for the owner's page (walking at PlayerTuning.WalkSpeed, every node cut, every pocket surveyed and dug).
+            float perMin = Meridian.Player.PlayerTuning.WalkSpeed * 60f / 100f;
+            TestContext.Out.WriteLine($"[MERIDIAN] u158 items per minute at walking pace ({Meridian.Player.PlayerTuning.WalkSpeed * 60f:F0} m a minute): 0.4.8 digging {ore * 100f / w * perMin:F1}; 0.5.0 nodes {side.finds.nodes.Count * ResourceFinds.NodeCharges * 100f / w * perMin:F1}, pockets (upper bound) {pockets * ResourceFinds.PocketYield * 100f / w * perMin:F1}");
             LogAssert.NoUnexpectedReceived();
         }
     }
