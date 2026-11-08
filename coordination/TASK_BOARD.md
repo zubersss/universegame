@@ -2791,7 +2791,7 @@ Goal: Build 0.5.1 for the owner: the walking fix (U-172), Mars on smooth ground 
 Accept: BUILD OK, SMOKE OK, the probe green; the full PlayMode sweep green on the build's code; GameInfo 0.5.1.
 Files: Build/MERIDIAN_0.5.1/, coordination/reports/unity/smoke_0.5.1/
 Depends: U-172, U-169's sweep
-Lead notes: Cycle 284 (16:2x). A quick build so the owner sees the walk fix while D1 is built; LEAD writes its page and the next playtest item.
+Lead notes: Cycle 284 (16:2x). A quick build so the owner sees the walk fix while D1 is built; LEAD writes its page and the next playtest item. 17:4x (D-177): the boot-window "Frame time · Earth" row waits for flora Ready + 120 frames (as C0's); a new row "Boot settle · Earth" (the first 2 s: max ≤ 50 ms gates 0.5.1, p99 recorded this once); U-179 brings its p99 to ≤ 16.6 ms. Chunk generation's p99 2.06 → 1.49 (U-169's fill top hoisted per column) already fixed in this build.
 
 ### U-174 · UNITY · Ready · D1
 Goal: The dig run's core (Bible 5.2 §8.1, D-174), on Earth: (1) the Surface Line: 2 m under the drawn surface everywhere; a topside state (feet above it); drawn as B-203's dashed line with pegs in the cutaway when the camera is below the surface; the HUD's depth readout (0 at the line) below it; (2) depth tiers 1–5 by depth below the line with hardness ×1 / ×2 / ×4 / ×8 / ×16 on the planet's base; a Beam stroke takes 0.25 s × base × hardness ÷ Beam power, capped at 8 s, no hard gate; each tier draws its own fill (B-203; B-175's fill until then); (3) per-tier drop tables and Scrip values and weights from LEAD's docs/D1_TABLES.md (data, not code: a json / ScriptableObject LEAD can tune); (4) the pack's weight limit (full = no more pickups, a HUD cue) and the load slowing the climb (jetpack lift, reel, climb speed); (5) the Sell panel, topside only, selling the pack for Scrip (paper UI, UiKit).
@@ -2827,6 +2827,13 @@ Accept: the stroke time per planet × tier; each planet's drops follow its table
 Files: as U-159 + Mining/, Creatures/Wardens/, Tests/
 Depends: U-174
 Lead notes: Cycle 284 (16:2x).
+
+### U-179 · UNITY · Ready · D1
+Goal: The owner's first seconds (D-177): trace what loads in the first 2 s after Earth's first visible frame (U-173's gate: p99 20–21 ms there, the steady game p99 7–9 ms; likely B-195's POI sheets and the extra dig-puff sheets) and move it behind the title card / boot screen (U-120's prefetch pattern) or spread it over frames, so "Boot settle · Earth" reaches p99 ≤ 16.6 ms with no frame over 50 ms.
+Accept: the new BudgetGate row "Boot settle · Earth" green at p99 ≤ 16.6 ms, max ≤ 50 ms, two runs (D-152); the cold first boot still under 5 s (D-129); the load list before / after in the perf report.
+Files: Code/Runtime/Core/ (boot, prefetch), Art residency, Tests/
+Depends: U-173
+Lead notes: Cycle 285 (17:4x). After 0.5.1, beside U-174 (lock-free code; its check rides U-174's).
 
 ### U-154 · UNITY · Ready · C2
 Goal: P-51 (UNITY, ruled yes in cycle 279): the Builder's aerostat pieces draw the re-inked kit on the four giants: PieceSpec gains a per-planet art key, so the Deck / Strut / Lift cell pieces draw `props/common/aerostat_{deck,strut,cell}` (B-156) on Jupiter, Saturn, Uranus and Neptune and keep `props/venus/aerostat_deck` on Venus; nothing else about the pieces changes (sizes, costs, saves).
