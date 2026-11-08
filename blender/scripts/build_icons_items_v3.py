@@ -645,16 +645,26 @@ def vitriol_glass(d, M):
 
 
 def deep_diamond_tip(d, M):
-    shank = [(-0.08, -0.36), (0.08, -0.36), (0.08, -0.04), (-0.08, -0.04)]
-    G.stroke(d, shank, M["sky_dp"], 0.0, cyclic=True)
-    G.stroke(d, [(0.02, -0.36), (0.08, -0.36), (0.08, -0.04), (0.02, -0.04)], M["brown_dp"], 0.0, cyclic=True)
-    G.stroke(d, shank, M["ink"], O, cyclic=True)
-    G.stroke(d, [(-0.16, -0.06), (0.16, -0.06), (0.16, 0.0), (-0.16, 0.0)], M["sky_sh_i"], I, cyclic=True)   # the collar
-    cone = [(-0.16, 0.0), (0.16, 0.0), (0.0, 0.38)]
-    G.stroke(d, cone, M["sky"], 0.0, cyclic=True)
-    G.stroke(d, [(0.0, 0.0), (0.16, 0.0), (0.0, 0.38)], M["sky_sh"], 0.0, cyclic=True)
-    G.stroke(d, [(-0.1, 0.02), (-0.05, 0.02), (0.0, 0.3)], M["off"], 0.0, cyclic=True)
-    G.stroke(d, cone, M["ink"], O, cyclic=True)
+    """A diamond drill bit (LEAD 15:4x: the smooth cone on a shaft read as a spearhead): a ridged chuck collar, a fluted body
+    with its spiral flutes slanting round it, a stepped, blunt tip studded with diamonds."""
+    chuck = [(-0.17, -0.38), (0.17, -0.38), (0.17, -0.14), (-0.17, -0.14)]
+    G.stroke(d, chuck, M["sky_dp"], 0.0, cyclic=True)
+    G.stroke(d, [(0.06, -0.38), (0.17, -0.38), (0.17, -0.14), (0.06, -0.14)], M["brown_dp"], 0.0, cyclic=True)
+    for z in (-0.32, -0.26, -0.2):                                                            # the chuck's grip ridges
+        G.seam(d, [(-0.17, z), (0.17, z)], M["ink"])
+    G.stroke(d, chuck, M["ink"], O, cyclic=True)
+    body = [(-0.11, -0.14), (0.11, -0.14), (0.11, 0.16), (-0.11, 0.16)]
+    G.stroke(d, body, M["sky_sh"], 0.0, cyclic=True)
+    for k in range(5):                                                                        # spiral flutes, slanting round the body
+        z0 = -0.16 + k * 0.07
+        G.stroke(d, [(-0.11, z0), (-0.11, z0 + 0.03), (0.11, z0 + 0.1), (0.11, z0 + 0.07)], M["sky_dp"], 0.0, cyclic=True)
+    G.stroke(d, [(-0.11, -0.14), (0.11, -0.14), (0.11, 0.16), (-0.11, 0.16)], M["ink"], O, cyclic=True)
+    tip = [(-0.11, 0.16), (0.11, 0.16), (0.08, 0.24), (0.06, 0.24), (0.03, 0.33), (-0.03, 0.33), (-0.06, 0.24), (-0.08, 0.24)]   # stepped
+    G.stroke(d, tip, M["sky"], 0.0, cyclic=True)
+    G.stroke(d, [(0.0, 0.16), (0.11, 0.16), (0.08, 0.24), (0.06, 0.24), (0.03, 0.33), (0.0, 0.33)], M["sky_sh"], 0.0, cyclic=True)
+    G.stroke(d, tip, M["ink"], O, cyclic=True)
+    for x, z in ((-0.06, 0.2), (0.04, 0.2), (-0.01, 0.28), (0.07, 0.17), (-0.09, 0.17)):    # the diamond studs
+        G.stroke(d, [(x, z + 0.022), (x + 0.016, z), (x, z - 0.022), (x - 0.016, z)], M["off_i"], I, cyclic=True)
 
 
 def deep_core_sample(d, M):
@@ -730,7 +740,7 @@ BATCHES = {1: ["iron", "copper", "nickel", "aluminium", "carbon", "graphite", "h
                "radiation_liner", "smelter_bar_copper", "smelter_bar_iron", "solarite_capacitor", "suit_patch", "survey_module"],
            4: ["jetpack_mk2", "jetpack_mk3", "skip_drive_mk2", "thruster_mk3", "basalt", "clay", "perchlorate", "phosphorus_pigment",
                "sand", "stone", "sulfur", "vitriol_glass", "deep_diamond_tip", "deep_core_sample", "ring_rock", "living_seed", "wood"]}
-EXPORT_BATCHES = (1, 2, 3)                                                                    # only LEAD-accepted batches export
+EXPORT_BATCHES = (1, 2, 3, 4)                                                                 # only LEAD-accepted batches export
 ITEM_PLANET = {"superionic_ice": "neptune", "skip_drive_mk2": "neptune",                      # the violet is Neptune's (its 'mustard' slot)
                "helium3_condensate": "saturn"}                                                # LEAD 15:3x: its source planet; Saturn's red is
                                                                                               # the dusty rose nearest the v2 pink (Earth's coral
