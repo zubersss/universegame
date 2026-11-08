@@ -237,12 +237,21 @@ def polar_ice(d, M):
 
 
 def ring_ice(d, M):
-    pts = G.lumpy_ellipse(0.0, -0.02, 0.3, 0.33, n=24, lump=0.05, seed=111)
-    G.stroke(d, pts, M["off"], 0.0, cyclic=True)
-    G.stroke(d, [q for q in pts if q[0] + q[1] * 0.7 > 0.05] + [(0.06, -0.08)], M["sky"], 0.0, cyclic=True)
-    G.specks(d, [(-0.1, -0.12), (0.06, 0.12), (0.14, -0.18), (-0.18, 0.06)], M["ink"])
-    G.stroke(d, pts, M["ink"], O, cyclic=True)
-    glint(d, M, -0.12, 0.14)
+    """A lumpy, uneven chunk of ring ice (LEAD 15:3x: the smooth spotted oval read as an egg): white, cool shading, rime
+    crystals on its top, specks of ring grit, one glint."""
+    pts = lump(0.0, -0.03, 0.36, 0.3, 112, n=11, jit=0.18)
+    faceted(d, M, pts, "off", "off", "sky", 0.0, -0.03)
+    for j, (x, z, r) in enumerate(((-0.16, 0.2, 0.04), (-0.04, 0.24, 0.032), (0.1, 0.2, 0.036))):   # rime on the top
+        G.stroke(d, B_shard(x, z, r, 210 + j), M["off_i"], I, cyclic=True)
+    for j, (x, z) in enumerate(((0.12, -0.12), (-0.08, -0.16), (0.2, 0.02))):               # ring grit
+        G.stroke(d, G.lumpy_ellipse(x, z, 0.018, 0.013, n=8, seed=215 + j), M["sky_dp"], 0.0, cyclic=True)
+    glint(d, M, -0.17, 0.08)
+
+
+def B_shard(x, z, r, seed, sides=5):
+    rnd = random.Random(seed)
+    return [(x + r * (1 + rnd.uniform(-0.25, 0.1)) * math.cos(2 * math.pi * i / sides + rnd.uniform(-0.2, 0.2)),
+             z + r * (1 + rnd.uniform(-0.25, 0.1)) * math.sin(2 * math.pi * i / sides + rnd.uniform(-0.2, 0.2))) for i in range(sides)]
 
 
 def superionic_ice(d, M):
@@ -311,16 +320,213 @@ def oxygen(d, M):
     glint(d, M, -0.09, 0.16, 0.025)
 
 
+# ---------------------------------------------------------------- batch 3: crafted items
+
+def _top_pt(fl, fr, ft, dx, dz, u, v):
+    """A point on a 3/4 block's top face: u along the front edge, v back."""
+    return (fl + u * (fr - fl) + v * dx, ft + v * dz)
+
+
+def _quad(fl, fr, ft, dx, dz, u0, u1, v0, v1):
+    return [_top_pt(fl, fr, ft, dx, dz, u0, v0), _top_pt(fl, fr, ft, dx, dz, u1, v0),
+            _top_pt(fl, fr, ft, dx, dz, u1, v1), _top_pt(fl, fr, ft, dx, dz, u0, v1)]
+
+
+def _pad(d, M, top_m, front_m, side_m, strip, strip_sh, quilt=True):
+    """A flat pad in 3/4 view, quilted 2 x 2, a band across it."""
+    fl, fr, fb, ft, dx, dz = _box(d, M, top_m, front_m, side_m, w=0.34, h=0.08, dx=0.2, dz=0.3, cz=-0.12)
+    G.stroke(d, _quad(fl, fr, ft, dx, dz, 0.0, 1.0, 0.44, 0.58), M[strip], 0.0, cyclic=True)
+    G.stroke(d, _quad(fl, fr, ft, dx, dz, 0.6, 1.0, 0.44, 0.58), M[strip_sh], 0.0, cyclic=True)
+    if quilt:
+        G.seam(d, [_top_pt(fl, fr, ft, dx, dz, 0.5, 0.0), _top_pt(fl, fr, ft, dx, dz, 0.5, 0.44)], M["ink"])
+        G.seam(d, [_top_pt(fl, fr, ft, dx, dz, 0.5, 0.58), _top_pt(fl, fr, ft, dx, dz, 0.5, 1.0)], M["ink"])
+    G.seam(d, [_top_pt(fl, fr, ft, dx, dz, 0.0, 0.44), _top_pt(fl, fr, ft, dx, dz, 1.0, 0.44)], M["ink"])
+    G.seam(d, [_top_pt(fl, fr, ft, dx, dz, 0.0, 0.58), _top_pt(fl, fr, ft, dx, dz, 1.0, 0.58)], M["ink"])
+    _box_ink(d, M, fl, fr, fb, ft, dx, dz)
+    return fl, fr, fb, ft, dx, dz
+
+
+def _ingot(d, M, top_m, front_m, side_m, panel_m):
+    top = [(-0.3, 0.06), (0.22, 0.06), (0.36, 0.16), (-0.16, 0.16)]
+    front = [(-0.36, -0.16), (0.24, -0.16), (0.22, 0.06), (-0.3, 0.06)]
+    side = [(0.24, -0.16), (0.38, -0.06), (0.36, 0.16), (0.22, 0.06)]
+    for poly, m in ((front, front_m), (side, side_m), (top, top_m)):
+        G.stroke(d, poly, M[m], 0.0, cyclic=True)
+    G.stroke(d, [(-0.2, -0.06), (0.1, -0.06), (0.09, 0.0), (-0.19, 0.0)], M[panel_m], 0.0, cyclic=True)
+    G.stroke(d, [(-0.36, -0.16), (0.24, -0.16), (0.38, -0.06), (0.36, 0.16), (-0.16, 0.16), (-0.3, 0.06)], M["ink"], O, cyclic=True)
+    G.seam(d, [(-0.3, 0.06), (0.22, 0.06), (0.24, -0.16)], M["ink"])
+    G.seam(d, [(0.22, 0.06), (0.36, 0.16)], M["ink"])
+    glint(d, M, -0.2, 0.11, 0.022)
+
+
+def _drum(d, M, body, body_sh, band, ring):
+    """A cell lying on its side in 3/4: the body, its shaded underside, two bands, the end cap facing right."""
+    L, R, H = -0.3, 0.18, 0.2
+    G.stroke(d, [(L, -H), (R, -H), (R, H), (L, H)], M[body], 0.0, cyclic=True)
+    G.stroke(d, [(L, -H), (R, -H), (R, -H * 0.35), (L, -H * 0.35)], M[body_sh], 0.0, cyclic=True)
+    for x0 in (-0.22, 0.04):
+        G.stroke(d, [(x0, -H), (x0 + 0.07, -H), (x0 + 0.07, H), (x0, H)], M[band], I, cyclic=True)
+    for x0 in (L, R - 0.03):
+        G.stroke(d, [(x0, -H - 0.01), (x0 + 0.04, -H - 0.01), (x0 + 0.04, H + 0.01), (x0, H + 0.01)], M[ring + "_i"], I, cyclic=True)
+    cap = G.lumpy_ellipse(R + 0.02, 0.0, 0.09, H + 0.01, n=20, lump=0.0, seed=150)
+    G.stroke(d, cap, M[body_sh], 0.0, cyclic=True)
+    G.stroke(d, G.lumpy_ellipse(R + 0.03, 0.0, 0.045, H * 0.55, n=16, lump=0.0, seed=151), M[body], 0.0, cyclic=True)
+    G.stroke(d, cap, M["ink"], O, cyclic=True)
+    G.stroke(d, [(L, -H), (R, -H), (R, H), (L, H)], M["ink"], O, cyclic=True)
+    glint(d, M, -0.14, H * 0.6, 0.024)
+
+
+def _cylinder(d, M, body, body_sh, top_m, x=0.0, w=0.2, zb=-0.24, zt=0.22):
+    """An upright cylinder: body, its shaded right side, the top ellipse; -> the top ellipse."""
+    G.stroke(d, G.lumpy_ellipse(x, zb, w, w * 0.32, n=20, lump=0.0, seed=160), M[body_sh], 0.0, cyclic=True)
+    G.stroke(d, [(x - w, zb), (x + w, zb), (x + w, zt), (x - w, zt)], M[body], 0.0, cyclic=True)
+    G.stroke(d, [(x + w * 0.45, zb), (x + w, zb), (x + w, zt), (x + w * 0.45, zt)], M[body_sh], 0.0, cyclic=True)
+    top = G.lumpy_ellipse(x, zt, w, w * 0.32, n=20, lump=0.0, seed=161)
+    G.stroke(d, top, M[top_m], 0.0, cyclic=True)
+    outline = [(x - w, zt)] + [p for p in G.lumpy_ellipse(x, zb, w, w * 0.32, n=20, lump=0.0, seed=160) if p[1] <= zb] + [(x + w, zt)]
+    G.stroke(d, sorted([p for p in outline], key=lambda p: p[0]), M["ink"], O)
+    G.seam(d, [(x - w, zt), (x - w, zb)], M["ink"])
+    G.seam(d, [(x + w, zt), (x + w, zb)], M["ink"])
+    G.stroke(d, top, M["ink"], O, cyclic=True)
+    return top
+
+
+def circuit_board(d, M):
+    fl, fr, fb, ft, dx, dz = _box(d, M, "green", "green_sh", "green_dp", w=0.36, h=0.05, dx=0.18, dz=0.3, cz=-0.1)
+    for u0, u1, v0, v1 in ((0.12, 0.48, 0.35, 0.75), (0.56, 0.78, 0.12, 0.4)):              # two chips with their legs
+        G.stroke(d, _quad(fl, fr, ft, dx, dz, u0, u1, v0, v1), M["sky_dp_i"], I, cyclic=True)
+        for j in range(4):
+            u = u0 + (u1 - u0) * (j + 0.5) / 4
+            G.seam(d, [_top_pt(fl, fr, ft, dx, dz, u, v0), _top_pt(fl, fr, ft, dx, dz, u, v0 - 0.06)], M["ink"])
+    for v in (0.2, 0.86):                                                                     # traces
+        G.seam(d, [_top_pt(fl, fr, ft, dx, dz, 0.08, v), _top_pt(fl, fr, ft, dx, dz, 0.5, v), _top_pt(fl, fr, ft, dx, dz, 0.6, v + 0.05)], M["ink"])
+    lx, lz = _top_pt(fl, fr, ft, dx, dz, 0.86, 0.78)
+    G.stroke(d, G.lumpy_ellipse(lx, lz, 0.035, 0.028, n=12, seed=170), M["green_i"], I, cyclic=True)   # the LED
+    glint(d, M, lx - 0.008, lz + 0.006, 0.014)
+    _box_ink(d, M, fl, fr, fb, ft, dx, dz)
+
+
+def cryo_pad(d, M):
+    _pad(d, M, "sky", "sky_sh", "sky_dp", "teal", "teal_sh")
+
+
+def thermal_pad(d, M):
+    _pad(d, M, "mustard_sh", "mustard_dp", "brown_sh", "red", "red_sh")
+
+
+def cryo_round(d, M):
+    R = (lambda pts: [(x * math.cos(0.7) - z * math.sin(0.7), x * math.sin(0.7) + z * math.cos(0.7)) for x, z in pts])  # 40 deg up-right
+    G.stroke(d, R([(-0.36, -0.09), (0.06, -0.09), (0.06, 0.09), (-0.36, 0.09)]), M["mustard"], 0.0, cyclic=True)   # the brass casing
+    G.stroke(d, R([(-0.36, -0.09), (0.06, -0.09), (0.06, -0.03), (-0.36, -0.03)]), M["mustard_sh"], 0.0, cyclic=True)
+    G.stroke(d, R([(-0.36, -0.1), (-0.32, -0.1), (-0.32, 0.1), (-0.36, 0.1)]), M["mustard_dp_i"], I, cyclic=True)
+    G.stroke(d, R([(0.06, -0.09), (0.12, -0.09), (0.12, 0.09), (0.06, 0.09)]), M["teal_i"], I, cyclic=True)        # the glowing ring
+    nose = [(0.12, -0.09), (0.2, -0.09), (0.38, 0.0), (0.2, 0.09), (0.12, 0.09)]
+    G.stroke(d, R(nose), M["sky"], 0.0, cyclic=True)
+    G.stroke(d, R([(0.12, -0.09), (0.2, -0.09), (0.38, 0.0), (0.12, 0.0)]), M["sky_sh"], 0.0, cyclic=True)
+    G.stroke(d, R([(0.2, 0.09), (0.38, 0.0), (0.24, 0.03)]), M["off"], 0.0, cyclic=True)
+    G.stroke(d, R([(-0.36, -0.09), (0.12, -0.09), (0.2, -0.09), (0.38, 0.0), (0.2, 0.09), (0.12, 0.09), (-0.36, 0.09)]), M["ink"], O, cyclic=True)
+    G.seam(d, R([(0.12, -0.09), (0.12, 0.09)]), M["ink"])
+    glint(d, M, *R([(-0.18, 0.05)])[0], 0.02)
+
+
+def float_cell_mk1(d, M):
+    _drum(d, M, "off", "off_sh", "red", "sky_dp")
+
+
+def float_cell_mk2(d, M):
+    _drum(d, M, "sky", "sky_sh", "teal", "sky_dp")
+
+
+def polymer(d, M):
+    top = _cylinder(d, M, "off", "off_sh", "off", x=-0.04, w=0.22, zb=-0.18, zt=0.24)
+    G.stroke(d, G.lumpy_ellipse(-0.04, 0.24, 0.07, 0.025, n=14, lump=0.0, seed=180), M["sky_sh_i"], I, cyclic=True)   # the core
+    G.stroke(d, [(0.12, -0.2), (0.34, -0.3), (0.36, -0.24), (0.16, -0.12)], M["off_i"], I, cyclic=True)   # the film's loose end
+    for j, (x, z) in enumerate(((-0.24, -0.3), (0.0, -0.33))):
+        G.stroke(d, G.lumpy_ellipse(x, z, 0.05, 0.03, n=12, seed=181 + j), M["mustard_i"], I, cyclic=True)   # amber pellets
+    glint(d, M, -0.18, 0.12, 0.024)
+    _ = top
+
+
+def radiation_liner(d, M):
+    for i, (dz0, w) in enumerate(((-0.2, 0.36), (-0.1, 0.33), (0.0, 0.3))):                  # stacked lead sheets
+        fl, fr, ft = -w, w - 0.12, dz0 + 0.04
+        edge = [(fl, dz0), (fr, dz0), (fr + 0.12, dz0 + 0.1), (fr + 0.12, dz0 + 0.14), (fr, ft), (fl, ft)]
+        G.stroke(d, edge, M["sky_dp"], 0.0, cyclic=True)
+        G.stroke(d, [(fl, ft), (fr, ft), (fr + 0.12, dz0 + 0.14), (fl + 0.12, dz0 + 0.14)], M["sky_sh" if i == 2 else "sky_dp"], 0.0, cyclic=True)
+        G.stroke(d, edge + [(fl + 0.12, dz0 + 0.14)], M["ink"], O if i == 0 else I, cyclic=True)
+    cx, cz = 0.0, 0.11                                                                        # the trefoil disc on top
+    G.stroke(d, G.lumpy_ellipse(cx, cz, 0.13, 0.05, n=20, lump=0.0, seed=190), M["mustard_i"], I, cyclic=True)
+    for a in (90, 210, 330):
+        t = math.radians(a)
+        pts = [(cx, cz)] + [(cx + 0.11 * math.cos(t + s), cz + 0.042 * math.sin(t + s)) for s in (-0.5, -0.25, 0.0, 0.25, 0.5)]
+        G.stroke(d, [(cx + 0.03 * math.cos(t - 0.5), cz + 0.012 * math.sin(t - 0.5))] + pts[1:] + [(cx + 0.03 * math.cos(t + 0.5), cz + 0.012 * math.sin(t + 0.5))],
+                 M["brown_dp"], 0.0, cyclic=True)
+    G.stroke(d, G.lumpy_ellipse(cx, cz, 0.018, 0.008, n=8, lump=0.0, seed=191), M["brown_dp"], 0.0, cyclic=True)
+
+
+def smelter_bar_copper(d, M):
+    _ingot(d, M, "red", "red_sh", "red_dp", "red_dp")
+
+
+def smelter_bar_iron(d, M):
+    _ingot(d, M, "sky_sh", "sky_dp", "brown_dp", "brown_dp")
+
+
+def solarite_capacitor(d, M):
+    _cylinder(d, M, "brown_dp", "brown_dp", "sky_dp", w=0.17, zb=-0.24, zt=0.22)
+    G.stroke(d, [(-0.12, -0.12), (0.12, -0.12), (0.12, 0.1), (-0.12, 0.1)], M["mustard"], 0.0, cyclic=True)   # the glowing window
+    G.stroke(d, [(-0.06, -0.1), (0.04, -0.1), (0.04, 0.08), (-0.06, 0.08)], M["off"], 0.0, cyclic=True)
+    G.stroke(d, [(-0.12, -0.12), (0.12, -0.12), (0.12, 0.1), (-0.12, 0.1)], M["ink"], I, cyclic=True)
+    for zc in (-0.2, 0.18):                                                                   # the caps' bands
+        G.stroke(d, [(-0.17, zc - 0.03), (0.17, zc - 0.03), (0.17, zc + 0.03), (-0.17, zc + 0.03)], M["sky_dp_i"], I, cyclic=True)
+    for x in (-0.08, 0.08):                                                                   # terminals
+        G.stroke(d, [(x - 0.025, 0.22), (x + 0.025, 0.22), (x + 0.025, 0.29), (x - 0.025, 0.29)], M["sky_sh_i"], I, cyclic=True)
+
+
+def suit_patch(d, M):
+    fl, fr, fb, ft, dx, dz = _box(d, M, "red", "red_sh", "red_dp", w=0.34, h=0.04, dx=0.2, dz=0.32, cz=-0.12)
+    for k in range(14):                                                                       # stitches round the edge
+        t = k / 14
+        for (u, v) in ((t, 0.08), (t, 0.92), (0.06, t), (0.94, t)):
+            if 0.05 < (u if v in (0.08, 0.92) else v) < 0.95 and k % 2 == 0:
+                p0 = _top_pt(fl, fr, ft, dx, dz, u, v)
+                p1 = _top_pt(fl, fr, ft, dx, dz, u + (0.035 if v in (0.08, 0.92) else 0.0), v + (0.035 if u in (0.06, 0.94) else 0.0))
+                G.stroke(d, [p0, p1, (p1[0], p1[1] + 0.008), (p0[0], p0[1] + 0.008)], M["off"], 0.0, cyclic=True)
+    _box_ink(d, M, fl, fr, fb, ft, dx, dz)
+
+
+def survey_module(d, M):
+    fl, fr, fb, ft, dx, dz = _box(d, M, "sky", "sky_sh", "sky_dp", w=0.3, h=0.32, dx=0.14, dz=0.1, cz=-0.08)
+    G.stroke(d, [(fl + 0.06, fb + 0.06), (fr - 0.08, fb + 0.06), (fr - 0.08, ft - 0.06), (fl + 0.06, ft - 0.06)], M["teal_dp_i"], I, cyclic=True)   # the screen
+    for i, w in enumerate((0.22, 0.14, 0.18)):
+        z = ft - 0.12 - i * 0.06
+        G.stroke(d, [(fl + 0.1, z - 0.012), (fl + 0.1 + w, z - 0.012), (fl + 0.1 + w, z + 0.012), (fl + 0.1, z + 0.012)], M["green"], 0.0, cyclic=True)
+    lx, lz = fr + dx * 0.55, (fb + ft) / 2 + dz * 0.5                                         # one lens, on the side face
+    G.stroke(d, G.lumpy_ellipse(lx, lz, 0.035, 0.08, n=16, lump=0.0, seed=200), M["brown_dp_i"], I, cyclic=True)
+    _box_ink(d, M, fl, fr, fb, ft, dx, dz)
+    G.stroke(d, G.hose_outline([(fl + 0.08, ft + 0.04), (fl + 0.08, ft + 0.18)], 0.014), M["sky_dp_i"], I, cyclic=True)   # the antenna
+    G.stroke(d, G.lumpy_ellipse(fl + 0.08, ft + 0.2, 0.025, 0.025, n=10, seed=201), M["green_i"], I, cyclic=True)
+
+
 ITEMS = {"iron": iron, "copper": copper, "nickel": nickel, "aluminium": aluminium, "carbon": carbon, "graphite": graphite,
          "hematite": hematite, "silica": silica, "solarite": solarite, "deep_diamond": deep_diamond,
          "water_ice": water_ice, "methane_ice": methane_ice, "polar_ice": polar_ice, "ring_ice": ring_ice,
          "superionic_ice": superionic_ice, "ammonia_ice": ammonia_ice, "helium3_condensate": helium3_condensate,
-         "metallic_hydrogen": metallic_hydrogen, "oxygen": oxygen}
+         "metallic_hydrogen": metallic_hydrogen, "oxygen": oxygen,
+         "circuit_board": circuit_board, "cryo_pad": cryo_pad, "thermal_pad": thermal_pad, "cryo_round": cryo_round,
+         "float_cell_mk1": float_cell_mk1, "float_cell_mk2": float_cell_mk2, "polymer": polymer, "radiation_liner": radiation_liner,
+         "smelter_bar_copper": smelter_bar_copper, "smelter_bar_iron": smelter_bar_iron, "solarite_capacitor": solarite_capacitor,
+         "suit_patch": suit_patch, "survey_module": survey_module}
 BATCHES = {1: ["iron", "copper", "nickel", "aluminium", "carbon", "graphite", "hematite", "silica", "solarite", "deep_diamond"],
            2: ["water_ice", "methane_ice", "polar_ice", "ring_ice", "superionic_ice", "ammonia_ice", "helium3_condensate",
-               "metallic_hydrogen", "oxygen"]}
-EXPORT_BATCHES = (1,)                                                                         # only LEAD-accepted batches export
-ITEM_PLANET = {"superionic_ice": "neptune"}                                                   # its violet is Neptune's
+               "metallic_hydrogen", "oxygen"],
+           3: ["circuit_board", "cryo_pad", "thermal_pad", "cryo_round", "float_cell_mk1", "float_cell_mk2", "polymer",
+               "radiation_liner", "smelter_bar_copper", "smelter_bar_iron", "solarite_capacitor", "suit_patch", "survey_module"]}
+EXPORT_BATCHES = (1, 2)                                                                       # only LEAD-accepted batches export
+ITEM_PLANET = {"superionic_ice": "neptune",                                                   # its violet is Neptune's
+               "helium3_condensate": "saturn"}                                                # LEAD 15:3x: its source planet; Saturn's red is
+                                                                                              # the dusty rose nearest the v2 pink (Earth's coral
+                                                                                              # read as a fire extinguisher)
 PROPS = {n: (ITEMS[n], SIZE, SIZE, None, 1, False) for b in EXPORT_BATCHES for n in BATCHES[b]}   # do_prop_sheet_set's API
 
 
