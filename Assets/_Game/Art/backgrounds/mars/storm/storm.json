@@ -20,8 +20,9 @@
     {
       "n": 2,
       "parallax": 0.7,
-      "y_m": -0.5,
-      "height_px": 768
+      "y_m": -2.0,
+      "continue_rows": 64,
+      "height_px": 864
     }
   ]
 }
