@@ -2917,7 +2917,84 @@ def preview_dip(out_dir, scene, from_png=False, out=None, footnote=None, planet=
     return out
 
 
+def preview_underwater(out_dir, scene, planet="earth", depths=(3.0, 8.0, 15.0), sea_m=0.0, out=None):
+    """B-200 (LEAD 15:5x): an exported Earth set seen from under the sea (the next build's swim frame). Per depth D below the
+    sea surface: the camera follows the swimmer (row 732, as the dip review's camera frame), every layer risen by its parallax
+    x the camera's drop (ParallaxMath.LayerY), the near layer's continue strip repeating below it (U-164), the camera's sky
+    colour wherever nothing covers; then U-040's underwater tint (UnderwaterTint.shader: everything below sea level, the
+    surveyor included, multiplied by (0.55, 0.78, 0.95) x max(0.06, exp(-depth / 45 m))). Assumption: the sea surface lies
+    sea_m above the set's line (0: over the Ocean the band's line follows the water line, BandDatum.cs 110-123). The seabed and
+    the shore's terrain are not drawn (their depth is the terrain's): what shows is the backdrop behind the water."""
+    import json
+    sys.path.insert(0, os.path.dirname(HERE))
+    import review
+    from meridian import pngio
+    import preview_c2_earth_rigs as PR
+    src = os.path.join(ART_DIR, "backgrounds", planet, scene)
+    layers = json.load(open(os.path.join(src, f"{scene}.json"), encoding="utf-8"))["layers"]
+    imgs = [pngio.read_png_np(os.path.join(src, f"layer{L['n']}_color.png")) for L in layers]
+    try:
+        fr, piv = PR.surveyor_frame()
+    except Exception:  # noqa: BLE001
+        fr = None
+    skyc = np.array(v3.hex_rgb(v3.PALETTES[planet]["sky"]), np.float32) / 255.0
+    tint = np.array((0.55, 0.78, 0.95), np.float32)
+    rows, notes = [], []
+    gl = 732
+    for D in depths:
+        cam = D - sea_m                                                                       # the camera's drop below the set's line
+        F = np.empty((1080, 1920, 3), np.float32)
+        F[:] = skyc
+        low, cover = None, np.zeros(1080, bool)
+        for img, L in zip(imgs, layers):
+            h = img.shape[0]
+            y_bot = gl + int(round(-L["y_m"] * v3.PPU)) - int(round(L["parallax"] * cam * v3.PPU))
+            y_top = y_bot - h
+            if y_bot > 0 and y_top < 1080:
+                part = img[max(0, -y_top):h - max(0, y_bot - 1080), :1920]
+                review._over(F, part, 0, max(0, y_top))
+                cover[max(0, y_top):min(1080, y_bot)] |= part[..., 3].max(axis=1) > 250
+            if L.get("continue_rows") or low is None or (y_bot > low[0] and not low[2]):
+                low = (y_bot, img, L.get("continue_rows", 0), L["n"])
+        cont_from = max(0, low[0])
+        if low[0] < 1080:
+            strip = low[1][-low[2]:, :1920] if low[2] else low[1][-1:, :1920]
+            review._over(F, np.tile(strip, (-(-(1080 - cont_from) // strip.shape[0]), 1, 1))[:1080 - cont_from], 0, cont_from)
+            cover[cont_from:] = True
+        bare = int((~cover).sum())                                                            # rows where only the sky colour shows
+        if fr is not None:
+            review._over(F, fr, 960 - fr.shape[1] // 2, gl - fr.shape[0] + int(round(piv[1] * fr.shape[0])))
+        surf = gl - int(round(D * v3.PPU))                                                    # the sea surface on screen
+        r = np.arange(1080, dtype=np.float32)
+        depth = (r - surf) / v3.PPU
+        k = np.where(depth > 0, np.maximum(0.06, np.exp(-depth / 45.0)), 1.0)[:, None, None]
+        under = (depth > 0)[:, None, None]
+        F = np.where(under, F * tint[None, None, :] * k, F)
+        if 0 <= surf < 1080:                                                                  # the surface, a light wavy line
+            for x in range(0, 1920, 2):
+                y = surf + int(round(2.5 * math.sin(x / 37.0)))
+                if 0 <= y < 1079:
+                    F[y:y + 2, x:x + 2] = (0.92, 0.95, 0.97)
+        ln = (f"{D:g} m below the surface: layer{low[3]}'s strip repeats from row {cont_from}"
+              + (f"; {bare} rows of the camera's sky colour under water" if bare else "") + (f"; the surface on row {surf}" if 0 <= surf < 1080 else "; the surface off-screen above"))
+        notes.append(ln)
+        review._label(F, f"{planet} {scene} at 1x, UNDER THE SEA: {ln}; tint x{float(k[min(1079, max(0, gl))][0, 0]):.2f} at the swimmer", 6, 6)
+        rows.append(F)
+    img = np.vstack(rows)
+    review._label(img, __import__("time").strftime("%m-%d %H:%M") + " B-200 underwater read (exported layers + U-040's tint)", 2, img.shape[0] - 16)
+    out = out or os.path.join(out_dir, f"review_b200_{planet}_{scene}_underwater.png")
+    review.write(out, img)
+    print(scene, "->", out)
+    for n in notes:
+        print("  ", n)
+    return out
+
+
 if __name__ == "__main__":
+    if "--underwater" in sys.argv:                        # python -I build_backdrop_v3.py <preview dir> coast,plains --underwater
+        for sc in sys.argv[2].split(","):
+            preview_underwater(sys.argv[1], sc)
+        sys.exit(0)
     if "--uranus-check" in sys.argv:                      # python -I build_backdrop_v3.py <preview dir> --uranus-check deck2
         sys.exit(0 if uranus_deck_check(sys.argv[1], sys.argv[sys.argv.index("--uranus-check") + 1]) else 1)
     if "--dip" in sys.argv:                               # python -I build_backdrop_v3.py <preview dir> forest --dip [--from-png] [--planet mars] [--stamp]
