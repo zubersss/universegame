@@ -56,6 +56,9 @@ namespace Meridian.Tests
             var s = go.AddComponent<SideShip>();
             s.externalInput = true;
             s.ConfigureFor(planet);
+            // The flight under test is the ship's own: a Core scene left loaded by an earlier test ticks SolidRescue, which would park this
+            // ship over that world's unloaded ground (it froze every ShipSide test after SaveLoad, 10:2x).
+            Meridian.Terrain.SolidRescue.Unregister(s.Body);
             s.Hull = 100f;
             s.Body.linearVelocity = new Vector2(0f, vy);
             return s;

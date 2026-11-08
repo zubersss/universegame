@@ -59,6 +59,7 @@ namespace Meridian.Terrain
         {
             float fx = p.x - 0.5f, fy = p.y - 0.5f;
             int i = Mathf.FloorToInt(fx), j = Mathf.FloorToInt(fy);
+            if (t.HasLevelsNear(i, j)) return t.FieldAt(p); // U-157 (D-168): a brushed stretch traces from its quarter-metre blocks
             float u = fx - i, v = fy - j, c0 = t.CurveAt(i), c1 = t.CurveAt(i + 1);
             float bottom = Mathf.Lerp(Node(t, i, j, c0), Node(t, i + 1, j, c1), u);
             float top = Mathf.Lerp(Node(t, i, j + 1, c0), Node(t, i + 1, j + 1, c1), u);
@@ -67,7 +68,7 @@ namespace Meridian.Terrain
 
         static float Node(TerrainStreamer t, int x, int y, float curve)
         {
-            if (t.TryLevel(x, y, out byte level)) return level / 255f; // U-157: a brushed tile's own density
+            if (t.TryLevel(x, y, out byte level)) return level / 255f; // U-157: a brushed tile's node density
             bool solid = TileId.IsSolid(t.GetTile(x, y));
             int top = t.OriginalTop(x);
             return GroundField.Density(solid, top != int.MinValue && solid == (y <= top), curve, y);

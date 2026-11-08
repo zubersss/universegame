@@ -347,6 +347,7 @@ namespace Meridian.View2D
             Layers.alpha = 1f;
             Layers.groundFill = Meridian.Planet.PlanetBackdrop.GroundColor(config.id); // U-139: ground, not black, under the set's bottom edge
             Layers.fillFromSet = Decked(config.id) || (side.terrain != null && side.terrain.SmoothGround); // U-153: on a decked giant the set's lowest layer goes on down instead; U-161: on the smooth ground too, never a flat block
+            Layers.continueNearest = side.terrain != null && side.terrain.SmoothGround; // U-164 (D-169): the nearest layer's strip, not layer0's sky or sea
             Layers.layer0Scene = Layer0Of(Scene); // U-130: the survey layer0, else the set's own
             Layers.upperScene = UpperOf(Scene); // U-133: the spot shares the storm's layers 1–2
             Layers.mirrorX = MirrorOf(Scene); // U-144
@@ -521,6 +522,7 @@ namespace Meridian.View2D
                 Incoming.alpha = 0f;
                 Incoming.groundFill = Layers.groundFill; // U-139
                 Incoming.fillFromSet = Layers.fillFromSet; // U-153
+                Incoming.continueNearest = Layers.continueNearest; // U-164
                 Incoming.layer0Scene = Layer0Of(want);
                 Incoming.upperScene = UpperOf(want);
                 Incoming.mirrorX = MirrorOf(want);

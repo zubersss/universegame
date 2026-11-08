@@ -130,8 +130,18 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 2ec2dff30962b3a4c962fe8ef2e9c379
+    m_Address: terrain/mars/ground_decor_basalt_2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 2f78a34c04ebe2748af0af5863b175bd
     m_Address: creatures/mars/dustskater
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 306916123f3bc1a4a9838859087c1437
+    m_Address: terrain/mars/ground_band_talus
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -150,6 +160,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 375fb33c9db971140bbef09a2e2156da
+    m_Address: terrain/mars/ground_band_basalt
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 3e6d533f4e89c274c90e9730269a2d5a
     m_Address: terrain/mars/dig_rim
     m_ReadOnly: 0
@@ -162,6 +177,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 427110687af11e0458e8dec5057bf28a
     m_Address: backgrounds/mars/storm/layer2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 43f6a1a5a92e4904d97dd847348dcaa1
+    m_Address: terrain/mars/ground_decor_talus_1
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -385,6 +405,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a3a05a5d7c72e4c49a0e2910060f34bb
+    m_Address: terrain/mars/ground_decor_basalt_1
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: a97ddf1cde57c5b408aebd51da3822f9
     m_Address: backgrounds/mars/skydome_storm
     m_ReadOnly: 0
@@ -440,8 +465,18 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: bfa5abd523d44874e895702573a757d8
+    m_Address: terrain/mars/ground_decor_basalt_3
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: c0b0724983df7144fb305091b70f2dee
     m_Address: terrain/mars/ground_strip
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c135af657f93f6449960939add7ba1ca
+    m_Address: terrain/mars/ground_decor_talus_2
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -455,6 +490,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c68073c4ba0d96e48a260fe6dcf204eb
+    m_Address: terrain/mars/ground_decor_talus_3
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: cbfd2a91e34d7024f8a6d7abf68b3184
     m_Address: terrain/mars/ground_decor_frost_2
     m_ReadOnly: 0
@@ -462,6 +502,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: cceee46a3466ff044a473d7529242035
     m_Address: backgrounds/mars/plains/layer0
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d0a1603488814b94892c7c36bdf6f590
+    m_Address: terrain/mars/ground_fill_basalt
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -522,6 +567,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: e949f620fef5566479a8157322f9f134
     m_Address: backgrounds/mars/canyon/layer0
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: ed2b5684d97a02f48aeb64f8722e4c4c
+    m_Address: terrain/mars/ground_lip_frost
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

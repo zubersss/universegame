@@ -1,7 +1,11 @@
 # UNITY STATUS
-Updated: 2026-11-08 10:2x · Session: 10 (resumed 09:3x after the ~3-hour break; earlier entries: coordination/status/archive/UNITY_2026-11-08.md)
+Updated: 2026-11-08 10:4x · Session: 10 (resumed 09:3x after the ~3-hour break; earlier entries: coordination/status/archive/UNITY_2026-11-08.md)
 ## Current task
-U-163 Build 0.5.0 (started 10:2x): the smoke's new Earth shots written lock-free first, then one lock (part scripts): Earth slice + M1Loop + M3Inner + SaveLoad v2 on the build's code → release + dev players → the probe (two runs, D-152) → the smoke into reports/unity/smoke_0.5.0/.
+10:4x: D-168 (U-157 not Done until the stroke is round) + U-164 (D-169) as code; want filed 10:40 behind BLENDER's B-183 forest render; then the short lock (CheckSetup import + compile + EditMode; PlayMode DigPlace, Harvest, SaveLoad, SolidRescue, InventoryPlay, ShipSide; CaptureU157Brush + CaptureU158Finds) → LEAD views → U-163 (Build 0.5.0; depends on U-164 + B-183), its smoke section already written (smoke_29-41, 50 shots, the wrapper's cap 360 s), GameInfo 0.5.0.
+- D-168 (1): a brushed tile holds a 4x4 block of densities at the tracer's 1/4 m sub-nodes (TerrainEdits v2 rewritten: 16 bytes per tile, sparse; [0] is the tile-centre node), set from each stroke's exact disc (carve min / pile max) with a 0.5 m ramp (BrushRamp); a tile without a block takes one holding what was drawn (the bilinear), and so does any tile whose cell has a corner node that moved, so nothing outside the disc shifts; values read before any is written. GroundContour takes the sub-node overrides (cells touching a block traced sub-cell by sub-cell); TerrainChunk fills them; SolidRescue and the chunk's ghost vertices read TerrainStreamer.FieldAt near blocks. The Beam also carves drawn-only ground (a mound's rounded skirt over tiles the grid holds open). Tests: DigPlaceTests.AStrokeIsRoundInSixteenDirections (±0.06 m), DugWallsAreRoundAtAnySize ±0.10 m.
+- D-168 (2): the mound's 16 "faces" were B-175's dig_puff frame 2 (a golden clod ball), 15 mound strokes caught 30 frames after; fill_decor is not wired in code. The u157 / u158 captures now wait 1 s for the puffs; 2_tunnel is framed on the tunnel.
+- U-164: CheckSetup.RecordOpaqueBottoms marks each set's nearest layer whose bottom strip (continue_rows or 64 px, never above ground_row) is ≥ 99.5 % opaque in its source PNG (ArtMaterials.opaqueBottoms); on smooth planets ParallaxLayers tiles that strip under the nearest layer at its order (24 m deep); unmarked sets keep U-153's continuation; giants untouched. BandFollowPlayTests.UnderTheNearestLayerAValleyShowsItsStripNeverTheSky (3 seeds × 6 biomes) runs after B-183.
+- Found 10:2x: 6 ShipSideTests failed after SaveLoad in one slice: a Core scene left loaded ticks the static SolidRescue, which parked ShipSide's synthetic ship over that world's unloaded ground (test cross-talk); ShipSideTests now unregister their ship.
 
 ## Last completed
 U-157 (P-54, P-55) + U-158 + U-161 checked, 09:47-10:17 (six short locks: compile + EditMode, four PlayMode slices, three captures); commits c4d59ee4 (the 06:17 tree), b69d80c1 (code, tests, the import), and this status commit (frames).
@@ -18,7 +22,7 @@ U-157 (P-54, P-55) + U-158 + U-161 checked, 09:47-10:17 (six short locks: compil
 U-163 (Build 0.5.0) → after the owner's look: U-159 + B-181, U-160, U-162.
 
 ## Ready for review
-U-157 (P-54 / P-55 in, b69d80c1), U-158 (b69d80c1), U-161 (b69d80c1); frames in reports/unity/u157, u158, u156 (*_050, 10_tundra). Earlier, still unjudged: U-129 slice 1 (SaturnStageTests ×4); U-130 slice 1 (UranusStageTests ×7); U-133 slice 1 (NeptuneStageTests ×8); U-146 (the survey scan pulse; UranusStageTests +1); U-144 (Neptune's -x zones, the drift, the anchor, the gust warning; NeptuneStageTests +3).
+U-157 (D-168 pending the short lock), U-158 (accepted; closes on U-163's Harvest comparison); frames in reports/unity/u157, u158, u156 (*_050, 10_tundra). Earlier, still unjudged: U-129 slice 1 (SaturnStageTests ×4); U-130 slice 1 (UranusStageTests ×7); U-133 slice 1 (NeptuneStageTests ×8); U-146 (the survey scan pulse; UranusStageTests +1); U-144 (Neptune's -x zones, the drift, the anchor, the gust warning; NeptuneStageTests +3).
 ## Handoffs
 (none unrouted)
 ## Blockers
@@ -30,4 +34,4 @@ U-157 (P-54 / P-55 in, b69d80c1), U-158 (b69d80c1), U-161 (b69d80c1); frames in 
 ## Housekeeping
 Editor churn in the tree (Generated/Models *.mat _MainTex fills, TMP font asset, existing animator.controllers, UnderwaterTint.mat, link.xml.meta, two InitTestScene files): never staged; my commits list files explicitly. MERIDIAN_SETUP.md at the repo root is untracked and not mine.
 ## HeavyJobLock
-none held, no want (the check's last capture released 10:17). No background waiters.
+want_unity.lock filed 10:40 (BLENDER's heavy lock: B-183 forest render). No background waiters.

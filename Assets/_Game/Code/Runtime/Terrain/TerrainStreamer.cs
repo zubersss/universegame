@@ -153,18 +153,56 @@ namespace Meridian.Terrain
         /// <summary>U-156: the drawn surface's height over column x's centre on a smooth planet (the outline's line where nothing is dug or built).</summary>
         public float CurveAt(int x) => GroundField.Curve(x, OriginalTop, PadTop);
 
-        /// <summary>U-157 (P-54): a brushed tile's fill level (0-255), if it has one.</summary>
+        /// <summary>U-157 (P-54): a brushed tile's node density (0-255: its block's [0]), if it has a block.</summary>
         public bool TryLevel(int x, int y, out byte level) { level = 0; return Edits != null && Edits.TryGetLevel(WrapX(x), y, out level); }
 
-        /// <summary>U-157: any fill levels in chunk (cx, cy) (cx may be unwrapped).</summary>
+        /// <summary>U-157 (D-168): a brushed tile's quarter-metre density block (TerrainEdits.Block bytes; read only), if it has one.</summary>
+        public bool TryBlock(int x, int y, out byte[] block) { block = null; return Edits != null && Edits.TryGetBlock(WrapX(x), y, out block); }
+
+        /// <summary>U-157: any density blocks in chunk (cx, cy) (cx may be unwrapped).</summary>
         public bool HasLevels(int cx, int cy) => Edits != null && Config != null && Edits.HasLevels(WorldNoise.FloorDiv(WrapX(cx * C), C), cy);
 
-        /// <summary>U-157 (P-54): sets a tile's fill level and retraces the outlines round it (batched within BeginBatch / EndBatch).</summary>
-        public void SetLevel(int x, int y, byte level)
+        /// <summary>U-157 (D-168): any density block that can shape the field round tile (x, y) (its chunk or the chunk past either far edge).</summary>
+        public bool HasLevelsNear(int x, int y)
+        {
+            int cx = WorldNoise.FloorDiv(x, C), cy = WorldNoise.FloorDiv(y, C), cx1 = WorldNoise.FloorDiv(x + 1, C), cy1 = WorldNoise.FloorDiv(y + 1, C);
+            return HasLevels(cx, cy) || HasLevels(cx1, cy) || HasLevels(cx, cy1) || HasLevels(cx1, cy1);
+        }
+
+        /// <summary>U-157 (D-168): stores a tile's density block (the array is kept) and retraces the outlines round it (batched within
+        /// BeginBatch / EndBatch). An array already stored for the tile may be passed again after an in-place change.</summary>
+        public void SetBlock(int x, int y, byte[] block)
         {
             if (!started || Edits == null || y < 0 || y >= Config.worldHeight) return;
-            Edits.SetLevel(WrapX(x), y, level);
+            Edits.SetBlock(WrapX(x), y, block);
             RefreshAround(x, y);
+        }
+
+        /// <summary>U-157 (D-168): quarter-metre sub-nodes per metre (GroundContour.Sub, TerrainEdits.BlockSide).</summary>
+        public const int Sub = TerrainEdits.BlockSide;
+
+        /// <summary>U-157 (D-168): the drawn ground's density at the global sub-node (i, j), which sits at (i / Sub + 1/2, j / Sub + 1/2): a brushed
+        /// tile's block value, else bilinear between the four tile-centre nodes round it (what the tracer does between nodes).</summary>
+        public float SubDensity(int i, int j)
+        {
+            int tx = WorldNoise.FloorDiv(i, Sub), ty = WorldNoise.FloorDiv(j, Sub), a = i - tx * Sub, b = j - ty * Sub;
+            if (TryBlock(tx, ty, out var blk)) return blk[b * Sub + a] / 255f;
+            float n00 = NodeDensity(tx, ty);
+            if (a == 0 && b == 0) return n00;
+            float fx = a / (float)Sub, fy = b / (float)Sub;
+            float n10 = a == 0 ? n00 : NodeDensity(tx + 1, ty), n01 = b == 0 ? n00 : NodeDensity(tx, ty + 1);
+            float n11 = a == 0 ? n01 : b == 0 ? n10 : NodeDensity(tx + 1, ty + 1);
+            return Mathf.Lerp(Mathf.Lerp(n00, n10, fx), Mathf.Lerp(n01, n11, fx), fy);
+        }
+
+        /// <summary>U-157 (D-168): the drawn ground's density at world p, bilinear between the sub-nodes round it; the traced outline is its iso.</summary>
+        public float FieldAt(Vector2 p)
+        {
+            float u = (p.x - 0.5f) * Sub, v = (p.y - 0.5f) * Sub;
+            int i = Mathf.FloorToInt(u), j = Mathf.FloorToInt(v);
+            float fx = u - i, fy = v - j;
+            float a = SubDensity(i, j), b = SubDensity(i + 1, j), c = SubDensity(i, j + 1), d = SubDensity(i + 1, j + 1);
+            return Mathf.Lerp(Mathf.Lerp(a, b, fx), Mathf.Lerp(c, d, fx), fy);
         }
 
         /// <summary>U-157: the drawn ground's density at tile (x, y)'s centre: its fill level if brushed, else the natural surface's ramp for a

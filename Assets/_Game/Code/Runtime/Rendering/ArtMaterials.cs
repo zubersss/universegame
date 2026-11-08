@@ -46,6 +46,10 @@ namespace Meridian.Rendering
             return null;
         }
         public List<string> emissiveKeys = new List<string>();
+        /// <summary>U-164 (D-169): painted-set layers (backgrounds/.../layer&lt;n&gt;) whose bottom strip is opaque, so the stage may repeat it below the
+        /// layer's bottom edge (ArtImporter.RecordOpaqueBottoms reads the source PNGs at import).</summary>
+        public List<string> opaqueBottoms = new List<string>();
+        public static bool OpaqueBottom(string layerKey) { var a = Active; return a != null && layerKey != null && a.opaqueBottoms.Contains(layerKey); }
         /// <summary>Animation clips of frame sheets (U-032), copied from each sheet's .json by ArtImporter.</summary>
         public List<ArtClipSet> clipSets = new List<ArtClipSet>();
 

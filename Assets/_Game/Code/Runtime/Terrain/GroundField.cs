@@ -109,12 +109,16 @@ namespace Meridian.Terrain
         readonly Dictionary<int, int> startAt = new Dictionary<int, int>(512), endAt = new Dictionary<int, int>(512);
         readonly List<bool> used = new List<bool>(512);
         float[] d; int n; int m; float iso; Vector2 origin;
+        // U-157 (D-168): sub-node values that override the bilinear ((m + 1)² row-major; NaN: bilinear), and the 1 m cells they touch.
+        float[] fine; bool[] fineCell;
         public const float MinGap = 0.01f;
 
-        /// <summary>Traces `density` ((size + 1)² node values, row-major, 1 m apart, node (0, 0) at `nodeOrigin`) at `level`.</summary>
-        public void Build(float[] density, int size, Vector2 nodeOrigin, float level = GroundField.Iso)
+        /// <summary>Traces `density` ((size + 1)² node values, row-major, 1 m apart, node (0, 0) at `nodeOrigin`) at `level`. U-157 (D-168):
+        /// `subNodes` ((size·Sub + 1)² values, NaN where none) override the bilinear at the quarter-metre sub-nodes of brushed tiles, and every
+        /// 1 m cell flagged in `subCells` (size² row-major) is traced by its sub-cells even when its four corners agree.</summary>
+        public void Build(float[] density, int size, Vector2 nodeOrigin, float level = GroundField.Iso, float[] subNodes = null, bool[] subCells = null)
         {
-            d = density; n = size; m = size * Sub; iso = level; origin = nodeOrigin;
+            d = density; n = size; m = size * Sub; iso = level; origin = nodeOrigin; fine = subNodes; fineCell = subCells;
             points.Clear(); lineStart.Clear(); lineCount.Clear(); lineClosed.Clear();
             fillVerts.Clear(); fillTris.Clear();
             segA.Clear(); segB.Clear(); segPA.Clear(); segPB.Clear(); startAt.Clear(); endAt.Clear(); used.Clear();
@@ -124,7 +128,7 @@ namespace Meridian.Terrain
                 for (int cx = 0; cx <= n; cx++)
                 {
                     bool full = false, empty = false;
-                    if (cx < n)
+                    if (cx < n && !(fineCell != null && fineCell[cy * n + cx]))
                     {
                         float a = V(cx, cy), b = V(cx + 1, cy), c = V(cx + 1, cy + 1), e = V(cx, cy + 1);
                         full = a >= iso && b >= iso && c >= iso && e >= iso;
@@ -146,9 +150,10 @@ namespace Meridian.Terrain
 
         float V(int vx, int vy) => d[vy * (n + 1) + vx];
 
-        /// <summary>The density at sub-vertex (i, j): bilinear between the 1 m vertices.</summary>
+        /// <summary>The density at sub-vertex (i, j): a brushed tile's own value (D-168), else bilinear between the 1 m vertices.</summary>
         float S(int i, int j)
         {
+            if (fine != null) { float f = fine[j * (m + 1) + i]; if (!float.IsNaN(f)) return f; }
             int vx = i / Sub, vy = j / Sub;
             float fx = (i - vx * Sub) / (float)Sub, fy = (j - vy * Sub) / (float)Sub;
             if (vx >= n) { vx = n - 1; fx = 1f; }

@@ -405,6 +405,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 7dfd4e5b090c7c845856039a161e4fb0
+    m_Address: terrain/earth/ground_lip_snow
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 7e626ab0d3ca1844680f55846130fe41
     m_Address: backgrounds/earth/tundra/layer0
     m_ReadOnly: 0
@@ -412,6 +417,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 870497325de772c4c9a8d4f5030c41d7
     m_Address: creatures/earth/shark
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 873c17da563e14d4caa25a0fba4e514f
+    m_Address: terrain/earth/ground_lip_stone
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -722,6 +732,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: ef45f02388786854788871a4979d48dc
     m_Address: props/earth/pocket_silica
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: ef71435cb40064243b5be24daf2e8cec
+    m_Address: terrain/earth/ground_lip_sand
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

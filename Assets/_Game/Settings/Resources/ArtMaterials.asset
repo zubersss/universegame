@@ -364,6 +364,20 @@ MonoBehaviour:
   - ships/pilgrim/top
   - ships/waystation_earth/top
   - ships/waystation_mars/top
+  opaqueBottoms:
+  - backgrounds/earth/coast/layer2
+  - backgrounds/earth/desert/layer2
+  - backgrounds/earth/forest/layer2
+  - backgrounds/earth/plains/layer2
+  - backgrounds/earth/taiga/layer2
+  - backgrounds/earth/tundra/layer2
+  - backgrounds/mars/canyon/layer2
+  - backgrounds/mars/plains/layer2
+  - backgrounds/mercury/day/layer2
+  - backgrounds/mercury/night/layer2
+  - backgrounds/mercury/twilight/layer2
+  - backgrounds/venus/deck/layer2
+  - backgrounds/venus/surface/layer2
   clipSets:
   - key: characters/calibration/base
     fps: 12

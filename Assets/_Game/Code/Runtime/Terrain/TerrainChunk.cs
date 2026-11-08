@@ -30,8 +30,12 @@ namespace Meridian.Terrain
             int PadTop(int x);
             /// <summary>U-157 (P-54): a brushed tile's fill level (0-255), if it has one.</summary>
             bool TryLevel(int x, int y, out byte level);
-            /// <summary>U-157: any fill levels in chunk (cx, cy).</summary>
+            /// <summary>U-157: any density blocks in chunk (cx, cy).</summary>
             bool HasLevels(int cx, int cy);
+            /// <summary>U-157 (D-168): a brushed tile's quarter-metre density block (read only), if it has one.</summary>
+            bool TryBlock(int x, int y, out byte[] block);
+            /// <summary>U-157 (D-168): the drawn ground's density at a world point (the sub-nodes, bilinear).</summary>
+            float FieldAt(Vector2 p);
         }
 
         /// <summary>When true the block mesh renders and the tilemap renderer is off (the 3D view).</summary>
@@ -150,11 +154,13 @@ namespace Meridian.Terrain
                     int top = tops[tx - t0];
                     bool natural = top != int.MinValue && solid == (ty <= top);
                     float density = GroundField.Density(solid, natural, curve[i], ty);
-                    if (levelled && world.TryLevel(tx, ty, out byte level)) density = level / 255f; // U-157 (P-54): a brushed tile's own density
+                    if (levelled && world.TryLevel(tx, ty, out byte level)) density = level / 255f; // U-157 (P-54): a brushed tile's node density
                     nodes[j * (C + 1) + i] = density;
                 }
             }
-            contour.Build(nodes, C, new Vector2(-0.5f, -0.5f));
+            outlineLevelled = levelled;
+            if (levelled) { FillSubNodes(x0, y0); contour.Build(nodes, C, new Vector2(-0.5f, -0.5f), GroundField.Iso, subNodes, subCells); }
+            else contour.Build(nodes, C, new Vector2(-0.5f, -0.5f));
             int lines = contour.Lines;
             while (edges.Count < lines) edges.Add(gameObject.AddComponent<EdgeCollider2D>());
             int used = 0;
@@ -183,6 +189,44 @@ namespace Meridian.Terrain
             OutlineBuilt?.Invoke(this);
         }
 
+        // U-157 (D-168): the quarter-metre sub-node values of this chunk's brushed tiles, shared by every chunk (the outline is built on the main
+        // thread, one chunk at a time), and the 1 m cells they touch.
+        static float[] subNodes;
+        static bool[] subCells;
+        bool outlineLevelled;
+
+        /// <summary>U-157 (D-168): copies every brushed tile's block over the chunk's sub-node grid (node (i, j) is tile (x0 − 1 + i, y0 − 1 + j);
+        /// its block's sub-node (a, b) is sub-node (i·Sub + a, j·Sub + b)) and flags the cells round it, so they are traced sub-cell by sub-cell.</summary>
+        void FillSubNodes(int x0, int y0)
+        {
+            const int C = TerrainConstants.ChunkSize, Sub = GroundContour.Sub, M = C * Sub;
+            if (subNodes == null) { subNodes = new float[(M + 1) * (M + 1)]; subCells = new bool[C * C]; }
+            for (int k = 0; k < subNodes.Length; k++) subNodes[k] = float.NaN;
+            System.Array.Clear(subCells, 0, subCells.Length);
+            for (int j = 0; j <= C; j++)
+                for (int i = 0; i <= C; i++)
+                {
+                    if (!world.TryBlock(x0 - 1 + i, y0 - 1 + j, out var blk)) continue;
+                    for (int b = 0; b < Sub; b++)
+                    {
+                        int sj = j * Sub + b;
+                        if (sj > M) break;
+                        for (int a = 0; a < Sub; a++)
+                        {
+                            int si = i * Sub + a;
+                            if (si > M) break;
+                            subNodes[sj * (M + 1) + si] = blk[b * Sub + a] / 255f;
+                        }
+                    }
+                    for (int dj = -1; dj <= 0; dj++)
+                        for (int di = -1; di <= 0; di++)
+                        {
+                            int ci = i + di, cj = j + dj;
+                            if (ci >= 0 && ci < C && cj >= 0 && cj < C) subCells[cj * C + ci] = true;
+                        }
+                }
+        }
+
         /// <summary>U-156: the neighbour outline's node next to a chain's end on this chunk's side (the iso crossing in the neighbour's first ¼ m
         /// sub-cell, from the same field), or the chain carried on straight where that is ambiguous (a top or bottom edge, a sub-cell corner).</summary>
         Vector2 Beyond(Vector2 end, Vector2 inner, int x0, int y0)
@@ -209,6 +253,7 @@ namespace Meridian.Terrain
         /// <summary>The field at a chunk-local point: the four tile-centre nodes round it, bilinear (past this chunk's nodes, from the world).</summary>
         float Field(float lx, float ly, int x0, int y0)
         {
+            if (outlineLevelled) return world.FieldAt(new Vector2(x0 + lx, y0 + ly)); // U-157 (D-168): the brushed blocks, as traced
             float fi = lx + 0.5f, fj = ly + 0.5f;
             int i = Mathf.FloorToInt(fi), j = Mathf.FloorToInt(fj);
             float u = fi - i, v = fj - j;

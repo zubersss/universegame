@@ -188,6 +188,7 @@ namespace Meridian.Core
             Meridian.Terrain.EarthBiomes.Range(Meridian.Terrain.Biome.Ocean, out int coast, out _);
             yield return LookAt(side, coast - 10f, 8f);
             yield return Shot(folder, "smoke_4_desert_ocean.png");
+            if (side != null) yield return EarthGround(folder, side); // U-163: Earth on the smooth ground (smoke_29-41)
 
             // U-142 (D-158, U-148 / U-150): the climb in the ship frame: full thrust off the pad until the hull boosts at speed (the long flame,
             // the speed lines, the frame widening), then the sound barrier breaking at Earth's 30 m/s (the vapor cone, the shock ring).
@@ -419,6 +420,139 @@ namespace Meridian.Core
 
             File.WriteAllText(Path.Combine(folder, "smoke_done.txt"), $"OK {GameInfo.Version} {(Debug.isDebugBuild ? "development" : "release")} {DateTime.Now:s}"); // U-143: which player the shots are from
             Application.Quit();
+        }
+
+        /// <summary>
+        /// U-163 (Build 0.5.0, D-161 / D-162): Earth on the smooth ground, staged after smoke_4. smoke_29 the camp on the curve (wide), smoke_30 a
+        /// hill, smoke_31 a fresh scoop, smoke_32 a short tunnel, smoke_33 a mound ramp, smoke_34 / 35 an iron node full and harvested, smoke_36 a
+        /// surveyed pocket (its scan X above), smoke_37 the pocket dug, smoke_38 / 39 / 40 the desert, taiga and tundra sets on the ground,
+        /// smoke_42 a forest valley (U-164: the set's nearest layer going on down), smoke_41 the coast cliff. The Rig's reach is lifted for the staging and restored; the climb after it boards the Pilgrim itself.
+        /// </summary>
+        static IEnumerator EarthGround(string folder, PlanetSideRoot side)
+        {
+            var t = side.terrain;
+            var rig = side.rig;
+            if (t == null || rig == null || !t.SmoothGround) yield break;
+            var owner = rig.owner;
+            rig.owner = null;
+            try
+            {
+                var cam = side.sideCamera;
+                float half = cam.orthographicSize;
+                yield return LookAt(side, side.spawnX + 6f, 5f, half * 1.25f);
+                yield return Staged(side);
+                yield return Shot(folder, "smoke_29_earth_camp_curve.png");
+                Meridian.CameraRig.SideView.SetHalfHeight(cam, half);
+
+                // A hill: the highest natural ground between the camp's band and the desert.
+                int hill = 600, top = int.MinValue;
+                for (int x = 400; x < 1250; x++) { int h = t.OriginalTop(x); if (t.PadTop(x) == int.MinValue && h > top) { top = h; hill = x; } }
+                yield return LookAt(side, hill - 6f, 3f);
+                yield return Staged(side);
+                yield return Shot(folder, "smoke_30_earth_hill.png");
+
+                // A gentle stretch east of the camp: a scoop, then a tunnel down and along into the cross-section, then a mound ramp.
+                int bx = side.spawnX + 40;
+                for (int x = side.spawnX + 40; x < side.spawnX + 300; x++)
+                {
+                    bool flat = t.PadTop(x) == int.MinValue;
+                    for (int k = 0; k < 20 && flat; k++) flat = Mathf.Abs(t.OriginalTop(x + k + 1) - t.OriginalTop(x + k)) <= 1 && t.PadTop(x + k) == int.MinValue;
+                    if (flat) { bx = x; break; }
+                }
+                yield return LookAt(side, bx + 0.5f, 1f);
+                int sx = bx + 4;
+                float sy = t.SurfaceAt(sx + 0.5f);
+                bool scooped = rig.Dig(new Vector2(sx + 0.5f, sy + 0.1f));
+                yield return Wait(0.8f);
+                yield return Shot(folder, "smoke_31_earth_scoop.png");
+                int strokes = 0;
+                for (int k = 0; k < 12; k++) if (rig.Dig(new Vector2(sx + 1.1f + k * 0.6f, sy - 0.5f - Mathf.Min(k, 6) * 0.5f))) strokes++; // from the scoop down and along
+                yield return Wait(0.8f);
+                yield return Shot(folder, "smoke_32_earth_tunnel.png");
+                int mx = bx + 16, piled = 0;
+                for (int row = 0; row < 3; row++) // a held Builder's sweep: a stroke every 0.3 m (D-168)
+                    for (float px = mx - 3f + row; px <= mx + 3f - row + 1e-3f; px += 0.3f)
+                        piled += rig.Mound(new Vector2(px, t.CurveAt(Mathf.FloorToInt(px)) + 0.5f + row * 0.6f), rig.GroundMaterial, false);
+                yield return LookAt(side, mx - 5.5f, 1.5f);
+                yield return Shot(folder, "smoke_33_earth_mound.png");
+                Debug.Log($"[MERIDIAN] smoke ground: scoop {scooped} at {sx}, tunnel {strokes} of 12 strokes, mound {piled} tiles at {mx}");
+
+                // An iron node (else the nearest node) east of the camp, full and harvested.
+                var finds = side.finds;
+                if (finds != null && finds.Active)
+                {
+                    Meridian.Mining.ResourceFinds.Node node = null;
+                    foreach (var n in finds.nodes)
+                    {
+                        if (n.x <= side.spawnX + 30) continue;
+                        bool better = node == null || (n.item == "iron" && node.item != "iron") || ((n.item == "iron") == (node.item == "iron") && n.x < node.x);
+                        if (better) node = n;
+                    }
+                    if (node != null)
+                    {
+                        yield return LookAt(side, node.x - 2f, 2f);
+                        yield return Staged(side);
+                        yield return Shot(folder, "smoke_34_earth_node_full.png");
+                        for (int k = 0; k < Meridian.Mining.ResourceFinds.NodeCharges; k++) rig.Dig(new Vector2(node.x + 0.5f, node.y + 0.6f));
+                        yield return Wait(0.8f);
+                        yield return Shot(folder, "smoke_35_earth_node_harvested.png");
+                        Debug.Log($"[MERIDIAN] smoke node: {node.item} at {node.x}, charges {node.charges}");
+                    }
+                    // A shallow pocket, surveyed (the scan X above it), then dug to.
+                    Meridian.Mining.ResourceFinds.Pocket pocket = null;
+                    foreach (var p in finds.pockets)
+                        if (p.kind == Meridian.Mining.ResourceFinds.Kind.Pocket && p.x > side.spawnX + 30 && t.OriginalTop(p.x) - p.y <= 5 && (pocket == null || p.x < pocket.x)) pocket = p;
+                    if (pocket != null)
+                    {
+                        yield return LookAt(side, pocket.x - 3f, -1.5f);
+                        finds.Reveal(new Vector2(pocket.x + 0.5f, pocket.y + 0.5f), 6f);
+                        var c = cam.transform.position;
+                        cam.transform.position = new Vector3(pocket.x + 0.5f, c.y, c.z);
+                        yield return Wait(0.5f);
+                        yield return Shot(folder, "smoke_36_earth_scan_x.png");
+                        float x = pocket.x + 0.5f;
+                        for (float y = t.SurfaceAt(x) - 0.3f; y > pocket.y + 1f; y -= 0.7f) rig.Dig(new Vector2(x, y));
+                        rig.Dig(new Vector2(x, pocket.y + 0.5f));
+                        yield return Wait(0.8f);
+                        yield return Shot(folder, "smoke_37_earth_pocket_dug.png");
+                        Debug.Log($"[MERIDIAN] smoke pocket: {pocket.item} at ({pocket.x}, {pocket.y}), spent {pocket.spent}");
+                    }
+                }
+
+                // B-179's sets on the smooth ground (U-161): the desert, the taiga and the tundra, each mid-band.
+                foreach (var (biome, name) in new[] { (Meridian.Terrain.Biome.Desert, "smoke_38_earth_desert.png"), (Meridian.Terrain.Biome.Taiga, "smoke_39_earth_taiga.png"), (Meridian.Terrain.Biome.Tundra, "smoke_40_earth_tundra.png") })
+                {
+                    Meridian.Terrain.EarthBiomes.Range(biome, out int bs, out int bl);
+                    yield return LookAt(side, bs + bl / 2, 3f);
+                    yield return Staged(side);
+                    yield return Shot(folder, name);
+                }
+
+                // U-164 (D-169): a valley beside a hill in the forest band, the forest set's nearest layer going on down under its edge.
+                Meridian.Terrain.EarthBiomes.Range(Meridian.Terrain.Biome.Forest, out int fs, out int fl);
+                int valley = fs + fl / 2; float dip = 0f;
+                for (int x = fs + 60; x < fs + fl - 60; x += 3)
+                {
+                    if (x > side.spawnX - 80 && x < side.spawnX + 80) continue; // away from the camp's pad
+                    float here = t.CurveAt(x), low = here;
+                    for (int dx = -12; dx <= 12; dx += 2) low = Mathf.Min(low, t.CurveAt(x + dx));
+                    if (here - low > dip) { dip = here - low; valley = x; }
+                }
+                yield return LookAt(side, valley, 3f);
+                yield return Staged(side);
+                yield return Shot(folder, "smoke_42_earth_forest_valley.png");
+                Debug.Log($"[MERIDIAN] smoke forest valley at {valley} (dip {dip:F1} m), fill layer {(side.cartoon != null && side.cartoon.Layers != null ? side.cartoon.Layers.FillLayer : -1)}");
+
+                // The coast cliff: the steepest drop of the curve where the land meets the sea.
+                Meridian.Terrain.EarthBiomes.Range(Meridian.Terrain.Biome.Ocean, out int os, out _);
+                int cliff = os; float steep = 0f;
+                for (int x = os - 40; x < os + 80; x++) { float s = Mathf.Abs(t.CurveAt(x + 1) - t.CurveAt(x)); if (s > steep) { steep = s; cliff = x; } }
+                yield return LookAt(side, cliff - 4f, 3f);
+                yield return Staged(side);
+                yield return Shot(folder, "smoke_41_earth_coast_cliff.png");
+                Debug.Log($"[MERIDIAN] smoke coast cliff at {cliff} (step {steep:F2} m per m)");
+            }
+            finally { rig.owner = owner; }
         }
 
         /// <summary>Points the side camera at column x, a few metres above the ground, and waits for the terrain there.</summary>

@@ -89,6 +89,7 @@ namespace Meridian.Rig
         bool DigBrush(Vector2 p)
         {
             int dug = 0;
+            ShapeRead(p); // D-168: the field as drawn before any tile flips (a dug tile's node must not read 0 where the disc says 0.49)
             terrain.BeginBatch();
             try
             {
@@ -99,7 +100,9 @@ namespace Meridian.Rig
                     dug++;
                     DropFor(id, c.x, c.y);
                 }
-                if (dug > 0) Shape(p, true, null);
+                // D-168: a mound's rounded skirt can stand in tiles the grid still holds open; the drawn ground there carves too (no item).
+                if (dug == 0 && terrain.FieldAt(p) >= GroundField.Iso) dug = -1;
+                if (dug != 0) ShapeApply(p, true, null);
             }
             finally { terrain.EndBatch(); }
             if (dug == 0) return false;
@@ -216,11 +219,12 @@ namespace Meridian.Rig
             if (MoundCells(p, moundScratch) == 0) return 0;
             int budget = spend ? GroundItems() : moundScratch.Count;
             int filled = 0;
+            ShapeRead(p); // D-168: before the piled tiles flip
             terrain.BeginBatch();
             try
             {
                 shapeSkip.Clear();
-                foreach (var c in BrushCells(p)) shapeSkip.Add(c); // a cell within the brush keeps its density unless it is piled
+                foreach (var c in BrushCells(p)) if (!TileId.IsSolid(terrain.GetTile(c.x, c.y))) shapeSkip.Add(c); // an open cell within the brush keeps its density unless it is piled (a body stands there); a solid one rounds up with the disc
                 foreach (var c in moundScratch)
                 {
                     if (filled >= budget) break;
@@ -228,7 +232,7 @@ namespace Meridian.Rig
                     filled++;
                     shapeSkip.Remove(c);
                 }
-                if (filled > 0) Shape(p, false, shapeSkip);
+                if (filled > 0) ShapeApply(p, false, shapeSkip);
             }
             finally { terrain.EndBatch(); }
             if (spend) SpendGroundItems(filled);
@@ -238,33 +242,133 @@ namespace Meridian.Rig
 
         readonly System.Collections.Generic.HashSet<Vector2Int> shapeSkip = new System.Collections.Generic.HashSet<Vector2Int>();
 
-        /// <summary>U-157 (P-54, D-167 (4)): how wide the density ramp round a stroke's circle is (m). The traced edge crosses the circle of BrushRadius
-        /// on the grid's axes; between them the bilinear tracing pulls it in (a 1 m ramp: 0.62 m on the diagonal, a rounded diamond; 2 m: 0.755 m,
-        /// the roundest the 1 m nodes allow).</summary>
-        public const float BrushRamp = 2f;
+        /// <summary>U-157 (P-54, D-168): the density ramp round a stroke's circle at the quarter-metre sub-nodes (m). Two sub-cells wide: every
+        /// sub-cell the traced edge crosses has its corners within ±0.25 m of the circle, so the field there is the disc's exact distance ramp and
+        /// the edge holds BrushRadius to about a centimetre in every direction (at 1 m tile centres the best was 0.9 m on the axes, 0.755 m on the
+        /// diagonals).</summary>
+        public const float BrushRamp = 0.5f;
+
+        const int Q = TerrainEdits.BlockSide, QQ = TerrainEdits.Block;
+        float[] shapeNodes = new float[64];
+        byte[] shapeNew = new byte[49 * QQ];
+        bool[] shapeChanged = new bool[49], shapeOwn = new bool[49], shapeNode0 = new bool[49];
+        byte[][] shapeBlocks = new byte[49][];
+        readonly System.Collections.Generic.Dictionary<Vector2Int, bool> shapeClear = new System.Collections.Generic.Dictionary<Vector2Int, bool>();
 
         /// <summary>
-        /// U-157 (P-54): the stroke's round shape in the field: every tile centre within BrushRadius + BrushRamp / 2 of p takes the density of a
-        /// disc of BrushRadius (carve: the lower of its own and the disc's outside; pile: the higher of its own and the disc's inside), stored as
-        /// its fill level. The tiles flipped already (within BrushRadius) agree with it, so the drawn edge is the circle and the grid stays the
-        /// game's solid / open truth. A mound never raises a cell a body stands in, nor an unpiled cell within the brush (`skip`).
+        /// U-157 (P-54, D-168): the stroke's round shape in the drawn field. Every quarter-metre sub-node within BrushRadius + BrushRamp / 2 of p
+        /// takes the disc's density (carve: the lower of its own and the disc's outside; pile: the higher of its own and the disc's inside), held
+        /// in its tile's block (TerrainEdits.Block bytes). A tile without a block takes one first, holding what the tracer drew there (the bilinear
+        /// between its four nodes), and so does any tile whose cell has a corner node that moved, so nothing outside the disc shifts. The tiles the
+        /// brush flipped (centres within BrushRadius) agree with the disc, so the grid stays the game's solid / open truth. A mound never raises a
+        /// sub-node in a cell a body stands in, nor in an unpiled cell within the brush (`skip`). Every value is read before any is written.
         /// </summary>
-        void Shape(Vector2 p, bool carve, System.Collections.Generic.HashSet<Vector2Int> skip)
+        int shapeX0, shapeY0, shapeW, shapeH;
+        byte[] shapeGrid = new byte[64];
+        float[] shapeCur = new float[49 * QQ];
+
+        /// <summary>D-168: reads the drawn field round p (each tile's block, or the bilinear between its nodes) before the stroke flips any tile.</summary>
+        void ShapeRead(Vector2 p)
         {
             float reach = BrushRadius + BrushRamp * 0.5f;
-            int x0 = Mathf.FloorToInt(p.x - reach), x1 = Mathf.FloorToInt(p.x + reach), y0 = Mathf.FloorToInt(p.y - reach), y1 = Mathf.FloorToInt(p.y + reach);
-            for (int y = y0; y <= y1; y++)
-                for (int x = x0; x <= x1; x++)
+            int x0 = Mathf.FloorToInt(p.x - reach - 1.5f), x1 = Mathf.FloorToInt(p.x + reach - 0.5f);
+            int y0 = Mathf.FloorToInt(p.y - reach - 1.5f), y1 = Mathf.FloorToInt(p.y + reach - 0.5f);
+            int w = x1 - x0 + 1, h = y1 - y0 + 1, tiles = w * h, nw = w + 1;
+            if (tiles > shapeChanged.Length)
+            {
+                shapeNew = new byte[tiles * QQ]; shapeChanged = new bool[tiles]; shapeOwn = new bool[tiles]; shapeNode0 = new bool[tiles]; shapeBlocks = new byte[tiles][];
+                shapeCur = new float[tiles * QQ];
+            }
+            shapeX0 = x0; shapeY0 = y0; shapeW = w; shapeH = h;
+            if (nw * (h + 1) > shapeNodes.Length) shapeNodes = new float[nw * (h + 1)];
+            for (int j = 0; j <= h; j++)
+                for (int i = 0; i <= w; i++) shapeNodes[j * nw + i] = terrain.NodeDensity(x0 + i, y0 + j);
+            for (int j = 0; j < h; j++)
+                for (int i = 0; i < w; i++)
                 {
-                    var centre = new Vector2(x + 0.5f, y + 0.5f);
-                    float t = Mathf.Clamp01(((centre - p).magnitude - BrushRadius) / BrushRamp + 0.5f);
-                    if (t >= 1f) continue;
-                    var cell = new Vector2Int(x, y);
-                    if (!carve && (skip != null && skip.Contains(cell) || !Clear(centre))) continue;
-                    float before = terrain.NodeDensity(x, y), after = carve ? Mathf.Min(before, t) : Mathf.Max(before, 1f - t);
-                    if (Mathf.Abs(after - before) < 0.5f / 255f) continue;
-                    terrain.SetLevel(x, y, (byte)Mathf.RoundToInt(after * 255f));
+                    int k = j * w + i, tx = x0 + i, ty = y0 + j;
+                    bool own = terrain.TryBlock(tx, ty, out var blk);
+                    shapeOwn[k] = own; shapeBlocks[k] = blk;
+                    float n00 = shapeNodes[j * nw + i], n10 = shapeNodes[j * nw + i + 1], n01 = shapeNodes[(j + 1) * nw + i], n11 = shapeNodes[(j + 1) * nw + i + 1];
+                    for (int b = 0; b < Q; b++)
+                        for (int a = 0; a < Q; a++)
+                        {
+                            float fx = a / (float)Q, fy = b / (float)Q;
+                            shapeCur[k * QQ + b * Q + a] = own ? blk[b * Q + a] / 255f : Mathf.Lerp(Mathf.Lerp(n00, n10, fx), Mathf.Lerp(n01, n11, fx), fy);
+                        }
                 }
+        }
+
+        /// <summary>D-168: the stroke's disc over the field ShapeRead took (same p), written as blocks once the tiles have flipped.</summary>
+        void ShapeApply(Vector2 p, bool carve, System.Collections.Generic.HashSet<Vector2Int> skip)
+        {
+            int x0 = shapeX0, y0 = shapeY0, w = shapeW, h = shapeH, gw = w + 1;
+            shapeClear.Clear();
+            if (!carve)
+            {
+                // D-168: the grid after the pile, round the range: solid, and built (piled where the generator left air). A sub-node whose cell's
+                // four tiles are all solid, one of them built, is inside the mound: filled, so no gap between two strokes' discs shows as a hole.
+                if (gw * (h + 1) > shapeGrid.Length) shapeGrid = new byte[gw * (h + 1)];
+                for (int j = 0; j <= h; j++)
+                    for (int i = 0; i <= w; i++)
+                    {
+                        int gx = x0 + i, gy = y0 + j;
+                        bool solid = TileId.IsSolid(terrain.GetTile(gx, gy));
+                        bool built = solid && !TileId.IsSolid(terrain.BaseGenerator.TileAt(terrain.WrapX(gx), gy));
+                        shapeGrid[j * gw + i] = (byte)(solid ? built ? 2 : 1 : 0);
+                    }
+            }
+            bool any = false;
+            for (int j = 0; j < h; j++)
+                for (int i = 0; i < w; i++)
+                {
+                    int k = j * w + i, tx = x0 + i, ty = y0 + j;
+                    bool own = shapeOwn[k]; var blk = shapeBlocks[k];
+                    shapeChanged[k] = false; shapeNode0[k] = false;
+                    for (int b = 0; b < Q; b++)
+                        for (int a = 0; a < Q; a++)
+                        {
+                            float fx = a / (float)Q, fy = b / (float)Q;
+                            float cur = shapeCur[k * QQ + b * Q + a];
+                            var pos = new Vector2(tx + 0.5f + fx, ty + 0.5f + fy);
+                            float t = Mathf.Clamp01(((pos - p).magnitude - BrushRadius) / BrushRamp + 0.5f);
+                            float next = cur;
+                            if (carve) next = Mathf.Min(cur, t);
+                            else
+                            {
+                                if (t < 1f && Pileable(pos, skip)) next = Mathf.Max(cur, 1f - t);
+                                byte g00 = shapeGrid[j * gw + i], g10 = shapeGrid[j * gw + i + 1], g01 = shapeGrid[(j + 1) * gw + i], g11 = shapeGrid[(j + 1) * gw + i + 1];
+                                if (g00 > 0 && g10 > 0 && g01 > 0 && g11 > 0 && (g00 == 2 || g10 == 2 || g01 == 2 || g11 == 2)) next = 1f;
+                            }
+                            bool moved = Mathf.Abs(next - cur) >= 0.5f / 255f;
+                            shapeNew[k * QQ + b * Q + a] = own && !moved ? blk[b * Q + a] : (byte)Mathf.RoundToInt(Mathf.Clamp01(next) * 255f);
+                            if (!moved) continue;
+                            shapeChanged[k] = true; any = true;
+                            if (a == 0 && b == 0) shapeNode0[k] = true;
+                        }
+                }
+            if (!any) return;
+            for (int j = 0; j < h; j++)
+                for (int i = 0; i < w; i++)
+                {
+                    int k = j * w + i;
+                    bool store = shapeChanged[k] || !shapeOwn[k] && (Node0(i + 1, j) || Node0(i, j + 1) || Node0(i + 1, j + 1));
+                    if (!store) continue;
+                    var blk = shapeOwn[k] ? shapeBlocks[k] : new byte[QQ];
+                    System.Array.Copy(shapeNew, k * QQ, blk, 0, QQ);
+                    terrain.SetBlock(x0 + i, y0 + j, blk);
+                }
+
+            bool Node0(int i, int j) => i < w && j < h && shapeNode0[j * w + i];
+        }
+
+        /// <summary>U-157: a mound may raise the sub-node at `pos`: its cell is not an unpiled brush cell and no body stands in it.</summary>
+        bool Pileable(Vector2 pos, System.Collections.Generic.HashSet<Vector2Int> skip)
+        {
+            var cell = new Vector2Int(Mathf.FloorToInt(pos.x), Mathf.FloorToInt(pos.y));
+            if (skip != null && skip.Contains(cell)) return false;
+            if (!shapeClear.TryGetValue(cell, out bool clear)) shapeClear[cell] = clear = Clear(new Vector2(cell.x + 0.5f, cell.y + 0.5f));
+            return clear;
         }
 
         /// <summary>U-157: the planet's one ground material a mound is made of (its near-surface ground).</summary>

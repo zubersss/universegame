@@ -63,9 +63,10 @@ namespace Meridian.Tests
             side.creatures.autoSpawn = false;
             side.creatures.DespawnAll();
 
-            // The scoop: a stroke on a column seam just under the ground, 3 m from the surveyor (four tiles in the brush).
+            // The scoop: a stroke aimed at the ground on a column seam, 3 m from the surveyor (both columns' top tiles in the brush). D-168: the
+            // disc is exact, so it must reach the surface to open it (aimed 1.1 m under it, it leaves a 0.2 m roof: a buried bubble).
             int x = side.spawnX - 3, top = t.TopSolidY(x);
-            var p = new Vector2(x, top - 0.1f); // on the seam of two columns: their top two tiles are all within the brush
+            var p = new Vector2(x, t.SurfaceAt(x) - 0.25f);
             var cells = RigTools.BrushCells(p);
             int solid = 0;
             foreach (var c in cells) if (TileId.IsSolid(t.GetTile(c.x, c.y))) solid++;
@@ -133,7 +134,7 @@ namespace Meridian.Tests
         /// <summary>
         /// U-157 P-54 (D-167 (4)): dug walls are round at any size, not only a lone scoop. A 4 m tunnel of strokes on the tile centres and a second,
         /// off-grid row above it make one hole of seven strokes; every outline point round it (the chunks' edge chains, under the surface band)
-        /// lies within BrushRadius −0.22 / +0.20 m of its nearest stroke centre (outward, the tracing rounds off the rock tips between neighbouring strokes: 0.15 m measured). Without the fill levels the walls follow the 1 m tile faces (a
+        /// lies within BrushRadius ± 0.10 m of its nearest stroke centre (D-168: the strokes' discs held at the quarter-metre sub-nodes). Without the fill levels the walls follow the 1 m tile faces (a
         /// lone stroke's wall at 0.5 m, a stack's straight faces on the column lines), far outside that band.
         /// </summary>
         [UnityTest]
@@ -178,8 +179,70 @@ namespace Meridian.Tests
                 }
             TestContext.Out.WriteLine($"[MERIDIAN] p54 hole at x {x0}, top {top}: {n} outline points, nearest-stroke distance {lo:F3}..{hi:F3} m (brush {RigTools.BrushRadius})");
             Assert.Greater(n, 16, "the hole's outline traced");
-            Assert.GreaterOrEqual(lo, RigTools.BrushRadius - 0.22f, "no wall pulled in onto a tile face");
-            Assert.LessOrEqual(hi, RigTools.BrushRadius + 0.2f, "no wall left standing out on a tile face");
+            Assert.GreaterOrEqual(lo, RigTools.BrushRadius - 0.10f, "no wall pulled in onto a tile face");
+            Assert.LessOrEqual(hi, RigTools.BrushRadius + 0.10f, "no wall left standing out on a tile face");
+            LogAssert.NoUnexpectedReceived();
+        }
+
+        /// <summary>
+        /// U-157 (D-168): one Beam stroke off the grid, deep in natural ground, traces a circle: in each of 16 directions round the stroke the
+        /// outline (the chunks' edge chains, what draws and collides) lies within BrushRadius ± 0.06 m of its centre.
+        /// </summary>
+        [UnityTest]
+        public IEnumerator AStrokeIsRoundInSixteenDirections()
+        {
+            PlanetSideRoot side = null;
+            yield return Boot(s => side = s);
+            var t = side.terrain;
+            var rig = side.rig;
+            // Solid rock all round (no natural cavity within 2 m: the 10:4x run met one 1.28 m off), off the grid.
+            int x0 = side.spawnX + 30;
+            for (int k = 0; k < 80 && t.PadTop(x0) != int.MinValue; k++) x0++;
+            var p = new Vector2(x0 + 0.37f, t.OriginalTop(x0) - 4.3f);
+            for (int tries = 0; tries < 40; tries++)
+            {
+                bool rock = true;
+                for (int k = 0; k < 24 && rock; k++)
+                    for (float r = 0f; r <= 2f && rock; r += 0.25f)
+                        rock = t.FieldAt(p + r * new Vector2(Mathf.Cos(k * Mathf.PI / 12f), Mathf.Sin(k * Mathf.PI / 12f))) >= 0.9f;
+                if (rock) break;
+                p += tries % 2 == 0 ? new Vector2(0f, -1.13f) : new Vector2(2.71f, 1.13f);
+            }
+            var owner = rig.owner;
+            rig.owner = null;
+            try { Assert.IsTrue(rig.Dig(p), "the stroke carves"); }
+            finally { rig.owner = owner; }
+            yield return new WaitForFixedUpdate();
+            yield return null;
+            var best = new float[16];
+            var bestAngle = new float[16];
+            for (int k = 0; k < 16; k++) { best[k] = float.NaN; bestAngle[k] = float.MaxValue; }
+            int n = 0;
+            foreach (var chunk in Object.FindObjectsByType<TerrainChunk>())
+                foreach (var e in chunk.GetComponents<EdgeCollider2D>())
+                {
+                    var pts = e.points;
+                    for (int k = 0; k < pts.Length; k++)
+                    {
+                        var w = (Vector2)e.transform.TransformPoint(pts[k] + e.offset);
+                        var v = w - p;
+                        if (v.magnitude > RigTools.BrushRadius + RigTools.BrushRamp) continue; // past the disc's ramp the stroke changes nothing
+                        n++;
+                        float d = v.magnitude;
+                        Assert.AreEqual(RigTools.BrushRadius, d, 0.06f, $"outline point ({w.x:F3}, {w.y:F3}) at {Mathf.Atan2(v.y, v.x) * Mathf.Rad2Deg:F0}°");
+                        float ang = Mathf.Repeat(Mathf.Atan2(v.y, v.x) * Mathf.Rad2Deg, 360f);
+                        int dir = Mathf.RoundToInt(ang / 22.5f) % 16;
+                        float off = Mathf.Abs(Mathf.DeltaAngle(ang, dir * 22.5f));
+                        if (off < bestAngle[dir]) { bestAngle[dir] = off; best[dir] = d; }
+                    }
+                }
+            var line = new System.Text.StringBuilder();
+            for (int k = 0; k < 16; k++)
+            {
+                Assert.IsFalse(float.IsNaN(best[k]), $"an outline point toward {k * 22.5f}°");
+                line.Append($" {k * 22.5f:F0}°:{best[k]:F3}");
+            }
+            TestContext.Out.WriteLine($"[MERIDIAN] d168 stroke at ({p.x:F2}, {p.y:F2}): {n} outline points; radius by direction{line}");
             LogAssert.NoUnexpectedReceived();
         }
     }

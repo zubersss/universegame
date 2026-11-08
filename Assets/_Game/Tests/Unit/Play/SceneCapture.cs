@@ -2229,31 +2229,41 @@ namespace Meridian.Tests
                 // 1: one stroke, its puff, then the settled scoop.
                 yield return Stand(bx + 0.5f);
                 int sx = bx + 4, stop = t.TopSolidY(sx);
-                bool dug = rig.Dig(new Vector2(sx, stop + 0.2f));
+                bool dug = rig.Dig(new Vector2(sx, t.SurfaceAt(sx) - 0.2f)); // D-168: aimed at the ground, a round bowl
                 for (int k = 0; k < 4; k++) yield return null;
                 yield return Shot("1_scoop_puff");
                 for (int k = 0; k < 60; k++) yield return null;
+                yield return new WaitForSeconds(1f); // settled: the puff played out
                 yield return Shot("1_scoop");
                 TestContext.Out.WriteLine($"[MERIDIAN] u157 1_scoop: at ({sx}, {stop + 0.2f:F1}), dug {dug}, ground {bx}..{bx + 24}");
 
                 // 2: a tunnel, stroke by stroke down and along into the cross-section.
                 int strokes = 0;
+                float sy0 = t.SurfaceAt(sx);
                 for (int k = 0; k < 14; k++)
                 {
-                    var p = new Vector2(sx + 2f + k * 0.7f, stop - 0.4f - Mathf.Min(k, 6) * 0.55f);
+                    var p = new Vector2(sx + 0.6f + k * 0.6f, sy0 - 0.5f - Mathf.Min(k, 6) * 0.5f); // from the scoop down and along
                     if (rig.Dig(p)) strokes++;
                 }
                 for (int k = 0; k < 30; k++) yield return null;
+                // The tunnel in the middle of the frame (it ran off the foot of the surveyor's frame, LEAD 10:3x).
+                if (follow != null) follow.enabled = false;
+                cam.transform.position = new Vector3(sx + 6f, stop - 1.5f, cam.transform.position.z);
+                yield return new WaitForSeconds(1f); // the strokes' dirt puffs play out (0.67 s)
                 yield return Shot("2_tunnel");
+                if (follow != null) { follow.enabled = true; follow.SnapToTarget(); }
                 TestContext.Out.WriteLine($"[MERIDIAN] u157 2_tunnel: {strokes} of 14 strokes carved");
 
                 // 3: a mound, piled stroke by stroke.
                 int mx = bx + 18, mtop = t.TopSolidY(mx), piled = 0;
                 yield return Stand(mx - 5.5f);
+                // D-168: a held Builder sweeping three passes (a stroke every 0.3 m, as one per frame does), each over the ground as it was:
+                // single clicks stacked 1.2 m apart leave a concave cusp between each pair of discs.
                 for (int row = 0; row < 3; row++)
-                    for (int k = -3 + row; k <= 3 - row; k++)
-                        piled += rig.Mound(new Vector2(mx + k * 0.8f, t.TopSolidY(Mathf.FloorToInt(mx + k * 0.8f)) + 1.2f), rig.GroundMaterial, false);
+                    for (float x = mx - 3f + row; x <= mx + 3f - row + 1e-3f; x += 0.3f)
+                        piled += rig.Mound(new Vector2(x, t.CurveAt(Mathf.FloorToInt(x)) + 0.5f + row * 0.6f), rig.GroundMaterial, false);
                 for (int k = 0; k < 30; k++) yield return null;
+                yield return new WaitForSeconds(1f); // D-168 (2): the 15 strokes' dirt puffs (B-175, 8 frames at 12 fps) play out; caught mid-play they read as faces
                 yield return Shot("3_mound");
                 TestContext.Out.WriteLine($"[MERIDIAN] u157 3_mound: {piled} tiles piled at {mx} (ground {mtop})");
 
@@ -2340,6 +2350,7 @@ namespace Meridian.Tests
                 IEnumerator Shot(string label)
                 {
                     for (int k = 0; k < 20; k++) yield return null;
+                    yield return new WaitForSeconds(0.8f); // any dirt puff plays out
                     yield return Save(cam, $"{name}_{label}");
                     File.Copy($"logs/capture_{name}_{label}.png", $"{dir}/{label}.png", true);
                 }

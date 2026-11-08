@@ -12,7 +12,16 @@ namespace Meridian.View2D
     public sealed class SceneLayout
     {
         /// <summary>One layer: U-103 (D-108) adds `tile` / `tile_y` (a repeating tile in x / and y), `height_px` and `role` (starfield, nebula) for the Space scene; the side scenes ignore them.</summary>
-        [System.Serializable] public sealed class Layer { public int n; public float parallax; public float y_m; public bool tile, tile_y; public int height_px; public string role; public Pulse pulse; }
+        [System.Serializable] public sealed class Layer { public int n; public float parallax; public float y_m; public bool tile, tile_y; public int height_px; public string role; public Pulse pulse; public int ground_row, continue_rows; }
+        /// <summary>U-164 (D-169): the rows a layer's continuation repeats: its json continue_rows (default DefaultContinueRows), never rows above its
+        /// painted ground line (height − ground_row) when the json states one, at least 2. Pure.</summary>
+        public const int DefaultContinueRows = 64;
+        public static int ContinueRows(Layer l, int heightPx)
+        {
+            int rows = l != null && l.continue_rows > 0 ? l.continue_rows : DefaultContinueRows;
+            if (l != null && l.ground_row > 0 && heightPx > l.ground_row) rows = Mathf.Min(rows, heightPx - l.ground_row);
+            return Mathf.Clamp(rows, 2, Mathf.Max(2, heightPx));
+        }
         /// <summary>U-133 (D-148): a layer that breathes: its scale and alpha swing between the pairs over `beats` beats at `bpm`, about pivot_uv
         /// (B-161's storm rim: scale 0.97–1.03, alpha 0.85–1.0, 8 beats at 110 bpm, the centre). Absent: an empty block (beats 0), not pulsed.</summary>
         [System.Serializable] public sealed class Pulse { public float[] scale; public float[] alpha; public int beats; public float bpm; public float[] pivot_uv; }
@@ -239,7 +248,16 @@ namespace Meridian.View2D
         /// <summary>U-153 (LEAD 02:5x): a decked giant's under-fill continues the set's lowest layer downward (its bottom rows stretched, in phase
         /// with it) instead of the ground strip's fill tile: there is no ground under the floes.</summary>
         public bool fillFromSet;
+        /// <summary>U-164 (D-169): on the smooth ground the NEAREST layer goes on down under its bottom edge (its bottom strip repeated, in front of
+        /// the farther layers), when the importer found that strip opaque; else the lowest layer's rows as before (U-153).</summary>
+        public bool continueNearest;
+        /// <summary>U-164: the layer the fill continued on the last frame (-1: the lowest layer's rows or the colour; tests read it).</summary>
+        public int FillLayer { get; private set; } = -1;
+        /// <summary>U-164: the fill renderer (tests read its sprite, size and order).</summary>
+        public SpriteRenderer Fill => fill;
         Sprite setFillFrom, setFill;
+        Sprite nearFillFrom, nearFill;
+        bool nearOpaque;
         /// <summary>How deep the ground fill reaches under the set (m): past the frame bottom from any dip the camera can drop into.</summary>
         public const float FillDepth = 200f;
         SpriteRenderer fill;
@@ -267,6 +285,8 @@ namespace Meridian.View2D
             SpriteRenderer lowest = null;
             for (int i = 0; i < renderers.Count; i++) if (renderers[i] != null && renderers[i].transform.position.y < bottom) { bottom = renderers[i].transform.position.y; lowest = renderers[i]; }
             if (bottom == float.MaxValue) { fill.enabled = false; FillTop = float.NaN; return; }
+            if (fillFromSet && continueNearest && ContinueNearest()) return;
+            FillLayer = -1;
             if (fillFromSet && lowest.sprite != null && lowest.sprite != white)
             {
                 // U-153 (LEAD 02:5x): the lowest layer's bottom rows stretched down, in phase with it: the clouds go on under the floes.
@@ -304,6 +324,50 @@ namespace Meridian.View2D
             else fill.transform.localScale = new Vector3(width, FillDepth, 1f);
             fill.enabled = true;
         }
+
+        /// <summary>U-164 (D-169): repeats the nearest layer's bottom strip (ContinueRows) from its bottom edge down, tiled (never a stretched
+        /// row), at the nearest layer's order (in front of the farther layers, behind the ground band). False when that layer has no art yet or
+        /// its strip is not opaque.</summary>
+        bool ContinueNearest()
+        {
+            int k = -1;
+            for (int i = 0; i < renderers.Count && i < Layout.layers.Length; i++)
+                if (renderers[i] != null && renderers[i].enabled && (k < 0 || Layout.layers[i].n > Layout.layers[k].n)) k = i;
+            if (k < 0) return false;
+            var near = renderers[k];
+            var l = Layout.layers[k];
+            var sp = near.sprite;
+            if (sp == null || sp == white) return false;
+            if (nearFillFrom != sp)
+            {
+                nearFillFrom = sp; // the key and the strip once per sprite (no per-frame string)
+                nearOpaque = Meridian.Rendering.ArtMaterials.OpaqueBottom(LayerKey(l.n));
+                if (!nearOpaque) return false;
+                var r = sp.rect;
+                int rows = SceneLayout.ContinueRows(l, Mathf.RoundToInt(r.height));
+                nearFill = Sprite.Create(sp.texture, new Rect(r.x, r.y, r.width, rows), new Vector2(0.5f, 1f), sp.pixelsPerUnit, 0, SpriteMeshType.FullRect);
+                nearFill.name = sp.name + "_continue";
+            }
+            if (!nearOpaque) return false;
+            if (fill.sprite != nearFill) { fill.sprite = nearFill; fill.drawMode = SpriteDrawMode.Tiled; }
+            var tint = new Color(1f, 1f, 1f, alpha);
+            if (fill.color != tint) fill.color = tint;
+            fill.flipX = near.flipX;
+            fill.sortingOrder = BackOrder + orderOffset + l.n;
+            float stripH = nearFill.bounds.size.y;
+            int strips = Mathf.Max(1, Mathf.CeilToInt(ContinueDepth / stripH));
+            var size = new Vector2(near.size.x, strips * stripH);
+            if (fill.size != size) fill.size = size;
+            fill.transform.localScale = Vector3.one;
+            FillTop = near.transform.position.y + 0.02f; // a hair over the layer's edge: no seam
+            fill.transform.position = new Vector3(near.transform.position.x, FillTop, 0f);
+            fill.enabled = true;
+            FillLayer = l.n;
+            return true;
+        }
+
+        /// <summary>U-164: how far the nearest layer goes on under its bottom edge (m): deeper than any valley the frame shows under it.</summary>
+        public const float ContinueDepth = 24f;
 
         void LateUpdate()
         {
