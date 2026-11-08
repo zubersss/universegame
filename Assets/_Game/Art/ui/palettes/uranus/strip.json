@@ -1,0 +1,47 @@
+{
+  "key": "ui/palettes/uranus/strip",
+  "style": "v3",
+  "palette": true,
+  "colors": [
+    {
+      "name": "offwhite",
+      "hex": "#E3ECE9",
+      "shadow": "#ADB8B8"
+    },
+    {
+      "name": "red",
+      "hex": "#C27A4A",
+      "shadow": "#966849"
+    },
+    {
+      "name": "mustard",
+      "hex": "#ABAF86",
+      "shadow": "#868D73"
+    },
+    {
+      "name": "teal",
+      "hex": "#5E9FA5",
+      "shadow": "#508289"
+    },
+    {
+      "name": "green",
+      "hex": "#7E9A80",
+      "shadow": "#667E6F"
+    },
+    {
+      "name": "sky",
+      "hex": "#9CC2C2",
+      "shadow": "#7B9A9D"
+    },
+    {
+      "name": "brown",
+      "hex": "#2E3D47",
+      "shadow": "#2E3D47"
+    },
+    {
+      "name": "ink",
+      "hex": "#1E1A17",
+      "shadow": null
+    }
+  ]
+}

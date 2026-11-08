@@ -1,0 +1,25 @@
+{
+  "key": "terrain/uranus/floe_strip_ice",
+  "style": "v3",
+  "frame_width": 64,
+  "frame_height": 152,
+  "columns": 10,
+  "gutter": 4,
+  "frames": 10,
+  "fps": 12,
+  "pivot": [
+    0.5,
+    0.842105
+  ],
+  "facing": "right",
+  "ppu": 64,
+  "tile": true,
+  "animations": [],
+  "ground_line_px": 128,
+  "material": "floe_ice",
+  "caps": {
+    "cap_left": 8,
+    "cap_right": 9
+  },
+  "note": "D-137: frames 0-7 tile (x mod 8), 8 = cap_left (the floe's first column), 9 = cap_right (its last); pivot = the ground line; below it the fill = the column's frame's bottom 8 px (a cap's continues its side wall, U-126)"
+}

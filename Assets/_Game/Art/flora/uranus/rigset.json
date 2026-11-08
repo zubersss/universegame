@@ -1,0 +1,648 @@
+{
+  "key": "flora/uranus/rigset",
+  "style": "v3",
+  "ppu": 64,
+  "rect_origin": "bottom_left",
+  "parts": [
+    {
+      "name": "embermoss_curl",
+      "rect": [
+        144,
+        40,
+        72,
+        32
+      ],
+      "pivot": [
+        0.481,
+        0.1738
+      ]
+    },
+    {
+      "name": "embermoss_hi",
+      "rect": [
+        348,
+        120,
+        68,
+        40
+      ],
+      "pivot": [
+        0.4704,
+        0.168
+      ]
+    },
+    {
+      "name": "embermoss_lo",
+      "rect": [
+        40,
+        36,
+        68,
+        36
+      ],
+      "pivot": [
+        0.4704,
+        0.1545
+      ]
+    },
+    {
+      "name": "fogbell_bell_open",
+      "rect": [
+        112,
+        36,
+        28,
+        36
+      ],
+      "pivot": [
+        0.44,
+        0.8377
+      ]
+    },
+    {
+      "name": "fogbell_bell_shut",
+      "rect": [
+        220,
+        40,
+        20,
+        32
+      ],
+      "pivot": [
+        0.464,
+        0.7178
+      ]
+    },
+    {
+      "name": "fogbell_stalk",
+      "rect": [
+        0,
+        76,
+        76,
+        84
+      ],
+      "pivot": [
+        0.2482,
+        0.0906
+      ]
+    },
+    {
+      "name": "hailcatch_base",
+      "rect": [
+        420,
+        120,
+        44,
+        40
+      ],
+      "pivot": [
+        0.4982,
+        0.2028
+      ]
+    },
+    {
+      "name": "hailcatch_bowl_h0",
+      "rect": [
+        244,
+        44,
+        48,
+        28
+      ],
+      "pivot": [
+        0.4999,
+        0.2718
+      ]
+    },
+    {
+      "name": "hailcatch_bowl_h1",
+      "rect": [
+        296,
+        44,
+        48,
+        28
+      ],
+      "pivot": [
+        0.4999,
+        0.2718
+      ]
+    },
+    {
+      "name": "hailcatch_bowl_h2",
+      "rect": [
+        348,
+        44,
+        48,
+        28
+      ],
+      "pivot": [
+        0.4999,
+        0.2718
+      ]
+    },
+    {
+      "name": "hailcatch_bowl_h3",
+      "rect": [
+        400,
+        44,
+        48,
+        28
+      ],
+      "pivot": [
+        0.4999,
+        0.2718
+      ]
+    },
+    {
+      "name": "hailcatch_bowl_h4",
+      "rect": [
+        452,
+        44,
+        48,
+        28
+      ],
+      "pivot": [
+        0.4999,
+        0.2718
+      ]
+    },
+    {
+      "name": "hailcatch_bowl_tip",
+      "rect": [
+        292,
+        108,
+        52,
+        52
+      ],
+      "pivot": [
+        0.1645,
+        0.4782
+      ]
+    },
+    {
+      "name": "prismfern_flat",
+      "rect": [
+        124,
+        84,
+        56,
+        76
+      ],
+      "pivot": [
+        0.5001,
+        0.1001
+      ]
+    },
+    {
+      "name": "prismfern_glint",
+      "rect": [
+        184,
+        84,
+        52,
+        76
+      ],
+      "pivot": [
+        0.4619,
+        0.1001
+      ]
+    },
+    {
+      "name": "prismfern_rest",
+      "rect": [
+        240,
+        84,
+        48,
+        76
+      ],
+      "pivot": [
+        0.5003,
+        0.1001
+      ]
+    },
+    {
+      "name": "sunturner_head_left",
+      "rect": [
+        468,
+        120,
+        36,
+        40
+      ],
+      "pivot": [
+        0.7023,
+        0.2259
+      ]
+    },
+    {
+      "name": "sunturner_head_right",
+      "rect": [
+        0,
+        32,
+        36,
+        40
+      ],
+      "pivot": [
+        0.1972,
+        0.2259
+      ]
+    },
+    {
+      "name": "sunturner_head_shut",
+      "rect": [
+        0,
+        0,
+        24,
+        28
+      ],
+      "pivot": [
+        0.4366,
+        0.0524
+      ]
+    },
+    {
+      "name": "sunturner_head_up",
+      "rect": [
+        28,
+        0,
+        36,
+        28
+      ],
+      "pivot": [
+        0.4958,
+        0.0524
+      ]
+    },
+    {
+      "name": "sunturner_stalk",
+      "rect": [
+        80,
+        80,
+        40,
+        80
+      ],
+      "pivot": [
+        0.4871,
+        0.0982
+      ]
+    }
+  ],
+  "plants": [
+    {
+      "name": "sunturner",
+      "biomes": [
+        "deck1",
+        "deck2"
+      ],
+      "bones": [
+        {
+          "name": "root",
+          "part": "sunturner_stalk",
+          "parent": null,
+          "length": 0.992,
+          "order": 0
+        },
+        {
+          "name": "head",
+          "part": "sunturner_head_up",
+          "parent": "root",
+          "length": 0.288,
+          "offset_m": [
+            0.0,
+            0.992
+          ],
+          "order": 1
+        }
+      ],
+      "swaps": {
+        "head": [
+          "sunturner_head_left",
+          "sunturner_head_up",
+          "sunturner_head_right",
+          "sunturner_head_shut"
+        ]
+      },
+      "slots": [
+        {
+          "slot": "head",
+          "bone": "head",
+          "offset_m": [
+            0.0,
+            0.0
+          ],
+          "order": 1,
+          "replaces_part": true
+        }
+      ],
+      "idle": {
+        "type": "sway",
+        "amplitude_deg": 3,
+        "beat_bpm": 110,
+        "squash": 0.02,
+        "swap_cycle": {
+          "slot": "head",
+          "sequence": [
+            "sunturner_head_up",
+            "sunturner_head_left"
+          ],
+          "beats": [
+            2,
+            2
+          ]
+        }
+      },
+      "react": {
+        "radius_m": 3.0,
+        "action": "turn_bounce",
+        "swap": "sunturner_head_shut",
+        "note": "UNITY sets the head to sunturner_head_left / _right by the season (the sun's side)"
+      }
+    },
+    {
+      "name": "fogbell",
+      "biomes": [
+        "deck1",
+        "deck2"
+      ],
+      "bones": [
+        {
+          "name": "root",
+          "part": "fogbell_stalk",
+          "parent": null,
+          "length": 0.96,
+          "order": 0
+        },
+        {
+          "name": "bell0",
+          "part": "fogbell_bell_open",
+          "parent": "root",
+          "length": 0.272,
+          "offset_m": [
+            0.2318,
+            0.8868
+          ],
+          "order": 1
+        },
+        {
+          "name": "bell1",
+          "part": "fogbell_bell_open",
+          "parent": "bell0",
+          "length": 0.272,
+          "offset_m": [
+            0.2643,
+            0.1291
+          ],
+          "order": 2
+        },
+        {
+          "name": "bell2",
+          "part": "fogbell_bell_open",
+          "parent": "bell1",
+          "length": 0.272,
+          "offset_m": [
+            0.1887,
+            -0.1324
+          ],
+          "order": 3
+        }
+      ],
+      "swaps": {
+        "b0": [
+          "fogbell_bell_open",
+          "fogbell_bell_shut"
+        ],
+        "b1": [
+          "fogbell_bell_open",
+          "fogbell_bell_shut"
+        ],
+        "b2": [
+          "fogbell_bell_open",
+          "fogbell_bell_shut"
+        ]
+      },
+      "slots": [
+        {
+          "slot": "b0",
+          "bone": "bell0",
+          "offset_m": [
+            0.0,
+            0.0
+          ],
+          "order": 1,
+          "replaces_part": true
+        },
+        {
+          "slot": "b1",
+          "bone": "bell1",
+          "offset_m": [
+            0.0,
+            0.0
+          ],
+          "order": 2,
+          "replaces_part": true
+        },
+        {
+          "slot": "b2",
+          "bone": "bell2",
+          "offset_m": [
+            0.0,
+            0.0
+          ],
+          "order": 3,
+          "replaces_part": true
+        }
+      ],
+      "idle": {
+        "type": "sway",
+        "amplitude_deg": 16,
+        "beat_bpm": 110,
+        "squash": 0.0
+      },
+      "react": {
+        "radius_m": 3.0,
+        "action": "turn_bounce",
+        "swap": "fogbell_bell_shut"
+      }
+    },
+    {
+      "name": "hailcatch",
+      "biomes": [
+        "deck2"
+      ],
+      "bones": [
+        {
+          "name": "root",
+          "part": "hailcatch_base",
+          "parent": null,
+          "length": 0.352,
+          "order": 0
+        },
+        {
+          "name": "bowl",
+          "part": "hailcatch_bowl_h2",
+          "parent": "root",
+          "length": 0.288,
+          "offset_m": [
+            0.0,
+            0.352
+          ],
+          "order": 1
+        }
+      ],
+      "swaps": {
+        "bowl": [
+          "hailcatch_bowl_h0",
+          "hailcatch_bowl_h1",
+          "hailcatch_bowl_h2",
+          "hailcatch_bowl_h3",
+          "hailcatch_bowl_h4",
+          "hailcatch_bowl_tip"
+        ]
+      },
+      "slots": [
+        {
+          "slot": "bowl",
+          "bone": "bowl",
+          "offset_m": [
+            0.0,
+            0.0
+          ],
+          "order": 1,
+          "replaces_part": true
+        }
+      ],
+      "idle": {
+        "type": "sway",
+        "amplitude_deg": 3,
+        "beat_bpm": 110,
+        "squash": 0.02,
+        "swap_cycle": {
+          "slot": "bowl",
+          "sequence": [
+            "hailcatch_bowl_h0",
+            "hailcatch_bowl_h1",
+            "hailcatch_bowl_h2",
+            "hailcatch_bowl_h3",
+            "hailcatch_bowl_h4"
+          ],
+          "beats": [
+            2,
+            2,
+            2,
+            2,
+            2
+          ]
+        }
+      },
+      "react": {
+        "radius_m": 3.0,
+        "action": "turn_bounce",
+        "swap": "hailcatch_bowl_tip"
+      }
+    },
+    {
+      "name": "embermoss",
+      "biomes": [
+        "dark_half"
+      ],
+      "bones": [
+        {
+          "name": "root",
+          "part": "embermoss_lo",
+          "parent": null,
+          "length": 0.352,
+          "order": 0
+        }
+      ],
+      "swaps": {
+        "moss": [
+          "embermoss_lo",
+          "embermoss_hi",
+          "embermoss_curl"
+        ]
+      },
+      "slots": [
+        {
+          "slot": "moss",
+          "bone": "root",
+          "offset_m": [
+            0.0,
+            0.0
+          ],
+          "order": 0,
+          "replaces_part": true
+        }
+      ],
+      "idle": {
+        "type": "sway",
+        "amplitude_deg": 1,
+        "beat_bpm": 110,
+        "squash": 0.02,
+        "swap_cycle": {
+          "slot": "moss",
+          "sequence": [
+            "embermoss_lo",
+            "embermoss_hi"
+          ],
+          "beats": [
+            2,
+            2
+          ]
+        }
+      },
+      "react": {
+        "radius_m": 3.0,
+        "action": "turn_bounce",
+        "swap": "embermoss_curl"
+      }
+    },
+    {
+      "name": "prismfern",
+      "biomes": [
+        "deck3",
+        "deep"
+      ],
+      "bones": [
+        {
+          "name": "root",
+          "part": "prismfern_rest",
+          "parent": null,
+          "length": 0.896,
+          "order": 0
+        }
+      ],
+      "swaps": {
+        "fern": [
+          "prismfern_rest",
+          "prismfern_glint",
+          "prismfern_flat"
+        ]
+      },
+      "slots": [
+        {
+          "slot": "fern",
+          "bone": "root",
+          "offset_m": [
+            0.0,
+            0.0
+          ],
+          "order": 0,
+          "replaces_part": true
+        }
+      ],
+      "idle": {
+        "type": "sway",
+        "amplitude_deg": 3,
+        "beat_bpm": 110,
+        "squash": 0.02,
+        "swap_cycle": {
+          "slot": "fern",
+          "sequence": [
+            "prismfern_rest",
+            "prismfern_glint"
+          ],
+          "beats": [
+            3,
+            1
+          ]
+        }
+      },
+      "react": {
+        "radius_m": 3.0,
+        "action": "turn_bounce",
+        "swap": "prismfern_flat"
+      }
+    }
+  ]
+}
