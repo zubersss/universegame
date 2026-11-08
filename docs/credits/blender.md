@@ -16,3 +16,9 @@ Assets not listed here are original work made in Blender from scripts in `blende
 - ui/title/logo: MERIDIAN wordmark built from hand-drawn geometric letterforms (signed-distance strokes in blender/scripts/build_title.py). No font file or third-party typeface is used.
 - ui/title/background: composed only from the project's own exported art (Earth parallax layers, Pilgrim, landing pad, thruster and dust FX); no external images.
 
+
+## Lettering in exported art (B-151, B-170; D-090)
+
+| Asset key(s) | Input | Source / URL | License |
+|--------------|-------|--------------|---------|
+| ui/titlecards/{earth,mars,mercury,venus,jupiter,saturn,uranus,neptune} | the planet name drawn from Limelight Regular's glyph outlines (Eben Sorkin, Sorkin Type) and the subtitle from Patrick Hand Regular's (Patrick Wagesreiter), read from UNITY's committed TTFs `Assets/_Game/Fonts/Limelight/Limelight-Regular.ttf` and `Assets/_Game/Fonts/PatrickHand/PatrickHand-Regular.ttf` by blender/scripts/build_ui_v3.py and baked as ink into each card's color PNG (no font file under Art/) | https://github.com/google/fonts/tree/main/ofl/limelight, https://github.com/google/fonts/tree/main/ofl/patrickhand (logged as files in docs/credits/unity.md) | SIL Open Font License 1.1; images rendered from an OFL font are not Font Software, so the cards carry no OFL condition |

@@ -16,14 +16,14 @@ cloud-column pattern Saturn, Uranus and Neptune reuse.
 
 | Item | State | File |
 |---|---|---|
-| Palette | ACCEPTED (D-137): in `meridian.v3.PALETTES["jupiter"]` + the ui/palettes/jupiter row (exports with the first Jupiter slot) | blender/scripts/build_c2_jupiter_palette.py |
-| Five flora (floe forms + float-cell forms) | source (f9205793, 1.6x since 7eee59fd): key poses checked, palette 100 %; the full preview waits for a free gap | build_c2_jupiter_plants.py |
-| Floe strips | source + checks (a7c4c38a: 4 kinds x 10 frames per D-137, joins <= 0.86/255, caps the same, palette 100 %); review_b155_jupiter_floes_preview.png | build_c2_jupiter_floes.py |
-| Cloud-deck backdrops | source (11169afd: deck1 / deck2 / deck3 / deep with the CRUSH band / spot = the Red Spot overlay); studies need slots | build_backdrop_v3.py (jupiter_scene) |
-| Creatures 1-4 | source (a4a75e39): every frame in bounds; the reviews wait for a free gap | build_creatures_jupiter_v3.py |
-| Vortex Whale | rig-set source (72753c0d, 6 bones); size (~48 m at 1x) asked | build_vortex_whale_v3.py |
-| Aerostat kit (B-156) | source (fcf4c22e): deck, strut, cell, two packs, hook; the review waits for a free gap | build_props_aerostat_v3.py |
-| Props that differ | later (section 6: the husk, derelict, vault) | - |
+| Palette | ACCEPTED (D-137): in `meridian.v3.PALETTES["jupiter"]`; ui/palettes/jupiter EXPORTED (B-159 slot 2, 2b00434b, 11-07 18:21) | blender/scripts/build_c2_jupiter_palette.py |
+| Five flora (floe forms + float-cell forms) | EXPORTED as flora/jupiter/rigset 500x164, 40 parts (B-159 slot 2, 2b00434b); source f9205793 | build_c2_jupiter_plants.py |
+| Floe strips | EXPORTED (B-159 slot 2, 2b00434b): floe_strip_{ice,core,derelict,spot} 676x152 with caps, joins 0.84 / 0.56 / 0.86 / 0.64; source a7c4c38a; review_b155_jupiter_floes.png | build_c2_jupiter_floes.py |
+| Cloud-deck backdrops | EXPORTED straight (B-159 slot 1, ad3d2e98, 11-07 18:20): deck1 / deck2 / deck3 / deep with the CRUSH band / spot = the Red Spot overlay; source 11169afd | build_backdrop_v3.py (jupiter_scene) |
+| Creatures 1-4 | EXPORTED (B-160, db4d5a53, 11-07 18:27): stormglider, lightning_eel, belt_wasp, ballast_tortoise; source a4a75e39 | build_creatures_jupiter_v3.py |
+| Vortex Whale | EXPORTED at D-153's 0.75 scale, ~36 m (B-160, 92830c7f, 11-08 01:03): a rig set 1808x1404, 8 parts, 6 bones; at ~48 m its parts covered 80 % of a 2048 sheet and failed to pack; source 72753c0d | build_vortex_whale_v3.py |
+| Aerostat kit (B-156) | EXPORTED (B-156, ad3d2e98, 11-07 18:20): deck, strut, cell, two packs, hook; source fcf4c22e | build_props_aerostat_v3.py |
+| Props that differ | EXPORTED (B-159 slot 2, 2b00434b): props/jupiter husk_tortoise / derelict_pod / beacon_vault (section 6) | build_props_jupiter_v3.py |
 
 ## 1. Palette (ACCEPTED, D-137; checked by blender/scripts/build_c2_jupiter_palette.py)
 
