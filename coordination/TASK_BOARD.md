@@ -22,11 +22,11 @@ When the lock frees, the highest pending job here goes next, even if the other r
 older (D-037 alternation applies only between equal ranks). A rank is live only while its role
 has a want on file or holds the lock (D-112): if the top rank has no want when the lock frees,
 the next live rank runs now and the skipped role goes next after it files. A role below the top
-keeps its want filed and refreshed (D-075) and works its `## While waiting` list. Cycle 274 (17:5x: BUILD 0.4.7 = THE OWNER'S BUILD (D-151) is in and green; Mercury and Venus complete, the C3 UI in; U-125 / U-140 / U-141 and B-151 / B-152 / B-153 / B-154 / B-167 / B-168 Done; BLENDER's last three Neptune decks running; UNITY on U-127 Jupiter code). A role files its want only when the queue says it is next after the running job:
+keeps its want filed and refreshed (D-075) and works its `## While waiting` list. Cycle 275 (18:5x, the 2-hour tick: 0.4.7 is the owner's build (USER-30); Jupiter's art in except the whale, which waits at the RAM gate (1.35 GB free vs 1376; USER-31); U-127 slice 1 checked, slice 2 owed (UNITY nudged: no commit since 18:14); Neptune designs Done). A role files its want only when the queue says it is next after the running job:
 1. BLENDER · now: B-151 the C3 UI export in one slot (the five 9-slice panels with `slice` [l, t, r, b] in each json, the three title cards ≤ 1920×540 drawn 1:1, `ui/hud/film_switch` with parts `off` / `on` by name); it unblocks the owner build.
-2. BLENDER · the Jupiter dry runs lock-free now (B-159 + B-156, B-160), the exports in slots once U-127's code is committed (D-119); the Saturn dry runs (B-163 / B-164) after; B-161 Neptune is Done as designs.
-3. UNITY · U-127 Jupiter code lock-free (the decks by altitude with the CRUSH band and the Spot, the capped floes, the kit, the creatures, the Vortex Whale framed), committed ahead of its check; then one check lock behind BLENDER's exports; U-129 Saturn code after.
-4. LEAD · the Mercury + Venus + C3 page from 0.4.7's smoke set and USER-30 (the owner's playtest); the next owner build (0.4.8) after Jupiter.
+2. BLENDER · the whale re-export (D-153) the moment the gate clears; then B-170 (the five remaining title cards, one slot); the Saturn exports (B-163 / B-164) when U-129's code lands; the Uranus rows (B-166) lock-free.
+3. UNITY · U-127 slice 2 lock-free NOW (the four creatures, the husk, the whale row guarded, CaptureU127Jupiter), committed; then one check lock (compile + EditMode + the Jupiter slice) alternating with BLENDER; then the Jupiter captures; then Build 0.4.8 (U-142) with the probe and the smoke set; U-129 Saturn code after.
+4. LEAD · the Jupiter page from 0.4.8's smoke set; the owner's USER-30 answer → any 0.4.7 fix card.
 4. UNITY · U-125 Venus code lock-free now; its check behind the Venus exports; U-126 floe caps as lock-free code any time.
 5. Then Jupiter (U-127 + B-159 / B-160 + B-156), Saturn (U-129 + B-163 / B-164), Uranus (U-130 + B-166), Neptune (U-133 + B-161's exports).
 
@@ -63,11 +63,11 @@ Rules: nothing here needs the lock; it stays under ~300 MB of extra RAM; no Unit
 did in your status before the next poll. LEAD tops each list up to ≥ 3 items every cycle.
 
 **UNITY**
-- U-127 Jupiter code lock-free now, committed ahead of its check so B-159 / B-160 / B-156 export behind it (D-119): the cloud-column decks as the B-155 layer sets by altitude with the CRUSH band on layer2 and the Red Spot overlay, the floes with U-126's caps, the aerostat kit sheets, the Jupiter creatures, the Vortex Whale framed so no shot shows both ends, the palette strip; the M4 Jupiter tests unchanged.
-- UNITY_STATUS current after each lock; the Ready list names only unjudged items.
-- U-129 Saturn code after U-127 (the ring sets, the Hexagon on layer1, the capped floes, the Hydra as a Grand rig); U-130 Uranus after that (D-142's four lights by the season clock).
-- The Creep watch row: 8.5 MB per visit on 0.4.5 with the Mono heap +4.5; read 0.4.6's figure; a card only above 10.
-- `docs/credits/unity.md` upkeep (the C3 UI, Mercury, Venus); the icon-coverage assert stays.
+- U-127 slice 2 lock-free now: the four Jupiter creatures on their B-160 sheets, the husk prop, the whale row guarded until D-153's sheet lands, CaptureU127Jupiter (a floe with the kit and a tortoise, the storm deck with a Stormglider, the deep with the CRUSH band, the whale crossing per D-138); committed ahead of its check.
+- UNITY_STATUS current (at the tick it read 18:14 with U-125 / U-140 / U-141 / 0.4.7 still under Ready for review: all Done); the Ready list names only unjudged items.
+- U-142 after the Jupiter captures: Build 0.4.8 + the 13-leg probe + the smoke set with the Jupiter shots; U-143's release build beside it.
+- U-129 Saturn code after U-127 (the ring sets, the Hexagon on layer1, the capped floes, the Hydra as a Grand rig); U-130 Uranus after.
+- The Creep watch row: 3.5 MB per visit on 0.4.7; read 0.4.8's; `docs/credits/unity.md` upkeep.
 Then one batched check per hand-off when your turn in the queue comes (compile + EditMode as one lock, PlayMode A / B as two, D-122).
 
 
@@ -78,11 +78,11 @@ Then one batched check per hand-off when your turn in the queue comes (compile +
 
 
 **BLENDER** (numpy / scripts only while UNITY holds the lock or a want; bpy only under your own lock; under 0.3 GB free, code only; otherwise only pre-measured ≤ 150 MB jobs beside another role's lock; the lock / RAM check is its own call)
-- Status trim (D-113): the Ready-for-review list names only unjudged items (B-151, B-152, B-153, B-154 are judged); drop the B-148 / B-150 handoffs (routed in U-123, the v2 metas are gone).
-- The Neptune deck studies' source dry run (deck1–3 / deep / storm / spot; the storm rim alone on layer1 with the pulse block) so the six render in ≤ 2 budgeted slots.
-- Export readiness for Jupiter (B-159 backdrops + floes + flora + props, B-160 creatures + the whale, B-156 the kit): a scratch dry run each; the five decks and the Spot re-rendered straight before export; rows ready for the slot after U-127's code lands.
-- The Saturn rows (B-163 / B-164) and the Uranus rows (B-166) the same way, in order.
-- `docs/credits/blender.md` and the design reports' upkeep (D-147's straight finish, D-148's lean / pulse, D-150's Mercury props).
+- Status trim (D-113): Ready for review names only unjudged items (B-154 is Done); the B-148 / B-150 / B-153 handoffs are routed: drop them.
+- B-170 source files-only: the Venus / Jupiter / Saturn / Uranus / Neptune title cards in B-151's style (1600×452, Limelight as ink, the planet medallion, a Patrick Hand subtitle), exported in one slot after the whale.
+- The Uranus v3 manifest rows (B-166) from the generator when nobody waits at the gate (~50 MB).
+- The Saturn exports' final dry runs (B-163 / B-164) stay as they are; the export slots when U-129's code lands.
+- `docs/credits/blender.md` and the design reports' upkeep (D-153's whale scale).
 
 **LEAD**
 - The charter idle list, plus: the C1 LeadQA scenario draft (pad → Escape Line → space → entry → touchdown under scripted input), the C1_REPORT skeleton, the owner's v4.1 look-over page, Bible gap closure, credits audit, a status-size check each cycle (D-113).
@@ -1362,19 +1362,26 @@ Files: blender/scripts/build_creatures_saturn_v3.py, build_polar_hydra_v3.py, As
 Depends: B-157, U-129
 Lead notes: Cycle 272. One slot after B-163. Cycle 274: READY in order after B-163.
 
-### B-166 · BLENDER · Backlog · C2
+### B-166 · BLENDER · Ready · C2
 Goal: Uranus export from the accepted B-158 designs: each deck as sun_left / sun_right / night sets + the survey layer0 (D-142) with the straight finish, the alpha masks identical across the lights (--uranus-check); the methane-ice floes with caps; `flora/uranus/rigset`; the four creatures and the Diamondback Colossus as a Grand rig set; the props; `ui/palettes/uranus/strip`.
 Accept: as B-159 + B-160, plus a --uranus-check PASS line per deck in the log.
 Files: blender/scripts/build_backdrop_v3.py, build_c2_uranus_*.py, Assets/_Game/Art/backgrounds/uranus/, terrain/uranus/, flora/uranus/, creatures/uranus/, props/uranus/, ui/palettes/uranus/
 Depends: B-158, U-130
-Lead notes: Cycle 272. Three slots when U-130's code is committed.
+Lead notes: Cycle 272. Three slots when U-130's code is committed. Cycle 275: READY in order after the Saturn exports; the rows from the generator lock-free; the URANUS-CHECK hook is in (25a6477e).
 
-### B-169 · BLENDER · Backlog · C2
+### B-169 · BLENDER · Ready · C2
 Goal: Neptune export from the accepted B-161 designs: `backgrounds/neptune/{deck1,deck2,deck3,deep,storm,spot}` with the straight finish and the storm rim alone on layer1 with its `pulse` block (D-148); the two capped floe strips; `flora/neptune/rigset`; the four creatures and the Umbral Leviathan as a Grand rig set; the wind anchor and the three Meridian wreck segments; `ui/palettes/neptune/strip`.
 Accept: as B-159 + B-160; nspot's layers 1–2 byte-identical to nstorm's; the Leviathan's rig json valid with eight bones and `grand: true`.
 Files: blender/scripts/build_backdrop_v3.py, build_c2_neptune_*.py, build_creatures_neptune_v3.py, build_props_neptune_v3.py, Assets/_Game/Art/backgrounds/neptune/, terrain/neptune/, flora/neptune/, creatures/neptune/, props/neptune/, ui/palettes/neptune/
 Depends: B-161, U-133
-Lead notes: Cycle 274. Three slots when U-133's code is committed.
+Lead notes: Cycle 274. Three slots when U-133's code is committed. Cycle 275: READY in order after B-166.
+
+### B-170 · BLENDER · Ready · C3
+Goal: The planet title cards for the five remaining planets in B-151's style: `ui/titlecards/{venus,jupiter,saturn,uranus,neptune}` 1600×452 drawn 1:1 (Limelight as drawn ink for the name, a Patrick Hand subtitle, the planet's medallion in its palette: the apricot deck, the banded giant with the Spot, the ringed world, the sideways-lit ice giant, the dark storm world), no faces.
+Accept: log OK ×5; the five on one stamped review at 1x beside the Earth / Mars / Mercury cards; the json per card; UNITY's TitleCard shows each on entry (the capture with each planet's stage card).
+Files: blender/scripts/build_ui_v3.py, Assets/_Game/Art/ui/titlecards/
+Depends: B-151
+Lead notes: Cycle 275. Files-only source now; one slot after the whale; the cards land in the planets' builds as they come (Jupiter's in 0.4.8).
 
 ### B-168 · BLENDER · Done · C2
 Goal: Venus props re-inked from the B-147 design language (D-151; the last grey v2 pieces on the owner's Venus): `props/venus/{station_hull_a,station_hull_b,meridian_station_door,aerostat_balloon,aerostat_deck,buoyancy_cell,railing,vent_harvester}` in the Venus palette, no faces, `replaces_v2` on each key (the .glb / _normal / _mask / _emission removed; never a .meta), pivots and frame counts as the v2 jsons so UNITY's station layout holds; the door with an open clip like Mercury's; sheets ≤ 512² each (the hulls may be two 512 tiles).
@@ -2323,12 +2330,12 @@ Files: Build/MERIDIAN_0.4.5/, coordination/reports/unity/smoke_0.4.5/, perf + te
 Depends: U-124, B-151
 Lead notes: Cycle 273. One lock after the U-124 captures; LEAD writes the Mercury + C3 page and the owner's playtest item from it. 15:4x: after U-135 (the inventory slots and the crafting paper, D-149) so the owner's build shows a usable inventory; U-136 (paper buttons) may follow in 0.4.6 if it is not in by the build lock. 16:0x: DONE (90781774; one lock 15:42–15:56, no memory stop: compile 0 / 0, EditMode 369/369, BudgetGate green, BUILD OK Build/MERIDIAN_0.4.5 552 MB, the 13-leg probe BUILD MEMORY GREEN (Mercury working set 930 / private 1272 / textures 315 MB, load 0.72 s; Creep 8.5 MB per visit ≤ 10, the Mono heap +4.5 per visit from the new UI: a watch row), SMOKE OK 28 shots in smoke_0.4.5/, LeadQA M1Loop + M3Inner 8/8). The smoke frames reviewed by LEAD: the UI shots pass; the Mercury shots away from the pad expose two gaps → D-150: 0.4.5 is a dev build; the owner's build is 0.4.6 after U-139 (the set follows the stamped surface), U-138 (the Cinderhulk retired, the v2 props dropped) and B-167 (the Mercury props re-inked).
 
-### U-133 · UNITY · Backlog · C2
+### U-133 · UNITY · Ready · C2
 Goal: Neptune on the cartoon stage (Bible §12 C2 order 8; §7.9 the dark storm world): the B-161 deck sets with the storm set's rim layer pulsed by its `pulse` block (D-148), the floes with caps, the Neptune rig set with the wind lean on the root bone (0° at calm to ~25° at 35 m/s, mirrored for −x wind, a stepped shiver in gusts; one controller, D-110), the Neptune creatures on sheets and the Umbral Leviathan as a Grand rig set piece, the Meridian wreck at ~7.5 m segments; the Neptune tests unchanged; the perf rows green.
 Accept: Neptune captures at 1x (a floe lane in the gale with the flora leaning, the storm deck with the rim breathing, the wreck with its beacon) matching the accepted B-161 composites; a lean test (angle per wind speed, the mirror); the 300-plant loop p99 unchanged; TransitionTests green; the BudgetGate Neptune rows green.
 Files: Code/Runtime/View2D/CartoonStage.cs, ParallaxLayers.cs, Code/Runtime/Planet/, Code/Runtime/Creatures/, Tests/
 Depends: U-130, B-161's exports
-Lead notes: Cycle 273 (D-148). Promoted when U-130 Uranus is Done.
+Lead notes: Cycle 273 (D-148). Promoted when U-130 Uranus is Done. Cycle 275: READY in order after U-130 (the code ahead of B-169, D-119; the Neptune designs are complete).
 
 ### U-140 · UNITY · Done · C3
 Goal: The crafting recipe list fits its paper (the 0.4.6 lock A finding): the recipes column scrolls inside the panel (keyboard and wheel, the selected row kept in view) or pages, with a faded-ink row count at the bottom; nothing draws past the panel's bottom edge; the blueprint tree column unchanged.
@@ -2343,6 +2350,20 @@ Accept: smoke_14 re-shot (0.4.7): the dip right of the flare shelter shows cream
 Files: Code/Runtime/View2D/ParallaxLayers.cs, Tests/
 Depends: U-139
 Lead notes: Cycle 274 (17:2x, the 0.4.6 smoke_14 read). A few lines; rides lock C. 17:5x: DONE (98903140; smoke_0.4.7/smoke_14: the dip right of the shelter shows the cream strip fill, tiled across and stretched down after the 80k-quad first try; the Earth and Mars frames unchanged).
+
+### U-142 · UNITY · Ready · C2
+Goal: Build 0.4.8, the owner's next build: Jupiter on the cartoon stage (U-127 with the Vortex Whale at D-153's scale, U-126's capped floes, the kit, the Jupiter title card from B-170 if it lands) on 0.4.7's code; the 13-leg probe BUILD MEMORY GREEN (D-152's two-run rule); the smoke set with Jupiter shots (a floe lane with the kit, the storm deck, the deep's CRUSH band, the whale in passing) in reports/unity/smoke_0.4.8/.
+Accept: BUILD OK; the probe's 13 legs green with the Creep row ≤ 10 MB; the smoke frames on disk; M1Loop + M3Inner + the Jupiter slice green on the build's code; GameInfo 0.4.8.
+Files: Build/MERIDIAN_0.4.8/, coordination/reports/unity/smoke_0.4.8/, perf + tests reports
+Depends: U-127, B-160
+Lead notes: Cycle 275. One lock after the U-127 captures; LEAD writes the Jupiter page and the owner's item from it.
+
+### U-143 · UNITY · Ready · C2
+Goal: The owner's build without the Development Build watermark: after the probe passes on the development build, the same code is built once more as a release build (`Build/MERIDIAN_<v>/` the release, `Build/MERIDIAN_<v>_dev/` the probed one), the smoke run once on the release build for the 29 shots; the probe stays on the dev build (its memory counters need it).
+Accept: 0.4.8 ships as a release exe with no watermark; SMOKE OK on it; the dev build kept beside it for the probe; the build script does both in one call.
+Files: tools/unity_profile.ps1 (or the build wrapper), Code/Runtime/Core/BuildSmoke.cs
+Depends: U-142
+Lead notes: Cycle 275. The owner's first-ever frame of every build has read "Development Build" in its corner; 73 s per build is cheap. Rides U-142's lock if in, else 0.4.9.
 
 ### U-138 · UNITY · Done · C2
 Goal: Mercury's v2 leftovers out of the cartoon stage (D-150): the Cinderhulk species leaves Mercury's spawn table and the smoke (the Cinderling is its B-145 re-ink; the night smoke shot shows the Shadewyrm at a burrow instead); the Mercury props draw from B-167's sheets when they land (`props/mercury/{flare_shelter,meridian_beacon,solarite_cluster,warden_vault_gate,shelter_door,equipment_locker}`), their v2 .glb / _normal / _mask / _emission metas dropped with the files (D-016); the M3 Mercury gameplay tests stay green (the flare window and shelter logic unchanged).
