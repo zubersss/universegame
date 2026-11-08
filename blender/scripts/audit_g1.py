@@ -219,7 +219,7 @@ def write_report(lines):
                 old[m.group(1)] = ln.rstrip("\n")
     for ln in lines:
         old[re.match(r"- (\w+) \(", ln).group(1)] = ln
-    order = ["earth", "mars", "mercury", "venus"]
+    order = ["earth", "mars", "mercury", "venus", "jupiter", "saturn", "uranus", "neptune"]   # B-194: the giants' lines (audit_g1_giants.py)
     with open(REPORT, "w", encoding="utf-8", newline="\n") as f:
         f.write(head + "\n".join(old[p] for p in order if p in old) + "\n")
 
