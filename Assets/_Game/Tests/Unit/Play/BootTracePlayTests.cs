@@ -20,14 +20,36 @@ namespace Meridian.Tests
         const string CorePath = "Assets/_Game/Scenes/Core.unity";
 
         [UnityTest, Timeout(120000)]
-        public IEnumerator ABootNeverBuriesTheSurveyor()
+        public IEnumerator ABootNeverBuriesTheSurveyor() => Boot(false);
+
+        /// <summary>U-165: the same boot with BudgetGate's full-size warm-up (RenderWarmup.TargetSize 1920x1080), the one boot setting it adds.</summary>
+        [UnityTest, Timeout(120000)]
+        public IEnumerator ABootWithTheFullSizeWarmUpNeverBuriesTheSurveyor() => Boot(true);
+
+        /// <summary>A first launch: an empty save folder (as BudgetGate boots), so no slot is continued.</summary>
+        IEnumerator Boot(bool fullSizeWarmUp)
+        {
+            var size0 = RenderWarmup.TargetSize;
+            var root = System.IO.Path.Combine(Application.temporaryCachePath, "meridian_saves_u165_" + System.Guid.NewGuid().ToString("N").Substring(0, 6));
+            Meridian.Save.SaveSystem.RootOverride = root;
+            if (fullSizeWarmUp) RenderWarmup.TargetSize = new Vector2Int(1920, 1080);
+            try { yield return Traced(fullSizeWarmUp); }
+            finally
+            {
+                RenderWarmup.TargetSize = size0;
+                Meridian.Save.SaveSystem.RootOverride = null;
+                if (System.IO.Directory.Exists(root)) System.IO.Directory.Delete(root, true);
+            }
+        }
+
+        IEnumerator Traced(bool fullSizeWarmUp)
         {
             int rescues0 = SolidRescue.Rescues;
 #if UNITY_EDITOR
             yield return UnityEditor.SceneManagement.EditorSceneManager.LoadSceneAsyncInPlayMode(CorePath, new LoadSceneParameters(LoadSceneMode.Single));
 #endif
             var trace = new System.Text.StringBuilder();
-            float worstSink = 0f; string worstAt = "";
+            float worstSink = 0f; string worstAt = "", lastLine = "";
             float until = -1f;
             for (int step = 0; step < 2000; step++)
             {
@@ -47,12 +69,13 @@ namespace Meridian.Tests
                     string line = $"s{step} t{Time.time:F2} dt{Time.deltaTime * 1000f:F0} sim {b.simulated} y {b.position.y:F2} vy {b.linearVelocity.y:F2} feet {feet:F2} floor {floor:F2} settled {settled} rescues {SolidRescue.Rescues - rescues0}";
                     if (trace.Length < 60000) trace.Append(line).Append('\n');
                     if (sink > worstSink) { worstSink = sink; worstAt = line; }
+                    lastLine = line;
                     if (Time.time >= until) break;
                 }
                 yield return new WaitForFixedUpdate();
             }
             int rescued = SolidRescue.Rescues - rescues0;
-            TestContext.Out.WriteLine($"[MERIDIAN] u165 boot: graphics {SystemInfo.graphicsDeviceType}, worst sink {worstSink:F3} m at [{worstAt}], rescues {rescued}");
+            TestContext.Out.WriteLine($"[MERIDIAN] u165 boot (full-size warm-up {fullSizeWarmUp}): graphics {SystemInfo.graphicsDeviceType}, worst sink {worstSink:F3} m at [{worstAt}], rescues {rescued}; last [{lastLine}]");
             if (rescued > 0 || worstSink > 0.1f) TestContext.Out.WriteLine("[MERIDIAN] u165 trace:\n" + trace);
             if (rescued > 0) LogAssert.Expect(LogType.Log, new System.Text.RegularExpressions.Regex("solid rescue"));
             Assert.AreEqual(0, rescued, $"the boot rescued the surveyor (worst sink {worstSink:F2} m at [{worstAt}])");

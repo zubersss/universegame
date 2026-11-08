@@ -156,6 +156,11 @@ namespace Meridian.Tests
             var cam = side.sideCamera;
             var follow = cam.GetComponent<CameraFollow>();
             follow.enabled = false;
+            // U-165: streaming follows the camera, so the camp's chunks unload under the surveyor while the camera is 200 m away: hold it
+            // still meanwhile (it fell through its unloaded ground and the solid rescue lifted it 0.76 m when the camera came back).
+            var surveyor = side.player != null ? side.player.Body : null;
+            bool surveyorSim = surveyor != null && surveyor.simulated;
+            if (surveyor != null) surveyor.simulated = false;
             var applyMs = new double[400];
             float worst = 0f;
             for (int i = 0; i < applyMs.Length; i++)
@@ -176,6 +181,8 @@ namespace Meridian.Tests
             cam.transform.position -= new Vector3(200f, 0f, 0f);
             follow.enabled = true;
             while (!t.IsSettled) yield return null;
+            yield return new WaitForFixedUpdate(); // the camp's colliders back in the physics world
+            if (surveyor != null) surveyor.simulated = surveyorSim;
 
             // ---- Launch → Space ----
             var transitions = UnityEngine.Object.FindAnyObjectByType<TransitionDirector>();
