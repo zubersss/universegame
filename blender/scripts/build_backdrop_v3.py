@@ -1775,6 +1775,93 @@ def mesa(mask, cx, base, top_w, h, slope, val=1.0, shade=None):
                 shade[max(int(base - hh), 0):min(int(base) + 1, H), x % W] = val
 
 
+def mesa2(mask, shade, talus, cx, base, top_w, h, slope, rng, val=1.0):
+    """LEAD 06:0x (the owner: the trapezoids read as blocks): an eroded butte drawn by hand - a slightly rounded, wobbly cap, a
+    steep cliff to a stepped ledge, a second drop, then a talus apron spreading at its foot; each side its own. shade (opt.):
+    the left cliffs and drops, a soft darkening toward the left of the face, a shadow band under the cap rim and the ledge
+    line; talus (opt.): the apron and the foot band (no strata there)."""
+    H = mask.shape[0]
+    sides = []
+    for _s in (-1, 1):
+        cliff = slope * rng.uniform(0.22, 0.38)
+        sides.append({"cliff": cliff, "ledge_h": h * rng.uniform(0.48, 0.66), "ledge_w": slope * rng.uniform(0.12, 0.30) if rng.uniform() < 0.75 else 0.0,
+                      "drop": slope * rng.uniform(0.10, 0.22), "talus_h": h * rng.uniform(0.20, 0.30), "talus_w": slope * rng.uniform(0.9, 1.4)})
+    ph1, ph2, ph3 = rng.uniform(0, 2 * math.pi, 3)
+    reach = [sd["cliff"] + sd["ledge_w"] + sd["drop"] + sd["talus_w"] for sd in sides]
+    for x in range(int(cx - top_w / 2 - reach[0]) - 1, int(cx + top_w / 2 + reach[1]) + 2):
+        d = x - cx
+        sd = sides[0 if d < 0 else 1]
+        e = abs(d) - top_w / 2
+        k1, k2 = sd["cliff"], sd["cliff"] + sd["ledge_w"]
+        k3 = k2 + sd["drop"]
+        if e <= 0:
+            hh = h - 9 * max(0.0, 1 - (-e) / 16) ** 2                       # the rounded cap edge
+            zone = "cap"
+        elif e <= k1:
+            hh = (h - 9) - (h - 9 - sd["ledge_h"]) * (e / k1) ** 0.65
+            zone = "cliff"
+        elif e <= k2:
+            hh = sd["ledge_h"] - 4 * (e - k1) / max(k2 - k1, 1)
+            zone = "ledge"
+        elif e <= k3:
+            top_ = sd["ledge_h"] - 4 if k2 > k1 else sd["ledge_h"]
+            hh = top_ - (top_ - sd["talus_h"]) * ((e - k2) / max(k3 - k2, 1)) ** 0.7
+            zone = "cliff"
+        else:
+            u = (e - k3) / sd["talus_w"]
+            if u >= 1:
+                continue
+            hh = sd["talus_h"] * (1 - u) ** 2
+            zone = "talus"
+        hh += 3.0 * math.sin(x * 0.11 + ph1) + 1.8 * math.sin(x * 0.29 + ph2) + 1.0 * math.sin(x * 0.71 + ph3)   # the hand's wobble
+        if hh <= 0.5:
+            continue
+        col = x % W
+        y_top = base - hh
+        mask[max(int(y_top), 0):min(int(base) + 1, H), col] = val
+        tal_h = hh if zone == "talus" else sd["talus_h"] * (0.85 + 0.15 * math.sin(x * 0.05 + ph1))
+        if talus is not None:
+            talus[max(int(base - tal_h), 0):min(int(base) + 1, H), col] = val
+        if shade is None:
+            continue
+        rows = slice(max(int(y_top), 0), min(int(base - tal_h) + 1, H))
+        if d < 0 and zone in ("cliff", "ledge"):
+            shade[rows, col] = np.maximum(shade[rows, col], 0.9 * val)          # the left cliffs face away from the light
+        elif zone == "cap":
+            g = 0.42 * max(0.0, min(1.0, -d / (top_w / 2) + 0.15 * math.sin(x * 0.04 + ph2)))
+            shade[rows, col] = np.maximum(shade[rows, col], g * val)
+            c0 = int(y_top + 7)
+            shade[max(c0, 0):min(c0 + 7, H), col] = np.maximum(shade[max(c0, 0):min(c0 + 7, H), col], 0.55 * val)   # under the cap rim
+            l0 = int(base - sides[0]["ledge_h"] + 2 * math.sin(x * 0.07 + ph3))
+            shade[max(l0, 0):min(l0 + 4, H), col] = np.maximum(shade[max(l0, 0):min(l0 + 4, H), col], 0.35 * val)  # the ledge's line
+        if d < 0:
+            tr = slice(max(int(base - tal_h), 0), min(int(base) + 1, H))
+            shade[tr, col] = np.maximum(shade[tr, col], 0.45 * val)
+
+
+def spruce(mask, snow, cx, base, h, w, rng, tiers=4):
+    """A snowy spruce: drooping tiers with ragged hems of branch tips, snow clumps on each tier's shoulders under the tier
+    above, a snow cap on the leader."""
+    prev_bot = None
+    for k in range(tiers):
+        top = base - h + h * 0.21 * k
+        bot = base - h * (0.60 - 0.17 * k) if k < tiers - 1 else base - h * 0.03
+        hw = w * (0.42 + 0.2 * k)
+        tri(mask, cx, top, bot, hw, droop=0.16)
+        n = max(3, int(hw / 8))
+        for i in range(n):
+            ell(mask, cx - hw + 2 * hw * (i + 0.5) / n + rng.uniform(-2, 2), bot + rng.uniform(1, 4), rng.uniform(3.5, 5.5), rng.uniform(5, 8))
+        if snow is not None:
+            if k == 0:
+                ell(snow, cx, top + h * 0.06, max(3.0, hw * 0.16), max(3.0, h * 0.045))
+            else:
+                yb = prev_bot + 3
+                hh = hw * min(1.0, max(0.1, (yb - top) / max(bot - top, 1)))
+                for side in (-1, 1):
+                    ell(snow, cx + side * hh * rng.uniform(0.45, 0.7), yb + rng.uniform(-1, 2), hh * rng.uniform(0.28, 0.42), rng.uniform(3.5, 5.5))
+        prev_bot = bot
+
+
 def barrel_stack(body, hi, cx, base, n, r, rng):
     """An original desert plant: a column of round lobes, each a little narrower, with a lit cap on each lobe."""
     y = base
@@ -1815,7 +1902,7 @@ def earth_desert(seed):
                        clouds=4, cloud_col=pal["offwhite"], flat=True)
     far = np.zeros((H, W), np.float32)
     for k in range(7):
-        mesa(far, rng.uniform(0, W), hz + 4, rng.uniform(60, 220), rng.uniform(45, 120), rng.uniform(25, 60))
+        mesa2(far, None, None, rng.uniform(0, W), hz + 4, rng.uniform(50, 200), rng.uniform(45, 120), rng.uniform(40, 80), rng)
     stack.append(wash32(rng, H, far, BG._mix(BG._mix(pal["red"], pal["mustard"], 0.4), pal["sky"], 0.55), var=0.04, edge_dark=0.05, bleed=3.0))
     sea = BG._ridge_mask(H, BG.ridge(rng, [(3, 0.5), (7, 0.3), (13, 0.12)], base=hz - 2, amp=7))
     stack.append(wash32(rng, H, sea, BG._mix(pal["mustard"], pal["offwhite"], 0.55), var=0.04, edge_dark=0.04, bleed=2.0))
@@ -1828,12 +1915,12 @@ def earth_desert(seed):
     # layer1: nearer striped mesas, then a dune line with distant plants; solid sand below its line
     H = 512
     gl = _gline(H, -1.0)
-    m = np.zeros((H, W), np.float32)
-    shade = np.zeros((H, W), np.float32)
-    for k in range(4):
-        mesa(m, (k + rng.uniform(-0.2, 0.2)) * W / 4, gl - 20, rng.uniform(140, 300), rng.uniform(150, 250), rng.uniform(50, 90), shade=shade)
+    m, shade, talus = (np.zeros((H, W), np.float32) for _ in range(3))
+    specs = [(0.00, 230, 220, 110), (0.27, 70, 260, 70), (0.50, 300, 170, 120), (0.78, 150, 205, 100), (0.92, 22, 230, 38)]   # (x, top, h, slope): a spire last
+    for fx, tw, hgt, sl in specs:
+        mesa2(m, shade, talus, (fx + rng.uniform(-0.03, 0.03)) * W, gl - 18, tw * rng.uniform(0.85, 1.15), hgt * rng.uniform(0.9, 1.1), sl, rng)
     yy = np.arange(H)[:, None]
-    stripes = m * ((np.sin(yy / 7.0 + BG.periodic_noise(rng, H, 60, 6) * 0.6) > 0.80).astype(np.float32))
+    stripes = m * (1 - talus) * ((np.sin(yy / 7.0 + BG.periodic_noise(rng, H, 60, 6) * 0.6) > 0.80).astype(np.float32))
     dunes = BG._ridge_mask(H, BG.ridge(rng, [(2, 0.5), (5, 0.3), (9, 0.15)], base=gl - 14, amp=20))
     plants_b, plants_h = np.zeros((H, W), np.float32), np.zeros((H, W), np.float32)
     line1 = BG.ridge(rng, [(2, 0.5)], base=gl - 14, amp=0)
@@ -1842,7 +1929,8 @@ def earth_desert(seed):
         barrel_stack(plants_b, plants_h, cx, gl - 8, int(rng.integers(2, 4)), rng.uniform(8, 12), rng)
     stack = [wash32(rng, H, m, BG._mix(pal["red"], pal["mustard"], 0.35), var=0.06, edge_dark=0.08, bleed=2.0),
              wash32(rng, H, stripes, BG._mix(BG._mix(pal["red"], pal["mustard"], 0.6), pal["offwhite"], 0.15), var=0.04, edge_dark=0.02, bleed=1.5),
-             wash32(rng, H, shade * 0.75, BG._mix(pal["red"], pal["brown"], 0.35), var=0.04, edge_dark=0.02, bleed=3.0),
+             wash32(rng, H, talus, BG._mix(BG._mix(pal["red"], pal["mustard"], 0.55), pal["offwhite"], 0.12), var=0.05, edge_dark=0.04, bleed=1.8),
+             wash32(rng, H, shade * 0.8, BG._mix(pal["red"], pal["brown"], 0.35), var=0.04, edge_dark=0.02, bleed=2.5),
              wash32(rng, H, dunes, BG._mix(pal["mustard"], pal["offwhite"], 0.38), var=0.05, edge_dark=0.05, bleed=2.0),
              wash32(rng, H, plants_b, BG._mix(pal["green"], pal["teal"], 0.25), var=0.05, edge_dark=0.08, bleed=1.2),
              wash32(rng, H, plants_h, BG._mix(pal["green"], pal["mustard"], 0.45), var=0.03, edge_dark=0.02, bleed=1.0)]
@@ -1882,7 +1970,7 @@ def earth_desert(seed):
              wash32(rng, H, rock, BG._mix(pal["red"], pal["brown"], 0.40), var=0.05, edge_dark=0.10, bleed=1.2),
              wash32(rng, H, ground, BG._mix(pal["mustard"], pal["offwhite"], 0.32), var=0.05, edge_dark=0.04, bleed=1.5)]
     out.append(finish(stack, rng, H))
-    return out, [dict(L) for L in B179_LAYERS]
+    return out, [dict(L, ground_row=_gline(rgb.shape[0], L["y_m"])) for L, (rgb, _a) in zip(B179_LAYERS, out)]
 
 
 def earth_taiga(seed):
@@ -1916,22 +2004,22 @@ def earth_taiga(seed):
     # layer1: snowy spruce ranks, a frozen lake along their foot, the snow bank below
     H = 640
     gl = _gline(H, -1.0)
-    back, front = np.zeros((H, W), np.float32), np.zeros((H, W), np.float32)
-    for rank, (cnt, hmin, hmax, wmin, wmax, base_off) in enumerate(((30, 190, 280, 55, 75, -46), (18, 280, 400, 70, 95, -34))):
-        tgt = back if rank == 0 else front
+    back, front, rims_b, rims_f = (np.zeros((H, W), np.float32) for _ in range(4))
+    for rank, (cnt, hmin, hmax, wmin, wmax, base_off) in enumerate(((30, 170, 250, 55, 75, -112), (18, 250, 360, 70, 95, -100))):
+        tgt, sn = (back, rims_b) if rank == 0 else (front, rims_f)
         for k in range(cnt):
             cx = (k + rng.uniform(-0.35, 0.35)) * W / cnt
-            conifer(tgt, cx, gl + base_off, rng.uniform(hmin, hmax), rng.uniform(wmin, wmax), tiers=4)
-    rims_b, rims_f = snow_rims(back), snow_rims(front)
-    bank_line = BG.ridge(rng, [(2, 0.5), (5, 0.3)], base=gl - 40, amp=8)
+            spruce(tgt, sn, cx, gl + base_off, rng.uniform(hmin, hmax), rng.uniform(wmin, wmax), rng, tiers=4)
+    bank_line = BG.ridge(rng, [(2, 0.5), (5, 0.3)], base=gl - 104, amp=6)
     bank = BG._ridge_mask(H, bank_line)
     lake = np.zeros((H, W), np.float32)
     for k in range(2):
-        ell(lake, rng.uniform(0, W), gl - 18, rng.uniform(380, 560), 20)
+        ell(lake, (k + rng.uniform(0.1, 0.4)) * W / 2, gl - 72, rng.uniform(420, 560), 26)
     glint = np.zeros((H, W), np.float32)
-    for k in range(30):
+    for k in range(34):
         cx = rng.uniform(0, W)
-        rect(glint, cx, cx + rng.uniform(20, 70), gl - 22 + rng.uniform(-6, 8), gl - 20 + rng.uniform(-6, 8))
+        y = gl - 72 + rng.uniform(-14, 14)
+        rect(glint, cx, cx + rng.uniform(20, 70), y, y + 2)
     glint *= lake
     stack = [wash32(rng, H, back, BG._mix(BG._mix(pal["teal"], pal["green"], 0.35), pal["sky"], 0.30), var=0.06, edge_dark=0.07, bleed=1.8),
              wash32(rng, H, rims_b, BG._mix(pal["offwhite"], pal["sky"], 0.30), var=0.03, edge_dark=0.02, bleed=1.2),
@@ -1945,13 +2033,13 @@ def earth_taiga(seed):
     # layer2: near drifts on the walking surface, snow-rimmed saplings, snowy rocks, a few bare twigs
     H = 384
     gl = _gline(H, -0.5)
-    drifts = BG._ridge_mask(H, BG.ridge(rng, [(3, 0.5), (7, 0.3), (13, 0.1)], base=gl - 40, amp=22))
+    drifts = BG._ridge_mask(H, BG.ridge(rng, [(3, 0.5), (7, 0.3), (13, 0.1)], base=gl - 22, amp=14))
     line = BG.ridge(rng, [(3, 0.5), (8, 0.3)], base=gl, amp=5)
     ground = BG._ridge_mask(H, line)
-    firs, rocks, twigs = (np.zeros((H, W), np.float32) for _ in range(3))
+    firs, fsnow, rocks, twigs = (np.zeros((H, W), np.float32) for _ in range(4))
     for k in range(11):
         cx = (k + rng.uniform(-0.3, 0.3)) * W / 11
-        conifer(firs, cx, line[int(cx) % W] + 4, rng.uniform(110, 190), rng.uniform(42, 60), tiers=3)
+        spruce(firs, fsnow, cx, line[int(cx) % W] + 4, rng.uniform(110, 190), rng.uniform(42, 60), rng, tiers=3)
     for k in range(9):
         cx = rng.uniform(0, W)
         ell(rocks, cx, line[int(cx) % W] - 4, rng.uniform(18, 34), rng.uniform(12, 20), cut=0.5)
@@ -1964,12 +2052,12 @@ def earth_taiga(seed):
              wash32(rng, H, drifts * (BG.periodic_noise(rng, H, 40, 12) > 0.6), snow_sh, var=0.03, edge_dark=0.02, bleed=3.0),
              wash32(rng, H, twigs, BG._mix(pal["brown"], pal["red"], 0.2), var=0.04, edge_dark=0.04, bleed=0.8),
              wash32(rng, H, firs, BG._mix(BG._mix(pal["teal"], pal["green"], 0.3), pal["brown"], 0.2), var=0.06, edge_dark=0.10, bleed=1.4),
-             wash32(rng, H, snow_rims(firs), snow, var=0.03, edge_dark=0.03, bleed=1.0),
+             wash32(rng, H, fsnow, snow, var=0.03, edge_dark=0.03, bleed=1.0),
              wash32(rng, H, rocks, BG._mix(pal["teal"], pal["brown"], 0.45), var=0.05, edge_dark=0.10, bleed=1.2),
              wash32(rng, H, caps, snow, var=0.03, edge_dark=0.03, bleed=1.0),
              wash32(rng, H, ground, snow, var=0.04, edge_dark=0.04, bleed=1.5)]
     out.append(finish(stack, rng, H))
-    return out, [dict(L) for L in B179_LAYERS]
+    return out, [dict(L, ground_row=_gline(rgb.shape[0], L["y_m"])) for L, (rgb, _a) in zip(B179_LAYERS, out)]
 
 
 def earth_tundra(seed):
@@ -2041,7 +2129,7 @@ def earth_tundra(seed):
              wash32(rng, H, lichen, BG._mix(pal["mustard"], pal["red"], 0.25), var=0.04, edge_dark=0.03, bleed=0.8),
              wash32(rng, H, ground, snow, var=0.04, edge_dark=0.04, bleed=1.5)]
     out.append(finish(stack, rng, H))
-    return out, [dict(L) for L in B179_LAYERS]
+    return out, [dict(L, ground_row=_gline(rgb.shape[0], L["y_m"])) for L, (rgb, _a) in zip(B179_LAYERS, out)]
 
 
 SCENES = {("earth", "forest"): earth_forest, ("earth", "coast"): earth_coast, ("mars", "plains"): mars_plains,
