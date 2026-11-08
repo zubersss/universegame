@@ -1,0 +1,725 @@
+{
+  "key": "flora/neptune/rigset",
+  "style": "v3",
+  "ppu": 64,
+  "rect_origin": "bottom_left",
+  "parts": [
+    {
+      "name": "gripweed_a",
+      "rect": [
+        368,
+        132,
+        80,
+        48
+      ],
+      "pivot": [
+        0.3912,
+        0.1159
+      ]
+    },
+    {
+      "name": "gripweed_b",
+      "rect": [
+        148,
+        44,
+        84,
+        44
+      ],
+      "pivot": [
+        0.3726,
+        0.1264
+      ]
+    },
+    {
+      "name": "gripweed_clench",
+      "rect": [
+        0,
+        40,
+        76,
+        48
+      ],
+      "pivot": [
+        0.4118,
+        0.1159
+      ]
+    },
+    {
+      "name": "kitebloom_kite_folded",
+      "rect": [
+        228,
+        124,
+        28,
+        56
+      ],
+      "pivot": [
+        0.33,
+        0.3188
+      ]
+    },
+    {
+      "name": "kitebloom_kite_open",
+      "rect": [
+        260,
+        124,
+        40,
+        56
+      ],
+      "pivot": [
+        0.3025,
+        0.3188
+      ]
+    },
+    {
+      "name": "kitebloom_root",
+      "rect": [
+        196,
+        12,
+        40,
+        24
+      ],
+      "pivot": [
+        0.4719,
+        0.2531
+      ]
+    },
+    {
+      "name": "kitebloom_tether0",
+      "rect": [
+        80,
+        40,
+        16,
+        48
+      ],
+      "pivot": [
+        0.2988,
+        0.0996
+      ]
+    },
+    {
+      "name": "kitebloom_tether1",
+      "rect": [
+        404,
+        52,
+        40,
+        36
+      ],
+      "pivot": [
+        0.1195,
+        0.1328
+      ]
+    },
+    {
+      "name": "pipereed_base",
+      "rect": [
+        240,
+        12,
+        76,
+        24
+      ],
+      "pivot": [
+        0.4827,
+        0.2318
+      ]
+    },
+    {
+      "name": "pipereed_reed0_a",
+      "rect": [
+        168,
+        120,
+        20,
+        60
+      ],
+      "pivot": [
+        0.4963,
+        0.1268
+      ]
+    },
+    {
+      "name": "pipereed_reed0_b",
+      "rect": [
+        76,
+        4,
+        60,
+        32
+      ],
+      "pivot": [
+        0.126,
+        0.2362
+      ]
+    },
+    {
+      "name": "pipereed_reed1_a",
+      "rect": [
+        0,
+        92,
+        24,
+        88
+      ],
+      "pivot": [
+        0.4618,
+        0.0911
+      ]
+    },
+    {
+      "name": "pipereed_reed1_b",
+      "rect": [
+        236,
+        44,
+        84,
+        44
+      ],
+      "pivot": [
+        0.0948,
+        0.1809
+      ]
+    },
+    {
+      "name": "pipereed_reed2_a",
+      "rect": [
+        28,
+        104,
+        24,
+        76
+      ],
+      "pivot": [
+        0.4259,
+        0.1028
+      ]
+    },
+    {
+      "name": "pipereed_reed2_b",
+      "rect": [
+        0,
+        0,
+        72,
+        36
+      ],
+      "pivot": [
+        0.1078,
+        0.2155
+      ]
+    },
+    {
+      "name": "pipereed_reed3_a",
+      "rect": [
+        344,
+        128,
+        20,
+        52
+      ],
+      "pivot": [
+        0.4781,
+        0.1424
+      ]
+    },
+    {
+      "name": "pipereed_reed3_b",
+      "rect": [
+        140,
+        4,
+        52,
+        32
+      ],
+      "pivot": [
+        0.1415,
+        0.2299
+      ]
+    },
+    {
+      "name": "rimecomb_flake",
+      "rect": [
+        56,
+        116,
+        52,
+        64
+      ],
+      "pivot": [
+        0.4846,
+        0.1195
+      ]
+    },
+    {
+      "name": "rimecomb_rest",
+      "rect": [
+        112,
+        116,
+        52,
+        64
+      ],
+      "pivot": [
+        0.4846,
+        0.1195
+      ]
+    },
+    {
+      "name": "rimecomb_shut",
+      "rect": [
+        192,
+        120,
+        32,
+        60
+      ],
+      "pivot": [
+        0.4852,
+        0.0927
+      ]
+    },
+    {
+      "name": "stormlantern_bulb_dim",
+      "rect": [
+        324,
+        48,
+        36,
+        40
+      ],
+      "pivot": [
+        0.4616,
+        0.1744
+      ]
+    },
+    {
+      "name": "stormlantern_bulb_hi",
+      "rect": [
+        100,
+        40,
+        44,
+        48
+      ],
+      "pivot": [
+        0.5032,
+        0.2465
+      ]
+    },
+    {
+      "name": "stormlantern_bulb_lo",
+      "rect": [
+        364,
+        48,
+        36,
+        40
+      ],
+      "pivot": [
+        0.4999,
+        0.2047
+      ]
+    },
+    {
+      "name": "stormlantern_stem",
+      "rect": [
+        304,
+        124,
+        36,
+        56
+      ],
+      "pivot": [
+        0.502,
+        0.1376
+      ]
+    }
+  ],
+  "plants": [
+    {
+      "name": "kitebloom",
+      "biomes": [
+        "deck1",
+        "deck2"
+      ],
+      "bones": [
+        {
+          "name": "root",
+          "part": "kitebloom_root",
+          "parent": null,
+          "length": 0.128,
+          "order": 0
+        },
+        {
+          "name": "tether0",
+          "part": "kitebloom_tether0",
+          "parent": "root",
+          "length": 0.5795,
+          "offset_m": [
+            0.0,
+            0.128
+          ],
+          "order": 1
+        },
+        {
+          "name": "tether1",
+          "part": "kitebloom_tether1",
+          "parent": "tether0",
+          "length": 0.5449,
+          "offset_m": [
+            0.064,
+            0.576
+          ],
+          "order": 2
+        },
+        {
+          "name": "kite",
+          "part": "kitebloom_kite_open",
+          "parent": "tether1",
+          "length": 0.448,
+          "offset_m": [
+            0.416,
+            0.352
+          ],
+          "order": 3
+        }
+      ],
+      "swaps": {
+        "kite": [
+          "kitebloom_kite_open",
+          "kitebloom_kite_folded"
+        ]
+      },
+      "slots": [
+        {
+          "slot": "kite",
+          "bone": "kite",
+          "offset_m": [
+            0.0,
+            0.0
+          ],
+          "order": 3,
+          "replaces_part": true
+        }
+      ],
+      "idle": {
+        "type": "sway",
+        "amplitude_deg": 16,
+        "beat_bpm": 110,
+        "squash": 0.02
+      },
+      "react": {
+        "radius_m": 3.0,
+        "action": "turn_bounce",
+        "swap": "kitebloom_kite_folded",
+        "note": "UNITY leans the root bone by the local wind and mirrors for a -x wind (D-148)"
+      }
+    },
+    {
+      "name": "gripweed",
+      "biomes": [
+        "deck1",
+        "deck2",
+        "deck3",
+        "deep",
+        "storm"
+      ],
+      "bones": [
+        {
+          "name": "root",
+          "part": "gripweed_a",
+          "parent": null,
+          "length": 0.32,
+          "order": 0
+        }
+      ],
+      "swaps": {
+        "tangle": [
+          "gripweed_a",
+          "gripweed_b",
+          "gripweed_clench"
+        ]
+      },
+      "slots": [
+        {
+          "slot": "tangle",
+          "bone": "root",
+          "offset_m": [
+            0.0,
+            0.0
+          ],
+          "order": 0,
+          "replaces_part": true
+        }
+      ],
+      "idle": {
+        "type": "sway",
+        "amplitude_deg": 2,
+        "beat_bpm": 110,
+        "squash": 0.03,
+        "swap_cycle": {
+          "slot": "tangle",
+          "sequence": [
+            "gripweed_a",
+            "gripweed_b"
+          ],
+          "beats": [
+            1,
+            1
+          ]
+        }
+      },
+      "react": {
+        "radius_m": 3.0,
+        "action": "turn_bounce",
+        "swap": "gripweed_clench",
+        "note": "UNITY leans the root bone by the local wind and mirrors for a -x wind (D-148)"
+      }
+    },
+    {
+      "name": "pipereed",
+      "biomes": [
+        "deck2",
+        "deck3"
+      ],
+      "bones": [
+        {
+          "name": "root",
+          "part": "pipereed_base",
+          "parent": null,
+          "length": 0.08,
+          "order": 0
+        },
+        {
+          "name": "reed0",
+          "part": "pipereed_reed0_a",
+          "parent": "root",
+          "length": 0.672,
+          "offset_m": [
+            -0.272,
+            0.0
+          ],
+          "order": 1
+        },
+        {
+          "name": "reed1",
+          "part": "pipereed_reed1_a",
+          "parent": "root",
+          "length": 1.056,
+          "offset_m": [
+            -0.096,
+            0.0
+          ],
+          "order": 2
+        },
+        {
+          "name": "reed2",
+          "part": "pipereed_reed2_a",
+          "parent": "root",
+          "length": 0.864,
+          "offset_m": [
+            0.096,
+            0.0
+          ],
+          "order": 3
+        },
+        {
+          "name": "reed3",
+          "part": "pipereed_reed3_a",
+          "parent": "root",
+          "length": 0.544,
+          "offset_m": [
+            0.256,
+            0.0
+          ],
+          "order": 4
+        }
+      ],
+      "swaps": {
+        "r0": [
+          "pipereed_reed0_a",
+          "pipereed_reed0_b"
+        ],
+        "r1": [
+          "pipereed_reed1_a",
+          "pipereed_reed1_b"
+        ],
+        "r2": [
+          "pipereed_reed2_a",
+          "pipereed_reed2_b"
+        ],
+        "r3": [
+          "pipereed_reed3_a",
+          "pipereed_reed3_b"
+        ]
+      },
+      "slots": [
+        {
+          "slot": "r0",
+          "bone": "reed0",
+          "offset_m": [
+            0.0,
+            0.0
+          ],
+          "order": 1,
+          "replaces_part": true
+        },
+        {
+          "slot": "r1",
+          "bone": "reed1",
+          "offset_m": [
+            0.0,
+            0.0
+          ],
+          "order": 2,
+          "replaces_part": true
+        },
+        {
+          "slot": "r2",
+          "bone": "reed2",
+          "offset_m": [
+            0.0,
+            0.0
+          ],
+          "order": 3,
+          "replaces_part": true
+        },
+        {
+          "slot": "r3",
+          "bone": "reed3",
+          "offset_m": [
+            0.0,
+            0.0
+          ],
+          "order": 4,
+          "replaces_part": true
+        }
+      ],
+      "idle": {
+        "type": "sway",
+        "amplitude_deg": 9,
+        "beat_bpm": 110,
+        "squash": 0.0
+      },
+      "react": {
+        "radius_m": 3.0,
+        "action": "turn_bounce",
+        "swap": "pipereed_reed0_b",
+        "also": {
+          "r1": "pipereed_reed1_b",
+          "r2": "pipereed_reed2_b",
+          "r3": "pipereed_reed3_b"
+        },
+        "note": "UNITY leans the root bone by the local wind and mirrors for a -x wind (D-148)"
+      }
+    },
+    {
+      "name": "stormlantern",
+      "biomes": [
+        "storm",
+        "deck3"
+      ],
+      "bones": [
+        {
+          "name": "root",
+          "part": "stormlantern_stem",
+          "parent": null,
+          "length": 0.576,
+          "order": 0
+        },
+        {
+          "name": "bulb",
+          "part": "stormlantern_bulb_lo",
+          "parent": "root",
+          "length": 0.4,
+          "offset_m": [
+            0.0,
+            0.576
+          ],
+          "order": 1
+        }
+      ],
+      "swaps": {
+        "bulb": [
+          "stormlantern_bulb_lo",
+          "stormlantern_bulb_hi",
+          "stormlantern_bulb_dim"
+        ]
+      },
+      "slots": [
+        {
+          "slot": "bulb",
+          "bone": "bulb",
+          "offset_m": [
+            0.0,
+            0.0
+          ],
+          "order": 1,
+          "replaces_part": true
+        }
+      ],
+      "idle": {
+        "type": "sway",
+        "amplitude_deg": 4,
+        "beat_bpm": 110,
+        "squash": 0.02,
+        "swap_cycle": {
+          "slot": "bulb",
+          "sequence": [
+            "stormlantern_bulb_lo",
+            "stormlantern_bulb_hi"
+          ],
+          "beats": [
+            4,
+            4
+          ]
+        }
+      },
+      "react": {
+        "radius_m": 3.0,
+        "action": "turn_bounce",
+        "swap": "stormlantern_bulb_dim",
+        "note": "the glow cycle is the storm's 8-beat breath (the storm rim's pulse, D-148); UNITY leans the root bone by the local wind and mirrors for a -x wind (D-148)"
+      }
+    },
+    {
+      "name": "rimecomb",
+      "biomes": [
+        "deep"
+      ],
+      "bones": [
+        {
+          "name": "root",
+          "part": "rimecomb_rest",
+          "parent": null,
+          "length": 0.672,
+          "order": 0
+        }
+      ],
+      "swaps": {
+        "combs": [
+          "rimecomb_rest",
+          "rimecomb_flake",
+          "rimecomb_shut"
+        ]
+      },
+      "slots": [
+        {
+          "slot": "combs",
+          "bone": "root",
+          "offset_m": [
+            0.0,
+            0.0
+          ],
+          "order": 0,
+          "replaces_part": true
+        }
+      ],
+      "idle": {
+        "type": "sway",
+        "amplitude_deg": 2,
+        "beat_bpm": 110,
+        "squash": 0.02,
+        "swap_cycle": {
+          "slot": "combs",
+          "sequence": [
+            "rimecomb_rest",
+            "rimecomb_flake"
+          ],
+          "beats": [
+            3,
+            1
+          ]
+        }
+      },
+      "react": {
+        "radius_m": 3.0,
+        "action": "turn_bounce",
+        "swap": "rimecomb_shut",
+        "note": "UNITY leans the root bone by the local wind and mirrors for a -x wind (D-148)"
+      }
+    }
+  ]
+}

@@ -1,0 +1,47 @@
+{
+  "key": "ui/palettes/neptune/strip",
+  "style": "v3",
+  "palette": true,
+  "colors": [
+    {
+      "name": "offwhite",
+      "hex": "#E4E8EE",
+      "shadow": "#ADB1C3"
+    },
+    {
+      "name": "red",
+      "hex": "#C06A55",
+      "shadow": "#945958"
+    },
+    {
+      "name": "mustard",
+      "hex": "#9E88B8",
+      "shadow": "#7C6E9E"
+    },
+    {
+      "name": "teal",
+      "hex": "#5A98B0",
+      "shadow": "#4C7998"
+    },
+    {
+      "name": "green",
+      "hex": "#7C9E86",
+      "shadow": "#647D7B"
+    },
+    {
+      "name": "sky",
+      "hex": "#5E74AE",
+      "shadow": "#4F6097"
+    },
+    {
+      "name": "brown",
+      "hex": "#2C3160",
+      "shadow": "#2C3160"
+    },
+    {
+      "name": "ink",
+      "hex": "#1E1A17",
+      "shadow": null
+    }
+  ]
+}
