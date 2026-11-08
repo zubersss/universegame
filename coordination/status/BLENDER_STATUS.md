@@ -1,13 +1,18 @@
 # BLENDER STATUS
-Updated: 2026-11-08 16:5x · Session: 10 (all three windows restarted ~09:30 after a ~3-hour break; context rebuilt from the repo) · trimmed under D-113 at 14:0x; older: coordination/status/archive/BLENDER_2026-11-08.md, BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
+Updated: 2026-11-08 17:2x · Session: 10 (all three windows restarted ~09:30 after a ~3-hour break; context rebuilt from the repo) · trimmed under D-113 at 14:0x; older: coordination/status/archive/BLENDER_2026-11-08.md, BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
 
 ## Current task
-LEAD's order (16:4x): B-203, B-204, B-206, B-205, then B-202's export and B-201.
-- **B-203** (Earth's depth tiers + the Surface Line): source in build_ground_variants_v3 part "tiers" (72f0ada2, revs e5fd3626). Two own-review passes on review_b203_earth_tiers_preview.png. The third render waits on UNITY's lock (want filed); then the sheet goes to LEAD, and the export follows acceptance.
-- **B-204** (the Skill Tree): mock-up source in build_skilltree_v3.py (47a5238e). Its 1080p sheet renders in the same slot.
-- B-172 waits on U-151.
+LEAD's order (17:1x): the Mars / Mercury / Venus tier previews (B-203), node-icon batch 1 (B-204), B-208, B-206, B-205, then B-202's export and B-201.
+- **B-203** Mars / Mercury / Venus: source in b9555c3b (tier_colours, tier_fill_fn, dec(), tier_tables; `python -I build_ground_variants_v3.py ..\preview tiers mars,mercury,venus`). The previews wait on UNITY's 0.5.1 gate (want filed).
+- **B-204** node icons: build_icons_nodes_v3.py has batch 1 (the 12 ring-1 nodes, each with a level meter). Its preview runs in the same slot; the export follows LEAD's OK.
+- B-207 waits on UNITY's import (PawsOnTheGround green). B-172 waits on U-151.
 
 ## Last completed
+- 17:2x (e72a24ff, wrapper peak 542 MB), all LEAD-accepted:
+  - B-203 Earth: terrain/earth/ground_fill_t2..t5, fill_decor_t2_1..t5_2, surface_line.
+  - B-204 kit: ui/skilltree/* (20 keys).
+  - B-207: creatures/venus/vent_eel (contact 4 → 0 px).
+  - D1_TABLES §5 now carries my crossing-free links (LEAD 5030aafd); build_skilltree_v3 follows them.
 - 16:03-16:05: U-168 + D-173 removals (cd4ead6b: 15 files, no .meta). B-200 underwater read (e4736852).
 - 15:56: B-199 COMPLETE: 48 item icons in v3 under their own keys + json (batches 654f2f7b, df99bb86, dc43ca52, and batch 4 in UNITY's import 1f2924b7: its add raced my index lock; same bytes); cryo_round retired. build_icons_items_v3.py, only EXPORT_BATCHES export.
 - 15:25-15:42: B-198 complete (bdcfa085 Mars + Mercury, 654f2f7b Venus): terrain/{mars,mercury,venus}/ground_lip_{basalt,talus,ice,tessera,vent}. B-199 batches 1-3 exported.
@@ -22,6 +27,7 @@ LEAD's order (16:4x): B-203, B-204, B-206, B-205, then B-202's export and B-201.
 - B-189 / B-185: review_b141_mars_{canyon,storm,plains}(_dip).png (9e04de12), review_b152_venus_surface(_dip).png (baa7f1e0), review_b149_mercury_{day,twilight,night}_dip.png (d7fbeace).
 
 ## Handoffs (unrouted only)
+- -> UNITY (B-203 / B-204 / B-207, sent to LEAD 17:2x): ground_fill_t<n> json tier / depth_m / transition_m 1.0; surface_line row 40 = pivot, 2 m down the surface normal; ui/skilltree chart json ring_r_px / branch_axis_deg / slots_deg, emblem_r_px 408; node icons at 40 px, 0.4 alpha when locked; links tiled under the frames; vent_eel contact 0 px.
 - -> UNITY (B-191): terrain/mercury/dig_puff_ice, terrain/venus/dig_puff_{tessera,vent}: drop-ins for dig_puff where the dig is in that variant's band, as B-190's (8 frames 128x128, pivot (0.5, 0.25), clip 'puff'; json "variant").
 - -> UNITY (U-167, B-192): terrain/earth/fill_decor_sand_1..3 and terrain/mars/fill_decor_basalt_1..3: scatter in the ground_fill_sand / ground_fill_basalt cutaway by a position seed, as D-165's fill_decor (upright, never rotated, pivot centred; json "fill" names the fill).
 - -> UNITY (U-164 / U-159): a layer2 json entry's "continue_rows": 64 = its bottom 64 rows tile vertically. Two depths: the B-133 / B-114 / B-185 sets 480 tall at y_m -2.0; the B-179 / B-186 / B-187 sets 544 tall at y_m -3.0 with "ground_row": 352. The Mars storm's layer2 is a translucent veil (864, y_m -2.0), no ground.
@@ -49,4 +55,4 @@ none.
 none.
 
 ## HeavyJobLock
-none held (my last hand-lock: 16:36-16:37, the B-203 previews). want_blender.lock is on file behind UNITY's U-172 job. No background waiters: I poll in the foreground.
+none held (last: the 17:2x wrapper export). want_blender.lock is on file behind UNITY's U-173 gate. No background waiters: I poll in the foreground.
