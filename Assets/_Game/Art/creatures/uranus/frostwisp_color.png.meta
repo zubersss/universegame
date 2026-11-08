@@ -1,0 +1,1172 @@
+fileFormatVersion: 2
+guid: 7f5612ee8ab83364da7ca8ab5919a680
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -3765393219834843658
+    second: frostwisp_color_0
+  - first:
+      213: -1383171872330643683
+    second: frostwisp_color_1
+  - first:
+      213: 7719179372461897180
+    second: frostwisp_color_2
+  - first:
+      213: -6242081622750704344
+    second: frostwisp_color_3
+  - first:
+      213: 6335056917645892343
+    second: frostwisp_color_4
+  - first:
+      213: 1514296976073852691
+    second: frostwisp_color_5
+  - first:
+      213: -8763614759392868050
+    second: frostwisp_color_6
+  - first:
+      213: 1074197414412417169
+    second: frostwisp_color_7
+  - first:
+      213: 5201427395936240343
+    second: frostwisp_color_8
+  - first:
+      213: 3491686125959460877
+    second: frostwisp_color_9
+  - first:
+      213: -1170005998089177969
+    second: frostwisp_color_10
+  - first:
+      213: -7940359011509145967
+    second: frostwisp_color_11
+  - first:
+      213: -7462009837954266332
+    second: frostwisp_color_12
+  - first:
+      213: -3765932298627842503
+    second: frostwisp_color_13
+  - first:
+      213: 2748851568198819632
+    second: frostwisp_color_14
+  - first:
+      213: 6317844850507610119
+    second: frostwisp_color_15
+  - first:
+      213: 3338880246193529477
+    second: frostwisp_color_16
+  - first:
+      213: -8932733693706088838
+    second: frostwisp_color_17
+  - first:
+      213: -1718013233460261427
+    second: frostwisp_color_18
+  - first:
+      213: 5523493319564188474
+    second: frostwisp_color_19
+  - first:
+      213: -4833517763834285881
+    second: frostwisp_color_20
+  - first:
+      213: -8439048766674025746
+    second: frostwisp_color_21
+  - first:
+      213: -5334481311263042919
+    second: frostwisp_color_22
+  - first:
+      213: -5402647642782047962
+    second: frostwisp_color_23
+  - first:
+      213: 5594515084619241481
+    second: frostwisp_color_24
+  - first:
+      213: 4339180417428109749
+    second: frostwisp_color_25
+  - first:
+      213: -5155704801822461189
+    second: frostwisp_color_26
+  - first:
+      213: -107700908936539731
+    second: frostwisp_color_27
+  - first:
+      213: 7520017421789872511
+    second: frostwisp_color_28
+  - first:
+      213: 734965905048624167
+    second: frostwisp_color_29
+  - first:
+      213: -2198461574943328363
+    second: frostwisp_color_30
+  - first:
+      213: -8037089236924757346
+    second: frostwisp_color_31
+  - first:
+      213: -4084033654140696389
+    second: frostwisp_color_32
+  - first:
+      213: 1939867392373369824
+    second: frostwisp_color_33
+  - first:
+      213: -293036664508822675
+    second: frostwisp_color_34
+  - first:
+      213: 6881156731924348840
+    second: frostwisp_color_35
+  - first:
+      213: 5815366695175381022
+    second: frostwisp_color_36
+  - first:
+      213: -6759689879964336882
+    second: frostwisp_color_37
+  - first:
+      213: -2920163817162270995
+    second: frostwisp_color_38
+  - first:
+      213: -4414809612982671345
+    second: frostwisp_color_39
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 9
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 64
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationMethod: 0
+  spriteTessellationDetail: -1
+  spriteGeometrySubdivision: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 2
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: 25
+    textureCompression: 1
+    compressionQuality: 100
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 1
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: frostwisp_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 84
+        width: 64
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8b6f2e0e97a72a14bb2aea248ac52e92
+      internalID: -59384266
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: frostwisp_1
+      rect:
+        serializedVersion: 2
+        x: 68
+        y: 84
+        width: 64
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 51e8bf2600498664b8b646c5bbf676bb
+      internalID: 1858325989
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: frostwisp_2
+      rect:
+        serializedVersion: 2
+        x: 136
+        y: 84
+        width: 64
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 05ca0b040b77627419f37953b4d25a31
+      internalID: 781495094
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: frostwisp_3
+      rect:
+        serializedVersion: 2
+        x: 204
+        y: 84
+        width: 64
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8cf36c0c64e048144abbb514bf861a88
+      internalID: 1573813105
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: frostwisp_4
+      rect:
+        serializedVersion: 2
+        x: 272
+        y: 84
+        width: 64
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 87dbf474703c9f84b81a1af568d70991
+      internalID: 154527038
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: frostwisp_5
+      rect:
+        serializedVersion: 2
+        x: 340
+        y: 84
+        width: 64
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 67c3162dfe3dbab44bbb1d1bd01619f8
+      internalID: 84583512
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: frostwisp_6
+      rect:
+        serializedVersion: 2
+        x: 408
+        y: 84
+        width: 64
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9fb647164f5163a49b9856d672c8de54
+      internalID: -1388800141
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: frostwisp_7
+      rect:
+        serializedVersion: 2
+        x: 476
+        y: 84
+        width: 64
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 698101cf14b7da245b462132643c2ee0
+      internalID: 784189800
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: frostwisp_8
+      rect:
+        serializedVersion: 2
+        x: 544
+        y: 84
+        width: 64
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 710899fc0e4f9da449d7e59ec9296718
+      internalID: -382755069
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: frostwisp_9
+      rect:
+        serializedVersion: 2
+        x: 612
+        y: 84
+        width: 64
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6c9a2d8dbe4e60f49bf763231dba4ec2
+      internalID: 1617322089
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: frostwisp_10
+      rect:
+        serializedVersion: 2
+        x: 680
+        y: 84
+        width: 64
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f049190f06c58c846ad34b00e34608a8
+      internalID: 520699091
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: frostwisp_11
+      rect:
+        serializedVersion: 2
+        x: 748
+        y: 84
+        width: 64
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ca5aa45167ce349448c60a00de535cc6
+      internalID: 1885699811
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: frostwisp_12
+      rect:
+        serializedVersion: 2
+        x: 816
+        y: 84
+        width: 64
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3f2998fc4ecdfaa4cbc98d5c235f5c8a
+      internalID: -70997219
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: frostwisp_13
+      rect:
+        serializedVersion: 2
+        x: 884
+        y: 84
+        width: 64
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 993c6f6d202552948b7f6cd67518be1f
+      internalID: -97793392
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: frostwisp_14
+      rect:
+        serializedVersion: 2
+        x: 952
+        y: 84
+        width: 64
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d61d8bcecda37d24fa9c399fc035d05a
+      internalID: -876474390
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: frostwisp_15
+      rect:
+        serializedVersion: 2
+        x: 1020
+        y: 84
+        width: 64
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5cbda25518fbc1445966ab610eb9a5c1
+      internalID: -103451663
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: frostwisp_16
+      rect:
+        serializedVersion: 2
+        x: 1088
+        y: 84
+        width: 64
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 795a2a174a213a64c85e6e197656210b
+      internalID: -292310812
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: frostwisp_17
+      rect:
+        serializedVersion: 2
+        x: 1156
+        y: 84
+        width: 64
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 21d0e5e7515d49a43a4a4b77429a3bbd
+      internalID: 302659508
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: frostwisp_18
+      rect:
+        serializedVersion: 2
+        x: 1224
+        y: 84
+        width: 64
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 2c164a1d9b535644f97a08b360265861
+      internalID: 759237950
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: frostwisp_19
+      rect:
+        serializedVersion: 2
+        x: 1292
+        y: 84
+        width: 64
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5ba521d39b5e7ff4e8167688cb29f177
+      internalID: -775034862
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: frostwisp_20
+      rect:
+        serializedVersion: 2
+        x: 1360
+        y: 84
+        width: 64
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8f095f466c34a8f4da1818ed93668661
+      internalID: -356451114
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: frostwisp_21
+      rect:
+        serializedVersion: 2
+        x: 1428
+        y: 84
+        width: 64
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 71152a48ddee11640a6fcc8bffca445d
+      internalID: 32698169
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: frostwisp_22
+      rect:
+        serializedVersion: 2
+        x: 1496
+        y: 84
+        width: 64
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 70c6e8cea19454b498c4e0fea849eb58
+      internalID: -1824277122
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: frostwisp_23
+      rect:
+        serializedVersion: 2
+        x: 1564
+        y: 84
+        width: 64
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c877dd7d3fb79954aad321281ee5a01d
+      internalID: -953337068
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: frostwisp_24
+      rect:
+        serializedVersion: 2
+        x: 1632
+        y: 84
+        width: 64
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5a62c2d9923b83245b0b8eb709c753ff
+      internalID: 1727706089
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: frostwisp_25
+      rect:
+        serializedVersion: 2
+        x: 1700
+        y: 84
+        width: 64
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 432444e3d1aa30346a28b6ea502c03a6
+      internalID: -531918366
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: frostwisp_26
+      rect:
+        serializedVersion: 2
+        x: 1768
+        y: 84
+        width: 64
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4838d96fef23a974c98848291ad6b0b5
+      internalID: -280120985
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: frostwisp_27
+      rect:
+        serializedVersion: 2
+        x: 1836
+        y: 84
+        width: 64
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6595659518da1404ea6d9d8d77743a35
+      internalID: 1949408430
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: frostwisp_28
+      rect:
+        serializedVersion: 2
+        x: 1904
+        y: 84
+        width: 64
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0694c67fdb1d46b458a811e44985c269
+      internalID: 886711576
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: frostwisp_29
+      rect:
+        serializedVersion: 2
+        x: 1972
+        y: 84
+        width: 64
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5d796e9a4f4f4a24fba27e26f81413b4
+      internalID: -733135287
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: frostwisp_30
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 64
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0d14bdea820591442a9ff60894162687
+      internalID: 2124061179
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: frostwisp_31
+      rect:
+        serializedVersion: 2
+        x: 68
+        y: 0
+        width: 64
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 449e490515877e041ab811dc589e2315
+      internalID: 2007198789
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: frostwisp_32
+      rect:
+        serializedVersion: 2
+        x: 136
+        y: 0
+        width: 64
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 252e7884d8f6f624ca2cc06f349655b6
+      internalID: -1909266008
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: frostwisp_33
+      rect:
+        serializedVersion: 2
+        x: 204
+        y: 0
+        width: 64
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 174031687648d364b870ea864951f7e6
+      internalID: 52815441
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: frostwisp_34
+      rect:
+        serializedVersion: 2
+        x: 272
+        y: 0
+        width: 64
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 603e4cea90a3fb44e97119ca3517d1b0
+      internalID: -1377675246
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: frostwisp_35
+      rect:
+        serializedVersion: 2
+        x: 340
+        y: 0
+        width: 64
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 097e0dffd646b514b93bad2b6d3e917f
+      internalID: -1551864372
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: frostwisp_36
+      rect:
+        serializedVersion: 2
+        x: 408
+        y: 0
+        width: 64
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 73a3e2f733c9ce746b4819f75206fe24
+      internalID: 1121691379
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: frostwisp_37
+      rect:
+        serializedVersion: 2
+        x: 476
+        y: 0
+        width: 64
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: bb810557adb111d47865b1f15555e52e
+      internalID: -1984253701
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: frostwisp_38
+      rect:
+        serializedVersion: 2
+        x: 544
+        y: 0
+        width: 64
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: cf6b0eb2fd86af942bcd1fbfaeab6ffd
+      internalID: -2092939157
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: frostwisp_39
+      rect:
+        serializedVersion: 2
+        x: 612
+        y: 0
+        width: 64
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: cd5fb393e701a7a419f48d309cfb5308
+      internalID: 71775286
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 8be15f6ba66f7344bb859ebaaacba27b
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      frostwisp_0: -59384266
+      frostwisp_1: 1858325989
+      frostwisp_10: 520699091
+      frostwisp_11: 1885699811
+      frostwisp_12: -70997219
+      frostwisp_13: -97793392
+      frostwisp_14: -876474390
+      frostwisp_15: -103451663
+      frostwisp_16: -292310812
+      frostwisp_17: 302659508
+      frostwisp_18: 759237950
+      frostwisp_19: -775034862
+      frostwisp_2: 781495094
+      frostwisp_20: -356451114
+      frostwisp_21: 32698169
+      frostwisp_22: -1824277122
+      frostwisp_23: -953337068
+      frostwisp_24: 1727706089
+      frostwisp_25: -531918366
+      frostwisp_26: -280120985
+      frostwisp_27: 1949408430
+      frostwisp_28: 886711576
+      frostwisp_29: -733135287
+      frostwisp_3: 1573813105
+      frostwisp_30: 2124061179
+      frostwisp_31: 2007198789
+      frostwisp_32: -1909266008
+      frostwisp_33: 52815441
+      frostwisp_34: -1377675246
+      frostwisp_35: -1551864372
+      frostwisp_36: 1121691379
+      frostwisp_37: -1984253701
+      frostwisp_38: -2092939157
+      frostwisp_39: 71775286
+      frostwisp_4: 154527038
+      frostwisp_5: 84583512
+      frostwisp_6: -1388800141
+      frostwisp_7: 784189800
+      frostwisp_8: -382755069
+      frostwisp_9: 1617322089
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

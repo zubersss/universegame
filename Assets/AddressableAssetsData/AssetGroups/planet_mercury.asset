@@ -35,13 +35,28 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 103295d4cada0844390791dff02e1b19
+    m_Address: terrain/mercury/dig_rim
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 11e467c22b311a749870ce99927a16fa
     m_Address: creatures/mercury/cinderhulk
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 123648f9b5775a04bb716e3fbe0ed72f
+    m_Address: terrain/mercury/ground_lip
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 129d91122fd7ce844911f0f57b789a59
     m_Address: props/mercury/meridian_beacon/json
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 1404676044068e4469933cb3fa3979a3
+    m_Address: terrain/mercury/dig_puff
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -57,6 +72,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 1d837d8d16304da44a67275f8ed9d503
     m_Address: creatures/mercury/flarewing
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 204d2320f5b329443906e22e30d688e5
+    m_Address: terrain/mercury/ground_decor_3
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -127,6 +147,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 4d3b11cfba86a6a4d90ae51d67362321
     m_Address: props/mercury/solarite_cut/json
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 4d66faa4ea804b94696a39fb3e4b791c
+    m_Address: terrain/mercury/ground_decor_5
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -245,6 +270,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 906c88792d95a77479e7058fb8790104
+    m_Address: terrain/mercury/ground_decor_6
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 9761f11241e126840b05572478e2eb25
     m_Address: terrain/mercury/ice
     m_ReadOnly: 0
@@ -265,8 +295,18 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: aa9b01fbe768a5c4e96dcca7f897af24
+    m_Address: terrain/mercury/ground_decor_1
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: ad19d4db1c901754faeacf43a11e41bb
     m_Address: props/mercury/meridian_beacon
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: ad7b68643ae7b334ebefd5d5e06bd947
+    m_Address: terrain/mercury/ground_band
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -277,6 +317,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: b0658ba40162d694eb598c7cf1c09cc9
     m_Address: props/mercury/warden_vault_gate
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b0d28d7e1b6e9504cac0bfe4d452dfc3
+    m_Address: terrain/mercury/ground_decor_4
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -350,8 +395,18 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d6c9ac9bb9a092546b5d683be29b0e06
+    m_Address: terrain/mercury/ground_decor_2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: e0a04c2f04dd89647afa7d6074599c02
     m_Address: creatures/mercury/flarewing
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e2da079bb9f40e949aca74f414cd50e1
+    m_Address: terrain/mercury/ground_fill
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -367,6 +422,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: f075c7686cc646446adabd1605db7294
     m_Address: creatures/mercury/glassback
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f86778f990ace37488744ea2bb6d8878
+    m_Address: terrain/mercury/dig_puff/animator
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

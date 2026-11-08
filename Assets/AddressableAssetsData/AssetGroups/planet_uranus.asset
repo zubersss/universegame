@@ -15,8 +15,48 @@ MonoBehaviour:
   m_GroupName: planet_uranus
   m_GUID: 228d135278ddb8047970734d38f19d68
   m_SerializeEntries:
+  - m_GUID: 1003d4211c147744da80cf4ebd2b3f9e
+    m_Address: backgrounds/uranus/deck2_sun_right/layer1
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 105f2e3a5ba07db49b6fb3d962c62295
     m_Address: props/uranus/umbrella_platform
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 10c519e2ffb1fd545b26fb7c60be44f9
+    m_Address: backgrounds/uranus/deck3_night/layer2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 14befcda9e39ac24d85edf975c725817
+    m_Address: backgrounds/uranus/deck3_sun_right/layer1
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 165cf2d0e4adf4a4da98a39744b8c4c7
+    m_Address: creatures/uranus/diamondback_colossus
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 1d33e393d93530043b186a60a821e326
+    m_Address: backgrounds/uranus/deep_night/layer2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 1de088ee4ca10cb47bf82c7aa0ee0bf6
+    m_Address: backgrounds/uranus/deck2_survey/layer0
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 2025204a223bdce4d9b93d990d2dddae
+    m_Address: backgrounds/uranus/deck3_sun_left/layer1
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 228a03e3ac5f21b44b3fe3f7b5e40451
+    m_Address: backgrounds/uranus/deck2_sun_right/layer0
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -30,6 +70,16 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 2c2227ee0e901b8489188c683e53d336
+    m_Address: backgrounds/uranus/deck3_sun_left
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 2cc863f017bd0e0448f0e3b676da850c
+    m_Address: backgrounds/uranus/deck2_sun_left
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 33754efc54c8bc44bafa68d0460cdd92
     m_Address: backgrounds/uranus/deck1_night/layer0
     m_ReadOnly: 0
@@ -40,8 +90,28 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 39c0f5eb892c35f488d5a4237fd1f90b
+    m_Address: backgrounds/uranus/deck2_survey/layer1
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 3a1cae5f69638304ab1767a5312e8c9d
+    m_Address: backgrounds/uranus/deep_night/layer1
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 3cbc0f02c15857548bbc03c0c57d73d4
+    m_Address: backgrounds/uranus/deck3_sun_right/layer2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 3e93ca1d053d2ed4a98f58555ed9788c
     m_Address: backgrounds/uranus/deck1_survey/layer2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 4003d2f7a25434647b407f15ac9763e8
+    m_Address: backgrounds/uranus/deep_sun_right/layer2
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -50,8 +120,63 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 44e70d44d86fe3946afd3021da641c83
+    m_Address: backgrounds/uranus/deep_sun_left/layer0
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 48a8a151d53a6c64da50f8f43d4eb3d4
+    m_Address: backgrounds/uranus/deck2_night
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 4a454192e30768c4d8087acba15e97d5
+    m_Address: creatures/uranus/diamondback_colossus/json
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 4b3599be7038efd41a4cc2d341f326e0
     m_Address: terrain/uranus/floe_ice
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 4f7ae33db26f3ba419e248dba303d4d5
+    m_Address: backgrounds/uranus/deck3_sun_left/layer0
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 4fff6b11fe041a242b32e76214e656b9
+    m_Address: backgrounds/uranus/deep_survey
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 50d7b2a0e03f42f4f9e2bec055275977
+    m_Address: creatures/uranus/tiltbird
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 52038b903bcf724498c086e735230f33
+    m_Address: props/uranus/umbrella_platform/json
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 54c006eed06baad489d2380da63a6d46
+    m_Address: backgrounds/uranus/deck2_night/layer1
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 58abb33d584cc4e4686b664fb5ae38aa
+    m_Address: backgrounds/uranus/deck2_survey
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 58ca7277aaa4da14382ca371ed918a18
+    m_Address: backgrounds/uranus/deck3_night
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 5aaabd19edf09f54bb4e88bf97dd3b42
+    m_Address: backgrounds/uranus/deep_sun_right/layer0
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -65,8 +190,53 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 648cc61b1b92c6f40b044e807b4b27c3
+    m_Address: flora/uranus/rigset/json
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 67786028d57d16f45a9c9a9dd1cbff71
+    m_Address: creatures/uranus/hailcrab
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 688db5eb41e397449a3753833c7fdcfe
+    m_Address: backgrounds/uranus/deep_night/layer0
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 6b11825d9eca2f54e9e8961b246b3973
+    m_Address: backgrounds/uranus/deck3_sun_left/layer2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 6df40949427793643abaaa582a282493
     m_Address: backgrounds/uranus/deck1_sun_right/layer0
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 6fe233512b75be645b0ca3ef8c143a62
+    m_Address: backgrounds/uranus/deck2_sun_right
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 74c95cf9bef0cea4cafe161ecaeb3cce
+    m_Address: backgrounds/uranus/deep_survey/layer0
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 757ced903ddd3de43b8440e940559a90
+    m_Address: backgrounds/uranus/deck3_night/layer0
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 7bc68d149460f074db1efc841dae4e75
+    m_Address: backgrounds/uranus/deck2_night/layer0
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 7c0d7b562d55c684ca05e29ec6b503c9
+    m_Address: creatures/uranus/hailcrab/animator
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -75,8 +245,78 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 7f5612ee8ab83364da7ca8ab5919a680
+    m_Address: creatures/uranus/frostwisp
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 84622e8d498053a4b9273355d71e7ac4
+    m_Address: backgrounds/uranus/deep_sun_left/layer1
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 85275da3c46975446bac7cecc0b04937
+    m_Address: backgrounds/uranus/deck3_survey/layer2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 87fda5904b1b3b447840d32543f8c6ea
     m_Address: props/uranus/tilted_derelict
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8a0b5359139985c4b86b4b8f15a118fa
+    m_Address: backgrounds/uranus/deep_sun_left
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8b7e9cfcf4208ab4c8a6ebabd3b0d6f4
+    m_Address: backgrounds/uranus/deck2_sun_left/layer2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8cfe51a1072eae24c869bd8469ab0837
+    m_Address: backgrounds/uranus/deep_sun_left/layer2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8e2fa5ef718583544810a578cba201f8
+    m_Address: terrain/uranus/floe_strip_dark
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 99c3b651cab492546842d8b5c6a9cce5
+    m_Address: backgrounds/uranus/deck3_survey/layer1
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 9d2e90b63c47f7947b52ef9c59717513
+    m_Address: flora/uranus/rigset/animator
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a2f87280c3277184cb44b4df89f1c4e4
+    m_Address: backgrounds/uranus/deck2_night/layer2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a67535cb622d2334b95210e77da20256
+    m_Address: creatures/uranus/methane_ray
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a70550fe45737d4499d6ef48594a8ae7
+    m_Address: backgrounds/uranus/deep_sun_right/layer1
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: ac0b5be587c20b04e8827c12a01855ca
+    m_Address: backgrounds/uranus/deep_sun_right
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b080fe5f5178ea146a537ee547da59cc
+    m_Address: backgrounds/uranus/deep_night
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -85,8 +325,18 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b7b6817dbe5ab534182ae8cdcaa0c49c
+    m_Address: backgrounds/uranus/deep_survey/layer1
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: bac7c431721272644ac53be09938d1b2
     m_Address: terrain/uranus/floe_core
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: bd9e42f9bc087264684d3b393d5ce4da
+    m_Address: creatures/uranus/methane_ray/animator
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -95,8 +345,38 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c0f84958f31f9644883614c203c40586
+    m_Address: terrain/uranus/floe_strip_ice
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c1af3ab12ef6ad94c9c5bf47ce373f94
+    m_Address: creatures/uranus/frostwisp/animator
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c80dfd96f56694748ab5d0af4a768ae8
+    m_Address: backgrounds/uranus/deck3_sun_right/layer0
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: ce8a49da892fe3042894db375c4a3a98
+    m_Address: backgrounds/uranus/deck2_sun_right/layer2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: cfb228d4f6b9da04c85eb906513b3ed1
     m_Address: backgrounds/uranus/deck1_night/layer2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d5444a01372f11c49afb312b71994a1f
+    m_Address: backgrounds/uranus/deep_survey/layer2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: db7e648b4423a154a87ef082915bfdb3
+    m_Address: backgrounds/uranus/deck3_night/layer1
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -105,8 +385,53 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: df98fa1d72ab3c1448962828c4f77191
+    m_Address: backgrounds/uranus/deck3_sun_right
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: dfb5d1d54262d074aa2c8c8a5048ef58
+    m_Address: backgrounds/uranus/deck2_sun_left/layer1
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e2c8e2230d6524f42a7bb42e8ac55472
+    m_Address: flora/uranus/rigset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e40199d2bb5d331418e21ddb14e6c22e
+    m_Address: backgrounds/uranus/deck3_survey
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e54bfaf7fb3db884baa75c3a87ab9ff7
+    m_Address: backgrounds/uranus/deck2_sun_left/layer0
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e570bf8fb07046e4892514ef1e0df156
+    m_Address: backgrounds/uranus/deck2_survey/layer2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e8d69393eaefaab47b2290bd875234e4
+    m_Address: creatures/uranus/tiltbird/animator
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: edc075ea0abbab04da3b661e61c8903b
+    m_Address: props/uranus/tilted_derelict/json
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: f137fb61a54fe014a8140703f1229cb1
     m_Address: backgrounds/uranus/deck1_survey
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f7e0f7524c6f2144c977f5f57bd1df16
+    m_Address: backgrounds/uranus/deck3_survey/layer0
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

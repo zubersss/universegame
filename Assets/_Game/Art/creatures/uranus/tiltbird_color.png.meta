@@ -1,0 +1,1181 @@
+fileFormatVersion: 2
+guid: 50d7b2a0e03f42f4f9e2bec055275977
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -4644122540369140471
+    second: tiltbird_color_0
+  - first:
+      213: 7284502578834847876
+    second: tiltbird_color_1
+  - first:
+      213: 3513077655249751723
+    second: tiltbird_color_2
+  - first:
+      213: -8591798116365767880
+    second: tiltbird_color_3
+  - first:
+      213: 5783781093219257881
+    second: tiltbird_color_4
+  - first:
+      213: 692027215414564451
+    second: tiltbird_color_5
+  - first:
+      213: 5498603548551663926
+    second: tiltbird_color_6
+  - first:
+      213: -1893168035134751339
+    second: tiltbird_color_7
+  - first:
+      213: -8154364941136704110
+    second: tiltbird_color_8
+  - first:
+      213: 970902150069218952
+    second: tiltbird_color_9
+  - first:
+      213: 5628756132079980573
+    second: tiltbird_color_10
+  - first:
+      213: 2144924019789661302
+    second: tiltbird_color_11
+  - first:
+      213: 9018297900958640451
+    second: tiltbird_color_12
+  - first:
+      213: 2318724385580041306
+    second: tiltbird_color_13
+  - first:
+      213: 7266354617090898392
+    second: tiltbird_color_14
+  - first:
+      213: -4651573918352499626
+    second: tiltbird_color_15
+  - first:
+      213: 6702687170098945171
+    second: tiltbird_color_16
+  - first:
+      213: 7760965717030598325
+    second: tiltbird_color_17
+  - first:
+      213: 1514298062766026861
+    second: tiltbird_color_18
+  - first:
+      213: 8303305906438817568
+    second: tiltbird_color_19
+  - first:
+      213: 7647317273495141633
+    second: tiltbird_color_20
+  - first:
+      213: 3664495252121299823
+    second: tiltbird_color_21
+  - first:
+      213: 2385611654108997137
+    second: tiltbird_color_22
+  - first:
+      213: 7361069433629715572
+    second: tiltbird_color_23
+  - first:
+      213: -3934028226537731906
+    second: tiltbird_color_24
+  - first:
+      213: 3456781512177131902
+    second: tiltbird_color_25
+  - first:
+      213: -483590873801538587
+    second: tiltbird_color_26
+  - first:
+      213: 6679425002271516911
+    second: tiltbird_color_27
+  - first:
+      213: -2715431895378002373
+    second: tiltbird_color_28
+  - first:
+      213: 7175073543270146905
+    second: tiltbird_color_29
+  - first:
+      213: 5903959413196417703
+    second: tiltbird_color_30
+  - first:
+      213: 5593878010000418788
+    second: tiltbird_color_31
+  - first:
+      213: 8297491349607583352
+    second: tiltbird_color_32
+  - first:
+      213: -6613450511650944416
+    second: tiltbird_color_33
+  - first:
+      213: -1460551828541874547
+    second: tiltbird_color_34
+  - first:
+      213: 5965570453550593767
+    second: tiltbird_color_35
+  - first:
+      213: -972422928019751040
+    second: tiltbird_color_36
+  - first:
+      213: 3349964195280408171
+    second: tiltbird_color_37
+  - first:
+      213: -6019989366685842981
+    second: tiltbird_color_38
+  - first:
+      213: 6837260657102459692
+    second: tiltbird_color_39
+  - first:
+      213: -4260120905135509639
+    second: tiltbird_color_40
+  - first:
+      213: 4984500583488358179
+    second: tiltbird_color_41
+  - first:
+      213: 7886274246117278288
+    second: tiltbird_color_42
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 9
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 64
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationMethod: 0
+  spriteTessellationDetail: -1
+  spriteGeometrySubdivision: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 2
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: 25
+    textureCompression: 1
+    compressionQuality: 100
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 1
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: tiltbird_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 200
+        width: 128
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6e00af521945daf4aafaa9b042d63076
+      internalID: -1232674335
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tiltbird_1
+      rect:
+        serializedVersion: 2
+        x: 132
+        y: 200
+        width: 128
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8710e23e0dfdb8644b817d3094d4ad5a
+      internalID: -1221057883
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tiltbird_2
+      rect:
+        serializedVersion: 2
+        x: 264
+        y: 200
+        width: 128
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0b3800720fc3cfe4caa6bc819ffed0db
+      internalID: 1196573765
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tiltbird_3
+      rect:
+        serializedVersion: 2
+        x: 396
+        y: 200
+        width: 128
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8553d189db6b1ca408a3f734d266f838
+      internalID: 1284936096
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tiltbird_4
+      rect:
+        serializedVersion: 2
+        x: 528
+        y: 200
+        width: 128
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d8d4568c385e6b74cb46107a046180de
+      internalID: 735367750
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tiltbird_5
+      rect:
+        serializedVersion: 2
+        x: 660
+        y: 200
+        width: 128
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 52b99764e9e51044abf2922db17bc51f
+      internalID: 648331950
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tiltbird_6
+      rect:
+        serializedVersion: 2
+        x: 792
+        y: 200
+        width: 128
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d02a008a083c0bf4fa0a7dd2577045fa
+      internalID: -1910152185
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tiltbird_7
+      rect:
+        serializedVersion: 2
+        x: 924
+        y: 200
+        width: 128
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: cec55e441e0426e4e9bcfb1b587dccae
+      internalID: -1222212034
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tiltbird_8
+      rect:
+        serializedVersion: 2
+        x: 1056
+        y: 200
+        width: 128
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9307b06c7e415cd4690c8a935d38c8f6
+      internalID: 1207205961
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tiltbird_9
+      rect:
+        serializedVersion: 2
+        x: 1188
+        y: 200
+        width: 128
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9087a7fb9aff8ca4b8f7833f7eb359a9
+      internalID: 1031091356
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tiltbird_10
+      rect:
+        serializedVersion: 2
+        x: 1320
+        y: 200
+        width: 128
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3dcab03f2ed58dc4d9141489a03c3b29
+      internalID: -540140970
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tiltbird_11
+      rect:
+        serializedVersion: 2
+        x: 1452
+        y: 200
+        width: 128
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f7ba2ccba8855034baffaa25a6a41a42
+      internalID: 179891420
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tiltbird_12
+      rect:
+        serializedVersion: 2
+        x: 1584
+        y: 200
+        width: 128
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0c66e33dbf96ac9498b89b480a3e6602
+      internalID: -1929110306
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tiltbird_13
+      rect:
+        serializedVersion: 2
+        x: 1716
+        y: 200
+        width: 128
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f727db2193b158342997d2e933646774
+      internalID: 1722294179
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tiltbird_14
+      rect:
+        serializedVersion: 2
+        x: 1848
+        y: 200
+        width: 128
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ad28ab858aee24e41ad1e138cc39d946
+      internalID: -1715711493
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tiltbird_15
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 100
+        width: 128
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 65ce8f147bc595244a922a50405a5b56
+      internalID: 62005689
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tiltbird_16
+      rect:
+        serializedVersion: 2
+        x: 132
+        y: 100
+        width: 128
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 78121c554a30fe94d918ce68337db0ba
+      internalID: -254425819
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tiltbird_17
+      rect:
+        serializedVersion: 2
+        x: 264
+        y: 100
+        width: 128
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 162d13b2b67da5b4099c3b0387c6e16f
+      internalID: -252977858
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tiltbird_18
+      rect:
+        serializedVersion: 2
+        x: 396
+        y: 100
+        width: 128
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e0fb31670c02a3f42931fbd7ad2d396d
+      internalID: 1956307622
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tiltbird_19
+      rect:
+        serializedVersion: 2
+        x: 528
+        y: 100
+        width: 128
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 638d800d7440ad249bb3c66ad226f0f8
+      internalID: -189172287
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tiltbird_20
+      rect:
+        serializedVersion: 2
+        x: 660
+        y: 100
+        width: 128
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c119a511e4ddde74a80bc4dddd3fe980
+      internalID: -2145351507
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tiltbird_21
+      rect:
+        serializedVersion: 2
+        x: 792
+        y: 100
+        width: 128
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 076230cb7132ddd4182e9671d6a88563
+      internalID: -1943101601
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tiltbird_22
+      rect:
+        serializedVersion: 2
+        x: 924
+        y: 100
+        width: 128
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 59d0872eff71682448a688ede0fb4e2d
+      internalID: 1211527012
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tiltbird_23
+      rect:
+        serializedVersion: 2
+        x: 1056
+        y: 100
+        width: 128
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4d7fa5229e5fe6e4d94df888cf8cd3f0
+      internalID: 1548219832
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tiltbird_24
+      rect:
+        serializedVersion: 2
+        x: 1188
+        y: 100
+        width: 128
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: faeae024c417b3a468c5605bd58d9e2b
+      internalID: -749980420
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tiltbird_25
+      rect:
+        serializedVersion: 2
+        x: 1320
+        y: 100
+        width: 128
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 088e370c8f46c46479b7adc6f191c700
+      internalID: -2006777380
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tiltbird_26
+      rect:
+        serializedVersion: 2
+        x: 1452
+        y: 100
+        width: 128
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 7be2909a22764304fb1b06b5f4c49583
+      internalID: 137651373
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tiltbird_27
+      rect:
+        serializedVersion: 2
+        x: 1584
+        y: 100
+        width: 128
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8b942234f5a582748921e1708437c7e6
+      internalID: 572994735
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tiltbird_28
+      rect:
+        serializedVersion: 2
+        x: 1716
+        y: 100
+        width: 128
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 7ec5a2e9e71d39b4dafbb3c0a38e6c2c
+      internalID: 55376774
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tiltbird_29
+      rect:
+        serializedVersion: 2
+        x: 1848
+        y: 100
+        width: 128
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 734f8821d7d736d4e87c09f26aa7afbe
+      internalID: 796242134
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tiltbird_30
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 128
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 7200c3dbc42d7084ca7a3fe9d850be4c
+      internalID: -444610634
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tiltbird_31
+      rect:
+        serializedVersion: 2
+        x: 132
+        y: 0
+        width: 128
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 073ffa5f89c118043aee2eb104467ca7
+      internalID: 1324557679
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tiltbird_32
+      rect:
+        serializedVersion: 2
+        x: 264
+        y: 0
+        width: 128
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 65c35dee94820ca43ba9e95a84eddc77
+      internalID: -61058704
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tiltbird_33
+      rect:
+        serializedVersion: 2
+        x: 396
+        y: 0
+        width: 128
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: fc69fd0571e3eb643a9eda4f8858b1df
+      internalID: -1972525453
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tiltbird_34
+      rect:
+        serializedVersion: 2
+        x: 528
+        y: 0
+        width: 128
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9a0640403c9ad5b4f98646a6ce534189
+      internalID: 24438561
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tiltbird_35
+      rect:
+        serializedVersion: 2
+        x: 660
+        y: 0
+        width: 128
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4cf59ecc4b390374f9480324e2fd60d4
+      internalID: -624225539
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tiltbird_36
+      rect:
+        serializedVersion: 2
+        x: 792
+        y: 0
+        width: 128
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 09c7a7acefdb806498b6b4671896285d
+      internalID: 1177762514
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tiltbird_37
+      rect:
+        serializedVersion: 2
+        x: 924
+        y: 0
+        width: 128
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d74bbe0971ad5bb4794b522a6239ad9f
+      internalID: 1271101899
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tiltbird_38
+      rect:
+        serializedVersion: 2
+        x: 1056
+        y: 0
+        width: 128
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f3ec60b709b838f47ac9fc72ca13069b
+      internalID: -2043416372
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tiltbird_39
+      rect:
+        serializedVersion: 2
+        x: 1188
+        y: 0
+        width: 128
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: afdf442842c5a5244afaecfee4cbbc3b
+      internalID: -904181572
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 085add85c54c4ff4498e824131d5956e
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      tiltbird_0: -1232674335
+      tiltbird_1: -1221057883
+      tiltbird_10: -540140970
+      tiltbird_11: 179891420
+      tiltbird_12: -1929110306
+      tiltbird_13: 1722294179
+      tiltbird_14: -1715711493
+      tiltbird_15: 62005689
+      tiltbird_16: -254425819
+      tiltbird_17: -252977858
+      tiltbird_18: 1956307622
+      tiltbird_19: -189172287
+      tiltbird_2: 1196573765
+      tiltbird_20: -2145351507
+      tiltbird_21: -1943101601
+      tiltbird_22: 1211527012
+      tiltbird_23: 1548219832
+      tiltbird_24: -749980420
+      tiltbird_25: -2006777380
+      tiltbird_26: 137651373
+      tiltbird_27: 572994735
+      tiltbird_28: 55376774
+      tiltbird_29: 796242134
+      tiltbird_3: 1284936096
+      tiltbird_30: -444610634
+      tiltbird_31: 1324557679
+      tiltbird_32: -61058704
+      tiltbird_33: -1972525453
+      tiltbird_34: 24438561
+      tiltbird_35: -624225539
+      tiltbird_36: 1177762514
+      tiltbird_37: 1271101899
+      tiltbird_38: -2043416372
+      tiltbird_39: -904181572
+      tiltbird_4: 735367750
+      tiltbird_5: 648331950
+      tiltbird_6: -1910152185
+      tiltbird_7: -1222212034
+      tiltbird_8: 1207205961
+      tiltbird_9: 1031091356
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

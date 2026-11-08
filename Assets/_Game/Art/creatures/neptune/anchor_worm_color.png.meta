@@ -1,0 +1,1444 @@
+fileFormatVersion: 2
+guid: ea39f1cc6b7cbae41a86cab7777182ce
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 4497344679962215650
+    second: anchor_worm_color_0
+  - first:
+      213: -954990494477754964
+    second: anchor_worm_color_1
+  - first:
+      213: 6773603514696843210
+    second: anchor_worm_color_2
+  - first:
+      213: -3183350150117806093
+    second: anchor_worm_color_3
+  - first:
+      213: -5981535058642053680
+    second: anchor_worm_color_4
+  - first:
+      213: -2110546281806730318
+    second: anchor_worm_color_5
+  - first:
+      213: 5956935076780941210
+    second: anchor_worm_color_6
+  - first:
+      213: 7294975990675125714
+    second: anchor_worm_color_7
+  - first:
+      213: -3175363704460051178
+    second: anchor_worm_color_8
+  - first:
+      213: 5632671435419487578
+    second: anchor_worm_color_9
+  - first:
+      213: -31868953623088629
+    second: anchor_worm_color_10
+  - first:
+      213: -246774723596262244
+    second: anchor_worm_color_11
+  - first:
+      213: 1289589645492744562
+    second: anchor_worm_color_12
+  - first:
+      213: 2806377401896238222
+    second: anchor_worm_color_13
+  - first:
+      213: 6255029032352649913
+    second: anchor_worm_color_14
+  - first:
+      213: 4077183507623080713
+    second: anchor_worm_color_15
+  - first:
+      213: -7993259758258866686
+    second: anchor_worm_color_16
+  - first:
+      213: 647325431568896935
+    second: anchor_worm_color_17
+  - first:
+      213: -3084716574544623535
+    second: anchor_worm_color_18
+  - first:
+      213: -6394901497543094952
+    second: anchor_worm_color_19
+  - first:
+      213: -2744266011601548526
+    second: anchor_worm_color_20
+  - first:
+      213: 5622862390752737925
+    second: anchor_worm_color_21
+  - first:
+      213: -1194706941745166285
+    second: anchor_worm_color_22
+  - first:
+      213: 1814177268768918295
+    second: anchor_worm_color_23
+  - first:
+      213: -299609998302266426
+    second: anchor_worm_color_24
+  - first:
+      213: 1863409501083992272
+    second: anchor_worm_color_25
+  - first:
+      213: -8491745547368824756
+    second: anchor_worm_color_26
+  - first:
+      213: -7412581412119988762
+    second: anchor_worm_color_27
+  - first:
+      213: 4234520452907838344
+    second: anchor_worm_color_28
+  - first:
+      213: 691120774906634103
+    second: anchor_worm_color_29
+  - first:
+      213: -4178877679830313040
+    second: anchor_worm_color_30
+  - first:
+      213: -2854510673626051490
+    second: anchor_worm_color_31
+  - first:
+      213: -403548494488134303
+    second: anchor_worm_color_32
+  - first:
+      213: -5917426978280844893
+    second: anchor_worm_color_33
+  - first:
+      213: 7267308227628905989
+    second: anchor_worm_color_34
+  - first:
+      213: -311232045749036402
+    second: anchor_worm_color_35
+  - first:
+      213: 5655813197100345003
+    second: anchor_worm_color_36
+  - first:
+      213: 7552238345724256829
+    second: anchor_worm_color_37
+  - first:
+      213: -7495360048591827901
+    second: anchor_worm_color_38
+  - first:
+      213: -7671857984313871862
+    second: anchor_worm_color_39
+  - first:
+      213: 5729501324893190432
+    second: anchor_worm_color_40
+  - first:
+      213: -5960951008128547374
+    second: anchor_worm_color_41
+  - first:
+      213: 2737297287773901092
+    second: anchor_worm_color_42
+  - first:
+      213: -5868546244228123513
+    second: anchor_worm_color_43
+  - first:
+      213: 5398980086804561096
+    second: anchor_worm_color_44
+  - first:
+      213: -1020695073802933072
+    second: anchor_worm_color_45
+  - first:
+      213: 5171604988096351146
+    second: anchor_worm_color_46
+  - first:
+      213: -6143737198911582511
+    second: anchor_worm_color_47
+  - first:
+      213: -3321321732391525112
+    second: anchor_worm_color_48
+  - first:
+      213: 6584915156225530839
+    second: anchor_worm_color_49
+  - first:
+      213: -2603761462697674699
+    second: anchor_worm_color_50
+  - first:
+      213: -4054478152306729156
+    second: anchor_worm_color_51
+  - first:
+      213: -5481738095103602272
+    second: anchor_worm_color_52
+  - first:
+      213: -2663007161175292451
+    second: anchor_worm_color_53
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 9
+  spritePivot: {x: 0.5, y: 0}
+  spritePixelsToUnits: 64
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationMethod: 0
+  spriteTessellationDetail: -1
+  spriteGeometrySubdivision: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 2
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: 25
+    textureCompression: 1
+    compressionQuality: 100
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 1
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: anchor_worm_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 588
+        width: 256
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 34dd106096a1fb24c8814a33e713ba7b
+      internalID: 2075053836
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: anchor_worm_1
+      rect:
+        serializedVersion: 2
+        x: 260
+        y: 588
+        width: 256
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 829d4c4ed7b302245b89b634a909c32f
+      internalID: 1561137262
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: anchor_worm_2
+      rect:
+        serializedVersion: 2
+        x: 520
+        y: 588
+        width: 256
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 7abca085d69653d439886254b9398ce1
+      internalID: 471773106
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: anchor_worm_3
+      rect:
+        serializedVersion: 2
+        x: 780
+        y: 588
+        width: 256
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f37ffabd69d047740859eeecf85bb1ed
+      internalID: -1686518174
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: anchor_worm_4
+      rect:
+        serializedVersion: 2
+        x: 1040
+        y: 588
+        width: 256
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5b98b7ef476149b4ab089e4def1ccea7
+      internalID: -2051151231
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: anchor_worm_5
+      rect:
+        serializedVersion: 2
+        x: 1300
+        y: 588
+        width: 256
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8e38a0deef4b9404797abb0813a1c93a
+      internalID: 235447204
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: anchor_worm_6
+      rect:
+        serializedVersion: 2
+        x: 1560
+        y: 588
+        width: 256
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ea8096724c5a3fc408ccbda386839706
+      internalID: 1684891402
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: anchor_worm_7
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 504
+        width: 256
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 32f455b8aee5b3c4ea8a44231cc9077c
+      internalID: 895194618
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: anchor_worm_8
+      rect:
+        serializedVersion: 2
+        x: 260
+        y: 504
+        width: 256
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e3098b418e49da94b92bb4880f0a6a9d
+      internalID: 463322233
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: anchor_worm_9
+      rect:
+        serializedVersion: 2
+        x: 520
+        y: 504
+        width: 256
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 70c3625945d4418449f50328f51402c8
+      internalID: -928183116
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: anchor_worm_10
+      rect:
+        serializedVersion: 2
+        x: 780
+        y: 504
+        width: 256
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 50f22f216c9273e4e851d3ab43791890
+      internalID: 497287397
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: anchor_worm_11
+      rect:
+        serializedVersion: 2
+        x: 1040
+        y: 504
+        width: 256
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: da49f7a1fec843c4abb66f2bcee297d3
+      internalID: 1317582888
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: anchor_worm_12
+      rect:
+        serializedVersion: 2
+        x: 1300
+        y: 504
+        width: 256
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d20382f802bc43c4a855e24c164065bb
+      internalID: 105525170
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: anchor_worm_13
+      rect:
+        serializedVersion: 2
+        x: 1560
+        y: 504
+        width: 256
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 36f90a223dd34f940996ef4915960e8e
+      internalID: -1072762987
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: anchor_worm_14
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 420
+        width: 256
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9dc66b022a469c24aa9bb75a30ed7ac4
+      internalID: 705217310
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: anchor_worm_15
+      rect:
+        serializedVersion: 2
+        x: 260
+        y: 420
+        width: 256
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4dcbe9fcbf9f96a42a76fdeba8c186cb
+      internalID: -123101225
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: anchor_worm_16
+      rect:
+        serializedVersion: 2
+        x: 520
+        y: 420
+        width: 256
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8867492e7c9fea845882a9de8865becd
+      internalID: -2007639642
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: anchor_worm_17
+      rect:
+        serializedVersion: 2
+        x: 780
+        y: 420
+        width: 256
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ef9d184e3e579d54c8571d19a07f8701
+      internalID: -969410205
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: anchor_worm_18
+      rect:
+        serializedVersion: 2
+        x: 1040
+        y: 420
+        width: 256
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 683e7b70477578145b25f2cbb4eb3b54
+      internalID: -1579443760
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: anchor_worm_19
+      rect:
+        serializedVersion: 2
+        x: 1300
+        y: 420
+        width: 256
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d31cc0dd1d7dfe14eab2541a2d437b18
+      internalID: -398496356
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: anchor_worm_20
+      rect:
+        serializedVersion: 2
+        x: 1560
+        y: 420
+        width: 256
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: aa541fd3154afd447bf41b72eb612a9b
+      internalID: -2019801762
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: anchor_worm_21
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 336
+        width: 256
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a48eba71fc4553d4aa7f91c2c8de64e7
+      internalID: -978523733
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: anchor_worm_22
+      rect:
+        serializedVersion: 2
+        x: 260
+        y: 336
+        width: 256
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 62c97fc923e00184da8fb9995fe2a515
+      internalID: 904759288
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: anchor_worm_23
+      rect:
+        serializedVersion: 2
+        x: 520
+        y: 336
+        width: 256
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0c00cc2c53f5a5c45b43313a1e11d392
+      internalID: -976567403
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: anchor_worm_24
+      rect:
+        serializedVersion: 2
+        x: 780
+        y: 336
+        width: 256
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e874a18023b4d91468fe8236524f0e86
+      internalID: -179955409
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: anchor_worm_25
+      rect:
+        serializedVersion: 2
+        x: 1040
+        y: 336
+        width: 256
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f3a4d84b0a6da9c4f8a2fd0cd558184b
+      internalID: -607399483
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: anchor_worm_26
+      rect:
+        serializedVersion: 2
+        x: 1300
+        y: 336
+        width: 256
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9723a98ad095a4c47af488aa3b175842
+      internalID: 1512737360
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: anchor_worm_27
+      rect:
+        serializedVersion: 2
+        x: 1560
+        y: 336
+        width: 256
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f45c3ea69fb15e247a8b8baefa340eeb
+      internalID: 1856605118
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: anchor_worm_28
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 252
+        width: 256
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 834fa2a5926b1704d9a853afc608db01
+      internalID: -356183860
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: anchor_worm_29
+      rect:
+        serializedVersion: 2
+        x: 260
+        y: 252
+        width: 256
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 116a8f3b600cbdb4abc2b4568c21d10c
+      internalID: 539612713
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: anchor_worm_30
+      rect:
+        serializedVersion: 2
+        x: 520
+        y: 252
+        width: 256
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b54fa3b6d8911c14ba98e9950f238cd3
+      internalID: 2010267837
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: anchor_worm_31
+      rect:
+        serializedVersion: 2
+        x: 780
+        y: 252
+        width: 256
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 086910b86220fa24f8688e16fae4f708
+      internalID: 303841090
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: anchor_worm_32
+      rect:
+        serializedVersion: 2
+        x: 1040
+        y: 252
+        width: 256
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: bae15ec37201ac949a78866aa66f8297
+      internalID: -831613657
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: anchor_worm_33
+      rect:
+        serializedVersion: 2
+        x: 1300
+        y: 252
+        width: 256
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1936cbd24be2092429a598243e4fb546
+      internalID: -1970084872
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: anchor_worm_34
+      rect:
+        serializedVersion: 2
+        x: 1560
+        y: 252
+        width: 256
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d518012808e440f48a1d2f23b1bad7a8
+      internalID: 1453752434
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: anchor_worm_35
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 168
+        width: 256
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6aaa3d9ea37760e43b2c248f13b55530
+      internalID: -1247844294
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: anchor_worm_36
+      rect:
+        serializedVersion: 2
+        x: 260
+        y: 168
+        width: 256
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 967547cfa9014644c86ffcfc838558d2
+      internalID: -995524485
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: anchor_worm_37
+      rect:
+        serializedVersion: 2
+        x: 520
+        y: 168
+        width: 256
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 66264345eeb36a1429265eff1155dd69
+      internalID: -1998996421
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: anchor_worm_38
+      rect:
+        serializedVersion: 2
+        x: 780
+        y: 168
+        width: 256
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c7e107c8e5d473c4ea9a3e08a5008ace
+      internalID: -1911189458
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: anchor_worm_39
+      rect:
+        serializedVersion: 2
+        x: 1040
+        y: 168
+        width: 256
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 7def4781571947445b9908acb4ed596c
+      internalID: -1197616548
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: anchor_worm_40
+      rect:
+        serializedVersion: 2
+        x: 1300
+        y: 168
+        width: 256
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e2843efd672222a4baf8b4375e22c8fa
+      internalID: -133168918
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: anchor_worm_41
+      rect:
+        serializedVersion: 2
+        x: 1560
+        y: 168
+        width: 256
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 15c6d3de7297aa340be1d0091e17b496
+      internalID: -399465669
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: anchor_worm_42
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 84
+        width: 256
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 10237f53ec7051744b918c5982f428b4
+      internalID: -1082974817
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: anchor_worm_43
+      rect:
+        serializedVersion: 2
+        x: 260
+        y: 84
+        width: 256
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 83281cfee44b8d34cb3172833d0dbdcf
+      internalID: 1087268713
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: anchor_worm_44
+      rect:
+        serializedVersion: 2
+        x: 520
+        y: 84
+        width: 256
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 035e1f808b563c845aacdda6158f5789
+      internalID: -1903283976
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: anchor_worm_45
+      rect:
+        serializedVersion: 2
+        x: 780
+        y: 84
+        width: 256
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 686d3cbbcd2ee2240a6440ba8462a0b8
+      internalID: -11514742
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: anchor_worm_46
+      rect:
+        serializedVersion: 2
+        x: 1040
+        y: 84
+        width: 256
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f1e8dca59539bbe4c9c809220c68125c
+      internalID: -1088638458
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: anchor_worm_47
+      rect:
+        serializedVersion: 2
+        x: 1300
+        y: 84
+        width: 256
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ac5d397ca56a0e74d83e54a8ec4a26d4
+      internalID: -2060773761
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: anchor_worm_48
+      rect:
+        serializedVersion: 2
+        x: 1560
+        y: 84
+        width: 256
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 20d55ff82a9e0934eac640209b968e84
+      internalID: -483852601
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: anchor_worm_49
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 256
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4184f5f94a3605641b7405a41258df9a
+      internalID: 1686858492
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: baae56918e125594f87244ec9e70c958
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      anchor_worm_0: 2075053836
+      anchor_worm_1: 1561137262
+      anchor_worm_10: 497287397
+      anchor_worm_11: 1317582888
+      anchor_worm_12: 105525170
+      anchor_worm_13: -1072762987
+      anchor_worm_14: 705217310
+      anchor_worm_15: -123101225
+      anchor_worm_16: -2007639642
+      anchor_worm_17: -969410205
+      anchor_worm_18: -1579443760
+      anchor_worm_19: -398496356
+      anchor_worm_2: 471773106
+      anchor_worm_20: -2019801762
+      anchor_worm_21: -978523733
+      anchor_worm_22: 904759288
+      anchor_worm_23: -976567403
+      anchor_worm_24: -179955409
+      anchor_worm_25: -607399483
+      anchor_worm_26: 1512737360
+      anchor_worm_27: 1856605118
+      anchor_worm_28: -356183860
+      anchor_worm_29: 539612713
+      anchor_worm_3: -1686518174
+      anchor_worm_30: 2010267837
+      anchor_worm_31: 303841090
+      anchor_worm_32: -831613657
+      anchor_worm_33: -1970084872
+      anchor_worm_34: 1453752434
+      anchor_worm_35: -1247844294
+      anchor_worm_36: -995524485
+      anchor_worm_37: -1998996421
+      anchor_worm_38: -1911189458
+      anchor_worm_39: -1197616548
+      anchor_worm_4: -2051151231
+      anchor_worm_40: -133168918
+      anchor_worm_41: -399465669
+      anchor_worm_42: -1082974817
+      anchor_worm_43: 1087268713
+      anchor_worm_44: -1903283976
+      anchor_worm_45: -11514742
+      anchor_worm_46: -1088638458
+      anchor_worm_47: -2060773761
+      anchor_worm_48: -483852601
+      anchor_worm_49: 1686858492
+      anchor_worm_5: 235447204
+      anchor_worm_6: 1684891402
+      anchor_worm_7: 895194618
+      anchor_worm_8: 463322233
+      anchor_worm_9: -928183116
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

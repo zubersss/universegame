@@ -1,0 +1,1172 @@
+fileFormatVersion: 2
+guid: a67535cb622d2334b95210e77da20256
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 8536475299479089350
+    second: methane_ray_color_0
+  - first:
+      213: -7167229065649842294
+    second: methane_ray_color_1
+  - first:
+      213: 2684528451789399890
+    second: methane_ray_color_2
+  - first:
+      213: -7960089878024523478
+    second: methane_ray_color_3
+  - first:
+      213: 8169131327693016787
+    second: methane_ray_color_4
+  - first:
+      213: -990257371386686087
+    second: methane_ray_color_5
+  - first:
+      213: 139468116333390409
+    second: methane_ray_color_6
+  - first:
+      213: 4881875153362609570
+    second: methane_ray_color_7
+  - first:
+      213: -8897096169442165480
+    second: methane_ray_color_8
+  - first:
+      213: 3363939510850154616
+    second: methane_ray_color_9
+  - first:
+      213: 3274031578378284726
+    second: methane_ray_color_10
+  - first:
+      213: -1508882878505752179
+    second: methane_ray_color_11
+  - first:
+      213: 8421081660605972297
+    second: methane_ray_color_12
+  - first:
+      213: -3293740912113987259
+    second: methane_ray_color_13
+  - first:
+      213: -149046864249267232
+    second: methane_ray_color_14
+  - first:
+      213: 7533753702582012510
+    second: methane_ray_color_15
+  - first:
+      213: 3620086031745147202
+    second: methane_ray_color_16
+  - first:
+      213: -3874167439313651687
+    second: methane_ray_color_17
+  - first:
+      213: 54925145463412486
+    second: methane_ray_color_18
+  - first:
+      213: -766368042696354253
+    second: methane_ray_color_19
+  - first:
+      213: 6043046161397451247
+    second: methane_ray_color_20
+  - first:
+      213: 5200145553248671163
+    second: methane_ray_color_21
+  - first:
+      213: 1092651845185995000
+    second: methane_ray_color_22
+  - first:
+      213: -2060407457662312080
+    second: methane_ray_color_23
+  - first:
+      213: 5362450436025068673
+    second: methane_ray_color_24
+  - first:
+      213: -3276591918986899542
+    second: methane_ray_color_25
+  - first:
+      213: 1795499115366136912
+    second: methane_ray_color_26
+  - first:
+      213: -6498078801927179778
+    second: methane_ray_color_27
+  - first:
+      213: 5693562251479741858
+    second: methane_ray_color_28
+  - first:
+      213: -5549953302272087415
+    second: methane_ray_color_29
+  - first:
+      213: -2686676272940687642
+    second: methane_ray_color_30
+  - first:
+      213: -8164121947762480574
+    second: methane_ray_color_31
+  - first:
+      213: -5915862664636932002
+    second: methane_ray_color_32
+  - first:
+      213: 4259645851438209743
+    second: methane_ray_color_33
+  - first:
+      213: 2867674485481306791
+    second: methane_ray_color_34
+  - first:
+      213: 1140883589863519670
+    second: methane_ray_color_35
+  - first:
+      213: -7791403408991437335
+    second: methane_ray_color_36
+  - first:
+      213: -3128126694610065952
+    second: methane_ray_color_37
+  - first:
+      213: 2940120720115590185
+    second: methane_ray_color_38
+  - first:
+      213: -1133247105986413884
+    second: methane_ray_color_39
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 9
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 64
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationMethod: 0
+  spriteTessellationDetail: -1
+  spriteGeometrySubdivision: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 2
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: 25
+    textureCompression: 1
+    compressionQuality: 100
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 1
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: methane_ray_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 300
+        width: 176
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0cd3812bdb509f04194b05045b84c018
+      internalID: -1496613091
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: methane_ray_1
+      rect:
+        serializedVersion: 2
+        x: 180
+        y: 300
+        width: 176
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3ba6e5cebe18f754f98bac2da6e39e2b
+      internalID: -1148179619
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: methane_ray_2
+      rect:
+        serializedVersion: 2
+        x: 360
+        y: 300
+        width: 176
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d43878445cd716b46be3765eb618af55
+      internalID: 1457353705
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: methane_ray_3
+      rect:
+        serializedVersion: 2
+        x: 540
+        y: 300
+        width: 176
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0979a642f2e385d47990a8a4edfc6493
+      internalID: -291911734
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: methane_ray_4
+      rect:
+        serializedVersion: 2
+        x: 720
+        y: 300
+        width: 176
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: caa2b855f7791be4996ab9514d4a06c0
+      internalID: -2047755214
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: methane_ray_5
+      rect:
+        serializedVersion: 2
+        x: 900
+        y: 300
+        width: 176
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4b56128c885a90748aa10a4654319912
+      internalID: 432994113
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: methane_ray_6
+      rect:
+        serializedVersion: 2
+        x: 1080
+        y: 300
+        width: 176
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3f22c251fabe0ff4e82178c04de73fc8
+      internalID: 2066861898
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: methane_ray_7
+      rect:
+        serializedVersion: 2
+        x: 1260
+        y: 300
+        width: 176
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 980e7a1f91f28254fa22ec4f49b10a0b
+      internalID: 1100382371
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: methane_ray_8
+      rect:
+        serializedVersion: 2
+        x: 1440
+        y: 300
+        width: 176
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b506461b98d3c0a4597f02b72542d927
+      internalID: 745369693
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: methane_ray_9
+      rect:
+        serializedVersion: 2
+        x: 1620
+        y: 300
+        width: 176
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 90e3b02ba6ce49145af7050c14103973
+      internalID: 123506943
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: methane_ray_10
+      rect:
+        serializedVersion: 2
+        x: 1800
+        y: 300
+        width: 176
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5ec6511deeb54fc4eb9465e11f919b2a
+      internalID: -667047704
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: methane_ray_11
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 200
+        width: 176
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5499dbaefc8c88a45806898ff2294522
+      internalID: 998199800
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: methane_ray_12
+      rect:
+        serializedVersion: 2
+        x: 180
+        y: 200
+        width: 176
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 20aab15455ab335469c8dabaab28353e
+      internalID: 1886269227
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: methane_ray_13
+      rect:
+        serializedVersion: 2
+        x: 360
+        y: 200
+        width: 176
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d120a49b10fc7b241a776e8546639278
+      internalID: -1991785471
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: methane_ray_14
+      rect:
+        serializedVersion: 2
+        x: 540
+        y: 200
+        width: 176
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1f81f10090404af4d8d5405f5b3dc17f
+      internalID: 1081643168
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: methane_ray_15
+      rect:
+        serializedVersion: 2
+        x: 720
+        y: 200
+        width: 176
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ec6fe742a6a34cc4db13f7c1f0cfabd2
+      internalID: -714476782
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: methane_ray_16
+      rect:
+        serializedVersion: 2
+        x: 900
+        y: 200
+        width: 176
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 74c8b3ca98e664e47a7468e691c4dcd4
+      internalID: -64063760
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: methane_ray_17
+      rect:
+        serializedVersion: 2
+        x: 1080
+        y: 200
+        width: 176
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 7103439fa27285a4d9344ed7066b2214
+      internalID: -340790224
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: methane_ray_18
+      rect:
+        serializedVersion: 2
+        x: 1260
+        y: 200
+        width: 176
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: edd6a2fc216bcd246a834e31d49f7034
+      internalID: 24598071
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: methane_ray_19
+      rect:
+        serializedVersion: 2
+        x: 1440
+        y: 200
+        width: 176
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e351cc4647f30344693abdaf0272f812
+      internalID: 382314156
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: methane_ray_20
+      rect:
+        serializedVersion: 2
+        x: 1620
+        y: 200
+        width: 176
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 93ead8e722d0b7e44b5195a5504c4c2d
+      internalID: 1309469542
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: methane_ray_21
+      rect:
+        serializedVersion: 2
+        x: 1800
+        y: 200
+        width: 176
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e87a4da4d6ab5674fa0dbc47bd9ae24c
+      internalID: -1050986709
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: methane_ray_22
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 100
+        width: 176
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: fe97de69393cc4a4a98f6ae6b0fcfbab
+      internalID: 909649897
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: methane_ray_23
+      rect:
+        serializedVersion: 2
+        x: 180
+        y: 100
+        width: 176
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5004bba2b722b8a4a8d383225a5a3e3d
+      internalID: 2746685
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: methane_ray_24
+      rect:
+        serializedVersion: 2
+        x: 360
+        y: 100
+        width: 176
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 7a513b2bdc1bece44b1abdfc3def5297
+      internalID: -1091095215
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: methane_ray_25
+      rect:
+        serializedVersion: 2
+        x: 540
+        y: 100
+        width: 176
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4d653f23facd7324b80512358f5bcf86
+      internalID: -452246548
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: methane_ray_26
+      rect:
+        serializedVersion: 2
+        x: 720
+        y: 100
+        width: 176
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8a2bf83d040daef45b61f917bfe69afe
+      internalID: 1918385026
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: methane_ray_27
+      rect:
+        serializedVersion: 2
+        x: 900
+        y: 100
+        width: 176
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: bb1d19955f9104446895b4941bab7931
+      internalID: -222853243
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: methane_ray_28
+      rect:
+        serializedVersion: 2
+        x: 1080
+        y: 100
+        width: 176
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0c160317a3b9df74cb5da296979a926c
+      internalID: -714271793
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: methane_ray_29
+      rect:
+        serializedVersion: 2
+        x: 1260
+        y: 100
+        width: 176
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b286fed5aeff5fb4a8b58415584467e2
+      internalID: -9275894
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: methane_ray_30
+      rect:
+        serializedVersion: 2
+        x: 1440
+        y: 100
+        width: 176
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 56756cecfe61cd448875a72ceb8de705
+      internalID: 1543570904
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: methane_ray_31
+      rect:
+        serializedVersion: 2
+        x: 1620
+        y: 100
+        width: 176
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 74cbed04cb06a5040af5a9e08e8d4c73
+      internalID: -1509899017
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: methane_ray_32
+      rect:
+        serializedVersion: 2
+        x: 1800
+        y: 100
+        width: 176
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a02ca2fbb8fcef241bd18823ae634a6a
+      internalID: 876290462
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: methane_ray_33
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 176
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 46e99b9c69ad1554fa8347908bf34cd0
+      internalID: -356024951
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: methane_ray_34
+      rect:
+        serializedVersion: 2
+        x: 180
+        y: 0
+        width: 176
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: da04561e914cd8547afe8433a3916215
+      internalID: -880167951
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: methane_ray_35
+      rect:
+        serializedVersion: 2
+        x: 360
+        y: 0
+        width: 176
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 86716b9467cffbe4bae9569603181d3a
+      internalID: 443732377
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: methane_ray_36
+      rect:
+        serializedVersion: 2
+        x: 540
+        y: 0
+        width: 176
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 071c09eedfe25194cbcd6c826b9a0c22
+      internalID: -2064896793
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: methane_ray_37
+      rect:
+        serializedVersion: 2
+        x: 720
+        y: 0
+        width: 176
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: dfa0d89032d2e0d4e811ecfbbae75281
+      internalID: -578370009
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: methane_ray_38
+      rect:
+        serializedVersion: 2
+        x: 900
+        y: 0
+        width: 176
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: adf75aa5e78e5f742b976cf05e3e3889
+      internalID: 596006803
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: methane_ray_39
+      rect:
+        serializedVersion: 2
+        x: 1080
+        y: 0
+        width: 176
+        height: 96
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f0ddf530be95c544fa88b5dfe996fe87
+      internalID: 637636837
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: ce6c446a7f4678d4c9ce41830e87b474
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      methane_ray_0: -1496613091
+      methane_ray_1: -1148179619
+      methane_ray_10: -667047704
+      methane_ray_11: 998199800
+      methane_ray_12: 1886269227
+      methane_ray_13: -1991785471
+      methane_ray_14: 1081643168
+      methane_ray_15: -714476782
+      methane_ray_16: -64063760
+      methane_ray_17: -340790224
+      methane_ray_18: 24598071
+      methane_ray_19: 382314156
+      methane_ray_2: 1457353705
+      methane_ray_20: 1309469542
+      methane_ray_21: -1050986709
+      methane_ray_22: 909649897
+      methane_ray_23: 2746685
+      methane_ray_24: -1091095215
+      methane_ray_25: -452246548
+      methane_ray_26: 1918385026
+      methane_ray_27: -222853243
+      methane_ray_28: -714271793
+      methane_ray_29: -9275894
+      methane_ray_3: -291911734
+      methane_ray_30: 1543570904
+      methane_ray_31: -1509899017
+      methane_ray_32: 876290462
+      methane_ray_33: -356024951
+      methane_ray_34: -880167951
+      methane_ray_35: 443732377
+      methane_ray_36: -2064896793
+      methane_ray_37: -578370009
+      methane_ray_38: 596006803
+      methane_ray_39: 637636837
+      methane_ray_4: -2047755214
+      methane_ray_5: 432994113
+      methane_ray_6: 2066861898
+      methane_ray_7: 1100382371
+      methane_ray_8: 745369693
+      methane_ray_9: 123506943
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

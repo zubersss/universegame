@@ -1,0 +1,690 @@
+fileFormatVersion: 2
+guid: e2c8e2230d6524f42a7bb42e8ac55472
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -9015811064428591007
+    second: rigset_color_0
+  - first:
+      213: -4646942707658281257
+    second: rigset_color_1
+  - first:
+      213: -367356044595573682
+    second: rigset_color_2
+  - first:
+      213: 4347448135749056951
+    second: rigset_color_3
+  - first:
+      213: -3315201752533947720
+    second: rigset_color_4
+  - first:
+      213: -8837342657336079748
+    second: rigset_color_5
+  - first:
+      213: -8765935735186961322
+    second: rigset_color_6
+  - first:
+      213: -8242980493334989995
+    second: rigset_color_7
+  - first:
+      213: -1429384369043599060
+    second: rigset_color_8
+  - first:
+      213: -1655417677226936628
+    second: rigset_color_9
+  - first:
+      213: -7864364231028489733
+    second: rigset_color_10
+  - first:
+      213: 4632427809600995280
+    second: rigset_color_11
+  - first:
+      213: -4947251109637937645
+    second: rigset_color_12
+  - first:
+      213: -8883380907211250912
+    second: rigset_color_13
+  - first:
+      213: -6618969852247736515
+    second: rigset_color_14
+  - first:
+      213: 8310072760055638085
+    second: rigset_color_15
+  - first:
+      213: -8941757950970621053
+    second: rigset_color_16
+  - first:
+      213: 2079164303080992741
+    second: rigset_color_17
+  - first:
+      213: 1490004103099028332
+    second: rigset_color_18
+  - first:
+      213: -6538976570956593336
+    second: rigset_color_19
+  - first:
+      213: 2518108490744669611
+    second: rigset_color_20
+  - first:
+      213: 1930681069225236888
+    second: rigset_color_21
+  - first:
+      213: 4284336572379364787
+    second: rigset_color_22
+  - first:
+      213: -1021163703781780209
+    second: rigset_color_23
+  - first:
+      213: 2261661250419273690
+    second: rigset_color_24
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 9
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 64
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationMethod: 0
+  spriteTessellationDetail: -1
+  spriteGeometrySubdivision: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 2
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: 25
+    textureCompression: 1
+    compressionQuality: 100
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 1
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: embermoss_curl
+      rect:
+        serializedVersion: 2
+        x: 144
+        y: 40
+        width: 72
+        height: 32
+      alignment: 9
+      pivot: {x: 0.481, y: 0.1738}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 383a5b762e2032c4fa6d8f4a4b883397
+      internalID: -2080916766
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: embermoss_hi
+      rect:
+        serializedVersion: 2
+        x: 348
+        y: 120
+        width: 68
+        height: 40
+      alignment: 9
+      pivot: {x: 0.4704, y: 0.168}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: efb242f6d11ec4742bd27a45d1f140a5
+      internalID: 289295028
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: embermoss_lo
+      rect:
+        serializedVersion: 2
+        x: 40
+        y: 36
+        width: 68
+        height: 36
+      alignment: 9
+      pivot: {x: 0.4704, y: 0.1545}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: fdc2e23f9ad360e4daf0ea580aa563d4
+      internalID: 490070579
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fogbell_bell_open
+      rect:
+        serializedVersion: 2
+        x: 112
+        y: 36
+        width: 28
+        height: 36
+      alignment: 9
+      pivot: {x: 0.44, y: 0.8377}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 960da297921912b4596d2a147a9f173d
+      internalID: 770773154
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fogbell_bell_shut
+      rect:
+        serializedVersion: 2
+        x: 220
+        y: 40
+        width: 20
+        height: 32
+      alignment: 9
+      pivot: {x: 0.464, y: 0.7178}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 40d3e8f1869360e4e9b7581c9b08ebcd
+      internalID: -765908941
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fogbell_stalk
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 76
+        width: 76
+        height: 84
+      alignment: 9
+      pivot: {x: 0.2482, y: 0.0906}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6a75215695cd8214da6a5a7431e2abb5
+      internalID: -1815689795
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hailcatch_base
+      rect:
+        serializedVersion: 2
+        x: 420
+        y: 120
+        width: 44
+        height: 40
+      alignment: 9
+      pivot: {x: 0.4982, y: 0.2028}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 733785a0e08281d48b35cd37513915c3
+      internalID: 122972656
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hailcatch_bowl_h0
+      rect:
+        serializedVersion: 2
+        x: 244
+        y: 44
+        width: 48
+        height: 28
+      alignment: 9
+      pivot: {x: 0.4999, y: 0.2718}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0b75f719a29a0f744a90a443a8e5fdf1
+      internalID: -2113808972
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hailcatch_bowl_h1
+      rect:
+        serializedVersion: 2
+        x: 296
+        y: 44
+        width: 48
+        height: 28
+      alignment: 9
+      pivot: {x: 0.4999, y: 0.2718}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ece3c0d8c1f55654698cd29068115201
+      internalID: 291721698
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hailcatch_bowl_h2
+      rect:
+        serializedVersion: 2
+        x: 348
+        y: 44
+        width: 48
+        height: 28
+      alignment: 9
+      pivot: {x: 0.4999, y: 0.2718}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e4bdb2512d3640b4398b82264ffc6002
+      internalID: 2063530735
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hailcatch_bowl_h3
+      rect:
+        serializedVersion: 2
+        x: 400
+        y: 44
+        width: 48
+        height: 28
+      alignment: 9
+      pivot: {x: 0.4999, y: 0.2718}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 927a0f70610d5a24f8ed8018a8bfeed9
+      internalID: 1320067074
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hailcatch_bowl_h4
+      rect:
+        serializedVersion: 2
+        x: 452
+        y: 44
+        width: 48
+        height: 28
+      alignment: 9
+      pivot: {x: 0.4999, y: 0.2718}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 604bc5da6d0a8d8429e6f355a5935aff
+      internalID: 1298254456
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hailcatch_bowl_tip
+      rect:
+        serializedVersion: 2
+        x: 292
+        y: 108
+        width: 52
+        height: 52
+      alignment: 9
+      pivot: {x: 0.1645, y: 0.4782}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c9c6f61011455f443baeb8e2fcdb446a
+      internalID: -2093680595
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: prismfern_flat
+      rect:
+        serializedVersion: 2
+        x: 124
+        y: 84
+        width: 56
+        height: 76
+      alignment: 9
+      pivot: {x: 0.5001, y: 0.1001}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 85582d89e21d7614aa8a67d5f46860a7
+      internalID: -450982613
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: prismfern_glint
+      rect:
+        serializedVersion: 2
+        x: 184
+        y: 84
+        width: 52
+        height: 76
+      alignment: 9
+      pivot: {x: 0.4619, y: 0.1001}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 11c71cd5011a6ab418c6d01e0e4f910f
+      internalID: 1082145064
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: prismfern_rest
+      rect:
+        serializedVersion: 2
+        x: 240
+        y: 84
+        width: 48
+        height: 76
+      alignment: 9
+      pivot: {x: 0.5003, y: 0.1001}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 939f773610f258d45a62e3aac585fd57
+      internalID: 2042183969
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sunturner_head_left
+      rect:
+        serializedVersion: 2
+        x: 468
+        y: 120
+        width: 36
+        height: 40
+      alignment: 9
+      pivot: {x: 0.7023, y: 0.2259}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ee0c76f3783dd044c8a4e7e8deb05286
+      internalID: -953399696
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sunturner_head_right
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 32
+        width: 36
+        height: 40
+      alignment: 9
+      pivot: {x: 0.1972, y: 0.2259}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1413e21894da8284aafe2d2d4ab359ba
+      internalID: -433524190
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sunturner_head_shut
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 24
+        height: 28
+      alignment: 9
+      pivot: {x: 0.4366, y: 0.0524}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f0ee96466e14d0d4fa3e6fb1c4496db9
+      internalID: -206592838
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sunturner_head_up
+      rect:
+        serializedVersion: 2
+        x: 28
+        y: 0
+        width: 36
+        height: 28
+      alignment: 9
+      pivot: {x: 0.4958, y: 0.0524}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4e07057db37f29d45a367acf4fcf6274
+      internalID: 568886778
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sunturner_stalk
+      rect:
+        serializedVersion: 2
+        x: 80
+        y: 80
+        width: 40
+        height: 80
+      alignment: 9
+      pivot: {x: 0.4871, y: 0.0982}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 499f744a5325efa4cb61bd23888cf50d
+      internalID: 1017307077
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 3e10ee6a4f6984a4aaa6dd6b48f78d76
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      embermoss_curl: -2080916766
+      embermoss_hi: 289295028
+      embermoss_lo: 490070579
+      fogbell_bell_open: 770773154
+      fogbell_bell_shut: -765908941
+      fogbell_stalk: -1815689795
+      hailcatch_base: 122972656
+      hailcatch_bowl_h0: -2113808972
+      hailcatch_bowl_h1: 291721698
+      hailcatch_bowl_h2: 2063530735
+      hailcatch_bowl_h3: 1320067074
+      hailcatch_bowl_h4: 1298254456
+      hailcatch_bowl_tip: -2093680595
+      prismfern_flat: -450982613
+      prismfern_glint: 1082145064
+      prismfern_rest: 2042183969
+      sunturner_head_left: -953399696
+      sunturner_head_right: -433524190
+      sunturner_head_shut: -206592838
+      sunturner_head_up: 568886778
+      sunturner_stalk: 1017307077
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

@@ -1,0 +1,1202 @@
+fileFormatVersion: 2
+guid: 67786028d57d16f45a9c9a9dd1cbff71
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 4209511096346484612
+    second: hailcrab_color_0
+  - first:
+      213: 3374328596821308170
+    second: hailcrab_color_1
+  - first:
+      213: -7126275653070073118
+    second: hailcrab_color_2
+  - first:
+      213: 4193967077555369851
+    second: hailcrab_color_3
+  - first:
+      213: -2619174013012563068
+    second: hailcrab_color_4
+  - first:
+      213: 3204391720270577030
+    second: hailcrab_color_5
+  - first:
+      213: -5876547115603489198
+    second: hailcrab_color_6
+  - first:
+      213: -4862967033676355935
+    second: hailcrab_color_7
+  - first:
+      213: 8369899593040947268
+    second: hailcrab_color_8
+  - first:
+      213: -3033156204806112835
+    second: hailcrab_color_9
+  - first:
+      213: -7288555379461965149
+    second: hailcrab_color_10
+  - first:
+      213: 4252000339759034140
+    second: hailcrab_color_11
+  - first:
+      213: -3834492228234045997
+    second: hailcrab_color_12
+  - first:
+      213: 3746711806595910949
+    second: hailcrab_color_13
+  - first:
+      213: -8830129605787675345
+    second: hailcrab_color_14
+  - first:
+      213: -3261428535895697334
+    second: hailcrab_color_15
+  - first:
+      213: -8705532350778379330
+    second: hailcrab_color_16
+  - first:
+      213: 4430119015956149360
+    second: hailcrab_color_17
+  - first:
+      213: 3876503206267126509
+    second: hailcrab_color_18
+  - first:
+      213: -1956544560478852719
+    second: hailcrab_color_19
+  - first:
+      213: -3791207760878782484
+    second: hailcrab_color_20
+  - first:
+      213: 5122328240228642082
+    second: hailcrab_color_21
+  - first:
+      213: -515117607179554266
+    second: hailcrab_color_22
+  - first:
+      213: -4377367134652346615
+    second: hailcrab_color_23
+  - first:
+      213: -341353489550142917
+    second: hailcrab_color_24
+  - first:
+      213: -5451197789631598800
+    second: hailcrab_color_25
+  - first:
+      213: -1650164511234298372
+    second: hailcrab_color_26
+  - first:
+      213: 8155265808019307367
+    second: hailcrab_color_27
+  - first:
+      213: -3804731690343791898
+    second: hailcrab_color_28
+  - first:
+      213: -4270472262583001916
+    second: hailcrab_color_29
+  - first:
+      213: 1151678210051299990
+    second: hailcrab_color_30
+  - first:
+      213: 3517059297303209218
+    second: hailcrab_color_31
+  - first:
+      213: 7898963300874554145
+    second: hailcrab_color_32
+  - first:
+      213: 2319782099210916313
+    second: hailcrab_color_33
+  - first:
+      213: -4019553802805989286
+    second: hailcrab_color_34
+  - first:
+      213: -1616275881384297527
+    second: hailcrab_color_35
+  - first:
+      213: -5301890756870188625
+    second: hailcrab_color_36
+  - first:
+      213: 8308701980920801088
+    second: hailcrab_color_37
+  - first:
+      213: 5645278202528485077
+    second: hailcrab_color_38
+  - first:
+      213: 4136173226245344186
+    second: hailcrab_color_39
+  - first:
+      213: -4731728317221064953
+    second: hailcrab_color_40
+  - first:
+      213: 113128152035690109
+    second: hailcrab_color_41
+  - first:
+      213: 1559616644968290847
+    second: hailcrab_color_42
+  - first:
+      213: -9126713473247731957
+    second: hailcrab_color_43
+  - first:
+      213: -3214491687690806976
+    second: hailcrab_color_44
+  - first:
+      213: 3786142921330610959
+    second: hailcrab_color_45
+  - first:
+      213: 6062716029459893408
+    second: hailcrab_color_46
+  - first:
+      213: 723806985781896501
+    second: hailcrab_color_47
+  - first:
+      213: -2382733023133671790
+    second: hailcrab_color_48
+  - first:
+      213: 6120585055710937471
+    second: hailcrab_color_49
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 9
+  spritePivot: {x: 0.5, y: 0}
+  spritePixelsToUnits: 64
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationMethod: 0
+  spriteTessellationDetail: -1
+  spriteGeometrySubdivision: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 2
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: 25
+    textureCompression: 1
+    compressionQuality: 100
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 1
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: hailcrab_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 168
+        width: 128
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 290f7e7b1ec409d41a9b68356a43801d
+      internalID: -1001115664
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hailcrab_1
+      rect:
+        serializedVersion: 2
+        x: 132
+        y: 168
+        width: 128
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 47786bf7f324ef64a835560e87419350
+      internalID: -2001635095
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hailcrab_2
+      rect:
+        serializedVersion: 2
+        x: 264
+        y: 168
+        width: 128
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 091d75cd45723d542adf2ab8bbad5972
+      internalID: -1137198555
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hailcrab_3
+      rect:
+        serializedVersion: 2
+        x: 396
+        y: 168
+        width: 128
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8e5d34ad8f225fe408ba5e8c2355213a
+      internalID: 542272002
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hailcrab_4
+      rect:
+        serializedVersion: 2
+        x: 528
+        y: 168
+        width: 128
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6151df7056b929b4399a5274b2d032b8
+      internalID: 1639410199
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hailcrab_5
+      rect:
+        serializedVersion: 2
+        x: 660
+        y: 168
+        width: 128
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b411d2bfd1a682e4f946c3ac0480db52
+      internalID: 749691633
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hailcrab_6
+      rect:
+        serializedVersion: 2
+        x: 792
+        y: 168
+        width: 128
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3a59a67a311709c438d83d7fceaf5d6d
+      internalID: 871549431
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hailcrab_7
+      rect:
+        serializedVersion: 2
+        x: 924
+        y: 168
+        width: 128
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 770f88f94a7c80a4fb3b4f5d0ea6fd82
+      internalID: -363975604
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hailcrab_8
+      rect:
+        serializedVersion: 2
+        x: 1056
+        y: 168
+        width: 128
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a3760e26d992c19498989dd72903e784
+      internalID: 1280922416
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hailcrab_9
+      rect:
+        serializedVersion: 2
+        x: 1188
+        y: 168
+        width: 128
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 7e8c1450d444a03448607be35c2c4512
+      internalID: -1353293321
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hailcrab_10
+      rect:
+        serializedVersion: 2
+        x: 1320
+        y: 168
+        width: 128
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: fb36de9a767112545a3c33c7d269ac32
+      internalID: 2107029440
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hailcrab_11
+      rect:
+        serializedVersion: 2
+        x: 1452
+        y: 168
+        width: 128
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: febb20a7f02efbe47a29aae287ad77f5
+      internalID: -129828185
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hailcrab_12
+      rect:
+        serializedVersion: 2
+        x: 1584
+        y: 168
+        width: 128
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4d2817be70f993a4caf9d5cb23723a61
+      internalID: -676080131
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hailcrab_13
+      rect:
+        serializedVersion: 2
+        x: 1716
+        y: 168
+        width: 128
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 67295eb53afdb2441873ec4133ba149f
+      internalID: 1337944683
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hailcrab_14
+      rect:
+        serializedVersion: 2
+        x: 1848
+        y: 168
+        width: 128
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 62ca1e616f944c147b0390013bcd5a0f
+      internalID: -1899628176
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hailcrab_15
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 84
+        width: 128
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6e052558b9d9eed44b490d0296d51198
+      internalID: 1901377576
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hailcrab_16
+      rect:
+        serializedVersion: 2
+        x: 132
+        y: 84
+        width: 128
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 92bb72394df85f84ea76b97a90be5fdc
+      internalID: -1394045810
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hailcrab_17
+      rect:
+        serializedVersion: 2
+        x: 264
+        y: 84
+        width: 128
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b076e432ca626054f9c765c5bc07f72f
+      internalID: 1910551219
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hailcrab_18
+      rect:
+        serializedVersion: 2
+        x: 396
+        y: 84
+        width: 128
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 79e542d886007ef4d99ed8c06d3c0495
+      internalID: -2057395996
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hailcrab_19
+      rect:
+        serializedVersion: 2
+        x: 528
+        y: 84
+        width: 128
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 56114c4d8a143e140a2fac9a802b8176
+      internalID: -142730023
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hailcrab_20
+      rect:
+        serializedVersion: 2
+        x: 660
+        y: 84
+        width: 128
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: dafc7e59725947a43a4c472410328434
+      internalID: -1322940112
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hailcrab_21
+      rect:
+        serializedVersion: 2
+        x: 792
+        y: 84
+        width: 128
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f3ff4c538319b8141be2826a2545bf64
+      internalID: 1682147956
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hailcrab_22
+      rect:
+        serializedVersion: 2
+        x: 924
+        y: 84
+        width: 128
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e6338f9ac9261654583963aee4291e71
+      internalID: -1630103147
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hailcrab_23
+      rect:
+        serializedVersion: 2
+        x: 1056
+        y: 84
+        width: 128
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3bd0b5c5c33d54349a2eb27317c3b5a8
+      internalID: -1423490113
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hailcrab_24
+      rect:
+        serializedVersion: 2
+        x: 1188
+        y: 84
+        width: 128
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 582c8ea18efff38408bac7bab8f9dc71
+      internalID: 921757338
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hailcrab_25
+      rect:
+        serializedVersion: 2
+        x: 1320
+        y: 84
+        width: 128
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ec45f5e366ac93b419314a09ca7d899d
+      internalID: 52100449
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hailcrab_26
+      rect:
+        serializedVersion: 2
+        x: 1452
+        y: 84
+        width: 128
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1bc782e311dbdc543b6167bae4a98dde
+      internalID: 524288845
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hailcrab_27
+      rect:
+        serializedVersion: 2
+        x: 1584
+        y: 84
+        width: 128
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9f2cb4131b7eb0c44b4d19503c6c6046
+      internalID: -708739917
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hailcrab_28
+      rect:
+        serializedVersion: 2
+        x: 1716
+        y: 84
+        width: 128
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f7c72510e5d33e7459afae08d2ded047
+      internalID: 2092160257
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hailcrab_29
+      rect:
+        serializedVersion: 2
+        x: 1848
+        y: 84
+        width: 128
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3074c29e9e434384ab20465b09e75430
+      internalID: 1111992396
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hailcrab_30
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 128
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 38e02e0746c7400459d334c7d94fcf62
+      internalID: 267451735
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hailcrab_31
+      rect:
+        serializedVersion: 2
+        x: 132
+        y: 0
+        width: 128
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8efcc2e0193bb1e448470eac6940d2c3
+      internalID: -326859877
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hailcrab_32
+      rect:
+        serializedVersion: 2
+        x: 264
+        y: 0
+        width: 128
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8e211da77aa378d4c9959b41570d5b10
+      internalID: -70659514
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hailcrab_33
+      rect:
+        serializedVersion: 2
+        x: 396
+        y: 0
+        width: 128
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 32c8333326b62664695bb113e89d1c37
+      internalID: -1811351675
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hailcrab_34
+      rect:
+        serializedVersion: 2
+        x: 528
+        y: 0
+        width: 128
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e6d6c859f1d95254e930209188938a6f
+      internalID: -196396825
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hailcrab_35
+      rect:
+        serializedVersion: 2
+        x: 660
+        y: 0
+        width: 128
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 304d57525a7ede44f98a6f5c911098ea
+      internalID: 656590168
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hailcrab_36
+      rect:
+        serializedVersion: 2
+        x: 792
+        y: 0
+        width: 128
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 772dcefda9e47944ab49d1812819ba06
+      internalID: 884855225
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hailcrab_37
+      rect:
+        serializedVersion: 2
+        x: 924
+        y: 0
+        width: 128
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1e3ff55908a8223439c047ca9729d6c4
+      internalID: -2006639957
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hailcrab_38
+      rect:
+        serializedVersion: 2
+        x: 1056
+        y: 0
+        width: 128
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: fd83b5323f3767448ae67aadee18df9a
+      internalID: -1151685498
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: hailcrab_39
+      rect:
+        serializedVersion: 2
+        x: 1188
+        y: 0
+        width: 128
+        height: 80
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 333208694b226e948bc07c622a72a260
+      internalID: 1422010193
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 47499b47c1e916e4e825d1c384ff9387
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      hailcrab_0: -1001115664
+      hailcrab_1: -2001635095
+      hailcrab_10: 2107029440
+      hailcrab_11: -129828185
+      hailcrab_12: -676080131
+      hailcrab_13: 1337944683
+      hailcrab_14: -1899628176
+      hailcrab_15: 1901377576
+      hailcrab_16: -1394045810
+      hailcrab_17: 1910551219
+      hailcrab_18: -2057395996
+      hailcrab_19: -142730023
+      hailcrab_2: -1137198555
+      hailcrab_20: -1322940112
+      hailcrab_21: 1682147956
+      hailcrab_22: -1630103147
+      hailcrab_23: -1423490113
+      hailcrab_24: 921757338
+      hailcrab_25: 52100449
+      hailcrab_26: 524288845
+      hailcrab_27: -708739917
+      hailcrab_28: 2092160257
+      hailcrab_29: 1111992396
+      hailcrab_3: 542272002
+      hailcrab_30: 267451735
+      hailcrab_31: -326859877
+      hailcrab_32: -70659514
+      hailcrab_33: -1811351675
+      hailcrab_34: -196396825
+      hailcrab_35: 656590168
+      hailcrab_36: 884855225
+      hailcrab_37: -2006639957
+      hailcrab_38: -1151685498
+      hailcrab_39: 1422010193
+      hailcrab_4: 1639410199
+      hailcrab_5: 749691633
+      hailcrab_6: 871549431
+      hailcrab_7: -363975604
+      hailcrab_8: 1280922416
+      hailcrab_9: -1353293321
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

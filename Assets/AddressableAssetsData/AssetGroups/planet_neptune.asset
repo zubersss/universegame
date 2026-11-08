@@ -15,8 +15,23 @@ MonoBehaviour:
   m_GroupName: planet_neptune
   m_GUID: 369253cc60f54d049b1845bd7551bb25
   m_SerializeEntries:
+  - m_GUID: 15ae8a77fd29398499e2df0d591cad68
+    m_Address: creatures/neptune/umbral_leviathan/json
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 172618d58e4b2ce479f8531aab9f680c
+    m_Address: props/neptune/meridian_wreck_mid/json
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 1d59ca5c8ac41244abf331ab753c29fc
     m_Address: props/neptune/wind_anchor
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 1d89d1455134a6e409cbd48ddf409940
+    m_Address: terrain/neptune/floe_strip_superionic
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -25,8 +40,93 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 254f5728e25ab6a4696a12ec6e7d8ad2
+    m_Address: backgrounds/neptune/deck2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 2aa508577c5ed8744bf35230de3747bc
+    m_Address: backgrounds/neptune/deck3
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 37f9292f848772141964cbd91ab67ccc
+    m_Address: creatures/neptune/shadow_shoal/animator
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 3b1157df6daecb74b996dcc3e0f98fb4
+    m_Address: creatures/neptune/shadow_shoal
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 3f6b7a270d122d6458d96d933c9ee221
+    m_Address: backgrounds/neptune/deck2/layer1
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 40341d0db8ae17a47ab6a0d99be20b27
+    m_Address: backgrounds/neptune/deep
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 446d0813e3e6b6c4180c22c231607e04
+    m_Address: backgrounds/neptune/deck1/layer0
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 4d2c4cd430f173e49ad359acbd6944c1
+    m_Address: backgrounds/neptune/storm/layer1
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 546ae83702406b149a6405f41f6262de
+    m_Address: backgrounds/neptune/deck2/layer2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 55a15d5777dba1844a7425fe5ed3216d
+    m_Address: backgrounds/neptune/deep/layer2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 55e8ca66f9912cc469d0c28c64a22f19
     m_Address: terrain/neptune/superionic_ice
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 5cf016359a7c0544f9c81028ad030254
+    m_Address: backgrounds/neptune/storm
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 5e53ffa352b5b4e45b491c149ba06fd6
+    m_Address: props/neptune/meridian_wreck_bow/json
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 5f1865ebe3c73924d93fdb085d3b1a3f
+    m_Address: creatures/neptune/pressure_phantom/animator
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 65b9a2b3b58ad4848923742d8534322b
+    m_Address: creatures/neptune/windrider
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 67b29ebe12b862b479fc3cd86d683592
+    m_Address: backgrounds/neptune/deck1/layer1
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 703fee1c6de6fee4d82290f22cfe5731
+    m_Address: backgrounds/neptune/deep/layer1
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 7225a9253371e3d44b196fabed4a1811
+    m_Address: creatures/neptune/windrider/animator
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -35,8 +135,28 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 74b999e3dcfd9a04199bd1e038021d35
+    m_Address: creatures/neptune/pressure_phantom
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 7516c61f20c0f72469a58e57a00281b8
+    m_Address: backgrounds/neptune/deck1/layer2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 78e5a82ea82f4c74aa3a8e680ac17a46
     m_Address: terrain/neptune/floe_ice
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 7e78a0520523d74438378493a0168a4b
+    m_Address: backgrounds/neptune/spot/layer2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8081ec5bddfd37647aa996e4d48f5343
+    m_Address: terrain/neptune/floe_strip_ice
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -47,6 +167,101 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 9a16bf02f8aac154f8ab567737ae72a2
     m_Address: props/neptune/meridian_wreck_stern
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 9d703fdf8acf0be4b9bb5ceda959728b
+    m_Address: flora/neptune/rigset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a4579a8c2ec66884c9d54f6378e2e7f9
+    m_Address: backgrounds/neptune/deck1
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b24b07bfd5dc5f24a9223ef1d35a63a5
+    m_Address: creatures/neptune/umbral_leviathan
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b52ff223286f9c64fa3134de92b7a585
+    m_Address: backgrounds/neptune/deck2/layer0
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b89a0ad50d5fd91478deae3e6428b941
+    m_Address: backgrounds/neptune/storm/layer2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: bb2e1b0965d1424468e3bd3398179131
+    m_Address: backgrounds/neptune/spot/layer1
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: bc6da2e0e107dbd468238c26bd9ae57c
+    m_Address: props/neptune/meridian_wreck_stern/json
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: bdd7574c0f9223949a655f76d4a84b80
+    m_Address: backgrounds/neptune/deck3/layer1
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: bed0d66a2c174114d856ada1558003f3
+    m_Address: backgrounds/neptune/deep/layer0
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d37e4bbfdca3c044492d81b21e605a82
+    m_Address: backgrounds/neptune/deck3/layer2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d3f22752f29af0747a58518ee74477c4
+    m_Address: flora/neptune/rigset/animator
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d992c3c881c5ec24d90f0499106f0718
+    m_Address: backgrounds/neptune/storm/layer0
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e3e7ac65230d5d34fa139cb54bd4f366
+    m_Address: backgrounds/neptune/spot/layer0
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e4774ee52e091584ba13355b249c8ba6
+    m_Address: backgrounds/neptune/spot
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e77c973ea2997c343a4a8894402e1b52
+    m_Address: creatures/neptune/anchor_worm/animator
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e9ce3f20819982742897acf9e81b93b6
+    m_Address: backgrounds/neptune/deck3/layer0
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: ea39f1cc6b7cbae41a86cab7777182ce
+    m_Address: creatures/neptune/anchor_worm
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: eff30969730ac7c4b94152d29c92fc7b
+    m_Address: flora/neptune/rigset/json
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f87a4594d371a73438b917415f96ee98
+    m_Address: props/neptune/wind_anchor/json
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

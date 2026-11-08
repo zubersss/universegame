@@ -1,0 +1,1068 @@
+fileFormatVersion: 2
+guid: 65b9a2b3b58ad4848923742d8534322b
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 7135630495159813309
+    second: windrider_color_0
+  - first:
+      213: -1723658874681942312
+    second: windrider_color_1
+  - first:
+      213: -3898713511902486062
+    second: windrider_color_2
+  - first:
+      213: 2063510674413858520
+    second: windrider_color_3
+  - first:
+      213: -6537241248211020086
+    second: windrider_color_4
+  - first:
+      213: -5761518570360653204
+    second: windrider_color_5
+  - first:
+      213: -1705755478628654791
+    second: windrider_color_6
+  - first:
+      213: 6298794367928858756
+    second: windrider_color_7
+  - first:
+      213: -3205842504084248740
+    second: windrider_color_8
+  - first:
+      213: -4451273017190157568
+    second: windrider_color_9
+  - first:
+      213: -1191018753903994322
+    second: windrider_color_10
+  - first:
+      213: 1937025447312632780
+    second: windrider_color_11
+  - first:
+      213: 1992837061526915965
+    second: windrider_color_12
+  - first:
+      213: -6260126685597009966
+    second: windrider_color_13
+  - first:
+      213: 7600456407080550975
+    second: windrider_color_14
+  - first:
+      213: -2523058528855959491
+    second: windrider_color_15
+  - first:
+      213: -7626775922776074327
+    second: windrider_color_16
+  - first:
+      213: -6638045952978039449
+    second: windrider_color_17
+  - first:
+      213: -1566103413365995470
+    second: windrider_color_18
+  - first:
+      213: -8684512247973498364
+    second: windrider_color_19
+  - first:
+      213: -2301694193781793694
+    second: windrider_color_20
+  - first:
+      213: 5492890866160844641
+    second: windrider_color_21
+  - first:
+      213: -3881053495969025250
+    second: windrider_color_22
+  - first:
+      213: 9210349799100783244
+    second: windrider_color_23
+  - first:
+      213: -2204411685431771331
+    second: windrider_color_24
+  - first:
+      213: 7982908026788760532
+    second: windrider_color_25
+  - first:
+      213: -5458734546608423265
+    second: windrider_color_26
+  - first:
+      213: -7540905547368601225
+    second: windrider_color_27
+  - first:
+      213: 2175848287254655015
+    second: windrider_color_28
+  - first:
+      213: -338547502429375558
+    second: windrider_color_29
+  - first:
+      213: 2104669549914619984
+    second: windrider_color_30
+  - first:
+      213: -6884854371356260279
+    second: windrider_color_31
+  - first:
+      213: 1478325147244091022
+    second: windrider_color_32
+  - first:
+      213: 2547054828248635143
+    second: windrider_color_33
+  - first:
+      213: 1263352861192135002
+    second: windrider_color_34
+  - first:
+      213: -6854299900645992319
+    second: windrider_color_35
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 9
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 64
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationMethod: 0
+  spriteTessellationDetail: -1
+  spriteGeometrySubdivision: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 2
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: 25
+    textureCompression: 1
+    compressionQuality: 100
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 1
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: windrider_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 348
+        width: 192
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: fa738ce9c419abd46b38be83237010b7
+      internalID: -170196765
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: windrider_1
+      rect:
+        serializedVersion: 2
+        x: 196
+        y: 348
+        width: 192
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 975c5d8dbb476664681bf75027d90b62
+      internalID: -2030950798
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: windrider_2
+      rect:
+        serializedVersion: 2
+        x: 392
+        y: 348
+        width: 192
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 7335865668484cb428a1cfe814d90500
+      internalID: 1556071854
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: windrider_3
+      rect:
+        serializedVersion: 2
+        x: 588
+        y: 348
+        width: 192
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1139e73819697924f8e5d810d1ee50fd
+      internalID: -863825366
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: windrider_4
+      rect:
+        serializedVersion: 2
+        x: 784
+        y: 348
+        width: 192
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e86db62f655f51d4ab8452b89c983186
+      internalID: -1696311461
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: windrider_5
+      rect:
+        serializedVersion: 2
+        x: 980
+        y: 348
+        width: 192
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 79c7008cba9585143af2281b42898ca5
+      internalID: 1346559075
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: windrider_6
+      rect:
+        serializedVersion: 2
+        x: 1176
+        y: 348
+        width: 192
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 251ad6b7d8b911d44b1cc82be2ad13e4
+      internalID: -215692115
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: windrider_7
+      rect:
+        serializedVersion: 2
+        x: 1372
+        y: 348
+        width: 192
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 7ad6d06295c986d4bbfd02f79561f9ee
+      internalID: -1571030188
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: windrider_8
+      rect:
+        serializedVersion: 2
+        x: 1568
+        y: 348
+        width: 192
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b6c2518994238004c81590a12c8360da
+      internalID: 571083704
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: windrider_9
+      rect:
+        serializedVersion: 2
+        x: 1764
+        y: 348
+        width: 192
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ccdb853d3cf1e4843a228ba7d231d529
+      internalID: 766709597
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: windrider_10
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 232
+        width: 192
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4c597987839ba7a4c87e9fc5acc76580
+      internalID: 858287194
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: windrider_11
+      rect:
+        serializedVersion: 2
+        x: 196
+        y: 232
+        width: 192
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e687b0893bcea744fa61b5fc1a9ef1bf
+      internalID: -147821097
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: windrider_12
+      rect:
+        serializedVersion: 2
+        x: 392
+        y: 232
+        width: 192
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 952c4ec959542d4409f0105ef56d3264
+      internalID: 2139358879
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: windrider_13
+      rect:
+        serializedVersion: 2
+        x: 588
+        y: 232
+        width: 192
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: cc4af6d679dc6714fb54adcc65fccb28
+      internalID: 1714136294
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: windrider_14
+      rect:
+        serializedVersion: 2
+        x: 784
+        y: 232
+        width: 192
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 482f71637384c9e4391cc6b9608bfff0
+      internalID: -412246238
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: windrider_15
+      rect:
+        serializedVersion: 2
+        x: 980
+        y: 232
+        width: 192
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c5625fe25ef50d546af5cc7751fbc959
+      internalID: 1413587426
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: windrider_16
+      rect:
+        serializedVersion: 2
+        x: 1176
+        y: 232
+        width: 192
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8bddc4df8bc75b04489f6b41324f9a90
+      internalID: 827220407
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: windrider_17
+      rect:
+        serializedVersion: 2
+        x: 1372
+        y: 232
+        width: 192
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 940513b530bbfdf4db782d56521e128e
+      internalID: -245416062
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: windrider_18
+      rect:
+        serializedVersion: 2
+        x: 1568
+        y: 232
+        width: 192
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c8b7f40a3fa3df3419866153e01eac04
+      internalID: 492806276
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: windrider_19
+      rect:
+        serializedVersion: 2
+        x: 1764
+        y: 232
+        width: 192
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5608f2677b4c1344db239d803eb237b3
+      internalID: 867774244
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: windrider_20
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 116
+        width: 192
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1db65ee0e03fec64cad6ccb1599ee938
+      internalID: 848275978
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: windrider_21
+      rect:
+        serializedVersion: 2
+        x: 196
+        y: 116
+        width: 192
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 807e947e7850ce84e9c253194ea72023
+      internalID: -269171587
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: windrider_22
+      rect:
+        serializedVersion: 2
+        x: 392
+        y: 116
+        width: 192
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a8474c6c58e9f0d4c87a1fe292d671ce
+      internalID: -53933502
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: windrider_23
+      rect:
+        serializedVersion: 2
+        x: 588
+        y: 116
+        width: 192
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 79b33a55ffed28a4682e43d407d863a8
+      internalID: 409644586
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: windrider_24
+      rect:
+        serializedVersion: 2
+        x: 784
+        y: 116
+        width: 192
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f3e7f09acc45e8a4ca60d1f20b93b315
+      internalID: -1552312861
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: windrider_25
+      rect:
+        serializedVersion: 2
+        x: 980
+        y: 116
+        width: 192
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b10e6c19e9b5ee64db6a6f0f5b41c08a
+      internalID: 1492918533
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: windrider_26
+      rect:
+        serializedVersion: 2
+        x: 1176
+        y: 116
+        width: 192
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 76ecd669c706e2d458434fa3fc4b2935
+      internalID: -1112490167
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: windrider_27
+      rect:
+        serializedVersion: 2
+        x: 1372
+        y: 116
+        width: 192
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 47ef03182221e0249a3a9e6d48ce67ed
+      internalID: -140606593
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: windrider_28
+      rect:
+        serializedVersion: 2
+        x: 1568
+        y: 116
+        width: 192
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5c42c88fae691d0448b2a24aec25050d
+      internalID: 2071339553
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: windrider_29
+      rect:
+        serializedVersion: 2
+        x: 1764
+        y: 116
+        width: 192
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 15bd256de7003614182ee49b5642e223
+      internalID: -115801685
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: windrider_30
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 192
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d485a5364fdd50c4eb051461c49f4c67
+      internalID: 874644695
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: windrider_31
+      rect:
+        serializedVersion: 2
+        x: 196
+        y: 0
+        width: 192
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1f53d6a19ee00074bb3b1eb0f141575a
+      internalID: -398105492
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: windrider_32
+      rect:
+        serializedVersion: 2
+        x: 392
+        y: 0
+        width: 192
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f80170dae08987a4694ddadff66861e8
+      internalID: 988655772
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: windrider_33
+      rect:
+        serializedVersion: 2
+        x: 588
+        y: 0
+        width: 192
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 11111f250eb8cc84588f8228e3e75347
+      internalID: 154245330
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: windrider_34
+      rect:
+        serializedVersion: 2
+        x: 784
+        y: 0
+        width: 192
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a87b33d6a0737234785cc2869087e6a7
+      internalID: -1794904662
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: windrider_35
+      rect:
+        serializedVersion: 2
+        x: 980
+        y: 0
+        width: 192
+        height: 112
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a3581b8eed8145c45b81862aa0cde053
+      internalID: 140066431
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 093b6e59facb1dc4384cbdf4fa23d894
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      windrider_0: -170196765
+      windrider_1: -2030950798
+      windrider_10: 858287194
+      windrider_11: -147821097
+      windrider_12: 2139358879
+      windrider_13: 1714136294
+      windrider_14: -412246238
+      windrider_15: 1413587426
+      windrider_16: 827220407
+      windrider_17: -245416062
+      windrider_18: 492806276
+      windrider_19: 867774244
+      windrider_2: 1556071854
+      windrider_20: 848275978
+      windrider_21: -269171587
+      windrider_22: -53933502
+      windrider_23: 409644586
+      windrider_24: -1552312861
+      windrider_25: 1492918533
+      windrider_26: -1112490167
+      windrider_27: -140606593
+      windrider_28: 2071339553
+      windrider_29: -115801685
+      windrider_3: -863825366
+      windrider_30: 874644695
+      windrider_31: -398105492
+      windrider_32: 988655772
+      windrider_33: 154245330
+      windrider_34: -1794904662
+      windrider_35: 140066431
+      windrider_4: -1696311461
+      windrider_5: 1346559075
+      windrider_6: -215692115
+      windrider_7: -1571030188
+      windrider_8: 571083704
+      windrider_9: 766709597
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

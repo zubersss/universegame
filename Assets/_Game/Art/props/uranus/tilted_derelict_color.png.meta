@@ -46,12 +46,12 @@ TextureImporter:
   nPOTScale: 0
   lightmap: 0
   compressionQuality: 50
-  spriteMode: 1
+  spriteMode: 2
   spriteExtrude: 1
   spriteMeshType: 1
   alignment: 9
-  spritePivot: {x: 0.5, y: 0.023148}
-  spritePixelsToUnits: 128
+  spritePivot: {x: 0.5, y: 0.052083}
+  spritePixelsToUnits: 64
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -115,23 +115,23 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: tilted_derelict_color_0
+      name: tilted_derelict_0
       rect:
         serializedVersion: 2
-        x: 25
-        y: 8
-        width: 426
-        height: 414
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 0
+        y: 0
+        width: 224
+        height: 192
+      alignment: 9
+      pivot: {x: 0.5, y: 0.052083}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: -1
+      tessellationDetail: 0
       bones: []
-      spriteID: 09c1901e367d55e40800000000000000
-      internalID: 5644654531955989648
+      spriteID: 3d8e5d87a002dde4eb13425355842ec2
+      internalID: -223370194
       vertices: []
       indices: 
       edges: []
@@ -146,16 +146,11 @@ TextureImporter:
     indices: 
     edges: []
     weights: []
-    secondaryTextures:
-    - texture: {fileID: 2800000, guid: 95c85ebdfd8d4174a89609fc203fe9e8, type: 3}
-      name: _NormalMap
-    - texture: {fileID: 2800000, guid: 09aa92733c6789844a27fdb54002851d, type: 3}
-      name: _EmissionMap
-    - texture: {fileID: 2800000, guid: 7a131c9dba8af494b9676293dd999a72, type: 3}
-      name: _MaskTex
+    secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      tilted_derelict_0: -223370194
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

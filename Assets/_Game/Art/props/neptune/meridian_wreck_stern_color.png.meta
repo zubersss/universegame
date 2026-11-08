@@ -55,12 +55,12 @@ TextureImporter:
   nPOTScale: 0
   lightmap: 0
   compressionQuality: 50
-  spriteMode: 1
+  spriteMode: 2
   spriteExtrude: 1
   spriteMeshType: 1
   alignment: 9
-  spritePivot: {x: 0.5, y: 0.025}
-  spritePixelsToUnits: 128
+  spritePivot: {x: 0.5, y: 0.03125}
+  spritePixelsToUnits: 64
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -124,89 +124,23 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: meridian_wreck_stern_color_0
+      name: meridian_wreck_stern_0
       rect:
         serializedVersion: 2
-        x: 40
-        y: 8
-        width: 451
-        height: 244
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 0
+        y: 0
+        width: 512
+        height: 320
+      alignment: 9
+      pivot: {x: 0.5, y: 0.03125}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: -1
+      tessellationDetail: 0
       bones: []
-      spriteID: e06811d34741a6200800000000000000
-      internalID: 173974025080505870
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: meridian_wreck_stern_color_1
-      rect:
-        serializedVersion: 2
-        x: 140
-        y: 251
-        width: 102
-        height: 79
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 7fbba10891d1b3960800000000000000
-      internalID: 7582686392968985591
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: meridian_wreck_stern_color_2
-      rect:
-        serializedVersion: 2
-        x: 469
-        y: 190
-        width: 27
-        height: 18
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 9685736c6680da180800000000000000
-      internalID: -9102610034340702103
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: meridian_wreck_stern_color_3
-      rect:
-        serializedVersion: 2
-        x: 471
-        y: 91
-        width: 24
-        height: 22
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: aaa269b17866e6990800000000000000
-      internalID: -7390857207998960982
+      spriteID: e68ae0ab462e67a4faba0ca84b0793b7
+      internalID: 481062805
       vertices: []
       indices: 
       edges: []
@@ -221,16 +155,11 @@ TextureImporter:
     indices: 
     edges: []
     weights: []
-    secondaryTextures:
-    - texture: {fileID: 2800000, guid: db6ecee847bcbf742b52dbfcd547b1e5, type: 3}
-      name: _NormalMap
-    - texture: {fileID: 2800000, guid: 57f61870a0597344d810df594efff21a, type: 3}
-      name: _EmissionMap
-    - texture: {fileID: 2800000, guid: 56f01f8b5be9f264190d57cfdd0992dd, type: 3}
-      name: _MaskTex
+    secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      meridian_wreck_stern_0: 481062805
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

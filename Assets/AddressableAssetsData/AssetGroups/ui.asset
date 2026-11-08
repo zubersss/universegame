@@ -55,6 +55,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 58b92e0542bf38c4e83021812a65f4cd
+    m_Address: ui/palettes/neptune/strip
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 5bed63cc22427ba47ad1c0c510424859
     m_Address: ui/panels/settings
     m_ReadOnly: 0
@@ -107,6 +112,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: a8f9b9a71fa89094dae3efef44ac6a19
     m_Address: ui/titlecards/venus
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b0679a4e4a7579442939460af16f7c1f
+    m_Address: ui/palettes/uranus/strip
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

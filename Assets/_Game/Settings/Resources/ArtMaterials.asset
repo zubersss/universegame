@@ -345,10 +345,6 @@ MonoBehaviour:
   - props/earth/launch_tower_ruin
   - props/mercury/solarite_crusted
   - props/mercury/solarite_cut
-  - props/neptune/meridian_wreck_bow
-  - props/neptune/meridian_wreck_mid
-  - props/neptune/meridian_wreck_stern
-  - props/neptune/wind_anchor
   - props/rig/beam
   - props/rig/builder
   - props/rig/lance
@@ -361,8 +357,6 @@ MonoBehaviour:
   - props/space/asteroid_06
   - props/space/waystation
   - props/space/waystation_mars
-  - props/uranus/tilted_derelict
-  - props/uranus/umbrella_platform
   - props/venus_scenery/atlas
   - ships/pilgrim/base
   - ships/pilgrim/side
@@ -1134,6 +1128,86 @@ MonoBehaviour:
       start: 40
       length: 10
       loop: 1
+  - key: creatures/neptune/anchor_worm
+    fps: 12
+    clips:
+    - name: idle
+      start: 0
+      length: 10
+      loop: 1
+    - name: crawl
+      start: 10
+      length: 12
+      loop: 1
+    - name: anchored
+      start: 22
+      length: 10
+      loop: 1
+    - name: react
+      start: 32
+      length: 8
+      loop: 0
+    - name: bump
+      start: 40
+      length: 10
+      loop: 0
+  - key: creatures/neptune/pressure_phantom
+    fps: 12
+    clips:
+    - name: idle
+      start: 0
+      length: 10
+      loop: 1
+    - name: drift
+      start: 10
+      length: 12
+      loop: 1
+    - name: react
+      start: 22
+      length: 8
+      loop: 0
+    - name: bump
+      start: 30
+      length: 10
+      loop: 0
+  - key: creatures/neptune/shadow_shoal
+    fps: 12
+    clips:
+    - name: idle
+      start: 0
+      length: 8
+      loop: 1
+    - name: swim
+      start: 8
+      length: 12
+      loop: 1
+    - name: react
+      start: 20
+      length: 8
+      loop: 0
+    - name: bump
+      start: 28
+      length: 8
+      loop: 0
+  - key: creatures/neptune/windrider
+    fps: 12
+    clips:
+    - name: idle
+      start: 0
+      length: 8
+      loop: 1
+    - name: glide
+      start: 8
+      length: 12
+      loop: 1
+    - name: react
+      start: 20
+      length: 8
+      loop: 0
+    - name: bump
+      start: 28
+      length: 8
+      loop: 0
   - key: creatures/saturn/floe_moth
     fps: 12
     clips:
@@ -1228,6 +1302,82 @@ MonoBehaviour:
     - name: death
       start: 10
       length: 4
+      loop: 0
+  - key: creatures/uranus/frostwisp
+    fps: 12
+    clips:
+    - name: idle
+      start: 0
+      length: 10
+      loop: 1
+    - name: drift
+      start: 10
+      length: 12
+      loop: 1
+    - name: react
+      start: 22
+      length: 8
+      loop: 0
+    - name: bump
+      start: 30
+      length: 10
+      loop: 0
+  - key: creatures/uranus/hailcrab
+    fps: 12
+    clips:
+    - name: idle
+      start: 0
+      length: 10
+      loop: 1
+    - name: walk
+      start: 10
+      length: 12
+      loop: 1
+    - name: react
+      start: 22
+      length: 8
+      loop: 0
+    - name: bump
+      start: 30
+      length: 10
+      loop: 0
+  - key: creatures/uranus/methane_ray
+    fps: 12
+    clips:
+    - name: idle
+      start: 0
+      length: 10
+      loop: 1
+    - name: glide
+      start: 10
+      length: 12
+      loop: 1
+    - name: react
+      start: 22
+      length: 8
+      loop: 0
+    - name: bump
+      start: 30
+      length: 10
+      loop: 0
+  - key: creatures/uranus/tiltbird
+    fps: 12
+    clips:
+    - name: idle
+      start: 0
+      length: 10
+      loop: 1
+    - name: fly
+      start: 10
+      length: 12
+      loop: 1
+    - name: react
+      start: 22
+      length: 8
+      loop: 0
+    - name: bump
+      start: 30
+      length: 10
       loop: 0
   - key: creatures/venus/acidmoth
     fps: 12
@@ -1651,6 +1801,27 @@ MonoBehaviour:
       start: 0
       length: 8
       loop: 1
+  - key: terrain/earth/dig_puff
+    fps: 12
+    clips:
+    - name: puff
+      start: 0
+      length: 8
+      loop: 0
+  - key: terrain/mars/dig_puff
+    fps: 12
+    clips:
+    - name: puff
+      start: 0
+      length: 8
+      loop: 0
+  - key: terrain/mercury/dig_puff
+    fps: 12
+    clips:
+    - name: puff
+      start: 0
+      length: 8
+      loop: 0
   modelClipSets:
   - key: characters/calibration/base
     fps: 30

@@ -1,0 +1,1068 @@
+fileFormatVersion: 2
+guid: 3b1157df6daecb74b996dcc3e0f98fb4
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -113925576476909953
+    second: shadow_shoal_color_0
+  - first:
+      213: -938823013426768047
+    second: shadow_shoal_color_1
+  - first:
+      213: 2702780148673678389
+    second: shadow_shoal_color_2
+  - first:
+      213: 395349869920222452
+    second: shadow_shoal_color_3
+  - first:
+      213: 3725013536123925543
+    second: shadow_shoal_color_4
+  - first:
+      213: 1331112735590602450
+    second: shadow_shoal_color_5
+  - first:
+      213: 2073000890740713537
+    second: shadow_shoal_color_6
+  - first:
+      213: -1455377103219090130
+    second: shadow_shoal_color_7
+  - first:
+      213: 4455415886894977255
+    second: shadow_shoal_color_8
+  - first:
+      213: -3487774913562591004
+    second: shadow_shoal_color_9
+  - first:
+      213: 2208851253100761274
+    second: shadow_shoal_color_10
+  - first:
+      213: 4301154051847047875
+    second: shadow_shoal_color_11
+  - first:
+      213: -3164535412886014278
+    second: shadow_shoal_color_12
+  - first:
+      213: -9205617922291143385
+    second: shadow_shoal_color_13
+  - first:
+      213: 7633059815560064733
+    second: shadow_shoal_color_14
+  - first:
+      213: 1737628772600306303
+    second: shadow_shoal_color_15
+  - first:
+      213: -71525326700150585
+    second: shadow_shoal_color_16
+  - first:
+      213: 6956040466715038002
+    second: shadow_shoal_color_17
+  - first:
+      213: -5253709512782756502
+    second: shadow_shoal_color_18
+  - first:
+      213: 8274568288695821598
+    second: shadow_shoal_color_19
+  - first:
+      213: -4720248556021438380
+    second: shadow_shoal_color_20
+  - first:
+      213: 1092341015871281553
+    second: shadow_shoal_color_21
+  - first:
+      213: -5283870421946233655
+    second: shadow_shoal_color_22
+  - first:
+      213: 1313826508476406528
+    second: shadow_shoal_color_23
+  - first:
+      213: 2414497365588625497
+    second: shadow_shoal_color_24
+  - first:
+      213: 6938381459229960124
+    second: shadow_shoal_color_25
+  - first:
+      213: 6026338737067833704
+    second: shadow_shoal_color_26
+  - first:
+      213: 8470099142319128525
+    second: shadow_shoal_color_27
+  - first:
+      213: 5131190860598492778
+    second: shadow_shoal_color_28
+  - first:
+      213: -3560917382858276695
+    second: shadow_shoal_color_29
+  - first:
+      213: -2534947947982251894
+    second: shadow_shoal_color_30
+  - first:
+      213: 908812052650781457
+    second: shadow_shoal_color_31
+  - first:
+      213: -1627258022988343463
+    second: shadow_shoal_color_32
+  - first:
+      213: 3656616044536601968
+    second: shadow_shoal_color_33
+  - first:
+      213: -7458102452526052977
+    second: shadow_shoal_color_34
+  - first:
+      213: 5199705893721067476
+    second: shadow_shoal_color_35
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 9
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 64
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationMethod: 0
+  spriteTessellationDetail: -1
+  spriteGeometrySubdivision: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 2
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: 25
+    textureCompression: 1
+    compressionQuality: 100
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 1
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: shadow_shoal_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 52
+        width: 64
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3536db3a4d4d47346a640e585635c6d1
+      internalID: -529628600
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: shadow_shoal_1
+      rect:
+        serializedVersion: 2
+        x: 68
+        y: 52
+        width: 64
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5b72199494ea35445b60a52dfeba9dc8
+      internalID: -85265626
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: shadow_shoal_2
+      rect:
+        serializedVersion: 2
+        x: 136
+        y: 52
+        width: 64
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6c716a72a20af1540b09aef5c6354b96
+      internalID: -1957259400
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: shadow_shoal_3
+      rect:
+        serializedVersion: 2
+        x: 204
+        y: 52
+        width: 64
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5f459ff21a8d5d442a01b58e181ac5aa
+      internalID: -1515508085
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: shadow_shoal_4
+      rect:
+        serializedVersion: 2
+        x: 272
+        y: 52
+        width: 64
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b1aff655c0843164581c4f4b8ce56c55
+      internalID: -817833534
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: shadow_shoal_5
+      rect:
+        serializedVersion: 2
+        x: 340
+        y: 52
+        width: 64
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ff20a692c7ec5304bbd7b6f89ecd363d
+      internalID: -1172446351
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: shadow_shoal_6
+      rect:
+        serializedVersion: 2
+        x: 408
+        y: 52
+        width: 64
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f86d46835617aa84c92a3f977d2b6e63
+      internalID: -1530407267
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: shadow_shoal_7
+      rect:
+        serializedVersion: 2
+        x: 476
+        y: 52
+        width: 64
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5bbf6d3f7898c3f4f8013ecb1ebc8dec
+      internalID: -1926034660
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: shadow_shoal_8
+      rect:
+        serializedVersion: 2
+        x: 544
+        y: 52
+        width: 64
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ae21f7ada8ff9484882eb55f762dafbe
+      internalID: 417685927
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: shadow_shoal_9
+      rect:
+        serializedVersion: 2
+        x: 612
+        y: 52
+        width: 64
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 62e531e73a15c924ca526aab8e53ca4c
+      internalID: 105782121
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: shadow_shoal_10
+      rect:
+        serializedVersion: 2
+        x: 680
+        y: 52
+        width: 64
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4a5cdad3c3bbd6b46950295c907de83b
+      internalID: -1736278193
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: shadow_shoal_11
+      rect:
+        serializedVersion: 2
+        x: 748
+        y: 52
+        width: 64
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4fb4343b88864b248b44a9199a75bb3f
+      internalID: -1456703267
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: shadow_shoal_12
+      rect:
+        serializedVersion: 2
+        x: 816
+        y: 52
+        width: 64
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 149a877626eb3c74e87abd99180c5ae3
+      internalID: 98785288
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: shadow_shoal_13
+      rect:
+        serializedVersion: 2
+        x: 884
+        y: 52
+        width: 64
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4db28be861b08a5409d2c2cab91562fa
+      internalID: 1087517801
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: shadow_shoal_14
+      rect:
+        serializedVersion: 2
+        x: 952
+        y: 52
+        width: 64
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e17c0d83c1c47c54ca66ad57b72e64cb
+      internalID: 225122845
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: shadow_shoal_15
+      rect:
+        serializedVersion: 2
+        x: 1020
+        y: 52
+        width: 64
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 00a2ebc5f07eab3478b3c123b25c9a9f
+      internalID: -1705888801
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: shadow_shoal_16
+      rect:
+        serializedVersion: 2
+        x: 1088
+        y: 52
+        width: 64
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 7ea7445db4354e348b50028ea28f2ca8
+      internalID: 149047618
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: shadow_shoal_17
+      rect:
+        serializedVersion: 2
+        x: 1156
+        y: 52
+        width: 64
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 289a61f8d71e0914588ef4e14f7697b0
+      internalID: -655915950
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: shadow_shoal_18
+      rect:
+        serializedVersion: 2
+        x: 1224
+        y: 52
+        width: 64
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0f631cc35c94bde46b8e87507692c8a3
+      internalID: 2025009532
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: shadow_shoal_19
+      rect:
+        serializedVersion: 2
+        x: 1292
+        y: 52
+        width: 64
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b3bb961bbd0fe424090d63ff05b5d735
+      internalID: 1362134180
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: shadow_shoal_20
+      rect:
+        serializedVersion: 2
+        x: 1360
+        y: 52
+        width: 64
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4d5230fcd51d295468cdb3caa5320778
+      internalID: 1788252221
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: shadow_shoal_21
+      rect:
+        serializedVersion: 2
+        x: 1428
+        y: 52
+        width: 64
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e787e666dca5c2141a5c8eddb09c8683
+      internalID: -439756227
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: shadow_shoal_22
+      rect:
+        serializedVersion: 2
+        x: 1496
+        y: 52
+        width: 64
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 35d6b14a38517a1409ac9c992f5b0bef
+      internalID: 861502294
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: shadow_shoal_23
+      rect:
+        serializedVersion: 2
+        x: 1564
+        y: 52
+        width: 64
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 601b1e8ee62d46741a030445bad69e8a
+      internalID: 150040358
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: shadow_shoal_24
+      rect:
+        serializedVersion: 2
+        x: 1632
+        y: 52
+        width: 64
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8e4bc4cc3bb7d3a428f7c1fefb2b4a3f
+      internalID: 716605734
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: shadow_shoal_25
+      rect:
+        serializedVersion: 2
+        x: 1700
+        y: 52
+        width: 64
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8712b5c0b5fec60419bcb38c79ea843d
+      internalID: -1246542743
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: shadow_shoal_26
+      rect:
+        serializedVersion: 2
+        x: 1768
+        y: 52
+        width: 64
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ea0f44ab56121c64ba772fcda5ca73d2
+      internalID: -1111722154
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: shadow_shoal_27
+      rect:
+        serializedVersion: 2
+        x: 1836
+        y: 52
+        width: 64
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f9d46ecfd21d54949bfe8618df337ffa
+      internalID: -2058947346
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: shadow_shoal_28
+      rect:
+        serializedVersion: 2
+        x: 1904
+        y: 52
+        width: 64
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 20bd226d8baa4784bbbfd14e510e9630
+      internalID: 874930200
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: shadow_shoal_29
+      rect:
+        serializedVersion: 2
+        x: 1972
+        y: 52
+        width: 64
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8db4c4617da1e814295af4928ce405fd
+      internalID: -651643915
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: shadow_shoal_30
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 64
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4f16fe03d784fe14e9c30f6e27a4d771
+      internalID: 1880388717
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: shadow_shoal_31
+      rect:
+        serializedVersion: 2
+        x: 68
+        y: 0
+        width: 64
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6a5bd7b99d114f948a3789afcdce4218
+      internalID: 1362926171
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: shadow_shoal_32
+      rect:
+        serializedVersion: 2
+        x: 136
+        y: 0
+        width: 64
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 05e3e6a13fc83584bbb6ce2df42afb11
+      internalID: -1587052861
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: shadow_shoal_33
+      rect:
+        serializedVersion: 2
+        x: 204
+        y: 0
+        width: 64
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: bfca9cc92bc108546a01d6e1cd6e650e
+      internalID: 1263360159
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: shadow_shoal_34
+      rect:
+        serializedVersion: 2
+        x: 272
+        y: 0
+        width: 64
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f8c039de6ed9a634e9a452e730a2f6af
+      internalID: -7746448
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: shadow_shoal_35
+      rect:
+        serializedVersion: 2
+        x: 340
+        y: 0
+        width: 64
+        height: 48
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9394cf369cbfbd5478a5bc7682e0b6a0
+      internalID: 1235454807
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 640df89107d5db94c954f23386e9e571
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      shadow_shoal_0: -529628600
+      shadow_shoal_1: -85265626
+      shadow_shoal_10: -1736278193
+      shadow_shoal_11: -1456703267
+      shadow_shoal_12: 98785288
+      shadow_shoal_13: 1087517801
+      shadow_shoal_14: 225122845
+      shadow_shoal_15: -1705888801
+      shadow_shoal_16: 149047618
+      shadow_shoal_17: -655915950
+      shadow_shoal_18: 2025009532
+      shadow_shoal_19: 1362134180
+      shadow_shoal_2: -1957259400
+      shadow_shoal_20: 1788252221
+      shadow_shoal_21: -439756227
+      shadow_shoal_22: 861502294
+      shadow_shoal_23: 150040358
+      shadow_shoal_24: 716605734
+      shadow_shoal_25: -1246542743
+      shadow_shoal_26: -1111722154
+      shadow_shoal_27: -2058947346
+      shadow_shoal_28: 874930200
+      shadow_shoal_29: -651643915
+      shadow_shoal_3: -1515508085
+      shadow_shoal_30: 1880388717
+      shadow_shoal_31: 1362926171
+      shadow_shoal_32: -1587052861
+      shadow_shoal_33: 1263360159
+      shadow_shoal_34: -7746448
+      shadow_shoal_35: 1235454807
+      shadow_shoal_4: -817833534
+      shadow_shoal_5: -1172446351
+      shadow_shoal_6: -1530407267
+      shadow_shoal_7: -1926034660
+      shadow_shoal_8: 417685927
+      shadow_shoal_9: 105782121
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
