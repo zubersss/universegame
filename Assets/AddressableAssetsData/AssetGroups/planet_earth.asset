@@ -20,6 +20,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 008d9b5ed54ad0449bf3df7415aae37a
+    m_Address: terrain/earth/fill_decor_t2_1
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 01882444839121d4fb012ba45dad3514
     m_Address: creatures/earth/stag
     m_ReadOnly: 0
@@ -85,13 +90,33 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 17a400dd2fbdc4743af3d181f13e428e
+    m_Address: terrain/earth/fill_decor_t4_2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 181c8c251d537d04c9ecfc1b131fa63e
     m_Address: backgrounds/earth/forest
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 1ab1f74e90259c94e96b6b519f4a1a0e
+    m_Address: terrain/earth/fill_decor_t2_2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 20bffdceb64fdfc47ad00b563096600f
     m_Address: backgrounds/earth/layer2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 219be5aa56d135f47be5c9de1ed59f4a
+    m_Address: terrain/earth/fill_decor_t4_1
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 2349b5287ce2ba140bd847c94947a9ad
+    m_Address: terrain/earth/fill_decor_t5_2
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -132,6 +157,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 2ace6d8b6a502c240b2947b5c4c7fd8d
     m_Address: terrain/earth/soil
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 2ae422854755b6b4d95dc5c06e53db33
+    m_Address: terrain/earth/fill_decor_t3_3
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -187,6 +217,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 37e234b279732d84094d257c983e9a8b
     m_Address: creatures/earth/wolf
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 39578a4b354dfe64cbf40a41bd553af2
+    m_Address: terrain/earth/ground_fill_t2
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -267,6 +302,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 50c7987beab26be42b3c6bf1122cdcd2
     m_Address: props/earth/pocket_iron/animator
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 50e41d4f1b99ecb4ab424adcfd6d4a7e
+    m_Address: terrain/earth/fill_decor_t5_1
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -445,6 +485,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 90bf73322bfe7544db41491e1b20c73c
+    m_Address: terrain/earth/fill_decor_t3_2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 9155973d82963fb489b40ecca28304f8
     m_Address: props/earth/node_iron/animator
     m_ReadOnly: 0
@@ -462,6 +507,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 93812ad0c2e2d6d4d94f0e3be4ba421d
     m_Address: terrain/earth/ground_band
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 93eaa0f85d6b7e9458ea724b22bbbf81
+    m_Address: terrain/earth/fill_decor_t4_3
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -645,6 +695,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: cad8b4226cfe7a54c9ba966c058793fb
+    m_Address: terrain/earth/ground_fill_t4
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: cd6cc1d67cd22e847a0085bf204414ac
     m_Address: terrain/earth/sand
     m_ReadOnly: 0
@@ -720,6 +775,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e47a633506824b74fbce51b1aaa167cf
+    m_Address: terrain/earth/fill_decor_t2_3
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: e6db82661784184489158145f1389ce7
     m_Address: terrain/earth/ground_band_snow
     m_ReadOnly: 0
@@ -732,6 +792,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: e730448a361babe4ea4084b681fcaea9
     m_Address: terrain/earth/fill_decor_sand_2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e799cc9200bb3c347a68668334e1ad5f
+    m_Address: terrain/earth/fill_decor_t3_1
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -790,6 +855,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f7e9359706fd45a42a43c4330cd15de3
+    m_Address: terrain/earth/ground_fill_t5
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: f85321d5b77969e4fbc673324e79adfe
     m_Address: props/earth/launch_tower_ruin/json
     m_ReadOnly: 0
@@ -802,6 +872,16 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: f95bcc7324886fc459f332bd8ef5714f
     m_Address: terrain/earth/fill_decor_sand_1
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: fac9895394d890842a02e6bbfccca1c3
+    m_Address: terrain/earth/surface_line
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: fb92ea29f5e91484596c99b14b7b371c
+    m_Address: terrain/earth/ground_fill_t3
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

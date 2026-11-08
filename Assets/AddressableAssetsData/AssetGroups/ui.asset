@@ -20,13 +20,28 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 07a99296c82d4a5499704672645310a8
+    m_Address: ui/skilltree/cost_tag
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 11045de9f61f83142859901bdbbbcb8a
     m_Address: ui/panels/sign
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 11c07b424eb4fa7498ea476787d05b53
+    m_Address: ui/skilltree/emblem_voyage
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 11d2683dcad545c4491199b2462bf550
     m_Address: ui/palettes/earth/strip
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 14fdf11f5db19234aa0bded64e0f1cd7
+    m_Address: ui/skilltree/emblem_endurance
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -45,13 +60,43 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 28af3974e6be25241976cb3359f025eb
+    m_Address: ui/skilltree/link_locked
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 2976b37e9ace31544a72070269badc07
+    m_Address: ui/skilltree/link_bought
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 2e6bff9c127f546408185e3e38600329
+    m_Address: ui/skilltree/select
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 3040d29c955bad444a80bd15af03acd2
+    m_Address: ui/skilltree/hub
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 332b192afb7007c46b518282ad1646ea
     m_Address: ui/app/icon_32
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 36d5439cd28d84947bd4ce9dc8afa7e1
+    m_Address: ui/skilltree/emblem_ascent
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 493bd42a09a4dc44194455e6bf7a3aca
     m_Address: ui/hud/gauges
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 57768228d2badc34c8ddc4cbe6b82746
+    m_Address: ui/skilltree/node_available
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -65,13 +110,28 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 7082015ee9f1b9c47a47e063bbb1423c
+    m_Address: ui/skilltree/emblem_haul
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 7253324ea7f9f1c4b8e530a27014162b
     m_Address: ui/title/logo
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 78e2fc24de05d6e41a5448a0e215574b
+    m_Address: ui/skilltree/chart
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 7d43b7d760aea9b44a259d3b63cc8a3b
     m_Address: ui/titlecards/earth
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 835c2a19f3dde1a4cae6a223bb3d0dd2
+    m_Address: ui/skilltree/emblem_dig
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -85,8 +145,18 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8fff1a6708e82864e992f4067fcbaa1b
+    m_Address: ui/skilltree/node_cap_bought
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 943256cba0bafaa46a808f040ce5cb34
     m_Address: ui/panels/scroll
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 97fe363ae1366584c8b9b83e4a1f7e19
+    m_Address: ui/skilltree/node_bought
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -110,8 +180,18 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a74418972a0930b47a93b4a5d635b49d
+    m_Address: ui/skilltree/node_cap_available
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: a8f9b9a71fa89094dae3efef44ac6a19
     m_Address: ui/titlecards/venus
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: ad3c4339c54057d4295902845abb971c
+    m_Address: ui/skilltree/link_open
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -125,8 +205,23 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b77941714af710049986a3080604356b
+    m_Address: ui/skilltree/node_locked
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: ba824accb082fe1488679d2b9f4b59dd
     m_Address: ui/titlecards/jupiter
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c81fcedd36ebcc24f9cef9a9de925327
+    m_Address: ui/skilltree/panel
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: cf56ebaefb9a21a4fb4b5c6065b6d0e1
+    m_Address: ui/skilltree/emblem_survey
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -142,6 +237,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: da6dd82dfbbe1fe4ab280fac46ff8a4c
     m_Address: ui/palettes/venus/strip
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: df2e9725ba5fde0449f3923dcac28f3f
+    m_Address: ui/skilltree/node_cap_locked
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
