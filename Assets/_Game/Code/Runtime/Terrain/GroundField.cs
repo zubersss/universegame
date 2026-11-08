@@ -18,12 +18,14 @@ namespace Meridian.Terrain
         public const float MaxWalkSlope = 0.7f, SurfaceSlope = 0.6f;
         /// <summary>The generator's rolling-hill smoothing: a moving average over ±SmoothRadius columns before the slope clamp.</summary>
         public const int SmoothRadius = 4;
+        /// <summary>U-159: the moving average's radius per planet (one radius today; Mars's landforms are bounded by the slope limit, not by it).</summary>
+        public static int SmoothRadiusFor(Meridian.Planets.PlanetId p) => SmoothRadius;
         /// <summary>The surface curve: the original column tops (stamps included) through this kernel, so plateaus stay flat and their edges ease.</summary>
         public static readonly float[] CurveKernel = { 1f, 2f, 3f, 4f, 5f, 4f, 3f, 2f, 1f }; // 9 taps: integer ramps up to 0.65 stay under 0.68 per m
         public const float CurveKernelSum = 25f;
 
         /// <summary>The planets whose ground is the smooth outline (Earth first, D-161 (6)); the others keep the blocks until U-159.</summary>
-        public static bool Smooth(Meridian.Planets.PlanetId p) => !ForceBlocks && p == Meridian.Planets.PlanetId.Earth;
+        public static bool Smooth(Meridian.Planets.PlanetId p) => !ForceBlocks && (p == Meridian.Planets.PlanetId.Earth || p == Meridian.Planets.PlanetId.Mars); // U-159: Mars
         /// <summary>Captures only: the 0.4.8 look (blocks, no hill smoothing) for the before / after frames. Read when a planet loads.</summary>
         public static bool ForceBlocks;
 

@@ -95,6 +95,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 22c5c33a3552c854b8e21340d102d14f
+    m_Address: backgrounds/mars/tharsis
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 23df7b2028e805748a5b61445c983ff5
     m_Address: terrain/mars/fill_decor_3
     m_ReadOnly: 0
@@ -150,6 +155,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 32f25917a5198a94d92d105443998256
+    m_Address: backgrounds/mars/polar
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 341e9c0f4728cf84e850422bbb4e9afc
     m_Address: props/mars/node_perchlorate/json
     m_ReadOnly: 0
@@ -162,6 +172,16 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 375fb33c9db971140bbef09a2e2156da
     m_Address: terrain/mars/ground_band_basalt
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 3c0e4f383d2aea346baf90ca6eb43afe
+    m_Address: backgrounds/mars/polar/layer1
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 3d801198f7ae9384e9e4b3ec22032ce5
+    m_Address: backgrounds/mars/polar/layer0
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -235,6 +255,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 604f689a0ff5be94695fe09523a34a79
+    m_Address: backgrounds/mars/tharsis/layer2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 623e9864b31edc2428c5a5ea5dab01d2
     m_Address: props/mars/node_hematite
     m_ReadOnly: 0
@@ -247,6 +272,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 662f5e6e3e11cb14c8f1c77083e2b870
     m_Address: props/mars/tube_mound
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 674a1edf370d72e478b426067a67bc86
+    m_Address: backgrounds/mars/tharsis/layer1
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -360,6 +390,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8f72b51c19bc9db4bab063588424beb6
+    m_Address: backgrounds/mars/polar/layer2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 92504d5b3af775a48ba937c0fe6dce56
     m_Address: props/mars/scan_x
     m_ReadOnly: 0
@@ -372,6 +407,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 95c4594ef44816741ad81925722508c8
     m_Address: backgrounds/mars/canyon
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 95d6308fcf8be3c4f8e0638b94e7ca65
+    m_Address: backgrounds/mars/tharsis/layer0
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

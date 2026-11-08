@@ -16,14 +16,15 @@ namespace Meridian.Tests
     /// </summary>
     public class SmoothGroundTests
     {
-        [Test]
-        public void EarthsCurveStaysWalkableOnTenSeeds()
+        [TestCase(PlanetId.Earth)]
+        [TestCase(PlanetId.Mars)] // U-159
+        public void TheCurveStaysWalkableOnTenSeeds(PlanetId planet)
         {
-            var cfg = AssetDatabase.LoadAssetAtPath<PlanetConfig>($"{PlanetConfigAuthoring.Folder}/Earth.asset");
-            Assert.NotNull(cfg, "Earth's config");
-            Assert.IsTrue(GroundField.Smooth(PlanetId.Earth), "Earth is a smooth planet (D-161 (6))");
+            var cfg = AssetDatabase.LoadAssetAtPath<PlanetConfig>($"{PlanetConfigAuthoring.Folder}/{planet}.asset");
+            Assert.NotNull(cfg, planet + "'s config");
+            Assert.IsTrue(GroundField.Smooth(planet), $"{planet} is a smooth planet (D-161 (6), U-159)");
             var pois = new List<PoiDef>();
-            foreach (var p in PoiCatalog.For(PlanetId.Earth)) if (!p.Floating && p.stamp != null) pois.Add(p);
+            foreach (var p in PoiCatalog.For(planet)) if (!p.Floating && p.stamp != null) pois.Add(p);
             int w = cfg.worldWidth;
             for (int seed = 1; seed <= 10; seed++)
             {
@@ -34,10 +35,10 @@ namespace Meridian.Tests
                 var tops = new int[w];
                 for (int x = 0; x < w; x++)
                 {
-                    tops[x] = PoiStamp.JointGround(gen, cfg.datumY, PlanetId.Earth, x, out int g) ? g : gen.SurfaceHeight(x); // TerrainStreamer.WallTop on a smooth planet
+                    tops[x] = PoiStamp.JointGround(gen, cfg.datumY, planet, x, out int g) ? g : gen.SurfaceHeight(x); // TerrainStreamer.WallTop on a smooth planet
                 }
                 System.Func<int, int> top = x => tops[((x % w) + w) % w];
-                System.Func<int, int> pad = x => PoiStamp.PadAt(gen, cfg.datumY, PlanetId.Earth, x); // TerrainStreamer.PadTop
+                System.Func<int, int> pad = x => PoiStamp.PadAt(gen, cfg.datumY, planet, x); // TerrainStreamer.PadTop
                 float worst = 0f; int at = 0, worstStep = 0;
                 for (int x = 0; x < w; x++)
                 {
@@ -45,7 +46,7 @@ namespace Meridian.Tests
                     if (s > worst) { worst = s; at = x; }
                     worstStep = Mathf.Max(worstStep, Mathf.Abs(top(x + 1) - top(x)));
                 }
-                TestContext.Out.WriteLine($"[MERIDIAN] u156 seed {seed}: steepest curve step {worst:F3} m per m at column {at}, largest grid step {worstStep}");
+                TestContext.Out.WriteLine($"[MERIDIAN] u156 {planet} seed {seed}: steepest curve step {worst:F3} m per m at column {at}, largest grid step {worstStep}");
                 Assert.LessOrEqual(worst, GroundField.MaxWalkSlope, $"seed {seed}: the curve at column {at} steps {worst:F3} (≤ tan 35°)");
                 Assert.LessOrEqual(worstStep, 1, $"seed {seed}: the hidden grid never steps more than one tile");
                 for (int i = 0; i < pois.Count; i++)

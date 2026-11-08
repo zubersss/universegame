@@ -35,6 +35,11 @@ namespace Meridian.Tests
             Assert.GreaterOrEqual(canyon, 0, "a canyon region on Mars"); Assert.GreaterOrEqual(plains, 0, "a plains region on Mars");
             Assert.AreEqual("canyon", CartoonStage.SceneFor(PlanetId.Mars, canyon));
             Assert.AreEqual("plains", CartoonStage.SceneFor(PlanetId.Mars, plains));
+            // U-159 (B-186): the polar caps and Olympus have their own sets.
+            Assert.AreEqual("polar", CartoonStage.SceneFor(PlanetId.Mars, 10));
+            Assert.AreEqual("tharsis", CartoonStage.SceneFor(PlanetId.Mars, Meridian.Terrain.MarsLandforms.OlympusCenter));
+            foreach (var set in new[] { "plains", "canyon", "polar", "tharsis", "storm" })
+                Assert.IsTrue(System.IO.File.Exists($"Assets/_Game/Art/backgrounds/mars/{set}/{set}.json"), set + " exported (B-185, B-186)");
             Assert.AreEqual("canyon", CartoonStage.MarsFallbackScene, "B-141 exported canyon + storm; plains falls back to the canyon set until it lands");
             Assert.AreEqual("forest", CartoonStage.SceneFor(PlanetId.Earth, 64), "Earth keeps its band rule (the camp is the forest band)");
             foreach (var scene in new[] { "canyon", "storm" })

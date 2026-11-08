@@ -33,8 +33,14 @@ namespace Meridian.Terrain
                 // U-156 (D-161 / D-162): rolling hills: the raw heights averaged and slope-clamped (≤ 31°), so the hidden grid under the drawn
                 // curve never steps more than 1 m between neighbouring columns.
                 var raw = new float[width];
-                for (int x = 0; x < width; x++) raw[x] = EarthBiomes.Height(x, WorldNoise.Fbm1D(x, width, this.seed), datum);
-                var smoothed = GroundField.SmoothSurface(raw, GroundField.SmoothRadius, GroundField.SurfaceSlope);
+                for (int x = 0; x < width; x++)
+                {
+                    float n = WorldNoise.Fbm1D(x, width, this.seed);
+                    raw[x] = planet == PlanetId.Earth ? EarthBiomes.Height(x, n, datum)
+                        : planet == PlanetId.Mars ? MarsLandforms.Height(x, datum + (n - 0.5f) * 2f * amplitude) // U-159: the landforms, unrounded
+                        : surface[x];
+                }
+                var smoothed = GroundField.SmoothSurface(raw, GroundField.SmoothRadiusFor(planet), GroundField.SurfaceSlope);
                 for (int x = 0; x < width; x++) surface[x] = Clamp((int)System.Math.Round(smoothed[x]));
                 if (planet == PlanetId.Earth)
                 {

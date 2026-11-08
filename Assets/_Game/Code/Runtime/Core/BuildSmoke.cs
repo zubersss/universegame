@@ -551,6 +551,14 @@ namespace Meridian.Core
                 yield return Staged(side);
                 yield return Shot(folder, "smoke_41_earth_coast_cliff.png");
                 Debug.Log($"[MERIDIAN] smoke coast cliff at {cliff} (step {steep:F2} m per m)");
+
+                // U-166 (D-171): the surveyor in the sea, 4+ m under the water line off the shore (only the sea holds water now).
+                int datum = side.Config.datumY, swim = os + 16;
+                for (int x = os + 16; x < os + 400; x++) if (t.Generator.SurfaceHeight(t.WrapX(x)) <= datum - 4) { swim = x; break; }
+                yield return LookAt(side, swim, 3f);
+                yield return Staged(side);
+                yield return Shot(folder, "smoke_43_earth_sea.png");
+                Debug.Log($"[MERIDIAN] smoke sea at {swim}: the floor {t.Generator.SurfaceHeight(t.WrapX(swim))}, the water line {datum + 1}");
             }
             finally { rig.owner = owner; }
         }

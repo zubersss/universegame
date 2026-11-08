@@ -38,12 +38,17 @@ namespace Meridian.Tests
             foreach (var poi in PoiCatalog.For(PlanetId.Mars)) { mars = poi.StampedFlag; break; }
             Assert.NotNull(mars, "a Mars POI");
             data.story.flags.Add(mars);
+            string mercury = null; // U-159: Mars is smooth now; Mercury's ground is still blocks
+            foreach (var poi in PoiCatalog.For(PlanetId.Mercury)) { mercury = poi.StampedFlag; break; }
+            Assert.NotNull(mercury, "a Mercury POI");
+            data.story.flags.Add(mercury);
             data.story.flags.Add("met_archivist");
             var m = SaveMigrations.Migrate(data);
             Assert.AreEqual(SaveData.CurrentVersion, m.version);
             Assert.AreEqual(2, m.loadedVersion, "the file's own version is kept for the terrain step");
             foreach (var f in earthFlags) Assert.IsFalse(m.story.flags.Contains(f), $"{f} goes: Earth re-stamps");
-            Assert.IsTrue(m.story.flags.Contains(mars), "Mars keeps its stamps (its ground is still blocks)");
+            Assert.IsFalse(m.story.flags.Contains(mars), "Mars's flag goes too (U-159: its ground is smooth now)");
+            Assert.IsTrue(m.story.flags.Contains(mercury), "Mercury keeps its stamps (its ground is still blocks)");
             Assert.IsTrue(m.story.flags.Contains("met_archivist"), "story flags stay");
         }
 

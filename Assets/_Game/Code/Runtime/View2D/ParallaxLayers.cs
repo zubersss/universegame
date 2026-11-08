@@ -251,6 +251,8 @@ namespace Meridian.View2D
         /// <summary>U-164 (D-169): on the smooth ground the NEAREST layer goes on down under its bottom edge (its bottom strip repeated, in front of
         /// the farther layers), when the importer found that strip opaque; else the lowest layer's rows as before (U-153).</summary>
         public bool continueNearest;
+        /// <summary>U-159: a translucent overlay (Mars's storm veil) continues its nearest layer's bottom strip whether or not it is opaque.</summary>
+        public bool continueAnyBottom;
         /// <summary>U-164: the layer the fill continued on the last frame (-1: the lowest layer's rows or the colour; tests read it).</summary>
         public int FillLayer { get; private set; } = -1;
         /// <summary>U-164: the fill renderer (tests read its sprite, size and order).</summary>
@@ -341,7 +343,7 @@ namespace Meridian.View2D
             if (nearFillFrom != sp)
             {
                 nearFillFrom = sp; // the key and the strip once per sprite (no per-frame string)
-                nearOpaque = Meridian.Rendering.ArtMaterials.OpaqueBottom(LayerKey(l.n));
+                nearOpaque = continueAnyBottom || Meridian.Rendering.ArtMaterials.OpaqueBottom(LayerKey(l.n));
                 if (!nearOpaque) return false;
                 var r = sp.rect;
                 int rows = SceneLayout.ContinueRows(l, Mathf.RoundToInt(r.height));

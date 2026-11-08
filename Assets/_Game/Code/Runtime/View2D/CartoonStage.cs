@@ -45,9 +45,18 @@ namespace Meridian.View2D
         public static string SceneFor(Meridian.Planets.PlanetId planet, int x)
         {
             if (planet == Meridian.Planets.PlanetId.Earth) return SceneFor(Meridian.Terrain.EarthBiomes.At(x));
-            if (planet == Meridian.Planets.PlanetId.Mars) return Meridian.Planet.Backdrop.StageRegions.At(planet, x) == "mars_canyon" ? "canyon" : "plains";
+            if (planet == Meridian.Planets.PlanetId.Mars) return MarsSceneFor(x);
             return EarthScene;
         }
+        /// <summary>U-159 (B-185, B-186): Mars's sets by landform: the polar caps' "polar", Olympus's "tharsis", the canyon's "canyon", the plains. Pure.</summary>
+        public static string MarsSceneFor(int x) => Meridian.Terrain.MarsLandforms.At(x) switch
+        {
+            Meridian.Terrain.MarsFeature.PolarCap => "polar",
+            Meridian.Terrain.MarsFeature.Olympus => "tharsis",
+            Meridian.Terrain.MarsFeature.Canyon => "canyon",
+            _ => "plains",
+        };
+
         /// <summary>The storm veil's alpha for a dust storm's intensity (a smooth step: the wall arrives late and lands fully). Pure.</summary>
         public static float StormAlpha(float intensity) { float t = Mathf.Clamp01(intensity); return t * t * (3f - 2f * t); }
         /// <summary>U-123 (B-149): Mercury's three sets — day, twilight, night — by the terminator's zone at the camera column; a cold trap is the night set on either side
@@ -276,6 +285,7 @@ namespace Meridian.View2D
             StormLayers.scrollX = 0f;
             StormLayers.onlyLayer = 0; StormLayers.mirrorX = false;
             StormLayers.layer0Scene = null; StormLayers.upperScene = null;
+            StormLayers.groundFill = null; StormLayers.fillFromSet = false; StormLayers.continueNearest = false; StormLayers.continueAnyBottom = false; // U-159: only Mars's veil continues
             StormLayers.ConfigureFor(planetName, DeckOf(Scene) + "_" + Meridian.Planet.UranusSeason.Survey, DatumFor(Scene, Layers.datumY));
         }
         void OnDestroy() { if (surveyedFrom != null) surveyedFrom.Surveyed -= OnSurveyed; }
@@ -376,6 +386,10 @@ namespace Meridian.View2D
                 StormLayers.alpha = 0f;
                 StormLayers.scrollX = 0f;
                 StormLayers.onlyLayer = -1; StormLayers.mirrorX = false; // U-146: the pulse may have left the slot on one layer
+                // U-159 (D-169): on the smooth ground the veil continues its own translucent bottom strip under its edge, never as ground.
+                bool smoothMars = side.terrain != null && side.terrain.SmoothGround;
+                StormLayers.groundFill = smoothMars ? new Color(0f, 0f, 0f, 0f) : (Color?)null;
+                StormLayers.fillFromSet = smoothMars; StormLayers.continueNearest = smoothMars; StormLayers.continueAnyBottom = smoothMars;
                 StormLayers.ConfigureFor("mars", StormScene, surfaceDatum);
                 storm = side.dustStorm;
             }
@@ -388,6 +402,7 @@ namespace Meridian.View2D
                 StormLayers.alpha = 0f;
                 StormLayers.scrollX = 0f;
                 StormLayers.onlyLayer = -1; StormLayers.mirrorX = false;
+                StormLayers.groundFill = null; StormLayers.fillFromSet = false; StormLayers.continueNearest = false; StormLayers.continueAnyBottom = false; // U-159: only Mars's veil continues
                 StormLayers.ConfigureFor(planetName, OverlayFor(config.id), DatumFor(Scene, surfaceDatum));
                 storm = null;
             }

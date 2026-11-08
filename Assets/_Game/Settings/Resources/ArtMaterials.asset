@@ -373,6 +373,8 @@ MonoBehaviour:
   - backgrounds/earth/tundra/layer2
   - backgrounds/mars/canyon/layer2
   - backgrounds/mars/plains/layer2
+  - backgrounds/mars/polar/layer2
+  - backgrounds/mars/tharsis/layer2
   - backgrounds/mercury/day/layer2
   - backgrounds/mercury/night/layer2
   - backgrounds/mercury/twilight/layer2
