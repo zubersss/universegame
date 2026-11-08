@@ -23,12 +23,12 @@ older (D-037 alternation applies only between equal ranks). A rank is live only 
 has a want on file or holds the lock (D-112): if the top rank has no want when the lock frees,
 the next live rank runs now and the skipped role goes next after it files. A role below the top
 keeps its want filed and refreshed (D-075) and works its `## While waiting` list. Cycle 278 (11-08 01:4x: all three windows restarted ~01:27; lock B's tests green (MarsStage 3/3, the Jupiter PlayMode slice 20/20) but its captures died with the restart; B-170 in; THE OWNER'S 0.4.7 PLAYTEST → D-158: the flight overhaul goes first and rides 0.4.8). A role files its want only when the queue says it is next after the running job:
-1. UNITY · next: the lock-B remainder ONLY = CaptureU127Jupiter 1–5 (the tests are green; don't re-run them). Short.
-2. BLENDER · then: B-163 slot 1 (backgrounds/saturn deck1–3, deep, hexagon straight). Its want is on file.
-3. UNITY · then: the flight check = compile + EditMode (FlightModelTests, SoundBarrierTests) + the PlayMode slice (ClimbSmoothPlay, FlightPlay, Transition, M1Loop, LeadQA M3Inner, GiantBandsPlay) + the u148 / u150 captures + CaptureU127Jupiter re-shot (U-153), once U-148 / U-149 / U-150 / U-153's code is committed; past 10 min it runs as one lock over several foreground calls. If the code is not in when BLENDER's slot 1 ends, BLENDER's next slot goes first. (01:40: the u127 captures ran green but FAIL by eye → U-153.)
-4. BLENDER · B-171 the flight FX export (after LEAD accepts its preview), else B-163 slot 2.
-5. UNITY · lock C = Build 0.4.8 (the flight overhaul + U-147 + Jupiter) as the dev + release pair (U-142 / U-143) + the 13-leg probe with the new Climb leg (D-152) + the smoke set (the climb shots, Jupiter, the Venus / Jupiter cards). LEAD then writes the page and USER-32 (play 0.4.8's flight).
-6. BLENDER · B-163 slot 2 → B-164 → (U-151's code in) B-172; UNITY · the Saturn check + captures after B-163 / B-164; then Uranus (B-166 → U-130 / U-146), Neptune (B-169 → U-133 / U-144).
+Done since: UNITY's CaptureU127Jupiter (01:37–01:39; frames fail → U-153); BLENDER's B-163 slots 1 + 2 and B-164 (01:39–01:54; all Saturn art in).
+1. BLENDER · now, in the free lock while UNITY codes: the B-171 preview first (light), then B-166 Uranus slot by slot (each one released; re-check for want_unity before taking the next).
+2. UNITY · top rank the moment its want appears: the flight check = compile + EditMode (FlightModelTests, SoundBarrierTests) + the PlayMode slice (ClimbSmoothPlay, FlightPlay, Transition, M1Loop, LeadQA M3Inner, GiantBandsPlay) + the u148 / u150 captures + CaptureU127Jupiter re-shot (U-153), once U-148 / U-149 / U-150 / U-153's code is committed; past 10 min it runs as one lock over several foreground calls. If the code is not in when BLENDER's slot 1 ends, BLENDER's next slot goes first. (01:40: the u127 captures ran green but FAIL by eye → U-153.)
+3. BLENDER · B-171 the flight FX export (after LEAD accepts its preview), so 0.4.8 draws the real art.
+4. UNITY · lock C = Build 0.4.8 (the flight overhaul + U-147 + Jupiter) as the dev + release pair (U-142 / U-143) + the 13-leg probe with the new Climb leg (D-152) + the smoke set (the climb shots, Jupiter, the Venus / Jupiter cards). LEAD then writes the page and USER-32 (play 0.4.8's flight).
+5. BLENDER · the rest of B-166, then B-169 Neptune, then (U-151's code in) B-172; UNITY · after 0.4.8: U-129 slice 2 code → the Saturn check + captures, then Uranus (U-130 / U-146), Neptune (U-133 / U-144).
 
 
 
@@ -1354,14 +1354,14 @@ Goal: Saturn export from the accepted B-157 designs: `backgrounds/saturn/{sdeck1
 Accept: as B-159.
 Files: blender/scripts/build_backdrop_v3.py, build_c2_saturn_*.py, Assets/_Game/Art/backgrounds/saturn/, terrain/saturn/, flora/saturn/, props/saturn/, ui/palettes/saturn/
 Depends: B-157, U-129
-Lead notes: Cycle 272. Two slots when U-129's code is committed. Cycle 274: READY in order after the Jupiter exports; the dry runs lock-free.
+Lead notes: Cycle 272. Two slots when U-129's code is committed. Cycle 274: READY in order after the Jupiter exports; the dry runs lock-free. Cycle 278 (02:0x): EXPORTED AND VERIFIED in two slots: 011b7de4 (01:39–01:43, peak 803 MB; log OK backgrounds/saturn deck1 / deck2 / deck3 / deep / hexagon, 3 painted layers each, layer0 2048×1024 ≤ 2.4 MB, seams ≤ 0.90) and f3d5d294 (01:51, peak 387 MB; terrain/saturn floe_strip_ice / _ring 676×152 with caps, joins and caps ice 0.94 / ring 0.50; flora/saturn/rigset 26 parts, 5 plants; props/saturn six props, 9 v2 maps removed; ui/palettes/saturn). Reviews viewed: review_b157_saturn_hexagon.png (2× tiled, no seam; the tilted rings and a moon over the band, the Hexagon's blue wind-walls on layer1 behind the surveyor at 1x), review_b157_saturn_floes.png (ice and ring rock as cap + tiles + cap, the five Saturn plants and the surveyor at 1x, palette 100 %). Done on U-129's Saturn captures (after U-153's shared deck fix).
 
 ### B-164 · BLENDER · Ready · C2
 Goal: Saturn creatures from the accepted B-157 designs: the Helium jelly, the Hex drake (fly at index 1), the Floe moth, the Ringmite, one sheet ≤ 2048² each; the Polar Hydra as a Grand rig set (D-140: 7 bones, the lost-head swap dissolving to a puff); `replaces_v2`.
 Accept: as B-160.
 Files: blender/scripts/build_creatures_saturn_v3.py, build_polar_hydra_v3.py, Assets/_Game/Art/creatures/saturn/
 Depends: B-157, U-129
-Lead notes: Cycle 272. One slot after B-163. Cycle 274: READY in order after B-163.
+Lead notes: Cycle 272. One slot after B-163. Cycle 274: READY in order after B-163. Cycle 278 (02:0x): EXPORTED AND VERIFIED (37ba2e94, 01:52–01:54, peak 458 MB; log OK ringmite 36 frames 48×48, helium_jelly 40 frames 96×112, hex_drake 40 frames 192×112 with fly at index 1, floe_moth 36 frames 64×64, all clips 0–3 in order, ink 2.0–3.0 / 1.0–1.5 px; polar_hydra a Grand rig set 1884×1392, 19 parts; its json: 7 bones, grand true, a lost-head swap per neck (neck0–5), D-140). review_b157_polar_hydra_assembled.png viewed: six necks on a cream body in the Hexagon's eye beside the surveyor at 0.25x, pie eyes, closed smiles, frill crests, no teeth (D-087); idle weave, the struck recoil, heads 0 and 4 lost as cloud puffs. Done on U-129's Saturn captures (the Hydra in passing).
 
 ### B-166 · BLENDER · Ready · C2
 Goal: Uranus export from the accepted B-158 designs: each deck as sun_left / sun_right / night sets + the survey layer0 (D-142) with the straight finish, the alpha masks identical across the lights (--uranus-check); the methane-ice floes with caps; `flora/uranus/rigset`; the four creatures and the Diamondback Colossus as a Grand rig set; the props; `ui/palettes/uranus/strip`.
