@@ -680,7 +680,7 @@ rotating backups. Version field; migrations on load.
 ### 10.8 Tools (PowerShell, in `tools/`)
 `unity_compile.ps1` (batch compile, zero-error gate), `unity_test.ps1 [EditMode|PlayMode]`
 (writes `logs/tests_<date>.xml` and a summary to `coordination/reports/unity/`),
-`unity_build.ps1` (Windows build to `Build/MERIDIAN_<version>/`), `unity_profile.ps1`
+`unity_build.ps1` (Windows builds: the probed development player to `Build/MERIDIAN_<version>_dev/`, the release player to `Build/MERIDIAN_<version>/`; U-143, D-155), `unity_profile.ps1`
 (runs the BudgetGate scenes and writes `coordination/reports/unity/perf_<date>.md`),
 `unity_art_preview.ps1 <key>` (renders the asset under 2D lights to `logs/preview_<key>.png`),
 `blender_render.ps1 <key|category|all> [-Preview]`. All read `tools/paths.json` for the

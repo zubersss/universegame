@@ -2330,7 +2330,7 @@ Files: Build/MERIDIAN_0.4.5/, coordination/reports/unity/smoke_0.4.5/, perf + te
 Depends: U-124, B-151
 Lead notes: Cycle 273. One lock after the U-124 captures; LEAD writes the Mercury + C3 page and the owner's playtest item from it. 15:4x: after U-135 (the inventory slots and the crafting paper, D-149) so the owner's build shows a usable inventory; U-136 (paper buttons) may follow in 0.4.6 if it is not in by the build lock. 16:0x: DONE (90781774; one lock 15:42–15:56, no memory stop: compile 0 / 0, EditMode 369/369, BudgetGate green, BUILD OK Build/MERIDIAN_0.4.5 552 MB, the 13-leg probe BUILD MEMORY GREEN (Mercury working set 930 / private 1272 / textures 315 MB, load 0.72 s; Creep 8.5 MB per visit ≤ 10, the Mono heap +4.5 per visit from the new UI: a watch row), SMOKE OK 28 shots in smoke_0.4.5/, LeadQA M1Loop + M3Inner 8/8). The smoke frames reviewed by LEAD: the UI shots pass; the Mercury shots away from the pad expose two gaps → D-150: 0.4.5 is a dev build; the owner's build is 0.4.6 after U-139 (the set follows the stamped surface), U-138 (the Cinderhulk retired, the v2 props dropped) and B-167 (the Mercury props re-inked).
 
-### U-133 · UNITY · Ready · C2
+### U-133 · UNITY · In Progress · C2
 Goal: Neptune on the cartoon stage (Bible §12 C2 order 8; §7.9 the dark storm world): the B-161 deck sets with the storm set's rim layer pulsed by its `pulse` block (D-148), the floes with caps, the Neptune rig set with the wind lean on the root bone (0° at calm to ~25° at 35 m/s, mirrored for −x wind, a stepped shiver in gusts; one controller, D-110), the Neptune creatures on sheets and the Umbral Leviathan as a Grand rig set piece, the Meridian wreck at ~7.5 m segments; the Neptune tests unchanged; the perf rows green.
 Accept: Neptune captures at 1x (a floe lane in the gale with the flora leaning, the storm deck with the rim breathing, the wreck with its beacon) matching the accepted B-161 composites; a lean test (angle per wind speed, the mirror); the 300-plant loop p99 unchanged; TransitionTests green; the BudgetGate Neptune rows green.
 Files: Code/Runtime/View2D/CartoonStage.cs, ParallaxLayers.cs, Code/Runtime/Planet/, Code/Runtime/Creatures/, Tests/
@@ -2358,12 +2358,12 @@ Files: Build/MERIDIAN_0.4.8/, coordination/reports/unity/smoke_0.4.8/, perf + te
 Depends: U-127, B-160
 Lead notes: Cycle 275. One lock after the U-127 captures; LEAD writes the Jupiter page and the owner's item from it.
 
-### U-143 · UNITY · Ready · C2
+### U-143 · UNITY · In Progress · C2
 Goal: The owner's build without the Development Build watermark: after the probe passes on the development build, the same code is built once more as a release build (`Build/MERIDIAN_<v>/` the release, `Build/MERIDIAN_<v>_dev/` the probed one), the smoke run once on the release build for the 29 shots; the probe stays on the dev build (its memory counters need it).
 Accept: 0.4.8 ships as a release exe with no watermark; SMOKE OK on it; the dev build kept beside it for the probe; the build script does both in one call.
 Files: tools/unity_profile.ps1 (or the build wrapper), Code/Runtime/Core/BuildSmoke.cs
 Depends: U-142
-Lead notes: Cycle 275. The owner's first-ever frame of every build has read "Development Build" in its corner; 73 s per build is cheap. Rides U-142's lock if in, else 0.4.9.
+Lead notes: Cycle 275. The owner's first-ever frame of every build has read "Development Build" in its corner; 73 s per build is cheap. Rides U-142's lock if in, else 0.4.9. 19:4x: CODE IN lock-free (the dev player to Build/MERIDIAN_<v>_dev/ for the probe; unity_profile.ps1 -Release builds the release player to Build/MERIDIAN_<v>/ only after a green gate + probe; unity_release.ps1 does both and smokes the release player; tools/unity_build_selftest.ps1 28/28 without the Editor); Bible §15 updated (D-155). Done on 0.4.8's two folders.
 
 ### U-138 · UNITY · Done · C2
 Goal: Mercury's v2 leftovers out of the cartoon stage (D-150): the Cinderhulk species leaves Mercury's spawn table and the smoke (the Cinderling is its B-145 re-ink; the night smoke shot shows the Shadewyrm at a burrow instead); the Mercury props draw from B-167's sheets when they land (`props/mercury/{flare_shelter,meridian_beacon,solarite_cluster,warden_vault_gate,shelter_door,equipment_locker}`), their v2 .glb / _normal / _mask / _emission metas dropped with the files (D-016); the M3 Mercury gameplay tests stay green (the flare window and shelter logic unchanged).
