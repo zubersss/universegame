@@ -1,17 +1,16 @@
 # UNITY STATUS
-Updated: 2026-11-08 11:1x · Session: 10 (resumed 09:3x after the ~3-hour break; earlier entries: coordination/status/archive/UNITY_2026-11-08.md)
+Updated: 2026-11-08 12:0x · Session: 10 (resumed 09:3x after the ~3-hour break; earlier entries: coordination/status/archive/UNITY_2026-11-08.md)
 ## Current task
-11:1x: waiting on LEAD's look at the D-168 frames (sent 11:10), then U-163 (Build 0.5.0; B-183 is in): (1) CheckSetup import + compile + EditMode; (2) PlayMode A, the Earth slice (DigPlace, Harvest, SaveLoad, SolidRescue, SmoothGroundPlay, Footing, SpawnCamp, ShipSide, PlayerPlay, CraftingPlay, InventoryPlay); (3) PlayMode B (BandFollowPlay incl. U-164's test, Transition, LeadQA M1Loop + M3Inner); (4) U-164's re-shoots (u156/3_valley, u157/2_tunnel); (5) one held lock in two parts (scratchpad u163_part1.ps1: profile + dev build + probe, two runs if a row is red (D-152); u163_part2.ps1: release build + smoke, 51 shots incl. smoke_29-42).
+U-165 (P-56 → card, LEAD 12:0x; ahead of U-159's check): trace the first 3 s of a graphics boot (BudgetGate's camp lift: the solid rescue lifts the surveyor 0.76 m at (64.5, 337.8) right after the PlanetSide load, every graphics run, never headless). BootTracePlayTests.ABootNeverBuriesTheSurveyor written (per physics step from Core's load: body, feet vs the outline under them, settled, rescues; prints the trace on failure); want filed 12:0x behind BLENDER's B-186 previews; then run it with -Graphics, fix the cause, BudgetGate's console clean. Ruled out so far: the Earth reload (the surveyor stands fine at x 738), the spawn math (grid top 337, spawn 338.05, held until settled), the knock (horizontal).
 
 ## Last completed
-D-168 + U-164 code + U-163's smoke, the short lock 10:40-11:08 (several short locks, BLENDER's B-183 renders between): commit d212b018. Compile 0 / 0; EditMode 442/442; PlayMode DigPlace / Harvest / SaveLoad / SolidRescue / InventoryPlay / ShipSide 20/20 on the final code. A single stroke traces 0.896-0.900 m in 16 directions (±0.06), the 7-stroke hole 0.896-0.909 m (±0.10), a surface scoop opens the outline 1.15 m. Fixed on the way: the field read before any tile flips (a dug tile's node read 0 where the disc says 0.49: the ring dented to 1.28 m); a mound fills cells whose four tiles are solid (one built) and rounds solid brush cells (holes between discs); strokes aimed at the ground (an exact disc 1.1 m under the surface leaves a 0.2 m roof); the mound staged as a held sweep (single clicks 1.2 m apart pile as discs with concave cusps). Frames: u157/1_scoop (a round bowl), 2_tunnel (from the scoop, scalloped), 3_mound (a solid lobed pile), u158/4_pocket_dug (a U shaft) + the rest re-shot. U-158's comparison: Earth's top 10 m holds 0 ore tiles (iron / copper / carbon / silica / water ice had no dig source on Earth in 0.4.8, trade only) vs 3.08 node items + 4.76 pocket items per 100 m (≈ 7.4 node items a minute at walking pace); LEAD's call on D-167 (2)'s 25 % rule.
-Earlier today: the U-157 / U-158 / U-161 check (b69d80c1, 1fe57806); archive: coordination/status/archive/UNITY_2026-11-08.md.
+U-163 Build 0.5.0 ACCEPTED by LEAD (12:0x; Done): commits ae1d52b4 (checks), the build evidence commit after it. BUILD OK Build/MERIDIAN_0.5.0 (release, 552 MB, 70 s) + _dev; the probe green on its second run (D-152: run 1 red on Return · Space after Mars +10.4 %, run 2 +9.9 % / +4.6 %, Creep +0.5 MB per visit, Climb p99 16.9 ms, Film pass 0.356 ms); SMOKE OK 51 shots, 0 errors (smoke_0.5.0; new Earth shots smoke_29-42; smoke_31's scoop missed: its aim fix rides the next build, no respin per LEAD). On the build's code: compile 0 / 0, EditMode 442/442, U-164 2/2, the Earth slice 37/37 (Harvest's items-per-minute table: 0.4.8 digging 0.0; 0.5.0 nodes 7.4, pockets up to 11.4 at walking pace), LeadQA M1Loop + M3Inner 8/8. U-157, U-158 (D-170), U-161, U-164 Done.
 
 ## Next up
-U-163 (Build 0.5.0) → after the owner's look: U-159 + B-181, U-160, U-162.
+U-165 → U-159 code (the region → band / set map on its card) → U-162 → U-152.
 
 ## Ready for review
-U-157 (D-168 in d212b018; frames sent 11:10), U-164 (code in; its test in U-163's lock), U-158 (accepted; the comparison above); frames in reports/unity/u157, u158, u156 (*_050, 10_tundra). Earlier, still unjudged: U-129 slice 1 (SaturnStageTests ×4); U-130 slice 1 (UranusStageTests ×7); U-133 slice 1 (NeptuneStageTests ×8); U-146 (the survey scan pulse; UranusStageTests +1); U-144 (Neptune's -x zones, the drift, the anchor, the gust warning; NeptuneStageTests +3).
+Earlier, still unjudged: U-129 slice 1 (SaturnStageTests ×4); U-130 slice 1 (UranusStageTests ×7); U-133 slice 1 (NeptuneStageTests ×8); U-146 (the survey scan pulse; UranusStageTests +1); U-144 (Neptune's -x zones, the drift, the anchor, the gust warning; NeptuneStageTests +3).
 ## Handoffs
 (none unrouted)
 ## Blockers
@@ -23,4 +22,4 @@ U-157 (D-168 in d212b018; frames sent 11:10), U-164 (code in; its test in U-163'
 ## Housekeeping
 Editor churn in the tree (Generated/Models *.mat _MainTex fills, TMP font asset, existing animator.controllers, UnderwaterTint.mat, link.xml.meta, two InitTestScene files): never staged; my commits list files explicitly. MERIDIAN_SETUP.md at the repo root is untracked and not mine.
 ## HeavyJobLock
-none held, no want (the short lock's last run released 11:08). No background waiters.
+want_unity.lock filed 12:0x (U-165's graphics boot run) behind BLENDER's B-186 previews. No background waiters.
