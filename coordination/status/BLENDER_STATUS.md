@@ -1,10 +1,11 @@
 # BLENDER STATUS
-Updated: 2026-11-08 03:0x · Session: 9 (zuber-0c; all three windows restarted ~01:27; context rebuilt from the repo) · trimmed under D-113; older: coordination/status/archive/BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
+Updated: 2026-11-08 03:3x · Session: 9 (zuber-0c; all three windows restarted ~01:27; context rebuilt from the repo) · trimmed under D-113; older: coordination/status/archive/BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
 
 ## Current task
-UNITY's lock C (Build 0.4.8: the M1Loop fix, re-shoots, dev build + probe, release build, smoke; want 02:57:14) holds the lock: FILES ONLY until it releases. Then, in order: (1) lock-free: `python -I build_props_space_v3.py blender/preview/review_b172_space_props_preview.png` = the B-172 design preview (both stations at 1x with the Pilgrim docked, the six rocks) -> LEAD; first run of b407a9ac's code, under the 300 MB cap (stations raster at ss 2). (2) B-166 slot 2: terrain/uranus/floe_strip_set, flora/uranus/rigset, props/uranus/props_set, ui/palettes/uranus. (3) B-166 slot 3: creatures/uranus frostwisp, hailcrab, methane_ray, tiltbird + diamondback_colossus (grand_pack 0.18). (4) B-169 Neptune: oneoff/neptune_rows.py, then its slots. Each job checks want_unity first; no want filed while UNITY's multi-part lock C runs.
+UNITY's 0.4.8 respin (the cone's draw order + a smoke staging fix; want 03:3x) goes next: FILES ONLY until it releases. Then, in order: (1) B-166 slot 3: creatures/uranus frostwisp, hailcrab, methane_ray, tiltbird + diamondback_colossus (grand_pack 0.18). (2) B-169 Neptune: oneoff/neptune_rows.py (lock-free, ~30 MB), then its slots (decks x6, floes / rig / props / palette, creatures + the Leviathan). (3) B-172: LEAD's verdict on review_b172_space_props_preview.png (03:28); the export after U-151's code. Each job checks want_unity first.
 
 ## Last completed
+- 03:19-03:28: B-166 slot 2 exported (0bb755cd; 390 MB); gp_raster box compositing, byte-identical + ~5x faster (5e37a670); the B-172 design preview (166 MB) and its fixes (clip 'lamps' 4, the review in place; 5e37a670); the floe reviews say "written to Art" on export (daa76512).
 - 02:54-02:57 SLOT (wrapper): B-166 slot 1d, Uranus deep x4 lights + URANUS-CHECK deep PASS (ead74e5b; 771 MB). Slot 1 COMPLETE: deck1 77e72d0c, deck2 eb8927fb (02:46-02:49, 773 MB), deck3 3082a574 (02:50-02:53, 758 MB), deep.
 - 02:5x files: B-172 source build_props_space_v3.py + the eight v3 prop rows + props/space/props_set (b407a9ac; py_compile clean, not yet run).
 - 02:45-02:46 lock-free: the B-171 set review from the exported sheets, review_b171_flight_fx.png (223 MB). B-171 VERIFIED by LEAD (Done on UNITY's u150 captures).
@@ -17,7 +18,8 @@ UNITY's lock C (Build 0.4.8: the M1Loop fix, re-shoots, dev build + probe, relea
 - 01:02-01:14 SLOTS: B-160 the Vortex Whale (92830c7f), B-170 the title cards (37c0a43f). VERIFIED.
 
 ## Ready for review
-- B-166 slot 1: the 16 Uranus backdrops (77e72d0c, eb8927fb, 3082a574, ead74e5b) + review_b158_uranus_{deck1,deck2,deck3,deep}_{sun_left,sun_right,night,survey}.png; URANUS-CHECK PASS x4 in logs/blender_2026-11-08.log (02:25, 02:49, 02:53, 02:57).
+- B-166 slot 2: floes / rig set / props / palette (0bb755cd) + review_b158_uranus_{floes,rigset,props}.png (03:20). (Slot 1 VERIFIED by LEAD 03:0x.)
+- B-172 design preview: review_b172_space_props_preview.png (03:28; its "json INVALID" footer for the stations is fixed in 5e37a670: clip 'lamps' 4).
 
 ## Handoffs (unrouted only)
 - -> UNITY (U-150), B-171 placement: vapor_cone and shock_ring pivots = the ship's centre of mass (ship-local 0, 6.2 m, the tilt pivot); the cone draws IN FRONT of the hull, the ring BEHIND it. speed_lines: 128x360 tiles, 3 per 1080 px edge (tile i may show frame (f + i) % 4), drawn for the LEFT edge, flip x for the right; pivot (0, 0.5) = the edge. puff_boost: a drop-in for ships/pilgrim/puff (socket tail_exhaust, pivot 0.5 / 0.96, clip 'puff'), now 192x288 frames: no 1.6x y-scale needed.
@@ -46,4 +48,4 @@ none (B-161's three ruled in D-148).
 none (USER-28, closing ChatGPT + Edge for RAM, is LEAD's).
 
 ## HeavyJobLock
-none held (released 02:57:5x after Uranus deep); no want (UNITY took lock C after my job: D-039; I take the next free gap per the queue). No background waiters.
+none held (released 03:20:0x after Uranus slot 2); no want (UNITY's respin want is on file: it goes first; I take the next free gap per the queue). No background waiters.
