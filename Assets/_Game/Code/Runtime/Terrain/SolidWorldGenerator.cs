@@ -36,8 +36,30 @@ namespace Meridian.Terrain
                 for (int x = 0; x < width; x++) raw[x] = EarthBiomes.Height(x, WorldNoise.Fbm1D(x, width, this.seed), datum);
                 var smoothed = GroundField.SmoothSurface(raw, GroundField.SmoothRadius, GroundField.SurfaceSlope);
                 for (int x = 0; x < width; x++) surface[x] = Clamp((int)System.Math.Round(smoothed[x]));
+                if (planet == PlanetId.Earth) sea = SeaColumns(); // U-166 (D-171)
             }
         }
+
+        /// <summary>U-166 (D-171): on a smooth Earth only the sea holds water: the columns reached from the ocean trench outward, both ways,
+        /// while the ground stays under the water line (the shore stops it). An inland basin under the datum is dry ground on the smoothed
+        /// curve (it held a lake drawn as faint tiles over the backdrop). Null elsewhere: every column under the datum fills, as before.</summary>
+        readonly bool[] sea;
+
+        bool[] SeaColumns()
+        {
+            var s = new bool[width];
+            for (int dir = -1; dir <= 1; dir += 2)
+                for (int i = 0, x = EarthBiomes.TrenchCenter; i < width; i++, x += dir)
+                {
+                    int wx = ((x % width) + width) % width;
+                    if (surface[wx] >= datum) break;
+                    s[wx] = true;
+                }
+            return s;
+        }
+
+        /// <summary>U-166: column x holds the sea (always true off a smooth Earth).</summary>
+        public bool SeaAt(int x) => sea == null || sea[((x % width) + width) % width];
 
         readonly int[] surface;
         /// <summary>U-156: a smooth planet (D-161): rolling-hill surface, no noise caves (the underground is the drawn cross-section, opened only by digs).</summary>
@@ -81,7 +103,7 @@ namespace Meridian.Terrain
 
             int surface = SurfaceHeight(x);
             if (y > surface)
-                return planet == PlanetId.Earth && y <= datum ? TileId.Water : TileId.Air;
+                return planet == PlanetId.Earth && y <= datum && SeaAt(x) ? TileId.Water : TileId.Air; // U-166: no inland lakes on the smooth ground
 
             if (planet == PlanetId.Mars && MarsLandforms.InTube(x, y, SurfaceOf)) return TileId.Air; // lava tubes (U-039)
             int depth = surface - y;

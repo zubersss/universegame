@@ -38,6 +38,9 @@ namespace Meridian.Terrain
             float FieldAt(Vector2 p);
         }
 
+        /// <summary>U-166: the liquid map's sorting order on a block planet, and on a smooth one (behind the ground mesh, SmoothGround.Order 1).</summary>
+        public const int LiquidOrder = 1, LiquidOrderSmooth = 0;
+
         /// <summary>When true the block mesh renders and the tilemap renderer is off (the 3D view).</summary>
         public static bool BlocksEnabled = true;
 
@@ -70,6 +73,10 @@ namespace Meridian.Terrain
             if (tileCollider != null) tileCollider.enabled = !smooth;
             if (composite != null) composite.enabled = !smooth;
             if (!smooth) for (int i = 0; i < edges.Count; i++) edges[i].enabled = false;
+            // U-166 (D-171): on a smooth planet the water draws behind the ground mesh (order 1): a water tile's part under the outline is
+            // covered by the drawn ground, so water shows only above it, still over the painted layers.
+            var lr = liquid != null ? liquid.GetComponent<TilemapRenderer>() : null;
+            if (lr != null) lr.sortingOrder = smooth ? LiquidOrderSmooth : LiquidOrder;
         }
 
         // ---------- U-156: the smooth ground (D-161 / D-162, Bible 5.0) ----------
@@ -349,7 +356,7 @@ namespace Meridian.Terrain
             chunk.liquid = liquidGo.AddComponent<Tilemap>();
             var lr = liquidGo.AddComponent<TilemapRenderer>();
             lr.mode = TilemapRenderer.Mode.Chunk;
-            lr.sortingOrder = 1;
+            lr.sortingOrder = LiquidOrder;
             if (lit != null) lr.sharedMaterial = lit;
             // See-through water (U-037): the backdrop behind it darkens with depth and the seabed stays visible.
             chunk.liquid.color = new Color(1f, 1f, 1f, WaterAlpha);
