@@ -6,13 +6,18 @@ Owner: LEAD (only the Lead edits this). Do the open items below, then tell the L
 
 ## Open
 
-### USER-32 — The 0.4.8 feel check: fly the new rocket (15 min)
-Open https://claude.ai/artifact/JZV8VcfbbnpHVSxn4YhMcF (the flight fix and Jupiter: the stills, the numbers, what changed), then
-double-click `C:\dev\universegame\Build\MERIDIAN_0.4.8\MERIDIAN.exe`. This check is about feel only. On Earth walk and jump
-around the camp; board with F, hold W or Space and climb: feel the engine build, watch for the long flame and the speed lines,
-listen for the boom about halfway up; let go of thrust for a moment, tilt with A / D; fly on to Mars and land under 6 m/s.
-Tell the Lead "0.4.8 feels right" or what still feels off (the climb, the zoom, the speed, the landing, the walking).
-The ground is still blocky in this build; the smooth ground with round digging (your 04:0x and 04:1x notes) is Build 0.5.0.
+### USER-33 — The 0.5.0 look and feel check: Earth on smooth ground (15 min)
+Open https://claude.ai/artifact/CHnmoFrDg2jzUuM42BVi83 (the stills, the numbers, what changed), then double-click
+`C:\dev\universegame\Build\MERIDIAN_0.5.0\MERIDIAN.exe`.
+1. Walk the camp and the hills: A / D to walk, Space to jump, Shift to run.
+2. Press 1 (the Beam), aim at the ground with the mouse and left-click to dig a round scoop; keep clicking for a tunnel.
+3. Press 4 (the Builder) and hold the left button while you sweep the mouse to pile a mound from the dirt you dug.
+4. With the Beam, left-click an ore rock three times to mine it.
+5. Press 3 (the Survey scanner) and left-click to scan; dig down to a red X.
+6. Walk far left or right to the desert, the taiga, the tundra and the coast.
+Tell the Lead "0.5.0 looks right" or what still feels off: the ground, the digging, the mounds, the backgrounds, or the
+mining speed (too fast, too slow, right). If you skipped the 0.4.8 flight check (USER-32), add how the rocket climb feels
+(F to board, W to climb). Only Earth has the new ground so far.
 
 ### USER-08 — Optional: let the team run PowerShell commands without prompts (2 min)
 On Windows, Claude Code runs commands through PowerShell as well as Bash, and the
@@ -22,6 +27,7 @@ If you get too many "allow this command?" prompts, tell the Lead "approve PowerS
 allow rules" and accept the edit when Claude Code asks you. Otherwise skip this.
 
 ## Done
+- 2026-11-08 12:3x · USER-32 (the 0.4.8 feel check, unanswered since 04:3x) folded into USER-33: the 0.5.0 check asks for the rocket climb too.
 - 2026-11-08 01:3x · USER-30 done: the owner played 0.4.7 and likes it so far; leaving the atmosphere felt laggy and stuttery, the view too zoomed in, and the ship should fly smoother, with weight, a felt difference between accelerating and top speed, and a sound barrier break → D-158, U-148 / U-149 / U-150, B-171; the fix ships in 0.4.8 (the next playtest item comes with it).
 - 2026-11-08 01:0x · USER-31 done: Chrome and Edge are closed, free RAM 2.0 GB; the team resumed on the owner’s "continue work".
 - 2026-11-07 17:5x · USER-27 folded into USER-30 (Build 0.4.7 has Earth, Mars, Mercury, Venus and the paper menus).
