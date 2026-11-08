@@ -316,6 +316,13 @@ def draw_puff(d, M, k):
     R = 0.30 * (0.35 + 0.65 * grow) * (1.0 if t < 0.72 else 1.0 - 1.4 * (t - 0.72))
     D = 0.15 + 0.45 * (1 - (1 - t) ** 2)
     rise = 0.12 + 0.28 * t
+    for j in range(5):                                                                        # flying clods on their arcs, drawn BEHIND the
+        a = math.radians(40 + 100 * j / 4)                                                    # billows (LEAD 10:4x, B-182: drawn over them,
+        v = 1.25 + 0.25 * (j % 3)                                                             # frames 1-2's clods sat on the ball as two dark
+        x = v * t * math.cos(a) * 0.7                                                         # marks over the fold: a face); they show once
+        z = 0.1 + v * t * math.sin(a) * 0.75 - 1.5 * t * t                                  # they fly clear of the dust
+        if z > -0.2 and t > 0.05:
+            G.stroke(d, G.lumpy_ellipse(x, z, 0.045, 0.035, n=10, lump=0.15, seed=j), M["clod_i"], I, cyclic=True)
     for j, (a_deg, df, sf) in sorted(enumerate(PUFF_BILLOWS), key=lambda e: -e[1][1]):
         a = math.radians(a_deg)
         r = R * sf
@@ -327,13 +334,6 @@ def draw_puff(d, M, k):
         G.stroke(d, G.lumpy_ellipse(x - r * 0.28, z - r * 0.25, r * 0.55, r * 0.42, n=12, lump=0.05, seed=j + 3), M["dust_sh"], 0.0, cyclic=True)
         if r > 0.12:                                    # a short billow fold on the upper right (not a smile: no faces)
             G.seam(d, G.bezier((x + r * 0.15, z + r * 0.62), (x + r * 0.55, z + r * 0.55), (x + r * 0.68, z + r * 0.18), n=6), M["ink"])
-    for j in range(5):                                                                        # flying clods on their arcs
-        a = math.radians(40 + 100 * j / 4)
-        v = 1.25 + 0.25 * (j % 3)
-        x = v * t * math.cos(a) * 0.7
-        z = 0.1 + v * t * math.sin(a) * 0.75 - 1.5 * t * t
-        if z > -0.2 and t > 0.05:
-            G.stroke(d, G.lumpy_ellipse(x, z, 0.045, 0.035, n=10, lump=0.15, seed=j), M["clod_i"], I, cyclic=True)
 
 
 # ---------------------------------------------------------------- the dig rim (x 0..4 m; the ink at z = 0, the solid below)
