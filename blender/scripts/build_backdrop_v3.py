@@ -623,6 +623,32 @@ def _seated(mask, shade, cap, line, rng, n, rmin, rmax, hq, cap_h=0.0):
             ell(cap, cx + rx * 0.05, cy - ry * 0.55, rx * 0.75, ry * cap_h)
 
 
+def _eroded(rng, base, amp, n, depth, width):
+    """B-186 rev 2 (LEAD 12:3x): an eroded, rounded skyline - a smooth periodic ridge plus n rounded dips and swells (gaussian,
+    x wrapped): irregular undulation with no step and no right angle (terrace() and notch() drew the blocky edges the owner
+    rejected)."""
+    line = BG.ridge(rng, [(2, 0.45), (5, 0.3), (11, 0.15), (23, 0.10)], base=base, amp=amp)
+    x = np.arange(W)
+    for _k in range(n):
+        c, d, w = rng.uniform(0, W), rng.uniform(-0.5, 1.0) * depth, rng.uniform(0.5, 1.0) * width
+        dx = (x - c + W / 2) % W - W / 2
+        line = line + d * np.exp(-0.5 * (dx / w) ** 2)
+    return line.astype(np.float32)
+
+
+def _face_bands(H, line, rng, offsets, weight):
+    """Dust bands that follow a scarp's face (parallel to the line above them, `offsets` px below it), their weight varying
+    along x between weight[0] and weight[1] px, breaking off in places; periodic in x."""
+    m = np.zeros((H, W), np.float32)
+    y = np.arange(H, dtype=np.float32)[:, None]
+    for off in offsets:
+        wgt = weight[0] + (weight[1] - weight[0]) * np.clip(0.5 + 0.8 * BG.ridge(rng, [(3, 0.5), (7, 0.5)], base=0, amp=1.0), 0, 1)
+        keep = BG.ridge(rng, [(4, 0.6), (9, 0.4)], base=0, amp=1.0) > -0.45                    # the breaks
+        top = line + off + BG.ridge(rng, [(5, 0.6), (13, 0.4)], base=0, amp=3)
+        m = np.maximum(m, ((y > top[None, :]) & (y < (top + wgt)[None, :]) & keep[None, :]).astype(np.float32))
+    return m
+
+
 def mars_polar(seed):
     """B-186: the polar cap (MarsFeature.PolarCap). layer0 a pale butterscotch sky, far layered ice plateaus in haze, the
     cap's white plain to the horizon; layer1 a nearer cap scarp: a frost top over a layered water-ice face with dust bands,
@@ -639,59 +665,83 @@ def mars_polar(seed):
     H = 1024
     hz = _gline(H, -2.0)
     stack = mars_sky(rng, pal, H, 0.0)
-    far = terrace(notch(BG.ridge(rng, [(2, 0.5), (5, 0.3), (11, 0.2)], base=hz - 210, amp=45), rng, 5, 30, 70), 24)   # B-186 rev 1: taller far plateaus
+    far = _eroded(rng, hz - 210, 40, 7, 36, 80)                                               # B-186 rev 2 (LEAD 12:3x): no stepped right angles
     farm = BG._ridge_mask(H, far)
     stack.append(wash32(rng, H, farm, BG._mix(frost, hazec, 0.35), var=0.03, edge_dark=0.05, bleed=2.5))
-    stack.append(wash32(rng, H, strata(H, farm, rng, hz - 170, hz - 20, 5, (3, 6)), BG._mix(ice, hazec, 0.50), var=0.03, edge_dark=0.02, bleed=2.5))
+    stack.append(wash32(rng, H, _face_bands(H, far, rng, (40, 75, 115, 150), (2.0, 4.5)) * farm, BG._mix(ice, hazec, 0.50), var=0.03, edge_dark=0.02, bleed=2.5))
     plain = BG._ridge_mask(H, BG.ridge(rng, [(4, 0.6), (9, 0.4)], base=hz - 8, amp=4))
     stack.append(wash32(rng, H, plain, BG._mix(frost, hazec, 0.15), var=0.03, edge_dark=0.03, bleed=3.0))
     out.append(BG.feather_top(*finish(stack, rng, H)))   # B-188: the sky's top edge feathered
     # layer1: the nearer cap scarp
     H = 512
     g1 = _gline(H, -1.0)
-    top = terrace(notch(BG.ridge(rng, [(1, 0.5), (3, 0.3), (7, 0.2)], base=g1 - 270, amp=45), rng, 5, 40, 80), 20)   # B-186 rev 1: a taller scarp (the first read as low stripes)
+    # B-186 rev 2 (LEAD 12:3x: the scarp read as a flat band of ruled stripes): an eroded, rounded skyline; a lit frost lip with
+    # a scalloped hem; a shaded face under it (darker toward its foot, vertical erosion flutes); dust bands that follow the face
+    # (parallel to the skyline), vary in weight and break off; the frost apron at its foot
+    top = _eroded(rng, g1 - 270, 40, 6, 48, 95)
     scarp = BG._ridge_mask(H, top)
+    yy1 = np.arange(H, dtype=np.float32)[:, None]
+    xs1 = np.arange(W, dtype=np.float32)
+    hem = top + 30 + 9 * np.abs(np.sin(np.pi * xs1 / (W / 26) + 0.7)) ** 0.6                    # the lip's scalloped hem (whole periods per tile)
+    capm = (scarp * (yy1 < hem[None, :])).astype(np.float32)
+    under = (scarp * (yy1 >= hem[None, :]) * (yy1 < hem[None, :] + 16)).astype(np.float32)   # the shadow the lip casts on the face
+    depth = np.clip((yy1 - hem[None, :]) / np.maximum(g1 - 28 - hem[None, :], 1), 0, 1)      # 0 under the lip, 1 at the foot
+    flutes = (BG.periodic_noise(rng, H, 5, 120) > 0.9).astype(np.float32) * scarp * (yy1 > hem[None, :] + 10)
     stack = Stack()
-    stack.append(wash32(rng, H, scarp, BG._mix(ice, pal["offwhite"], 0.35), var=0.05, edge_dark=0.07, bleed=2.0))
-    stack.append(wash32(rng, H, strata(H, scarp, rng, g1 - 220, g1 - 30, 6, (3, 6)), BG._mix(dust, pal["sky"], 0.10), var=0.04, edge_dark=0.03, bleed=2.0))
-    capm = (scarp * (np.arange(H)[:, None] < top[None, :] + 36)).astype(np.float32)
-    stack.append(wash32(rng, H, capm, frost, var=0.03, edge_dark=0.05, bleed=2.0))
-    apron = BG._ridge_mask(H, BG.ridge(rng, [(3, 0.5), (8, 0.5)], base=g1 - 28, amp=14))
+    stack.append(wash32(rng, H, scarp, BG._mix(ice, pal["offwhite"], 0.30), var=0.05, edge_dark=0.07, bleed=2.0))
+    stack.append(tint(rng, H, scarp * (yy1 > hem[None, :]), BG._mix(ice, pal["brown"], 0.30), 0.10 + 0.45 * depth, var=0.03, edge_dark=0.0, bleed=3.0))
+    stack.append(tint(rng, H, flutes, BG._mix(ice, pal["brown"], 0.35), 0.45, var=0.03, edge_dark=0.0, bleed=1.5))
+    stack.append(wash32(rng, H, _face_bands(H, hem, rng, (34, 62, 98, 140, 182), (1.5, 7.0)) * scarp, BG._mix(dust, pal["red"], 0.15), var=0.04, edge_dark=0.03, bleed=1.6))
+    stack.append(tint(rng, H, under, BG._mix(ice, pal["brown"], 0.45), 0.6, var=0.02, edge_dark=0.0, bleed=2.5))
+    stack.append(wash32(rng, H, capm, frost, var=0.03, edge_dark=0.06, bleed=1.6))
+    stack.append(tint(rng, H, (capm * (yy1 < top[None, :] + 6)).astype(np.float32), pal["offwhite"], 0.8, var=0.0, edge_dark=0.0, bleed=1.2))   # the lit rim
+    apron = BG._ridge_mask(H, _eroded(rng, g1 - 28, 12, 8, 10, 60))
     stack.append(wash32(rng, H, apron, BG._mix(frost, pal["teal"], 0.10), var=0.04, edge_dark=0.05, bleed=2.5))
     out.append(finish(stack, rng, H))
     # layer2: the near cap (480 tall, the line on row 352)
     H = 384 + 160
     g2 = _gline(H, -3.0)
     hq = H - 2 * BG.CONTINUE_ROWS
+    # B-186 rev 2 (LEAD 12:3x: the near cap read as blank cream): soft rounded hummocks (8-14 px) on the line, a field of rounded
+    # polygon plates outlined by darker troughs in the cap's first metre (squashed: the ground plane seen low), clearly dark
+    # fan-shaped CO2 streaks spreading downslope from small vents, sparse
     ws, x0 = [], 0.0
     while x0 < W - 40:
-        w = rng.uniform(50, 95)
-        ws.append((x0, w, rng.uniform(3.0, 8.0)))
+        w = rng.uniform(60, 110)
+        ws.append((x0, w, rng.uniform(8.0, 14.0)))
         x0 += w
     sc = W / x0
     hum = np.full(W, float(g2), np.float32)
-    troughs = []
     for a, w, h in ws:
         a, w = a * sc, w * sc
         xs = np.arange(int(a), int(a + w) + 1)
-        hum[xs % W] = g2 - h * np.sin(np.pi * np.clip((xs - a) / w, 0, 1)) ** 0.6
-        troughs.append(a)
+        hum[xs % W] = g2 - h * np.sin(np.pi * np.clip((xs - a) / w, 0, 1)) ** 0.7
     ground = BG._ridge_mask(H, hum)
+    rows = slice(int(g2) - 14, int(g2) + 64)                                                  # the polygon field (Voronoi cells, x wrapped)
+    py = np.arange(rows.start, rows.stop, dtype=np.float32)[:, None, None]
+    pxs = np.arange(W, dtype=np.float32)[None, :, None]
+    cxs, cys = rng.uniform(0, W, 46).astype(np.float32), rng.uniform(rows.start, rows.stop, 46).astype(np.float32)
+    ddx = np.abs((pxs - cxs[None, None, :] + W / 2) % W - W / 2)
+    dist = np.sqrt(ddx ** 2 + (3.2 * (py - cys[None, None, :])) ** 2)                        # rows squashed x3.2 (perspective)
+    dist.sort(axis=2)
+    edge = np.clip(1 - (dist[..., 1] - dist[..., 0]) / 7.0, 0, 1) ** 1.5
     trough = np.zeros((H, W), np.float32)
-    for a in troughs:                                                                         # soft V shading at each polygon trough
-        ell(trough, a, g2 + 6, 1.6, 7)                                                       # a soft crack (the 7x14 marks read as teal drips)
+    trough[rows] = edge
     trough *= ground
+    del dist, ddx
     fans = np.zeros((H, W), np.float32)
-    for _k in range(9):                                                                       # dark CO2 vent fans lying flat on the cap
-        cx, cy = rng.uniform(0, W), g2 + rng.uniform(14, 70)
-        if cy < hq - 10:
-            ell(fans, cx, cy, rng.uniform(26, 60), rng.uniform(2.5, 4.5))
+    for _k in range(8):                                                                       # dark CO2 fans: a vent dot, a fan spreading downslope
+        cx, cy = rng.uniform(0, W), g2 + rng.uniform(6, 40)
+        L_, spread, ang = rng.uniform(40, 90), rng.uniform(10, 22), rng.choice((-1.0, 1.0))
+        if cy + 16 < hq - 10:
+            for t in np.linspace(0, 1, 24):
+                ell(fans, cx + ang * L_ * t, cy + 6 * t, 2 + spread * t, 1.2 + 3.0 * t)
     rocks, rshade, rcap = (np.zeros((H, W), np.float32) for _ in range(3))
-    _seated(rocks, rshade, rcap, hum, rng, 10, 12, 30, hq, cap_h=0.35)
+    _seated(rocks, rshade, rcap, hum, rng, 9, 12, 30, hq, cap_h=0.35)
     stack = Stack()
     stack.append(wash32(rng, H, ground, BG._mix(frost, pal["teal"], 0.08), var=0.05, edge_dark=0.06, bleed=2.0))
-    stack.append(wash32(rng, H, trough, BG._mix(pal["teal"], frost, 0.45), var=0.03, edge_dark=0.0, bleed=3.0))
-    stack.append(tint(rng, H, fans, BG._mix(pal["brown"], pal["teal"], 0.30), 0.55, var=0.03, edge_dark=0.0, bleed=2.0))
+    stack.append(tint(rng, H, trough, BG._mix(pal["teal"], pal["brown"], 0.25), 0.55, var=0.03, edge_dark=0.0, bleed=1.6))
+    stack.append(tint(rng, H, fans * ground, BG._mix(pal["brown"], pal["teal"], 0.25), 0.75, var=0.03, edge_dark=0.0, bleed=1.8))
     stack.append(wash32(rng, H, rocks, BG._mix(pal["red"], pal["brown"], 0.35), var=0.05, edge_dark=0.10, bleed=1.2))
     stack.append(wash32(rng, H, rshade * rocks, BG._mix(pal["brown"], pal["red"], 0.25), var=0.04, edge_dark=0.03, bleed=1.6))
     stack.append(wash32(rng, H, rcap * rocks, frost, var=0.03, edge_dark=0.04, bleed=1.0))
