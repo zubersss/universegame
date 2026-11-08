@@ -1,0 +1,26 @@
+{
+  "key": "ships/pilgrim/puff_boost",
+  "style": "v3",
+  "frame_width": 192,
+  "frame_height": 288,
+  "columns": 4,
+  "gutter": 4,
+  "frames": 8,
+  "fps": 12,
+  "pivot": [
+    0.5,
+    0.96
+  ],
+  "facing": "right",
+  "ppu": 64,
+  "animations": [
+    {
+      "name": "puff",
+      "start": 0,
+      "length": 8,
+      "loop": true,
+      "loop_from": 0
+    }
+  ],
+  "squash_root": false
+}

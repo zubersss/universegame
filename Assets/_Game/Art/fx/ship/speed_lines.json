@@ -1,0 +1,26 @@
+{
+  "key": "fx/ship/speed_lines",
+  "style": "v3",
+  "frame_width": 128,
+  "frame_height": 360,
+  "columns": 4,
+  "gutter": 4,
+  "frames": 4,
+  "fps": 12,
+  "pivot": [
+    0.0,
+    0.5
+  ],
+  "facing": "right",
+  "ppu": 64,
+  "animations": [
+    {
+      "name": "streak",
+      "start": 0,
+      "length": 4,
+      "loop": true,
+      "loop_from": 0
+    }
+  ],
+  "squash_root": false
+}

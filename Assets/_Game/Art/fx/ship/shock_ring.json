@@ -1,0 +1,25 @@
+{
+  "key": "fx/ship/shock_ring",
+  "style": "v3",
+  "frame_width": 504,
+  "frame_height": 248,
+  "columns": 2,
+  "gutter": 4,
+  "frames": 8,
+  "fps": 12,
+  "pivot": [
+    0.5,
+    0.5
+  ],
+  "facing": "right",
+  "ppu": 64,
+  "animations": [
+    {
+      "name": "burst",
+      "start": 0,
+      "length": 8,
+      "loop": false
+    }
+  ],
+  "squash_root": false
+}
