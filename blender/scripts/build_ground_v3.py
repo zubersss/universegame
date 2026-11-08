@@ -653,20 +653,20 @@ def fill_venus(d, M, k=0):
         G.stroke(d, sh_(hu + hl[::-1]), M["glow"], 0.0, cyclic=True)
         G.stroke(d, sh_(up + lo[::-1]), M["ember"], 0.0, cyclic=True)
         G.stroke(d, sh_(cu + cl[::-1]), M["ember_core"], 0.0, cyclic=True)
-        G.seam(d, sh_(up), M["ink"])
-        G.seam(d, sh_(lo), M["ink"])
+        G.stroke(d, sh_(up), M["ink"], O)                 # the seam's edges at outer weight (it reads as a body)
+        G.stroke(d, sh_(lo), M["ink"], O)
     wrapped(ember, L, L)
     for i in range(6):                                                                        # sulfur veins (coloured lines)
         x0, z0 = rnd.uniform(0, L), rnd.uniform(0, L)
         pts = [(x0 + 0.12 * t + 0.05 * math.sin(t * 1.7 + i), z0 + 0.09 * t * (1 if i % 2 else -1) + 0.04 * math.sin(t * 2.3)) for t in range(10)]
         wrapped(lambda dx, dz, pts=pts: G.stroke(d, [(x + dx, z + dz) for x, z in pts], M["vein_line"], I), L, L)
-    for i in range(12):                                                                       # vitriol-glass shards
-        x, z, r = rnd.uniform(0, L), rnd.uniform(0, L), rnd.uniform(0.06, 0.14)
+    for i in range(11):                                                                       # vitriol-glass shards
+        x, z, r = rnd.uniform(0, L), rnd.uniform(0, L), rnd.uniform(0.13, 0.26)
         pts = _shard(0.0, 0.0, r, rnd, sides=rnd.choice((3, 4)), flat=rnd.uniform(0.5, 1.0))
 
         def shard(dx, dz, x=x, z=z, pts=pts, r=r):
             sh_ = [(x + dx + px, z + dz + pz) for px, pz in pts]
-            G.stroke(d, sh_, M["glass_i"], I, cyclic=True)
+            G.stroke(d, sh_, M["glass_i"], O, cyclic=True)
             G.seam(d, [(x + dx - r * 0.3, z + dz + r * 0.1), (x + dx + r * 0.2, z + dz + r * 0.35)], M["ink"])
         wrapped(shard, L, L)
     _scatter(d, M, L, 20, (0.0, L), (0.012, 0.022), "fold_c", 2971)
