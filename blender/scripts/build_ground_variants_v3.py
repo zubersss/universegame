@@ -1062,15 +1062,120 @@ PART = "variants"
 # B-190 (LEAD 13:0x): dig puffs in each ground's own material - B-175's draw_puff (the face-safe one: clods behind the billows,
 # c8cf185b) with its three roles (the billow fill, its shade, the clods) taken from the variant's materials; 8 frames of 128x128,
 # pivot (0.5, 0.25), clip 'puff', as terrain/<planet>/dig_puff
-PUFF_VARIANTS = {"earth": ("sand", "snow", "stone"), "mars": ("frost", "basalt")}
+PUFF_VARIANTS = {"earth": ("sand", "snow", "stone"), "mars": ("frost", "basalt"),
+                 "mercury": ("ice",), "venus": ("tessera", "vent")}                          # B-191 (LEAD cycle 284)
 PUFF_ROLES = {"sand": ("sand_i", "sand_sh", "sand_sh_i"), "snow": ("snow_i", "sandstone", "snow_sh_i"),
               "stone": ("rock_lit_i", "rock", "rock_sh_i"), "frost": ("frost_i", "pale", "ice_i"),
-              "basalt": ("bas_lit_i", "basalt", "basalt_sh_i")}
+              "basalt": ("bas_lit_i", "basalt", "basalt_sh_i"),
+              "ice": ("ice_i", "ice_sh", "ice_lit_i"),                                     # B-191: teal ice spray, off-white ice chunks
+              "tessera": ("tess_i", "tess_sh", "tess_dp_i"), "vent": ("sulfur_i", "sulfur_sh", "black_i")}
 
 
 def _puff_fn(v):
     dust_i, dust_sh, clod_i = PUFF_ROLES[v]
     return lambda d, M, k: B.draw_puff(d, {**M, "dust_i": M[dust_i], "dust_sh": M[dust_sh], "clod_i": M[clod_i]}, k)
+
+
+# B-192 (LEAD cycle 284): buried details for the newest fills on D-165's pattern (upright, pivot centred; UNITY's U-167 scatters
+# them in that fill's cutaway by a position seed, never rotated): three for Earth's ground_fill_sand, three for Mars's
+# ground_fill_basalt. Coordinates in metres from the frame centre (64 px = 1 m).
+
+def _rot_ell(cx, cz, rx, rz, a, n=20, lump=0.04, seed=0):
+    rnd = random.Random(seed)
+    pts = []
+    for i in range(n):
+        t = TAU * i / n
+        k = 1 + lump * (2 * rnd.random() - 1)
+        x, z = rx * k * math.cos(t), rz * k * math.sin(t)
+        pts.append((cx + x * math.cos(a) - z * math.sin(a), cz + x * math.sin(a) + z * math.cos(a)))
+    return pts
+
+
+def _tube(path, widths):
+    """A closed outline round a centre path, widths[i] each side of point i."""
+    left, right = [], []
+    for i, (x, z) in enumerate(path):
+        x0, z0 = path[max(i - 1, 0)]
+        x1, z1 = path[min(i + 1, len(path) - 1)]
+        ln = math.hypot(x1 - x0, z1 - z0) or 1.0
+        nx, nz = -(z1 - z0) / ln, (x1 - x0) / ln
+        left.append((x + nx * widths[i], z + nz * widths[i]))
+        right.append((x - nx * widths[i], z - nz * widths[i]))
+    return left + right[::-1]
+
+
+def fs_scallop(d, M):
+    """A pink scallop shell from the old sea floor: a ribbed fan with a scalloped rim and two ears at the hinge."""
+    hz = -0.15
+    arc = []
+    for i in range(41):
+        a = math.radians(32 + 116 * i / 40)
+        r = 0.29 + 0.012 * abs(math.sin(9 * math.pi * i / 40))                               # one rim bump per rib
+        arc.append((r * math.cos(a), hz + r * math.sin(a)))
+    G.stroke(d, [(-0.08, hz - 0.03), (0.08, hz - 0.03), (0.09, hz + 0.03)] + arc + [(-0.09, hz + 0.03)], M["shell_pink_i"], O, cyclic=True)
+    for j in range(9):
+        a = math.radians(42 + 96 * j / 8)
+        G.seam(d, [(0.05 * math.cos(a), hz + 0.05 + 0.03 * math.sin(a)), (0.26 * math.cos(a), hz + 0.26 * math.sin(a))], M["ink"])
+    G.seam(d, [(-0.08, hz + 0.03), (0.08, hz + 0.03)], M["ink"])
+
+
+def fs_fulgurite(d, M):
+    """A fulgurite: a knobbly tube of sand fused by lightning, branching, broken off at one end to show its hollow core."""
+    def branch(p0, p1, w0, w1, n, wob, seed):
+        r = random.Random(seed)
+        path = [(p0[0] + (p1[0] - p0[0]) * t, p0[1] + (p1[1] - p0[1]) * t + wob * math.sin(math.pi * 2.3 * t + seed)) for t in [i / n for i in range(n + 1)]]
+        ws = [(w0 + (w1 - w0) * i / n) * (1 + 0.28 * (r.random() - 0.5)) for i in range(n + 1)]
+        return path, _tube(path, ws)
+    for p0, p1, seed in (((-0.06, 0.0), (0.12, -0.17), 3), ((0.14, 0.02), (0.30, 0.17), 5)):
+        G.stroke(d, branch(p0, p1, 0.028, 0.012, 10, 0.015, seed)[1], M["sandstone_i"], I, cyclic=True)
+    path, outline = branch((-0.40, 0.04), (0.40, -0.02), 0.046, 0.02, 24, 0.03, 1)
+    G.stroke(d, outline, M["sandstone_i"], O, cyclic=True)
+    G.stroke(d, G.lumpy_ellipse(path[0][0] + 0.004, path[0][1], 0.012, 0.028, n=10, lump=0.05, seed=7), M["rock_sh"], 0.0, cyclic=True)
+
+
+def fs_desert_rose(d, M):
+    """A desert rose: a rosette of rounded gypsum blades, rust behind, sand-coloured in front, each front blade's edge-on ridge."""
+    back = [(-0.10, 0.02, 0.15, 0.045, 1.15), (0.09, 0.03, 0.15, 0.045, 0.45), (0.0, 0.08, 0.14, 0.04, 1.6),
+            (-0.16, -0.06, 0.13, 0.04, 0.2), (0.16, -0.07, 0.13, 0.04, 2.9)]
+    front = [(-0.05, -0.06, 0.13, 0.04, 0.75), (0.06, -0.05, 0.12, 0.04, 2.3), (0.0, -0.11, 0.12, 0.035, 0.05)]
+    for i, (cx, cz, rx, rz, a) in enumerate(back):
+        G.stroke(d, _rot_ell(cx, cz, rx, rz, a, seed=10 + i), M["rust_i"], I, cyclic=True)
+    for i, (cx, cz, rx, rz, a) in enumerate(front):
+        G.stroke(d, _rot_ell(cx, cz, rx, rz, a, seed=20 + i), M["sand_sh_i"], I, cyclic=True)
+        G.seam(d, [(cx - 0.5 * rx * math.cos(a), cz - 0.5 * rx * math.sin(a)), (cx + 0.5 * rx * math.cos(a), cz + 0.5 * rx * math.sin(a))], M["ink"])
+
+
+def fs_lava_tube(d, M):
+    """A lava tube in section: a pale chilled rind round an empty dark tube, the last flow's flat floor, lava drips on the roof."""
+    G.stroke(d, G.lumpy_ellipse(0.0, 0.0, 0.80, 0.34, n=40, lump=0.04, seed=1931), M["bas_lit_i"], O, cyclic=True)
+    G.stroke(d, G.lumpy_ellipse(0.0, 0.03, 0.64, 0.24, n=36, lump=0.03, seed=1932), M["basalt_sh_i"], I, cyclic=True)
+    G.stroke(d, G.lumpy_ellipse(0.0, -0.13, 0.42, 0.045, n=24, lump=0.03, seed=1933), M["basalt_i"], I, cyclic=True)
+    for x in (-0.38, -0.2, -0.05, 0.12, 0.3, 0.42):
+        top = 0.03 + 0.24 * math.sqrt(max(0.0, 1 - (x / 0.64) ** 2)) - 0.015
+        G.stroke(d, [(x - 0.022, top), (x + 0.022, top), (x + 0.004, top - 0.06), (x - 0.004, top - 0.06)], M["bas_lit_i"], I, cyclic=True)
+
+
+def fs_vesicles(d, M):
+    """Gas vesicles frozen in the flow: dark bubbles stretched sideways, each with a lit lower lip."""
+    rnd = random.Random(1934)
+    for i in range(8):
+        a, dist = rnd.uniform(0, TAU), 0.2 * math.sqrt(rnd.random())
+        x, z, r = dist * math.cos(a), dist * math.sin(a) * 0.6, rnd.uniform(0.028, 0.05)
+        G.stroke(d, G.lumpy_ellipse(x, z, r * 1.5, r, n=14, lump=0.06, seed=1934 + i), M["basalt_sh_i"], I, cyclic=True)
+        G.stroke(d, G.lumpy_ellipse(x, z - r * 0.5, r * 0.9, r * 0.32, n=10, lump=0.0, seed=1940 + i), M["bas_lit"], 0.0, cyclic=True)
+
+
+def fs_amygdale(d, M):
+    """An amygdale: an old vesicle filled with pale zeolite, needles radiating from a teal core."""
+    G.stroke(d, G.lumpy_ellipse(0.0, 0.0, 0.21, 0.15, n=24, lump=0.04, seed=1951), M["pale_i"], O, cyclic=True)
+    G.stroke(d, G.lumpy_ellipse(0.02, 0.01, 0.09, 0.06, n=16, lump=0.05, seed=1952), M["ice_i"], I, cyclic=True)
+    for k in range(12):
+        a = TAU * k / 12 + 0.13
+        G.seam(d, [(0.02 + 0.10 * math.cos(a), 0.01 + 0.068 * math.sin(a)), (0.17 * math.cos(a), 0.12 * math.sin(a))], M["ink"])
+
+
+FILL_PIECES = {"earth": ("sand", [("scallop", fs_scallop, 64, 48), ("fulgurite", fs_fulgurite, 96, 48), ("desert_rose", fs_desert_rose, 64, 64)]),
+               "mars": ("basalt", [("lava_tube", fs_lava_tube, 128, 64), ("vesicles", fs_vesicles, 64, 48), ("amygdale", fs_amygdale, 48, 48)])}
 
 
 def _pieces(planet, part="variants"):
@@ -1080,6 +1185,9 @@ def _pieces(planet, part="variants"):
         return {f"ground_lip_{v}": (128, 96, LIP_PIV, 1, LIPS[v]) for v in PLANET_VARIANTS[planet]}, ()
     if part == "puffs":                                                                       # B-190: one 8-frame sheet per material
         return {f"dig_puff_{v}": (128, 128, (0.5, 0.25), 8, _puff_fn(v)) for v in PUFF_VARIANTS[planet]}, ()
+    if part == "fills":                                                                       # B-192: the variant fill's buried details
+        v, lst = FILL_PIECES[planet]
+        return {f"fill_decor_{v}_{i + 1}": (w, h, (0.5, 0.5), 1, (lambda d, M, k, fn=fn: fn(d, M))) for i, (_n, fn, w, h) in enumerate(lst)}, ()
     if part == "b181":                                                                        # B-181: the planet's new biome variants, their own row
         P, T = {}, []
         for v in B181_VARIANTS[planet]:
@@ -1140,7 +1248,8 @@ def use_planet(planet, part="variants"):
     """The row's planet: Earth's sand / stone / snow set (B-178) or Mars's polar frost (LEAD 05:3x); part "lips": B-180's lips."""
     global PLANET, VARIANTS, PIECES, TILES, KEYS, PART
     PLANET, PART = planet, part
-    VARIANTS = B181_VARIANTS[planet] if part == "b181" else PUFF_VARIANTS[planet] if part == "puffs" else PLANET_VARIANTS[planet]
+    VARIANTS = (B181_VARIANTS[planet] if part == "b181" else PUFF_VARIANTS[planet] if part == "puffs"
+                else (FILL_PIECES[planet][0],) if part == "fills" else PLANET_VARIANTS[planet])
     PIECES, TILES = _pieces(planet, part)
     KEYS = _keys()
 
@@ -1165,7 +1274,7 @@ def sheets():
 
 
 def pieces_of(S):
-    if PART in ("lips", "puffs"):
+    if PART in ("lips", "puffs", "fills"):
         return dict(S)
     out = {n: S[n] for n in TILES}
     for v in VARIANTS:
@@ -1199,6 +1308,10 @@ def sheet_meta(kn, frames):
         v = kn.rsplit("_", 1)[1]
         meta.update({"animations": [{"name": "puff", "start": 0, "length": n, "loop": False}], "variant": v,
                      "note": f"B-190: the dig puff in the {v} ground's material (as dig_puff: the clods behind the billows, no face)"})
+    elif kn.startswith("fill_decor_"):
+        v, i = kn.split("_")[2], int(kn.rsplit("_", 1)[1]) - 1
+        meta.update({"upright": True, "variant": v, "fill": FILL_OF[v], "decor": FILL_PIECES[PLANET][1][i][0],
+                     "note": f"B-192: a buried detail of {FILL_OF[v]} (D-165's pattern, for U-167): UNITY scatters it in that fill's cutaway by a position seed, never rotated; pivot centred"})
     elif kn.startswith("ground_band_"):
         v = kn.rsplit("_", 1)[1]
         meta.update({"tile_x": True, "repeat_px": B.BAND_W, "surface_row": B.SURF_ROW, "above_px": B.SURF_ROW, "below_px": B.BAND_H - B.SURF_ROW,
@@ -1255,7 +1368,7 @@ def export(art, S=None):
             _json.dump(meta, f, indent=2)
             f.write("\n")
         out.append((meta["key"], sheet.shape[1], sheet.shape[0], n))
-    return out, within, f"{len(out)} keys, contract v3.2 11.9 ({'B-180 lips' if PART == 'lips' else 'B-181 variants' if PART == 'b181' else 'B-190 puffs' if PART == 'puffs' else 'B-178 variants'})"
+    return out, within, f"{len(out)} keys, contract v3.2 11.9 ({'B-180 lips' if PART == 'lips' else 'B-181 variants' if PART == 'b181' else 'B-190 puffs' if PART == 'puffs' else 'B-192 fill decor' if PART == 'fills' else 'B-178 variants'})"
 
 
 def main(out, S=None, allw=None, footnote=None):
@@ -1263,6 +1376,9 @@ def main(out, S=None, allw=None, footnote=None):
         S, allw = sheets()
     if PART == "puffs":                                                                       # B-190: the export's review, this planet's rows
         preview_puffs(os.path.dirname(out), planets=(PLANET,), pieces=pieces_of(S), out=out, footnote=footnote)
+        return
+    if PART == "fills":                                                                       # B-192: the export's review, this planet's rows
+        preview_fills(os.path.dirname(out), planets=(PLANET,), pieces=pieces_of(S), out=out, footnote=footnote)
         return
     (preview_lips if PART == "lips" else preview)(os.path.dirname(out), pieces=pieces_of(S), out=out, footnote=footnote)
 
@@ -1575,7 +1691,7 @@ def preview_puffs(out_dir, planets=("earth", "mars"), pieces=None, out=None, foo
     Wt = rows[0].shape[1]
     head = np.empty((22, Wt, 3), np.float32)
     head[:] = review.PAPER
-    review._label(head, "B-190 dig puffs in each ground's material (draw_puff, the clods behind the billows): 8 frames at 1x over the band, frame 2 at 2x", 6, 4)
+    review._label(head, ("B-191" if planets[0] in ("mercury", "venus") else "B-190") + " dig puffs in each ground's material (draw_puff, the clods behind the billows): 8 frames at 1x over the band, frame 2 at 2x", 6, 4)
     foot = np.empty((30 + 16 * len(lines), Wt, 3), np.float32)
     foot[:] = review.PAPER
     for i, ln in enumerate(lines):
@@ -1583,7 +1699,7 @@ def preview_puffs(out_dir, planets=("earth", "mars"), pieces=None, out=None, foo
     img = np.vstack([head] + rows + [foot])
     import time
     review.draw(img, time.strftime("%m-%d %H:%M") + " " + (footnote or "design preview (lock-free, fakegp + numpy)"), 2, img.shape[0] - 16, (1.0, 1.0, 0.85))
-    out = out or os.path.join(out_dir, "review_b190_dig_puffs_preview.png")
+    out = out or os.path.join(out_dir, "review_b190_dig_puffs_preview.png" if planets[0] in ("earth", "mars") else "review_b191_dig_puffs_preview.png")
     np.clip(img, 0.0, 1.0, out=img)
     u8 = np.empty(img.shape[:2] + (4,), np.uint8)
     u8[..., :3] = np.rint(img * 255.0)
@@ -1594,9 +1710,91 @@ def preview_puffs(out_dir, planets=("earth", "mars"), pieces=None, out=None, foo
         print(ln)
 
 
-if __name__ == "__main__":                       # python -I build_ground_variants_v3.py <preview dir> [planet] [lips | b181] | <dir> puffs
-    if len(sys.argv) > 2 and sys.argv[2] == "puffs":
-        preview_puffs(sys.argv[1])
+def preview_fills(out_dir, planets=("earth", "mars"), pieces=None, out=None, footnote=None):
+    """B-192: per planet, two tiles of the variant's fill (read from Art) with the new buried details scattered by a seed as
+    U-167 will, each detail at 2x on the right; under it the planet's D-165 fill_decor on its ground_fill for comparison."""
+    import numpy as np
+    from meridian import pngio
+    sys.path.insert(0, os.path.dirname(HERE))
+    import review
+    keep = (PLANET, PART)
+    rows, lines = [], []
+    for p in planets:
+        use_planet(p, "fills")
+        v, lst = FILL_PIECES[p]
+        E = os.path.join(ART, "terrain", p)
+        rd = lambda name: pngio.read_png_np(os.path.join(E, name + "_color.png"))  # noqa: E731
+        fill = rd(FILL_OF[v])[..., :3].astype(np.float32) / 255.0
+        frames = []
+        for i, (dn, _fn, w, h) in enumerate(lst):
+            name = f"fill_decor_{v}_{i + 1}"
+            fr = pieces[name][0][0] if pieces is not None and name in pieces else render_piece(name, 0)[0]
+            frames.append((name, dn, fr))
+            m = v3.EDGE_MARGIN
+            edge = fr[:m, :, 3].any() or fr[-m:, :, 3].any() or fr[:, :m, 3].any() or fr[:, -m:, 3].any()
+            lines.append(f"{name} ({dn}) {w}x{h}, pivot centred, palette {v3.palette_hits(fr, p)[0] * 100:.1f}%{'; EDGE' if edge else '; inside the edge margin'}")
+        field = np.tile(fill, (1, 2, 1)).copy()                                                # two tiles: 16 m x 8 m of the cutaway
+        rnd, boxes = random.Random(192), []
+        for j in range(80):
+            if len(boxes) >= 18:
+                break
+            _n, _dn, fr = frames[j % len(frames)]
+            h, w = fr.shape[:2]
+            X0, Y0 = rnd.randint(8, field.shape[1] - w - 8), rnd.randint(8, field.shape[0] - h - 8)
+            if any(X0 < bx + bw + 24 and bx < X0 + w + 24 and Y0 < by + bh + 24 and by < Y0 + h + 24 for bx, by, bw, bh in boxes):
+                continue
+            boxes.append((X0, Y0, w, h))
+            review._over(field, fr, X0, Y0)
+        side = np.empty((field.shape[0], 2 * 128 + 16, 3), np.float32)
+        side[:] = review.PAPER
+        y = 0
+        for _n, dn, fr in frames:
+            h, w = fr.shape[:2]
+            crop = np.repeat(np.repeat(fill[:h, :w], 2, 0), 2, 1).copy()
+            review._over(crop, np.repeat(np.repeat(fr, 2, 0), 2, 1), 0, 0)
+            review._label(side, f"{dn} at 2x", 8, y + 2, scale=1)
+            side[y + 14:y + 14 + 2 * h, 8:8 + 2 * w] = crop
+            y += 14 + 2 * h + 8
+        top = np.hstack([field, side])
+        gf = rd("ground_fill")[..., :3].astype(np.float32) / 255.0
+        comp = np.tile(gf, (1, 3, 1))[:128, :top.shape[1]].copy()
+        x = 24
+        for i in range(len(B.FILL_DECOR.get(p, []))):
+            fr = rd(f"fill_decor_{i + 1}")
+            review._over(comp, fr, x, 64 - fr.shape[0] // 2)
+            x += fr.shape[1] + 48
+        for title, img in ((f"{p}: {FILL_OF[v]} (two tiles) with the NEW fill_decor_{v}_1..{len(lst)} scattered by a seed (as U-167), each at 2x", top),
+                           (f"{p}: for comparison, D-165's fill_decor_1..{len(B.FILL_DECOR.get(p, []))} on ground_fill", comp)):
+            lab = np.empty((22, top.shape[1], 3), np.float32)
+            lab[:] = review.PAPER
+            review._label(lab, title, 4, 6, scale=1)
+            rows += [lab, img]
+    use_planet(*keep)
+    Wt = rows[0].shape[1]
+    head = np.empty((22, Wt, 3), np.float32)
+    head[:] = review.PAPER
+    review._label(head, "B-192 buried details for the newest fills (D-165's pattern: upright, pivot centred, scattered in the cutaway, never rotated)", 6, 4)
+    foot = np.empty((30 + 16 * len(lines), Wt, 3), np.float32)
+    foot[:] = review.PAPER
+    for i, ln in enumerate(lines):
+        review._label(foot, ln, 6, 6 + 16 * i, scale=1)
+    img = np.vstack([head] + rows + [foot])
+    import time
+    review.draw(img, time.strftime("%m-%d %H:%M") + " " + (footnote or "design preview (lock-free, fakegp + numpy)"), 2, img.shape[0] - 16, (1.0, 1.0, 0.85))
+    out = out or os.path.join(out_dir, "review_b192_fill_decor_preview.png")
+    np.clip(img, 0.0, 1.0, out=img)
+    u8 = np.empty(img.shape[:2] + (4,), np.uint8)
+    u8[..., :3] = np.rint(img * 255.0)
+    u8[..., 3] = 255
+    pngio.write_png(out, u8)
+    print("written", out, u8.shape[1], "x", u8.shape[0])
+    for ln in lines:
+        print(ln)
+
+
+if __name__ == "__main__":                       # python -I build_ground_variants_v3.py <preview dir> [planet] [lips | b181] | <dir> puffs|fills [planets]
+    if len(sys.argv) > 2 and sys.argv[2] in ("puffs", "fills"):                            # [planets, comma-separated]
+        (preview_puffs if sys.argv[2] == "puffs" else preview_fills)(sys.argv[1], tuple(sys.argv[3].split(",")) if len(sys.argv) > 3 else ("earth", "mars"))
         fakegp.restore()
         sys.exit(0)
     if len(sys.argv) > 2:
