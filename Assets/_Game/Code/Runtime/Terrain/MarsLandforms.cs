@@ -18,10 +18,10 @@ namespace Meridian.Terrain
         public const int Width = 3072;
 
         public const int CanyonStart = 1150, CanyonEnd = 1750, CanyonWall = 128;
-        public const float CanyonDepth = 160f, LedgeStep = 5f;
+        public const float CanyonDepth = 165f, LedgeStep = 5f; // D-172: 165 (was 160), a margin over the floor dips the slope limit fills
 
-        public const int OlympusCenter = 2420, OlympusHalfWidth = 330, CalderaHalfWidth = 36;
-        public const float OlympusHeight = 220f, CalderaDepth = 35f;
+        public const int OlympusCenter = 2420, OlympusHalfWidth = 330, CalderaHalfWidth = 48; // D-172: 48 (was 36) with CalderaDepth 45: the dome falls ~12 m to the rim, the 31-degree walls cap the dish near 0.6 x 48
+        public const float OlympusHeight = 220f, CalderaDepth = 45f; // D-172 (proposed): 45 (was 35), so the dish under the slope cap stays 20+ m below its rim
 
         /// <summary>The cap spans the seam: 2860..3071 and 0..211.</summary>
         public const int CapHalfWidth = 212;

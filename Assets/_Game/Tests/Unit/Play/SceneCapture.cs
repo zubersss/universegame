@@ -2429,6 +2429,133 @@ namespace Meridian.Tests
         }
 
         /// <summary>
+        /// U-159 (D-161, D-172): Mars on the smooth ground beside 0.4.8's blocks → coordination/reports/unity/u159/: 1_plains, 2_canyon_floor,
+        /// 3_polar_cliff (the steepest stretch at the cap's edge), 4_caldera_rim (the summit beside Olympus's caldera), 5_olympus_flank, each as
+        /// &lt;spot&gt;_050 (smooth) and &lt;spot&gt;_048 (GroundField.ForceBlocks); then on the smooth ground 6_dig_node (a scoop beside a Mars node) and
+        /// 7_storm_plains (a dust storm's veil over the plains). The spots are chosen on the smooth pass and reused.
+        /// </summary>
+        [UnityTest, Timeout(480000)]
+        public IEnumerator CaptureU159Mars()
+        {
+            var name = Environment.GetEnvironmentVariable(Variable);
+            if (string.IsNullOrEmpty(name)) Assert.Ignore($"Set {Variable} (tools/unity_capture.ps1).");
+            if (SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.Null)
+                Assert.Fail("No graphics device: run without -nographics.");
+            bool wasCartoon = Meridian.View2D.CartoonStage.Enabled;
+            Meridian.View2D.CartoonStage.Enabled = true;
+            var mars = Meridian.Planets.PlanetId.Mars;
+            try
+            {
+#if UNITY_EDITOR
+                yield return UnityEditor.SceneManagement.EditorSceneManager.LoadSceneAsyncInPlayMode(
+                    CorePath, new LoadSceneParameters(LoadSceneMode.Single));
+#endif
+                var director = UnityEngine.Object.FindAnyObjectByType<SceneDirector>();
+                float timeout = Time.realtimeSinceStartup + 30f;
+                while (!director.IsReady && Time.realtimeSinceStartup < timeout) yield return null;
+                var dir = "coordination/reports/unity/u159";
+                Directory.CreateDirectory(dir);
+                string[] spots = { "1_plains", "2_canyon_floor", "3_polar_cliff", "4_caldera_rim", "5_olympus_flank" };
+                var xs = new int[spots.Length];
+                PlanetSideRoot side = null;
+
+                IEnumerator Load(bool blocks)
+                {
+                    Meridian.Terrain.GroundField.ForceBlocks = blocks;
+                    GameState.Instance.EditsFor(mars).Clear();
+                    foreach (var poi in Meridian.Planet.POI.PoiCatalog.For(mars)) GameState.Instance.ClearFlag(poi.StampedFlag);
+                    yield return director.LoadPlanetSide(GameState.Instance.catalog.Get(mars));
+                    side = director.PlanetSide;
+                    float until = Time.realtimeSinceStartup + 20f;
+                    while (!side.terrain.IsSettled && Time.realtimeSinceStartup < until) yield return null;
+                    if (side.hazards != null) side.hazards.enabled = false;
+                    if (side.dayNight != null) side.dayNight.Override = 0.45f;
+                    side.creatures.autoSpawn = false;
+                    side.creatures.DespawnAll();
+                }
+
+                IEnumerator Stand(float x)
+                {
+                    var t = side.terrain;
+                    var body = side.player.Body;
+                    var follow = side.sideCamera.GetComponent<Meridian.Player.CameraFollow>();
+                    if (follow != null) follow.enabled = true;
+                    body.simulated = false;
+                    body.position = new Vector2(x, t.TopSolidY(Mathf.FloorToInt(x)) + 2f); side.player.transform.position = body.position;
+                    yield return null;
+                    float until = Time.realtimeSinceStartup + 15f;
+                    while (!t.IsSettled && Time.realtimeSinceStartup < until) yield return null;
+                    body.simulated = true;
+                    for (int k = 0; k < 60; k++) yield return new WaitForFixedUpdate();
+                    if (follow != null) follow.SnapToTarget();
+                    for (int k = 0; k < 30; k++) yield return null;
+                    yield return new WaitForSeconds(0.8f); // the set's crossfade and the puffs
+                }
+
+                IEnumerator Shot(string label)
+                {
+                    yield return Save(side.sideCamera, $"{name}_{label}");
+                    File.Copy($"logs/capture_{name}_{label}.png", $"{dir}/{label}.png", true);
+                }
+
+                for (int pass = 0; pass < 2; pass++)
+                {
+                    yield return Load(pass == 1);
+                    var t = side.terrain;
+                    if (pass == 0)
+                    {
+                        Assert.IsTrue(t.SmoothGround, "Mars's ground is the traced outline (U-159)");
+                        xs[0] = 600;
+                        xs[1] = (Meridian.Terrain.MarsLandforms.CanyonStart + Meridian.Terrain.MarsLandforms.CanyonEnd) / 2;
+                        int cap = Meridian.Terrain.MarsLandforms.CapHalfWidth, steep = cap; float steepS = 0f;
+                        for (int x = cap - 40; x < cap + 40; x++) { float s = Mathf.Abs(t.CurveAt(x + 1) - t.CurveAt(x)); if (s > steepS) { steepS = s; steep = x; } }
+                        xs[2] = steep;
+                        int oc = Meridian.Terrain.MarsLandforms.OlympusCenter, rim = oc, rimTop = int.MinValue;
+                        for (int x = oc - Meridian.Terrain.MarsLandforms.CalderaHalfWidth - 30; x < oc; x++) { int h = t.OriginalTop(x); if (h > rimTop) { rimTop = h; rim = x; } }
+                        xs[3] = rim;
+                        xs[4] = oc - 200;
+                        TestContext.Out.WriteLine($"[MERIDIAN] u159 spots: plains {xs[0]}, canyon floor {xs[1]} (top {t.OriginalTop(xs[1])}), polar cliff {xs[2]} (curve step {steepS:F2}), caldera rim {xs[3]} (top {rimTop}, the caldera's floor {t.OriginalTop(oc)}: {rimTop - t.OriginalTop(oc)} m deep), flank {xs[4]}");
+                    }
+                    for (int i = 0; i < spots.Length; i++)
+                    {
+                        yield return Stand(xs[i] + 0.5f);
+                        string label = $"{spots[i]}_{(pass == 0 ? "050" : "048")}";
+                        yield return Shot(label);
+                        TestContext.Out.WriteLine($"[MERIDIAN] u159 {label}: x {xs[i]}, feet {side.player.Body.position.y:F2}, grounded {side.player.Grounded}, scene {(side.cartoon != null ? side.cartoon.Scene : "?")}, variant {(side.cartoon != null && side.cartoon.Smooth != null ? side.cartoon.Smooth.VariantAt(xs[i]) : -1)}");
+                    }
+                }
+
+                // The smooth ground's extras: a scoop beside a node, a storm over the plains.
+                yield return Load(false);
+                var finds = side.finds;
+                Assert.IsTrue(finds != null && finds.Active, "Mars's nodes and finds placed (U-158 on a smooth planet)");
+                Meridian.Mining.ResourceFinds.Node node = null;
+                foreach (var n in finds.nodes) if (n.x > side.spawnX + 30 && (node == null || n.x < node.x)) node = n;
+                Assert.NotNull(node, "a Mars node east of the pad");
+                yield return Stand(node.x - 3f);
+                var rig = side.rig; var owner = rig.owner; rig.owner = null;
+                bool dug;
+                try { dug = rig.Dig(new Vector2(node.x - 1f, side.terrain.SurfaceAt(node.x - 1f) - 0.2f)); }
+                finally { rig.owner = owner; }
+                yield return new WaitForSeconds(1f);
+                yield return Shot("6_dig_node");
+                TestContext.Out.WriteLine($"[MERIDIAN] u159 6_dig_node: {node.item} at {node.x}, dug {dug}");
+                yield return Stand(xs[0] + 0.5f);
+                Assert.NotNull(side.dustStorm, "Mars's dust storm");
+                side.dustStorm.Force(0f, 60f);
+                yield return new WaitForSeconds(6f);
+                yield return Shot("7_storm_plains");
+                TestContext.Out.WriteLine($"[MERIDIAN] u159 7_storm_plains: intensity {side.dustStorm.Intensity:F2}, veil fill layer {(side.cartoon != null && side.cartoon.StormLayers != null ? side.cartoon.StormLayers.FillLayer : -1)}");
+                LogAssert.NoUnexpectedReceived();
+            }
+            finally
+            {
+                Meridian.Terrain.GroundField.ForceBlocks = false;
+                Meridian.View2D.CartoonStage.Enabled = wasCartoon;
+            }
+        }
+
+        /// <summary>
         /// U-104: the cartoon HUD at 1080p → coordination/reports/unity/u104/: on foot beside the ship (the three dials, the
         /// suit rows, the markers, every string in Patrick Hand) and aboard just under the Escape Line (the ship rows, the
         /// painted dotted line with its lettered sign). The overlay canvases draw through the side camera for the shots.
