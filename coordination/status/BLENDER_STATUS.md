@@ -1,8 +1,16 @@
 # BLENDER STATUS
-Updated: 2026-11-08 12:4x · Session: 10 (all three windows restarted ~09:30 after a ~3-hour break; context rebuilt from the repo) · trimmed under D-113; older: coordination/status/archive/BLENDER_2026-11-08.md, BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
+Updated: 2026-11-08 12:5x · Session: 10 (all three windows restarted ~09:30 after a ~3-hour break; context rebuilt from the repo) · trimmed under D-113; older: coordination/status/archive/BLENDER_2026-11-08.md, BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
 
 ## Current task
-B-185 exports, one planet per slot: Mercury (day / twilight / night) next, then Venus surface; then B-182's Earth audit (audit_g1.py), B-184's puffs (Mars / Mercury / Venus ground_set re-exports, only dig_puff changing), B-187's previews (mercury/coldtrap, venus/tessera: sources in, now 544 / y_m -3.0 too). Files only while UNITY holds the lock; my want beside its lock, withdrawn between the parts of a multi-lock job.
+B-189 (LEAD 12:4x) previews in my next slot: venus/surface (its B-185 export folded in: one export, not two), mars/canyon (+ storm, which shares its layers 0-1), mars/plains; each to LEAD, then its export. Then B-182's Earth audit, B-184's puffs, B-187's previews. B-185 Mercury exported (d7fbeace). Files only while UNITY holds the lock.
+
+## B-189 list: every inner set using terrace() / notch() or showing right-angle steps (sources 4876c415)
+- mars/canyon: layer0 rim notch() + spur terrace(notch()), layer1's three tiers terrace(notch()) -> _eroded / _soft_ledges (ledges with rounded corners). REDRAWN, preview pending.
+- mars/storm: shares the canyon's layers 0-1 (fixed with it); its veil has no skyline. Re-export with the canyon.
+- mars/plains: no terrace / notch, but its far mesas were trapezoids with flat block caps -> the desert's eroded buttes (mesa2), form shading, lit caprock. REDRAWN, preview pending.
+- venus/surface: layer1's tesserae ridge terrace() -> _soft_ledges. REDRAWN, preview pending (its B-185 export waits for it).
+- mercury/coldtrap (B-187): rim notch(), walls terrace(notch()) -> _eroded / _soft_ledges. REDRAWN before its first preview.
+- clean (no terrace / notch, no right-angle steps at 1x): mercury/day, twilight, night (ridges and crater ellipses; viewed in their 12:5x dip reviews), venus/tessera (B-187; sigmoid ridges), mars/polar, mars/tharsis (B-186). venus/deck: no terrace / notch in source; to view at 1x in its review before closing B-189.
 
 ## Last completed
 - 12:43-12:45: B-186 exported (60132bdb): mars/polar (rev 2, accepted) + mars/tharsis (rev 3: two unequal rises, varied flow bands, tongue fronts); stamped dip reviews incl. the camera-5-m frame.
