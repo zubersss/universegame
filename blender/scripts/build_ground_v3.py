@@ -70,7 +70,7 @@ def colours(planet):
                 "soil": sh("sky"), "soil_sh": dp("red"), "soil_dp": P["brown"], "ochre": sh("mustard"), "redbrown": dp("red"), "salmon": P["sky"],
                 "basalt": dp("teal"), "basalt_sh": P["brown"], "hem": P["brown"], "hem_hi": sh("offwhite"), "ice": P["offwhite"], "ice_sh": sh("teal"),
                 "rock": dp("sky"), "rock_sh": P["brown"], "pebble": sh("offwhite"), "frost": P["offwhite"], "frost_sh": P["teal"],
-                "ripple": P["sky"], "ripple_sh": sh("sky"), "dust": P["sky"], "dust_sh": sh("sky"), "clod": dp("red")}
+                "ripple": sh("mustard"), "ripple_sh": dp("mustard"), "dust": sh("red"), "dust_sh": dp("red"), "clod": P["brown"]}   # not the salmon sky
     if planet == "mercury":                     # LEAD 04:1x: cream regolith, impact breccia, a charcoal band, sulfide, solarite hints
         return {"top": P["offwhite"], "top_sh": sh("offwhite"), "topsoil": dp("offwhite"), "speck": dp("sky"),
                 "soil": dp("offwhite"), "soil_sh": sh("sky"), "soil_dp": P["brown"], "charcoal": P["brown"],
@@ -1042,12 +1042,12 @@ def preview(out_dir, planet="earth", pieces=None, out=None, footnote=None):
             pass
     A = compose(strip_tex, 24, "shear")
     surveyor_at(A, 2.0), surveyor_at(A, 12.0), surveyor_at(A, 20.5)
-    rows.append(("today's terrain/earth/ground_strip per column (vertical shear, as GroundStrip draws it): on the 30 deg slope and the "
-                 "lip the tufts tilt, the blades and the ink edge thin", A))
+    rows.append((f"today's terrain/{planet}/ground_strip per column (vertical shear, as GroundStrip draws it): on the 30 deg slope and the "
+                 "lip its top detail tilts and the ink edge thins", A))
     B = compose(strip_tex, 24, "normal")
     surveyor_at(B, 2.0), surveyor_at(B, 12.0), surveyor_at(B, 20.5)
-    rows.append(("the same strip bent along the curve (a mesh band, u = arc length): the 1 m tufts lean with the slope and splay on the "
-                 "lip; its 2 m soil body bends too", B))
+    rows.append(("the same strip bent along the curve (a mesh band, u = arc length): its top detail leans with the slope and splays on the "
+                 "lip; its 2 m body folds at the cliff", B))
     scoop = (int(8.6 * PPU), int(round(ys[int(8.6 * PPU)])) + 20, 62)
     Cimg = compose(band_tex, SURF_ROW, "normal", fill_tex, scoop)
     # the dig rim round the scoop's wall (the band's own mapping on a circle), the decor upright, the lip, a puff
