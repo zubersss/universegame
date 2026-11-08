@@ -153,6 +153,35 @@ namespace Meridian.Tests
             Assert.Greater(WindAnchor.LetGo, WindAnchor.Reach, "the hold lets go a little past where it takes");
         }
 
+        /// <summary>D-157 (c): the drawn surveyor leans into the wind: 40 % of the flora's steady lean in the swell, 60 % in a gust, none anchored.</summary>
+        [Test]
+        public void TheSurveyorLeansIntoTheWind()
+        {
+            Assert.AreEqual(10f, NeptuneWind.SurveyorLean(35f, false, false), 1e-4f, "+x wind: the head back toward −x, 40 % of 25°");
+            Assert.AreEqual(15f, NeptuneWind.SurveyorLean(35f, true, false), 1e-4f, "in a gust: 60 %");
+            Assert.AreEqual(-10f, NeptuneWind.SurveyorLean(-35f, false, false), 1e-4f, "−x wind: mirrored");
+            Assert.AreEqual(0f, NeptuneWind.SurveyorLean(35f, true, true), "anchored: upright");
+            Assert.AreEqual(0f, NeptuneWind.SurveyorLean(0f, false, false), "calm: upright");
+            Assert.AreEqual(-0.4f * NeptuneWind.Lean(14f, false, 0), NeptuneWind.SurveyorLean(14f, false, false), 1e-5f);
+        }
+
+        /// <summary>D-157 (b): the wind anchor is a Builder piece made at the fabricator (placed like a camp prop); every Neptune landing floe
+        /// carries one by the pad.</summary>
+        [Test]
+        public void TheWindAnchorIsABuilderPiece()
+        {
+            var spec = Meridian.Building.PieceSpec.ForItem("wind_anchor");
+            Assert.NotNull(spec, "a base piece");
+            Assert.AreEqual(Meridian.Building.PieceKind.WindAnchor, spec.kind);
+            Assert.AreEqual(WindAnchor.ArtKey, spec.artKey);
+            Assert.IsFalse(spec.solid, "walk-through: the surveyor stands at it");
+            Assert.NotNull(Meridian.Items.ItemRegistry.Get("wind_anchor"));
+            var recipe = Meridian.Crafting.CraftingDefaults.Recipes().Find(r => r.output.item == "wind_anchor");
+            Assert.NotNull(recipe, "the fabricator makes it");
+            Assert.AreEqual(Meridian.Crafting.Station.Fabricator, recipe.station);
+            Assert.Greater(Meridian.Core.PlanetSideRoot.PadAnchorOffset, 0);
+        }
+
         /// <summary>U-144: the HUD's gust warning: GUST IN 2, GUST IN 1, then GUST while it blows; nothing between.</summary>
         [Test]
         public void TheHudWarnsOfAGust()

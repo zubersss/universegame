@@ -246,6 +246,14 @@ namespace Meridian.Building
                 box.size = spec.size;
                 box.offset = new Vector2(spec.size.x * 0.5f, spec.size.y * 0.5f);
             }
+            if (spec.kind == PieceKind.WindAnchor)
+            {
+                // D-157 (b): the anchor's hold point at its foot, mid-width (the piece draws the art itself).
+                var hold = new GameObject("Hold");
+                hold.transform.SetParent(go.transform, false);
+                hold.transform.localPosition = new Vector3(spec.size.x * 0.5f, 0.5f, 0f);
+                hold.AddComponent<Meridian.Planet.Weather.WindAnchor>().drawsItself = false;
+            }
             if (spec.kind == PieceKind.Lamp)
             {
                 // U-064: a lamp lights its shelter: a small warm point light at its head.

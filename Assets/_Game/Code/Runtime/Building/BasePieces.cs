@@ -3,7 +3,7 @@ using UnityEngine;
 namespace Meridian.Building
 {
     /// <summary>Append only: saved by name in BasePieceSave.kind.</summary>
-    public enum PieceKind { Wall, Door, Lamp, Crate, Deck, FloatCell }
+    public enum PieceKind { Wall, Door, Lamp, Crate, Deck, FloatCell, WindAnchor } // D-157: appended (saves name kinds; the table follows the enum)
 
     /// <summary>
     /// U-056 Bases v1: one base piece (B-014 shelter set, B-045 aerostat set). Pieces sit on the 1 m tile grid,
@@ -29,6 +29,8 @@ namespace Meridian.Building
             new PieceSpec { kind = PieceKind.Crate, itemKey = "storage_crate", artKey = "props/common/storage_crate", size = new Vector2Int(1, 1), solid = true, seals = true, stretch = true, mass = 2f },
             new PieceSpec { kind = PieceKind.Deck, itemKey = "aerostat_deck", artKey = "props/venus/aerostat_deck", size = new Vector2Int(2, 1), solid = true, seals = true, stretch = true, mass = 2f },
             new PieceSpec { kind = PieceKind.FloatCell, itemKey = "float_cell_mk1", artKey = "props/venus/buoyancy_cell", size = new Vector2Int(1, 2), mass = 0f, lift = 6f },
+            // D-157 (b): Neptune's wind anchor (B-161, 128 x 192): placed like a camp prop; the surveyor holds it to stand fast (U-144).
+            new PieceSpec { kind = PieceKind.WindAnchor, itemKey = "wind_anchor", artKey = "props/neptune/wind_anchor", size = new Vector2Int(2, 3), mass = 1f },
         };
 
         public static PieceSpec Get(PieceKind k) => All[(int)k];

@@ -24,7 +24,7 @@ namespace Meridian.Planet.Weather
 
         void OnDisable()
         {
-            if (player != null) player.windX = 0f;
+            if (player != null) { player.windX = 0f; player.leanDegrees = 0f; }
             Wind = Drift = 0f; Sheltered = false; Holding = null;
         }
 
@@ -53,6 +53,8 @@ namespace Meridian.Planet.Weather
             Sheltered = NeptuneWind.Sheltered(solid, feet, Wind > 0f ? 1 : Wind < 0f ? -1 : 0);
             Drift = NeptuneWind.Drift(Wind, Sheltered, Holding != null);
             player.windX = Drift;
+            // D-157 (c): the drawn surveyor leans into it (quarter-degree steps: the view writes only on a change).
+            player.leanDegrees = Mathf.Round(NeptuneWind.SurveyorLean(Wind, NeptuneWind.Gusting(t), Holding != null) * 4f) * 0.25f;
         }
     }
 }

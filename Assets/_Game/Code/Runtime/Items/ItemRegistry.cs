@@ -90,6 +90,8 @@ namespace Meridian.Items
                 ("thruster_mk2", "Thruster Mk2"), ("thruster_mk3", "Thruster Mk3"),
             })
                 Add(new ItemDef { id = id++, key = key, name = name, icon = $"icons/{key}/base" });
+            // D-157 (b): Neptune's wind anchor, a base piece (its prop art is its icon); appended so every older id stays.
+            Add(new ItemDef { id = id++, key = "wind_anchor", name = "Wind anchor", icon = "props/neptune/wind_anchor" });
         }
 
         /// <summary>U-107: a retired item's slot in an id-ordered list (its id stays unused so later ids never move).</summary>

@@ -25,6 +25,8 @@ namespace Meridian.Player
         public InputActionAsset actions;
         /// <summary>Air speed (m/s, +x) the surveyor drifts with (U-050 Venus wind; 0 elsewhere).</summary>
         [System.NonSerialized] public float windX;
+        /// <summary>D-157: the drawn surveyor's lean (z degrees) into Neptune's wind (0 elsewhere); visual only, PlayerView applies it.</summary>
+        [System.NonSerialized] public float leanDegrees;
         /// <summary>Share of the wind that moves a grounded surveyor.</summary>
         public const float WindGrip = 0.35f;
         [Tooltip("Tests drive the controller through `intent` instead of devices.")]

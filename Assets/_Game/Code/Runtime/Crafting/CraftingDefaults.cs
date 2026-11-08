@@ -50,6 +50,8 @@ namespace Meridian.Crafting
             R("fab_lamp", Station.Fabricator, A("lamp", 2), "fabrication", A("smelter_bar_copper"), A("silica")),
             R("fab_storage_crate", Station.Fabricator, A("storage_crate"), "fabrication", A("smelter_bar_iron", 2)),
             R("fab_aerostat_deck", Station.Fabricator, A("aerostat_deck", 2), "fabrication", A("polymer", 2), A("smelter_bar_iron")),
+            // D-157 (b): a wind anchor for Neptune's gales (placeholder costs: iron for the post and hooks, ammonia ice from any giant's floes).
+            R("fab_wind_anchor", Station.Fabricator, A("wind_anchor"), "fabrication", A("smelter_bar_iron", 3), A("ammonia_ice", 2)),
             // Story blueprints (Bible §2).
             R("fab_solarite_capacitor", Station.Fabricator, A("solarite_capacitor"), "solarite_capacitor", A("solarite", 2), A("circuit_board"), A("smelter_bar_copper")),
             R("fab_float_cell", Station.Fabricator, A("float_cell_mk1"), "float_cell_mk1", A("polymer", 3), A("vitriol_glass", 2), A("smelter_bar_iron")),

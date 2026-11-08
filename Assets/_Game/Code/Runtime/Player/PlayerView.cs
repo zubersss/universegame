@@ -130,6 +130,8 @@ namespace Meridian.Player
             return SurveyorAnim.StandIn(clip);
         }
 
+        float appliedLean;
+
         void LateUpdate()
         {
             watch.Restart();
@@ -141,6 +143,7 @@ namespace Meridian.Player
             // U-089: squash and stretch on the visual root only; the dash stretches along x while it runs.
             if (controller.Dash.Active && !Squash.Dashing) Squash.Dash(AirDash.Duration);
             if (VisualRoot != null) VisualRoot.localScale = Squash.Step(dt);
+            if (VisualRoot != null && controller.leanDegrees != appliedLean) { appliedLean = controller.leanDegrees; VisualRoot.localRotation = Quaternion.Euler(0f, 0f, appliedLean); } // D-157: about the feet
 
             var body = controller.Body;
             var v = body != null ? body.linearVelocity : Vector2.zero;

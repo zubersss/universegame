@@ -49,6 +49,11 @@ namespace Meridian.Planet.Weather
             return false;
         }
 
+        /// <summary>D-157 (c): the drawn surveyor leans into the wind: SurveyorSwell of the flora's steady lean in the swell, SurveyorGust in a gust
+        /// (no shiver), none while anchored; positive z tips the head toward −x, so a +x wind leans the surveyor back toward it. Pure.</summary>
+        public const float SurveyorSwell = 0.4f, SurveyorGust = 0.6f;
+        public static float SurveyorLean(float wind, bool gusting, bool anchored) => anchored ? 0f : -(gusting ? SurveyorGust : SurveyorSwell) * Lean(wind, false, 0);
+
         /// <summary>U-144: seconds until the next gust (0 while one blows): the HUD's warning.</summary>
         public static float SecondsToGust(double t) => Gusting(t) ? 0f : (float)(GustEvery - Mod(t, GustEvery));
 

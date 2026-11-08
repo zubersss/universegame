@@ -29,6 +29,9 @@ namespace Meridian.Core
         public Meridian.Planet.Weather.VenusWind wind { get; private set; }
         /// <summary>U-144: Neptune's wind on the surveyor (drift, shelter, the anchor's hold); off elsewhere.</summary>
         public Meridian.Planet.Weather.NeptuneWindDriver neptuneWind { get; private set; }
+        /// <summary>D-157 (b): the anchor by the landing pad on Neptune (inactive elsewhere), PadAnchorOffset columns from the spawn.</summary>
+        public Meridian.Planet.Weather.WindAnchor padAnchor { get; private set; }
+        public const int PadAnchorOffset = 4;
         public Meridian.Survey.SurveyScanner scanner { get; private set; }
         public Meridian.Creatures.Wardens.WardenDirector wardens { get; private set; }
         public Meridian.Hazards.SolariteCrystals solarite { get; private set; }
@@ -158,6 +161,21 @@ namespace Meridian.Core
             if (neptuneWind == null) neptuneWind = gameObject.AddComponent<Meridian.Planet.Weather.NeptuneWindDriver>();
             neptuneWind.player = player; neptuneWind.terrain = terrain;
             neptuneWind.enabled = config.id == PlanetId.Neptune; // U-144
+            // D-157 (b): every Neptune landing floe carries a wind anchor by the pad from the start (the side's own, not a saved piece).
+            if (config.id == PlanetId.Neptune)
+            {
+                if (padAnchor == null) { var ago = new GameObject("PadWindAnchor"); ago.transform.SetParent(transform, false); padAnchor = ago.AddComponent<Meridian.Planet.Weather.WindAnchor>(); }
+                int ax = spawnX + PadAnchorOffset;
+                if (terrain != null)
+                {
+                    int padTop = terrain.TopSolidY(spawnX); // on the pad's own floe: the nearest column at the pad's height, PadAnchorOffset first
+                    foreach (int o in new[] { PadAnchorOffset, PadAnchorOffset - 1, PadAnchorOffset + 1, -PadAnchorOffset, 2 - PadAnchorOffset, 2 })
+                        if (terrain.TopSolidY(spawnX + o) == padTop) { ax = spawnX + o; break; }
+                }
+                padAnchor.transform.position = new Vector3(ax + 0.5f, terrain != null ? terrain.TopSolidY(ax) + 1f : config.datumY, 0f);
+                padAnchor.gameObject.SetActive(true);
+            }
+            else if (padAnchor != null) padAnchor.gameObject.SetActive(false);
             if (dayNight != null) dayNight.ConfigureFor(config);
             if (dustStorm != null) dustStorm.ConfigureFor(config, seed);
             if (creatures != null) { creatures.hazards = hazards; creatures.ConfigureFor(config, seed); }

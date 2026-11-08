@@ -8,8 +8,9 @@ namespace Meridian.Planet.Weather
 {
     /// <summary>
     /// U-144 (Bible §7.9): a wind anchor on Neptune: the surveyor who holds one (Interact within Reach) stands fast through the gusts (no drift).
-    /// Drawn with B-161's `props/neptune/wind_anchor` when its sheet is in (nothing until then: a missing key never logs). Where anchors stand
-    /// (a POI, the Builder) is their own card; the build gate ("anchors needed to build") too.
+    /// Drawn with B-161's `props/neptune/wind_anchor` when its sheet is in (nothing until then: a missing key never logs). D-157 (b): a Builder
+    /// piece (PieceKind.WindAnchor, the fabricator's recipe), and every Neptune landing floe carries one by the pad from the start. The build
+    /// gate ("anchors needed to build") is its own card.
     /// </summary>
     public sealed class WindAnchor : MonoBehaviour
     {
@@ -36,6 +37,8 @@ namespace Meridian.Planet.Weather
             return best;
         }
 
+        /// <summary>False for a Builder piece (the piece draws the prop); true for the landing pad's own anchor.</summary>
+        public bool drawsItself = true;
         SpriteRenderer view;
         AsyncOperationHandle<IList<Sprite>> sprites;
 
@@ -44,6 +47,7 @@ namespace Meridian.Planet.Weather
 
         void Start()
         {
+            if (!drawsItself) return;
             view = gameObject.AddComponent<SpriteRenderer>();
             view.sortingOrder = 3;
             var probe = Addressables.LoadResourceLocationsAsync(ArtKey);
