@@ -1,11 +1,13 @@
 # BLENDER STATUS
-Updated: 2026-11-07 19:3x · Session: 8 (resumed 14:3x after the ~14:17 machine restart; C2, contract v3.1, Bible 4.1) · trimmed under D-113; older: coordination/status/archive/BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
+Updated: 2026-11-07 22:3x · Session: 8 (resumed 14:3x after the ~14:17 machine restart; C2, contract v3.1, Bible 4.1) · trimmed under D-113; older: coordination/status/archive/BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
 
 ## Current task
-B-160's last item: creatures/jupiter/vortex_whale re-export at D-153 (WHALE_SCALE 0.75, ~36 m; code a9bae628; the parts pack 46 % of one 2048 sheet). Waiting at the wrapper's RAM gate (18:42: 1301 MB free < 1376); want_blender.lock on file, a RAM/locks monitor armed. After it (rank 2): B-170 the five title cards, one slot (source written 19:0x: build_ui_v3 five painted medallions + subtitles, a cards-only export mode, preview_cards; render.py do_ui_set "cards" / "panels"; the row ui/c2/titlecards_set; py_compile + JSON check at the start of my next slot, then committed). LEAD 19:3x order: the whale -> UNITY's U-127 check (its want 18:58:33) -> the B-170 card preview + export -> B-163 slot 1 (backgrounds/saturn/deck1,deck2,deck3,deep,hexagon straight; UNITY's U-129 loads these deck names + "hexagon") -> B-163 slot 2 (terrain/saturn/floe_strip_set, flora/saturn/rigset, props/saturn/props_set, ui/palettes/saturn) -> B-164 (creatures/saturn/helium_jelly,hex_drake,floe_moth,ringmite,polar_hydra). Uncommitted until my next slot's py_compile: build_ui_v3 + render.py + the B-170 row, and the D-141 guards in build_c2_{saturn,uranus}_palette (setdefault -> raise if the table and v3 differ; textually identical). The Uranus rows (B-166) when nobody waits.
-B-159 EXPORTED + VERIFIED (ad3d2e98 slot 1: the five Jupiter backdrops straight + the B-156 kit; 2b00434b slot 2: floes, flora, props, palette). B-160 four of five VERIFIED (db4d5a53).
+PAUSED by the owner (LEAD relayed 21:1x; acted on 22:3x): the RAM / locks monitor stopped, want_blender.lock removed, no renders, no dry runs, no polling until the owner or LEAD says continue.
+RESUME POINT, in order: (1) creatures/jupiter/vortex_whale under D-156: `blender/scripts/oneoff/whale_d156.ps1` (one-off gate 1300 MB, a 900 MB Blender working-set cap; the 20:51 attempt never reached 1300 free, so the exception is unspent; D-153 scale in code a9bae628, the parts pack 46 % of one sheet; its stamped review at 0.25x beside the surveyor). Then release: UNITY's D-156 compile + EditMode (1250 / 1000) runs next. (2) B-170: the lock-free card preview (`python -I build_ui_v3.py --cards <png>`, ~60 MB, for LEAD's look), then the export slot (ui/c2/titlecards_set; source fc08fbff). (3) B-163 slot 1: backgrounds/saturn/deck1,deck2,deck3,deep,hexagon (straight; U-129 loads these names). (4) B-163 slot 2: terrain/saturn/floe_strip_set, flora/saturn/rigset, props/saturn/props_set, ui/palettes/saturn. (5) B-164: creatures/saturn/helium_jelly, hex_drake, floe_moth, ringmite, polar_hydra. In free gaps only (nobody waiting): `oneoff/grand_pack.py` before the Hydra / Diamondback / Leviathan slots (a misfit goes to LEAD with a scale first), `oneoff/uranus_rows.py`, then `oneoff/neptune_rows.py` (LEAD 19:4x).
+Uncommitted on purpose: blender/sources/creatures/jupiter_vortex_whale_rigset.blend (the stale 1x build from 18:25; the D-156 export rebuilds it).
 
 ## Last completed
+- files (pause): B-170 source fc08fbff, the D-141 palette guards fa039f3b, the resume helpers 391c7cf7 (blender/scripts/oneoff/).
 - 18:22:10-18:27:02 SLOT (wrapper): B-160 stormglider / lightning_eel / belt_wasp / ballast_tortoise (db4d5a53; 658 MB); the whale failed to pack -> D-153.
 - 18:20:58-18:21:37 SLOT (wrapper): B-159 slot 2, floes / flora / props / palette (2b00434b; 393 MB).
 - 18:14:01-18:20:21 SLOT (wrapper): B-159 slot 1, Jupiter deck1-3 / deep / spot straight + the B-156 aerostat kit (ad3d2e98; 836 MB).
@@ -48,4 +50,4 @@ none (B-161's three ruled in D-148).
 none (USER-28, closing ChatGPT + Edge for RAM, is LEAD's).
 
 ## HeavyJobLock
-want_blender.lock filed 18:42:51 by the wrapper (creatures/jupiter/vortex_whale, the RAM gate; rank 2); want_unity.lock 18:58:33 (rank 3); none held.
+none held, no want on file (paused; removed 22:3x).
