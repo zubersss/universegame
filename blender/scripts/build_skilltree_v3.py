@@ -186,6 +186,8 @@ def done(c, seed=3, grain=0.0):
 
 
 # ---------------------------------------------------------------- the branch glyphs (unit: s = 1 fits radius ~28 px)
+DIG_CABLE = True     # LEAD to rule (18:2x): the Beam on a cable, no pistol grip (as build_icons_nodes_v3.BEAM_CABLE); the
+                     # exported ui/skilltree/emblem_dig keeps the grip until re-exported
 def g_dig(d, M, cx, cy, s):
     """The Rig's Beam: the emitter (upper left) firing a teal beam down-right into chipped ground."""
     R = rot(cx, cy, s, 0.55)
@@ -194,7 +196,11 @@ def g_dig(d, M, cx, cy, s):
     G.stroke(d, G.hose_outline(R([(6, 0), (24, 0)]), 2.6 * s), M["offwhite_f"], 0.0, cyclic=True)        # its core
     for a in (-0.7, 0.0, 0.7):                                                                           # sparks
         G.stroke(d, R([(28 + 2 * math.cos(a), 6 * math.sin(a)), (33 + 3 * math.cos(a), 11 * math.sin(a))]), M["ln_mustard"], I * 1.3 * s)
-    G.stroke(d, G.hose_outline(R([(-17, 5), (-21, 19)]), 7 * s), M["brown"], I, cyclic=True)              # the grip
+    if DIG_CABLE:                                                         # 18:2x flag (D-087): no pistol grip; a cable to the rig
+        P = lambda pts: [(cx + s * u, cy + s * v) for u, v in pts]  # noqa: E731
+        G.stroke(d, G.hose_outline(P([(-24, -14), (-28, -4), (-26, 9), (-18, 18), (-6, 23)]), 4.5 * s), M["brown_sh"], I, cyclic=True)
+    else:
+        G.stroke(d, G.hose_outline(R([(-17, 5), (-21, 19)]), 7 * s), M["brown"], I, cyclic=True)          # the grip
     G.stroke(d, R([(-28, -7), (-2, -7), (-2, 7), (-28, 7)]), M["teal"], O * s, cyclic=True)               # the body
     G.stroke(d, R([(-22, -7), (-22, 7)]), M["ink"], I)
     G.stroke(d, R([(-2, -6), (6, -3.5), (6, 3.5), (-2, 6)]), M["mustard"], I, cyclic=True)                # the nozzle
@@ -666,12 +672,15 @@ def kit():
     return out
 
 
-def export(art):
-    """Writes ui/skilltree/<name>_color.png + .json; every check runs before anything is written. -> [(key, w, h, bytes)]"""
+def export(art, names=None):
+    """Writes ui/skilltree/<name>_color.png + .json (names: only those, e.g. one re-drawn key); every check runs before
+    anything is written. -> [(key, w, h, bytes)]"""
     import json
     from meridian import pngio
     built, problems = [], []
     for name, img, extra_meta in kit():
+        if names and name not in names:
+            continue
         h, w = img.shape[:2]
         meta = {"key": f"{KIT}/{name}", "style": "v3", "ppu": U.PPU, "pivot": [0.5, 0.5], "width": w, "height": h, "palette": "earth"}
         meta.update(extra_meta)

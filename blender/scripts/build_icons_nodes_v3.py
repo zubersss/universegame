@@ -160,6 +160,11 @@ def m_grapple(d, M, lv=1):
     G.stroke(d, circ(-0.01, 0.24, 0.065, 20), M["sky_i"], O, cyclic=True)                                             # the eye ring
     G.stroke(d, circ(-0.01, 0.24, 0.03, 14), M["off_sh"], 0.0, cyclic=True)
     G.stroke(d, circ(-0.01, 0.24, 0.03, 14), M["ink"], I, cyclic=True)
+    if lv >= 3:                                                                                                         # step 3: two anchors
+        G.stroke(d, G.hose_outline([(0.27, 0.2), (0.36, 0.04), (0.34, -0.12)], 0.035), M["mustard_sh_i"], I, cyclic=True)
+        G.stroke(d, G.hose_outline([(0.34, -0.12), (0.34, -0.32)], 0.05), M["sky_sh_i"], O, cyclic=True)
+        for s in (-1, 1):
+            G.stroke(d, G.hose_outline([(0.34, -0.3), (0.34 + 0.08 * s, -0.36), (0.34 + 0.13 * s, -0.28)], 0.04), M["sky_sh_i"], I, cyclic=True)
 
 
 def m_ladder(d, M, lv=1):
@@ -294,6 +299,11 @@ def m_rhythm(d, M, lv=1):
     G.stroke(d, glass, M["ink"], I, cyclic=True)
     for z in (0.2, -0.2):                                                                                               # the frame
         G.stroke(d, [(-0.22, z - 0.03), (0.14, z - 0.03), (0.14, z + 0.03), (-0.22, z + 0.03)], M["mustard_i"], I, cyclic=True)
+    if lv >= 2:                                                                                                         # step 2: a second
+        a = math.radians(257)                                                                                           # head (a faster loop)
+        ex, ez = -0.04 + 0.34 * math.cos(a), 0.34 * math.sin(a)
+        tx, tz, nx, nz = -math.sin(a), math.cos(a), math.cos(a), math.sin(a)
+        G.stroke(d, [(ex + tx * 0.12, ez + tz * 0.12), (ex + nx * 0.08, ez + nz * 0.08), (ex - nx * 0.08, ez - nz * 0.08)], M["teal_i"], I, cyclic=True)
 
 
 def m_light(d, M, lv=1):
@@ -303,13 +313,16 @@ def m_light(d, M, lv=1):
     G.stroke(d, [(-0.3, -0.38), (0.18, -0.38), (0.1, -0.1), (-0.22, -0.1)], M["sky_sh_i"], O, cyclic=True)            # the weight
     G.stroke(d, [(0.0, -0.38), (0.18, -0.38), (0.1, -0.1), (0.04, -0.1)], M["sky_dp"], 0.0, cyclic=True)
     G.stroke(d, [(-0.3, -0.38), (0.18, -0.38), (0.1, -0.1), (-0.22, -0.1)], M["ink"], O, cyclic=True)
-    R = rot(0.04, 0.22, 0.45)                                                                                          # the feather
-    vane = [(-0.28, 0.0)] + [(u, 0.075 * math.sin(math.pi * (u + 0.28) / 0.6)) for u in (-0.2, -0.1, 0.0, 0.1, 0.2, 0.3)] + \
-           [(u, -0.06 * math.sin(math.pi * (u + 0.28) / 0.6)) for u in (0.2, 0.1, 0.0, -0.1, -0.2)]
-    G.stroke(d, R(vane), M["off_i"], O, cyclic=True)
-    G.stroke(d, G.hose_outline(R([(-0.36, 0.0), (0.3, 0.0)]), 0.018), M["brown"], 0.0, cyclic=True)
-    for u in (-0.12, 0.02, 0.14):
-        G.seam(d, R([(u, 0.0), (u + 0.06, 0.05)]), M["ink"])
+    def feather(R, k=1.0):
+        vane = [(-0.28 * k, 0.0)] + [(u * k, 0.075 * k * math.sin(math.pi * (u + 0.28) / 0.6)) for u in (-0.2, -0.1, 0.0, 0.1, 0.2, 0.3)] + \
+               [(u * k, -0.06 * k * math.sin(math.pi * (u + 0.28) / 0.6)) for u in (0.2, 0.1, 0.0, -0.1, -0.2)]
+        G.stroke(d, R(vane), M["off_i"], O, cyclic=True)
+        G.stroke(d, G.hose_outline(R([(-0.36 * k, 0.0), (0.3 * k, 0.0)]), 0.018), M["brown"], 0.0, cyclic=True)
+        for u in (-0.12, 0.02, 0.14):
+            G.seam(d, R([(u * k, 0.0), ((u + 0.06) * k, 0.05 * k)]), M["ink"])
+    if lv >= 2:                                                                                                         # step 2: two feathers
+        feather(rot(-0.2, 0.36, -0.35), 0.62)
+    feather(rot(0.04, 0.22, 0.45))                                                                                      # the feather
 
 
 def m_jet(d, M, lv=1):
@@ -473,12 +486,63 @@ def m_skip(d, M, lv=1):
     G.stroke(d, [(ex + tx * 0.09, ez + tz * 0.09), (ex + nx * 0.06, ez + nz * 0.06), (ex - nx * 0.06, ez - nz * 0.06)], M["off_i"], I, cyclic=True)
 
 
+# ---------------------------------------------------------------- batch 4 (ring 4)
+def m_vault(d, M, lv=1):
+    """Vaults and relics on the map: a folded map, a red dashed route to a vault's arch, a relic star beside it."""
+    xs = (-0.42, -0.14, 0.14, 0.42)
+    for i in range(3):                                                                                                  # three folds
+        z0, z1 = (-0.34, 0.3) if i % 2 == 0 else (-0.3, 0.34)
+        G.stroke(d, [(xs[i], z0), (xs[i + 1], z1 - 0.64 + 0.04 if i % 2 == 0 else z0 - 0.04), (xs[i + 1], z1 + (0.04 if i % 2 == 0 else 0.0)),
+                     (xs[i], z1)], M["off_i" if i != 1 else "off_sh_i"], I, cyclic=True)
+    for k in range(5):                                                                                                  # the route
+        x = -0.34 + 0.11 * k
+        G.stroke(d, G.hose_outline([(x, -0.2 + 0.05 * k), (x + 0.06, -0.17 + 0.05 * k)], 0.03), M["red"], 0.0, cyclic=True)
+    arch = [(0.14, -0.04), (0.34, -0.04), (0.34, 0.12)] + arc(0.24, 0.12, 0.1, 0.0, math.pi, 8)[1:] + [(0.14, 0.12)]
+    G.stroke(d, arch, M["brown_i"], I, cyclic=True)                                                                     # the vault
+    G.stroke(d, [(0.2, -0.04), (0.28, -0.04), (0.28, 0.1), (0.2, 0.1)], M["brown_dp"], 0.0, cyclic=True)
+    st = [(0.0 + (0.08 if k % 2 == 0 else 0.035) * math.cos(TAU / 4 + TAU * k / 10), 0.2 + (0.08 if k % 2 == 0 else 0.035) * math.sin(TAU / 4 + TAU * k / 10)) for k in range(10)]
+    G.stroke(d, st, M["mustard_i"], I, cyclic=True)                                                                     # the relic
+
+
+def m_deep(d, M, lv=1):
+    """Depth heat on Venus halved: a thermometer standing before Venus (banded, warm), its red column at half (at the bottom
+    on step 2, every planet)."""
+    G.stroke(d, circ(0.16, 0.08, 0.26, 40), M["mustard_sh_i"], O, cyclic=True)                                       # Venus
+    for k, z in enumerate((0.18, 0.04, -0.08)):
+        G.stroke(d, G.hose_outline([(0.16 - 0.2 + 0.03 * k, z), (0.16 + 0.2 - 0.02 * k, z + 0.02)], 0.035), M["mustard_dp"], 0.0, cyclic=True)
+    G.stroke(d, circ(0.16, 0.08, 0.26, 40), M["ink"], O, cyclic=True)
+    tube = [(-0.32, -0.22), (-0.2, -0.22), (-0.2, 0.32)] + arc(-0.26, 0.32, 0.06, 0.0, math.pi, 6)[1:] + [(-0.32, 0.32)]
+    G.stroke(d, tube, M["off_i"], O, cyclic=True)
+    top = 0.06 if lv == 1 else -0.14
+    G.stroke(d, [(-0.28, -0.22), (-0.24, -0.22), (-0.24, top), (-0.28, top)], M["red"], 0.0, cyclic=True)
+    G.stroke(d, circ(-0.26, -0.3, 0.1, 24), M["red_i"], O, cyclic=True)                                               # the bulb
+    for z in (0.24, 0.12, 0.0, -0.12):
+        G.stroke(d, [(-0.2, z), (-0.14, z)], M["ink"], I)
+    arrow(d, M, (-0.06, 0.34), (-0.06, top + 0.02), 0.05, "teal")
+
+
+def m_trader(d, M, lv=1):
+    """Selling from orbit: a teal world, a dashed orbit round it, a Scrip coin riding the orbit like a moon."""
+    G.stroke(d, circ(-0.12, -0.1, 0.2, 36), M["teal_i"], O, cyclic=True)
+    G.stroke(d, arc(-0.12, -0.1, 0.2, -0.9, 0.9, 10) + arc(-0.12, -0.1, 0.13, 0.9, -0.9, 10), M["teal_sh"], 0.0, cyclic=True)
+    G.stroke(d, circ(-0.12, -0.1, 0.2, 36), M["ink"], O, cyclic=True)
+    orbit = [(-0.12 + 0.36 * math.cos(t), -0.1 + 0.36 * math.sin(t)) for t in [math.radians(a) for a in range(0, 360, 6)]]
+    for i in range(0, len(orbit) - 2, 3):
+        if not (0.3 < (i / len(orbit)) < 0.5):                                                                         # not behind the coin
+            G.stroke(d, G.hose_outline(orbit[i:i + 2], 0.025), M["off_sh_i"], I * 0.6, cyclic=True)
+    cx, cz = 0.18, 0.2                                                                                                  # the coin moon
+    G.stroke(d, circ(cx, cz, 0.13, 30), M["mustard_i"], O, cyclic=True)
+    G.stroke(d, [(cx + (0.075 if k % 2 == 0 else 0.032) * math.cos(TAU / 4 + TAU * k / 10), cz + (0.075 if k % 2 == 0 else 0.032) * math.sin(TAU / 4 + TAU * k / 10))
+                 for k in range(10)], M["mustard_sh_i"], I, cyclic=True)
+
+
 MOTIF = {"dig_power": m_beam, "dig_brush": m_brush, "haul_pack": m_pack, "haul_dirt": m_dirt, "asc_grapple": m_grapple,
          "asc_ladder": m_ladder, "sur_scan": m_scan, "sur_depth": m_depth, "end_air": m_air, "end_fall": m_fall,
          "voy_price": m_price, "voy_hold": m_hold,
          "dig_rhythm": m_rhythm, "haul_light": m_light, "asc_jet": m_jet, "asc_climb": m_climb, "sur_preview": m_preview,
          "end_heat": m_heat, "voy_thrust": m_thrust,
-         "dig_heatsink": m_heatsink, "haul_magnet": m_magnet, "haul_sorter": m_sorter, "sur_rare": m_rare, "voy_skip": m_skip}
+         "dig_heatsink": m_heatsink, "haul_magnet": m_magnet, "haul_sorter": m_sorter, "sur_rare": m_rare, "voy_skip": m_skip,
+         "sur_vault": m_vault, "end_deep": m_deep, "voy_trader": m_trader}
 
 
 def draw_node(d, M, nid):
@@ -494,7 +558,9 @@ BATCHES = {1: ["dig_power_1", "dig_brush_1", "haul_pack_1", "haul_dirt_1", "asc_
                "end_air_2", "end_heat_1", "voy_thrust_2", "voy_price_2"],
            3: ["dig_power_3", "dig_heatsink", "dig_brush_2", "haul_magnet_1", "haul_sorter", "haul_pack_3", "asc_jet_2", "asc_grapple_2",
                "asc_ladder_2", "sur_scan_3", "sur_rare", "sur_preview_2", "end_air_3", "end_heat_2", "end_fall_2", "voy_hold_2", "voy_skip_1",
-               "voy_price_3", "end_heat_1", "voy_thrust_2"]}                       # + batch 2's two redraws (LEAD 18:0x)
+               "voy_price_3", "end_heat_1", "voy_thrust_2"],                       # + batch 2's two redraws (LEAD 18:0x)
+           4: ["dig_power_4", "dig_rhythm_2", "haul_light_2", "haul_pack_4", "asc_jet_3", "asc_grapple_3", "sur_scan_4", "sur_vault",
+               "end_air_4", "end_deep_1", "voy_thrust_3", "voy_trader"]}
 EXPORT_BATCHES = (1,)                                                                           # only LEAD-accepted batches export (1: 17:3x)
 
 

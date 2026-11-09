@@ -1095,13 +1095,15 @@ def do_skilltree_set(entry, preview):
     if preview:
         raise AssetError(f"{entry['key']}: no preview mode (python build_skilltree_v3.py <dir>)")
     import build_skilltree_v3 as ST
+    names = entry.get("names")          # a row may re-export named keys only (e.g. emblem_dig)
     fakegp.install()                    # an earlier review script in this batch may have restored gp_draw.mat
     try:
         try:
-            out = ST.export(ART)
+            out = ST.export(ART, names)
         except Exception:
             for k in ST.keys():
-                mark_stale(k, True)
+                if not names or k.rsplit("/", 1)[1] in names:
+                    mark_stale(k, True)
             raise
         ST.preview(PREVIEW, out=os.path.join(PREVIEW, f"review_{entry.get('review_name', 'b204_skilltree')}.png"),
                    footnote=f"exported {time.strftime('%m-%d %H:%M')}")
