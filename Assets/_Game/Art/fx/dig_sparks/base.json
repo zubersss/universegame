@@ -1,15 +1,17 @@
 {
   "key": "fx/dig_sparks/base",
-  "frame_width": 128,
-  "frame_height": 128,
-  "columns": 6,
+  "style": "v3",
+  "ppu": 128,
   "gutter": 4,
-  "frames": 6,
   "fps": 15,
   "pivot": [
     0.5,
     0.5
   ],
+  "frame_width": 128,
+  "frame_height": 128,
+  "columns": 6,
+  "frames": 6,
   "facing": "right",
   "animations": [
     {
@@ -18,5 +20,6 @@
       "length": 6,
       "loop": false
     }
-  ]
+  ],
+  "note": "B-216: the Beam's cut - an ink impact star, dirt chips tumbling out, hot flecks streaking off (no glow; v3 replaces B-012)"
 }

@@ -1,22 +1,25 @@
 {
   "key": "fx/dust/base",
-  "frame_width": 128,
-  "frame_height": 128,
-  "columns": 4,
+  "style": "v3",
+  "ppu": 128,
   "gutter": 4,
-  "frames": 8,
   "fps": 12,
   "pivot": [
     0.5,
     0.0625
   ],
+  "frame_width": 128,
+  "frame_height": 128,
+  "columns": 6,
+  "frames": 6,
   "facing": "right",
   "animations": [
     {
       "name": "puff",
       "start": 0,
-      "length": 8,
+      "length": 6,
       "loop": false
     }
-  ]
+  ],
+  "note": "B-216: the landing puff - two cream clouds rolling out along the ground (cream + ink: UNITY's ground tint multiplies through; v3 replaces B-012)"
 }
