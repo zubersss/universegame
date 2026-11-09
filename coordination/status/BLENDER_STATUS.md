@@ -1,8 +1,9 @@
 # BLENDER STATUS
-Updated: 2026-11-09 14:0x · Session: 12 (resumed 14:03 after the owner's restart; THIS SESSION = zuber-4d; peers seen: zuber-d1, zuber-a0, roles not yet known to me) · older: coordination/status/archive/BLENDER_2026-11-09.md, BLENDER_2026-11-08.md, BLENDER_2026-11-07.md
+Updated: 2026-11-09 14:0x · Session: 12 (resumed 14:03 after the owner's restart; THIS SESSION = zuber-4d; LEAD = zuber-d1, UNITY = zuber-a0) · older: coordination/status/archive/BLENDER_2026-11-09.md, BLENDER_2026-11-08.md, BLENDER_2026-11-07.md
 
 ## Current task
-**14:0x — session 12 resumed (context rebuilt from CLAUDE.md, the charter, the contract, the board, git).** heavy_unity.lock on file (13:56:50, unity_test PlayMode; no Unity Editor process at 14:03:57, free RAM 1.43 GB: between the chain's parts or left by the restart, LEAD's call, not mine) → files only: desk-checking the six not-yet-run sources in run order (B-229, B-230, B-232, B-231, B-223, B-225) and drafting the B-223 / B-224 / B-225 preview notes (the While-waiting list's last item).
+**14:1x — session 12 (LEAD = zuber-d1, UNITY = zuber-a0).** UNITY's U-194 chain holds the lock (slice C since 14:06) → files only, no want, no python; LEAD messages when the chain has released. Done files-only since 14:03: B-229 rev (LEAD 14:1x: the surveyor's hand on the D-grip: sleeve, mustard cuff, white mitt; the picture at 2x on the sheet) and B-233's source (build_site_icons_v3.py, ten site icons, manifest row icons/catalogue/sites). Next files-only: the desk-check of B-230 / B-232 / B-231 / B-223 / B-225 by reading, the preview notes for B-229 / B-230 / B-232 then B-223 / B-224 / B-225 (reports/blender/).
+- B-233 keys (D-187's rule, label lowercased): TWO differ from the card's list, which used PoiDef ids: MERIDIAN BEACON → icons/catalogue/meridian_beacon (card: mercury_beacon), SOLARITE → icons/catalogue/solarite (card: solarite_field). Sent to LEAD 14:2x; NAMES in the script is the one place to change.
 **13:5x — RESUME HERE.** No lock and no want of mine; every source is committed. UNITY runs U-194 Build 0.6.1 (a multi-lock chain): NO want while it runs. When it has released (LEAD says so), in my lock (LEAD's order 13:5x), each item to LEAD before any export:
 1. B-229 sheet (light; build_hints_v3.py preview, source daf89aad): ui/hints/dig_down's new picture (the shovel mid-scoop + flick) at 1x beside the SURFACE LINE card → export on ACCEPTED (0.6.2).
 2. B-220 Neptune sheet (`python -I blender/scripts/gen_painted_bg.py --continue neptune blender/preview/review_b220_neptune_continue.png`, ~3 min), then Venus deck (`--continue venus`) in its own run; > 8 scenes = its own lock; <= 15 min per lock.
@@ -12,7 +13,8 @@ Updated: 2026-11-09 14:0x · Session: 12 (resumed 14:03 after the owner's restar
 6. B-231 design sheet (build_surveyor_v5.py, source eb51b232; writes the bone JSON beside the review): PREVIEWS ONLY until the owner's look-over on the C5 page (D-185); interleave its source work whenever UNITY holds the lock.
 Then the older previews: B-224 (veil serpent, f95c5461), B-223 (the bay + camp icon, 2f4a47f6), B-225 (the sea shallows, 6f107fa2).
 B-228 (the 0.6.1 smoke read, read only, no lock) when U-194's smoke lands: prep in coordination/reports/blender/smoke_read_0.6.1.md.
-NOT YET RUN (expect first-run fixes): B-223, B-225, B-229, B-230, B-231, B-232. How I ran light sheets this session: list coordination/locks (abort on any other heavy_ / want_), read RAM in its own call, write heavy_blender.lock, run Blender's bundled `python.exe -I <script> <png>` with a working-set watchdog, delete the lock in `finally`.
+7. After B-224 / B-223 / B-225's previews: B-233's sheet (`python -I blender/scripts/build_site_icons_v3.py blender/preview/review_b233_site_icons_preview.png`, light; only after B-223's camp icon is judged).
+NOT YET RUN (expect first-run fixes): B-223, B-225, B-229, B-230, B-231, B-232, B-233. How I ran light sheets this session: list coordination/locks (abort on any other heavy_ / want_), read RAM in its own call, write heavy_blender.lock, run Blender's bundled `python.exe -I <script> <png>` with a working-set watchdog, delete the lock in `finally`.
 - B-220 rule (LEAD-ruled 11:5x): continue_rows 64 only where a layer's bottom band is >= 25 % solid; a sparse layer fades out over its last 64 rows with no continue_rows. B-223's bay keeps DockingBay's keys backgrounds/waystation/layer0..2 at 1920x1080 (no code change). The owner's v5 direction (D-185): cards after 0.6.1; v4 keeps shipping.
 - **Rule (LEAD 09:2x, after two slips):** the first line of ANY call that starts python lists coordination/locks (abort on another role's heavy_ / want_) and reads RAM.
 - **Rule from LEAD 18:2x (D-087):** the Beam reads as a mining tool, never a gun. No pistol grip or trigger, nothing hanging under the body: a cable-fed, arm-mounted emitter with a cutting nozzle.
@@ -31,7 +33,6 @@ NOT YET RUN (expect first-run fixes): B-223, B-225, B-229, B-230, B-231, B-232. 
 - 11-08 12:10-22:5x: B-184 to B-217, the strip retirements, U-183's hand_socket (archived: coordination/status/archive/BLENDER_2026-11-09.md, BLENDER_2026-11-08.md).
 
 ## Ready for review
-- B-191 / B-192: review_b191_{mercury,venus}_puffs.png, review_b192_{earth,mars}_fill_decor.png (591164e9).
 - B-189 / B-185: review_b141_mars_{canyon,storm,plains}(_dip).png (9e04de12), review_b152_venus_surface(_dip).png (baa7f1e0), review_b149_mercury_{day,twilight,night}_dip.png (d7fbeace).
 
 ## Handoffs (unrouted only)

@@ -148,7 +148,7 @@ def pic_dig_down(d, M, seed):
     G.stroke(d, Ps(pit[1:]), M["ink"], I)                                                                     # (open at the turf)
     for x, y, r in ((44, 34, 3.5), (84, 34, 3.0), (89, 35, 2.2)):                                             # spoil on the turf
         G.stroke(d, Ps(circ(x, y, r, 10, r * 0.75)), M["brown"], I * 0.8, cyclic=True)
-    g0, tip = (28.0, 8.0), (66.0, 47.0)                                                                       # the shovel: grip -> tip
+    g0, tip = (30.0, 11.0), (66.0, 47.0)                                                                      # the shovel: grip -> tip
     L = math.hypot(tip[0] - g0[0], tip[1] - g0[1])
     du, dv = (tip[0] - g0[0]) / L, (tip[1] - g0[1]) / L
     nu, nv = -dv, du                                                                                          # across the shovel
@@ -157,6 +157,14 @@ def pic_dig_down(d, M, seed):
         return (g0[0] + du * s + nu * t, g0[1] + dv * s + nv * t)
     dg = [S(-3.5, -5.5), S(-3.5, 5.5)] + [S(1.0 + 5.0 * math.cos(a), 5.5 * math.sin(a)) for a in np.linspace(math.pi / 2, -math.pi / 2, 9)]
     G.stroke(d, G.hose_outline(Ps(dg + [dg[0]]), 2.6), M["mustard"], I, cyclic=True)                          # the brass D-grip
+    # the surveyor's hand on it (LEAD 14:1x: the card says "in the surveyor's hand"; no face): the off-white sleeve in from the
+    # window's left edge, the mustard cuff, the white mitt closed over the D-grip's bar (the loop shows past the fingers)
+    G.stroke(d, Ps([(0, 0.8), (16.0, 3.0), (14.6, 11.4), (0, 9.4)]), M["offwhite"], I, cyclic=True)           # the sleeve
+    G.stroke(d, Ps([(15.0, 2.2), (22.5, 3.6), (21.3, 12.6), (13.8, 11.2)]), M["mustard"], I, cyclic=True)     # the cuff
+    mc = S(-4.4)
+    G.stroke(d, Ps(G.lumpy_ellipse(mc[0], mc[1], 5.4, 4.8, n=20, lump=0.05, seed=seed + 9)), M["offwhite"], I * 1.4, cyclic=True)   # the mitt
+    for t in (-1.7, 1.7):                                                                                      # two finger seams
+        G.stroke(d, Ps([S(-6.6, t), S(-2.4, t)]), M["ink"], I * 0.8)
     G.stroke(d, G.hose_outline(Ps([S(6), S(L * 0.58)]), 4.6), M["teal"], I, cyclic=True)                      # the teal haft
     G.stroke(d, Ps([S(L * 0.56, -3.2), S(L * 0.63, -3.2), S(L * 0.63, 3.2), S(L * 0.56, 3.2)]), M["mustard"], I, cyclic=True)   # ferrule
     blade = [S(L * 0.63, -6.5), S(L * 0.74, -7.5), S(L * 0.88, -6.0), S(L, 0.0), S(L * 0.88, 6.0), S(L * 0.74, 7.5), S(L * 0.63, 6.5)]
@@ -167,7 +175,7 @@ def pic_dig_down(d, M, seed):
         cx, cy = S(L * s, t)
         G.stroke(d, Ps(circ(cx, cy, r, 10, r * 0.8)), M["brown"], I, cyclic=True)
     G.stroke(d, Ps(circ(50, 13, 5.0, 12, 4.2)), M["brown"], I, cyclic=True)                                  # the flicked clod, up
-    for x, y, r in ((57, 22, 2.2), (60, 28, 1.8), (53, 19, 1.6)):                                             # and back, crumbs after it
+    for x, y, r in ((57, 22, 2.2), (59.5, 25.5, 1.8), (53, 19, 1.6)):                                         # and back, crumbs after it
         G.stroke(d, Ps(circ(x, y, r, 8, r * 0.85)), M["brown"], I * 0.8, cyclic=True)
     for k in range(2):                                                                                        # its motion arcs
         G.stroke(d, Ps([(58 + 4 * k, 9 + 3 * k), (63 + 4 * k, 13 + 3 * k), (66 + 4 * k, 19 + 3 * k)]), M["ink"], I)
@@ -483,6 +491,9 @@ def preview(out, footnote=None):
         a2 = np.repeat(np.repeat(arr, sc, 0), sc, 1)
         ST.ov(hud, a2, ax + k * 90, ay + 20)
     review._label(hud, "ui/hints/arrow (1x, 2x)", ax, ay, scale=1)
+    wx0, wy0, wx1, wy1 = WIN                                                                                # B-229: the shovel picture at 2x
+    ST.ov(hud, np.repeat(np.repeat(cards[0][1][wy0:wy1, wx0:wx1], 2, 0), 2, 1), ax, 256)
+    review._label(hud, "dig_down's picture at 2x (B-229: the shovel in the surveyor's hand)", ax, 242, scale=1)
     rows.append(hud)
     bare = np.tile(bg, (CH + 60, Wd, 1))
     x = 20
