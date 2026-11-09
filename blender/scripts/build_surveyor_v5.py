@@ -361,7 +361,7 @@ def bones(facing):
         ("pack", "pack", "torso", pack_off, 0.0, 0.0, 4),
         ("head", Hd, "torso", head_off, 0.0, 0.0, 14),
         ("helmet", "helmet", "head", (0.02, -0.06), 0.0, 0.0, 16),
-        ("antenna", "antenna", "helmet", (-0.04, 0.63), 0.0, 0.3, 15),
+        ("antenna", "antenna", "helmet", (-0.04, 0.63), 0.0, 0.3, 17),     # over the bubble (it lies back across it in crouch)
         ("upper_arm_b", "upper_arm", "torso", sh_b, 0.0, L_UA, 1),
         ("forearm_b", "forearm", "upper_arm_b", (0.0, -L_UA), 0.0, L_FA, 2),
         ("hand_b", "hand", "forearm_b", (0.0, -L_FA), 0.0, 0.12, 3),
@@ -384,10 +384,14 @@ POSES = {   # degrees counter-clockwise, added to rest; "lift" raises the root a
     # shovel out of both hands' reach): every pose has both soles level (a boot's world angle 0 = flat)
     "idle": {"torso": -2, "head": 3, "upper_arm_f": 8, "forearm_f": 14, "upper_arm_b": -6, "forearm_b": 10,
              "thigh_f": 3, "shin_f": -3, "thigh_b": -3, "shin_b": -2, "boot_b": 5},
-    # a deep tuck, hands to the ground: the helmet's top ~1.08 m (the collider halves to 0.9 m, PlayerTuning.Height 1.8, as
-    # the standing 2.0 m figure stands over its 1.8 m): hips 0.36 m, both ankles 0.18 m under the hip joints
-    "crouch": {"torso": -70, "head": 54, "upper_arm_f": 41, "forearm_f": 84, "upper_arm_b": 34, "forearm_b": 88,
-               "thigh_f": 115, "shin_f": -142, "boot_f": 27, "thigh_b": 95, "shin_b": -152, "boot_b": 57},
+    # LEAD 14:4x: the 1 m gap stays (terrain cells are 1 m), so the crouch stands <= 0.98 m: a deep forward tuck (hips 0.36 m,
+    # both ankles 0.18 m under the hip joints, the torso 76 deg forward, the helmet leading and tilted with the spine, hands to
+    # the ground), the springy antenna pressed back along the helmet, and a root squash of 0.92 (root_scale_z: a per-state root
+    # scale about the ground, in the bone JSON's "states" for U-199). By hand: the bubble's top 1.03 m and the antenna's foot
+    # 1.04 m unsquashed (the plumb bob 15 deg below level behind it) -> ~0.95 / ~0.96 m; the sheet measures the drawn top and
+    # draws the 1 m line
+    "crouch": {"torso": -76, "head": 58, "antenna": 123, "upper_arm_f": 45, "forearm_f": 90, "upper_arm_b": 38, "forearm_b": 94,
+               "thigh_f": 115, "shin_f": -142, "boot_f": 27, "thigh_b": 95, "shin_b": -152, "boot_b": 57, "root_scale_z": 0.92},
     "jump": {"torso": -8, "head": 10, "upper_arm_f": 150, "forearm_f": 30, "upper_arm_b": 125, "forearm_b": 40,
              "thigh_f": 78, "shin_f": -96, "boot_f": 18, "thigh_b": 40, "shin_b": -104, "boot_b": 30, "lift": 0.42},
     # a lunge on the shovel: the near hand on the D-grip at (0.33, 0.93) m from the hips' ground point, the shovel 48 deg
@@ -413,6 +417,12 @@ def rig_json(parts_rects):
                    {"chain": ["thigh_b", "shin_b"], "effector": "boot_b", "bend": "forward"}],
             "sockets": {"hand_f_grip": {"bone": "hand_f", "offset_m": [0.03, -0.09]},
                         "helmet_top": {"bone": "antenna", "offset_m": [0.0, 0.3]}}})
+    # per state (LEAD 14:4x, for U-199 to read, not guess): the root's scale [x, z] about the ground point (the crouch's 0.92
+    # squash), the root's lift, and the design pose in degrees added to each bone's rest angle (side facing)
+    out["states"] = {k: {"root_scale": [1.0, v.get("root_scale_z", 1.0)], "lift_m": v.get("lift", 0.0),
+                         "pose_deg": {b: a for b, a in v.items() if b not in ("lift", "root_scale_z")}} for k, v in POSES.items()}
+    out["states_note"] = ("root_scale is applied to the rig's root about the ground point (z only: a cartoon squash); crouch must stand "
+                          "<= 0.98 m under a 1 m gap (the crouch collider is 0.9 m)")
     return out
 
 
@@ -482,8 +492,29 @@ def sole_z(world, boot):
     return min(z + ox * math.sin(t) + oz * math.cos(t) for ox, oz in ((-0.09, -0.18), (0.24, -0.18)))
 
 
+def squash(img, ground, sz):
+    """The state's root scale (z only) about the ground row: the canvas resampled along y (linear), as UNITY's root transform
+    will scale the whole rig."""
+    if abs(sz - 1.0) < 1e-6:
+        return img
+    H = img.shape[0]
+    ys = ground - (ground - (np.arange(H, dtype=np.float32) + 0.5)) / sz - 0.5      # the source row of each output row
+    i0 = np.floor(ys).astype(int)
+    f = (ys - i0)[:, None, None]
+    a = np.where(((i0 >= 0) & (i0 < H))[:, None, None], img[np.clip(i0, 0, H - 1)], 0.0)
+    b = np.where(((i0 + 1 >= 0) & (i0 + 1 < H))[:, None, None], img[np.clip(i0 + 1, 0, H - 1)], 0.0)
+    return (a * (1 - f) + b * f).astype(np.float32)
+
+
+def top_m(img, ground):
+    """The posed figure's height (m): its top-most drawn row above the ground row."""
+    rows = np.where(img[..., 3].max(axis=1) > 0.02)[0]
+    return (ground - rows[0]) / PX if len(rows) else 0.0
+
+
 def pose_image(P, facing, pose, W=300, H=380, ground=350, cx=150, prop=None):
-    """One posed figure on a transparent canvas (premultiplied float), the ground line at row `ground`."""
+    """One posed figure on a transparent canvas (premultiplied float), the ground line at row `ground`; the pose's
+    root_scale_z (the crouch's squash) applied about the ground."""
     dst = np.zeros((H, W, 4), np.float32)
     world = solve(facing, pose)
     for n, p, par, off, rest, L, order in sorted(bones(facing), key=lambda b: b[6]):
@@ -496,7 +527,7 @@ def pose_image(P, facing, pose, W=300, H=380, ground=350, cx=150, prop=None):
         img, pivot = P[p + ("_far" if n in FAR else "")]
         x, z, a = world[n]
         place(dst, img, pivot, a, (cx + x * PX, ground - z * PX))
-    return dst
+    return squash(dst, ground, pose.get("root_scale_z", 1.0))
 
 
 def all_parts():
@@ -551,17 +582,22 @@ def preview(out, footnote=None):
     GROUND = 350                                                                 # pose_image's ground row
 
     def strip(cells, label, h=430):
-        """cells: (name, premultiplied float image, its ground row): each stands on the strip's ground line."""
+        """cells: (name, premultiplied float image, its ground row[, a ceiling in m]): each stands on the strip's ground line; a
+        ceiling draws a red line that far above the ground across the cell (the crouch's 1 m gap, LEAD 14:4x)."""
         r = np.tile(paper, (h, W, 1)).astype(np.float32)
         r[h - 40:h - 36] = ground_col
         review._label(r, label, 6, 4, scale=1)
         x = 10
-        for name, img, g in cells:
+        for name, img, g, *rest in cells:
             ih, iw = img.shape[:2]
             y = h - 40 - g                                                       # desk-check: the figures floated 28 px over the line
             y0, y1 = max(y, 0), min(y + ih, h)
             a = img[y0 - y:y1 - y, :, 3:4]
             r[y0:y1, x:x + iw] = img[y0 - y:y1 - y, :, :3] + r[y0:y1, x:x + iw] * (1 - a)
+            if rest and rest[0]:
+                yc = h - 40 - int(round(rest[0] * PX))                           # the line's lower edge = the ceiling
+                r[yc - 2:yc, x:x + iw] = rgb(PAL["red"])
+                review._label(r, f"{rest[0]:g} m ceiling", x + iw - 96, yc - 16, scale=1)
             review._label(r, name, x + 4, h - 30, scale=1)
             x += iw + 12
         return r
@@ -578,14 +614,19 @@ def preview(out, footnote=None):
     rows = [np.tile(paper, (28, W, 1)).astype(np.float32)]
     review._label(rows[0], "B-231 the v5 surveyor (C5 design, D-185): a rigged cut-out, jointed limbs, painted shading; 2.0 m = 256 px", 6, 8)
     rows.append(strip(turn, "turnaround (posed from the rig) beside the v4 surveyor"))
-    poses = [(k, pose_image(P, "side", POSES[k]), GROUND) for k in ("idle", "crouch", "jump")]
-    poses.append(("dig", pose_image(P, "side", POSES["dig"], W=400, cx=120, prop=prop), GROUND))   # (wider: the shovel reaches 1.25 m)
-    rows.append(strip(poses, "pose sheet (side): idle, crouch (a deep tuck, the helmet's top ~1.08 m), jump apex (knees tucked, arms up), dig with B-226's shovel"))
+    pimg = {k: pose_image(P, "side", POSES[k]) for k in ("idle", "crouch", "jump")}
+    pimg["dig"] = pose_image(P, "side", POSES["dig"], W=400, cx=120, prop=prop)                    # (wider: the shovel reaches 1.25 m)
+    csz, ctop = POSES["crouch"].get("root_scale_z", 1.0), top_m(pimg["crouch"], GROUND)
+    over = f", {100 * (ctop - 1.0):.0f} cm INTO THE 1 m LINE" if ctop > 1.0 else ""
+    poses = [("idle", pimg["idle"], GROUND), (f"crouch x{csz:g}: top {ctop:.2f} m{over}", pimg["crouch"], GROUND, 1.0),
+             ("jump", pimg["jump"], GROUND), ("dig", pimg["dig"], GROUND)]
+    rows.append(strip(poses, f"pose sheet (side): idle, crouch (a deep tuck under a 1 m gap, root squash {csz:g}, measured top {ctop:.2f} m), jump apex (knees tucked, arms up), dig with B-226's shovel"))
     for k in ("idle", "crouch", "jump", "dig"):                                  # the measured heights, for the sheet's reader
         w_ = solve("side", POSES[k])
         hx, hz, ha = w_["helmet"]
         top = hz + 0.3125 * math.cos(math.radians(ha)) + 0.305
-        print(f"{k}: hips {w_['hips'][1]:.2f} m, helmet top {top:.2f} m, soles f / b {sole_z(w_, 'boot_f'):+.3f} / {sole_z(w_, 'boot_b'):+.3f} m")
+        print(f"{k}: hips {w_['hips'][1]:.2f} m, the bubble's top {top:.2f} m unscaled, drawn top {top_m(pimg[k], GROUND):.2f} m (root scale z "
+              f"{POSES[k].get('root_scale_z', 1.0):g}), soles f / b {sole_z(w_, 'boot_f'):+.3f} / {sole_z(w_, 'boot_b'):+.3f} m")
     ps = np.tile(paper, (sh.shape[0] + 30, W, 1)).astype(np.float32)
     review._label(ps, f"the part sheet characters/surveyor_v5/rig_color.png ({sh.shape[1]}x{sh.shape[0]}, {len(rects)} parts on pivots; far limbs a step darker)", 6, 4, scale=1)
     f = sh.astype(np.float32) / 255.0
