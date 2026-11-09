@@ -238,6 +238,73 @@ namespace Meridian.Tests
             }
         }
 
+        /// <summary>U-190 (D1_TABLES §4, 01:5x): the jetpack out of a 6 m starter hole on Earth and on Mars, empty and with a full pack (the load
+        /// slows the climb above gravity, never strands it): jump, then hold.</summary>
+        [UnityTest, Timeout(300000)]
+        public IEnumerator TheJetpackClimbsASixMetreHoleEmptyAndFull()
+        {
+            yield return Boot();
+            var director = Object.FindAnyObjectByType<SceneDirector>();
+            var row = new System.Text.StringBuilder("[MERIDIAN] u190 jetpack 6 m:");
+            try
+            {
+                foreach (var planet in new[] { Meridian.Planets.PlanetId.Earth, Meridian.Planets.PlanetId.Mars })
+                {
+                    if (planet != Meridian.Planets.PlanetId.Earth)
+                    {
+                        yield return director.LoadPlanetSide(state.catalog.Get(planet));
+                        side = director.PlanetSide; player = side.player; rig = player.GetComponent<PlayerRigInput>();
+                        if (side.hazards != null) side.hazards.enabled = false;
+                        side.creatures.autoSpawn = false; side.creatures.DespawnAll();
+                        float until = Time.realtimeSinceStartup + 15f;
+                        while (!side.terrain.IsSettled && Time.realtimeSinceStartup < until) yield return null;
+                        player.externalInput = true;
+                    }
+                    // 25 m past the landed ship (on Mars the Pilgrim sits over the camp's first columns: its hull would cap the hole)
+                    int hx = Mathf.FloorToInt(side.ship != null ? side.ship.transform.position.x : player.Body.position.x) + 25;
+                    float top = side.terrain.SurfaceAt(hx + 1.5f);
+                    int floor = Mathf.FloorToInt(top) - 6;
+                    for (int y = floor; y <= Mathf.CeilToInt(top) + 2; y++)
+                        for (int x = hx; x < hx + 3; x++) side.terrain.SetTile(x, y, TileId.Air);
+                    for (int i = 0; i < 5; i++) yield return null;
+                    float g = -Physics2D.gravity.y;
+                    foreach (bool full in new[] { false, true })
+                    {
+                        state.inventory.Clear();
+                        if (full) FillPack();
+                        float lf = player.LoadFactor;
+                        var at = new Vector2(hx + 1.5f, floor + 0.05f);
+                        player.LetGo(); player.intent = default;
+                        side.creatures.DespawnAll();
+                        player.Body.simulated = true; // a planet load can leave the body held (aboard / waiting for the ground)
+                        player.Body.position = at; player.transform.position = at; player.Body.linearVelocity = Vector2.zero;
+                        for (int i = 0; i < 60; i++) yield return new WaitForFixedUpdate(); // on the floor: the charge refills
+                        player.intent = new PlayerIntent { jumpHeld = true };
+                        player.PressJump();
+                        int steps = 0;
+                        while (player.Body.position.y < floor + 6f && steps < 400) { yield return new WaitForFixedUpdate(); steps++; }
+                        player.intent = default;
+                        float t = Seconds(steps);
+                        row.Append($" {planet} {(full ? "full" : "empty")} (load {lf:0.00}, g {g:0.00}) {(steps < 400 ? t.ToString("0.00") + " s" : "never")};");
+                        if (steps >= 400)
+                        {
+                            var hit = Physics2D.Raycast(player.Body.position + new Vector2(0f, 1.9f), Vector2.up, 8f);
+                            TestContext.Out.WriteLine($"[MERIDIAN] u190 stuck at {player.Body.position} (floor {floor}, hole x {hx}), grounded {player.Grounded}, above: {(hit.collider != null ? hit.collider.name + " at " + hit.point : "nothing")}");
+                        }
+                        Assert.Less(steps, 400, $"{planet}, {(full ? "a full" : "an empty")} pack: out of 6 m by the jetpack (a load slows, never strands)");
+                    }
+                }
+                TestContext.Out.WriteLine(row.ToString());
+                LogAssert.NoUnexpectedReceived();
+            }
+            finally
+            {
+                TestContext.Out.WriteLine(row.ToString());
+                if (player != null) player.externalInput = false;
+                state.inventory.Clear();
+            }
+        }
+
         [UnityTest, Timeout(300000)]
         public IEnumerator PlacementRecallAndTheGrip()
         {

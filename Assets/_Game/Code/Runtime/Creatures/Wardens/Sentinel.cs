@@ -26,6 +26,10 @@ namespace Meridian.Creatures.Wardens
         internal WardenDirector director;
         internal float ringIn, bumpReady, anim;
         internal int sweep = 1;
+        /// <summary>U-190: the hunt's way through open air (WardenDirector re-plans it).</summary>
+        internal Vector2 goal;
+        internal float replanAt;
+        internal bool direct;
         SpriteRenderer view;
         FxSheet sheet;
         ArtClipSet clips;

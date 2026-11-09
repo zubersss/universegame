@@ -2639,6 +2639,105 @@ namespace Meridian.Tests
             UnityEngine.Object.Destroy(uiGo);
         }
 
+        /// <summary>U-190 (Bible 5.3 §8.1): a full dig run at Earth's camp with no sentinel → coordination/reports/unity/u190/: the Beam digs a
+        /// shaft 30 m down beside the camp (the pack fills), 1_dug_30m at its floor, 2_ladder_up on the way out, 3_topside beside the shaft;
+        /// the Warden meter never trips and no sentinel comes (the camp is no Warden site).</summary>
+        [UnityTest, Timeout(480000)]
+        public IEnumerator CaptureU190CampShaft()
+        {
+            var name = Environment.GetEnvironmentVariable(Variable);
+            if (string.IsNullOrEmpty(name)) Assert.Ignore($"Set {Variable} (tools/unity_capture.ps1).");
+            if (SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.Null)
+                Assert.Fail("No graphics device: run without -nographics.");
+            bool wasCartoon = Meridian.View2D.CartoonStage.Enabled;
+            Meridian.View2D.CartoonStage.Enabled = true;
+            var state = GameState.Instance;
+            try
+            {
+#if UNITY_EDITOR
+                yield return UnityEditor.SceneManagement.EditorSceneManager.LoadSceneAsyncInPlayMode(
+                    CorePath, new LoadSceneParameters(LoadSceneMode.Single));
+#endif
+                var director = UnityEngine.Object.FindAnyObjectByType<SceneDirector>();
+                float timeout = Time.realtimeSinceStartup + 30f;
+                while ((!director.IsReady || !director.PlanetSide.terrain.IsSettled) && Time.realtimeSinceStartup < timeout) yield return null;
+                var side = director.PlanetSide;
+                state = GameState.Instance;
+                if (side.hazards != null) side.hazards.enabled = false;
+                if (side.dayNight != null) side.dayNight.Override = 0.45f;
+                side.creatures.autoSpawn = false;
+                side.creatures.DespawnAll();
+                var dir = "coordination/reports/unity/u190";
+                Directory.CreateDirectory(dir);
+                var player = side.player;
+                var rig = player.GetComponent<Meridian.Player.PlayerRigInput>();
+                var wardens = side.wardens;
+                var tools = rig.rig;
+                state.skillNodes.Clear(); state.skillNodes.Add("asc_ladder_1"); Meridian.Progress.SkillStats.Apply(state);
+                state.inventory.Clear();
+                player.externalInput = true;
+                float sx = Mathf.Floor(player.Body.position.x) + 9.5f;
+                float surface = side.terrain.SurfaceAt(sx);
+                var start = new Vector2(sx, surface + 0.5f);
+                player.Body.position = start; player.transform.position = start; player.Body.linearVelocity = Vector2.zero;
+                for (int i = 0; i < 20; i++) yield return new WaitForFixedUpdate();
+                int hunters = 0;
+                void Watch() { foreach (var s in wardens.sentinels) if (s.Alive && s.State == Meridian.Creatures.Wardens.SentinelState.Hunt) hunters++; }
+                // the Beam's run: stroke after stroke under the feet (and to each side) until the floor is 30 m down
+                int strokes = 0;
+                for (int k = 0; k < 400 && player.Body.position.y > surface - 30f; k++)
+                {
+                    var f = player.Body.position;
+                    foreach (float dx in new[] { 0f, -0.9f, 0.9f }) if (tools.Dig(new Vector2(sx + dx, f.y - 0.6f))) strokes++;
+                    for (int i = 0; i < 6; i++) { yield return new WaitForFixedUpdate(); Watch(); }
+                }
+                int id = Meridian.Items.ItemRegistry.Get(Meridian.Mining.D1Tables.Current.materials[0].item).id;
+                state.inventory.Add(id, state.inventory.FitsByWeight(id)); // the rest of the run's haul: the pack full
+                float floor = player.Body.position.y;
+                for (int i = 0; i < 30; i++) { yield return new WaitForFixedUpdate(); Watch(); }
+                var follow = side.sideCamera.GetComponent<Meridian.Player.CameraFollow>();
+                if (follow != null) follow.SnapToTarget();
+                float t0 = Time.time;
+                while (Time.time - t0 < Meridian.Creatures.Wardens.WardenDirector.SpawnDelay + 1f) { yield return null; Watch(); }
+                IEnumerator Shot(string label)
+                {
+                    for (int i = 0; i < 6; i++) yield return null;
+                    yield return SaveWithUi(side.sideCamera, side.sideHud.RankSlot.canvas, $"{name}_{label}");
+                    File.Copy($"logs/capture_{name}_{label}.png", $"{dir}/{label}.png", true);
+                    TestContext.Out.WriteLine($"[MERIDIAN] u190 {label}: depth {Meridian.Mining.DigRun.Depth(side.terrain, player.Body.position):0.0} m, strokes {strokes}, pack {state.inventory.Weight:0.0} kg (load {player.LoadFactor:0.00}), dirt {state.dirt.count}, Warden trips {wardens.Trips}, hunting sentinels seen {hunters}, active {wardens.Active}");
+                }
+                yield return Shot("1_dug_30m");
+                // out by ladder (asc_ladder_1, the dirt store pays)
+                state.dirt.count = state.dirt.capacity;
+                side.ladders.player = null;
+                for (int k = 0; k < 40; k++) side.ladders.Place(new Vector2(sx, floor + k + 0.5f));
+                side.ladders.player = player.transform;
+                player.intent = new Meridian.Player.PlayerIntent { climb = 1f };
+                for (int i = 0; i < 20; i++) yield return new WaitForFixedUpdate();
+                {
+                    int lo = int.MaxValue, cols = 0; foreach (var c in side.ladders.Cells) { lo = Mathf.Min(lo, c.y); cols++; }
+                    bool found = side.ladders.Find(player.Body.position, out var spot);
+                    TestContext.Out.WriteLine($"[MERIDIAN] u190 climb check: on {player.ClimbingOn}, feet {player.Body.position}, ladder cells {cols} from y {lo} at x {Mathf.FloorToInt(sx)}, find {found} ({spot.x:0.00}, {spot.bottom}..{spot.top}), grounded {player.Grounded}, rate {player.ClimbRate:0.00}");
+                }
+                for (int i = 0; i < 1000 && player.Body.position.y < floor + 14f; i++) { yield return new WaitForFixedUpdate(); Watch(); }
+                yield return Shot("2_ladder_up");
+                for (int i = 0; i < 2000 && player.Body.position.y < surface + 0.3f && player.ClimbingOn == Meridian.Player.ClimbKind.Ladder; i++) { yield return new WaitForFixedUpdate(); Watch(); }
+                player.intent = new Meridian.Player.PlayerIntent { move = 1f };
+                for (int i = 0; i < 60; i++) { yield return new WaitForFixedUpdate(); Watch(); }
+                player.intent = default;
+                for (int i = 0; i < 30; i++) { yield return new WaitForFixedUpdate(); Watch(); }
+                yield return Shot("3_topside");
+                Assert.AreEqual(0, wardens.Trips, "a dig run at the camp never trips the Warden meter");
+                Assert.AreEqual(0, hunters, "and no sentinel hunts the surveyor");
+                // (no NoUnexpectedReceived: a full pack's drops are lifted out of the dug ground with an info line, as they should be)
+            }
+            finally
+            {
+                Meridian.View2D.CartoonStage.Enabled = wasCartoon;
+                if (state != null) { state.skillNodes.Clear(); Meridian.Progress.SkillStats.Apply(state); state.inventory.Clear(); }
+            }
+        }
+
         /// <summary>U-178 (B-206 / B-211 / B-214): Rank and the New Expedition → coordination/reports/unity/u178/: 1_tree_rank10 (the header's
         /// insignia and badge, NEW EXPEDITION offered), 2_confirmation (the panel's certificate: wiped, kept, the new multiplier), 3_seal (B-214's
         /// press mid-way), 4_camp_expedition_II (back at Earth's camp, the HUD's Rank slot at 1), 5_rank_up (Rank 2: B-214's rank_up).</summary>

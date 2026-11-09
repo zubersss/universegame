@@ -188,7 +188,8 @@ namespace Meridian.Player
             // A tap is only a jump.
             bool jetHeld = intent.jumpHeld && !Grounded && !jumped && (airTimeSinceJump > 0.25f || pressed);
             Jetpack.PowerUse = Meridian.Progress.SkillStats.JetPowerUse; // U-175
-            v.y += Jetpack.Step(dt, jetHeld, Grounded) * LoadFactor * Meridian.Progress.SkillStats.JetThrust * dt; // U-174: the pack's load lowers the lift; U-175: Ascent's thrust
+            float jetThrust = Meridian.Progress.SkillStats.JetThrust; // U-175: Ascent's thrust
+            v.y += JetLift(Jetpack.Step(dt, jetHeld, Grounded) * jetThrust, Jetpack.Thrust * jetThrust, g, LoadFactor) * dt; // U-190: the load slows the climb above g
 
             // U-088: jump cut: releasing the jump while rising keeps 40 % of the upward speed (the full height is unchanged).
             if (jumpHeldLast && !intent.jumpHeld && !Grounded && !jumped && v.y > 0f) v.y *= PlayerTuning.JumpCutFactor;
@@ -252,6 +253,18 @@ namespace Meridian.Player
         public bool Sliding { get; private set; }
         /// <summary>U-176: reeling up the Grapple's line (the reel_up clip).</summary>
         public bool Reeling => grapple != null && grapple.Reeling;
+
+        /// <summary>
+        /// U-190 (D1_TABLES §4, 01:5x: "a load slows, never strands"): the jetpack's lift this step under the pack's load. `raw` is this
+        /// step's thrust (a step the charge runs out in gives its share of `full`, the full thrust); with full > g the load scales only the
+        /// lift above gravity, g + (full − g) × load; a thrust under g scales whole. Pure.
+        /// </summary>
+        public static float JetLift(float raw, float full, float g, float load)
+        {
+            if (raw <= 0f || full <= 0f) return 0f;
+            float lift = full > g ? g + (full - g) * load : full * load;
+            return lift * (raw / full);
+        }
 
         /// <summary>U-176: ground whose normal leans past `noSlideDeg` from up (a slope steeper than that).</summary>
         public static bool TooSteep(Vector2 normal, float noSlideDeg) => normal.y < Mathf.Cos(noSlideDeg * Mathf.Deg2Rad) - 1e-4f;

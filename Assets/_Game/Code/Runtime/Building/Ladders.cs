@@ -37,6 +37,10 @@ namespace Meridian.Building
         public const int SortingOrder = 5;
         /// <summary>The body stands this far from a ladder's centre while it climbs (B-210's side_b "ladder" socket: 0.38 m in front).</summary>
         public const float Beside = 0.38f;
+        /// <summary>The heights over the feet a ladder cell is reached at (the feet, the waist, the shoulders, just under the feet).</summary>
+        static readonly float[] Reach = { 0.2f, 1.0f, 1.8f, -0.4f };
+        /// <summary>How far to the side of a ladder's centre the surveyor can take hold of it (m; a Beam-dug bowl leaves the feet off-centre).</summary>
+        public const float GrabReach = 1.2f;
 
         public static Ladders Instance { get; private set; }
         public TerrainStreamer terrain;
@@ -144,8 +148,9 @@ namespace Meridian.Building
             if (TileId.IsSolid(id)) Remove(new Vector2Int(x, y)); // a mound buried it
         }
 
-        /// <summary>The column a body at `feet` can hold: a ladder cell beside it (within 0.9 m of its centre) at the feet, the waist or
-        /// just under the feet (stepping down onto a ladder's top).</summary>
+        /// <summary>The column a body at `feet` can hold: a ladder cell beside it (within GrabReach of its centre) anywhere along the body (the
+        /// feet, the waist, the shoulders: a Beam-dug floor's bowl can leave the ladder's foot a metre or two up) or just under the feet
+        /// (stepping down onto a ladder's top).</summary>
         public bool Find(Vector2 feet, out ClimbSpot spot)
         {
             spot = default;
@@ -154,10 +159,10 @@ namespace Meridian.Building
             for (int dx = 0; dx <= 2; dx++)
             {
                 int cx = fx + (dx == 0 ? 0 : dx == 1 ? -1 : 1);
-                if (Mathf.Abs(cx + 0.5f - feet.x) > 0.9f) continue;
-                for (int h = 0; h < 3; h++)
+                if (Mathf.Abs(cx + 0.5f - feet.x) > GrabReach) continue;
+                for (int h = 0; h < Reach.Length; h++)
                 {
-                    int cy = Mathf.FloorToInt(feet.y + (h == 0 ? 0.2f : h == 1 ? 1.0f : -0.4f));
+                    int cy = Mathf.FloorToInt(feet.y + Reach[h]);
                     var c = new Vector2Int(cx, cy);
                     if (!cells.Contains(c)) continue;
                     int lo = cy, hi = cy;

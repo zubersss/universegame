@@ -16,6 +16,7 @@ namespace Meridian.Tests
     /// <summary>
     /// U-053 (PlayMode): digging past the threshold near the Mercury Warden vault calls a sentinel within 10 s;
     /// D-087 (U-093): it closes in and rings but never shoots, and no meter moves; six hunting sentinels cost ≤ 0.3 ms of AI (D-047: median and p99).
+    /// U-190: the meter fills only within 48 m of a site (a camp shaft calls nothing); a called sentinel moves through open air only.
     /// </summary>
     public class WardenPlayTests
     {
@@ -107,6 +108,91 @@ namespace Meridian.Tests
             Assert.LessOrEqual(median, AiBudgetMs, "median");
             Assert.LessOrEqual(p99, AiBudgetMs, "p99");
             if (worst > AiBudgetMs) Assert.LessOrEqual(worst, 2f * AiBudgetMs, "a single frame up to 2× is logged, not failed (D-047)");
+            LogAssert.NoUnexpectedReceived();
+        }
+
+        /// <summary>Carves a shaft `width` wide and `depth` deep from the natural surface at column x0, tile by tile (each one a dig the meter
+        /// sees), and stands the surveyor on its floor. Returns the floor's y.</summary>
+        static int CarveShaft(PlanetSideRoot side, int x0, int width, int depth)
+        {
+            int top = Mathf.CeilToInt(side.terrain.SurfaceAt(x0 + width * 0.5f)) + 1, floor = top - 1 - depth;
+            for (int y = top; y >= floor; y--)
+                for (int x = x0; x < x0 + width; x++)
+                    if (TileId.IsSolid(side.terrain.GetTile(x, y))) side.terrain.SetTile(x, y, TileId.Air);
+            var p = side.player;
+            var feet = new Vector2(x0 + width * 0.5f, floor + 0.05f);
+            p.Body.position = feet; p.transform.position = feet; p.Body.linearVelocity = Vector2.zero;
+            return floor;
+        }
+
+        /// <summary>
+        /// U-190 (Bible 5.3 §8.1): a 38 m shaft at Earth's camp calls no sentinel (the camp is no Warden site: the meter does not fill there);
+        /// the same shaft 30 m from Mercury's vault trips the meter and calls one, which comes down the open shaft through air only (never a
+        /// step inside rock) to ring beside the surveyor at its floor.
+        /// </summary>
+        [UnityTest, Timeout(300000)]
+        public IEnumerator ACampShaftCallsNoSentinelAndAVaultShaftCallsOneThroughAir()
+        {
+#if UNITY_EDITOR
+            yield return UnityEditor.SceneManagement.EditorSceneManager.LoadSceneAsyncInPlayMode(
+                CorePath, new LoadSceneParameters(LoadSceneMode.Single));
+#endif
+            var director = Object.FindAnyObjectByType<SceneDirector>();
+            float timeout = Time.realtimeSinceStartup + 30f;
+            while ((!director.IsReady || !director.PlanetSide.terrain.IsSettled) && Time.realtimeSinceStartup < timeout) yield return null;
+            var side = director.PlanetSide;
+            var wardens = side.wardens;
+            if (side.hazards != null) side.hazards.enabled = false;
+            side.creatures.autoSpawn = false; side.creatures.DespawnAll();
+            for (int i = 0; i < 20; i++) yield return new WaitForFixedUpdate();
+            Assert.IsTrue(wardens.meter.IsGuarded(Mathf.FloorToInt(PoiCatalog.SurveyArchive.CenterX)), "the Survey Archive is a guarded site");
+            int camp = Mathf.FloorToInt(PoiCatalog.SpawnCamp.CenterX);
+            Assert.IsFalse(wardens.meter.IsGuarded(camp + 12), "the camp is not");
+
+            // 38 m at the camp
+            int floorA = CarveShaft(side, camp + 12, 3, 38);
+            float t0 = Time.time;
+            while (Time.time - t0 < WardenDirector.SpawnDelay + 2f) yield return null;
+            Assert.AreEqual(0, wardens.Trips, "a 38 m shaft at the camp trips nothing");
+            Assert.IsFalse(wardens.sentinels.Exists(s => s.Alive && s.State == SentinelState.Hunt), "and calls no sentinel");
+            TestContext.Out.WriteLine($"[MERIDIAN] u190 camp shaft 38 m (3 x {38 + 2} tiles dug): trips {wardens.Trips}, hunters 0");
+
+            // the same shaft 30 m from Mercury's vault
+            yield return director.LoadPlanetSide(GameState.Instance.catalog.Get(PlanetId.Mercury));
+            side = director.PlanetSide;
+            wardens = side.wardens;
+            side.hazards.enabled = false; side.hazards.RestoreSuit();
+            timeout = Time.realtimeSinceStartup + 15f;
+            int x0 = Mathf.FloorToInt(PoiCatalog.WardenVault.CenterX) + 30;
+            var stand = new Vector2(x0 + 1.5f, side.terrain.SurfaceAt(x0 + 1.5f) + 1f);
+            side.player.Body.position = stand; side.player.transform.position = stand;
+            yield return null;
+            while (!side.terrain.IsSettled && Time.realtimeSinceStartup < timeout) yield return null;
+            for (int i = 0; i < 20; i++) yield return new WaitForFixedUpdate();
+            Assert.IsTrue(wardens.meter.IsGuarded(x0 + 1), "30 m from the vault: guarded");
+            var patrol = wardens.sentinels.Find(s => s.Alive);
+            int floorB = CarveShaft(side, x0, 3, 38);
+            Assert.GreaterOrEqual(wardens.Trips, 1, "the meter trips");
+            Sentinel hunter = null;
+            float tripped = Time.time;
+            int inRock = 0, samples = 0;
+            float closest = float.MaxValue;
+            while (Time.time - tripped < 16f)
+            {
+                yield return new WaitForFixedUpdate();
+                if (hunter == null) hunter = wardens.sentinels.Find(s => s.Alive && s != patrol && s.State == SentinelState.Hunt);
+                foreach (var s in wardens.sentinels)
+                {
+                    if (!s.Alive) continue;
+                    samples++;
+                    if (!wardens.Air(s.Body.position)) inRock++;
+                }
+                if (hunter != null) closest = Mathf.Min(closest, (hunter.Body.position - (side.player.Body.position + new Vector2(0f, 0.9f))).magnitude);
+            }
+            TestContext.Out.WriteLine($"[MERIDIAN] u190 vault shaft 38 m, 30 m from the vault: trips {wardens.Trips}, hunter {(hunter != null ? "called" : "none")}, closest {closest:F1} m, sentinel samples inside rock {inRock} of {samples}, refused steps {wardens.RockRefusals}");
+            Assert.NotNull(hunter, "a sentinel is called");
+            Assert.AreEqual(0, inRock, "never inside rock");
+            Assert.LessOrEqual(closest, WardenDirector.RingRange, "it came down the open shaft to the surveyor");
             LogAssert.NoUnexpectedReceived();
         }
     }

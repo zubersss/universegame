@@ -93,6 +93,19 @@ namespace Meridian.Tests
         }
 
         [Test]
+        public void TheLoadSlowsTheJetpackAboveGravityNeverStrands()
+        {
+            // U-190 (D1_TABLES §4, 01:5x): effective lift = g + (thrust − g) × load factor when thrust > g
+            Assert.AreEqual(14f, PlayerController.JetLift(14f, 14f, 9.81f, 1f), 1e-4f, "empty: the whole thrust");
+            Assert.AreEqual(9.81f + 4.19f * 0.5f, PlayerController.JetLift(14f, 14f, 9.81f, 0.5f), 1e-4f, "a full Mk1 pack on Earth climbs at half the net rate");
+            Assert.Greater(PlayerController.JetLift(14f, 14f, 9.81f, 0.5f), 9.81f, "it still rises");
+            Assert.AreEqual(3.71f + 10.29f * 0.5f, PlayerController.JetLift(14f, 14f, 3.71f, 0.5f), 1e-4f, "Mars");
+            Assert.AreEqual((9.81f + 4.19f * 0.5f) * 0.5f, PlayerController.JetLift(7f, 14f, 9.81f, 0.5f), 1e-4f, "the step the charge runs out in: its share");
+            Assert.AreEqual(4f, PlayerController.JetLift(8f, 8f, 9.81f, 0.5f), 1e-4f, "a thrust under g scales whole");
+            Assert.AreEqual(0f, PlayerController.JetLift(0f, 14f, 9.81f, 0.5f), "not firing");
+        }
+
+        [Test]
         public void TheGripHoldsRampsUpToItsAngle()
         {
             Vector2 Normal(float deg) => new Vector2(-Mathf.Sin(deg * Mathf.Deg2Rad), Mathf.Cos(deg * Mathf.Deg2Rad));
