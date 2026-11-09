@@ -1,5 +1,5 @@
 # LEAD STATUS
-Updated: 2026-11-08 23:0x · Session: 10 (zuber-dc; all three windows restarted ~09:30 after a ~3-hour break) · Review cycle: 288 · Cadence: every 2 hours (owner, 11-07 15:1x; session cron 5ca489ce at :43 on odd hours, next ~01:05) + messages from the workers as they arrive
+Updated: 2026-11-09 00:4x · Session: 10 (zuber-dc; all three windows restarted ~09:30 after a ~3-hour break) · Review cycle: 288 · Cadence: every 2 hours (owner, 11-07 15:1x; session cron 5ca489ce at :43 on odd hours, next ~01:05) + messages from the workers as they arrive
 Cycle 288 (23:05): no stall; U-186 / U-187 Done, U-182 in Review; all D1 art in; LeadQA D1DigRunTests compiles; U-183 in UNITY's lock (RAM 0.14 GB, watched); 0.6.0 after U-176 / U-178 / U-185 and the sweep.
 Cycle 287 (21:05): no stall; U-175 and U-184 in Review; every D1 art card exported; U-182 (the tier shader) in UNITY's lock; BLENDER on B-215.
 Cycle 286 (19:05): no stall; Build 0.5.1 out (USER-34 open); every D1 art card but B-205 exported; U-174 in Review; U-175 next.
@@ -8,7 +8,7 @@ Cycle 284 (15:05–17:0x): THE OWNER'S 0.5.0 PLAYTEST → D-174 (a progression d
 Cycles 281–283 (09:3x–15:0x): the resume; Build 0.5.0 (page https://claude.ai/artifact/CHnmoFrDg2jzUuM42BVi83); D-168..D-173; U-159 Mars smooth.
 (cycles 231–280: coordination/status/archive/LEAD_2026-11-06.md and REVIEW_LOG)
 ## Current task
-Directing D1, the owner's progression digging game (D-174 / D-175 / D-178, Bible 5.3 §8.1, docs/D1_TABLES.md). UNITY: U-182 (the tier fill shader, in its lock) → U-178 (Rank, New Expedition) → U-183 (the tool looks) → U-176 (ways up) → U-177 (the planet ladder, Mercury / Venus smooth) → U-185 (the hints) → U-179 / U-180 / U-181 / U-171 → a full sweep → the D1 build. BLENDER: B-215 (the D1 key audit), then B-201 (the D1 smoke read). All D1 art is exported.
+Directing D1, the owner's progression digging game (D-174 / D-175 / D-178, Bible 5.3 §8.1, docs/D1_TABLES.md). UNITY: U-176 (ways up: code in, its check re-running once under D-046 after a memory reap) → U-178 (Rank, New Expedition) → U-185 (the hints) → U-180 / U-181 / U-171 → a full sweep → U-188 Build 0.6.0. BLENDER: B-219 (the giants' find nodes: sources in 40d46029, previews in its lock after UNITY's run), then B-201 (0.6.0's smoke read). U-189 (the giants' finds harvestable) after 0.6.0. Done since 23:05: U-183 (the tool looks), D1_TABLES §4 climbing numbers (the winch 6 m/s), D-179 (unused), LeadQA step 6b (the ladder).
 ## Last completed
 Cycle 287's tick.
 ## Next up
