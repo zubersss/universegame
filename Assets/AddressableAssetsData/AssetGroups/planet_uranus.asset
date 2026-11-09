@@ -20,6 +20,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 0a2bd8cc1ec01da40bc17bdc174d94da
+    m_Address: props/uranus/node_superionic_ice/animator
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 1003d4211c147744da80cf4ebd2b3f9e
     m_Address: backgrounds/uranus/deck2_sun_right/layer1
     m_ReadOnly: 0
@@ -45,6 +50,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 1cbe00d4d4c448d4889f5f0a1277ff2a
+    m_Address: props/uranus/node_superionic_ice/json
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 1d33e393d93530043b186a60a821e326
     m_Address: backgrounds/uranus/deep_night/layer2
     m_ReadOnly: 0
@@ -62,6 +72,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 20de944a63807fa4ca485824c358d789
     m_Address: terrain/uranus/under_haze_deck3
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 223620f4981aacd4ab28c530a48a4f58
+    m_Address: props/uranus/node_methane_ice
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -140,6 +155,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 4892b5e4bfbd45149b1b50d05b6bbfb2
+    m_Address: props/uranus/node_methane_ice/animator
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 48a8a151d53a6c64da50f8f43d4eb3d4
     m_Address: backgrounds/uranus/deck2_night
     m_ReadOnly: 0
@@ -197,6 +217,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 5aaabd19edf09f54bb4e88bf97dd3b42
     m_Address: backgrounds/uranus/deep_sun_right/layer0
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 5fa6af89ff9a9c84aaca7449da38eba1
+    m_Address: props/uranus/node_superionic_ice
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -317,6 +342,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 99ede88b05627834e9b761a647b2f060
     m_Address: terrain/uranus/under_haze_deep
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 9a1aeb96c9db30741970efd1afbd3acc
+    m_Address: props/uranus/node_methane_ice/json
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

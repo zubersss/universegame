@@ -45,6 +45,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 284e0334a9af63843b7f73c64a8e113c
+    m_Address: props/jupiter/node_ammonia_ice/animator
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 326047f908b75bf4486880162ce63faa
     m_Address: backgrounds/jupiter/spot/layer0
     m_ReadOnly: 0
@@ -150,6 +155,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8b9c6d3bb9217464e834a06b075ded6c
+    m_Address: props/jupiter/node_ammonia_ice
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 91b34c364e8ca6048ba12144369fc073
     m_Address: terrain/jupiter/under_haze_deep
     m_ReadOnly: 0
@@ -185,6 +195,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a3f3c51f9e007fc43890d3ad1be51bab
+    m_Address: props/jupiter/node_metallic_hydrogen
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: a6da09b755fdc1f40b6b269f4202e27b
     m_Address: backgrounds/jupiter/deck2/layer1
     m_ReadOnly: 0
@@ -215,6 +230,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c5c1e924a521ef94e926c2b7343cdcc5
+    m_Address: props/jupiter/node_metallic_hydrogen/animator
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: cfbbab9979db4cc4fb5cc0fac749a839
     m_Address: backgrounds/jupiter/deep/layer2
     m_ReadOnly: 0
@@ -225,8 +245,18 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d42e01bfed088ef49813f103f9fe5a52
+    m_Address: props/jupiter/node_ammonia_ice/json
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: d9956cb0a6df3f443a2db0dfbd42b931
     m_Address: backgrounds/jupiter/spot/layer2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: dabeb0b34a83aa548aa50fa93e9cc1d8
+    m_Address: props/jupiter/node_metallic_hydrogen/json
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

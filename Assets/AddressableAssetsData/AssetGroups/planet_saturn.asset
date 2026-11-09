@@ -105,6 +105,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 69bad14d74da2414bb3cb5267edd3938
+    m_Address: props/saturn/node_ring_rock/json
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 69d52c3df66ef684da4ccdbcbaea81e0
     m_Address: props/saturn/helium_trap/json
     m_ReadOnly: 0
@@ -215,6 +220,26 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b1d5a641c62b000498565a3267f22194
+    m_Address: props/saturn/node_ring_ice/json
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b460764587db93d45aadf319372abf8c
+    m_Address: props/saturn/node_helium3/animator
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b6373f69da15cab48a27f79e2a8350f8
+    m_Address: props/saturn/node_ring_ice/animator
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b8716651c3531ee45a96229adace4a04
+    m_Address: props/saturn/node_ring_ice
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: bdfffeb9ee1833c4998514660439f2e7
     m_Address: creatures/saturn/ringmite
     m_ReadOnly: 0
@@ -245,6 +270,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: da442dd536818f543ba3fd9778d2cbd4
+    m_Address: props/saturn/node_ring_rock/animator
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: e08a6684772555145a7a346bd3c5fcac
     m_Address: backgrounds/saturn/deep/layer2
     m_ReadOnly: 0
@@ -257,6 +287,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: e411d3555192b17438d878469c5133fa
     m_Address: creatures/saturn/ringmite/animator
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e4e7885a2db427040a0c9272a5a7b6b4
+    m_Address: props/saturn/node_ring_rock
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -287,6 +322,16 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: f3374511b2747a245b9e0ab00c727ad9
     m_Address: flora/saturn/rigset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f758723af9e97004c82bd977fc5e813a
+    m_Address: props/saturn/node_helium3/json
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f8070e6f17dc71c49914a2ae15f05614
+    m_Address: props/saturn/node_helium3
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

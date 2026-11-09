@@ -15,6 +15,16 @@ MonoBehaviour:
   m_GroupName: planet_neptune
   m_GUID: 369253cc60f54d049b1845bd7551bb25
   m_SerializeEntries:
+  - m_GUID: 067ed86d8a461c84fbce31533d726cf8
+    m_Address: props/neptune/node_methane_ice
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 0725f0bc765ccaf4194acda38229dc5d
+    m_Address: props/neptune/node_deep_diamond/json
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 15ae8a77fd29398499e2df0d591cad68
     m_Address: creatures/neptune/umbral_leviathan/json
     m_ReadOnly: 0
@@ -125,6 +135,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 637571dd8b01d00489f9b5c74f919573
+    m_Address: props/neptune/node_superionic_ice
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 65b9a2b3b58ad4848923742d8534322b
     m_Address: creatures/neptune/windrider
     m_ReadOnly: 0
@@ -147,6 +162,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 73484da7d6ef95b4da106b2b7272b4ab
     m_Address: props/neptune/meridian_wreck_bow
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 73f1df99e6eb20b4d9cdceab5635c643
+    m_Address: props/neptune/node_deep_diamond/animator
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -185,6 +205,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8e3c33d8781aaa04697a56022a1ee87e
+    m_Address: props/neptune/node_superionic_ice/animator
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 9a16bf02f8aac154f8ab567737ae72a2
     m_Address: props/neptune/meridian_wreck_stern
     m_ReadOnly: 0
@@ -202,6 +227,16 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: b24b07bfd5dc5f24a9223ef1d35a63a5
     m_Address: creatures/neptune/umbral_leviathan
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b28a2ddb5062b7e409457e2ad4786098
+    m_Address: props/neptune/node_methane_ice/animator
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b2fb31baf569f4647b0bf79c407a6221
+    m_Address: props/neptune/node_deep_diamond
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -265,6 +300,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: dfd9d8ecfb286844aa0900d3549afb8b
+    m_Address: props/neptune/node_methane_ice/json
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: e3e7ac65230d5d34fa139cb54bd4f366
     m_Address: backgrounds/neptune/spot/layer0
     m_ReadOnly: 0
@@ -272,6 +312,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: e4774ee52e091584ba13355b249c8ba6
     m_Address: backgrounds/neptune/spot
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e54adf28b89efe547ad9b6f1de357602
+    m_Address: props/neptune/node_superionic_ice/json
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
