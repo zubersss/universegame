@@ -110,6 +110,8 @@ namespace Meridian.Save
             data.datacores = state.datacores;
             data.scripEarned = state.scripEarned; // U-174
             data.dirt = state.dirt.count;
+            data.skillNodes.AddRange(state.skillNodes); // U-175
+            data.expedition = state.expedition;
             data.catalogue.AddRange(state.catalogue);
             data.basePieces.AddRange(state.basePieces);
             data.aerostats.AddRange(state.aerostats);
@@ -203,7 +205,9 @@ namespace Meridian.Save
             state.scrip = data.scrip;
             state.datacores = data.datacores;
             state.scripEarned = data.scripEarned; // U-174
-            state.dirt.count = 0; state.dirt.Add(data.dirt);
+            state.skillNodes.Clear(); // U-175: the tree; an older file's tool / suit / ship unlocks become bought nodes
+            if (data.skillNodes != null) foreach (var n in data.skillNodes) state.skillNodes.Add(n);
+            state.expedition = Mathf.Max(1, data.expedition);
             state.catalogue.Clear();
             if (data.catalogue != null) foreach (var id in data.catalogue) state.catalogue.Add(id);
             state.basePieces.Clear(); state.aerostats.Clear();
@@ -211,11 +215,16 @@ namespace Meridian.Save
             if (data.aerostats != null) state.aerostats.AddRange(data.aerostats);
             state.contracts.Clear();
             if (data.contracts != null) state.contracts.AddRange(data.contracts);
+            state.storyFlags.Clear();
+            if (data.story != null && data.story.flags != null) state.storyFlags.AddRange(data.story.flags);
+            // U-175: a pre-tree file's unlocks become nodes (they read the story flags and the suit, so after both), then the tree's stats.
+            if (data.player != null) state.suitTier = data.player.suitTier;
+            if (data.loadedVersion < Meridian.Progress.SkillTree.SaveVersion) Meridian.Progress.SkillTree.MapOldUnlocks(state);
+            Meridian.Progress.SkillStats.Apply(state); // the pack's limit before the pack is read (the refund adds by weight)
             int cryoBatches = Meridian.Items.RetiredItems.TakeCryoRoundBatches(data.inventory); // U-170 (D-173)
             state.inventory.ReadFrom(data.inventory, data.selectedSlot);
             Meridian.Items.RetiredItems.Refund(state.inventory, cryoBatches);
-            state.storyFlags.Clear();
-            if (data.story != null && data.story.flags != null) state.storyFlags.AddRange(data.story.flags);
+            state.dirt.count = 0; state.dirt.Add(data.dirt); // U-174 (after the tree's store size)
             state.nodeStates.Clear();
             if (data.nodes != null) state.nodeStates.AddRange(data.nodes);
             if (time != null) time.SetGameSeconds(data.timers.gameSeconds);

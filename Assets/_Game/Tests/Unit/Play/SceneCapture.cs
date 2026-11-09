@@ -2593,6 +2593,95 @@ namespace Meridian.Tests
             }
         }
 
+        /// <summary>U-174 / U-175: a frame with an overlay canvas drawn by a plain UI camera at 1920x1080 over the scene's render (the game draws
+        /// overlays crisp; through the scene camera they went through the film pass and the scene's light). Written to logs/capture_&lt;file&gt;.png.</summary>
+        static IEnumerator SaveWithUi(Camera cam, Canvas ui, string file)
+        {
+            var sceneRt = new RenderTexture(1920, 1080, 24, RenderTextureFormat.ARGB32);
+            var uiRt = new RenderTexture(1920, 1080, 24, RenderTextureFormat.ARGB32);
+            var uiGo = new GameObject("CaptureUiCamera");
+            var uiCam = uiGo.AddComponent<Camera>();
+            uiCam.orthographic = true;
+            uiCam.cullingMask = 1 << ui.gameObject.layer;
+            uiCam.clearFlags = CameraClearFlags.SolidColor;
+            uiCam.backgroundColor = new Color(0f, 0f, 0f, 0f);
+            uiCam.targetTexture = uiRt;
+            cam.targetTexture = sceneRt;
+            var mode = ui.renderMode; var wc = ui.worldCamera;
+            ui.renderMode = RenderMode.ScreenSpaceCamera; ui.worldCamera = uiCam; ui.planeDistance = 1f;
+            cam.aspect = 1920f / 1080f; uiCam.aspect = cam.aspect;
+            yield return null;
+            yield return null;
+            cam.Render(); uiCam.Render();
+            Texture2D Read(RenderTexture r)
+            {
+                var prev = RenderTexture.active;
+                RenderTexture.active = r;
+                var tx = new Texture2D(1920, 1080, TextureFormat.RGBA32, false);
+                tx.ReadPixels(new Rect(0, 0, 1920, 1080), 0, 0);
+                tx.Apply();
+                RenderTexture.active = prev;
+                return tx;
+            }
+            var sceneTex = Read(sceneRt); var uiTex = Read(uiRt);
+            cam.targetTexture = null; uiCam.targetTexture = null;
+            var sp = sceneTex.GetPixels32(); var up = uiTex.GetPixels32();
+            for (int k = 0; k < sp.Length; k++)
+            {
+                float a = Mathf.Sqrt(up[k].a / 255f);
+                sp[k] = new Color32((byte)Mathf.Min(255, up[k].r + sp[k].r * (1f - a)), (byte)Mathf.Min(255, up[k].g + sp[k].g * (1f - a)), (byte)Mathf.Min(255, up[k].b + sp[k].b * (1f - a)), 255);
+            }
+            sceneTex.SetPixels32(sp); sceneTex.Apply();
+            File.WriteAllBytes($"logs/capture_{file}.png", sceneTex.EncodeToPNG());
+            UnityEngine.Object.Destroy(sceneTex); UnityEngine.Object.Destroy(uiTex);
+            sceneRt.Release(); uiRt.Release(); UnityEngine.Object.Destroy(sceneRt); UnityEngine.Object.Destroy(uiRt);
+            ui.renderMode = mode; ui.worldCamera = wc;
+            UnityEngine.Object.Destroy(uiGo);
+        }
+
+        /// <summary>U-175 (D-174): the Skill Tree panel topside at Earth's camp with a few nodes bought (dig_power_1, haul_pack_1, haul_dirt_1,
+        /// sur_scan_1, asc_ladder_1) and dig_power_2 chosen → coordination/reports/unity/u175/1_skill_tree.png.</summary>
+        [UnityTest, Timeout(240000)]
+        public IEnumerator CaptureU175Tree()
+        {
+            var name = Environment.GetEnvironmentVariable(Variable);
+            if (string.IsNullOrEmpty(name)) Assert.Ignore($"Set {Variable} (tools/unity_capture.ps1).");
+            if (SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.Null)
+                Assert.Fail("No graphics device: run without -nographics.");
+            bool wasCartoon = Meridian.View2D.CartoonStage.Enabled;
+            Meridian.View2D.CartoonStage.Enabled = true;
+            try
+            {
+#if UNITY_EDITOR
+                yield return UnityEditor.SceneManagement.EditorSceneManager.LoadSceneAsyncInPlayMode(
+                    CorePath, new LoadSceneParameters(LoadSceneMode.Single));
+#endif
+                var director = UnityEngine.Object.FindAnyObjectByType<SceneDirector>();
+                float timeout = Time.realtimeSinceStartup + 30f;
+                while ((!director.IsReady || !director.PlanetSide.terrain.IsSettled) && Time.realtimeSinceStartup < timeout) yield return null;
+                var side = director.PlanetSide;
+                side.creatures.autoSpawn = false;
+                side.creatures.DespawnAll();
+                if (side.dayNight != null) side.dayNight.Override = 0.45f;
+                var state = GameState.Instance;
+                state.scrip = 2000;
+                foreach (var id in new[] { "dig_power_1", "haul_pack_1", "haul_dirt_1", "sur_scan_1", "asc_ladder_1" })
+                    Assert.AreEqual(Meridian.Progress.SkillTree.BuyResult.Ok, Meridian.Progress.SkillTree.Current.Buy(state, id, true), id);
+                var panel = side.sideHud.Skills;
+                panel.SetOpen(true);
+                panel.Select("dig_power_2");
+                yield return new WaitForSeconds(2f); // the chart, frames and icons
+                var dir = "coordination/reports/unity/u175";
+                Directory.CreateDirectory(dir);
+                yield return SaveWithUi(side.sideCamera, panel.Title.canvas, $"{name}_1_skill_tree");
+                File.Copy($"logs/capture_{name}_1_skill_tree.png", $"{dir}/1_skill_tree.png", true);
+                TestContext.Out.WriteLine($"[MERIDIAN] u175 1_skill_tree: {state.skillNodes.Count} bought, chosen {panel.Selected}: '{panel.Status.text}', Beam power {Meridian.Progress.SkillStats.BeamPower:F2}, pack {state.inventory.LimitKg:F0} kg");
+                panel.SetOpen(false);
+                LogAssert.NoUnexpectedReceived();
+            }
+            finally { Meridian.View2D.CartoonStage.Enabled = wasCartoon; }
+        }
+
         /// <summary>
         /// U-174 (D-174, Bible 5.2 §8.1): the dig run on Earth → coordination/reports/unity/u174/: 1_surface_line (the surveyor 8 m down in a
         /// dug hollow, the Surface Line drawn in the cutaway above), 2_depth_hud_50m (the HUD's depth readout 50 m under the line) and

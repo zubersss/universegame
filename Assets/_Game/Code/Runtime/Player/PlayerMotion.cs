@@ -86,6 +86,9 @@ namespace Meridian.Player
             Remaining = BurnTime;
         }
 
+        /// <summary>U-175: the charge used per second of thrust (1; Ascent lowers it).</summary>
+        public float PowerUse = 1f;
+
         /// <summary>Upward acceleration (m/s²) to apply this step.</summary>
         public float Step(float dt, bool held, bool grounded)
         {
@@ -96,8 +99,8 @@ namespace Meridian.Player
                 return 0f;
             }
             if (!held || Remaining <= 0f) return 0f;
-            float used = Mathf.Min(dt, Remaining);
-            Remaining -= used;
+            float used = Mathf.Min(dt, Remaining / Mathf.Max(0.05f, PowerUse));
+            Remaining -= used * PowerUse; // U-175: Ascent's power use
             if (Remaining < 1e-4f) Remaining = 0f; // float slivers would otherwise add one extra burn step
             Firing = true;
             return Thrust * used / dt;

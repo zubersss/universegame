@@ -25,7 +25,9 @@ namespace Meridian.Player
         /// <summary>A hard landing (12–24 m/s, PlayerTuning) drains the reserve; 24 m/s or more empties it.</summary>
         public void TakeFallImpact(float impactSpeed)
         {
-            float f = FallDamage.Fraction(impactSpeed);
+            float f = FallDamage.Fraction(impactSpeed) * Meridian.Progress.SkillStats.FallDamageFactor; // U-175: Endurance's fall cut
+            float safe = Meridian.Progress.SkillStats.SafeFallM, g = -Physics2D.gravity.y;
+            if (safe > 0f && g > 0f && impactSpeed * impactSpeed / (2f * g) < safe) f = 0f; // no fall damage under its height
             if (f > 0f) Damage(f * maxHealth);
         }
 

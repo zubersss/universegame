@@ -202,12 +202,16 @@ namespace Meridian.UI
             // U-174 (D-174): the Sell panel (G), topside only.
             Sell = gameObject.AddComponent<SellPanel>();
             Sell.player = player;
+            // U-175 (D-174): the Skill Tree (K).
+            Skills = gameObject.AddComponent<SkillTreePanel>();
+            Skills.player = player;
         }
 
         public InventoryPanel Inventory { get; private set; }
         public CraftingPanel Crafting { get; private set; }
         public CataloguePanel Catalogue { get; private set; }
         public SellPanel Sell { get; private set; }
+        public SkillTreePanel Skills { get; private set; }
 
         /// <summary>U-174: the depth readout under the Surface Line ("DEPTH 12 m · SUBSOIL"; blank topside) and the pack-full cue.</summary>
         public Text DepthText { get; private set; }
@@ -445,7 +449,7 @@ namespace Meridian.UI
 
         void LateUpdate()
         {
-            bool hidden = MenuController.HudHidden || InventoryPanel.AnyOpen || CraftingPanel.AnyOpen || CataloguePanel.AnyOpen || SellPanel.AnyOpen; // U-058: nothing draws through a full-screen panel
+            bool hidden = MenuController.HudHidden || InventoryPanel.AnyOpen || CraftingPanel.AnyOpen || CataloguePanel.AnyOpen || SellPanel.AnyOpen || SkillTreePanel.AnyOpen; // U-058: nothing draws through a full-screen panel
             UpdateDepth(); // U-174
             if (hudCanvas != null && hudCanvas.enabled == hidden) hudCanvas.enabled = !hidden;
             if (vitals == null && player != null) vitals = player.GetComponent<PlayerVitals>();

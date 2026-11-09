@@ -51,7 +51,7 @@ namespace Meridian.Mining
         public static float LoadFactor(Inventory inv)
         {
             if (inv == null || float.IsPositiveInfinity(inv.LimitKg) || inv.LimitKg <= 0f) return 1f;
-            return Mathf.Max(0f, 1f - D1Tables.Current.loadK * inv.Weight / inv.LimitKg);
+            return Mathf.Max(0f, 1f - Meridian.Progress.SkillStats.LoadK * inv.Weight / inv.LimitKg); // U-175: the Haul branch's k
         }
 
         /// <summary>
@@ -72,7 +72,7 @@ namespace Meridian.Mining
                 total += st.count * tables.Scrip(st.itemId);
                 inv.TakeFrom(s, st.count);
             }
-            int paid = Mathf.RoundToInt(total * (atWaystation ? 1f + tables.waystationBonus : 1f));
+            int paid = Mathf.RoundToInt(total * (atWaystation ? 1f + Meridian.Progress.SkillStats.WaystationBonus : 1f)); // U-175: Voyage's prices
             state.scrip += paid;
             state.scripEarned += paid;
             return paid;
@@ -88,7 +88,7 @@ namespace Meridian.Mining
                 var st = inv[s];
                 if (!st.IsEmpty && tables.Sellable(st.itemId)) total += st.count * tables.Scrip(st.itemId);
             }
-            return Mathf.RoundToInt(total * (atWaystation ? 1f + tables.waystationBonus : 1f));
+            return Mathf.RoundToInt(total * (atWaystation ? 1f + Meridian.Progress.SkillStats.WaystationBonus : 1f));
         }
     }
 

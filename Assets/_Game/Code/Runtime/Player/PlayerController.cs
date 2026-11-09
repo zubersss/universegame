@@ -171,7 +171,8 @@ namespace Meridian.Player
             // Jetpack: jump held in the air past 0.25 s, or a fresh press while airborne.
             // A tap is only a jump.
             bool jetHeld = intent.jumpHeld && !Grounded && !jumped && (airTimeSinceJump > 0.25f || pressed);
-            v.y += Jetpack.Step(dt, jetHeld, Grounded) * LoadFactor * dt; // U-174: the pack's load lowers the lift
+            Jetpack.PowerUse = Meridian.Progress.SkillStats.JetPowerUse; // U-175
+            v.y += Jetpack.Step(dt, jetHeld, Grounded) * LoadFactor * Meridian.Progress.SkillStats.JetThrust * dt; // U-174: the pack's load lowers the lift; U-175: Ascent's thrust
 
             // U-088: jump cut: releasing the jump while rising keeps 40 % of the upward speed (the full height is unchanged).
             if (jumpHeldLast && !intent.jumpHeld && !Grounded && !jumped && v.y > 0f) v.y *= PlayerTuning.JumpCutFactor;

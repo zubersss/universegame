@@ -16,8 +16,9 @@ namespace Meridian.Rig
     {
         /// <summary>Tool reach in meters (Bible is silent; P-09).</summary>
         public const float Reach = 5f;
-        /// <summary>U-157: the round brush's radius (m): a stroke works the 1 to 4 tiles whose centres lie within it.</summary>
-        public const float BrushRadius = 0.9f;
+        /// <summary>U-157: the round brush's radius (m): a stroke works the 1 to 4 tiles whose centres lie within it. U-175: 0.9 m plus the
+        /// Dig branch's, under the expedition factor.</summary>
+        public static float BrushRadius => Meridian.Progress.SkillStats.BrushRadius;
 
         public TerrainStreamer terrain;
         public ItemDrops drops;
@@ -28,8 +29,10 @@ namespace Meridian.Rig
         [System.NonSerialized] public Meridian.Mining.DirtStore dirt; // GameState's (a serialized field would get its own empty store)
         /// <summary>U-174: the dirt store (GameState's unless one was set).</summary>
         public Meridian.Mining.DirtStore Dirt => dirt ??= Meridian.Core.GameState.Instance != null ? Meridian.Core.GameState.Instance.dirt : null;
-        /// <summary>U-174: the Beam's power (1 at the start; the Skill Tree's Dig branch raises it): a stroke's time divides by it.</summary>
-        public float BeamPower = 1f;
+        /// <summary>U-174: the Beam's power (1 at the start; U-175: the Dig branch raises it): a stroke's time divides by it. Setting it pins
+        /// a value (tests); 0 or less: the tree's again.</summary>
+        public float BeamPower { get => beamPin > 0f ? beamPin : Meridian.Progress.SkillStats.BeamPower; set => beamPin = value; }
+        float beamPin;
         /// <summary>U-174: raised when a dug tile gives dirt (true: into the store; false: the store was full, a puff only).</summary>
         public event System.Action<bool> DirtDug;
         /// <summary>Raised after the Beam removes a tile (U-032 dig animation).</summary>
@@ -41,7 +44,6 @@ namespace Meridian.Rig
         {
             if (inventory == null && Meridian.Core.GameState.Instance != null) inventory = Meridian.Core.GameState.Instance.inventory;
             if (dirt == null && Meridian.Core.GameState.Instance != null) dirt = Meridian.Core.GameState.Instance.dirt;
-            BeamPower = Meridian.Mining.D1Tables.Current.beamPowerStart;
             if (drops != null && drops.collector == null) drops.collector = owner;
             if (drops != null && drops.inventory == null) drops.inventory = inventory;
         }

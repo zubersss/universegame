@@ -64,7 +64,7 @@ namespace Meridian.Player
             var screen = aim.ReadValue<Vector2>();
             if (view != null && !externalAim) AimWorld = (Vector2)view.ScreenToWorldPoint(new Vector3(screen.x, screen.y, -view.transform.position.z));
             // While the inventory panel is open, clicks select slots, not tiles (U-045).
-            bool pressed = (primary.IsPressed() || holdUse) && !Meridian.UI.InventoryPanel.AnyOpen && !Meridian.UI.CraftingPanel.AnyOpen && !Meridian.UI.CataloguePanel.AnyOpen && !Meridian.UI.SellPanel.AnyOpen;
+            bool pressed = (primary.IsPressed() || holdUse) && !Meridian.UI.InventoryPanel.AnyOpen && !Meridian.UI.CraftingPanel.AnyOpen && !Meridian.UI.CataloguePanel.AnyOpen && !Meridian.UI.SellPanel.AnyOpen && !Meridian.UI.SkillTreePanel.AnyOpen;
             bool edge = primary.WasPressedThisFrame() || (holdUse && !heldLast);
             heldLast = holdUse;
             Using = rig != null && view != null && pressed;

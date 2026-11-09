@@ -40,6 +40,7 @@ namespace Meridian.Player
             Button(foot, "Catalogue", "<Keyboard>/n");
             Button(foot, "FloatCell", "<Keyboard>/v");
             Button(foot, "Sell", "<Keyboard>/g"); // U-174: the Sell panel, topside
+            Button(foot, "Skills", "<Keyboard>/k"); // U-175: the Skill Tree
 
             // U-107 (§6 v4.1): the upright rocket: thrust held on W or Space, A/D tilt (springs upright on release). Thrust
             // and tilt check their keys' state when enabled, so a key held through launch or entry keeps working on the

@@ -77,7 +77,7 @@ namespace Meridian.Trade
         public static int BuyPrice(string station, string item)
         {
             float raw = RawScrip(item);
-            if (raw > 0f) return Mathf.Max(1, Mathf.RoundToInt(raw * (1f + Meridian.Mining.D1Tables.Current.waystationBonus) / SellShare * Factor(station, item)));
+            if (raw > 0f) return Mathf.Max(1, Mathf.RoundToInt(raw * (1f + Meridian.Mining.D1Tables.Current.waystationBonus) / SellShare * Factor(station, item))); // Halcyon's price: the base bonus, not the player's
             return Base.TryGetValue(item, out int p) ? Mathf.Max(1, Mathf.RoundToInt(p * Factor(station, item))) : 0;
         }
 
@@ -85,7 +85,7 @@ namespace Meridian.Trade
         public static int SellPrice(string station, string item)
         {
             float raw = RawScrip(item);
-            if (raw > 0f) return Mathf.Max(1, Mathf.RoundToInt(raw * (1f + Meridian.Mining.D1Tables.Current.waystationBonus)));
+            if (raw > 0f) return Mathf.Max(1, Mathf.RoundToInt(raw * (1f + Meridian.Progress.SkillStats.WaystationBonus))); // U-175: Voyage raises it
             return Mathf.Max(1, Mathf.FloorToInt(BuyPrice(station, item) * SellShare));
         }
 

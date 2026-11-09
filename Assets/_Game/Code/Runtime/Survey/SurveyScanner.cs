@@ -11,7 +11,7 @@ namespace Meridian.Survey
     /// </summary>
     public sealed class SurveyScanner : MonoBehaviour
     {
-        public const float ScanRadius = 8f;
+        public static float ScanRadius => Meridian.Progress.SkillStats.ScanRadius; // U-175: 8 m plus the Survey branch's
 
         public PlanetSideRoot side;
         PlayerRigInput rig;

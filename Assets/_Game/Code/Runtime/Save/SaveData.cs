@@ -12,7 +12,7 @@ namespace Meridian.Save
     [Serializable]
     public sealed class SaveData
     {
-        public const int CurrentVersion = 3;
+        public const int CurrentVersion = 4;
 
         public int version = CurrentVersion;
         /// <summary>U-157: the version the file was written at (set by SaveMigrations.Migrate; never saved).</summary>
@@ -34,6 +34,9 @@ namespace Meridian.Save
         /// <summary>U-174 (D-174 / D-175): the Scrip earned by selling this expedition, and the dirt store's tiles (absent in older files: 0).</summary>
         public int scripEarned;
         public int dirt;
+        /// <summary>U-175 (D-174 / D-175): the Skill Tree's bought nodes and the expedition number (absent in older files: none, 1).</summary>
+        public List<string> skillNodes = new List<string>();
+        public int expedition = 1;
         public List<Meridian.Trade.Contract> contracts = new List<Meridian.Trade.Contract>();
         /// <summary>v2 (U-045): the surveyor's 40 slots in order (empty ones included) and the Builder's slot.</summary>
         public List<Meridian.Items.ItemStack> inventory = new List<Meridian.Items.ItemStack>();
@@ -123,6 +126,9 @@ namespace Meridian.Save
                 if (data.story != null) SmoothGroundMigration.DropFlags(data.story.flags);
                 data.version = 3;
             }
+            // v3 → v4 (U-175, D-174): the Skill Tree replaces the Blueprint Tree; the file's unlocks become bought nodes once the state is read
+            // (SkillTree.MapOldUnlocks, SaveSystem.Load, on loadedVersion < 4).
+            if (data.version < 4) data.version = 4;
             return data;
         }
     }

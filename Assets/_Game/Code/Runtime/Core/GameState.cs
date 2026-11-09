@@ -32,14 +32,17 @@ namespace Meridian.Core
         public int scripEarned;
         /// <summary>U-174 (D-174): the dirt store (dug matrix tiles for the Builder; weightless, not sellable).</summary>
         public readonly Meridian.Mining.DirtStore dirt = new Meridian.Mining.DirtStore();
+        /// <summary>U-175 (D-174): the Skill Tree's bought nodes; D-175: the expedition number (1 for the first).</summary>
+        public readonly System.Collections.Generic.HashSet<string> skillNodes = new System.Collections.Generic.HashSet<string>();
+        public int expedition = 1;
 
         /// <summary>U-174: the D1 tables' pack limit, item weights and dirt store size on the surveyor's inventory and store.</summary>
         public void ApplyD1()
         {
             var t = Meridian.Mining.D1Tables.Current;
             Meridian.Items.Inventory.KgOf = t.Kg;
-            inventory.LimitKg = t.packLimitKg;
-            dirt.capacity = t.dirtStoreStart;
+            inventory.LimitKg = Meridian.Progress.SkillStats.PackKg; // U-175: the Haul branch's pack, the expedition factor
+            dirt.capacity = Meridian.Progress.SkillStats.DirtStore;
         }
         /// <summary>Survey Datacores and the catalogue of scanned entries (U-054).</summary>
         public int datacores;
@@ -82,7 +85,7 @@ namespace Meridian.Core
         {
             if (Instance != null && Instance != this) { Destroy(gameObject); return; }
             Instance = this;
-            ApplyD1(); // U-174: the pack's weight limit and the dirt store from the D1 tables
+            Meridian.Progress.SkillStats.Apply(this); // U-174 / U-175: the pack's limit and the dirt store from the D1 tables and the tree
         }
 
         void OnDestroy()
