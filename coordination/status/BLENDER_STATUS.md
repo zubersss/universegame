@@ -1,13 +1,17 @@
 # BLENDER STATUS
-Updated: 2026-11-08 17:2x · Session: 10 (all three windows restarted ~09:30 after a ~3-hour break; context rebuilt from the repo) · trimmed under D-113 at 14:0x; older: coordination/status/archive/BLENDER_2026-11-08.md, BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
+Updated: 2026-11-08 18:2x · Session: 10 (all three windows restarted ~09:30 after a ~3-hour break; context rebuilt from the repo) · trimmed under D-113 at 14:0x; older: coordination/status/archive/BLENDER_2026-11-08.md, BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
 
 ## Current task
-LEAD's order (17:1x): the Mars / Mercury / Venus tier previews (B-203), node-icon batch 1 (B-204), B-208, B-206, B-205, then B-202's export and B-201.
-- **B-203** Mars / Mercury / Venus: source in b9555c3b (tier_colours, tier_fill_fn, dec(), tier_tables; `python -I build_ground_variants_v3.py ..\preview tiers mars,mercury,venus`). The previews wait on UNITY's 0.5.1 gate (want filed).
-- **B-204** node icons: build_icons_nodes_v3.py has batch 1 (the 12 ring-1 nodes, each with a level meter). Its preview runs in the same slot; the export follows LEAD's OK.
+LEAD's order (18:2x): the B-204 node icons (batch 3 export, then ring 4 and ring 5), B-206, B-205, then B-202's export and B-201.
+- **B-204 node icons** (build_icons_nodes_v3.py): batches 1, 2 (10 of 12) exported; batch 3 accepted, all 20. Its export waits on UNITY's lock (want filed): row icons/nodes/batch3 (also re-exports dig_power_1 / _2 cable-fed) + ui/skilltree/emblem_dig re-drawn. Ring 4 (batch 4, 12) is in source; its preview runs next.
+- **Rule from LEAD 18:2x (D-087; also binds B-205):** the Beam reads as a mining tool, never a gun. No pistol grip or trigger: a cable-fed emitter (two-handed or arm-mounted) with a cutting nozzle. Mk1-5 grow the emitter and warm the beam colour from teal to gold.
 - B-207 waits on UNITY's import (PawsOnTheGround green). B-172 waits on U-151.
 
 ## Last completed
+- 17:4x-18:0x, all LEAD-accepted (the reviews are stamped):
+  - B-203 Mars / Mercury / Venus tiers + node icons batch 1 (f473f930, 106 files).
+  - B-208: B-151's panels flat + ui/panels/grain (5cb90871; U-181 wires the overlay).
+  - Node icons batch 2, 10 of 12 (ea7e8384).
 - 17:2x (e72a24ff, wrapper peak 542 MB), all LEAD-accepted:
   - B-203 Earth: terrain/earth/ground_fill_t2..t5, fill_decor_t2_1..t5_2, surface_line.
   - B-204 kit: ui/skilltree/* (20 keys).
@@ -41,7 +45,7 @@ none. Waiting on: U-151 (B-172's export), U-152 (B-174).
 none.
 
 ## Rules I keep (from slips)
-- While another role holds the lock or waits at the RAM gate, NOTHING of mine runs: no capped dry run, no python / sed text patch, no json check. Edit files with the edit tools only (13:1x and 13:5x slips: two one-off python patches beside UNITY's lock; 16:4x: one `sed -i` swapping two characters in my own script).
+- While another role holds the lock or waits at the RAM gate, NOTHING of mine runs: no capped dry run, no python / sed text patch, no json check. Edit files with the edit tools only (13:1x and 13:5x slips: two one-off python patches beside UNITY's lock; 16:4x: one `sed -i` swapping two characters in my own script; 18:2x: one `sed -i` on this status line. The shell is never the editor while a lock is out.)
 - Before sending a sheet, look at every new shape at 2x for faces: dark marks on a ball (puff frame 2), pale points under a dark arch (teeth), a dark oval on a white ball (a hole).
 - preview_dip and any scene lookup: take the planet from the key (PLANET_OF is keyed by scene name). Hold heavy_blender.lock by hand around a light run (the wrapper also refuses beside another role's lock or want).
 - No 2>&1 on the render wrapper in PowerShell 5.1 (a numpy warning becomes a terminating error).
@@ -55,4 +59,4 @@ none.
 none.
 
 ## HeavyJobLock
-none held (last: the 17:2x wrapper export). want_blender.lock is on file behind UNITY's U-173 gate. No background waiters: I poll in the foreground.
+none held (last: the 18:0x batch 2 export). want_blender.lock is on file behind UNITY's U-174 run. No background waiters: I poll in the foreground.
