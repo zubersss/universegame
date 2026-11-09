@@ -1,0 +1,51 @@
+{
+  "key": "fx/dig_clods/t3",
+  "style": "v3",
+  "width": 404,
+  "height": 268,
+  "palette": "earth",
+  "ppu": 64,
+  "frame_width": 64,
+  "frame_height": 64,
+  "columns": 6,
+  "gutter": 4,
+  "frames": 24,
+  "fps": 12,
+  "pivot": [
+    0.5,
+    0.5
+  ],
+  "tier": 3,
+  "tier_name": "Stone",
+  "animations": [
+    {
+      "name": "clod_1",
+      "start": 0,
+      "length": 6,
+      "loop": true,
+      "loop_from": 0
+    },
+    {
+      "name": "clod_2",
+      "start": 6,
+      "length": 6,
+      "loop": true,
+      "loop_from": 0
+    },
+    {
+      "name": "clod_3",
+      "start": 12,
+      "length": 6,
+      "loop": true,
+      "loop_from": 0
+    },
+    {
+      "name": "clod_4",
+      "start": 18,
+      "length": 6,
+      "loop": true,
+      "loop_from": 0
+    }
+  ],
+  "note": "B-232 (D-183, LEAD 14:2x): four clips, each ONE clod turning in place (no travel): spawn 4-8 per opened cell, a random clip each, and move them in code (U-195); cream + ink: tint by the dug cell's tier tone; mirror freely"
+}

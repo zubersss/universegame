@@ -1012,6 +1012,9 @@ def sheet_meta(kn, frames):
         meta.update({"brink": True, "note": "drawn for a drop to the right; mirror x for a drop to the left"})
     elif kn == "dig_puff":
         meta["animations"] = [{"name": "puff", "start": 0, "length": n, "loop": False}]
+        meta["note"] = ("B-238 (D-190): low wide dust at the cell's mouth, no clods in it (fx/dig_clods are thrown over it); cream + ink: "
+                        "tint it by the tone of the fill drawn at the dug cell, everywhere it plays; drawn 0.69 x 0.31 m at its peak "
+                        "(frames 2-3), its foot on the pivot row, so it plays at scale 1")
     elif kn.startswith("fill_decor_"):
         meta.update({"upright": True, "decor": FILL_DECOR[PLANET][int(kn.rsplit("_", 1)[1]) - 1][0],
                      "note": "D-165: a spot feature of the cross-section; UNITY scatters it in the cutaway by a position seed, never rotated; pivot centred"})
