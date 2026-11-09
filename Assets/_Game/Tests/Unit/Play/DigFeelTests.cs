@@ -64,11 +64,19 @@ namespace Meridian.Tests
             Assert.GreaterOrEqual(tiers.Length, 3, "at least three tiers in the tables");
             for (int k = 0; k < tiers.Length; k++)
             {
-                var want = Color.Lerp(tiers[k].ChipColor, Color.white, DigFeel.ToneLift);
+                // D-190 (2): clods lifted 35 % toward white on T1-T3 and 60 % on T4-T5; the dust puff 60 % at its alpha
+                float lift = k >= 3 ? 0.6f : 0.35f;
+                Assert.AreEqual(lift, DigFeel.ToneLiftOf(k), 1e-6f, $"T{k + 1}'s lift");
+                var want = Color.Lerp(tiers[k].ChipColor, Color.white, lift);
                 var tone = DigFeel.Tone(k);
                 Assert.AreEqual(want.r, tone.r, 1e-4f, $"T{k + 1} red"); Assert.AreEqual(want.g, tone.g, 1e-4f, $"T{k + 1} green"); Assert.AreEqual(want.b, tone.b, 1e-4f, $"T{k + 1} blue");
                 Assert.AreEqual(1f, tone.a, 1e-6f, "opaque");
+                var dust = Color.Lerp(tiers[k].ChipColor, Color.white, 0.6f);
+                var puff = DigFeel.PuffTone(k);
+                Assert.AreEqual(dust.r, puff.r, 1e-4f, $"T{k + 1} puff red"); Assert.AreEqual(dust.g, puff.g, 1e-4f, $"T{k + 1} puff green"); Assert.AreEqual(dust.b, puff.b, 1e-4f, $"T{k + 1} puff blue");
+                Assert.AreEqual(DigFeel.PuffRedrawn ? 0.85f : 0.7f, puff.a, 1e-6f, "the puff's alpha (0.85 on B-238's dust, 0.7 on the old ball)");
             }
+            Assert.AreEqual(DigFeel.PuffRedrawn ? 1f : 0.6f, DigFeel.PuffScaleNow, 1e-6f, "the puff's scale (1 on B-238's dust)");
             Color t1 = DigFeel.Tone(0), t3 = DigFeel.Tone(2);
             Assert.Greater(t1.r - t1.b, 0.15f, "Topsoil: a brown (red well over blue)");
             Assert.Less(Mathf.Abs(t3.r - t3.b), 0.06f, "Stone: a grey");
@@ -156,8 +164,23 @@ namespace Meridian.Tests
                 Assert.AreEqual(DigFeel.Tone(2), feel.TintOf(i), "at 56 m: Stone's tone, not the surface's");
             }
             Assert.AreEqual(feel.LastBurst, deepClods, "the deep burst's clods");
+            // D-190: the stroke's dust puff takes the same cell's tone (the one puff: no band set's own)
+            var fx = Object.FindAnyObjectByType<Meridian.FX.SideFx>();
+            Assert.NotNull(fx, "SideFx on the planet side");
+            Assert.AreEqual(DigFeel.PuffTone(2), fx.LastPuffTint, "the deep stroke's puff: Stone's dust");
+            Assert.Less(Vector2.Distance(fx.LastPuffAt, deepAt), 0.01f, "played at the stroke");
+            StringAssert.EndsWith("/dig_puff", fx.PuffAt(deepAt), "the planet's one puff");
             body.position = p; side.player.transform.position = p;
             body.simulated = true;
+            yield return null;
+
+            // D-190 (3): a mound's puff is the same one, tinted where the earth lands (it played untinted)
+            int puffs = fx.Puffs;
+            for (int i = 0; i < 10; i++) yield return new WaitForFixedUpdate();
+            var moundAt = side.player.Body.position + new Vector2(-2.2f, 0.6f);
+            Assert.IsTrue(side.rig.Place(moundAt, side.rig.GroundMaterial), "the Builder (as a raw tool) piles a mound beside the surveyor");
+            Assert.AreEqual(puffs + 1, fx.Puffs, "the mound's puff");
+            Assert.AreEqual(DigFeel.PuffTone(0), fx.LastPuffTint, "a mound at camp: Topsoil's dust, tinted");
             yield return null;
             LogAssert.NoUnexpectedReceived();
         }

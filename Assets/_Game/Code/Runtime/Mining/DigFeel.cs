@@ -24,21 +24,46 @@ namespace Meridian.Mining
         public const float KickPixels = 2f, StandInSpinDeg = 540f;
         /// <summary>How far toward the open side a clod starts from the stroke's point (m: the bowl's mouth).</summary>
         public const float MouthM = 0.45f;
-        /// <summary>LEAD 17:0x: clods and the dig puff take the dug cell's TIER tone (the depth chip's colour, D1_TABLES), lifted this far
-        /// toward white so the cream-and-ink art keeps its light side; the puff until B-238 redraws it: smaller and thinner, behind the clods.</summary>
-        public const float ToneLift = 0.35f, PuffScale = 0.6f, PuffAlpha = 0.7f;
+        /// <summary>D-190 (LEAD, from BLENDER's B-232 / B-238 sheet): the dig's debris is drawn once in cream and ink and coloured here by
+        /// the dug cell's tone, lifted toward white so the art keeps its light side: clods 35 % on T1-T3 and 60 % on T4-T5 (the deep tiers'
+        /// thin shards read weakly on their dark fills), the dust puff 60 %. The tone today is the tier's depth-chip colour (D1_TABLES);
+        /// D-190 (1) wants the fill actually drawn at the cell (a biome's sand or snow in Topsoil): a known gap until the fills carry a tone.</summary>
+        public const float ToneLiftShallow = 0.35f, ToneLiftDeep = 0.6f, PuffLift = 0.6f;
+        public const int DeepLiftFromTier = 3;
+        public static float ToneLiftOf(int tier) => tier >= DeepLiftFromTier ? ToneLiftDeep : ToneLiftShallow;
 
-        static Color[] tones;
-        /// <summary>The tone clods (and the puff) are multiplied by at a depth tier (0-based): the tier's chip colour lifted toward white.</summary>
-        public static Color Tone(int tier)
+        /// <summary>B-238's puff (a low, small dust, drawn to be played at scale 1 and 0.85 alpha) is imported: set with its import. Until
+        /// then B-184's lobed ball plays at 0.6 scale and 0.7 alpha (LEAD 17:0x) and the shovel's flick stays off (D-190 (4)).</summary>
+        public static readonly bool PuffRedrawn = false;
+        public static float PuffScaleNow => PuffRedrawn ? 1f : 0.6f;
+        public static float PuffAlphaNow => PuffRedrawn ? 0.85f : 0.7f;
+
+        static Color[] tones, puffTones;
+        static void Tones()
         {
             var t = D1Tables.Current.tiers;
-            if (tones == null || tones.Length != t.Length)
+            if (tones != null && tones.Length == t.Length) return;
+            tones = new Color[t.Length]; puffTones = new Color[t.Length];
+            for (int i = 0; i < t.Length; i++)
             {
-                tones = new Color[t.Length];
-                for (int i = 0; i < t.Length; i++) { var c = Color.Lerp(t[i].ChipColor, Color.white, ToneLift); c.a = 1f; tones[i] = c; }
+                var chip = t[i].ChipColor;
+                var c = Color.Lerp(chip, Color.white, ToneLiftOf(i)); c.a = 1f; tones[i] = c;
+                var p = Color.Lerp(chip, Color.white, PuffLift); p.a = 1f; puffTones[i] = p;
             }
+        }
+        /// <summary>The tone a depth tier's clods are multiplied by (0-based tier; past the last: the last).</summary>
+        public static Color Tone(int tier)
+        {
+            Tones();
             return tones.Length == 0 ? Color.white : tones[Mathf.Clamp(tier, 0, tones.Length - 1)];
+        }
+        /// <summary>The dust puff's tint at a depth tier: the tier's tone lifted PuffLift, at the puff's alpha.</summary>
+        public static Color PuffTone(int tier)
+        {
+            Tones();
+            var c = puffTones.Length == 0 ? Color.white : puffTones[Mathf.Clamp(tier, 0, puffTones.Length - 1)];
+            c.a = PuffAlphaNow;
+            return c;
         }
         public const int SortingOrder = 41; // over the stroke's puff (FxPool, 40)
 

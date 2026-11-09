@@ -93,5 +93,50 @@ namespace Meridian.Tests
             // unattenuated, the same border under a 20-degree hill does climb back: the fault
             Assert.Greater(SmoothGround.TierWobbleSlopeMax, Mathf.Tan(20f * Mathf.Deg2Rad), "at full strength the wobble out-runs a 20-degree hill");
         }
+
+        /// <summary>U-196 (D-183): the back wall's depth term: its full shade at the natural surface, 55 % of it from 6 m down, never
+        /// darker, nothing above the surface (a mound's back wall is not darkened).</summary>
+        [Test]
+        public void TheBackWallDarkensWithDepthToItsFloor()
+        {
+            Assert.AreEqual(1f, SmoothGround.DepthShade(0f), 1e-6f, "at the opening");
+            Assert.AreEqual(0.775f, SmoothGround.DepthShade(3f), 1e-4f, "halfway at 3 m");
+            Assert.AreEqual(0.55f, SmoothGround.DepthShade(6f), 1e-6f, "55 % at 6 m");
+            Assert.AreEqual(0.55f, SmoothGround.DepthShade(60f), 1e-6f, "and no darker below");
+            Assert.AreEqual(1f, SmoothGround.DepthShade(-2f), 1e-6f, "nothing darkens above the natural surface");
+            float prev = 1f;
+            for (float d = 0f; d <= 8f; d += 0.1f) { float s = SmoothGround.DepthShade(d); Assert.LessOrEqual(s, prev + 1e-6f, $"never lighter with depth ({d:0.0} m)"); prev = s; }
+        }
+
+        /// <summary>U-196: the open-air term at known cells: 0 extra way down a shaft that sees the sky, one more metre a cell along a
+        /// tunnel off its foot, no way at all from a closed pocket; the term falls to 80 % over 3 m of extra way.</summary>
+        [Test]
+        public void TheBackWallDarkensAwayFromTheOpenSky()
+        {
+            const int W = 9;
+            var air = new bool[W * W]; var lit = new bool[W * W]; var depth = new float[W * W]; var extra = new float[W * W];
+            int K(int i, int j) => i + j * W;
+            for (int j = 0; j < W; j++)
+                for (int i = 0; i < W; i++)
+                {
+                    depth[K(i, j)] = 7 - j;            // the natural surface at row 7: rows 7 and 8 are the sky
+                    if (j >= 7) { air[K(i, j)] = true; lit[K(i, j)] = true; }
+                }
+            for (int j = 2; j <= 6; j++) { air[K(2, j)] = true; lit[K(2, j)] = true; } // a shaft down column 2: it sees the sky
+            for (int i = 3; i <= 7; i++) air[K(i, 2)] = true;                           // a tunnel off its foot along row 2
+            air[K(6, 5)] = true; air[K(7, 5)] = true;                                   // a closed pocket
+            SmoothGround.AirExtra(W, air, lit, depth, extra);
+            for (int j = 2; j <= 6; j++) Assert.AreEqual(0f, extra[K(2, j)], 1e-5f, $"the shaft at row {j}: straight up is the way");
+            for (int i = 3; i <= 7; i++) Assert.AreEqual(i - 2, extra[K(i, 2)], 1e-5f, $"the tunnel, {i - 2} m off the shaft");
+            Assert.IsTrue(float.IsPositiveInfinity(extra[K(6, 5)]) && float.IsPositiveInfinity(extra[K(7, 5)]), "a closed pocket has no way to the sky");
+            Assert.IsTrue(float.IsPositiveInfinity(extra[K(4, 4)]), "solid ground has none");
+            Assert.AreEqual(0f, extra[K(5, 8)], 1e-6f, "the sky itself");
+
+            Assert.AreEqual(1f, SmoothGround.AirShade(0f), 1e-6f, "under the open sky");
+            Assert.AreEqual(0.9f, SmoothGround.AirShade(1.5f), 1e-5f, "1.5 m into a tunnel");
+            Assert.AreEqual(0.8f, SmoothGround.AirShade(3f), 1e-6f, "80 % from 3 m on");
+            Assert.AreEqual(0.8f, SmoothGround.AirShade(float.PositiveInfinity), 1e-6f, "a closed room");
+            Assert.AreEqual(0.55f * 0.8f, SmoothGround.DepthShade(10f) * SmoothGround.AirShade(5f), 1e-5f, "the darkest a back wall goes: 44 % of its shade");
+        }
     }
 }

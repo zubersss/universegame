@@ -901,7 +901,11 @@ namespace Meridian.View2D
                 float yt = C - 0.5f;
                 BackAir(wx0, wy0);
                 BackMask(C, backAir, backMask);
-                for (int i = 0; i < C; i++)
+                bool anyBack = false;
+                for (int m = 0; m < backMask.Length && !anyBack; m++) anyBack = backMask[m];
+                if (anyBack) HoleShadeGrid(wx0, wy0); // U-196: only a chunk with a hole pays for its shading
+                var sandBack = new Color(BackShade, BackShade, BackShade, 1f);
+                for (int i = 0; i < C && anyBack; i++)
                 {
                     float h0 = c.SurfaceCurve[i] - wy0, h1 = c.SurfaceCurve[i + 1] - wy0;
                     if (float.IsNaN(h0) || float.IsNaN(h1)) continue;
@@ -910,17 +914,15 @@ namespace Meridian.View2D
                     for (int j = 0; j < C; j++)
                     {
                         if (!backMask[i + j * C]) continue;
-                        int run = j;
-                        while (j + 1 < C && backMask[i + (j + 1) * C]) j++;
-                        float yb = run - 0.5f, top = j + 0.5f;
+                        // U-196: a quad a cell (they ran merged up the column), so its corners carry the hole's shading
+                        float yb = j - 0.5f, top = j + 0.5f;
                         float t0 = Mathf.Min(h0, top), t1 = Mathf.Min(h1, top);
                         if (t0 <= yb && t1 <= yb) continue;
-                        BackQuad(tris[SubBack], x0, x1, yb, t0, t1, back, back, FillUv);
+                        BackQuadShaded(tris[SubBack], c, wy0, x0, x1, yb, t0, t1, back, 1f, 1f, FillUv);
                         if (sandFill)
                         {
                             float s0 = SandWeight(wx0 + x0), s1 = SandWeight(wx0 + x1);
-                            if (s0 > 0f || s1 > 0f)
-                                BackQuad(tris[SubBackSand], x0, x1, yb, t0, t1, new Color(BackShade, BackShade, BackShade, s0), new Color(BackShade, BackShade, BackShade, s1), WorldUv);
+                            if (s0 > 0f || s1 > 0f) BackQuadShaded(tris[SubBackSand], c, wy0, x0, x1, yb, t0, t1, sandBack, s0, s1, WorldUv);
                         }
                     }
                 }
@@ -954,7 +956,7 @@ namespace Meridian.View2D
                     float len = (q - p).magnitude;
                     // U-157: the band only on the natural surface; a dug floor or a mound's top is earth, ink-rimmed.
                     if (segN.y > SurfaceFacing && variantCount[Grass] > 0 && OnSurface(c, (p + q) * 0.5f, wy0)) quads += BandByBiome(p, q, np, nq, wx0);
-                    else Rim(p, q, np, nq, arc);
+                    else { RimShadow(c, p, q, np, nq, wy0, FillUv); Rim(p, q, np, nq, arc); } // U-196: the hole's soft inner shadow under the ink rim
                     arc += len;
                 }
             }
@@ -1047,6 +1049,151 @@ namespace Meridian.View2D
             Add(new Vector3(x0, yb, 0.01f), uvOf(x0, yb), c0); Add(new Vector3(x1, yb, 0.01f), uvOf(x1, yb), c1);
             Add(new Vector3(x1, h1, 0.01f), uvOf(x1, h1), c1); Add(new Vector3(x0, h0, 0.01f), uvOf(x0, h0), c0);
             into.Add(b); into.Add(b + 2); into.Add(b + 1); into.Add(b); into.Add(b + 3); into.Add(b + 2);
+        }
+
+        // ---------- U-196 (D-183, the owner's 0.6.0 playtest): holes read as holes ----------
+
+        /// <summary>The back wall darkens with depth under the natural surface (to DepthShadeFloor of its shade at DepthShadeM and below) and
+        /// with the extra way its air is from the open sky beyond straight up (to AirShadeFloor over AirFalloffM: a side tunnel off a shaft,
+        /// a closed room); a soft ink shadow RimShadowM wide lies inside every dug edge. All of it in the back wall's own vertex colours and
+        /// triangles: no texture sample, no draw call added.</summary>
+        public const float DepthShadeM = 6f, DepthShadeFloor = 0.55f, AirFalloffM = 3f, AirShadeFloor = 0.8f, RimShadowM = 0.3f, RimShadowInk = 0.5f;
+        /// <summary>The shading grid's ring round the chunk (cells) and how far over the grid a column is searched for the open sky.</summary>
+        public const int AirRing = 4, LitScan = 12;
+
+        /// <summary>The depth term: 1 at the natural surface, DepthShadeFloor from DepthShadeM down. Pure.</summary>
+        public static float DepthShade(float depth) => Mathf.Lerp(1f, DepthShadeFloor, Mathf.Clamp01(depth / DepthShadeM));
+        /// <summary>The open-air term for the path to the sky beyond the straight-up distance (m): 1 under an open shaft, AirShadeFloor from
+        /// AirFalloffM on (and in a closed pocket: +infinity). Pure.</summary>
+        public static float AirShade(float extra) => Mathf.Lerp(1f, AirShadeFloor, Mathf.Clamp01(extra / AirFalloffM));
+
+        /// <summary>For a W x W grid of cells (index i + j * W, j up): `air` (not solid), `lit` (air that sees the sky straight up, or is above
+        /// the natural surface), `depth` (m under the natural surface at the cell) → `extra`: how much longer the cell's way through air to
+        /// the sky is than straight up (0 where lit; +infinity in solid and in air no lit cell reaches). Four alternating sweeps: exact for
+        /// the first few metres off a lit cell, which is all AirFalloffM needs. Pure.</summary>
+        public static void AirExtra(int W, bool[] air, bool[] lit, float[] depth, float[] extra)
+        {
+            int n = W * W;
+            for (int k = 0; k < n; k++) extra[k] = air[k] && lit[k] ? Mathf.Max(0f, depth[k]) : float.PositiveInfinity; // the path, first
+            for (int sweep = 0; sweep < 4; sweep++)
+            {
+                bool forward = (sweep & 1) == 0;
+                for (int a = 0; a < n; a++)
+                {
+                    int k = forward ? a : n - 1 - a;
+                    if (!air[k] || lit[k]) continue;
+                    int i = k % W, j = k / W;
+                    float best = extra[k];
+                    if (i > 0 && extra[k - 1] + 1f < best) best = extra[k - 1] + 1f;
+                    if (i < W - 1 && extra[k + 1] + 1f < best) best = extra[k + 1] + 1f;
+                    if (j > 0 && extra[k - W] + 1f < best) best = extra[k - W] + 1f;
+                    if (j < W - 1 && extra[k + W] + 1f < best) best = extra[k + W] + 1f;
+                    extra[k] = best;
+                }
+            }
+            for (int k = 0; k < n; k++) if (!float.IsPositiveInfinity(extra[k])) extra[k] = Mathf.Max(0f, extra[k] - Mathf.Max(0f, depth[k]));
+        }
+
+        bool[] holeAir, holeLit;
+        float[] holeDepth, holeExtra, nodeExtra;
+
+        /// <summary>The chunk's shading: the air grid with its ring (cells as BackAir's: tile wx, wy at local i, j), which of it sees the sky,
+        /// its extra path, then the extra at the chunk's cell corners (the least of the air cells round each, capped at AirFalloffM).</summary>
+        void HoleShadeGrid(float wx0, float wy0)
+        {
+            const int C = TerrainConstants.ChunkSize, R = AirRing, W = C + 2 * R, N = C + 1;
+            if (holeAir == null || holeAir.Length != W * W)
+            {
+                holeAir = new bool[W * W]; holeLit = new bool[W * W]; holeDepth = new float[W * W]; holeExtra = new float[W * W]; nodeExtra = new float[N * N];
+            }
+            int bx = Mathf.RoundToInt(wx0), by = Mathf.RoundToInt(wy0);
+            for (int i = -R; i < C + R; i++)
+            {
+                int wx = bx + i;
+                float surface = terrain.SurfaceAt(wx);
+                // the sky over the grid's top row: air all the way up to the natural surface (LitScan cells at most)
+                bool above = true;
+                int over = by + C + R;
+                for (int wy = over; wy < surface && above; wy++) above = wy - over < LitScan && !TileId.IsSolid(terrain.GetTile(wx, wy));
+                for (int j = C + R - 1; j >= -R; j--)
+                {
+                    int wy = by + j, k = (i + R) + (j + R) * W;
+                    bool air = !TileId.IsSolid(terrain.GetTile(wx, wy));
+                    holeAir[k] = air;
+                    holeDepth[k] = surface - wy;
+                    above = air && (wy >= surface || above); // a solid cell shuts the sky off for the column under it
+                    holeLit[k] = above;
+                }
+            }
+            AirExtra(W, holeAir, holeLit, holeDepth, holeExtra);
+            for (int nj = 0; nj < N; nj++)
+                for (int ni = 0; ni < N; ni++)
+                {
+                    float least = AirFalloffM;
+                    for (int dj = -1; dj <= 0; dj++)
+                        for (int di = -1; di <= 0; di++)
+                        {
+                            int k = (ni + di + R) + (nj + dj + R) * W;
+                            if (holeAir[k] && holeExtra[k] < least) least = holeExtra[k];
+                        }
+                    nodeExtra[ni + nj * N] = least;
+                }
+        }
+
+        /// <summary>The hole's shading at a chunk-local point: the depth term under the chunk's own surface curve times the open-air term
+        /// between the cell corners round it.</summary>
+        float HoleShade(TerrainChunk c, float lx, float ly, float wy0)
+        {
+            const int C = TerrainConstants.ChunkSize, N = C + 1;
+            float fi = lx + 0.5f, fj = ly + 0.5f;
+            int i = Mathf.Clamp(Mathf.FloorToInt(fi), 0, C - 1), j = Mathf.Clamp(Mathf.FloorToInt(fj), 0, C - 1);
+            float u = Mathf.Clamp01(fi - i), w = Mathf.Clamp01(fj - j);
+            float a = c.SurfaceCurve[i], b = c.SurfaceCurve[i + 1];
+            float depth = float.IsNaN(a) || float.IsNaN(b) ? 0f : Mathf.Max(0f, Mathf.Lerp(a, b, u) - (wy0 + ly));
+            float low = Mathf.Lerp(nodeExtra[i + j * N], nodeExtra[i + 1 + j * N], u), high = Mathf.Lerp(nodeExtra[i + (j + 1) * N], nodeExtra[i + 1 + (j + 1) * N], u);
+            return DepthShade(depth) * AirShade(Mathf.Lerp(low, high, w));
+        }
+
+        /// <summary>BackQuad for one cell with the hole's shading at each corner: `tint` times HoleShade there, alpha a0 → a1 across the cell.</summary>
+        void BackQuadShaded(List<int> into, TerrainChunk c, float wy0, float x0, float x1, float yb, float h0, float h1, Color tint, float a0, float a1, System.Func<float, float, Vector2> uvOf)
+        {
+            float xa = x0, span = Mathf.Max(1e-5f, x1 - x0);
+            if (h0 > yb && h1 < yb) { float u = (h0 - yb) / (h0 - h1); x1 = Mathf.Lerp(x0, x1, u); h1 = yb; }
+            else if (h1 > yb && h0 < yb) { float u = (yb - h0) / (h1 - h0); x0 = Mathf.Lerp(x0, x1, u); h0 = yb; }
+            h0 = Mathf.Max(h0, yb); h1 = Mathf.Max(h1, yb);
+            int b = v.Count;
+            ShadedVertex(c, wy0, x0, yb, tint, Mathf.Lerp(a0, a1, (x0 - xa) / span), uvOf);
+            ShadedVertex(c, wy0, x1, yb, tint, Mathf.Lerp(a0, a1, (x1 - xa) / span), uvOf);
+            ShadedVertex(c, wy0, x1, h1, tint, Mathf.Lerp(a0, a1, (x1 - xa) / span), uvOf);
+            ShadedVertex(c, wy0, x0, h0, tint, Mathf.Lerp(a0, a1, (x0 - xa) / span), uvOf);
+            into.Add(b); into.Add(b + 2); into.Add(b + 1); into.Add(b); into.Add(b + 3); into.Add(b + 2);
+        }
+
+        void ShadedVertex(TerrainChunk c, float wy0, float x, float y, Color tint, float alpha, System.Func<float, float, Vector2> uvOf)
+        {
+            float s = HoleShade(c, x, y, wy0);
+            Add(new Vector3(x, y, 0.01f), uvOf(x, y), new Color(tint.r * s, tint.g * s, tint.b * s, tint.a * alpha));
+        }
+
+        /// <summary>The soft shadow inside a dug edge: from the outline (ink at RimShadowInk) RimShadowM into the hole (clear), in the back
+        /// wall's triangles after its quads (over them, under the body and the ink rim). Only where the strip lies under the natural surface:
+        /// a mound's side and a cliff's face stand in the open air and get none.</summary>
+        void RimShadow(TerrainChunk c, Vector2 p, Vector2 q, Vector2 np, Vector2 nq, float wy0, System.Func<float, float, Vector2> uvOf)
+        {
+            Vector2 inside = (p + q) * 0.5f + (np + nq) * (0.25f * RimShadowM);
+            const int C = TerrainConstants.ChunkSize;
+            float fi = inside.x + 0.5f;
+            int i = Mathf.Clamp(Mathf.FloorToInt(fi), 0, C - 1);
+            float a = c.SurfaceCurve[i], b = c.SurfaceCurve[i + 1];
+            if (float.IsNaN(a) || float.IsNaN(b) || wy0 + inside.y > Mathf.Lerp(a, b, Mathf.Clamp01(fi - i)) - 0.05f) return;
+            Vector2 pf = p + np * RimShadowM, qf = q + nq * RimShadowM;
+            var ink = new Color(0f, 0f, 0f, RimShadowInk);
+            var clear = new Color(0f, 0f, 0f, 0f);
+            int i0 = v.Count;
+            Add(new Vector3(p.x, p.y, 0.005f), uvOf(p.x, p.y), ink); Add(new Vector3(q.x, q.y, 0.005f), uvOf(q.x, q.y), ink);
+            Add(new Vector3(qf.x, qf.y, 0.005f), uvOf(qf.x, qf.y), clear); Add(new Vector3(pf.x, pf.y, 0.005f), uvOf(pf.x, pf.y), clear);
+            var into = tris[SubBack];
+            into.Add(i0); into.Add(i0 + 1); into.Add(i0 + 2); into.Add(i0); into.Add(i0 + 2); into.Add(i0 + 3);
         }
 
         /// <summary>The body's triangles again in the sand fill, alpha = the sand's weight: whole where the weight holds at 0 or 1 across a

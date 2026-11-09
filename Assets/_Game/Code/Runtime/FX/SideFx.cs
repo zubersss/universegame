@@ -34,38 +34,44 @@ namespace Meridian.FX
             if (rig != null) { rig.Dug -= OnDug; rig.Mounded -= OnMounded; }
             if (player != null) player.Landed -= OnPlayerLanded;
             FxSheet.Release(puffKey); puffKey = null; // U-159 (Residency): the puff is the planet's art; leaving releases its bundle
-            ReleaseVariantPuffs();
             if (ship != null) ship.TouchedDown -= OnTouchdown;
         }
 
         void OnDug(Vector2 at)
         {
-            // U-157: the round brush throws B-175's dirt puff from the scoop; a block planet keeps the tile's sparks. U-186: in the stroke's
-            // band set (the desert's sand, the canyon's talus ...) where B-190 / B-191 drew one.
+            // U-157: the round brush throws the planet's dirt puff from the scoop; a block planet keeps the tile's sparks.
             bool shovel = rig != null && rig.Tool == Meridian.Rig.DigTool.Shovel;
-            // U-193: the shovel flicked B-226's fx/shovel_flick over the scoop. U-195 (LEAD 17:0x): DigFeel's clods are the stroke's debris
-            // now and the flick's clod is as large as the surveyor's torso (B-228's F1b): not played until B-238 redraws it without the clod.
-            var puff = PuffAt(at);
-            if (puff != null && FxSheet.Get(puff).Ready)
-            {
-                // U-195 (LEAD 17:0x, until B-238 redraws the puff as low wide dust): the puff smaller and thinner, in the dug cell's tier
-                // tone (as the clods: a tan ball in a grey Stone room read as a lump); the clods draw over it (DigFeel.SortingOrder).
-                int tier = rig != null && rig.D1 && rig.terrain != null ? Meridian.Mining.DigRun.TierAt(rig.terrain, at) : 0;
-                var tone = Meridian.Mining.DigFeel.Tone(tier);
-                tone.a = Meridian.Mining.DigFeel.PuffAlpha;
-                pool.Play(puff, at, Meridian.Mining.DigFeel.PuffScale, 0f, false, tone);
-                return;
-            }
+            int tier = TierAt(at);
+            // U-193 / D-190 (4): the shovel's flick comes back with B-238's export (seven crumbs, no torso-sized clod: B-228's F1b), tinted
+            // as the clods; until then DigFeel's clods are the scoop's debris alone.
+            if (shovel && Meridian.Mining.DigFeel.PuffRedrawn && FxSheet.Get(ArtKeys.Fx.ShovelFlick).Ready)
+                pool.Play(ArtKeys.Fx.ShovelFlick, at, 1f, 0f, player != null && at.x < player.Body.position.x, Meridian.Mining.DigFeel.Tone(tier)); // thrown back over the shoulder
+            if (PlayPuff(at, tier)) return;
             var t = RigTools.TileOf(at);
             pool.Play(shovel ? ArtKeys.Fx.Dust : ArtKeys.Fx.DigSparks, new Vector2(t.x + 0.5f, t.y + 0.5f), shovel ? 1f : 2f); // sparks are the Beam's
         }
 
-        /// <summary>U-157: a mound's puff where the earth lands.</summary>
-        void OnMounded(Vector2 at)
+        /// <summary>U-157: a mound's puff where the earth lands (D-190: the one puff, in the tone of the ground there, as a stroke's).</summary>
+        void OnMounded(Vector2 at) => PlayPuff(at, TierAt(at));
+
+        int TierAt(Vector2 at) => rig != null && rig.D1 && rig.terrain != null ? Meridian.Mining.DigRun.TierAt(rig.terrain, at) : 0;
+
+        /// <summary>D-190: the planet's one dig puff at `at`, drawn in cream and ink and coloured here: the dug tier's tone lifted toward
+        /// white, thin enough to read as dust behind the clods (DigFeel.PuffTone / PuffScaleNow). False while the puff's sheet is not in.</summary>
+        public bool PlayPuff(Vector2 at, int tier)
         {
-            var puff = PuffAt(at);
-            if (puff != null && FxSheet.Get(puff).Ready) pool.Play(puff, at, 1f);
+            var puff = Puff();
+            if (puff == null || !FxSheet.Get(puff).Ready) return false;
+            LastPuffTint = Meridian.Mining.DigFeel.PuffTone(tier);
+            LastPuffAt = at;
+            Puffs++;
+            pool.Play(puff, at, Meridian.Mining.DigFeel.PuffScaleNow, 0f, false, LastPuffTint);
+            return true;
         }
+        /// <summary>Tests: the last puff's tint and place, the puffs played since this planet came up.</summary>
+        public Color LastPuffTint { get; private set; }
+        public Vector2 LastPuffAt { get; private set; }
+        public int Puffs { get; private set; }
 
         /// <summary>U-193: the flick's cream-and-ink art multiplied toward the planet's earth (B-226: tinted per ground like the dust).</summary>
         public static Color FlickTint(Meridian.Planets.PlanetId p) => p switch
@@ -88,45 +94,22 @@ namespace Meridian.FX
             if (key != puffKey)
             {
                 FxSheet.Release(puffKey); puffKey = key; if (key != null) FxSheet.Get(key);
-                ReleaseVariantPuffs();
-                if (key != null) // U-186: the planet's band sets' puffs load with its base puff (a set without one plays the base)
-                    for (int v = 1; v < Meridian.View2D.SmoothGround.Variants; v++)
-                        if (Meridian.View2D.SmoothGround.VariantSuffix(id, v) != null) { variantPuffs[v] = Meridian.View2D.SmoothGround.PuffKey(id, v); FxSheet.Get(variantPuffs[v]); }
             }
             puffPlanet = id;
             return puffKey;
         }
 
-        // ---------- U-186: the puff by the stroke's band set ----------
-
-        /// <summary>The brush planet's puffs load as soon as it is up (OnEnable can run before the rig is configured), so the first stroke
-        /// already has its band set's puff. Nothing per frame once loaded (no string is built while the key holds).</summary>
+        /// <summary>The brush planet's puff loads as soon as it is up (OnEnable can run before the rig is configured), so the first stroke
+        /// already has it. Nothing per frame once loaded (no string is built while the key holds).</summary>
         void LateUpdate()
         {
             if (rig == null || !rig.Brush || rig.terrain == null || rig.terrain.Config == null) return;
             if (puffKey == null || rig.terrain.Config.id != puffPlanet) Puff();
         }
 
-        readonly string[] variantPuffs = new string[Meridian.View2D.SmoothGround.Variants];
-        Meridian.View2D.SmoothGround ground;
-
-        void ReleaseVariantPuffs()
-        {
-            for (int v = 0; v < variantPuffs.Length; v++) { if (variantPuffs[v] != null) FxSheet.Release(variantPuffs[v]); variantPuffs[v] = null; }
-            ground = null;
-        }
-
-        /// <summary>The puff for a stroke at `at`: its column's band set's (dig_puff_sand ...) once loaded, else the planet's dig_puff.</summary>
-        public string PuffAt(Vector2 at)
-        {
-            var basePuff = Puff();
-            if (basePuff == null) return null;
-            if (ground == null || !ground.Active) ground = FindAnyObjectByType<Meridian.View2D.SmoothGround>();
-            if (ground == null) return basePuff;
-            int v = ground.VariantAt(Mathf.RoundToInt(at.x));
-            var key = v > 0 && v < variantPuffs.Length ? variantPuffs[v] : null;
-            return key != null && FxSheet.Get(key).Ready ? key : basePuff;
-        }
+        /// <summary>The puff a stroke at `at` plays: the planet's dig_puff. D-190 (3): the band sets' own puffs (dig_puff_sand, _snow,
+        /// _stone, _frost, _basalt, ...) are retired; no code asks for their keys, the one puff takes its colour from its tint.</summary>
+        public string PuffAt(Vector2 at) => Puff();
 
         /// <summary>U-157: terrain/&lt;planet&gt;/dig_puff on a smooth planet; null elsewhere.</summary>
         string PuffKey() =>

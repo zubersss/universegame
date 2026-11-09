@@ -3437,7 +3437,7 @@ namespace Meridian.Tests
                 yield return new WaitForSeconds(0.18f);
                 yield return Shot("2_earth_desert_puff");
                 TestContext.Out.WriteLine($"[MERIDIAN] u186 desert puff: x {desert}, variant {Ground().VariantAt(Mathf.RoundToInt(at.x))}, key {puff}");
-                StringAssert.EndsWith("dig_puff_sand", puff, "the desert throws the sand puff");
+                StringAssert.EndsWith("dig_puff", puff, "D-190: the desert throws the one puff too (the sand puff is retired; the tint carries the tone)");
 
                 // Mars.
                 var mars = Meridian.Planets.PlanetId.Mars;
@@ -4107,6 +4107,108 @@ namespace Meridian.Tests
                     foreach (var p in bases.pieces) if (p.foot != 0f || p.viewFoot != 0f) log.Append($" {p.go.name} foot {p.foot:0.00} view foot {p.viewFoot:0.00}");
                     TestContext.Out.WriteLine($"[MERIDIAN] u200 1_shelter_walls at {sx}:{log}");
                 }
+                LogAssert.NoUnexpectedReceived();
+            }
+            finally { Meridian.View2D.CartoonStage.Enabled = wasCartoon; }
+        }
+
+        /// <summary>U-196 (D-183: holes read as holes) → coordination/reports/unity/u196/: 1_camp_shaft_10m (a 2.4 m wide shaft 10 m down
+        /// from the camp's ground: the back wall lit at the top and dim at the foot, the soft shadow inside every edge), 2_t3_room (a room
+        /// 56 m under the Surface Line), 3_t5_core_room (212 m down), 4_mound_and_pit (a mound piled on the surface beside a pit: nothing
+        /// darkens above the natural surface).</summary>
+        [UnityTest, Timeout(300000)]
+        public IEnumerator CaptureU196Holes()
+        {
+            var name = Environment.GetEnvironmentVariable(Variable);
+            if (string.IsNullOrEmpty(name)) Assert.Ignore($"Set {Variable} (tools/unity_capture.ps1).");
+            if (SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.Null)
+                Assert.Fail("No graphics device: run without -nographics.");
+            bool wasCartoon = Meridian.View2D.CartoonStage.Enabled;
+            Meridian.View2D.CartoonStage.Enabled = true;
+            try
+            {
+#if UNITY_EDITOR
+                yield return UnityEditor.SceneManagement.EditorSceneManager.LoadSceneAsyncInPlayMode(
+                    CorePath, new LoadSceneParameters(LoadSceneMode.Single));
+#endif
+                var director = UnityEngine.Object.FindAnyObjectByType<SceneDirector>();
+                float timeout = Time.realtimeSinceStartup + 30f;
+                while ((!director.IsReady || !director.PlanetSide.terrain.IsSettled) && Time.realtimeSinceStartup < timeout) yield return null;
+                var dir = "coordination/reports/unity/u196";
+                Directory.CreateDirectory(dir);
+                var side = director.PlanetSide;
+                if (side.hazards != null) side.hazards.enabled = false;
+                if (side.dayNight != null) side.dayNight.Override = 0.45f;
+                side.creatures.autoSpawn = false; side.creatures.DespawnAll();
+                var follow = side.sideCamera.GetComponent<Meridian.Player.CameraFollow>();
+                var t = side.terrain;
+                var rig = side.rig;
+                var body = side.player.Body;
+                IEnumerator Park(Vector2 at)
+                {
+                    body.simulated = false;
+                    body.position = at; side.player.transform.position = at;
+                    yield return null;
+                    float until = Time.realtimeSinceStartup + 20f;
+                    while (!t.IsSettled && Time.realtimeSinceStartup < until) yield return null;
+                    if (follow != null) { follow.enabled = true; follow.SnapToTarget(); }
+                    for (int k = 0; k < 30; k++) yield return null;
+                }
+                int Carve(float cx, float cy, float halfW, float halfH)
+                {
+                    int dug = 0;
+                    var owner = rig.owner; rig.owner = null;
+                    try
+                    {
+                        for (float dy = -halfH; dy <= halfH + 1e-3f; dy += 0.6f)
+                            for (float dx = -halfW; dx <= halfW + 1e-3f; dx += 0.6f)
+                                if (rig.Dig(new Vector2(cx + dx, cy + dy))) dug++;
+                    }
+                    finally { rig.owner = owner; }
+                    return dug;
+                }
+                IEnumerator Shot(string label)
+                {
+                    for (int k = 0; k < 20; k++) yield return null;
+                    var drops = rig.drops; // the carving's drops off the shot (back to their pool)
+                    if (drops != null) for (int k = drops.Live.Count - 1; k >= 0; k--) drops.Collect(drops.Live[k]);
+                    yield return new WaitForSeconds(1.2f); // the carving's clods and puffs gone
+                    yield return Save(side.sideCamera, $"{name}_{label}");
+                    File.Copy($"logs/capture_{name}_{label}.png", $"{dir}/{label}.png", true);
+                }
+                int camp = Mathf.FloorToInt(Meridian.Planet.POI.PoiCatalog.SpawnCamp.CenterX);
+
+                // 1: a 10 m shaft from the camp's ground, the camera on its middle (the surveyor at its foot)
+                float sx = camp + 20.5f, top = t.SurfaceAt(sx);
+                yield return Park(new Vector2(sx, top - 9.6f));
+                int shaft = Carve(sx, top - 4.9f, 1.2f, 5.2f);
+                if (follow != null) follow.enabled = false;
+                var cam = side.sideCamera.transform;
+                cam.position = new Vector3(sx, top - 4.6f, cam.position.z);
+                yield return Shot("1_camp_shaft_10m");
+                TestContext.Out.WriteLine($"[MERIDIAN] u196 1_camp_shaft_10m: {shaft} strokes at x {sx:0.0}, the ground at {top:0.0}, the foot {Meridian.Mining.DigRun.Depth(t, new Vector2(sx, top - 10f)):0} m under the line; shades: top {Meridian.View2D.SmoothGround.DepthShade(0.5f):0.00}, foot {Meridian.View2D.SmoothGround.DepthShade(10f):0.00}");
+
+                // 2 / 3: a room 56 m and one 212 m under the Surface Line
+                float rx = camp + 60.5f;
+                foreach (var (depth, label) in new[] { (56f, "2_t3_room"), (212f, "3_t5_core_room") })
+                {
+                    float cy = Meridian.Mining.DigRun.LineAt(t, rx) - depth;
+                    yield return Park(new Vector2(rx, cy - 0.9f));
+                    int room = Carve(rx, cy, 2.4f, 1.5f);
+                    yield return Shot(label);
+                    TestContext.Out.WriteLine($"[MERIDIAN] u196 {label}: {room} strokes, tier {Meridian.Mining.DigRun.TierAt(t, new Vector2(rx, cy)) + 1}, {depth:0} m under the line");
+                }
+
+                // 4: a mound piled on the surface beside a pit: the pit's wall darkens, nothing does above the natural surface
+                float mx = camp + 34.5f;
+                yield return Park(new Vector2(mx - 3.2f, t.SurfaceAt(mx - 3.2f) + 0.05f));
+                int piled = 0;
+                for (int row = 0; row < 3; row++)
+                    for (float x = mx - 1.2f; x <= mx + 1.2f; x += 0.6f)
+                        piled += rig.Mound(new Vector2(x, t.CurveAt(Mathf.FloorToInt(x)) + 0.5f + row * 0.6f), rig.GroundMaterial, false);
+                int pit = Carve(mx + 3.4f, t.SurfaceAt(mx + 3.4f) - 1.3f, 0.9f, 1.4f);
+                yield return Shot("4_mound_and_pit");
+                TestContext.Out.WriteLine($"[MERIDIAN] u196 4_mound_and_pit: {piled} tiles piled at x {mx:0.0}, a pit of {pit} strokes at x {mx + 3.4f:0.0}");
                 LogAssert.NoUnexpectedReceived();
             }
             finally { Meridian.View2D.CartoonStage.Enabled = wasCartoon; }
