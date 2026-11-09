@@ -103,6 +103,11 @@ for k, pat in (("fx/dig_sparks/base", r"ArtKeys\.Fx\.DigSparks\)"), ("fx/dust/ba
     want(k, where(pat), "fx")
 for m, k in (("Beam", "beam"), ("Grapple", "grapple"), ("Survey", "survey"), ("_", "builder")):
     want(f"props/rig/{k}", where(re.escape(f'"props/rig/{k}"')), "tools")
+want("props/rig/shovel", where(r'ShovelKey = "props/rig/shovel"'), "tools")                          # B-226 (D-182) for U-193
+want("fx/shovel_flick/base", where(r'ArtKeys\.Fx\.ShovelFlick(?!\s*=)'), "fx")
+for t in ("shovel", "beam", "grapple", "survey", "builder"):                                          # B-226 / B-227: U-193's HudToolSlot
+    want(f"icons/tools/{t}", where(re.escape(f'"icons/tools/{t}"')), "tools")
+want("icons/thruster_mk2/base", where(r'R\("fab_thruster_mk2"'), "items (crafting)")                 # B-222
 want("characters/surveyor/side", where(r'SurveyorKey = "characters/surveyor/side"'), "characters")
 want("characters/surveyor/side_b", where(r'SurveyorSideB'), "characters")
 sh = where(r'"characters/surveyor/mk" \+')
