@@ -42,5 +42,38 @@ namespace Meridian.Audio
             clip.SetData(data, 0);
             return clip;
         }
+
+        public const float ShovelSeconds = 0.28f;
+
+        /// <summary>U-193 (D-182): the shovel's scoop: the blade's scrape into soil (a short band of low-passed noise, rising then cut) and the
+        /// clod coming loose (a soft 90 Hz thud and a crumble of grit after it). Deterministic, mono at `rate`, in [−1, 1].</summary>
+        public static float[] Shovel(int rate = Rate)
+        {
+            var s = new float[Mathf.CeilToInt(ShovelSeconds * rate)];
+            var rng = new System.Random(193);
+            double lp = 0, hp = 0, prev = 0;
+            for (int i = 0; i < s.Length; i++)
+            {
+                float t = i / (float)rate;
+                float noise = (float)rng.NextDouble() * 2f - 1f;
+                lp += (noise - lp) * 0.18;                                    // the scrape: soil, not metal (no bright top)
+                float scrape = (float)lp * Mathf.Clamp01(t / 0.05f) * Mathf.Exp(-Mathf.Max(0f, t - 0.07f) * 38f);
+                float tc = t - 0.08f;                                         // the clod comes loose
+                float thud = tc >= 0f ? 0.6f * Mathf.Sin(2f * Mathf.PI * 90f * tc) * Mathf.Exp(-tc * 28f) : 0f;
+                hp = 0.7 * (hp + noise - prev); prev = noise;                 // the grit: sparse high clicks after the thud
+                float grit = tc >= 0.02f && rng.NextDouble() < 0.05 ? (float)hp * 0.5f * Mathf.Exp(-(tc - 0.02f) * 16f) : 0f;
+                s[i] = Mathf.Clamp(1.6f * scrape + thud + grit, -1f, 1f) * 0.8f;
+            }
+            return s;
+        }
+
+        /// <summary>The shovel's scoop as a clip (allocates once per call: callers keep it).</summary>
+        public static AudioClip ShovelClip()
+        {
+            var data = Shovel(Rate);
+            var clip = AudioClip.Create("shovel_placeholder", data.Length, 1, Rate, false);
+            clip.SetData(data, 0);
+            return clip;
+        }
     }
 }

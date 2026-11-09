@@ -131,7 +131,7 @@ namespace Meridian.Player
             var bought = RigLooks.Bought;
             for (int m = 1; m <= RigModules.Count; m++)
             {
-                int want = RigLooks.MkOf((RigModule)m, bought);
+                int want = (RigModule)m == RigModule.Beam ? RigLooks.DigMk(Meridian.Progress.SkillStats.DigTool, bought) : RigLooks.MkOf((RigModule)m, bought); // U-193: the look follows the tool in hand
                 if (want == mk[m] && toolHandles[m].IsValid()) continue;
                 mk[m] = want;
                 LoadTool((RigModule)m, want);

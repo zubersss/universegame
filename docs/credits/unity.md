@@ -20,6 +20,7 @@ domain under **CC0 1.0** (https://creativecommons.org/publicdomain/zero/1.0/).
 | `Assets/_Game/Audio/sfx/ui_click.wav` | UI click | AudioSynth.cs (2.2 kHz tick) | CC0 1.0 (original) |
 | `Assets/_Game/Audio/ambient/ambient_wind.wav` | ambient loop | AudioSynth.cs, seed 6 (gusting wind, 20 s loop) | CC0 1.0 (original) |
 | (no file: built at run time) | sonic boom placeholder (U-150, D-158) | `Code/Runtime/Audio/SfxSynth.cs` Boom(), seed 158 (two N-wave cracks 0.11 s apart, a 45 Hz thump, a low rumble; 1.4 s) | CC0 1.0 (original) |
+| (no file: built at run time) | shovel scoop placeholder (U-193, D-182) | `Code/Runtime/Audio/SfxSynth.cs` Shovel(), seed 193 (a low-passed soil scrape, a 90 Hz thud as the clod comes loose, a crumble of grit; 0.28 s) | CC0 1.0 (original) |
 
 ## Fonts
 

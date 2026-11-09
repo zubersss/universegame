@@ -82,7 +82,11 @@ namespace Meridian.Progress
         // The stats the game reads (bases from the D1 tables or the systems they replace).
         public static float BeamPower => Value("beam_power", D1Tables.Current.beamPowerStart);
         /// <summary>U-193 (D-182, the owner): the dig tool: the shovel until The Beam (dig_power_1, its "beam" flag), then the Beam for good.</summary>
-        public static Meridian.Rig.DigTool DigTool => Has("beam") ? Meridian.Rig.DigTool.Beam : Meridian.Rig.DigTool.Shovel;
+        public static Meridian.Rig.DigTool DigTool => toolOverride ?? (Has("beam") ? Meridian.Rig.DigTool.Beam : Meridian.Rig.DigTool.Shovel);
+        /// <summary>U-193, tests only: pins the dig tool whatever the tree holds (PlayModeDefaults gives the suites written before D-182 the
+        /// Beam, as it switches the hint cards off; the shovel's own tests clear it). Null in the game. Setting it bumps Version so views re-read.</summary>
+        public static Meridian.Rig.DigTool? ToolOverride { get => toolOverride; set { toolOverride = value; Version++; } }
+        static Meridian.Rig.DigTool? toolOverride;
         /// <summary>U-193: the dig tool's power (the shovel's from the tables; the Beam's BeamPower, raised by dig_power_2..5).</summary>
         public static float DigPower => DigTool == Meridian.Rig.DigTool.Beam ? BeamPower : D1Tables.Current.shovelPower;
         /// <summary>U-193: the dig tool's reach (m): the shovel's from the tables (2 m), the Beam's RigTools.Reach.</summary>

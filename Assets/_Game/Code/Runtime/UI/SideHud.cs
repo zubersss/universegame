@@ -76,7 +76,7 @@ namespace Meridian.UI
         public readonly System.Collections.Generic.List<Image> MarkerTags = new System.Collections.Generic.List<Image>();
         /// <summary>U-147: the lettering each tag carries, in the order of Tags (tests check it sits on its tag in ink).</summary>
         public readonly System.Collections.Generic.List<Text[]> TagLetters = new System.Collections.Generic.List<Text[]>();
-        Image Tag(Transform parent, string name, Vector2 anchor, Vector2 pos, Vector2 size, Vector2 pivot, params Text[] letters)
+        internal Image Tag(Transform parent, string name, Vector2 anchor, Vector2 pos, Vector2 size, Vector2 pivot, params Text[] letters)
         {
             var tag = UiKit.PaperTag(parent, name, anchor, pos, size, pivot, letters.Length > 0 && letters[0] != null ? letters[0].transform : null);
             foreach (var t in letters) UiKit.InkOn(t);
@@ -151,6 +151,10 @@ namespace Meridian.UI
             BuildPack(root, top, theme);
             BuildRank(root, tl);
             BuildScrip(root, tl);
+            // U-193 (LEAD 11:3x): the held tool's slot under the Rank medallion
+            ToolSlot = gameObject.AddComponent<HudToolSlot>();
+            ToolSlot.hud = this;
+            ToolSlot.Build(root);
             // U-147 (D-149): the hazard row and the suit row on paper tags in ink; the suit bar an ink-ruled strip with a gold fill.
             Tag(root, "HazardTag", tl, new Vector2(18f, -243f), new Vector2(128f, 23f), tl, HazardLabel, CryoText);
             Tag(root, "SuitTag", tl, new Vector2(18f, -267f), new Vector2(312f, 32f), tl, suitWord, SuitRateText);
@@ -217,6 +221,8 @@ namespace Meridian.UI
         public SellPanel Sell { get; private set; }
         public SkillTreePanel Skills { get; private set; }
         public HintCards Hints { get; private set; }
+        /// <summary>U-193: the held tool's slot (its icon, name and the Q / E caps).</summary>
+        public HudToolSlot ToolSlot { get; private set; }
 
         /// <summary>U-174: the depth readout under the Surface Line ("DEPTH 12 m · SUBSOIL"; blank topside) and the pack-full cue.</summary>
         public Text DepthText { get; private set; }

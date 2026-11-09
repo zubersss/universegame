@@ -66,13 +66,26 @@ namespace Meridian.Rig
 
         bool InReach(Vector2 point) => owner == null || (point - (Vector2)owner.position).sqrMagnitude <= Reach * Reach;
 
-        /// <summary>U-193: within the dig tool's reach (the shovel's 2 m, the Beam's Reach); building keeps Reach.</summary>
+        /// <summary>U-193: within the dig tool's reach (the shovel's 2 m, the Beam's Reach) of the owner's body (its Rigidbody2D: the transform
+        /// trails an interpolated body, and a body set while not simulated until the next physics step); building keeps Reach.</summary>
         bool InDigReach(Vector2 point)
         {
             if (owner == null) return true;
             float r = Meridian.Progress.SkillStats.DigReach;
-            return (point - (Vector2)owner.position).sqrMagnitude <= r * r;
+            return (point - OwnerAt).sqrMagnitude <= r * r;
         }
+
+        /// <summary>U-193: the owner's position as physics holds it (its Rigidbody2D's, else the transform's).</summary>
+        Vector2 OwnerAt
+        {
+            get
+            {
+                if (bodyOf != owner) { bodyOf = owner; ownerBody = owner != null ? owner.GetComponent<Rigidbody2D>() : null; }
+                return ownerBody != null ? ownerBody.position : (Vector2)owner.position;
+            }
+        }
+        Transform bodyOf;
+        Rigidbody2D ownerBody;
 
         /// <summary>The dig tool (the shovel, then the Beam): removes the solid tile at the world point (on a smooth planet, the brush's
         /// tiles) and spawns its item.</summary>

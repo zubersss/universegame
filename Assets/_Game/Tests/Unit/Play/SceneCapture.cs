@@ -3719,8 +3719,10 @@ namespace Meridian.Tests
             bool wasCartoon = Meridian.View2D.CartoonStage.Enabled;
             Meridian.View2D.CartoonStage.Enabled = true;
             var state = GameState.Instance;
+            var suiteTool = Meridian.Progress.SkillStats.ToolOverride;
             try
             {
+                Meridian.Progress.SkillStats.ToolOverride = null; // a new surveyor's shovel (PlayModeDefaults gives the older suites the Beam)
 #if UNITY_EDITOR
                 yield return UnityEditor.SceneManagement.EditorSceneManager.LoadSceneAsyncInPlayMode(
                     CorePath, new LoadSceneParameters(LoadSceneMode.Single));
@@ -3763,7 +3765,8 @@ namespace Meridian.Tests
                 // a held stroke, shot halfway
                 float need = side.rig.StrokeSeconds(target);
                 input.holdUse = true;
-                while (input.StrokeProgress < 0.5f) yield return null;
+                until = Time.realtimeSinceStartup + 10f;
+                while (input.StrokeProgress < 0.5f && Time.realtimeSinceStartup < until) yield return null;
                 yield return Shot("1_shovel_midswing", side.sideHud.RankSlot.canvas);
                 TestContext.Out.WriteLine($"[MERIDIAN] u193 1_shovel_midswing: tool {side.rig.Tool}, stroke {need:0.00} s, progress {input.StrokeProgress:0.00}, arc {view.ScoopArcDegrees:0.0} deg, sprite {(view.Tool.sprite != null ? view.Tool.sprite.name : "-")}");
                 // the stroke lands: the flick
@@ -3786,12 +3789,21 @@ namespace Meridian.Tests
                 yield return Shot("3_tree_the_beam", panel.Title.canvas);
                 TestContext.Out.WriteLine($"[MERIDIAN] u193 3_tree_the_beam: '{panel.Status.text}', cost '{panel.CostText.text}', BUY {(panel.Buy.interactable ? "on" : "greyed")}");
                 panel.SetOpen(false);
+                // The Beam bought: the tool in hand and the HUD's tool slot follow (1_ shows the slot's SHOVEL)
+                var slot = side.sideHud.ToolSlot;
+                Assert.AreEqual(Meridian.Progress.SkillTree.BuyResult.Ok, Meridian.Progress.SkillTree.Current.Buy(state, "dig_power_1", true));
+                until = Time.realtimeSinceStartup + 10f;
+                while ((slot.ShownTool != Meridian.Rig.DigTool.Beam || slot.IconKey == null || view.Tool.sprite == null || !view.Tool.sprite.name.Contains("beam")) && Time.realtimeSinceStartup < until) yield return null;
+                yield return new WaitForSeconds(0.5f);
+                yield return Shot("4_tool_slot_beam", side.sideHud.RankSlot.canvas);
+                TestContext.Out.WriteLine($"[MERIDIAN] u193 4_tool_slot_beam: slot '{slot.Name.text}' {slot.IconKey}, in hand {(view.Tool.sprite != null ? view.Tool.sprite.name : "-")}");
                 LogAssert.NoUnexpectedReceived();
             }
             finally
             {
                 Meridian.View2D.CartoonStage.Enabled = wasCartoon;
                 if (state != null) { state.skillNodes.Clear(); Meridian.Progress.SkillStats.Apply(state); }
+                Meridian.Progress.SkillStats.ToolOverride = suiteTool;
             }
         }
 

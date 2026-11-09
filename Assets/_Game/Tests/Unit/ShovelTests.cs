@@ -85,5 +85,30 @@ namespace Meridian.Tests
             Assert.AreEqual(DigTool.Shovel, SkillStats.DigTool, "the shovel again");
             Assert.AreEqual(0, RigLooks.BeamMk(s.skillNodes), "and its look");
         }
+
+        /// <summary>The card's shovel dig sound (SfxSynth.Shovel): a short scoop, never clipped, the same every time, and not silent.</summary>
+        [Test]
+        public void TheShovelHasItsOwnScoopSound()
+        {
+            var a = Meridian.Audio.SfxSynth.Shovel(8000);
+            var b = Meridian.Audio.SfxSynth.Shovel(8000);
+            Assert.AreEqual(Mathf.CeilToInt(Meridian.Audio.SfxSynth.ShovelSeconds * 8000), a.Length);
+            CollectionAssert.AreEqual(a, b, "deterministic (seed 193)");
+            float peak = 0f;
+            foreach (var v in a) { Assert.LessOrEqual(Mathf.Abs(v), 1f); peak = Mathf.Max(peak, Mathf.Abs(v)); }
+            Assert.Greater(peak, 0.2f, "audible");
+            Assert.AreNotEqual(Meridian.Audio.Sfx.Dig, Meridian.Audio.Sfx.Shovel, "its own cue beside the Beam's dig");
+        }
+
+        /// <summary>LEAD 11:5x: the PlayMode suites' tool pin never reaches the game: null outside them, and the look follows the tool.</summary>
+        [Test]
+        public void TheToolPinIsOffOutsideThePlaySuites()
+        {
+            Assert.IsNull(SkillStats.ToolOverride, "no runtime code pins the dig tool");
+            Assert.AreEqual(DigTool.Shovel, SkillStats.DigTool, "a new game holds the shovel");
+            Assert.AreEqual(0, RigLooks.DigMk(DigTool.Shovel, new[] { "dig_power_2" }), "the shovel's look whatever is bought");
+            Assert.AreEqual(1, RigLooks.DigMk(DigTool.Beam, new string[0]), "the Beam at least Mk1");
+            Assert.AreEqual(3, RigLooks.DigMk(DigTool.Beam, new[] { "dig_power_1", "dig_power_2", "dig_power_3" }));
+        }
     }
 }

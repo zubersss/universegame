@@ -23,6 +23,9 @@ namespace Meridian.Rig
             return 0;
         }
 
+        /// <summary>U-193: the dig slot's look for the tool in hand: 0 (the shovel) while it is the shovel, else the Beam's Mk (at least Mk1).</summary>
+        public static int DigMk(DigTool tool, ICollection<string> bought) => tool == DigTool.Beam ? System.Math.Max(1, BeamMk(bought)) : 0;
+
         /// <summary>U-193: the shovel's sprite (B-226; the Beam Mk1 stands in until it is exported).</summary>
         public const string ShovelKey = "props/rig/shovel";
 

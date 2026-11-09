@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace Meridian.Audio
 {
-    public enum Sfx { Jump, Land, Dig, Place, UiClick, Boom } // U-150: Boom appended (every older value stays)
+    public enum Sfx { Jump, Land, Dig, Place, UiClick, Boom, Shovel } // U-150: Boom, U-193: Shovel appended (every older value stays)
 
     /// <summary>
     /// Plays the game's sounds (Bible §10.3, Core): pooled one-shot sources, a thrust loop and an
@@ -20,6 +20,8 @@ namespace Meridian.Audio
         public AudioClip jump, land, dig, place, uiClick, thrust, ambient;
         /// <summary>U-150 (D-158 (4)): the sonic boom; unset, SfxSynth's placeholder is built the first time it sounds.</summary>
         public AudioClip boom;
+        /// <summary>U-193 (D-182): the shovel's scoop, for a dig while the shovel is the tool (the Beam keeps `dig`); unset, SfxSynth's placeholder.</summary>
+        public AudioClip shovel;
         /// <summary>U-150: after a boom the engine sound rises (louder, higher) and settles back over RiseSeconds.</summary>
         public const float RiseSeconds = 0.6f, RiseVolume = 0.35f, RisePitch = 0.12f;
         /// <summary>U-150: 1 right after a boom, back to 0 over RiseSeconds (tests read it).</summary>
@@ -123,14 +125,16 @@ namespace Meridian.Audio
 
         void OnJumped() => Play(Sfx.Jump);
         void OnLanded(float impact) { if (impact >= QuietLanding) Play(Sfx.Land, Mathf.Clamp01(impact / 12f)); }
-        void OnTileChanged(int x, int y, byte oldId, byte newId) => Play(newId == TileId.Air ? Sfx.Dig : Sfx.Place);
+        void OnTileChanged(int x, int y, byte oldId, byte newId) =>
+            Play(newId != TileId.Air ? Sfx.Place : Meridian.Progress.SkillStats.DigTool == Meridian.Rig.DigTool.Shovel ? Sfx.Shovel : Sfx.Dig);
         void OnBoom() { Play(Sfx.Boom); Rise = 1f; }
 
         public void Play(Sfx id, float volume = 1f)
         {
             var clip = id switch
             {
-                Sfx.Jump => jump, Sfx.Land => land, Sfx.Dig => dig, Sfx.Place => place, Sfx.Boom => boom != null ? boom : (boom = SfxSynth.BoomClip()), _ => uiClick,
+                Sfx.Jump => jump, Sfx.Land => land, Sfx.Dig => dig, Sfx.Place => place, Sfx.Boom => boom != null ? boom : (boom = SfxSynth.BoomClip()),
+                Sfx.Shovel => shovel != null ? shovel : (shovel = SfxSynth.ShovelClip()), _ => uiClick,
             };
             LastPlayed = id;
             PlayCount++;
