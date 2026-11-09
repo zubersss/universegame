@@ -159,10 +159,27 @@ namespace Meridian.Tests.LeadQA
             player.PressJump();
             while (!sell.Topside && Time.time - t0 < 12f) yield return new WaitForFixedUpdate();
             float climb = Time.time - t0;
-            player.intent = default;
-            for (int i = 0; i < 200 && !player.Grounded; i++) yield return new WaitForFixedUpdate();
             TestContext.Out.WriteLine($"[LEADQA] D1 jetpack climb out of 6 m with a full pack: {climb:F2} s");
-            Assert.IsTrue(sell.Topside, "4. the full pack reached topside by the jetpack");
+            Assert.IsTrue(sell.Topside, "4. the full pack rose above the Surface Line by the jetpack");
+            // Step off onto the rim: keep burning until clear of the ground, drift right past the hole's edge, then land.
+            // (With no sideways input the surveyor falls straight back down the open shaft: UNITY's U-190 note.)
+            int rimX = Mathf.FloorToInt(sx) + 2;
+            float rimY = Mathf.Max(t.SurfaceAt(sx), t.SurfaceAt(rimX + 1f));
+            float r0 = Time.time;
+            while (Time.time - r0 < 8f)
+            {
+                Vector2 pos = player.Body.position;
+                bool overRim = pos.x > rimX + 0.5f;
+                if (overRim && player.Grounded) break;
+                bool clear = pos.y > rimY + 1f;
+                player.intent = new PlayerIntent { jumpHeld = !overRim, move = clear || overRim ? 1f : 0f };
+                yield return new WaitForFixedUpdate();
+            }
+            player.intent = default;
+            for (int i = 0; i < 30; i++) yield return new WaitForFixedUpdate();
+            TestContext.Out.WriteLine($"[LEADQA] D1 stepped onto the rim {Time.time - r0:F2} s after topside");
+            Assert.IsTrue(player.Grounded, "4. landed on the rim beside the shaft");
+            Assert.IsTrue(sell.Topside, "4. standing topside with the full pack");
 
             // 5. Selling topside pays the tables' Scrip and counts toward the Rank.
             int value = DigRun.PackValue(inv, false);
