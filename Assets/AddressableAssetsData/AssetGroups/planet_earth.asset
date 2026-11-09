@@ -200,11 +200,6 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 344cf575b08142549bc89344b2ad7695
-    m_Address: terrain/earth/ground_strip_soil
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 3468e26c6a841f3418ae1323dd70c5c6
     m_Address: props/earth/pocket_copper
     m_ReadOnly: 0
@@ -400,11 +395,6 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 6ca3de721568b514ba1b50571db07a0f
-    m_Address: terrain/earth/ground_strip_stone
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 6de93e277d7379843bbf95db87bff07c
     m_Address: backgrounds/earth/sea_under
     m_ReadOnly: 0
@@ -567,11 +557,6 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 9cc22b9e071600b4aaa07a29a2e2a4ae
     m_Address: terrain/earth/ground_decor_stone_2
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: a2c7605046078c846b7764e16c5c5a2c
-    m_Address: terrain/earth/ground_strip_sand
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
