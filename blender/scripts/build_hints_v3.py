@@ -2,7 +2,7 @@
 the words lettered at runtime by UNITY; plus a small pointing paper arrow.
 
   ui/hints/<name>   320x200, 9-slice, pivot centre, ppu 64, flat paper (ui/panels/grain overlays it, as B-208's panels):
-      dig_down      the Beam cutting down into the ground; the mouse (left button) on its corner
+      dig_down      B-229: the shovel mid-scoop in a fresh pit, a clod flicked up and back; the mouse (left button) on its corner
       surface_line  the dashed Surface Line with its pennant: sky and sun above, the dirt below
       sell          the pack -> brass Scrip coins, topside; a key cap (G)
       skill_tree    the chart: the hub, its rings and nodes; a key cap (K)
@@ -43,7 +43,7 @@ TITLE = (42, 22, 278, 48)
 BODY = (156, 62, 296, 176)
 CARDS = ("dig_down", "surface_line", "sell", "skill_tree", "climb_up", "pack_full")
 KEY = {"dig_down": "mouse_left", "surface_line": None, "sell": "G", "skill_tree": "K", "climb_up": "climb", "pack_full": None}
-SAMPLE = {"dig_down": ("DIG DOWN", "hold the mouse to cut down with the Beam"),
+SAMPLE = {"dig_down": ("DIG DOWN", "hold the left button: the shovel digs"),
           "surface_line": ("THE SURFACE LINE", "above it you're topside"),
           "sell": ("SELL", "topside, press G to sell your pack for Scrip"),
           "skill_tree": ("THE SKILL TREE", "press K to spend Scrip on new nodes"),
@@ -141,18 +141,36 @@ def pic_dig_down(d, M, seed):
     band(d, M, "red_sh", 0, 116, 96, 104, seed + 3, 1.0)
     band(d, M, "brown_f", 0, 116, 103, 116, seed + 4, 1.0)
     G.stroke(d, Ps(wavy_band(0, 116, 33, 0.8, seed + 5) + [(116, 39), (0, 39)]), M["green"], I, cyclic=True)   # the turf
-    hole = [(48, 37), (70, 37), (70, 86)] + [(59 + 11 * math.cos(a), 86 + 9 * math.sin(a)) for a in np.linspace(0, math.pi, 9)] + [(48, 86)]
-    G.stroke(d, Ps(hole), M["brown_dp"], 0.0, cyclic=True)                                                    # the cut shaft
-    G.stroke(d, Ps(hole[1:] + hole[:1]), M["ink"], I)                                                         # (open at the turf)
-    beam = [(57, 31), (61, 31), (64, 92), (54, 92)]
-    G.stroke(d, Ps(beam), M["teal"], I, cyclic=True)                                                          # the beam
-    G.stroke(d, G.hose_outline(Ps([(59, 33), (59, 89)]), 1.6), M["offwhite_f"], 0.0, cyclic=True)
-    for a in (-0.9, -0.3, 0.3, 0.9):                                                                           # chips flying
-        G.stroke(d, Ps([(59 + 7 * math.sin(a), 92 - 3 * math.cos(a)), (59 + 13 * math.sin(a), 88 - 7 * math.cos(a))]), M["ln_mustard"], I * 1.3)
-    G.stroke(d, G.hose_outline(Ps([(59, 6), (66, 2.5), (84, 4), (98, 8), (114, 5)]), 3.0), M["brown"], I, cyclic=True)  # the cable
-    G.stroke(d, Ps(rrect(51, 4, 67, 24, 3)), M["mustard"], I, cyclic=True)                                    # the emitter
-    G.stroke(d, Ps([(51, 12), (67, 12)]), M["ink"], I)
-    G.stroke(d, Ps([(53, 24), (65, 24), (62, 31), (56, 31)]), M["brown"], I, cyclic=True)                     # its nozzle
+    # B-229 (D-182: the first tool is the shovel): B-226's shovel mid-scoop in a fresh pit, dirt on its blade, a clod flicked
+    # up and back over the haft (the Beam drilling a shaft was here)
+    pit = [(50, 36), (78, 36)] + [(64 + 14 * math.cos(a), 37 + 13 * math.sin(a)) for a in np.linspace(0, math.pi, 11)]
+    G.stroke(d, Ps(pit), M["brown_dp"], 0.0, cyclic=True)                                                     # the scooped pit
+    G.stroke(d, Ps(pit[1:]), M["ink"], I)                                                                     # (open at the turf)
+    for x, y, r in ((44, 34, 3.5), (84, 34, 3.0), (89, 35, 2.2)):                                             # spoil on the turf
+        G.stroke(d, Ps(circ(x, y, r, 10, r * 0.75)), M["brown"], I * 0.8, cyclic=True)
+    g0, tip = (28.0, 8.0), (66.0, 47.0)                                                                       # the shovel: grip -> tip
+    L = math.hypot(tip[0] - g0[0], tip[1] - g0[1])
+    du, dv = (tip[0] - g0[0]) / L, (tip[1] - g0[1]) / L
+    nu, nv = -dv, du                                                                                          # across the shovel
+
+    def S(s, t=0.0):
+        return (g0[0] + du * s + nu * t, g0[1] + dv * s + nv * t)
+    dg = [S(-3.5, -5.5), S(-3.5, 5.5)] + [S(1.0 + 5.0 * math.cos(a), 5.5 * math.sin(a)) for a in np.linspace(math.pi / 2, -math.pi / 2, 9)]
+    G.stroke(d, G.hose_outline(Ps(dg + [dg[0]]), 2.6), M["mustard"], I, cyclic=True)                          # the brass D-grip
+    G.stroke(d, G.hose_outline(Ps([S(6), S(L * 0.58)]), 4.6), M["teal"], I, cyclic=True)                      # the teal haft
+    G.stroke(d, Ps([S(L * 0.56, -3.2), S(L * 0.63, -3.2), S(L * 0.63, 3.2), S(L * 0.56, 3.2)]), M["mustard"], I, cyclic=True)   # ferrule
+    blade = [S(L * 0.63, -6.5), S(L * 0.74, -7.5), S(L * 0.88, -6.0), S(L, 0.0), S(L * 0.88, 6.0), S(L * 0.74, 7.5), S(L * 0.63, 6.5)]
+    G.stroke(d, Ps(blade), M["sky"], O, cyclic=True)                                                          # the steel blade
+    G.stroke(d, Ps([S(L * 0.64, -6.0), S(L * 0.74, -6.8), S(L * 0.86, -5.4), S(L * 0.76, -3.5)]), M["offwhite_f"], 0.0, cyclic=True)   # lit edge
+    G.stroke(d, Ps([S(L * 0.66, 0.0), S(L * 0.93, 0.0)]), M["ink"], I)                                        # the rib
+    for s, t, r in ((0.72, -7.0, 4.2), (0.81, -6.5, 3.6), (0.66, -6.0, 3.0)):                                # dirt riding the blade
+        cx, cy = S(L * s, t)
+        G.stroke(d, Ps(circ(cx, cy, r, 10, r * 0.8)), M["brown"], I, cyclic=True)
+    G.stroke(d, Ps(circ(50, 13, 5.0, 12, 4.2)), M["brown"], I, cyclic=True)                                  # the flicked clod, up
+    for x, y, r in ((57, 22, 2.2), (60, 28, 1.8), (53, 19, 1.6)):                                             # and back, crumbs after it
+        G.stroke(d, Ps(circ(x, y, r, 8, r * 0.85)), M["brown"], I * 0.8, cyclic=True)
+    for k in range(2):                                                                                        # its motion arcs
+        G.stroke(d, Ps([(58 + 4 * k, 9 + 3 * k), (63 + 4 * k, 13 + 3 * k), (66 + 4 * k, 19 + 3 * k)]), M["ink"], I)
     G.stroke(d, Ps([(88, 42), (100, 42), (100, 56), (106, 56), (94, 70), (82, 56), (88, 56)]), M["red"], I, cyclic=True)   # down
 
 
