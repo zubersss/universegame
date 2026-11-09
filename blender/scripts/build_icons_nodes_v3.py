@@ -85,7 +85,7 @@ def m_beam(d, M, lv=1):
     if not BEAM_CABLE:
         G.stroke(d, G.hose_outline(R([(-0.22, -0.08), (-0.27, -0.27)]), 0.09), M["brown_i"], I, cyclic=True)       # the grip
     else:                                                                    # rev 18:1x: no grip (a pistol grip read as a ray gun, a top
-        G.stroke(d, G.hose_outline([(-0.42, -0.02), (-0.46, -0.16), (-0.38, -0.3), (-0.2, -0.36), (0.0, -0.4)], 0.05),   # handle as a
+        G.stroke(d, G.hose_outline([(-0.41, -0.02), (-0.43, -0.16), (-0.36, -0.3), (-0.2, -0.36), (0.0, -0.4)], 0.05),   # handle as a
                  M["brown_sh_i"], I, cyclic=True)                            # padlock): a cable from its back to the rig, off below
     G.stroke(d, R([(-0.34, -0.1), (-0.05, -0.1), (-0.05, 0.1), (-0.34, 0.1)]), M["teal_sh_i"], O, cyclic=True)     # the body
     G.stroke(d, R([(-0.34, 0.02), (-0.05, 0.02), (-0.05, 0.1), (-0.34, 0.1)]), M["teal"], 0.0, cyclic=True)
@@ -439,13 +439,15 @@ def m_sorter(d, M, lv=1):
 
 def m_rare(d, M, lv=1):
     """Rare finds glint through the ground: a gem in the soil, its glint rays crossing the surface."""
-    G.stroke(d, [(-0.42, -0.4), (0.42, -0.4), (0.42, 0.06)] + [(x, 0.06 + 0.012 * math.sin(25 * x)) for x in (0.3, 0.1, -0.1, -0.3, -0.42)],
-             M["brown_i"], O, cyclic=True)
-    G.stroke(d, [(-0.42, -0.4), (0.42, -0.4), (0.42, -0.2), (-0.42, -0.2)], M["brown_sh"], 0.0, cyclic=True)
-    G.seam(d, [(-0.42, -0.2), (0.42, -0.2)], M["ink"])
-    G.stroke(d, [(-0.42, 0.04)] + [(x, 0.06 + 0.012 * math.sin(25 * x)) for x in (-0.3, -0.1, 0.1, 0.3)] + [(0.42, 0.04), (0.42, 0.11)]
-             + [(x + 0.05 * (k % 2), 0.11 + 0.04 * (k % 2)) for k, x in enumerate((0.36, 0.28, 0.2, 0.12, 0.04, -0.04, -0.12, -0.2, -0.28, -0.36))]
-             + [(-0.42, 0.11)], M["green_i"], I, cyclic=True)                                  # rev 18:1x: grass on top (it read as a chest)
+    top = lambda x: -0.4 + 0.46 * math.sqrt(max(0.0, 1 - (x / 0.43) ** 2))  # noqa: E731   rev 18:2x: a mound of ground (a slab, even
+    xs = [-0.43 + 0.86 * i / 24 for i in range(25)]                                       # grassed, read as a chest)
+    G.stroke(d, [(x, top(x)) for x in xs], M["brown_i"], O, cyclic=True)
+    G.stroke(d, [(x, min(top(x), -0.22)) for x in xs], M["brown_sh"], 0.0, cyclic=True)
+    blades = []
+    for i, x in enumerate(xs[2:-2]):                                                       # grass along its crown
+        blades += [(x, top(x) - 0.02), (x + 0.012, top(x) + (0.06 if i % 2 else 0.035))]
+    G.stroke(d, [(xs[2], top(xs[2]) - 0.04)] + blades + [(xs[-3], top(xs[-3]) - 0.04)], M["green_i"], I, cyclic=True)
+    G.stroke(d, [(x, top(x)) for x in xs], M["ink"], O, cyclic=True)
     IT.faceted(d, M, [(0.0, -0.06), (0.1, -0.16), (0.0, -0.3), (-0.1, -0.16)], "mustard", "off", "mustard_sh", 0.0, -0.17)
     for a in (55, 75, 90, 105, 125):                                                                                    # glint rays
         t = math.radians(a)
