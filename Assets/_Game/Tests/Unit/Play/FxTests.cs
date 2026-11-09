@@ -64,7 +64,8 @@ namespace Meridian.Tests
             yield return Ready(ArtKeys.Fx.Dust);
             var reg = ArtMaterials.Active;
             Assert.AreSame(reg.litEmissive, FxSheet.Get(ArtKeys.Fx.Thruster).material, "thruster has an emission map");
-            Assert.AreSame(reg.litEmissive, FxSheet.Get(ArtKeys.Fx.DigSparks).material, "dig sparks have an emission map");
+            // B-216 (import 1c58f11b): the dig sparks are v3 ink with no emission map; ArtMaterials took them off the emissive list
+            Assert.AreSame(reg.lit, FxSheet.Get(ArtKeys.Fx.DigSparks).material, "dig sparks: v3 ink, plain lit");
             Assert.AreSame(reg.lit, FxSheet.Get(ArtKeys.Fx.Dust).material, "dust has none");
             yield return Ready(ArtKeys.Fx.HeatShimmer);
             Assert.AreSame(reg.litEmissive, FxSheet.Get(ArtKeys.Fx.HeatShimmer).material, "B-030 entry shimmer has an emission map");

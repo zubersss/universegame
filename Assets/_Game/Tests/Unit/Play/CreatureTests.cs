@@ -275,14 +275,19 @@ namespace Meridian.Tests
                 var c = creatures.Spawn(s, OnSurface(px0 + (s == Species.Stag ? -34f : -44f), s)); // west of the camp: no props underfoot
                 for (int i = 0; i < 300 && c.Held; i++) yield return new WaitForFixedUpdate();
                 for (int i = 0; i < 30; i++) yield return new WaitForFixedUpdate();
+                // D-070: a model species stands on its model's feet origin; wait for the model to load, then read the box and the contact on
+                // the same frame (a wandering stag walks on while the model loads: read apart, they parted by its climb).
+                for (int i = 0; i < 600 && c.Model != null && !c.Model.Ready; i++) yield return null;
+                yield return new WaitForFixedUpdate();
                 // The box from the body itself (Collider2D.bounds can lag a frame behind a resized, re-pooled box).
                 Vector2 b = c.Body.position + c.Box.offset;
                 float boxBottom = b.y - c.Box.size.y * 0.5f - c.Box.edgeRadius, half = c.Box.size.x * 0.5f + c.Box.edgeRadius; // U-156: rounded corners
-                float ground = Mathf.Max(side.terrain.TopSolidY(Mathf.FloorToInt(b.x - half + 0.01f)), side.terrain.TopSolidY(Mathf.FloorToInt(b.x + half - 0.01f))) + 1f;
-                // D-070: a model species stands on its model's feet origin; wait for the model to load.
-                for (int i = 0; i < 600 && c.Model != null && !c.Model.Ready; i++) yield return null;
+                // The ground line: the drawn surface's highest point under the box (D-161, as FootingTests: on the smooth ground the tile grid
+                // stands up to 0.75 m over a slope's outline; an upright box rests on the high side of the slope).
+                float ground = Mathf.Max(side.terrain.SurfaceAt(b.x - half), Mathf.Max(side.terrain.SurfaceAt(b.x), side.terrain.SurfaceAt(b.x + half)));
                 bool model = c.Model != null && c.Model.Ready;
-                float contact = model ? c.Model.transform.position.y : c.View.transform.position.y;
+                // The body's own pose, not the interpolated transform's (the box above is the body's).
+                float contact = (model ? c.Model.transform.position.y : c.View.transform.position.y) + (c.Body.position.y - c.transform.position.y);
                 float twoPx = model ? 0.02f : 2f / c.View.sprite.pixelsPerUnit;
                 report.AppendLine($"{s}: sprite contact {contact:F3}, box bottom {boxBottom:F3}, ground {ground:F3}; v {c.Body.linearVelocity}, state {c.State}");
                 if (Mathf.Abs(boxBottom - contact) > twoPx) fails.Add($"{s}: sprite contact {contact:F3} vs box bottom {boxBottom:F3}");
