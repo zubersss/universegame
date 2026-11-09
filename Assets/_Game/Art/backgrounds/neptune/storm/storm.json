@@ -9,6 +9,7 @@
       "n": 0,
       "parallax": 0.1,
       "y_m": -2.0,
+      "continue_rows": 64,
       "height_px": 1024
     },
     {
