@@ -9,8 +9,8 @@ Owner: LEAD (only the Lead edits this). Do the open items below, then tell the L
 ### USER-35 — Close Edge while the team finishes the 0.6.0 build (1 min)
 Free memory has sat at about 1.3 GB this morning with nothing heavy running, and the team's
 heavy jobs (compiling, testing and building the game) need 1.5 GB free before they start.
-Microsoft Edge is using about 0.55 GB. Please:
-1. Close every Edge window (and Chrome, if it's open).
+Microsoft Edge was using about 0.55 GB (0.2 GB at 09:5x). Please:
+1. Close every Edge window (and Chrome, and any other app you have open that you don't need).
 2. Tell the Lead `done: USER-35`.
 You can open them again once the Lead posts the 0.6.0 page (a couple of hours).
 
