@@ -20,7 +20,7 @@ Cycles 281–283 (09:3x–15:0x): the resume; Build 0.5.0 (page https://claude.a
 ## Last completed
 13:3x: U-193 DONE (DoD checked: compile 0/0, 493/493, slices green, LeadQA 1/1, u193/1..4 viewed); B-229 carded; B-227 rev 2 and B-220 Jupiter accepted; the LeadQA HeldStroke fix (cceb9e6d). Cycle 296: USER-37 closed, UNITY pinged at the open gate, B-228 carded, queues rewritten. Cycle 295: B-221 / B-222 / B-226 Done; U-194 + B-227 cards; B-220's sparse-layer rule; B-227's first sheet judged.
 ## Next up
-1. B-227's export commit (git show --stat, 0 .meta) → UNITY files U-194's want. 2. B-229's hint-card preview → judge. 3. U-194 Build 0.6.1 → view its smoke with B-228 → the owner page + a short playtest item. 4. B-220's five sheets, B-224, B-223, B-225 previews → judge. 5. The owner's USER-36 notes → cards.
+1. U-194's release (UNITY's want filed 13:3x; B-227 in, 3a46eb91 verified) → BUILD OK / SMOKE OK / the probe. 2. B-220 Saturn + Uranus sheets → judge. 3. U-194 Build 0.6.1 → view its smoke with B-228 → the owner page + a short playtest item. 4. B-220's five sheets, B-224, B-223, B-225 previews → judge. 5. The owner's USER-36 notes → cards.
 ## Pending decisions
 none open.
 ## Waiting on the user
