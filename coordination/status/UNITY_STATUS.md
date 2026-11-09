@@ -1,7 +1,7 @@
 # UNITY STATUS
-Updated: 2026-11-09 10:4x · Session: 10 (resumed 09:3x; earlier entries: coordination/status/archive/UNITY_2026-11-08.md)
+Updated: 2026-11-09 11:4x · Session: 10 (resumed 09:3x; earlier entries: coordination/status/archive/UNITY_2026-11-08.md)
 ## Current task
-10:4x: U-188 Build 0.6.0: BUILD OK (release 519 MB / 71 s; dev 586 MB / 74 s), SMOKE OK (75 shots, 0 error lines, release player), the probe green (D-152 run 2: Return +8.9 % / +5.5 %, creep -17 MB; D-180 Film pass 0.266 / 0.257 ms), BudgetGate GREEN (153 draws, GC 0 B). Now: the full PlayMode sweep on the build's code + LeadQA (D1DigRun's second pass, L-014). After 0.6.0: U-189, U-191 (the AI timing assert, continue_rows), U-177. Shelter walls (smoke_18) → 0.6.1.
+11:4x: U-188 DONE (0.6.0 out). The post-build sweep on its code: PlayMode A 22/23 (1 skipped), B 25/29 (3 skipped; CreatureTests' AI worst frame 1.68 ms, LEAD's 0.6.0 note, robust assert in U-191), C 34/34, D 28/28 + 29/29, F 23/24 (1 skipped); LeadQA M1Loop 1/1, M3Inner + D1DigRun 8/8 (D1DigRun's second pass, L-014). Now U-193 (D-182, the owner: the shovel first, the Beam an early unlock; LEAD applies its D1DigRunTests patch once DigTool compiles). Then U-189 + U-191, U-177, U-192, U-179. 0.6.1 = U-193 + B-221 + B-222 + B-226 + the shelter walls.
 
 ## Last completed
 - The pre-0.6.0 sweep (one lock per slice): compile 0 / 0, EditMode 486/486; PlayMode A 22/23 (1 skipped), B 29/29 after two stale stagings fixed (FxTests: the dig sparks are B-216's v3 ink, plain lit; CreatureTests.PawsOnTheGround: box and contact read on the same step, the box judged on the drawn surface, D-161), C 33/33, D 28/28 + 28/28, F 23/24 (1 skipped); LeadQA M1Loop 1/1, M3Inner + D1DigRun 8/8; BudgetGate GREEN (perf_2026-11-09: chunk p99 1.86 ms, Earth C0 151 draws, avg 3.62 / p99 5.08 ms, 36 Animators).
