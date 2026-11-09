@@ -18,6 +18,8 @@ MP = v3.PALETTES["mars"]
 REGOLITH = GS._mix(MP["red"], MP["brown"], 0.22)
 BASALT = GS._mix(MP["brown"], MP["sky"], 0.30)
 KEYS = {"regolith": "terrain/mars/ground_strip", "basalt": "terrain/mars/ground_strip_basalt"}
+RETIRED = ("basalt",)   # 2026-11-08 (B-215, U-186 9694c4c8): a smooth planet loads only its first strip (the regolith: SmoothGround's
+                        # placeholder and the block path's fallback); ground_strip_basalt was removed from Art/ and the export skips it
 
 
 def mats(gp):
@@ -42,8 +44,8 @@ def sheets():
 
 
 def export(art, S=None):
-    """B-140: terrain/mars/ground_strip (+ _basalt) colour + json in the B-130 contract; raises on a failed check."""
-    return GS.export(art, S if S is not None else sheets()[0], keys=KEYS)
+    """B-140: terrain/mars/ground_strip colour + json in the B-130 contract (_basalt RETIRED); raises on a failed check."""
+    return GS.export(art, S if S is not None else sheets()[0], keys={k: v for k, v in KEYS.items() if k not in RETIRED})
 
 
 def main(out, S=None, allw=None, footnote="sources + preview"):

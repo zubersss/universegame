@@ -1,4 +1,7 @@
-"""D-143 (LEAD): the Mars polar cap's top tile, terrain/mars/ground_strip_frost: CO2 frost over ice, on the accepted B-130
+"""RETIRED 2026-11-08 (B-215, U-186 9694c4c8: a smooth planet loads only its first strip): the key was removed from Art/ and its
+manifest row dropped; kept for reference only.
+
+D-143 (LEAD): the Mars polar cap's top tile, terrain/mars/ground_strip_frost: CO2 frost over ice, on the accepted B-130
 recipe and contract (8 frames 64x152, the same pivot and ground line as terrain/mars/ground_strip, the silhouette ON the line
 at both edges, paper grain), in the Mars palette (D-125), palette colours and their own tones only. The recipe's mid-tone band
 under the top becomes the white frost lip; the body is the cap's ice (the Mars teal), blocks and cracks, frost patches on
