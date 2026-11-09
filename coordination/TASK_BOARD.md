@@ -25,6 +25,7 @@ the next live rank runs now and the skipped role goes next after it files. A rol
 keeps its want filed and refreshed (D-075) and works its `## While waiting` list. Cycle 278 (11-08 01:4x: all three windows restarted ~01:27; lock B's tests green (MarsStage 3/3, the Jupiter PlayMode slice 20/20) but its captures died with the restart; B-170 in; THE OWNER'S 0.4.7 PLAYTEST → D-158: the flight overhaul goes first and rides 0.4.8). A role files its want only when the queue says it is next after the running job:
 Cycle 281 (11-08 09:4x, the resume: all three windows restarted ~09:30 after a ~3-hour break; no lock, no want; free RAM 0.69 GB at 09:33 while the sessions started, 1.83 GB at 09:4x: the gate is open). Done since 05:1x: U-156 accepted; B-176 exported for the four inner planets; B-177's islands for all four giants; B-178 Earth's bands; B-179's desert and taiga exported, the tundra accepted with one fix; D-167.
 Cycle 282 (11:0x, 2-hour tick): every 0.5.0 art item is in and verified (B-178 frost, B-179 tundra, B-180 lips, B-181 all, B-183 forest / coast / plains with D-169's layer2, Earth's dig_puff). UNITY's short lock (U-157's D-168 fix + U-164) is in its capture part (11:04); the re-shot u157/1_scoop (a round bowl) and u158/4_pocket_dug (a U-bottomed shaft) viewed at 11:0x.
+11:1x: 0.6.0's post-build sweep GREEN on the build's code (A 22/23, B 25/29 with 3 skips and the AI worst-frame note 1.68 ms → U-191, C 34/34, D 28 + 29, F 23/24; LeadQA M1Loop / M3Inner / D1DigRun all green: L-014 Done); UNITY on U-193.
 Cycle 294 (11:05, 2-hour tick): UNITY holds the lock (the post-build sweep, PlayMode P-Sp, 11:01); RAM 0.48 GB under it. Since 09:05: the release fixes in (314a482b), BUILD 0.6.0 OUT (40a0b641) with its owner page and USER-36; the owner's shovel ask → D-182, U-193, B-226; B-221 accepted (0.6.1); B-222 / B-224 / B-226 / B-220 sources in. Not paused: UNITY in its lock, BLENDER committed 10:56.
 1. UNITY · the post-build sweep + LeadQA (in its lock) → U-193 (the shovel first, the Beam early; LEAD applies its D1DigRunTests patch when the API compiles) → U-194 Build 0.6.1 (U-193 + B-221 + B-222 + B-226 + the shelter walls) → U-189 + U-191 (the giants), U-177, U-192, U-179.
 2. BLENDER · after UNITY's sweep, in its lock: B-221 export → B-226 preview (to LEAD) → B-222 → B-220 previews → B-224 → B-223, B-225.
@@ -223,7 +224,7 @@ Depends: D-174
 Lead notes: Cycle 284 (16:2x). LEAD's own; blocks U-174's data, U-175 and B-204's icons. Today.
 
 
-### L-014 · LEAD · In Progress · D1
+### L-014 · LEAD · Done · D1
 Goal: The D1 exit scenario in LeadQA (charter: write LeadQA tests for the next milestone's exit criteria): Tests/LeadQA/D1DigRunTests.cs: on Earth, scripted input digs from the camp to tier 3 (a stroke time per tier within the tables' formula), fills the pack past its limit (the refusal and the stamp), climbs back above the Surface Line by a ladder and by the jetpack with a full pack (the load factor), sells topside (the Scrip and Rank change by the tables), buys a ring-1 node (its stat changes), and saves / loads with the pack, Scrip, nodes and Rank kept; LogAssert.NoUnexpectedReceived; ≤ 10 min game time.
 Accept: passes twice on U-188's build code; its numbers logged in the REVIEW_LOG.
 Files: Assets/_Game/Tests/LeadQA/D1DigRunTests.cs
@@ -238,7 +239,7 @@ Lead notes: Cycle 287 (22:2x). LEAD's own; written now against the D1 APIs, run 
 > card below is Superseded (its code stays; move what you retire to `Assets/_Game/Archive/`, never
 > delete). R1 closed (D-088): U-077 and U-086 Done on the 11:17 profile. Work the cards in this
 > order; build against v3 placeholder sheets until BLENDER's land. Memory: no heavy job below
-> 1.5 GB free (11:2x read 0.46 GB); close the Editor after every batch (D-091).
+> 1.5 GB free (11:2x read 0.46 GB); close the Editor after every batch (D-091). 11:1x: DONE: D1DigRunTests passed on U-188's code twice (the pre-build sweep and the post-build sweep): strokes 0.25 / 1.00 s, a full pack out by jetpack 2.50 s and onto the rim, sold 180, 9 m of ladder for 18 dirt, climbed 2.42 s, save / load; the shovel version (D-182) follows with U-193 as a patch.
 
 ### U-093 · UNITY · Done · C0
 Goal: Remove combat (D-087): move Parry, HitStop/HitStopClock, the Lance module, creature bite/bolt attacks, fight zoom, kill shake, health/damage on the player and creatures, and their tests (FeelPlayTests parry cases, U-092 fight-zoom prep) to `Assets/_Game/Archive/Combat/` excluded from compilation (an `.asmdef` with no platforms, or `~` folder). Replace with: `Bump` (0.8 m knock over 0.12 s + `bump` clip + dizzy-stars hook, no damage) from creature contact and hazards; hazards drain Suit power; at 0 `ConkOut` (iris-out, respawn at the last base or the ship, cargo kept). Rig slots: Beam, Survey, Builder, Grapple. Keep the air dash, StageCamera follow (minus fight zoom) and SquashStretch.
