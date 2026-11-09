@@ -82,13 +82,19 @@ namespace Meridian.Tests.LeadQA
             b.linearVelocity = Vector2.zero;
         }
 
-        /// <summary>A held Beam stroke at the wall beside the surveyor; returns the seconds until the wall opened (-1 if it never did).</summary>
+        /// <summary>A held dig stroke (the current tool: the shovel, then the Beam) at the wall beside the surveyor, within the shovel's 2 m reach; returns the seconds until the wall opened (-1 if it never did).</summary>
         IEnumerator HeldStroke(System.Action<float, float> done)
         {
             var input = player.GetComponent<PlayerRigInput>();
             var feet = player.Body.position;
-            var target = new Vector2(Mathf.Floor(feet.x) + 2.5f, Mathf.Floor(feet.y) + 0.5f);
-            float expect = D1Tables.Current.StrokeSeconds(PlanetId.Earth, DigRun.Depth(t, target), SkillStats.BeamPower);
+            // Stand at the hollow's right side so the wall cell sits ~1.2 m off, inside the shovel's 2 m reach (D-182).
+            player.Body.position = new Vector2(Mathf.Floor(feet.x) + 1.3f, feet.y);
+            player.Body.linearVelocity = Vector2.zero;
+            yield return new WaitForFixedUpdate();
+            feet = player.Body.position;
+            var target = new Vector2(Mathf.Floor(feet.x) + 1.5f, Mathf.Floor(feet.y) + 0.5f);
+            Assert.LessOrEqual(Vector2.Distance(feet + new Vector2(0f, 0.9f), target), SkillStats.DigReach + 0.01f, "the wall within the current tool's reach");
+            float expect = D1Tables.Current.StrokeSeconds(PlanetId.Earth, DigRun.Depth(t, target), SkillStats.DigPower, SkillStats.DigTool);
             int solid0 = CountSolid(target);
             input.module = RigModule.Beam;
             input.AimAt(target);
@@ -120,8 +126,10 @@ namespace Meridian.Tests.LeadQA
             float camp = player.Body.position.x;
             int scrip0 = state.scrip, earned0 = state.scripEarned;
             Assert.IsTrue(sell.Topside, "1. at the camp: topside");
+            Assert.AreEqual(DigTool.Shovel, SkillStats.DigTool, "1. a new surveyor digs with the shovel (D-182)");
+            Assert.AreEqual(2f, SkillStats.DigReach, 0.01f, "1. the shovel reaches 2 m");
 
-            // 2. Held strokes at tier 1 (5 m) and tier 3 (55 m) take the tables' time at the starting Beam.
+            // 2. Held shovel scoops at tier 1 (5 m) and tier 3 (55 m) take the tables' time (0.5 s and 2 s on Earth, D-182).
             foreach (float depth in new[] { 5f, 55f })
             {
                 yield return StandAtDepth(camp + 40f + depth, depth);
@@ -129,7 +137,7 @@ namespace Meridian.Tests.LeadQA
                 float expect = 0f, dugAt = -1f;
                 yield return HeldStroke((e, d) => { expect = e; dugAt = d; });
                 TestContext.Out.WriteLine($"[LEADQA] D1 stroke at {depth} m (T{DigRun.TierAt(t, player.Body.position) + 1}): expected {expect:F2} s, dug after {dugAt:F2} s");
-                Assert.Greater(dugAt, 0f, $"2. {depth} m: the held Beam digs");
+                Assert.Greater(dugAt, 0f, $"2. {depth} m: the held shovel digs");
                 Assert.AreEqual(expect, dugAt, 0.15f + expect * 0.05f, $"2. {depth} m: the stroke takes the tables' time");
             }
             Assert.Greater(state.dirt.count, 0, "2. dug tiles fill the dirt store");
@@ -197,6 +205,8 @@ namespace Meridian.Tests.LeadQA
             Assert.AreEqual(SkillTree.BuyResult.NotTopside, tree.CanBuy(state, "dig_power_1", false), "6. no buying below the line");
             Assert.AreEqual(SkillTree.BuyResult.Ok, tree.Buy(state, "dig_power_1", true), "6. dig_power_1 bought topside");
             Assert.AreEqual(power0 + 0.5f, SkillStats.BeamPower, 1e-4f, "6. Beam power +0.5");
+            Assert.AreEqual(DigTool.Beam, SkillStats.DigTool, "6. The Beam (dig_power_1) replaces the shovel");
+            Assert.AreEqual(0.25f / 1.5f, D1Tables.Current.StrokeSeconds(PlanetId.Earth, 5f, SkillStats.DigPower, SkillStats.DigTool), 0.005f, "6. a T1 Beam stroke 0.167 s");
 
             // 6b. Ladders (U-176): bought topside, built from the dirt store up a 6 m shaft, climbed out above the Surface Line.
             Assert.AreEqual(SkillTree.BuyResult.Ok, tree.Buy(state, "asc_ladder_1", true), "6b. asc_ladder_1 bought topside");
@@ -244,6 +254,7 @@ namespace Meridian.Tests.LeadQA
             Assert.AreEqual(rank, D1Tables.Current.Rank(state.scripEarned), "7. the Rank survives a load");
             Assert.AreEqual(2, state.inventory.Count(copper), "7. the pack survives a load");
             Assert.AreEqual(power0 + 0.5f, SkillStats.BeamPower, 1e-4f, "7. the node's stat applies after a load");
+            Assert.AreEqual(DigTool.Beam, SkillStats.DigTool, "7. the Beam survives a load");
             Assert.IsTrue(state.skillNodes.Contains("asc_ladder_1"), "7. the ladder node survives a load");
             Assert.Greater(state.ascentPieces.Count, 0, "7. the placed ladder survives a load");
             LogAssert.NoUnexpectedReceived();
