@@ -1,0 +1,22 @@
+{
+  "key": "ui/rank/expedition_badge",
+  "style": "v3",
+  "ppu": 64,
+  "pivot": [
+    0.5,
+    0.5
+  ],
+  "width": 112,
+  "height": 128,
+  "palette": "earth",
+  "numeral_rect": [
+    28,
+    30,
+    56,
+    40
+  ],
+  "rect_origin": "top_left",
+  "numerals": "I-X",
+  "lettering": "runtime",
+  "note": "UNITY sets the expedition's numeral (Limelight, ink) centred in numeral_rect"
+}

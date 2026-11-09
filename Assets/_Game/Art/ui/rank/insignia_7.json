@@ -1,0 +1,15 @@
+{
+  "key": "ui/rank/insignia_7",
+  "style": "v3",
+  "ppu": 64,
+  "pivot": [
+    0.5,
+    0.5
+  ],
+  "width": 96,
+  "height": 96,
+  "palette": "earth",
+  "rank": 7,
+  "display_px": 48,
+  "note": "Surveyor Rank 7: the HUD shows it at 48 px, the tree panel at 96"
+}

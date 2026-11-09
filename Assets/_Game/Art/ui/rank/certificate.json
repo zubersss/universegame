@@ -1,0 +1,22 @@
+{
+  "key": "ui/rank/certificate",
+  "style": "v3",
+  "ppu": 64,
+  "pivot": [
+    0.5,
+    0.5
+  ],
+  "width": 384,
+  "height": 288,
+  "palette": "earth",
+  "slice": [
+    72,
+    72,
+    104,
+    104
+  ],
+  "grain": "ui/panels/grain",
+  "lettering": "runtime",
+  "slice_order": "[left, top, right, bottom] px in from each edge (contract 11.6); Unity's Sprite.border is (left, bottom, right, top)",
+  "note": "the New Expedition certificate (B-208's flat paper: tile ui/panels/grain over it, masked); the seal sits in the bottom-right slice"
+}

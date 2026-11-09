@@ -1,0 +1,22 @@
+{
+  "key": "ui/rank/expedition_badge_laurel",
+  "style": "v3",
+  "ppu": 64,
+  "pivot": [
+    0.5,
+    0.5
+  ],
+  "width": 112,
+  "height": 128,
+  "palette": "earth",
+  "numeral_rect": [
+    28,
+    30,
+    56,
+    40
+  ],
+  "rect_origin": "top_left",
+  "numerals": "XI and on",
+  "lettering": "runtime",
+  "note": "from expedition XI: the badge in a laurel"
+}
