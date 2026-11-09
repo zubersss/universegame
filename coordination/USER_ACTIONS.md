@@ -6,7 +6,15 @@ Owner: LEAD (only the Lead edits this). Do the open items below, then tell the L
 
 ## Open
 
-(none open but the optional one below; the next playtest item comes with the D1 build)
+### USER-35 — Close Edge while the team finishes the 0.6.0 build (1 min)
+Free memory has sat at about 1.3 GB this morning with nothing heavy running, and the team's
+heavy jobs (compiling, testing and building the game) need 1.5 GB free before they start.
+Microsoft Edge is using about 0.55 GB. Please:
+1. Close every Edge window (and Chrome, if it's open).
+2. Tell the Lead `done: USER-35`.
+You can open them again once the Lead posts the 0.6.0 page (a couple of hours).
+
+(the 0.6.0 playtest item comes with the build)
 
 ### USER-08 — Optional: let the team run PowerShell commands without prompts (2 min)
 On Windows, Claude Code runs commands through PowerShell as well as Bash, and the

@@ -20,7 +20,7 @@ Cycle 287's tick.
 ## Pending decisions
 none open.
 ## Waiting on the user
-nothing (USER-34 answered 19:3x: the walk fixed, a minimap asked for → D-178). USER-08 optional.
+USER-35 (09:0x): close Edge (~0.55 GB) so the 0.6.0 build's heavy jobs clear the 1.5 GB gate (free RAM 1.30 GB with nothing running). USER-08 optional.
 ## Loop / stall watch
 none. The stag is U-162 (D-167 (6)).
 ## Session addresses (ListAgents, 11-08 09:4x)
