@@ -184,6 +184,49 @@ def depth_sheet():
                                                            {"name": "below", "rect": [72, 0, 68, 68], "pivot": [0.5, 0.5]}]}
 
 
+# ---------------------------------------------------------------- the export (on LEAD's OK)
+def kit():
+    sheet, meta, _d, _n = gauge_pack()
+    dm, dmeta = depth_sheet()
+    return [("gauge_pack", sheet, {**meta, "note": "B-211: the fourth brass gauge, the pack's kg against its limit; B-121's colours (LEAD: matching the three)"}),
+            ("scrip_tag", scrip_tag(), {"slice": [60, 14, 18, 14], "lettering": "runtime", "note": "B-211: the Scrip purse; the amount in Patrick Hand, ink"}),
+            ("rank_slot", rank_slot(), {"insignia_px": 48, "note": "B-211: the Rank insignia (ui/rank/insignia_<n>) sits centred in it at 48 px"}),
+            ("pack_full", pack_full(), {"note": "B-211: the red-ink stamp shown while the pack is full (no glow)"}),
+            ("depth_marker", dm, {**dmeta, "note": "B-211: topside above the Surface Line, below under it (with the depth lettered beside it)"})]
+
+
+def export(art):
+    from meridian import pngio as _png
+    built, problems = [], []
+    for name, img, extra_meta in kit():
+        h, w = img.shape[:2]
+        meta = {"key": f"ui/hud/{name}", "style": "v3", "ppu": v3.PPU, "pivot": [0.5, 0.5], "width": w, "height": h, **extra_meta}
+        m = v3.EDGE_MARGIN
+        if w % 4 or h % 4:
+            problems.append(f"{name}: {w}x{h} not a multiple of 4")
+        if name != "gauge_pack" and v3.palette_hits(img, "earth")[0] < 0.995:
+            problems.append(f"{name}: palette {v3.palette_hits(img, 'earth')[0] * 100:.1f}%")
+        if name not in ("gauge_pack", "depth_marker") and (img[:m, :, 3].any() or img[-m:, :, 3].any() or img[:, :m, 3].any() or img[:, -m:, 3].any()):
+            problems.append(f"{name}: touches the {m} px edge")
+        built.append((meta["key"], img, meta))
+    if problems:
+        raise ValueError("B-211 HUD checks: " + "; ".join(problems))
+    out = []
+    for key, img, meta in built:
+        base = os.path.join(art, *key.split("/"))
+        os.makedirs(os.path.dirname(base), exist_ok=True)
+        n = _png.write_png(base + "_color.png", img)
+        with open(base + ".json", "w", encoding="utf-8", newline="\n") as f:
+            json.dump(meta, f, indent=2)
+            f.write("\n")
+        out.append((key, img.shape[1], img.shape[0], n))
+    return out
+
+
+def keys():
+    return [f"ui/hud/{n}" for n in ("gauge_pack", "scrip_tag", "rank_slot", "pack_full", "depth_marker")]
+
+
 # ---------------------------------------------------------------- the 1080p mock-up
 def preview(out, footnote=None):
     import time
