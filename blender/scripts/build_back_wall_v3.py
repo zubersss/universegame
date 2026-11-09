@@ -75,19 +75,37 @@ def tier_colours(planet, t):
         u, c = np.unique(idx, return_counts=True)
         counts = {names[i]: n / c.sum() for i, n in zip(u, c)}
     order = sorted(counts, key=lambda k: -counts[k])
-    base = pal[order[0]]
-    back = nearest(pal, base * 0.66, avoid=("ink",) if t < 5 else ())
-    if back == order[0]:                                                 # desk-check: the snap can land back on the fill's own
-        darker = [k for k in pal if k != "ink" and float(pal[k].mean()) < float(base.mean()) * 0.9]   # main tone (no hole then):
-        if darker:                                                       # take the nearest tone that IS darker; the darkest
-            back = min(darker, key=lambda k: float(np.abs(pal[k] - base * 0.66).sum()))               # fills fall to ink from T4
-        elif t >= 4:
-            back = "ink"
-    dark = nearest(pal, pal[back] * 0.68)
-    light = nearest(pal, np.clip(pal[back] * 1.3 + 0.04, 0, 1), avoid=("ink",))
-    accents = [k for k in order[1:6] if k not in (back, dark, "ink")] or [light]
-    bright = max(order[:8], key=lambda k: float(pal[k].max() - pal[k].min()) + float(pal[k].mean()) * 0.3)
-    return pal, {"back": back, "dark": dark, "light": light, "accents": accents, "bright": bright, "fill_main": order[0]}
+    # rev (the 16:05 Earth sheet): snapping the wall to the NEAREST darker palette tone left the fill's hue - Stone's grey wall
+    # came out teal, Subsoil's stayed the fill's own brown (brown is the palette's darkest tone but ink). The wall is now the
+    # fill's own tones mixed toward ink, as the painted backdrops mix their darks (BG._mix(..., ink, t)): the same material,
+    # one step darker
+    main = order[0]
+    others = [k for k in order[1:8] if k != "ink" and counts[k] >= 0.01]
+    back = toward_ink(pal[main])                                          # T5's fill is mostly ink: its wall stays ink
+    dark = toward_ink(back, 0.45)                                         # holes, cracks
+    light = toward_ink(pal[main] * 0.55 + pal["offwhite"] * 0.45, 0.2)    # roots, strata lines: the main tone, paler
+    accents = [toward_ink(pal[k]) for k in others[:3]] or [light]         # pebbles: the fill's other tones, as dark as the wall
+    brightest = max(order[:8], key=lambda k: float(pal[k].max() - pal[k].min()) + float(pal[k].mean()) * 0.3)
+    names = {"fill_main": main, "wall": f"{main} mixed {DARKEN:.2f} toward ink", "accents": others[:3], "bright": brightest}
+    return pal, {"back": back, "dark": dark, "light": light, "accents": accents, "bright": toward_ink(pal[brightest], 0.15)}, names
+
+
+INK = np.array(v3.hex_rgb(v3.INK), np.float32) / 255.0
+DARKEN = 0.35              # the wall = the fill's tones mixed this far toward ink (UNITY's depth darkening multiplies on top)
+
+
+def toward_ink(c, t=None):
+    t = DARKEN if t is None else t
+    return c * (1 - t) + INK * t
+
+
+def quiet_roll(f):
+    """Roll a periodic tile so its wrap falls on its quietest row and column (build_backdrop_v3.finish's lesson: a strata
+    line that happened to lie on row 0 scored 3.81 on the seam check although the tile is continuous)."""
+    ky = int(np.argmin(np.abs(f - np.roll(f, 1, axis=0)).sum(-1).mean(1)))
+    f = np.roll(f, -ky, axis=0)
+    kx = int(np.argmin(np.abs(f - np.roll(f, 1, axis=1)).sum(-1).mean(0)))
+    return np.roll(f, -kx, axis=1)
 
 
 # ---------------------------------------------------------------- periodic drawing at 2x
@@ -162,7 +180,7 @@ def periodic_noise(rng, cells):
 # ---------------------------------------------------------------- the tiers
 def draw_tier(planet, t):
     """-> (RGBA uint8 256x256, the roles used)."""
-    pal, R = tier_colours(planet, t)
+    pal, R, names = tier_colours(planet, t)
     rng = np.random.default_rng(23000 + 100 * PLANETS.index(planet) + t)
     layers = []                                                          # (mask, colour) painted in order over the back tone
     if t == 1:                                                           # Topsoil: roots and worm holes
@@ -181,21 +199,25 @@ def draw_tier(planet, t):
             ellipse(holes, cx, cy, r, r * 0.8, rng.uniform(0, 3))
         layers += [(roots, R["light"]), (rims, R["light"]), (holes, R["dark"])]
     elif t == 2:                                                         # Subsoil: pebbles and ore flecks
-        for k, col in enumerate(R["accents"][:3] + [R["light"]]):
+        lit = np.zeros((N, N), np.float32)                               # rev: larger pebbles (5-11 px at 1x; the first read
+        for k, col in enumerate(R["accents"][:3] + [R["light"]]):        # as a rash of specks), each with a lit top
             peb = np.zeros((N, N), np.float32)
-            for _ in range(10 - 2 * k):
-                ellipse(peb, rng.uniform(0, N), rng.uniform(0, N), rng.uniform(7, 16), rng.uniform(5, 11), rng.uniform(0, 3))
-            layers.append((peb, nearest(pal, pal[col] * 0.82, avoid=("ink",))))
+            for _ in range(7 - k):
+                cx, cy, rx, ry, rot = rng.uniform(0, N), rng.uniform(0, N), rng.uniform(10, 22), rng.uniform(7, 14), rng.uniform(-0.5, 0.5)
+                ellipse(peb, cx, cy, rx, ry, rot)
+                ellipse(lit, cx - rx * 0.15, cy - ry * 0.35, rx * 0.55, ry * 0.35, rot, val=0.45)
+            layers.append((peb, col))
+        layers.append((lit, R["light"]))
         fl = np.zeros((N, N), np.float32)
-        for _ in range(40):
+        for _ in range(24):
             ellipse(fl, rng.uniform(0, N), rng.uniform(0, N), rng.uniform(1.5, 3), rng.uniform(1.2, 2.2), rng.uniform(0, 3))
         layers.append((fl, R["bright"]))
     elif t == 3:                                                         # Stone: strata lines and cracks
         Y, X = grid()
-        for k, col in enumerate((R["light"], R["dark"], R["light"])):
-            y0 = rng.uniform(0, N)
-            wave = sum(rng.uniform(3, 9) * np.sin(2 * math.pi * (h * X / N + rng.uniform(0, 1))) for h in (1, 2, 3))
-            band = np.clip(1.6 - np.abs(pdist(Y, y0) - wave) / rng.uniform(4, 9), 0, 1)
+        for k, col in enumerate((R["light"], R["dark"], R["light"], R["dark"], R["light"])):   # rev: five thin strata LINES
+            y0 = (k + rng.uniform(0.2, 0.8)) * N / 5                    # (1.6-3 px at 1x), spread down the tile; the first
+            wave = sum(rng.uniform(2, 6) * np.sin(2 * math.pi * (h * X / N + rng.uniform(0, 1))) for h in (1, 2, 3))   # three were
+            band = np.clip(1.6 - np.abs(pdist(Y, y0) - wave) / rng.uniform(1.0, 1.9), 0, 1) * 0.8             # 14 px bands: a pipe
             layers.append((band, col))
         cr = np.zeros((N, N), np.float32)
         for _ in range(6):
@@ -216,25 +238,25 @@ def draw_tier(planet, t):
             cx, cy, r = rng.uniform(0, N), rng.uniform(0, N), rng.uniform(4, 8)
             ellipse(glints, cx, cy, r, 1.2, 0.0)
             ellipse(glints, cx, cy, 1.2, r, 0.0)
-        layers += [(seams, R["bright"]), (glints, "offwhite_shadow" if "offwhite_shadow" in pal else R["light"])]
+        layers += [(seams, R["bright"]), (glints, toward_ink(pal["offwhite"], 0.2))]
     else:                                                                # Core: dark glassy veins, a few embers
         veins, gloss, emb = np.zeros((N, N), np.float32), np.zeros((N, N), np.float32), np.zeros((N, N), np.float32)
-        for _ in range(6):
-            pts = wander(rng, rng.uniform(0, N), rng.uniform(0, N), rng.uniform(0, math.tau), 12, 14, 0.5)
-            stroke(veins, pts, 6.0, 3.0)
-            stroke(gloss, [(x - 2, y - 2) for x, y in pts[1:-2]], 1.4, 0.6)
+        for _ in range(6):                                               # rev: straighter dark-teal glass with a thin lit edge
+            pts = wander(rng, rng.uniform(0, N), rng.uniform(0, N), rng.uniform(0, math.tau), 12, 14, 0.28)   # (the first were
+            stroke(veins, pts, 5.0, 2.0)                                                                       # brown squiggles:
+            stroke(gloss, [(x - 1.5, y - 1.5) for x, y in pts[1:-3]], 0.9, 0.4)                               # worms)
         for _ in range(10):
             ellipse(emb, rng.uniform(0, N), rng.uniform(0, N), rng.uniform(1.8, 3.2), rng.uniform(1.5, 2.6))
-        glass = nearest(pal, (pal["sky"] * 0.35 + pal["teal"] * 0.25) * 0.6, avoid=("ink",))
-        layers += [(veins, glass), (gloss, "offwhite_shadow"), (emb, "red" if "red" in pal else R["bright"])]
-    out = np.broadcast_to(pal[R["back"]], (N, N, 3)).copy()
+        glass = toward_ink(pal["teal"], 0.5)
+        layers += [(veins, glass), (gloss, toward_ink(pal["sky"], 0.3)), (emb, pal["red"])]
+    out = np.broadcast_to(R["back"], (N, N, 3)).copy()
     for m, col in layers:
-        out = out * (1 - m[..., None]) + pal[col][None, None, :] * m[..., None]
+        out = out * (1 - m[..., None]) + col[None, None, :] * m[..., None]
     small = out.reshape(S, SS, S, SS, 3).mean(axis=(1, 3))
     grain = periodic_noise(rng, 64)[::SS, ::SS] * 0.6 + periodic_noise(rng, 16)[::SS, ::SS] * 0.4
-    small = small * (1 + 0.035 * grain[..., None])
+    small = quiet_roll(small * (1 + 0.035 * grain[..., None]))
     img = np.dstack([np.clip(np.rint(small * 255), 0, 255).astype(np.uint8), np.full((S, S), 255, np.uint8)])
-    return img, R
+    return img, names
 
 
 def rim_shadow():
@@ -334,8 +356,7 @@ def preview(out, planet="earth", footnote=None):
         img, R = draw_tier(planet, t)
         walls[t] = img
         sx, sy = seam_score(img)
-        same = " (= THE FILL'S MAIN TONE: no darker palette tone)" if R["back"] == R["fill_main"] else ""
-        lines.append(f"t{t} {TIER_NAMES[t]}: fill mostly {R['fill_main']}; back {R['back']}{same}, dark {R['dark']}, light {R['light']}, accents {', '.join(R['accents'][:3])}, bright {R['bright']}; seam x {sx:.2f} y {sy:.2f}")
+        lines.append(f"t{t} {TIER_NAMES[t]}: fill mostly {R['fill_main']}; wall = {R['wall']}; pebbles / accents from {', '.join(R['accents']) or '-'}; bright {R['bright']}; seam x {sx:.2f} y {sy:.2f}")
         r = np.tile(paper, (548, W, 1)).astype(np.float32)
         review._label(r, f"t{t} {TIER_NAMES[t]}: the back wall 2x2 | the fill | a 3 m x 5 m cell dug out of it", 6, 4, scale=1)
         r[24:24 + 2 * S, 10:10 + 2 * S] = tiled(img, 2 * S, 2 * S)
