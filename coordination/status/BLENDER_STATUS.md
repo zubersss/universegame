@@ -20,12 +20,8 @@ NOT YET RUN (desk-checked by reading; expect first-run fixes): B-223, B-224, B-2
 ## Last completed
 - 11-09 16:16: B-220 export part 1, Jupiter (1fb6b29b; 15 files, 0 .meta; lock 16:12:04-16:16:02, peak 832 MB).
 - 11-09 16:02-16:10: the Venus deck sheet (not accepted: towers repeating as slabs, a ladder of crescents) → its rev ACCEPTED (the >= 0.90 rule; layer2 moved, y_m -1.5); the Neptune storm anchor preview ACCEPTED (the core inside the rim, seam 1.03 / 1.02).
-- 11-09 15:5x: B-228 complete (reports/blender/smoke_read_0.6.1.md: 79 shots, 21 findings; F1 the pickaxe swing in the shovel stroke → U-203 / Build 0.6.1b).
-- 11-09 15:44: B-229 EXPORTED (d7353cd6, LEAD-accepted; Done): ui/hints/dig_down_color.png only, 0 .meta; my lock 15:44:20-15:44:36, peak 335 MB.
-- 11-09 15:42: B-220 Neptune sheet ACCEPTED (review_b220_neptune_continue.png; lock 15:37:22-15:42:53, 331 s, peak 455 MB).
-- 11-09 15:35: B-229 sheet (lock 15:35:07-15:35:18, peak 82 MB) → ACCEPTED.
-- 11-09 14:03-14:5x (session 12, files only): B-233 source (d593051c); B-232 to the ruled format (6970371f); B-230 / B-231 / B-224 desk-check fixes (65e2b1db, 8e9058ce); B-231 to LEAD's rulings (the crouch 734ae6a7; lit from above + the blink swap); reports/blender/preview_notes_0.6.2.md and c5_style_notes.md.
-- 11-09 13:10-13:38: B-220 Jupiter, Saturn, Uranus sheets ACCEPTED (the U-191 list in reports/blender/b220_continue_rows.md); export after Neptune + Venus.
+- 11-09 15:35-15:5x: B-229 sheet → ACCEPTED → EXPORTED (d7353cd6; Done); B-220 Neptune sheet ACCEPTED; B-228 complete and Done (reports/blender/smoke_read_0.6.1.md: 79 shots, 21 findings; F1 the pickaxe swing in the shovel stroke → U-203 / Build 0.6.1b).
+- 11-09 14:03-14:5x (files only): sources B-233 (d593051c), B-232 to the ruled format (6970371f), desk-check fixes B-230 / B-231 / B-224, B-231 to LEAD's rulings (the crouch, lit from above, the blink); reports preview_notes_0.6.2.md, c5_style_notes.md, b237_giants_close_view.md.
 - Earlier (B-184 to B-227, all Done on the board): coordination/status/archive/BLENDER_2026-11-09.md, BLENDER_2026-11-08.md.
 
 ## Ready for review
