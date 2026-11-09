@@ -1,5 +1,6 @@
 # LEAD STATUS
-Updated: 2026-11-08 21:0x · Session: 10 (zuber-dc; all three windows restarted ~09:30 after a ~3-hour break) · Review cycle: 287 · Cadence: every 2 hours (owner, 11-07 15:1x; session cron 5ca489ce at :43 on odd hours, next ~23:05) + messages from the workers as they arrive
+Updated: 2026-11-08 23:0x · Session: 10 (zuber-dc; all three windows restarted ~09:30 after a ~3-hour break) · Review cycle: 288 · Cadence: every 2 hours (owner, 11-07 15:1x; session cron 5ca489ce at :43 on odd hours, next ~01:05) + messages from the workers as they arrive
+Cycle 288 (23:05): no stall; U-186 / U-187 Done, U-182 in Review; all D1 art in; LeadQA D1DigRunTests compiles; U-183 in UNITY's lock (RAM 0.14 GB, watched); 0.6.0 after U-176 / U-178 / U-185 and the sweep.
 Cycle 287 (21:05): no stall; U-175 and U-184 in Review; every D1 art card exported; U-182 (the tier shader) in UNITY's lock; BLENDER on B-215.
 Cycle 286 (19:05): no stall; Build 0.5.1 out (USER-34 open); every D1 art card but B-205 exported; U-174 in Review; U-175 next.
 Cycle 285 (17:05–19:0x): the full PlayMode sweep judged (U-172 the downhill walk, U-169 Done; D-176); D-177 (the Earth frame-time row on steady play, a new Boot settle row); BUILD 0.5.1 OUT (page https://claude.ai/artifact/LHdbQJd7sWTNv2grcGszkG, USER-34); D1 art: B-203 ×4 planets, B-204 kit + 66 icons, B-206, B-207, B-208; U-174's core → Review; the Skill Tree stacking rule.
@@ -11,7 +12,7 @@ Directing D1, the owner's progression digging game (D-174 / D-175 / D-178, Bible
 ## Last completed
 Cycle 287's tick.
 ## Next up
-1. U-182's tier captures → judge (each tier visible, soft borders on a slope; Mars / Mercury / Venus at T4). 2. B-215's audit → route any missing key. 3. U-178 / U-183 / U-176 / U-177 / U-185 slices → judge. 4. The D1 build → its page + the owner's playtest item (the first hour with the new loop). 5. LeadQA: a dig-run scenario for D1's exit (dig to tier 3 on Earth, sell topside, buy a node, climb with a full pack).
+1. U-183's captures → judge (the hip-height grip). 2. U-176 / U-178 / U-185 → judge. 3. U-178 / U-183 / U-176 / U-177 / U-185 slices → judge. 4. The D1 build → its page + the owner's playtest item (the first hour with the new loop). 5. LeadQA: a dig-run scenario for D1's exit (dig to tier 3 on Earth, sell topside, buy a node, climb with a full pack).
 ## Pending decisions
 none open.
 ## Waiting on the user
