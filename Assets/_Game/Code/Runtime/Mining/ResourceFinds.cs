@@ -162,6 +162,16 @@ namespace Meridian.Mining
             return terrain.BaseGenerator.TileAt(terrain.WrapX(x), top + 1) != TileId.Water;
         }
 
+        /// <summary>U-174 (D1_TABLES §1): on a planet the D1 tables dig, a pocket holds its depth tier's rarest item (the tier table's last
+        /// row); the given fallback elsewhere.</summary>
+        string PocketItem(int px, int py, string fallback)
+        {
+            var tables = D1Tables.Current;
+            if (tables.PlanetOf(planet) == null) return fallback;
+            var def = Meridian.Items.ItemRegistry.Get(tables.Rarest(planet, DigRun.TierAt(terrain, new Vector2(px + 0.5f, py + 0.5f))));
+            return def != null ? def.key : fallback;
+        }
+
         void Place(PlanetConfig config, int seed)
         {
             var items = ItemsOf(planet);
@@ -186,7 +196,7 @@ namespace Meridian.Mining
                 int depth = kind == Kind.Vault ? PocketDepthMax - 2 : PocketDepthMin + (int)(Hash01(i, 4, s) * (PocketDepthMax - PocketDepthMin + 1));
                 int py = terrain.OriginalTop(px) - depth;
                 if (!TileId.IsSolid(terrain.BaseGenerator.TileAt(terrain.WrapX(px), py))) continue;
-                pockets.Add(new Pocket { x = px, y = py, kind = kind, relicKey = relic, item = kind == Kind.Pocket ? items[(int)(Hash01(i, 5, s) * items.Length) % items.Length] : null });
+                pockets.Add(new Pocket { x = px, y = py, kind = kind, relicKey = relic, item = kind == Kind.Pocket ? PocketItem(px, py, items[(int)(Hash01(i, 5, s) * items.Length) % items.Length]) : null });
             }
             foreach (var n in nodes) n.view = Sprite(root, $"Node_{n.item}_{n.x}", new Vector2(n.x + 0.5f, n.y), SmoothGroundOrder + 2);
             foreach (var p in pockets)
@@ -430,7 +440,7 @@ namespace Meridian.Mining
                 var state = Meridian.Core.GameState.Instance;
                 switch (p.kind)
                 {
-                    case Kind.Pocket: p.spent = true; Give(p.item, PocketYield, new Vector2(p.x + 0.5f, p.y + 0.5f)); break;
+                    case Kind.Pocket: p.spent = true; Give(p.item, D1Tables.Current.PlanetOf(planet) != null ? D1Tables.Current.pocketCount : PocketYield, new Vector2(p.x + 0.5f, p.y + 0.5f)); break; // U-174: the tables' count
                     case Kind.Relic:
                         p.spent = true;
                         if (state != null) { state.datacores++; state.SetFlag(RelicFlag(p)); }

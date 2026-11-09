@@ -171,7 +171,7 @@ namespace Meridian.Player
             // Jetpack: jump held in the air past 0.25 s, or a fresh press while airborne.
             // A tap is only a jump.
             bool jetHeld = intent.jumpHeld && !Grounded && !jumped && (airTimeSinceJump > 0.25f || pressed);
-            v.y += Jetpack.Step(dt, jetHeld, Grounded) * dt;
+            v.y += Jetpack.Step(dt, jetHeld, Grounded) * LoadFactor * dt; // U-174: the pack's load lowers the lift
 
             // U-088: jump cut: releasing the jump while rising keeps 40 % of the upward speed (the full height is unchanged).
             if (jumpHeldLast && !intent.jumpHeld && !Grounded && !jumped && v.y > 0f) v.y *= PlayerTuning.JumpCutFactor;
@@ -231,6 +231,9 @@ namespace Meridian.Player
         /// <summary>U-156: the most upright ground contact's normal on the last step (up when airborne).</summary>
         public Vector2 GroundNormal => groundNormal;
         Vector2 groundNormal = Vector2.up;
+
+        /// <summary>U-174 (D-174): the pack's load factor on climbing (1 - k x load / limit): the jetpack's lift, later the reel and ladders.</summary>
+        public float LoadFactor => Meridian.Core.GameState.Instance != null ? Meridian.Mining.DigRun.LoadFactor(Meridian.Core.GameState.Instance.inventory) : 1f;
 
         /// <summary>U-172: how far under the feet the ground snap reaches (m): a sprint down the steepest walkable slope drops ~0.1 m a step.</summary>
         public const float SnapDistance = 0.3f;

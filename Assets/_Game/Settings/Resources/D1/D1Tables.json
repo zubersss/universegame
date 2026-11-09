@@ -1,0 +1,73 @@
+{
+  "source": "docs/D1_TABLES.md (L-013, D-174): LEAD tunes these numbers here, never in code. Starting values for the owner's next playtest.",
+  "surfaceLineDepth": 2.0,
+  "strokeBaseSeconds": 0.25,
+  "strokeCapSeconds": 8.0,
+  "beamPowerStart": 1.0,
+  "dirtStoreStart": 60,
+  "packLimitKg": 30.0,
+  "loadK": 0.5,
+  "waystationBonus": 0.25,
+  "pocketCount": 3,
+  "tiers": [
+    { "name": "Topsoil", "fromM": 0,   "hardness": 1,  "materialChance": 0.05 },
+    { "name": "Subsoil", "fromM": 10,  "hardness": 2,  "materialChance": 0.09 },
+    { "name": "Stone",   "fromM": 40,  "hardness": 4,  "materialChance": 0.11 },
+    { "name": "Deep",    "fromM": 100, "hardness": 8,  "materialChance": 0.12 },
+    { "name": "Core",    "fromM": 200, "hardness": 16, "materialChance": 0.12 }
+  ],
+  "planets": [
+    { "id": "Earth", "hardness": 1.0, "tiers": [
+      { "rows": [ { "item": "clay", "weight": 60 }, { "item": "carbon", "weight": 40 } ] },
+      { "rows": [ { "item": "carbon", "weight": 20 }, { "item": "iron", "weight": 45 }, { "item": "copper", "weight": 35 } ] },
+      { "rows": [ { "item": "aluminium", "weight": 25 }, { "item": "nickel", "weight": 35 }, { "item": "silica", "weight": 40 } ] },
+      { "rows": [ { "item": "aluminium", "weight": 20 }, { "item": "phosphorus_pigment", "weight": 25 }, { "item": "graphite", "weight": 55 } ] },
+      { "rows": [ { "item": "graphite", "weight": 30 }, { "item": "deep_core_sample", "weight": 55 }, { "item": "deep_diamond", "weight": 15 } ] } ] },
+    { "id": "Mars", "hardness": 1.6, "tiers": [
+      { "rows": [ { "item": "hematite", "weight": 60 }, { "item": "perchlorate", "weight": 40 } ] },
+      { "rows": [ { "item": "water_ice", "weight": 25 }, { "item": "iron", "weight": 35 }, { "item": "hematite", "weight": 40 } ] },
+      { "rows": [ { "item": "perchlorate", "weight": 25 }, { "item": "silica", "weight": 35 }, { "item": "nickel", "weight": 40 } ] },
+      { "rows": [ { "item": "phosphorus_pigment", "weight": 25 }, { "item": "graphite", "weight": 35 }, { "item": "aluminium", "weight": 40 } ] },
+      { "rows": [ { "item": "graphite", "weight": 25 }, { "item": "deep_core_sample", "weight": 50 }, { "item": "deep_diamond", "weight": 25 } ] } ] },
+    { "id": "Mercury", "hardness": 2.5, "tiers": [
+      { "rows": [ { "item": "iron", "weight": 30 }, { "item": "sulfide", "weight": 70 } ] },
+      { "rows": [ { "item": "iron", "weight": 20 }, { "item": "sulfide", "weight": 30 }, { "item": "nickel", "weight": 50 } ] },
+      { "rows": [ { "item": "nickel", "weight": 25 }, { "item": "aluminium", "weight": 35 }, { "item": "silica", "weight": 40 } ] },
+      { "rows": [ { "item": "graphite", "weight": 35 }, { "item": "polar_ice", "weight": 25, "coldTrapOnly": true, "elseItem": "graphite" }, { "item": "solarite", "weight": 40 } ] },
+      { "rows": [ { "item": "solarite", "weight": 30 }, { "item": "deep_core_sample", "weight": 40 }, { "item": "deep_diamond", "weight": 30 } ] } ] },
+    { "id": "Venus", "hardness": 4.0, "tiers": [
+      { "rows": [ { "item": "sulfide", "weight": 30 }, { "item": "sulfur", "weight": 70 } ] },
+      { "rows": [ { "item": "aluminium", "weight": 20 }, { "item": "sulfur", "weight": 40 }, { "item": "nickel", "weight": 40 } ] },
+      { "rows": [ { "item": "silica", "weight": 25 }, { "item": "sulfide", "weight": 30 }, { "item": "aluminium", "weight": 45 } ] },
+      { "rows": [ { "item": "phosphorus_pigment", "weight": 25 }, { "item": "graphite", "weight": 30 }, { "item": "vitriol_glass", "weight": 45 } ] },
+      { "rows": [ { "item": "vitriol_glass", "weight": 30 }, { "item": "deep_core_sample", "weight": 30 }, { "item": "deep_diamond", "weight": 40 } ] } ] }
+  ],
+  "materials": [
+    { "item": "clay", "scrip": 2, "kg": 1 },
+    { "item": "carbon", "scrip": 4, "kg": 1 },
+    { "item": "hematite", "scrip": 9, "kg": 1.5 },
+    { "item": "water_ice", "scrip": 10, "kg": 1.5 },
+    { "item": "iron", "scrip": 12, "kg": 2 },
+    { "item": "perchlorate", "scrip": 12, "kg": 1 },
+    { "item": "sulfide", "scrip": 14, "kg": 1.5 },
+    { "item": "sulfur", "scrip": 14, "kg": 1 },
+    { "item": "copper", "scrip": 16, "kg": 2 },
+    { "item": "silica", "scrip": 24, "kg": 1.5 },
+    { "item": "nickel", "scrip": 30, "kg": 2.5 },
+    { "item": "aluminium", "scrip": 36, "kg": 2 },
+    { "item": "polar_ice", "scrip": 40, "kg": 1.5 },
+    { "item": "graphite", "scrip": 60, "kg": 1 },
+    { "item": "phosphorus_pigment", "scrip": 80, "kg": 0.5 },
+    { "item": "vitriol_glass", "scrip": 140, "kg": 1 },
+    { "item": "deep_core_sample", "scrip": 150, "kg": 3 },
+    { "item": "solarite", "scrip": 160, "kg": 1 },
+    { "item": "deep_diamond", "scrip": 300, "kg": 0.5 },
+    { "item": "ring_rock", "scrip": 25, "kg": 0 },
+    { "item": "ring_ice", "scrip": 30, "kg": 0 },
+    { "item": "methane_ice", "scrip": 20, "kg": 0 },
+    { "item": "ammonia_ice", "scrip": 25, "kg": 0 },
+    { "item": "superionic_ice", "scrip": 400, "kg": 0 },
+    { "item": "helium3_condensate", "scrip": 500, "kg": 0 },
+    { "item": "metallic_hydrogen", "scrip": 600, "kg": 0 }
+  ]
+}

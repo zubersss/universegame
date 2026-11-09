@@ -72,10 +72,11 @@ namespace Meridian.Tests
             foreach (var c in cells) if (TileId.IsSolid(t.GetTile(c.x, c.y))) solid++;
             Assert.Greater(solid, 1, "the stroke covers more than one solid tile");
             float before = Outline(x, top + 4f);
-            int drops = rig.drops.Live.Count;
+            int drops = rig.drops.Live.Count, dirt0 = rig.Dirt != null ? rig.Dirt.count : 0;
             Assert.IsTrue(rig.Dig(p), "the Beam carves");
             foreach (var c in cells) Assert.AreEqual(TileId.Air, t.GetTile(c.x, c.y), $"tile {c} carved");
-            Assert.GreaterOrEqual(rig.drops.Live.Count - drops, solid, "one item per carved tile (plus any only-here bonus)");
+            // U-174 (D-174): a carved tile gives dirt into the store or, by its tier's chance, a material dropped for the pack (was: its own item).
+            Assert.GreaterOrEqual(rig.drops.Live.Count - drops + (rig.Dirt.count - dirt0), solid, "each carved tile gives dirt or a material (plus any only-here bonus)");
             yield return new WaitForFixedUpdate();
             float after = Outline(x, top + 4f);
             TestContext.Out.WriteLine($"[MERIDIAN] u157 scoop: {cells.Count} tiles in the brush, {solid} carved, outline {before:F2} → {after:F2}");
@@ -86,6 +87,7 @@ namespace Meridian.Tests
             inv.Clear();
             int soil = Meridian.Items.ItemRegistry.DropOf(TileId.Soil);
             inv.Add(soil, 10);
+            rig.Dirt.count = 0; // U-174: the dirt store pays first; empty here, the carried ground items pay
             Assert.AreEqual(TileId.Soil, rig.GroundMaterial, "Earth's ground material");
             Assert.AreEqual(TileId.Soil, rig.SelectedTile, "the Builder's material while ground items are carried, whatever slot is selected");
             int mx = side.spawnX + 4, mtop = t.TopSolidY(mx); // within the Rig's 5 m reach, clear of the Pilgrim

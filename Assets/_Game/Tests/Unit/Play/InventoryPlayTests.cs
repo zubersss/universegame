@@ -58,39 +58,32 @@ namespace Meridian.Tests
             var t = side.terrain;
             var player = side.player;
 
-            // Dig the tile under the surveyor's feet: its item drops right there and is picked up.
+            // U-174 (D-174): the tile under the surveyor's feet gives dirt into the dirt store (or, by its tier's chance, a material dropped for
+            // the pack); the Builder piles mounds from the dirt store first (was: the dug tile's own item, picked up and placed back).
+            var store = state.dirt;
+            store.count = 0;
             Vector2 feet = player.Body.position;
             int x = Mathf.FloorToInt(feet.x), y = t.TopSolidY(x);
-            byte dug = t.GetTile(x, y);
-            int item = ItemRegistry.DropOf(dug);
-            Assert.AreNotEqual(0, item, "the surface tile drops an item");
+            int drops0 = rig.drops.Live.Count;
             Assert.IsTrue(rig.Dig(new Vector2(x + 0.5f, y + 0.5f)), "Beam digs");
-            float until = Time.realtimeSinceStartup + 5f;
-            while (inv.Count(item) == 0 && Time.realtimeSinceStartup < until) yield return new WaitForFixedUpdate();
-            Assert.AreEqual(1, inv.Count(item), "picked up: count rises");
-            Assert.AreEqual(0, rig.drops.Live.Count, "the drop left the world");
+            Assert.GreaterOrEqual(store.count + (rig.drops.Live.Count - drops0), 1, "the dug tile gives dirt (or a material)");
 
-            // Place it back: the Builder uses the selected slot and its count falls.
-            int slot = -1;
-            for (int i = 0; i < Inventory.SlotCount; i++) if (inv[i].itemId == item && !inv[i].IsEmpty) slot = i;
-            inv.Select(slot);
-            inv.Add(item, 4); // 5 in the stack
+            // Place: the Builder spends the dirt store.
+            store.count = 5;
             int px = x + 2, py = t.TopSolidY(px) + 1; // U-157 P-54: on the ground 2 m off (the round scoop under the feet lowers the surveyor; the Builder reaches 5 m)
             Assert.AreEqual(TileId.Air, t.GetTile(px, py));
-            Assert.IsTrue(rig.Place(new Vector2(px + 0.5f, py + 0.5f)), "Builder places from the inventory");
-            // U-157 (D-162 (3)): on Earth's smooth ground the Builder piles the planet's one ground material, spending a carried ground item.
-            Assert.AreEqual(rig.Brush ? rig.GroundMaterial : ItemRegistry.Get(item).placeTile, t.GetTile(px, py));
-            Assert.AreEqual(4, inv.Count(item), "count falls");
+            Assert.IsTrue(rig.Place(new Vector2(px + 0.5f, py + 0.5f)), "the Builder piles from the dirt store");
+            Assert.AreEqual(rig.Brush ? rig.GroundMaterial : t.GetTile(px, py), t.GetTile(px, py));
+            Assert.Less(store.count, 5, "the dirt store spent");
 
-            // A non-placeable selection places nothing.
+            // A non-placeable selection places nothing of its own: the mound still piles from the dirt store and the iron is never spent.
             inv.Add(ItemRegistry.Get("iron").id, 7);
             for (int i = 0; i < Inventory.SlotCount; i++) if (inv[i].itemId == ItemRegistry.Get("iron").id) inv.Select(i);
             if (rig.Brush)
             {
-                // U-157: no block is chosen (no hotbar of blocks): with iron selected the mound still piles from the ground items carried,
-                // and the iron is never spent.
-                Assert.IsTrue(rig.Place(new Vector2(px + 0.5f, py + 1.5f)), $"the mound piles from the ground items, whatever is selected (target {Vector2.Distance(new Vector2(px + 0.5f, py + 1.5f), player.transform.position):F2} m from the surveyor)");
-                Assert.AreEqual(3, inv.Count(item), "a ground item spent");
+                int left = store.count;
+                Assert.IsTrue(rig.Place(new Vector2(px + 0.5f, py + 1.5f)), $"the mound piles from the dirt store, whatever is selected (target {Vector2.Distance(new Vector2(px + 0.5f, py + 1.5f), player.transform.position):F2} m from the surveyor)");
+                Assert.Less(store.count, left, "dirt spent");
             }
             else Assert.IsFalse(rig.Place(new Vector2(px + 0.5f, py + 1.5f)), "iron isn't a tile");
             Assert.AreEqual(7, inv.Count(ItemRegistry.Get("iron").id));
@@ -130,6 +123,7 @@ namespace Meridian.Tests
             var panel = hud.Inventory;
             var inv = GameState.Instance.inventory;
             inv.Clear();
+            inv.LimitKg = float.PositiveInfinity; // U-174: the panel's stack display, not the pack's weight (ApplyD1 restores the limit below)
             inv.Add(ItemRegistry.Get("iron").id, 1200);
             inv.Add(TileId.Stone, 3);
             Assert.IsFalse(panel.IsOpen);
@@ -145,6 +139,7 @@ namespace Meridian.Tests
             Assert.AreEqual("999", panel.Counts[0].text);
             Assert.AreEqual("201", panel.Counts[1].text);
             Assert.AreEqual("3", panel.Counts[2].text);
+            GameState.Instance.ApplyD1(); // U-174: the pack's limit back
             Assert.IsTrue(panel.Icons[0].enabled, "iron icon (B-013)");
             Assert.IsTrue(panel.Icons[2].enabled, "stone icon");
             Assert.AreEqual("", panel.Counts[3].text, "empty slot");

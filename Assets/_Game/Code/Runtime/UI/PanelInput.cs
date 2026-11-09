@@ -11,7 +11,7 @@ namespace Meridian.UI
     public static class PanelInput
     {
         /// <summary>The on-foot actions that stay live while a panel is open: the panels' own toggles.</summary>
-        public static readonly string[] PanelKeys = { "Inventory", "Catalogue", "BuildMenu" };
+        public static readonly string[] PanelKeys = { "Inventory", "Catalogue", "BuildMenu", "Sell" };
 
         static readonly List<InputAction> held = new List<InputAction>(24);
         static readonly HashSet<object> openers = new HashSet<object>();

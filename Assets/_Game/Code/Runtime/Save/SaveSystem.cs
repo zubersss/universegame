@@ -108,6 +108,8 @@ namespace Meridian.Save
             data.cargo.AddRange(state.cargo);
             data.scrip = state.scrip;
             data.datacores = state.datacores;
+            data.scripEarned = state.scripEarned; // U-174
+            data.dirt = state.dirt.count;
             data.catalogue.AddRange(state.catalogue);
             data.basePieces.AddRange(state.basePieces);
             data.aerostats.AddRange(state.aerostats);
@@ -200,6 +202,8 @@ namespace Meridian.Save
             state.cargo.AddRange(data.cargo);
             state.scrip = data.scrip;
             state.datacores = data.datacores;
+            state.scripEarned = data.scripEarned; // U-174
+            state.dirt.count = 0; state.dirt.Add(data.dirt);
             state.catalogue.Clear();
             if (data.catalogue != null) foreach (var id in data.catalogue) state.catalogue.Add(id);
             state.basePieces.Clear(); state.aerostats.Clear();

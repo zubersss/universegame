@@ -2594,6 +2594,106 @@ namespace Meridian.Tests
         }
 
         /// <summary>
+        /// U-174 (D-174, Bible 5.2 §8.1): the dig run on Earth → coordination/reports/unity/u174/: 1_surface_line (the surveyor 8 m down in a
+        /// dug hollow, the Surface Line drawn in the cutaway above), 2_depth_hud_50m (the HUD's depth readout 50 m under the line) and
+        /// 3_sell_panel (topside, the Sell panel over a pack of Earth's materials).
+        /// </summary>
+        [UnityTest, Timeout(300000)]
+        public IEnumerator CaptureU174DigRun()
+        {
+            var name = Environment.GetEnvironmentVariable(Variable);
+            if (string.IsNullOrEmpty(name)) Assert.Ignore($"Set {Variable} (tools/unity_capture.ps1).");
+            if (SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.Null)
+                Assert.Fail("No graphics device: run without -nographics.");
+            bool wasCartoon = Meridian.View2D.CartoonStage.Enabled;
+            Meridian.View2D.CartoonStage.Enabled = true;
+            try
+            {
+#if UNITY_EDITOR
+                yield return UnityEditor.SceneManagement.EditorSceneManager.LoadSceneAsyncInPlayMode(
+                    CorePath, new LoadSceneParameters(LoadSceneMode.Single));
+#endif
+                var director = UnityEngine.Object.FindAnyObjectByType<SceneDirector>();
+                float timeout = Time.realtimeSinceStartup + 30f;
+                while ((!director.IsReady || !director.PlanetSide.terrain.IsSettled) && Time.realtimeSinceStartup < timeout) yield return null;
+                var side = director.PlanetSide;
+                var t = side.terrain;
+                var player = side.player;
+                player.externalInput = true; player.intent = default;
+                side.creatures.autoSpawn = false;
+                side.creatures.DespawnAll();
+                if (side.dayNight != null) side.dayNight.Override = 0.45f;
+                var dir = "coordination/reports/unity/u174";
+                Directory.CreateDirectory(dir);
+                var cam = side.sideCamera;
+
+                IEnumerator Shot(string label, Canvas ui = null)
+                {
+                    RenderMode mode = RenderMode.ScreenSpaceOverlay;
+                    if (ui != null) { mode = ui.renderMode; ui.renderMode = RenderMode.ScreenSpaceCamera; ui.worldCamera = cam; ui.planeDistance = 1f; }
+                    yield return Save(cam, $"{name}_{label}");
+                    if (ui != null) ui.renderMode = mode;
+                    File.Copy($"logs/capture_{name}_{label}.png", $"{dir}/{label}.png", true);
+                }
+
+                // The surveyor in a 3 × 3 m hollow `depth` m under the Surface Line at x, the camera following.
+                IEnumerator Down(float x, float depth)
+                {
+                    float floorY = Meridian.Mining.DigRun.LineAt(t, x) - depth;
+                    int fx = Mathf.FloorToInt(x), fy = Mathf.FloorToInt(floorY);
+                    var b = player.Body;
+                    b.simulated = false;
+                    b.position = new Vector2(fx + 0.5f, fy + 1.05f); player.transform.position = b.position;
+                    yield return null;
+                    float until = Time.realtimeSinceStartup + 15f;
+                    while (!t.IsSettled && Time.realtimeSinceStartup < until) yield return null;
+                    for (int c = fx - 1; c <= fx + 1; c++) for (int y = fy; y <= fy + 2; y++) t.SetTile(c, y, Meridian.Terrain.TileId.Air);
+                    yield return new WaitForFixedUpdate();
+                    b.position = new Vector2(fx + 0.5f, fy + 0.05f); player.transform.position = b.position; b.linearVelocity = Vector2.zero;
+                    b.simulated = true;
+                    var follow = cam.GetComponent<Meridian.Player.CameraFollow>();
+                    if (follow != null) { follow.enabled = true; follow.SnapToTarget(); }
+                    for (int k = 0; k < 40; k++) yield return new WaitForFixedUpdate();
+                    yield return new WaitForSeconds(0.6f);
+                }
+
+                float x0 = player.Body.position.x + 30f;
+                yield return Down(x0, 6f);
+                var line = side.cartoon.SurfaceLine;
+                yield return Shot("1_surface_line");
+                TestContext.Out.WriteLine($"[MERIDIAN] u174 1_surface_line: feet {player.Body.position.y:F2}, the line {Meridian.Mining.DigRun.LineAt(t, player.Body.position.x):F2}, showing {line.Showing}, {line.Placed} tiles");
+
+                yield return Down(x0 + 20f, 50f);
+                var hud = side.sideHud;
+                yield return Shot("2_depth_hud_50m", hud.DepthText.canvas);
+                TestContext.Out.WriteLine($"[MERIDIAN] u174 2_depth_hud_50m: '{hud.DepthText.text}'");
+
+                // Topside at the camp with a pack: the Sell panel.
+                var b2 = player.Body;
+                b2.simulated = false;
+                b2.position = new Vector2(side.spawnX + 0.5f, t.SurfaceAt(side.spawnX + 0.5f) + 0.05f); player.transform.position = b2.position;
+                yield return null;
+                float until2 = Time.realtimeSinceStartup + 15f;
+                while (!t.IsSettled && Time.realtimeSinceStartup < until2) yield return null;
+                b2.simulated = true;
+                var follow2 = cam.GetComponent<Meridian.Player.CameraFollow>();
+                if (follow2 != null) follow2.SnapToTarget();
+                var inv = GameState.Instance.inventory;
+                inv.Clear();
+                foreach (var (item, n) in new[] { ("clay", 6), ("carbon", 4), ("iron", 5), ("copper", 3), ("silica", 2) }) inv.Add(Meridian.Items.ItemRegistry.Get(item).id, n);
+                for (int k = 0; k < 30; k++) yield return new WaitForFixedUpdate();
+                var sell = hud.Sell;
+                sell.SetOpen(true);
+                yield return new WaitForSeconds(0.8f); // the paper
+                yield return Shot("3_sell_panel", sell.Total.canvas);
+                TestContext.Out.WriteLine($"[MERIDIAN] u174 3_sell_panel: topside {sell.Topside}, '{sell.Total.text}'");
+                sell.SetOpen(false);
+                LogAssert.NoUnexpectedReceived();
+            }
+            finally { Meridian.View2D.CartoonStage.Enabled = wasCartoon; }
+        }
+
+        /// <summary>
         /// U-104: the cartoon HUD at 1080p → coordination/reports/unity/u104/: on foot beside the ship (the three dials, the
         /// suit rows, the markers, every string in Patrick Hand) and aboard just under the Escape Line (the ship rows, the
         /// painted dotted line with its lettered sign). The overlay canvases draw through the side camera for the shots.

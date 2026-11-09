@@ -33,10 +33,40 @@ namespace Meridian.Items
 
         static int MaxOf(int itemId) => ItemRegistry.Get(itemId)?.stackMax ?? StackMax;
 
-        /// <summary>Adds up to `count`; returns how many didn't fit.</summary>
+        /// <summary>U-174 (D-174): an item's weight in the pack (kg; D1Tables, 0 for what they do not list). Null: weightless.</summary>
+        public static Func<int, float> KgOf;
+        /// <summary>U-174: the pack's weight limit (kg; 30 at the start, Haul raises it). Infinite: no limit (a plain inventory).</summary>
+        public float LimitKg = float.PositiveInfinity;
+        /// <summary>U-174: raised when an Add is cut short by the weight limit (the HUD's "pack full" cue).</summary>
+        public event Action Refused;
+
+        /// <summary>U-174: what the pack weighs now (kg).</summary>
+        public float Weight
+        {
+            get
+            {
+                if (KgOf == null) return 0f;
+                float w = 0f;
+                for (int i = 0; i < SlotCount; i++) if (!slots[i].IsEmpty) w += slots[i].count * KgOf(slots[i].itemId);
+                return w;
+            }
+        }
+
+        /// <summary>U-174: how many of the item still fit under the weight limit (int.MaxValue when weightless or unlimited).</summary>
+        public int FitsByWeight(int itemId)
+        {
+            if (KgOf == null || float.IsPositiveInfinity(LimitKg)) return int.MaxValue;
+            float kg = KgOf(itemId);
+            if (kg <= 0f) return int.MaxValue;
+            return Math.Max(0, (int)Math.Floor((LimitKg - Weight) / kg + 1e-4));
+        }
+
+        /// <summary>Adds up to `count`; returns how many didn't fit (the slots, or U-174's weight limit).</summary>
         public int Add(int itemId, int count)
         {
             if (itemId <= 0 || count <= 0) return Math.Max(0, count);
+            int over = 0, fits = FitsByWeight(itemId);
+            if (fits < count) { over = count - fits; count = fits; Refused?.Invoke(); if (count == 0) return over; }
             int max = MaxOf(itemId), left = count;
             for (int i = 0; i < SlotCount && left > 0; i++)
             {
@@ -53,7 +83,7 @@ namespace Meridian.Items
                 left -= put;
             }
             if (left != count) Changed?.Invoke();
-            return left;
+            return left + over;
         }
 
         /// <summary>Removes exactly `count` if there are that many (from the last stacks first); false and no change otherwise.</summary>

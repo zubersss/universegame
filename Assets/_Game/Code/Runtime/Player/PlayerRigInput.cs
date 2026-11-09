@@ -64,11 +64,23 @@ namespace Meridian.Player
             var screen = aim.ReadValue<Vector2>();
             if (view != null && !externalAim) AimWorld = (Vector2)view.ScreenToWorldPoint(new Vector3(screen.x, screen.y, -view.transform.position.z));
             // While the inventory panel is open, clicks select slots, not tiles (U-045).
-            bool pressed = (primary.IsPressed() || holdUse) && !Meridian.UI.InventoryPanel.AnyOpen && !Meridian.UI.CraftingPanel.AnyOpen && !Meridian.UI.CataloguePanel.AnyOpen;
+            bool pressed = (primary.IsPressed() || holdUse) && !Meridian.UI.InventoryPanel.AnyOpen && !Meridian.UI.CraftingPanel.AnyOpen && !Meridian.UI.CataloguePanel.AnyOpen && !Meridian.UI.SellPanel.AnyOpen;
             bool edge = primary.WasPressedThisFrame() || (holdUse && !heldLast);
             heldLast = holdUse;
             Using = rig != null && view != null && pressed;
-            if (!Using) return;
+            if (!Using) { strokeHeld = 0f; StrokeProgress = 0f; return; }
+            // U-174 (D-174): a Beam stroke takes its time (0.25 s x the planet's and the tier's hardness / Beam power, capped at 8 s), held.
+            if (module == RigModule.Beam)
+            {
+                float need = rig.StrokeSeconds(AimWorld);
+                if (need > 0f)
+                {
+                    strokeHeld += Time.deltaTime;
+                    StrokeProgress = Mathf.Clamp01(strokeHeld / need);
+                    if (strokeHeld < need) return;
+                    strokeHeld = 0f;
+                }
+            }
             Use(module, edge);
         }
 
@@ -89,6 +101,10 @@ namespace Meridian.Player
                     break;
             }
         }
+
+        float strokeHeld;
+        /// <summary>U-174: the Beam stroke under way (0..1; the tool view and tests read it).</summary>
+        public float StrokeProgress { get; private set; }
 
         /// <summary>Points the rig at a world point without the mouse (tests, scripted demos).</summary>
         public void AimAt(Vector2 world) { externalAim = true; AimWorld = world; }

@@ -37,31 +37,10 @@ namespace Meridian.Tests
             Assert.NotNull(book, "RecipeBook in Resources");
             for (int i = 0; i < 30; i++) yield return new WaitForFixedUpdate();
 
-            // Mine iron ore: three hematite seams beside the surveyor, dug with the Beam and picked up.
+            // U-174 (D-174): the Beam's dug tiles give dirt or the tier tables' materials (DigRunTests), so the ore comes from a resource node
+            // (U-158's harvest, as the game gives it); the smelt and the craft are this test's subject.
             int hematite = ItemRegistry.Get("hematite").id;
-            for (int n = 0; n < 3; n++)
-            {
-                Vector2 feet = player.Body.position;
-                // A free cell near the surveyor (clear of his collider, the camp props and rising ground).
-                int x = 0, y = 0;
-                bool placed = false;
-                foreach (int dx in new[] { 2, -2, 3, -3, 1, -1 })
-                {
-                    foreach (int dy in new[] { 0, 1 })
-                    {
-                        x = Mathf.FloorToInt(feet.x) + dx; y = Mathf.FloorToInt(feet.y) + dy;
-                        if (rig.Place(new Vector2(x + 0.5f, y + 0.5f), TileId.Hematite)) { placed = true; break; }
-                    }
-                    if (placed) break;
-                }
-                Assert.IsTrue(placed, "an ore seam");
-                Assert.IsTrue(rig.Dig(new Vector2(x + 0.5f, y + 0.5f)), "Beam digs the ore");
-                // Walk to the ore (it pops out of the seam).
-                for (int k = 0; k < 10; k++) yield return new WaitForFixedUpdate();
-                if (rig.drops.Live.Count > 0) { player.Body.position = rig.drops.Live[0].transform.position; player.Body.linearVelocity = Vector2.zero; }
-                float until = Time.realtimeSinceStartup + 5f;
-                while (inv.Count(hematite) < n + 1 && Time.realtimeSinceStartup < until) yield return new WaitForFixedUpdate();
-            }
+            Assert.AreEqual(0, inv.Add(hematite, 3), "three hematite from a node");
             Assert.AreEqual(3, inv.Count(hematite), "three ore picked up");
 
             // Smelt at the camp's Smelter.

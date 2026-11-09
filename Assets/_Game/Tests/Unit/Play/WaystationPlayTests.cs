@@ -70,9 +70,12 @@ namespace Meridian.Tests
             Assert.IsFalse(bay.Docked);
             yield return null;
 
-            // Mars prices differ.
+            // Mars prices differ: what Halcyon charges (its local factor). U-174 (D1_TABLES §2): what a Waystation pays for a raw material is the
+            // tables' Scrip + 25 % at every station (crafted goods keep their local prices).
             Assert.IsTrue(bay.Dock("mars"));
-            Assert.AreNotEqual(Market.SellPrice("earth", "iron"), Market.SellPrice("mars", "iron"));
+            Assert.AreNotEqual(Market.BuyPrice("earth", "iron"), Market.BuyPrice("mars", "iron"));
+            Assert.AreEqual(Market.SellPrice("earth", "iron"), Market.SellPrice("mars", "iron"), "a raw material sells at the tables' price + 25 % anywhere");
+            Assert.AreNotEqual(Market.SellPrice("earth", "circuit_board"), Market.SellPrice("mars", "circuit_board"), "crafted goods keep the local prices");
             bay.Undock();
 
             // Save → change → load: Scrip and contracts come back.

@@ -24,6 +24,14 @@ namespace Meridian.Rig
         public Transform owner;
         /// <summary>Where Builder material comes from and dug items go (GameState's; U-045, closes D-021).</summary>
         public Meridian.Items.Inventory inventory;
+        /// <summary>U-174 (D-174): the dirt store a dug matrix tile goes into and the Builder spends (GameState's).</summary>
+        [System.NonSerialized] public Meridian.Mining.DirtStore dirt; // GameState's (a serialized field would get its own empty store)
+        /// <summary>U-174: the dirt store (GameState's unless one was set).</summary>
+        public Meridian.Mining.DirtStore Dirt => dirt ??= Meridian.Core.GameState.Instance != null ? Meridian.Core.GameState.Instance.dirt : null;
+        /// <summary>U-174: the Beam's power (1 at the start; the Skill Tree's Dig branch raises it): a stroke's time divides by it.</summary>
+        public float BeamPower = 1f;
+        /// <summary>U-174: raised when a dug tile gives dirt (true: into the store; false: the store was full, a puff only).</summary>
+        public event System.Action<bool> DirtDug;
         /// <summary>Raised after the Beam removes a tile (U-032 dig animation).</summary>
         public event System.Action<Vector2> Dug;
         /// <summary>U-157: raised after the Builder piles a mound (its puff).</summary>
@@ -32,6 +40,8 @@ namespace Meridian.Rig
         void Start()
         {
             if (inventory == null && Meridian.Core.GameState.Instance != null) inventory = Meridian.Core.GameState.Instance.inventory;
+            if (dirt == null && Meridian.Core.GameState.Instance != null) dirt = Meridian.Core.GameState.Instance.dirt;
+            BeamPower = Meridian.Mining.D1Tables.Current.beamPowerStart;
             if (drops != null && drops.collector == null) drops.collector = owner;
             if (drops != null && drops.inventory == null) drops.inventory = inventory;
         }
@@ -110,9 +120,16 @@ namespace Meridian.Rig
             return true;
         }
 
+        /// <summary>U-174: the planet digs by the D1 tables (Earth, Mars, Mercury, Venus): strokes take time and tiles give dirt or a material.</summary>
+        public bool D1 => terrain != null && terrain.Config != null && Meridian.Mining.D1Tables.Current.PlanetOf(terrain.Config.id) != null;
+
+        /// <summary>U-174: a Beam stroke's time at p (0 where the planet does not dig by the D1 tables: a stroke a frame, as before).</summary>
+        public float StrokeSeconds(Vector2 p) => D1 ? Meridian.Mining.DigRun.StrokeSeconds(terrain, p, BeamPower) : 0f;
+
         /// <summary>The dug tile's item (and the planet's only-here finds) at the tile's centre.</summary>
         void DropFor(byte id, int x, int y)
         {
+            if (D1) { DropD1(x, y); return; }
             int item = Meridian.Items.ItemRegistry.DropOf(id);
             // U-059: "only here" finds (Mars perchlorate deposits, Earth living seed).
             int depth = terrain.Generator != null ? terrain.Generator.SurfaceHeight(terrain.WrapX(x)) - y : 0;
@@ -124,6 +141,34 @@ namespace Meridian.Rig
                 var tile = replace != 0 || Brush ? null : terrain.TileSet.Get(id, 0) as UnityEngine.Tilemaps.Tile;
                 drops.Spawn(item, new Vector2(x + 0.5f, y + 0.5f), tile != null ? tile.sprite : null);
             }
+            if (drops != null && bonus != 0) drops.Spawn(bonus, new Vector2(x + 0.5f, y + 0.7f), null);
+        }
+
+        /// <summary>
+        /// U-174 (D1_TABLES §1): a dug tile gives either dirt into the dirt store (full: a puff, nothing lost but the dirt) or, by its depth
+        /// tier's material chance, a material from the planet's tier table, dropped at the tile for the pack (refused past the weight limit, it
+        /// stays on the ground). The rolls hash the cell and the world seed: the same tile always gives the same. U-059's only-here finds stay.
+        /// </summary>
+        void DropD1(int x, int y)
+        {
+            var tables = Meridian.Mining.D1Tables.Current;
+            var pid = terrain.Config.id;
+            int wx = terrain.WrapX(x);
+            var centre = new Vector2(x + 0.5f, y + 0.5f);
+            int tier = Meridian.Mining.DigRun.TierAt(terrain, centre);
+            int seed = Meridian.Core.GameState.Instance != null ? Meridian.Core.GameState.Instance.worldSeed : 1969;
+            Meridian.Mining.DigRun.Rolls(wx, y, seed, out float materialRoll, out float pickRoll);
+            bool coldTrap = pid == Meridian.Planets.PlanetId.Mercury && MercuryLandforms.PermanentShadow(wx, terrain.Config.worldWidth);
+            int item = tables.Roll(pid, tier, materialRoll, pickRoll, coldTrap);
+            if (item != 0) { if (drops != null) drops.Spawn(item, centre, null); }
+            else
+            {
+                var store = Dirt;
+                bool stored = store != null && store.Add(1) == 1;
+                DirtDug?.Invoke(stored);
+            }
+            int depth = terrain.Generator != null ? terrain.Generator.SurfaceHeight(wx) - y : 0;
+            var (_, bonus) = Meridian.Items.OnlyHere.DropAt(pid, terrain.GetTile(x, y), wx, y, depth);
             if (drops != null && bonus != 0) drops.Spawn(bonus, new Vector2(x + 0.5f, y + 0.7f), null);
         }
 
@@ -380,11 +425,11 @@ namespace Meridian.Rig
             _ => TileId.Soil,
         };
 
-        /// <summary>U-157: the ground items carried (any dug material: an item the old Builder could place).</summary>
+        /// <summary>U-157: the ground items carried (any dug material: an item the old Builder could place). U-174: the dirt store first.</summary>
         public int GroundItems()
         {
-            if (inventory == null) return 0;
-            int n = 0;
+            int n = D1 && Dirt != null ? Dirt.count : 0;
+            if (inventory == null) return n;
             for (int s = 0; s < Meridian.Items.Inventory.SlotCount; s++)
             {
                 var st = inventory[s];
@@ -397,6 +442,7 @@ namespace Meridian.Rig
 
         void SpendGroundItems(int n)
         {
+            if (D1 && Dirt != null) n -= Dirt.Spend(n); // U-174: the Builder spends the dirt store first
             for (int s = 0; s < Meridian.Items.Inventory.SlotCount && n > 0; s++)
             {
                 var st = inventory[s];

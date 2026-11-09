@@ -54,14 +54,40 @@ namespace Meridian.Trade
             }
         }
 
-        public static IEnumerable<string> Goods => Base.Keys;
+        /// <summary>The goods Halcyon trades: its crafted goods and every raw material of the D1 tables (U-174).</summary>
+        public static IEnumerable<string> Goods
+        {
+            get
+            {
+                foreach (var k in Base.Keys) yield return k;
+                foreach (var m in Meridian.Mining.D1Tables.Current.materials) if (!Base.ContainsKey(m.item)) yield return m.item;
+            }
+        }
 
-        /// <summary>What Halcyon charges at this station (0 if it doesn't trade the item).</summary>
-        public static int BuyPrice(string station, string item) =>
-            Base.TryGetValue(item, out int p) ? Mathf.Max(1, Mathf.RoundToInt(p * Factor(station, item))) : 0;
+        /// <summary>U-174 (D1_TABLES §2): a raw material's topside Scrip from the D1 tables (0: not a raw material; crafted goods keep Base).</summary>
+        static float RawScrip(string item)
+        {
+            var def = ItemRegistry.Get(item);
+            var t = Meridian.Mining.D1Tables.Current;
+            return def != null && t.Sellable(def.id) ? t.Scrip(def.id) : 0f;
+        }
 
-        /// <summary>What Halcyon pays for one unit here.</summary>
-        public static int SellPrice(string station, string item) => Mathf.Max(1, Mathf.FloorToInt(BuyPrice(station, item) * SellShare));
+        /// <summary>What Halcyon charges at this station (0 if it doesn't trade the item). U-174: a raw material's price is what a Waystation
+        /// pays for it (the tables' Scrip + the Waystation bonus) over the share Halcyon buys at, times the station's local factor.</summary>
+        public static int BuyPrice(string station, string item)
+        {
+            float raw = RawScrip(item);
+            if (raw > 0f) return Mathf.Max(1, Mathf.RoundToInt(raw * (1f + Meridian.Mining.D1Tables.Current.waystationBonus) / SellShare * Factor(station, item)));
+            return Base.TryGetValue(item, out int p) ? Mathf.Max(1, Mathf.RoundToInt(p * Factor(station, item))) : 0;
+        }
+
+        /// <summary>What Halcyon pays for one unit here. U-174 (D1_TABLES §2): a raw material at the tables' Scrip + the Waystation bonus.</summary>
+        public static int SellPrice(string station, string item)
+        {
+            float raw = RawScrip(item);
+            if (raw > 0f) return Mathf.Max(1, Mathf.RoundToInt(raw * (1f + Meridian.Mining.D1Tables.Current.waystationBonus)));
+            return Mathf.Max(1, Mathf.FloorToInt(BuyPrice(station, item) * SellShare));
+        }
 
         /// <summary>Hull repair (per point). U-107 (D-103): no refuelling.</summary>
         public static int RepairPrice(string station) => station == "mars" ? 4 : 3;

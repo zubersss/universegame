@@ -135,6 +135,12 @@ namespace Meridian.UI
             SuitFill = UiKit.Bar(root, "Suit", tl, new Vector2(24f, -288f), new Vector2(220f, 6f), new Color(0.6f, 0.85f, 1f, 1f));
             SuitRateText = UiKit.Text(root, "SuitRate", tl, new Vector2(252f, -278f), new Vector2(120f, 24f), 16);
             SuitRateText.text = "";
+            // U-174: the depth under the Surface Line, top centre; the pack-full cue under it.
+            DepthText = UiKit.Text(root, "Depth", new Vector2(0.5f, 1f), new Vector2(-200f, -24f), new Vector2(400f, 30f), 20, true, TextAnchor.MiddleCenter, theme.text);
+            DepthText.text = "";
+            PackText = UiKit.Text(root, "PackFull", new Vector2(0.5f, 1f), new Vector2(-200f, -58f), new Vector2(400f, 26f), 17, true, TextAnchor.MiddleCenter, theme.warning);
+            PackText.text = "PACK FULL";
+            PackText.enabled = false;
             // U-147 (D-149): the hazard row and the suit row on paper tags in ink; the suit bar an ink-ruled strip with a gold fill.
             Tag(root, "HazardTag", tl, new Vector2(18f, -243f), new Vector2(128f, 23f), tl, HazardLabel, CryoText);
             Tag(root, "SuitTag", tl, new Vector2(18f, -267f), new Vector2(312f, 32f), tl, suitWord, SuitRateText);
@@ -183,11 +189,64 @@ namespace Meridian.UI
             // U-054: the Survey Catalogue (N).
             Catalogue = gameObject.AddComponent<CataloguePanel>();
             Catalogue.player = player;
+            // U-174 (D-174): the Sell panel (G), topside only.
+            Sell = gameObject.AddComponent<SellPanel>();
+            Sell.player = player;
         }
 
         public InventoryPanel Inventory { get; private set; }
         public CraftingPanel Crafting { get; private set; }
         public CataloguePanel Catalogue { get; private set; }
+        public SellPanel Sell { get; private set; }
+
+        /// <summary>U-174: the depth readout under the Surface Line ("DEPTH 12 m · SUBSOIL"; blank topside) and the pack-full cue.</summary>
+        public Text DepthText { get; private set; }
+        public Text PackText { get; private set; }
+        Meridian.Terrain.TerrainStreamer depthTerrain;
+        int shownDepth = int.MinValue;
+        float packCueUntil;
+        string[] depthStrings;
+        Meridian.Items.Inventory cuedInventory;
+
+        void UpdateDepth()
+        {
+            if (DepthText == null || player == null) return;
+            if (depthTerrain == null || !depthTerrain.isActiveAndEnabled) depthTerrain = FindAnyObjectByType<Meridian.Terrain.TerrainStreamer>();
+            int d = -1;
+            if (depthTerrain != null && depthTerrain.SmoothGround && depthTerrain.Config != null)
+            {
+                float depth = Meridian.Mining.DigRun.Depth(depthTerrain, player.Body.position);
+                if (depth > 0f) d = Mathf.FloorToInt(depth);
+            }
+            if (d != shownDepth)
+            {
+                shownDepth = d;
+                if (d < 0) DepthText.text = "";
+                else
+                {
+                    depthStrings ??= new string[1024];
+                    int k = Mathf.Min(d, depthStrings.Length - 1);
+                    if (depthStrings[k] == null)
+                    {
+                        var tables = Meridian.Mining.D1Tables.Current;
+                        int tier = tables.TierIndex(k);
+                        depthStrings[k] = $"DEPTH {k} m · {(tier < tables.tiers.Length ? tables.tiers[tier].name.ToUpperInvariant() : "")}";
+                    }
+                    DepthText.text = depthStrings[k];
+                }
+            }
+            var inv = Meridian.Core.GameState.Instance != null ? Meridian.Core.GameState.Instance.inventory : null;
+            if (inv != cuedInventory)
+            {
+                if (cuedInventory != null) cuedInventory.Refused -= OnPackRefused;
+                cuedInventory = inv;
+                if (inv != null) inv.Refused += OnPackRefused;
+            }
+            bool cue = Time.time < packCueUntil;
+            if (PackText.enabled != cue) PackText.enabled = cue;
+        }
+
+        void OnPackRefused() => packCueUntil = Time.time + 2f;
 
         const int MaxMarkers = 4;
 
@@ -369,7 +428,8 @@ namespace Meridian.UI
 
         void LateUpdate()
         {
-            bool hidden = MenuController.HudHidden || InventoryPanel.AnyOpen || CraftingPanel.AnyOpen || CataloguePanel.AnyOpen; // U-058: nothing draws through a full-screen panel
+            bool hidden = MenuController.HudHidden || InventoryPanel.AnyOpen || CraftingPanel.AnyOpen || CataloguePanel.AnyOpen || SellPanel.AnyOpen; // U-058: nothing draws through a full-screen panel
+            UpdateDepth(); // U-174
             if (hudCanvas != null && hudCanvas.enabled == hidden) hudCanvas.enabled = !hidden;
             if (vitals == null && player != null) vitals = player.GetComponent<PlayerVitals>();
             if (vitals != null)

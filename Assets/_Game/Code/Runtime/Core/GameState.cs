@@ -28,6 +28,19 @@ namespace Meridian.Core
         public int suitTier;
         /// <summary>Halcyon Scrip (U-052).</summary>
         public int scrip = Meridian.Trade.Market.StartingScrip;
+        /// <summary>U-174 (D-175): the Scrip earned by selling in this expedition (sales only; Surveyor Rank).</summary>
+        public int scripEarned;
+        /// <summary>U-174 (D-174): the dirt store (dug matrix tiles for the Builder; weightless, not sellable).</summary>
+        public readonly Meridian.Mining.DirtStore dirt = new Meridian.Mining.DirtStore();
+
+        /// <summary>U-174: the D1 tables' pack limit, item weights and dirt store size on the surveyor's inventory and store.</summary>
+        public void ApplyD1()
+        {
+            var t = Meridian.Mining.D1Tables.Current;
+            Meridian.Items.Inventory.KgOf = t.Kg;
+            inventory.LimitKg = t.packLimitKg;
+            dirt.capacity = t.dirtStoreStart;
+        }
         /// <summary>Survey Datacores and the catalogue of scanned entries (U-054).</summary>
         public int datacores;
         /// <summary>Bases (U-056): placed pieces and aerostats, every planet.</summary>
@@ -69,6 +82,7 @@ namespace Meridian.Core
         {
             if (Instance != null && Instance != this) { Destroy(gameObject); return; }
             Instance = this;
+            ApplyD1(); // U-174: the pack's weight limit and the dirt store from the D1 tables
         }
 
         void OnDestroy()
