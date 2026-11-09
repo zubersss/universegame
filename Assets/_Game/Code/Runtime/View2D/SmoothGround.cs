@@ -989,11 +989,17 @@ namespace Meridian.View2D
         /// <summary>U-157: how far off the natural surface curve a stretch still carries the band (m).</summary>
         public const float NaturalBand = 0.35f;
 
+        /// <summary>One column's back wall from yb up to the curve h0 → h1. U-171 (LEAD's smoke_43 read): where the curve crosses yb inside the
+        /// column the wall stops at the crossing (a triangle); clamping the low corner up to yb instead ran its top over the curve, a 1 m wedge
+        /// of wall in the air beside a steep shore at a chunk's bottom edge.</summary>
         void BackQuad(List<int> into, float x0, float x1, float yb, float h0, float h1, Color c0, Color c1, System.Func<float, float, Vector2> uvOf)
         {
+            if (h0 > yb && h1 < yb) { float u = (h0 - yb) / (h0 - h1); x1 = Mathf.Lerp(x0, x1, u); c1 = Color.Lerp(c0, c1, u); h1 = yb; }
+            else if (h1 > yb && h0 < yb) { float u = (yb - h0) / (h1 - h0); x0 = Mathf.Lerp(x0, x1, u); c0 = Color.Lerp(c0, c1, u); h0 = yb; }
+            h0 = Mathf.Max(h0, yb); h1 = Mathf.Max(h1, yb);
             int b = v.Count;
             Add(new Vector3(x0, yb, 0.01f), uvOf(x0, yb), c0); Add(new Vector3(x1, yb, 0.01f), uvOf(x1, yb), c1);
-            Add(new Vector3(x1, Mathf.Max(h1, yb), 0.01f), uvOf(x1, h1), c1); Add(new Vector3(x0, Mathf.Max(h0, yb), 0.01f), uvOf(x0, h0), c0);
+            Add(new Vector3(x1, h1, 0.01f), uvOf(x1, h1), c1); Add(new Vector3(x0, h0, 0.01f), uvOf(x0, h0), c0);
             into.Add(b); into.Add(b + 2); into.Add(b + 1); into.Add(b); into.Add(b + 3); into.Add(b + 2);
         }
 

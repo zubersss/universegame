@@ -131,6 +131,66 @@ namespace Meridian.Terrain
                     liquid.SetTile(new Vector3Int(lx, ly, 0), waterTile);
                     shoreWater.Add(i);
                 }
+            FadeShoreWater(x0, y0);
+        }
+
+        /// <summary>U-171 (LEAD's smoke_43 read): the sea's water tint stopped on the first water column's box edge; under the water line the
+        /// shore's last land cells (solid, their tops above the drawn slope) showed the backdrop untinted beside it. Solid cells within ShoreFade
+        /// columns of water in their row take view-only water, its alpha stepping down with the distance (6/7 … 1/7): drawn behind the ground
+        /// mesh it shows only above the outline, so the tint fades out over the slope instead of ending on a box. One pass per row over the
+        /// chunk's ids (and ShoreFade columns either side, read only where a solid cell is in reach of that edge). View only; ids untouched.</summary>
+        public const int ShoreFade = 6;
+        readonly System.Collections.Generic.List<int> fadedWater = new System.Collections.Generic.List<int>(32);
+        static byte[] fadeRow;
+        static int[] fadeDist;
+
+        void FadeShoreWater(int x0, int y0)
+        {
+            const int C = TerrainConstants.ChunkSize, F = ShoreFade, W = C + 2 * F, None = F + 1;
+            for (int k = 0; k < fadedWater.Count; k++)
+            {
+                int i = fadedWater[k];
+                var p0 = new Vector3Int(i % C, i / C, 0);
+                if (TileId.IsLiquid(ids[i]) || shoreWater.Contains(i)) liquid.SetColor(p0, Color.white); // water again, or the shore's fill: whole
+                else liquid.SetTile(p0, null);
+            }
+            fadedWater.Clear();
+            if (waterTile == null) return;
+            fadeRow ??= new byte[W];
+            fadeDist ??= new int[W];
+            for (int ly = 0; ly < C; ly++)
+            {
+                int r = ly * C;
+                bool solidLeft = false, solidRight = false, water = false;
+                for (int lx = 0; lx < C; lx++)
+                {
+                    byte id = ids[r + lx];
+                    fadeRow[lx + F] = id;
+                    water |= TileId.IsLiquid(id);
+                    if (TileId.IsSolid(id)) { if (lx < F) solidLeft = true; if (lx >= C - F) solidRight = true; }
+                }
+                for (int k = 1; k <= F; k++)
+                {
+                    byte l = solidLeft ? world.TileAt(x0 - k, y0 + ly) : TileId.Air, rt = solidRight ? world.TileAt(x0 + C - 1 + k, y0 + ly) : TileId.Air;
+                    fadeRow[F - k] = l; fadeRow[F + C - 1 + k] = rt;
+                    water |= TileId.IsLiquid(l) || TileId.IsLiquid(rt);
+                }
+                if (!water) continue;
+                int d = None;
+                for (int k = 0; k < W; k++) { d = TileId.IsLiquid(fadeRow[k]) ? 0 : Mathf.Min(d + 1, None); fadeDist[k] = d; }
+                d = None;
+                for (int k = W - 1; k >= 0; k--) { d = TileId.IsLiquid(fadeRow[k]) ? 0 : Mathf.Min(d + 1, None); if (d < fadeDist[k]) fadeDist[k] = d; }
+                for (int lx = 0; lx < C; lx++)
+                {
+                    int i = r + lx, dist = fadeDist[lx + F];
+                    if (dist < 1 || dist > F || !TileId.IsSolid(ids[i]) || shoreWater.Contains(i)) continue;
+                    var p = new Vector3Int(lx, ly, 0);
+                    liquid.SetTile(p, waterTile);
+                    liquid.SetTileFlags(p, TileFlags.None);
+                    liquid.SetColor(p, new Color(1f, 1f, 1f, 1f - dist / (F + 1f)));
+                    fadedWater.Add(i);
+                }
+            }
         }
 
         void BuildOutline()

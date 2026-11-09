@@ -13,7 +13,8 @@ namespace Meridian.Tests
     /// U-171 (B-200's read, B-202's sea_under): Earth's sea from below. Out at sea under the water line the land set's nearest layer and its
     /// continued strip are gone (no beach or meadow on or under the water) and sea_under's water column covers the frame below the surface,
     /// over every land-set layer still drawn there; at 3 m the far layers still show above the surface; at the shore, above the water, the
-    /// land set is untouched and sea_under draws nothing; between them the weight crossfades over 3 m.
+    /// land set is untouched and sea_under draws nothing; between them the weight crossfades over 3 m. At smoke_43's frame no back wall
+    /// stands over the shore's curve.
     /// </summary>
     public class SeaUnderPlayTests
     {
@@ -112,6 +113,69 @@ namespace Meridian.Tests
                 Assert.AreEqual(0f, stage.SeaWeight, 1e-4f, "on land");
                 Assert.AreEqual(1f, stage.Layers.nearAlpha, 1e-4f, "the land set whole");
                 Assert.IsFalse(stage.SeaUnder.gameObject.activeSelf, "sea_under draws nothing");
+
+                // smoke_43's frame (3 m under, off the shore's steep slope): no back-wall triangle stands over its column's surface curve (LEAD's
+                // read: a 1 m wedge of wall poked out of the slope into the water where the curve crossed a chunk's bottom edge).
+                int swim = os + 16;
+                for (int x = os + 16; x < os + 400; x++) if (gen.SurfaceHeight(x) <= side.Config.datumY - 4) { swim = x; break; }
+                yield return Hold(new Vector2(swim + 0.5f, water - 3f));
+                int backTris = 0;
+                foreach (var chunk in Object.FindObjectsByType<TerrainChunk>())
+                {
+                    MeshFilter mf = null;
+                    foreach (var f in chunk.GetComponentsInChildren<MeshFilter>()) if (f.name == "SmoothGround") mf = f;
+                    if (mf == null || mf.sharedMesh == null || mf.sharedMesh.subMeshCount == 0) continue;
+                    var vs = mf.sharedMesh.vertices;
+                    var tri = mf.sharedMesh.GetTriangles(0); // SmoothGround's submesh 0: the back wall
+                    float wy0 = chunk.cy * TerrainConstants.ChunkSize;
+                    for (int t = 0; t < tri.Length; t += 3)
+                    {
+                        Vector3 mid = (vs[tri[t]] + vs[tri[t + 1]] + vs[tri[t + 2]]) / 3f;
+                        float fi = mid.x + 0.5f;
+                        int i = Mathf.Clamp(Mathf.FloorToInt(fi), 0, TerrainConstants.ChunkSize - 1);
+                        float a = chunk.SurfaceCurve[i], b = chunk.SurfaceCurve[i + 1];
+                        if (float.IsNaN(a) || float.IsNaN(b)) continue;
+                        float curve = Mathf.Lerp(a, b, Mathf.Clamp01(fi - i)) - wy0;
+                        Assert.LessOrEqual(mid.y, curve + 0.02f, $"chunk ({chunk.cx}, {chunk.cy}): a back-wall triangle at local ({mid.x:0.00}, {mid.y:0.00}) over the curve ({curve:0.00})");
+                        backTris++;
+                    }
+                }
+                TestContext.Out.WriteLine($"[MERIDIAN] u171 smoke_43 frame at {swim}: {backTris} back-wall triangles, all under the curve");
+                Assert.Greater(backTris, 0, "the shore's chunks laid a back wall (the sea's columns)");
+                // ...and the sea's tint fades into the shore along the datum row (LEAD's read: it stopped on a box edge): from the last water cell
+                // inland, each step drops at most 1/(ShoreFade + 1) of the water's alpha
+                const int C = TerrainConstants.ChunkSize;
+                int datum = side.Config.datumY;
+                float TintAt(int x)
+                {
+                    int cx = Mathf.FloorToInt((float)x / C), cy = Mathf.FloorToInt((float)datum / C);
+                    foreach (var chunk in Object.FindObjectsByType<TerrainChunk>())
+                    {
+                        if (chunk.cx != cx || chunk.cy != cy) continue;
+                        foreach (var tm in chunk.GetComponentsInChildren<UnityEngine.Tilemaps.Tilemap>())
+                        {
+                            if (tm.name != "Liquid") continue;
+                            var cell = new Vector3Int(x - cx * C, datum - cy * C, 0);
+                            return tm.HasTile(cell) ? tm.GetColor(cell).a : 0f;
+                        }
+                    }
+                    return -1f;
+                }
+                int edge = swim;
+                while (edge > swim - 40 && side.terrain.GetTile(edge - 1, datum) == TileId.Water) edge--;
+                Assert.Less(edge, swim, "water on the datum row at the swim column");
+                var ramp = new System.Text.StringBuilder();
+                float prev = TintAt(edge);
+                Assert.AreEqual(1f, prev, 1e-3f, "the last water cell whole");
+                for (int x = edge - 1; x >= edge - TerrainChunk.ShoreFade - 2; x--)
+                {
+                    float a = TintAt(x);
+                    ramp.Append($" {a:0.00}");
+                    Assert.GreaterOrEqual(a, 0f, $"x {x}: its chunk resident");
+                    Assert.LessOrEqual(prev - a, 1f / (TerrainChunk.ShoreFade + 1f) + 0.01f, $"x {x}: the tint steps from {prev:0.00} to {a:0.00}");
+                    prev = a;
+                }
+                TestContext.Out.WriteLine($"[MERIDIAN] u171 the shore's tint inland from the water's edge at {edge}:{ramp}");
                 player.Body.simulated = true;
                 LogAssert.NoUnexpectedReceived();
             }
