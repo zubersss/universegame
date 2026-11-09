@@ -32,7 +32,7 @@ Sell topside from the pack at these values; a Waystation pays +25 % (Voyage rais
 | copper | 16 | 2 |  | solarite | 160 | 1 |
 |  |  |  |  | deep_diamond | 300 | 0.5 |
 
-The giants' finds (not dug; floe cores and deep dives; they pay the Skill Tree's outer rings): ring_rock 25 · ring_ice 30 · methane_ice 20 · ammonia_ice 25 · superionic_ice 400 · helium3_condensate 500 · metallic_hydrogen 600.
+The giants' finds (not dug; floe cores and deep dives; they pay the Skill Tree's outer rings), Scrip / kg: ring_rock 25 / 2 · ring_ice 30 / 1.5 · methane_ice 20 / 1.5 · ammonia_ice 25 / 1.5 · superionic_ice 400 / 2 · helium3_condensate 500 / 1 · metallic_hydrogen 600 / 2.
 
 These replace Trade/Market.cs's raw-material base prices (its crafted goods keep theirs).
 
