@@ -1,5 +1,6 @@
 # LEAD STATUS
-Updated: 2026-11-09 07:0x · Session: 10 (zuber-dc; all three windows restarted ~09:30 after a ~3-hour break) · Review cycle: 292 · Cadence: every 2 hours (owner, 11-07 15:1x; session cron 5ca489ce at :43 on odd hours, next ~09:05) + messages from the workers as they arrive
+Updated: 2026-11-09 09:0x · Session: 10 (zuber-dc; all three windows restarted ~09:30 after a ~3-hour break) · Review cycle: 293 · Cadence: every 2 hours (owner, 11-07 15:1x; session cron 5ca489ce at :43 on odd hours, next ~11:05) + messages from the workers as they arrive
+Cycle 293 (09:05): both workers paused 2 h (no commit, no edit, RAM 1.30 GB under the gate) → nudged; USER-35 (close Edge).
 Cycle 292 (07:05): no stall; U-188's dev build probed (a leak fixed; D-180) and its smoke judged with BLENDER's B-201 (release fixes routed; B-220..B-224 / U-191 / U-192 after); both workers mid-edit on the release fixes, B-222 / B-221.
 Cycle 291 (05:05): no stall; U-171 Done; the pre-0.6.0 sweep green (LeadQA, BudgetGate); U-188 Build 0.6.0 in UNITY's lock (RAM 0.43 GB, watched).
 Cycle 290 (03:05): no stall; U-190 / U-185 / U-181 / U-180 Done; LeadQA D1DigRunTests passes every step; U-171 in UNITY's lock; then the sweep and U-188 Build 0.6.0.
