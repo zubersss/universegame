@@ -87,7 +87,8 @@ def beam_ray(mk, k):
         for j in range(8):                                                                    # flowing sparks, period 0.25 m
             x = (j * 0.25 + k * 0.25 / 8) % Lr
             G.stroke(d, [(x, 0.075), (x + 0.06, 0.09), (x + 0.12, 0.075), (x + 0.06, 0.062)], M[core if core != "off" else "off"], 0.0, cyclic=True)
-            G.stroke(d, [(x + 0.1, -0.075), (x + 0.16, -0.09), (x + 0.22, -0.075), (x + 0.16, -0.062)], M[tone + "_sh"], 0.0, cyclic=True)
+            dark = tone[:-3] + "_dp" if tone.endswith("_sh") else tone + "_sh"
+            G.stroke(d, [(x + 0.1, -0.075), (x + 0.16, -0.09), (x + 0.22, -0.075), (x + 0.16, -0.062)], M[dark], 0.0, cyclic=True)
     return fn
 
 
@@ -96,9 +97,10 @@ def grapple_tool(mk):
     def fn(d, M):
         R = 0.09 + 0.015 * (mk - 1)
         G.stroke(d, hose([(0.0, 0.0), (0.24, 0.0)], 0.035), M["sky_sh_i"], I, cyclic=True)   # the arm to the hook seat
-        G.stroke(d, IT.lump(0.0, 0.0, R, R, 11 + mk, n=12, jit=0.0), M["brown_i"], O, cyclic=True)      # the reel drum
-        G.stroke(d, [(x, z) for x, z in [(R * 0.7 * math.cos(a), R * 0.7 * math.sin(a)) for a in [TAU * i / 16 for i in range(16)]]],
-                 M["mustard_sh_i"], I, cyclic=True)                                          # the coiled line
+        G.stroke(d, IT.lump(0.0, 0.0, R, R, 11 + mk, n=12, jit=0.0), M["sky_sh_i"], O, cyclic=True)     # the reel drum (steel)
+        for k in range(3):                                                                   # the coiled line, lap on lap (rev 19:1x:
+            rr = R * (0.78 - 0.16 * k)                                                       # a dark drum hid it)
+            G.stroke(d, hose([(rr * math.cos(a), rr * math.sin(a)) for a in [TAU * i / 20 for i in range(19)]], 0.022), M["mustard_sh_i"], I * 0.7, cyclic=True)
         G.stroke(d, hose([(-R * 0.4, R * 0.1), (R * 0.4, -R * 0.1)], 0.02), M["sky_i"], I, cyclic=True)   # the crank bar
         hooks = [(0.0, 0.0)] if mk < 3 else [(0.0, 0.035), (0.0, -0.035)]
         for (dx, dz) in hooks:                                                               # the hook(s): shank + three prongs forward
@@ -115,14 +117,16 @@ def grapple_tool(mk):
 # ---------------------------------------------------------------- the jetpack overlays, Mk2-3 (metres from the pack's centre)
 def jetpack(mk):
     def fn(d, M):
-        for x in ((-0.2,) if mk == 2 else (-0.22, -0.11)):                                    # tanks strapped on the pack's back
-            w = 0.055 if mk == 2 else 0.05
-            IT._tank(d, M, x, w, -0.2, 0.24, "sky_sh" if mk == 2 else "mustard_sh", "sky_dp" if mk == 2 else "mustard_dp", nozzle="sky_sh")
-        for z in (0.12, -0.08):                                                              # the straps over the pack
-            G.stroke(d, [(-0.28, z - 0.02), (0.12, z - 0.02), (0.12, z + 0.02), (-0.28, z + 0.02)], M["brown_i"], I, cyclic=True)
-        if mk == 3:                                                                          # Mk3: fins
-            G.stroke(d, [(-0.28, -0.1), (-0.36, -0.24), (-0.28, -0.2)], M["red_i"], I, cyclic=True)
-            G.stroke(d, [(0.0, -0.1), (0.08, -0.24), (0.0, -0.2)], M["red_i"], I, cyclic=True)
+        if mk == 2:                                                                          # Mk2: one steel tank, a nozzle
+            IT._tank(d, M, -0.2, 0.06, -0.2, 0.24, "sky_sh", "sky_dp", nozzle="sky_sh")
+        else:                                                                                # Mk3: one fat teal fuel tank, gold
+            IT._tank(d, M, -0.2, 0.085, -0.2, 0.26, "teal", "teal_sh", nozzle="mustard_sh")    # bands, steel side fins (rev 19:1x: two
+            for z in (0.12, -0.08):                                                          # thin mustard tanks + red fins read as
+                G.stroke(d, [(-0.29, z - 0.018), (-0.11, z - 0.018), (-0.11, z + 0.018), (-0.29, z + 0.018)], M["mustard_i"], I, cyclic=True)   # dynamite)
+            for s in (-1, 1):
+                G.stroke(d, [(-0.2 + s * 0.085, -0.06), (-0.2 + s * 0.15, -0.2), (-0.2 + s * 0.085, -0.16)], M["sky_i"], I, cyclic=True)
+        for z in (0.16, -0.12):                                                              # the straps over the pack
+            G.stroke(d, [(-0.3, z - 0.02), (0.12, z - 0.02), (0.12, z + 0.02), (-0.3, z + 0.02)], M["brown_i"], I, cyclic=True)
     return fn
 
 
@@ -188,6 +192,17 @@ def preview(out, footnote=None):
         return outi, (R, R)
     paper = np.array(review.PAPER, np.float32)
     bg = np.array(v3.hex_rgb(v3.PALETTES["earth"]["sky"]), np.float32) / 255.0
+
+    class _R:                                                                                # review._over without the clip: wrap it
+        @staticmethod
+        def _over(dst, fr, x, y):
+            h, w = fr.shape[:2]
+            x0, y0, x1, y1 = max(x, 0), max(y, 0), min(x + w, dst.shape[1]), min(y + h, dst.shape[0])
+            if x1 > x0 and y1 > y0:
+                f = fr[y0 - y:y1 - y, x0 - x:x1 - x].astype(np.float32) / 255.0
+                a = f[..., 3:4]
+                dst[y0:y1, x0:x1] = f[..., :3] * a + dst[y0:y1, x0:x1] * (1 - a)
+    _over = _R._over
     W = 1500
     rows = []
     head = np.tile(paper, (28, W, 1)).astype(np.float32)
@@ -202,23 +217,23 @@ def preview(out, footnote=None):
         for k, (cap, fidx, tool, ray, aim, over, sock) in enumerate(items):
             x0 = 10 + k * 290
             f = frame(fidx)
-            review._over(r, f, x0, 24)
+            _over(r, f, x0, 24)
             fx, fz = x0 + FW // 2, 24 + FH                                                    # the feet (pivot 0.5, 0)
             if over is not None and sock is not None:                                         # a jetpack overlay on the back socket
                 ox, oz, ang, _sx, _sz = sock
                 oimg, opiv = rotate(over, math.degrees(ang), (32, 32))
-                review._over(r, oimg, int(fx + ox * 64 - opiv[0]), int(fz - oz * 64 - opiv[1]))
+                _over(r, oimg, int(fx + ox * 64 - opiv[0]), int(fz - oz * 64 - opiv[1]))
             if tool is not None:
                 t = scale_half(tool)
                 timg, tpiv = rotate(t, aim, (TW * TPIV[0] / 2, TH * TPIV[1] / 2))
                 hx, hy = fx + HAND[0] * 64, fz - HAND[1] * 64
-                review._over(r, timg, int(hx - tpiv[0]), int(hy - tpiv[1]))
+                _over(r, timg, int(hx - tpiv[0]), int(hy - tpiv[1]))
                 if ray is not None:                                                           # the ray from the muzzle, 1.5 m
                     a = math.radians(aim)
                     mx, my = hx + 0.47 * 64 * math.cos(a), hy - 0.47 * 64 * math.sin(a)
                     rr = scale_half(np.tile(ray, (1, 1, 1)))[:, :96]
                     rimg, rpiv = rotate(rr, aim, (0, rr.shape[0] / 2))
-                    review._over(r, rimg, int(mx - rpiv[0]), int(my - rpiv[1]))
+                    _over(r, rimg, int(mx - rpiv[0]), int(my - rpiv[1]))
             review._label(r, cap, x0 + 4, FH + 26, scale=1)
         return r
     beams = [render(beam_tool(m), TW, TH, TPPU, TPIV)[0] for m in range(1, 6)]
@@ -232,15 +247,15 @@ def preview(out, footnote=None):
                           + [("jetpack_mk2 idle", 0, None, None, 0, jets[2], socks[0]), ("jetpack_mk3 walk", 13, None, None, 0, jets[3], socks[13])]))
     rows.append(scene_row("jetpack Mk3 through jump 1, run 4, dash 2, land 0 (the socket follows the pack's swing)",
                           [(f"frame {i}", i, None, None, 0, jets[3], socks[i]) for i in (23, 70, 94, 30)]))
-    zoom = np.tile(paper, (TH * 2 + 40, W, 1)).astype(np.float32)                             # every sprite at 2x
-    x = 8
+    zoom = np.tile(paper, (2 * (TH * 2 + 40), W, 1)).astype(np.float32)                       # every sprite at 2x, two rows
+    x, y = 8, 0
     for name, img in [(f"beam_mk{m}", beams[m - 1]) for m in range(1, 6)] + [(f"grapple_mk{m}", grs[m - 1]) for m in range(1, 4)] + \
                      [(f"jetpack_mk{m}", jets[m]) for m in (2, 3)]:
-        im2 = np.repeat(np.repeat(img, 2, 0), 2, 1) if img.shape[0] == TH else np.repeat(np.repeat(img, 2, 0), 2, 1)[:TH * 2]
+        im2 = np.repeat(np.repeat(img, 2, 0), 2, 1)
         if x + im2.shape[1] > W:
-            break
-        review._over(zoom, im2[:TH * 2], x, 24)
-        review._label(zoom, name, x, 6, scale=1)
+            x, y = 8, y + TH * 2 + 40
+        _over(zoom, im2, x, y + 24)
+        review._label(zoom, name, x, y + 6, scale=1)
         x += im2.shape[1] + 10
     rows.append(zoom)
     lines = []
