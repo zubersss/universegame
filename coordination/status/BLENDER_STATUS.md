@@ -1,13 +1,19 @@
 # BLENDER STATUS
-Updated: 2026-11-08 18:2x · Session: 10 (all three windows restarted ~09:30 after a ~3-hour break; context rebuilt from the repo) · trimmed under D-113 at 14:0x; older: coordination/status/archive/BLENDER_2026-11-08.md, BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
+Updated: 2026-11-08 19:3x · Session: 10 (all three windows restarted ~09:30 after a ~3-hour break; context rebuilt from the repo) · trimmed under D-113 at 14:0x; older: coordination/status/archive/BLENDER_2026-11-08.md, BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
 
 ## Current task
-LEAD's order (18:2x): the B-204 node icons (batch 3 export, then ring 4 and ring 5), B-206, B-205, then B-202's export and B-201.
-- **B-204 node icons** (build_icons_nodes_v3.py): batches 1, 2 (10 of 12) exported; batch 3 accepted, all 20. Its export waits on UNITY's lock (want filed): row icons/nodes/batch3 (also re-exports dig_power_1 / _2 cable-fed) + ui/skilltree/emblem_dig re-drawn. Ring 4 (batch 4, 12) is in source; its preview runs next.
-- **Rule from LEAD 18:2x (D-087; also binds B-205):** the Beam reads as a mining tool, never a gun. No pistol grip or trigger: a cable-fed emitter (two-handed or arm-mounted) with a cutting nozzle. Mk1-5 grow the emitter and warm the beam colour from teal to gold.
-- B-207 waits on UNITY's import (PawsOnTheGround green). B-172 waits on U-151.
+LEAD's order (19:3x): B-209 (the space minimap + the system map, D-178; one mock-up first), then B-202's export and B-201.
+- **Rule from LEAD 18:2x (D-087):** the Beam reads as a mining tool, never a gun. No pistol grip or trigger, nothing hanging under the body: a cable-fed, arm-mounted emitter with a cutting nozzle.
+- Waiting on others:
+  - props/rig/lance: remove on UNITY's word after U-183 (never a .meta).
+  - B-207 closes on PawsOnTheGround green. B-204 closes on UNITY's capture.
+  - B-172 waits on U-151.
 
 ## Last completed
+- 18:2x-19:25, all LEAD-accepted, reviews stamped:
+  - B-204 complete: node icons batches 3-5 (e09be9a4, 8d8fed62, acbc7ffd; all 66 in icons/nodes/) + emblem_dig cable-fed.
+  - B-206: ui/rank/* (13 keys, d9f66b10).
+  - B-205: props/rig/beam_mk1..5 + beam, grapple_mk1..3 + grapple, jetpack_mk2 / mk3 + back_socket, fx/beam_ray/mk1..5 (e5da8d0e).
 - 17:4x-18:0x, all LEAD-accepted (the reviews are stamped):
   - B-203 Mars / Mercury / Venus tiers + node icons batch 1 (f473f930, 106 files).
   - B-208: B-151's panels flat + ui/panels/grain (5cb90871; U-181 wires the overlay).
