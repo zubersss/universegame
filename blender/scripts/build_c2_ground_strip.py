@@ -52,6 +52,8 @@ SAND = _mix(P["mustard"], P["offwhite"], 0.55)       # the B-133 coast dunes' sa
 KEYS = {"grass": "terrain/earth/ground_strip", "soil": "terrain/earth/ground_strip_soil", "stone": "terrain/earth/ground_strip_stone",
         "sand": "terrain/earth/ground_strip_sand"}  # sand: the coast (LEAD cycle 252), the same frame contract
 KINDS = tuple(KEYS)
+RETIRED = ("soil", "stone", "sand")  # 2026-11-08 (B-215 finding 5, U-186): smooth Earth loads only the grass strip; these three were
+                                     # removed from Art/ and Earth's export skips them (their drawing stays: other planets' rows use it)
 
 
 def mats(gp):
@@ -281,7 +283,7 @@ def export(art, S=None, keys=None):
     if problems:
         raise ValueError("ground strips fail the B-130 checks: " + "; ".join(problems))
     out = []
-    keys = keys or KEYS                                       # B-140: build_c2_mars_ground passes the Mars keys
+    keys = keys or {k: v for k, v in KEYS.items() if k not in RETIRED}   # B-140: build_c2_mars_ground passes the Mars keys
     for kind in keys:
         key = keys[kind]
         W = 8 * FW + 7 * GUTTER
