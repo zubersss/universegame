@@ -22,12 +22,8 @@ namespace Meridian.Rig
             _ => "props/rig/builder",
         };
 
-        /// <summary>
-        /// The key the tool view loads now: the Grapple has no sprite yet (v4 rig art is a later BLENDER card), so it shows
-        /// the old slot-2 tool until props/rig/grapple exists; every other module loads its own key.
-        /// </summary>
-        public static string LoadKey(RigModule m) => m == RigModule.Grapple ? StandInGrapple : ArtKey(m);
-        public const string StandInGrapple = "props/rig/lance";
+        /// <summary>The key the tool view loads: each module's own (U-183: B-205's props/rig/grapple replaced the v2 Lance stand-in).</summary>
+        public static string LoadKey(RigModule m) => ArtKey(m);
 
         /// <summary>Muzzle offset from the grip in the tool's own space (m, tool pointing +x).</summary>
         public static Vector2 Muzzle(RigModule m) => m switch
