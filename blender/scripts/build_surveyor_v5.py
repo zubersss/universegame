@@ -235,15 +235,16 @@ def torso(d, M):
 
 @part("pack", 40, 72, (30, 16), depth=0.25)
 def pack(d, M):
-    G.stroke(d, hose([(26, 14), (28, 6), (34, 3)], 5.5), M["hose"], INN, cyclic=True)              # the air hose to the helmet
+    G.stroke(d, hose([(26, 14), (28, 7), (34, 5)], 5.5), M["hose"], INN, cyclic=True)              # the air hose to the helmet (desk-check: its end was cut by the canvas top)
     G.stroke(d, [(8, 12), (30, 12), (34, 18), (34, 62), (30, 68), (10, 68), (5, 62), (5, 18)], M["pack"], OUT, cyclic=True)   # the float pack
     G.stroke(d, [(7, 46), (33, 46)], M["ink"], INN)                                                  # its lid
     G.stroke(d, [(12, 20), (18, 20), (18, 40), (12, 40)], M["pack_sh"], INN, cyclic=True)        # a vent
 
 
-@part("head", 72, 72, (32, 64), depth=0.18)
+@part("head", 72, 76, (32, 68), depth=0.18)
 def head(d, M):
-    G.stroke(d, C(38, 32, 22, 32, ry=24), M["skin"], OUT, cyclic=True)                              # the face, in profile (facing right)
+    d = G.Xf(d, lambda pts: [(x, y + 4) for x, y in pts])                                           # desk-check: 4 px more headroom (the
+    G.stroke(d, C(38, 32, 22, 32, ry=24), M["skin"], OUT, cyclic=True)                              # tuft was cut); the face, in profile
     G.stroke(d, [(55, 30), (63, 35.5), (57, 40)], M["skin"], INN, cyclic=True)                      # the nose
     G.stroke(d, hose([(24, 12), (32, 4), (44, 6), (50, 12)], 9), M["hair"], INN, cyclic=True)      # the hair tuft
     G.stroke(d, hose([(44, 6), (50, 1), (54, 4)], 5), M["hair"], INN, cyclic=True)                  # its cowlick
@@ -258,8 +259,9 @@ def head(d, M):
     G.stroke(d, [(30, 56), (46, 56), (44, 64), (32, 64)], M["skin"], INN, cyclic=True)             # the neck
 
 
-@part("head34", 72, 72, (36, 64), depth=0.18)
+@part("head34", 72, 78, (36, 70), depth=0.18)
 def head34(d, M):
+    d = G.Xf(d, lambda pts: [(x, y + 6) for x, y in pts])                                           # (6 px more headroom, as head)
     G.stroke(d, C(37, 32, 23, 32, ry=24), M["skin"], OUT, cyclic=True)                              # the face, three-quarter
     G.stroke(d, hose([(18, 14), (28, 4), (44, 4), (54, 12)], 10), M["hair"], INN, cyclic=True)
     G.stroke(d, hose([(40, 4), (46, -1), (51, 2)], 5), M["hair"], INN, cyclic=True)
@@ -355,7 +357,7 @@ def bones(facing):
         pack_off, head_off = (-0.13, 0.38), (0.0, 0.56)
     return [
         ("hips", Hp, None, (0.0, 0.92), 0.0, 0.0, 12),
-        ("torso", T, "hips", (0.0, 0.0), 0.0, 0.56, 13),
+        ("torso", T, "hips", (0.0, 0.0), 0.0, 0.56, 8),      # under the near leg (a raised thigh crosses it), the belt over both
         ("pack", "pack", "torso", pack_off, 0.0, 0.0, 4),
         ("head", Hd, "torso", head_off, 0.0, 0.0, 14),
         ("helmet", "helmet", "head", (0.02, -0.06), 0.0, 0.0, 16),
@@ -378,15 +380,22 @@ def bones(facing):
 FAR = {"upper_arm_b", "forearm_b", "hand_b", "thigh_b", "shin_b", "boot_b"}
 
 POSES = {   # degrees counter-clockwise, added to rest; "lift" raises the root above the ground solve (m)
+    # desk-check 14:3x (forward kinematics by hand; the first set left a foot 6-10 px off the ground in crouch and dig, and the
+    # shovel out of both hands' reach): every pose has both soles level (a boot's world angle 0 = flat)
     "idle": {"torso": -2, "head": 3, "upper_arm_f": 8, "forearm_f": 14, "upper_arm_b": -6, "forearm_b": 10,
-             "thigh_f": 3, "shin_f": -3, "thigh_b": -3, "shin_b": -2},
-    "crouch": {"torso": -18, "head": 16, "upper_arm_f": 34, "forearm_f": 48, "upper_arm_b": 20, "forearm_b": 40,
-               "thigh_f": 82, "shin_f": -118, "boot_f": 36, "thigh_b": 64, "shin_b": -112, "boot_b": 48},
+             "thigh_f": 3, "shin_f": -3, "thigh_b": -3, "shin_b": -2, "boot_b": 5},
+    # a deep tuck, hands to the ground: the helmet's top ~1.08 m (the collider halves to 0.9 m, PlayerTuning.Height 1.8, as
+    # the standing 2.0 m figure stands over its 1.8 m): hips 0.36 m, both ankles 0.18 m under the hip joints
+    "crouch": {"torso": -70, "head": 54, "upper_arm_f": 41, "forearm_f": 84, "upper_arm_b": 34, "forearm_b": 88,
+               "thigh_f": 115, "shin_f": -142, "boot_f": 27, "thigh_b": 95, "shin_b": -152, "boot_b": 57},
     "jump": {"torso": -8, "head": 10, "upper_arm_f": 150, "forearm_f": 30, "upper_arm_b": 125, "forearm_b": 40,
              "thigh_f": 78, "shin_f": -96, "boot_f": 18, "thigh_b": 40, "shin_b": -104, "boot_b": 30, "lift": 0.42},
-    "dig": {"torso": -24, "head": 18, "upper_arm_f": 58, "forearm_f": 34, "hand_f": -10, "upper_arm_b": 44, "forearm_b": 48,
-            "thigh_f": 40, "shin_f": -52, "boot_f": 12, "thigh_b": -22, "shin_b": -18, "boot_b": 12},
+    # a lunge on the shovel: the near hand on the D-grip at (0.33, 0.93) m from the hips' ground point, the shovel 48 deg
+    # down (DIG_AIM), its tip ~0.1 m in the ground 1.25 m ahead; the far hand on the haft 0.3 m down it; the back foot on its toe
+    "dig": {"torso": -24, "head": 18, "upper_arm_f": -18.8, "forearm_f": 121.6, "upper_arm_b": 35.3, "forearm_b": 41.3,
+            "thigh_f": 40, "shin_f": -52, "boot_f": 12, "thigh_b": -25, "shin_b": -27, "boot_b": 32},
 }
+DIG_AIM = -126.8      # the shovel's turn from the near hand's angle (the hand's world angle 78.8 in "dig": 48 deg below level)
 
 
 def rig_json(parts_rects):
@@ -466,19 +475,27 @@ def solve(facing, pose):
     return {n: (x, z + dz, a) for n, (x, z, a) in world.items()}
 
 
+def sole_z(world, boot):
+    """The lowest point of a boot's sole (m above the ground) in a solved pose: 0 = standing on it."""
+    x, z, a = world[boot]
+    t = math.radians(a)
+    return min(z + ox * math.sin(t) + oz * math.cos(t) for ox, oz in ((-0.09, -0.18), (0.24, -0.18)))
+
+
 def pose_image(P, facing, pose, W=300, H=380, ground=350, cx=150, prop=None):
     """One posed figure on a transparent canvas (premultiplied float), the ground line at row `ground`."""
     dst = np.zeros((H, W, 4), np.float32)
     world = solve(facing, pose)
     for n, p, par, off, rest, L, order in sorted(bones(facing), key=lambda b: b[6]):
-        img, pivot = P[p + ("_far" if n in FAR else "")]
-        x, z, a = world[n]
-        place(dst, img, pivot, a, (cx + x * PX, ground - z * PX))
-        if prop is not None and n == "hand_f":                                 # the held tool on the grip socket
-            pimg, ppiv, aim = prop
+        if prop is not None and n == "upper_arm_f":                            # the held tool on the near hand's grip socket,
+            pimg, ppiv, aim = prop                                             # drawn over the body and the far hand, under the
+            x, z, a = world["hand_f"]                                          # near arm (its mitt closes over the D-grip)
             t = math.radians(a)
             gx, gz = x + 0.03 * math.cos(t) + 0.09 * math.sin(t), z + 0.03 * math.sin(t) - 0.09 * math.cos(t)
             place(dst, pimg, ppiv, a + aim, (cx + gx * PX, ground - gz * PX))
+        img, pivot = P[p + ("_far" if n in FAR else "")]
+        x, z, a = world[n]
+        place(dst, img, pivot, a, (cx + x * PX, ground - z * PX))
     return dst
 
 
@@ -529,37 +546,46 @@ def preview(out, footnote=None):
     prop = None
     if os.path.isfile(shovel):
         simg = pngio.read_png_np(shovel)
-        prop = (simg, (simg.shape[1] * 0.0667, simg.shape[0] * 0.5), -100.0)    # B-226's shovel, pivot at the D-grip (PPU 128, as v5)
+        prop = (simg, (simg.shape[1] * 0.0667, simg.shape[0] * 0.5), DIG_AIM)   # B-226's shovel, pivot at the D-grip (PPU 128, as v5)
     W = 1560
+    GROUND = 350                                                                 # pose_image's ground row
 
     def strip(cells, label, h=430):
+        """cells: (name, premultiplied float image, its ground row): each stands on the strip's ground line."""
         r = np.tile(paper, (h, W, 1)).astype(np.float32)
         r[h - 40:h - 36] = ground_col
         review._label(r, label, 6, 4, scale=1)
         x = 10
-        for name, img in cells:
+        for name, img, g in cells:
             ih, iw = img.shape[:2]
-            y = h - 38 - ih
-            a = img[..., 3:4]
-            r[y:y + ih, x:x + iw] = img[..., :3] + r[y:y + ih, x:x + iw] * (1 - a)
+            y = h - 40 - g                                                       # desk-check: the figures floated 28 px over the line
+            y0, y1 = max(y, 0), min(y + ih, h)
+            a = img[y0 - y:y1 - y, :, 3:4]
+            r[y0:y1, x:x + iw] = img[y0 - y:y1 - y, :, :3] + r[y0:y1, x:x + iw] * (1 - a)
             review._label(r, name, x + 4, h - 30, scale=1)
             x += iw + 12
         return r
-    turn = [("side (idle)", pose_image(P, "side", POSES["idle"])), ("front 3/4 (idle)", pose_image(P, "front34", POSES["idle"]))]
+    turn = [("side (idle)", pose_image(P, "side", POSES["idle"]), GROUND), ("front 3/4 (idle)", pose_image(P, "front34", POSES["idle"]), GROUND)]
     v4 = os.path.join(ART, "characters", "surveyor", "side_color.png")
     if os.path.isfile(v4):
         s4 = pngio.read_png_np(v4).astype(np.float32) / 255.0
         f4 = s4[:192, :192].copy()
         f4[..., :3] *= f4[..., 3:4]
-        turn.append(("v4 surveyor at 1x (128 px tall)", f4))
+        turn.append(("v4 surveyor at 1x (128 px tall)", f4, 192))                # its pivot: the frame's bottom row
         side = pose_image(P, "side", POSES["idle"])
         half = side[:side.shape[0] // 2 * 2, :side.shape[1] // 2 * 2].reshape(side.shape[0] // 2, 2, side.shape[1] // 2, 2, 4).mean(axis=(1, 3))
-        turn.append(("v5 at the v4's height (1/2)", half))
+        turn.append(("v5 at the v4's height (1/2)", half, GROUND // 2))
     rows = [np.tile(paper, (28, W, 1)).astype(np.float32)]
     review._label(rows[0], "B-231 the v5 surveyor (C5 design, D-185): a rigged cut-out, jointed limbs, painted shading; 2.0 m = 256 px", 6, 8)
     rows.append(strip(turn, "turnaround (posed from the rig) beside the v4 surveyor"))
-    poses = [(k, pose_image(P, "side", POSES[k], prop=prop if k == "dig" else None)) for k in ("idle", "crouch", "jump", "dig")]
-    rows.append(strip(poses, "pose sheet (side): idle, crouch (knees bend), jump apex (knees tucked, arms up), dig with B-226's shovel"))
+    poses = [(k, pose_image(P, "side", POSES[k]), GROUND) for k in ("idle", "crouch", "jump")]
+    poses.append(("dig", pose_image(P, "side", POSES["dig"], W=400, cx=120, prop=prop), GROUND))   # (wider: the shovel reaches 1.25 m)
+    rows.append(strip(poses, "pose sheet (side): idle, crouch (a deep tuck, the helmet's top ~1.08 m), jump apex (knees tucked, arms up), dig with B-226's shovel"))
+    for k in ("idle", "crouch", "jump", "dig"):                                  # the measured heights, for the sheet's reader
+        w_ = solve("side", POSES[k])
+        hx, hz, ha = w_["helmet"]
+        top = hz + 0.3125 * math.cos(math.radians(ha)) + 0.305
+        print(f"{k}: hips {w_['hips'][1]:.2f} m, helmet top {top:.2f} m, soles f / b {sole_z(w_, 'boot_f'):+.3f} / {sole_z(w_, 'boot_b'):+.3f} m")
     ps = np.tile(paper, (sh.shape[0] + 30, W, 1)).astype(np.float32)
     review._label(ps, f"the part sheet characters/surveyor_v5/rig_color.png ({sh.shape[1]}x{sh.shape[0]}, {len(rects)} parts on pivots; far limbs a step darker)", 6, 4, scale=1)
     f = sh.astype(np.float32) / 255.0

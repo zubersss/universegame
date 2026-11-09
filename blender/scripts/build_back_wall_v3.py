@@ -77,11 +77,17 @@ def tier_colours(planet, t):
     order = sorted(counts, key=lambda k: -counts[k])
     base = pal[order[0]]
     back = nearest(pal, base * 0.66, avoid=("ink",) if t < 5 else ())
+    if back == order[0]:                                                 # desk-check: the snap can land back on the fill's own
+        darker = [k for k in pal if k != "ink" and float(pal[k].mean()) < float(base.mean()) * 0.9]   # main tone (no hole then):
+        if darker:                                                       # take the nearest tone that IS darker; the darkest
+            back = min(darker, key=lambda k: float(np.abs(pal[k] - base * 0.66).sum()))               # fills fall to ink from T4
+        elif t >= 4:
+            back = "ink"
     dark = nearest(pal, pal[back] * 0.68)
     light = nearest(pal, np.clip(pal[back] * 1.3 + 0.04, 0, 1), avoid=("ink",))
     accents = [k for k in order[1:6] if k not in (back, dark, "ink")] or [light]
     bright = max(order[:8], key=lambda k: float(pal[k].max() - pal[k].min()) + float(pal[k].mean()) * 0.3)
-    return pal, {"back": back, "dark": dark, "light": light, "accents": accents, "bright": bright}
+    return pal, {"back": back, "dark": dark, "light": light, "accents": accents, "bright": bright, "fill_main": order[0]}
 
 
 # ---------------------------------------------------------------- periodic drawing at 2x
@@ -308,7 +314,7 @@ def preview(out, planet="earth", footnote=None):
         xx = np.arange(Wd, dtype=np.float32)[None, :]
         depth = np.clip((yy - y0) / 64.0, 0, None)
         side = np.abs(xx - (x0 + x1) / 2) / max((x1 - x0) / 2, 1)
-        dk = np.clip(1.0 - 0.045 * depth, 0.45, 1.0) * (1.0 - 0.12 * side)
+        dk = np.clip(1.0 - 0.075 * depth, 0.55, 1.0) * (1.0 - 0.12 * side)                 # U-196: to 55 % at 6 m
         out[y0:y1, x0:x1] = (wall * dk[..., None])[y0:y1, x0:x1]
         n, sh = len(prof), np.zeros((H, Wd), np.float32)
         for k in range(n):
@@ -328,7 +334,8 @@ def preview(out, planet="earth", footnote=None):
         img, R = draw_tier(planet, t)
         walls[t] = img
         sx, sy = seam_score(img)
-        lines.append(f"t{t} {TIER_NAMES[t]}: back {R['back']}, dark {R['dark']}, light {R['light']}, accents {', '.join(R['accents'][:3])}, bright {R['bright']}; seam x {sx:.2f} y {sy:.2f}")
+        same = " (= THE FILL'S MAIN TONE: no darker palette tone)" if R["back"] == R["fill_main"] else ""
+        lines.append(f"t{t} {TIER_NAMES[t]}: fill mostly {R['fill_main']}; back {R['back']}{same}, dark {R['dark']}, light {R['light']}, accents {', '.join(R['accents'][:3])}, bright {R['bright']}; seam x {sx:.2f} y {sy:.2f}")
         r = np.tile(paper, (548, W, 1)).astype(np.float32)
         review._label(r, f"t{t} {TIER_NAMES[t]}: the back wall 2x2 | the fill | a 3 m x 5 m cell dug out of it", 6, 4, scale=1)
         r[24:24 + 2 * S, 10:10 + 2 * S] = tiled(img, 2 * S, 2 * S)
