@@ -1,0 +1,21 @@
+{
+  "key": "props/rig/builder",
+  "style": "v3",
+  "width": 128,
+  "height": 64,
+  "palette": "earth",
+  "ppu": 128,
+  "pivot": [
+    0.375,
+    0.5
+  ],
+  "muzzle": [
+    0.44,
+    0.03
+  ],
+  "cable_socket": [
+    -0.22,
+    0.14
+  ],
+  "note": "B-217: the Builder, a forearm-strapped dirt hopper with a steel scoop forward (its lip = the muzzle) and a dirt hose to the pack; no grip, nothing flared; replaces the v2 render"
+}

@@ -1,5 +1,10 @@
 {
   "key": "fx/builder_ghost/base",
+  "style": "v3",
+  "width": 588,
+  "height": 292,
+  "palette": "earth",
+  "ppu": 128,
   "frame_width": 144,
   "frame_height": 144,
   "columns": 4,
@@ -18,5 +23,6 @@
       "length": 8,
       "loop": true
     }
-  ]
+  ],
+  "note": "B-217: the Builder's placement ghost (tile planets; RigToolView scales it to one tile) - cream dashes marching round the tile, ink-edged corner brackets; the Blocked tint reads through"
 }

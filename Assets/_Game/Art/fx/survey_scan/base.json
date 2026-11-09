@@ -1,5 +1,10 @@
 {
   "key": "fx/survey_scan/base",
+  "style": "v3",
+  "width": 972,
+  "height": 728,
+  "palette": "earth",
+  "ppu": 128,
   "frame_width": 240,
   "frame_height": 240,
   "columns": 4,
@@ -18,5 +23,6 @@
       "length": 12,
       "loop": false
     }
-  ]
+  ],
+  "note": "B-217: the Survey's scan - a teal ink pulse ring with compass ticks and an echo, breaking into dashes as it fades (no glow; v3 replaces B-037)"
 }
