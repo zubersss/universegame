@@ -50,4 +50,21 @@ Source: `coordination/reports/unity/smoke_0.6.0/` (75 shots). Read at 1:1 with t
 | 8 inventory | ui/panels/inventory, item icons | OK |
 | 27 climb boost | the Pilgrim, puff_boost | #5 |
 
-Second pass (the remaining shots: 1-7, 9-12, 14-16, 18-22, 24, 26, 28-33, 35-36, 39, 42, 44-46): appended below when read.
+## Second pass (09:1x): the remaining 42 shots
+
+A first read by a helper agent, then every flagged shot re-read by me at 1:1 (1, 5, 9, 10, 14, 16). Verified defects:
+
+| # | Shot | Defect | Owner |
+|---|------|--------|-------|
+| 10 | smoke_1 (the title menu) | The whole scene is B-046's v2 render (`ui/title/background`, MenuController.cs:243): 3D-rendered conifers, a glowing violet peak, a grey placeholder hull with a black window, pixel-noise dirt with hard edges at x≈558 / 1898. The first thing a player sees. | BLENDER (a v3 title scene: the Pilgrim on its pad, painted backdrop; card) |
+| 11 | smoke_10 (Earth waystation) | The docking bay interior is unthemed 3D (grey cloudy panels, a photographic starfield, flat grey / orange / yellow blocks); DockingBay.cs requests no art key. | UNITY + BLENDER (a v3 painted bay interior would need a card and its wiring) |
+| 12 | smoke_9 (crafting) | Thruster Mk2's icon is a flat teal square: `icons/thruster_mk2/base` does not exist (Mk3 does). | BLENDER (draw it in B-199's item-icon style) |
+| 13 | smoke_5, smoke_6 (Mars canyon), smoke_14 (Mercury twilight) | Below layer2 the view smears into vertical streaks (Mars) or stops at a hard edge with flat cream below (Mercury, x 1445-1920, y≈810). Both sets DO declare `continue_rows` 64 (D-169), so the band is not being repeated below the layer. | UNITY (repeat continue_rows; the same code serves B-220 / U-191) |
+| 14 | smoke_16 (Venus station) | Flat bands with ruler-straight edges under the aerostat deck (a pale strip y 900-945, a dark slab below): `backgrounds/venus/deck` has no `continue_rows`. | BLENDER + UNITY: add venus/deck to B-220's tileable bands |
+| 15 | smoke_16 | The sky serpent is shaded in soft gradients with a glowing mesh halo behind its spines and little ink: reads as the pre-v3 creature style. | BLENDER (check its key; a v3 redraw if it is v2) |
+| 16 | smoke_18 (Mars shelter, night) | The built shelter wall stacks float ~40 px above the slope (bases at y≈692 / 615 over ground at ≈740 / 655). | UNITY (base-piece placement on a slope) |
+| 17 | smoke_11 (catalogue) | The "Camp" entry has no icon. | UNITY / BLENDER (which key it wants) |
+
+Possible, low confidence (the helper's flags, not confirmed by me): smoke_3 / 18 "night" shots look like day (lighting); smoke_7 Saturn has no rings or bands at that distance; smoke_24 the Pilgrim's base below the floe top; smoke_4 strata above the sloping shore line; smoke_22 a pale vertical seam in the mesa backdrop; smoke_31 / 32 / 36 soft dark smudges on the strata (UNITY's depth shading, as on smoke_41); smoke_3b / 3d a hairline seam in the ground band at x≈922; smoke_2c / 15 the held tool or scan beam reading weapon-like at a glance (the v3 tools landed in B-217; worth a look on the next smoke).
+
+Clean in the second pass: 2, 2b, 3c, 12, 19, 20, the five title cards, 26, 28, 29, 30, 33, 35, 39, 42, 44, 45, 46a-d.
