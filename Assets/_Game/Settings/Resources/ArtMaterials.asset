@@ -354,11 +354,13 @@ MonoBehaviour:
   - backgrounds/mars/plains/layer2
   - backgrounds/mars/polar/layer2
   - backgrounds/mars/tharsis/layer2
+  - backgrounds/mercury/coldtrap/layer2
   - backgrounds/mercury/day/layer2
   - backgrounds/mercury/night/layer2
   - backgrounds/mercury/twilight/layer2
   - backgrounds/venus/deck/layer2
   - backgrounds/venus/surface/layer2
+  - backgrounds/venus/tessera/layer2
   clipSets:
   - key: characters/calibration/base
     fps: 12
@@ -5152,6 +5154,12 @@ MonoBehaviour:
     - -0.08
     - 0.9806
     - 1.04
+  - key: props/rig/shovel
+    name: muzzle
+    stride: 2
+    values:
+    - 1.24
+    - 0
   - key: props/rig/survey
     name: cable_socket
     stride: 2

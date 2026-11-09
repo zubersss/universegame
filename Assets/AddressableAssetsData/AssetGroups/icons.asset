@@ -30,6 +30,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 07054490ea0839f4b924ab5286a71d64
+    m_Address: icons/tools/builder
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 0bdeaf2544055f34382e262138fbf649
     m_Address: icons/nodes/haul_pack_2
     m_ReadOnly: 0
@@ -112,6 +117,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 2bc609320a2877146b6cbcae18439c0c
     m_Address: icons/suit_patch/base
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 2bd08896402c35148ac5945eba4f2a8f
+    m_Address: icons/tools/beam
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -202,6 +212,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 47a4710b7e39fae41843d4766cd786d1
     m_Address: icons/nodes/asc_recall
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 490aaf58fd63359418c8ecdeaf4feda5
+    m_Address: icons/tools/survey
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -352,6 +367,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 77bc5991816f07e43ba6ecc77cd53827
     m_Address: icons/snow/base
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 795ad3f0278781d47889da115359ebd9
+    m_Address: icons/tools/grapple
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
