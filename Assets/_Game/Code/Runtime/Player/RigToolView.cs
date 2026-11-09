@@ -195,7 +195,12 @@ namespace Meridian.Player
             bool held;
             HandWorld = DrawnHand(out bool onSocket, out held) is Vector2 h && onSocket ? h : feet + new Vector2(left ? -Hand.x : Hand.x, Hand.y);
             HandOnSocket = onSocket;
-            if (Tool.enabled == held) Tool.enabled = !held;
+            // U-204 F18 (B-228's read of smoke_55): on the jetpack's frames the raised hand held the dig tool straight up over the helmet
+            // like a flag: put away while flying, as on the ladder, unless it is in use.
+            bool flying = body != null && body.Clip == SurveyorAnim.Jetpack && !input.Using;
+            bool away = held || flying;
+            ToolAway = away;
+            if (Tool.enabled == away) Tool.enabled = !away;
             Vector2 dir = input.AimWorld - HandWorld;
             if (dir.sqrMagnitude < 1e-4f) dir = left ? Vector2.left : Vector2.right;
             AimDegrees = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
@@ -235,6 +240,9 @@ namespace Meridian.Player
                 Cable.SetPosition(i, new Vector3(p.x, p.y, 0.01f));
             }
         }
+
+        /// <summary>The held tool is put away this frame: the sheet draws its own in that hand (held_b), or the surveyor flies (U-204 F18).</summary>
+        public bool ToolAway { get; private set; }
 
         /// <summary>U-193: the shovel's swing now (degrees off the aim; 0 between strokes) and its arc's ends.</summary>
         public float ScoopArcDegrees { get; private set; }

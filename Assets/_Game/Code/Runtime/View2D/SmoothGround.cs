@@ -113,8 +113,10 @@ namespace Meridian.View2D
 
         // ---------- U-182: the fill by depth tier ----------
 
-        /// <summary>B-203's transition between tiers (each tier json's transition_m), centred on the tier's depth.</summary>
-        public const float TierTransition = 1f;
+        /// <summary>The transition between tiers, centred on the tier's depth. U-196 (LEAD 17:3x, on u196/1 and u200/2): 0.35 m, where
+        /// B-203's jsons say transition_m 1.0 (they stay until those fills are next exported): across a metre two differently patterned
+        /// fills blended into a soft dark smudge that read as a stain or a shadow; at 0.35 m a border reads as a boundary between layers.</summary>
+        public const float TierTransition = 0.35f;
         /// <summary>Tiers 2..5's fills (B-203's ground_fill_t2..t5; null until loaded or where a planet has none).</summary>
         readonly Sprite[] tierFills = new Sprite[4];
         readonly Dictionary<Texture, Material> tierMaterials = new Dictionary<Texture, Material>(4);
@@ -337,13 +339,9 @@ namespace Meridian.View2D
             return sfx == null ? $"terrain/{planetName}/ground_decor_{n}" : $"terrain/{planetName}/ground_decor_{sfx}_{n}";
         }
 
-        /// <summary>The variant's dig puff key (dig_puff_suffix; the base dig_puff for the base set). Pure.</summary>
-        public static string PuffKey(Meridian.Planets.PlanetId id, int variant)
-        {
-            string sfx = VariantSuffix(id, variant);
-            string planetName = id.ToString().ToLowerInvariant();
-            return sfx == null ? $"terrain/{planetName}/dig_puff" : $"terrain/{planetName}/dig_puff_{sfx}";
-        }
+        /// <summary>The planet's dig puff key. D-190 (3): one puff a planet, coloured by its tint; the band sets' own puffs
+        /// (dig_puff_sand, _snow, ...) are retired and no key is built for them. Pure.</summary>
+        public static string PuffKey(Meridian.Planets.PlanetId id) => $"terrain/{id.ToString().ToLowerInvariant()}/dig_puff";
 
         void ProbeTop()
         {

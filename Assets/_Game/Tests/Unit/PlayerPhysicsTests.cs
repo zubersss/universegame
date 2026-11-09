@@ -109,8 +109,9 @@ namespace Meridian.Tests
             Assert.IsTrue(a.FindAction("ShipTop/Thrust").bindings.Any(b => b.path == "<Keyboard>/space"), "a Space held through launch keeps thrusting");
             Assert.IsTrue(a.FindAction("ShipSide/Thrust").wantsInitialStateCheck, "side thrust reads a key already held");
             Assert.IsTrue(a.FindAction("ShipTop/Thrust").wantsInitialStateCheck, "top thrust reads a key already held");
-            foreach (var name in new[] { "Thrust", "Retro", "Rotate", "Boost", "SkipDrive", "Fire", "Scan", "SystemMap", "Inventory" })
+            foreach (var name in new[] { "Thrust", "Retro", "Rotate", "Boost", "SkipDrive", "Scan", "SystemMap", "Inventory" })
                 Assert.NotNull(a.FindAction($"{MeridianInput.ShipTop}/{name}"), name);
+            Assert.IsNull(a.FindAction($"{MeridianInput.ShipTop}/Fire", false), "no Fire in space (U-204 F12: the lance is retired, D-087)");
             Assert.NotNull(a.FindAction($"{MeridianInput.Always}/Pause"));
             Assert.IsTrue(a.FindAction("OnFoot/Jump").bindings.Any(b => b.path == "<Keyboard>/space"));
             Assert.IsTrue(a.FindAction("OnFoot/Sprint").bindings.Any(b => b.path == "<Keyboard>/leftShift"));

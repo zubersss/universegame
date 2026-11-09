@@ -258,6 +258,62 @@ namespace Meridian.Tests
             LogAssert.NoUnexpectedReceived();
         }
 
+        /// <summary>U-204 F18 (B-228's read of smoke_55: on the jetpack the shovel stood straight up over the helmet like a flag, held by
+        /// the jetpack frames' raised hand): the dig tool is put away on every frame the jetpack clip plays, and is back in the hand on
+        /// the ground.</summary>
+        [UnityTest, Timeout(240000)]
+        public IEnumerator TheDigToolIsPutAwayOnTheJetpack()
+        {
+#if UNITY_EDITOR
+            yield return UnityEditor.SceneManagement.EditorSceneManager.LoadSceneAsyncInPlayMode(CorePath, new LoadSceneParameters(LoadSceneMode.Single));
+#endif
+            var director = Object.FindAnyObjectByType<SceneDirector>();
+            float timeout = Time.realtimeSinceStartup + 30f;
+            while ((!director.IsReady || !director.PlanetSide.terrain.IsSettled) && Time.realtimeSinceStartup < timeout) yield return null;
+            var side = director.PlanetSide;
+            if (side.hazards != null) side.hazards.enabled = false;
+            side.creatures.autoSpawn = false; side.creatures.DespawnAll();
+            var drawn = side.cartoon != null && side.cartoon.Active ? side.cartoon.Surveyor : null;
+            Assert.NotNull(drawn, "the drawn surveyor (the cartoon stage)");
+            var player = side.player;
+            var view = player.GetComponentInChildren<RigToolView>();
+            Assert.NotNull(view, "the tool view");
+            player.externalInput = true; player.intent = default;
+            int camp = Mathf.FloorToInt(Meridian.Planet.POI.PoiCatalog.SpawnCamp.CenterX);
+            float x = camp + 14.5f;
+            var feet = new Vector2(x, side.terrain.SurfaceAt(x) + 0.05f);
+            player.Body.position = feet; player.transform.position = feet; player.Body.linearVelocity = Vector2.zero;
+            for (int i = 0; i < 40; i++) yield return new WaitForFixedUpdate();
+            float shownBy = Time.realtimeSinceStartup + 10f;
+            while ((view.ToolAway || !view.Tool.enabled) && Time.realtimeSinceStartup < shownBy) yield return null;
+            Assert.IsTrue(view.Tool.enabled, "standing: the tool in the hand");
+
+            player.intent = new PlayerIntent { jumpHeld = true };
+            player.PressJump();
+            int flown = 0, shownFlying = 0;
+            string first = null;
+            float until = Time.time + 2f;
+            while (Time.time < until)
+            {
+                yield return null;
+                if (drawn.Clip != SurveyorAnim.Jetpack) continue;
+                flown++;
+                if (view.Tool.enabled || !view.ToolAway) { shownFlying++; first ??= $"frame {flown} of the jetpack clip: tool enabled {view.Tool.enabled}, away {view.ToolAway}"; }
+            }
+            player.intent = default;
+            TestContext.Out.WriteLine($"[MERIDIAN] u204 F18: {flown} frames on the jetpack clip, the tool shown in {shownFlying}");
+            Assert.Greater(flown, 10, "the jetpack clip played while the jump was held in the air");
+            Assert.AreEqual(0, shownFlying, $"the dig tool shown on a jetpack frame: {first}");
+
+            for (int i = 0; i < 400 && !player.Grounded; i++) yield return new WaitForFixedUpdate();
+            Assert.IsTrue(player.Grounded, "back on the ground");
+            float backBy = Time.realtimeSinceStartup + 10f;
+            while ((view.ToolAway || !view.Tool.enabled) && Time.realtimeSinceStartup < backBy) yield return null;
+            Assert.IsTrue(view.Tool.enabled, "landed: the tool back in the hand");
+            Assert.IsFalse(view.ToolAway);
+            LogAssert.NoUnexpectedReceived();
+        }
+
         /// <summary>Two held strokes with `tool` in hand (the first `reach` m to the right and `down` m under the feet, the second mirrored
         /// to the left on fresh ground), sampled every frame until 0.45 s after the second: the tool shown, no baked-tool body frame.</summary>
         static IEnumerator HeldStrokes(PlanetSideRoot side, Meridian.View2D.SpriteCharacterView drawn, PlayerRigInput input, RigToolView view, string tool, float reach, float down)

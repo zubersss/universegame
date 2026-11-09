@@ -4200,13 +4200,16 @@ namespace Meridian.Tests
                 }
 
                 // 4: a mound piled on the surface beside a pit: the pit's wall darkens, nothing does above the natural surface
-                float mx = camp + 34.5f;
+                float mx = camp + 46.5f; // 26 m east of shot 1's shaft: out of this frame (17:3x: the first set had it at the left edge)
                 yield return Park(new Vector2(mx - 3.2f, t.SurfaceAt(mx - 3.2f) + 0.05f));
                 int piled = 0;
                 for (int row = 0; row < 3; row++)
                     for (float x = mx - 1.2f; x <= mx + 1.2f; x += 0.6f)
                         piled += rig.Mound(new Vector2(x, t.CurveAt(Mathf.FloorToInt(x)) + 0.5f + row * 0.6f), rig.GroundMaterial, false);
                 int pit = Carve(mx + 3.4f, t.SurfaceAt(mx + 3.4f) - 1.3f, 0.9f, 1.4f);
+                // the camera on the mound and the pit together (following the surveyor on the slope cut the pit off below the frame)
+                if (follow != null) follow.enabled = false;
+                cam.position = new Vector3(mx + 0.6f, t.SurfaceAt(mx + 0.6f) + 0.8f, cam.position.z);
                 yield return Shot("4_mound_and_pit");
                 TestContext.Out.WriteLine($"[MERIDIAN] u196 4_mound_and_pit: {piled} tiles piled at x {mx:0.0}, a pit of {pit} strokes at x {mx + 3.4f:0.0}");
                 LogAssert.NoUnexpectedReceived();

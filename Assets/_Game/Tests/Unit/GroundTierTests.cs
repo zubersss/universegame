@@ -46,13 +46,17 @@ namespace Meridian.Tests
         {
             var t = D1Tables.Load();
             var prev = SmoothGround.TierWeights(0f, t, 3.3f);
+            // a smoothstep's steepest rise is 1.5 / its width: over a 0.02 m step no more than that (U-196: the width is 0.35 m, a boundary
+            // between two layers, not a metre's smudge)
+            Assert.AreEqual(0.35f, SmoothGround.TierTransition, 1e-6f, "the tiers' crossfade (LEAD 17:3x)");
+            float most = 1.5f * 0.02f / SmoothGround.TierTransition + 0.01f;
             for (float depth = 0f; depth <= 210f; depth += 0.02f)
             {
                 var w = SmoothGround.TierWeights(depth, t, 3.3f);
                 for (int k = 0; k < 4; k++)
                 {
                     Assert.GreaterOrEqual(w[k], prev[k] - 1e-6f, "never fades back");
-                    Assert.LessOrEqual(w[k] - prev[k], 0.04f, $"no step at {depth:F2} m (T{k + 2})");
+                    Assert.LessOrEqual(w[k] - prev[k], most, $"no step at {depth:F2} m (T{k + 2})");
                 }
                 prev = w;
             }

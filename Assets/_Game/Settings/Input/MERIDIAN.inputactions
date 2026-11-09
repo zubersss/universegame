@@ -871,16 +871,6 @@
                     "priority": 0
                 },
                 {
-                    "name": "Fire",
-                    "type": "Button",
-                    "id": "e29485e0-3c04-4f18-83e6-8235190e6aaa",
-                    "expectedControlType": "",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": false,
-                    "priority": 0
-                },
-                {
                     "name": "Scan",
                     "type": "Button",
                     "id": "585b4178-8806-4378-8503-783445418d36",
@@ -1051,17 +1041,6 @@
                     "processors": "",
                     "groups": "",
                     "action": "SkipDrive",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "72e24029-b24b-4974-b2fd-32563b24f753",
-                    "path": "<Mouse>/leftButton",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "Fire",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },

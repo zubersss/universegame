@@ -63,7 +63,7 @@ namespace Meridian.Player
                 .AddCompositeBinding("1DAxis").With("Negative", "<Keyboard>/d").With("Positive", "<Keyboard>/a");
             Button(top, "Boost", "<Keyboard>/leftShift", "<Gamepad>/leftStickPress");
             Button(top, "SkipDrive", "<Keyboard>/j", "<Gamepad>/buttonNorth");
-            Button(top, "Fire", "<Mouse>/leftButton");
+            // U-204 F12: no "Fire" (the lance is retired, D-087 / D-173; nothing read the action, and the key list still printed "Fire: LMB")
             Button(top, "Scan", "<Mouse>/rightButton");
             Button(top, "Enter", "<Keyboard>/f", "<Gamepad>/buttonWest"); // hold inside a ring: controlled entry (§5.3)
             Button(top, "SystemMap", "<Keyboard>/m");
