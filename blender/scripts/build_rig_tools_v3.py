@@ -153,27 +153,36 @@ def back_sockets():
     poses = [SV.idle_pose(i) for i in range(10)] + [SV.walk_pose(i) for i in range(12)] + SV.JUMP + SV.LAND + \
         [SV.look_pose(i) for i in range(12)] + SV.BUMP + SV.CONK + [SV.run_pose(i) for i in range(12)] + \
         [SV.fall_pose(i) for i in range(8)] + SV.DASH
-    out = []
-    for pose in poses:
-        p = dict(view="side", bob=0.0, sz=1.0, lean=0.0, shift=0.0, pack_swing=0.0, pack_dz=0.0)
-        p.update(pose)
-        if p["view"] not in ("side", "tq"):
-            out.append(None)
-            continue
-        sz = p["sz"]
-        sx = 1.0 / math.sqrt(sz)
+    return [_socket(pose) for pose in poses]
 
-        def X1(x, z, pivot_z=0.55):
-            return ((x * sx) + p["lean"] * (z - pivot_z) + p["shift"], pivot_z + (z - pivot_z) * sz + p["bob"])
-        px = -0.36 if p["view"] == "side" else -0.33
-        strap = X1(px + 0.02, 1.14)
-        sw, pdz = p["pack_swing"], p["pack_dz"]
-        c = X1(px, 0.92)
-        cs, sn = math.cos(sw), math.sin(sw)
-        cx = strap[0] + (c[0] - strap[0]) * cs - (c[1] - strap[1]) * sn
-        cz = strap[1] + (c[0] - strap[0]) * sn + (c[1] - strap[1]) * cs + pdz
-        out.append([round(cx, 4), round(cz, 4), round(sw, 4), round(sx, 4), round(sz, 4)])
-    return out
+
+def back_sockets_b():
+    """B-210: the same for characters/surveyor/side_b's frames (dig ... climb_in, climb_ladder, reel_up); null where the
+    surveyor is hidden (climb_in's vanish)."""
+    sys.path.insert(0, HERE)
+    import build_surveyor_side_b as SB
+    return [None if pose.get("hidden") else _socket(pose) for pose in SB.all_poses()]
+
+
+def _socket(pose):
+    """[x, z, swing, sx, sz] of the float pack's centre for one pose (build_surveyor_v3's X and PK), None in the front views."""
+    p = dict(view="side", bob=0.0, sz=1.0, lean=0.0, shift=0.0, pack_swing=0.0, pack_dz=0.0)
+    p.update(pose)
+    if p["view"] not in ("side", "tq"):
+        return None
+    sz = p["sz"]
+    sx = 1.0 / math.sqrt(sz)
+
+    def X1(x, z, pivot_z=0.55):
+        return ((x * sx) + p["lean"] * (z - pivot_z) + p["shift"], pivot_z + (z - pivot_z) * sz + p["bob"])
+    px = -0.36 if p["view"] == "side" else -0.33
+    strap = X1(px + 0.02, 1.14)
+    sw, pdz = p["pack_swing"], p["pack_dz"]
+    c = X1(px, 0.92)
+    cs, sn = math.cos(sw), math.sin(sw)
+    cx = strap[0] + (c[0] - strap[0]) * cs - (c[1] - strap[1]) * sn
+    cz = strap[1] + (c[0] - strap[0]) * sn + (c[1] - strap[1]) * cs + pdz
+    return [round(cx, 4), round(cz, 4), round(sw, 4), round(sx, 4), round(sz, 4)]
 
 
 # ---------------------------------------------------------------- the export (on LEAD's OK)
@@ -203,7 +212,8 @@ def kit():
     for mk in (2, 3):
         img = render(jetpack(mk), 64, 64, 64, (0.5, 0.5))[0]
         out.append((f"props/rig/jetpack_mk{mk}", img, {"ppu": 64, "pivot": [0.5, 0.5], "mk": mk, "socket_sheet": "characters/surveyor/side",
-                                                       "back_socket": socks,
+                                                       "back_socket": socks, "socket_sheet_b": "characters/surveyor/side_b",
+                                                       "back_socket_b": back_sockets_b(),                       # B-210: side_b's frames too
                                                        "socket_units": "per sheet frame: [x, z] m from the sheet's pivot (the feet; x right, z up, facing right), the pack's swing (rad, CCW), the body's squash sx / sz; null = the pack hidden (front views)",
                                                        "note": "B-205: drawn over the surveyor at the frame's back socket (mirror x when facing left); Mk1 is the float pack as drawn"}))
     for mk in range(1, 6):

@@ -40,7 +40,8 @@ P = G.PALETTES["earth"]
 O, I = G.OUTER, G.INNER
 TAU = 2 * math.pi
 PPU = 64
-CLIPS = [("dig", 10, True), ("build", 10, True), ("surprise", 12, False), ("jetpack", 10, True), ("climb_in", 14, False)]
+CLIPS = [("dig", 10, True), ("build", 10, True), ("surprise", 12, False), ("jetpack", 10, True), ("climb_in", 14, False),
+         ("climb_ladder", 8, True), ("reel_up", 8, True)]                                  # B-210 (D-174): the ways back up
 SEED = 5
 HATCH = (1.0, 1.05)                     # the hatch socket (m from the pivot): where the zip ends
 DEFAULT_OUT = os.path.join(os.path.dirname(HERE), "sources", "characters", "surveyor_side_b.blend")
@@ -209,6 +210,52 @@ def flame(d, M, nz, L, wob):
     G.stroke(d, shape(0.36, 0.028), M["flame_core"], 0.0, cyclic=True)
 
 
+def forearm(p):
+    """draw_surveyor's front forearm (side view): the elbow (its bezier mid) and the hand."""
+    sh = X1(p, 0.04, 1.00)
+    h, _u = hand(p, 1)
+    mid = ((sh[0] + h[0]) / 2 - 0.06, (sh[1] + h[1]) / 2 + 0.02)
+    return mid, h
+
+
+def beam_on_arm(d, M, p, seed):
+    """B-210 (LEAD's Beam rule): the cable-fed Beam strapped along the front forearm, its nozzle toward the fingers, the cable
+    from its back over the shoulder to the float pack - never in the hand, no grip."""
+    e, h = forearm(p)
+    L = math.hypot(h[0] - e[0], h[1] - e[1]) or 1.0
+    u = ((h[0] - e[0]) / L, (h[1] - e[1]) / L)
+    a, b = add(e, u, 0.18 * L), add(e, u, 0.74 * L)
+    top = pack_point(p, -0.24, 1.10)
+    sho = X1(p, -0.08, 1.16)
+    G.stroke(d, G.hose_outline(G.bezier(a, ((a[0] + sho[0]) / 2 - 0.02, max(a[1], sho[1]) + 0.08), sho, n=8) + G.bezier(sho, (sho[0] - 0.08, sho[1] + 0.05), top, n=6)[1:],
+                               0.03), M["boot_sh"], I, cyclic=True)                         # the cable, over the shoulder
+    G.stroke(d, G.hose_outline([a, b], 0.085), M["teal"], O, cyclic=True)                  # the emitter
+    n = (-u[1], u[0])
+    for t in (0.35, 0.62):                                                                  # its straps round the arm
+        c = add(a, (b[0] - a[0], b[1] - a[1]), t)
+        G.stroke(d, G.hose_outline([add(c, n, -0.055), add(c, n, 0.055)], 0.022), M["mustard"], I * 0.8, cyclic=True)
+    tip = add(b, u, 0.07)
+    G.stroke(d, [add(b, n, -0.04), add(tip, n, -0.018), add(tip, n, 0.018), add(b, n, 0.04)], M["mustard"], I, cyclic=True)   # the nozzle
+
+
+def reel(d, M, p, crank):
+    """B-210: the grapple's hand reel at the front hand, its crank turning, the line leaving it upward (UNITY draws the line
+    on from the 'reel' socket)."""
+    h, _u = hand(p, 1)
+    c = (h[0] + 0.02, h[1] + 0.04)
+    G.stroke(d, G.hose_outline([(c[0] + 0.03, c[1] + 0.06), REEL_TOP(p)], 0.022), M["boot_sh"], I * 0.8, cyclic=True)   # the line stub
+    G.stroke(d, G.lumpy_ellipse(c[0], c[1], 0.075, 0.075, n=20, lump=0.0, seed=3), M["steel"], O, cyclic=True)
+    G.stroke(d, G.lumpy_ellipse(c[0], c[1], 0.045, 0.045, n=16, lump=0.0, seed=4), M["mustard"], I * 0.7, cyclic=True)   # the coil
+    k = (math.cos(crank), math.sin(crank))
+    G.stroke(d, G.hose_outline([c, add(c, k, 0.085)], 0.02), M["steel_sh"], I * 0.7, cyclic=True)
+    G.stroke(d, G.lumpy_ellipse(c[0] + 0.085 * k[0], c[1] + 0.085 * k[1], 0.02, 0.02, n=10, lump=0.0, seed=5), M["red"], I * 0.7, cyclic=True)
+
+
+def REEL_TOP(p):
+    h, _u = hand(p, 1)
+    return (h[0] + 0.05, h[1] + 0.40)                                                       # the 'reel' socket: the line's start
+
+
 # ---------------------------------------------------------------- one drawing
 
 def draw_side_b(d, M, pose, seed=0):
@@ -248,6 +295,11 @@ def draw_side_b(d, M, pose, seed=0):
             c = (nz[0] - 0.08 - 0.30 * t, nz[1] - L - 0.08 - 0.40 * t)
             c = (c[0] - 0.25 * max(0.0, r + 0.03 - c[1]), max(c[1], r + 0.03))       # rolls along the ground
             puff(d, M, c, r, seed + 400 + j)
+    if p.get("beam_arm"):
+        beam_on_arm(d, M, p, seed)
+    if p.get("reel") is not None:
+        reel(d, M, p, p["reel"])
+        front_glove(d, M, p, seed)                                                         # the hand round the reel
     if p.get("vanish") is not None:
         t = p["vanish"]
         puff(d, M, (HATCH[0] - 0.05, HATCH[1] - 0.25 + 0.05 * t), 0.20 * (1 - 0.45 * t), seed + 500)
@@ -257,7 +309,7 @@ def draw_side_b(d, M, pose, seed=0):
             G.stroke(d, G.bowed_line((HATCH[0] - 0.45 - 0.05 * k, z), (HATCH[0] - 0.75 - 0.10 * k - 0.2 * (1 - t), z + 0.02), bow=0.04, n=8), M["ink"], I)
 
 
-EXTRA = ("pick", "chips", "chips_at", "impact", "plate", "rivet", "snap", "hammer", "flame", "puffs", "vanish", "hidden")
+EXTRA = ("pick", "chips", "chips_at", "impact", "plate", "rivet", "snap", "hammer", "flame", "puffs", "vanish", "hidden", "beam_arm", "reel")
 
 
 # ---------------------------------------------------------------- the five clips
@@ -363,13 +415,49 @@ def climb_poses():
     return out
 
 
+def ladder_poses():
+    """B-210 climb_ladder (8, loop): hand over hand up a ladder, the feet stepping rung to rung opposite the hands, looking
+    up; the Beam strapped on the forearm, the pack on the back."""
+    out = []
+    for i in range(8):
+        ph = TAU * i / 8
+        out.append(dict(arms=(2.0 + 0.32 * math.sin(ph), 2.0 - 0.32 * math.sin(ph)), lean=0.03,
+                        legs=((-0.04, 0.12 - 0.12 * math.sin(ph)), (0.06, 0.12 + 0.12 * math.sin(ph))),
+                        bob=0.06 + 0.03 * math.sin(2 * ph), sz=1.0 + 0.03 * math.cos(2 * ph), look=(0.2, 0.9),
+                        bob_tip=0.04 * math.sin(ph - 1.0), pack_swing=0.04 * math.sin(ph - 0.8), hose_lag=0.04 * math.sin(ph - 1.5),
+                        beam_arm=True))
+    return out
+
+
+def reel_poses():
+    """B-210 reel_up (8, loop): hanging under the grapple line, the reel in the front hand winding (its crank turns), the back
+    hand on the line, legs dangling and swaying, the plumb bob and hose trailing; the Beam on the forearm."""
+    out = []
+    for i in range(8):
+        ph = TAU * i / 8
+        out.append(dict(arms=(2.25 + 0.05 * math.sin(ph), 2.0 + 0.04 * math.sin(ph)), lean=0.05 * math.sin(ph),
+                        legs=((-0.10 + 0.05 * math.sin(ph), 0.30 + 0.03 * math.sin(ph)), (0.05 + 0.05 * math.sin(ph + 1.0), 0.24 + 0.03 * math.cos(ph))),
+                        bob=0.12, sz=1.04, look=(0.3, 0.8), expr="determined",
+                        bob_tip=0.08 * math.sin(ph - 1.0), pack_swing=0.08 * math.sin(ph - 0.8), hose_lag=0.05 * math.sin(ph - 1.6),
+                        beam_arm=True, reel=-TAU * i / 8))
+    return out
+
+
 def all_poses():
-    return dig_poses() + build_poses() + SURPRISE + jetpack_poses() + climb_poses()
+    return dig_poses() + build_poses() + SURPRISE + jetpack_poses() + climb_poses() + ladder_poses() + reel_poses()
 
 
 def sockets():
-    """Per-frame sockets in metres from the pivot (render.py's B-122 path): the hatch the zip ends at."""
-    return {str(f + 1): {"hatch": list(HATCH)} for f in range(sum(n for _c, n, _l in CLIPS))}
+    """Per-frame sockets in metres from the pivot (render.py's B-122 path): the hatch the zip ends at; B-210: on reel_up's
+    frames the 'reel' socket, where UNITY's grapple line starts (it runs up from here to the hook)."""
+    out = {}                                                     # every frame carries all three (render.py writes a socket only
+    for f, pose in enumerate(all_poses()):                       # when it has one entry per frame); 'reel' matters on reel_up's,
+        out[str(f + 1)] = {"hatch": list(HATCH), "reel": [round(v, 4) for v in REEL_TOP(base(pose))],   # 'ladder' on climb_ladder's
+                           "ladder": list(LADDER)}
+    return out
+
+
+LADDER = (0.38, 0.0)                                             # B-210: the ladder's centre line under the reaching hands
 
 
 def build(out=DEFAULT_OUT):
@@ -399,7 +487,8 @@ ENTRY = {"key": "characters/surveyor/side_b", "style": "v3", "palette_tints": [[
                         "original": "the B-125 surveyor (accepted), our own tools and effects",
                         "style": "drawn with the side sheet's own function; LEAD judges"},
          "ours": "a surveyor with a plumb-bob antenna that swings behind every move, a teal meridian stripe and a float pack breathing through a rubber hose",
-         "note": "B-134 (D-121): the five missing C1 clips; side untouched"}
+         "note": "B-134 (D-121): the five missing C1 clips; side untouched. B-210: + climb_ladder (8, loop) and reel_up (8, loop) with "
+                 "the cable-fed Beam on the forearm; a 'reel' socket per frame (the grapple line's start on reel_up)"}
 
 
 # ---------------------------------------------------------------- lock-free preview
