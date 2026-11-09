@@ -1,14 +1,14 @@
 # UNITY STATUS
-Updated: 2026-11-08 18:0x · Session: 10 (resumed 09:3x; earlier entries: coordination/status/archive/UNITY_2026-11-08.md)
+Updated: 2026-11-08 18:4x · Session: 10 (resumed 09:3x; earlier entries: coordination/status/archive/UNITY_2026-11-08.md)
 ## Current task
-18:0x: U-174 (D-174, Bible 5.2 §8.1, docs/D1_TABLES.md as data): the Surface Line, depth tiers and stroke time, pack weight, selling topside. Then U-179 (the first-2-s boot loads behind the title card) beside it.
+18:4x: U-175 (the Skill Tree: D1_TABLES §5 as data, 66 nodes, the panel on B-204's ui/skilltree art, every effect a stat modifier taking D-175's expedition multiplier; replaces the Blueprint Tree's unlocks).
 
 ## Last completed
-- U-173 Build 0.5.1 (603fe1c3): BUILD OK release 515 MB, SMOKE OK 58 / 0, BUILD MEMORY GREEN, BudgetGate green with D-177 (Boot settle row). Import 3c9966bd (e72a24ff, B-207).
-- U-172 DONE (6a30e7e3), the sweep (d77227b1), D-176 ShipMarks. U-169 / U-170 / U-168 DONE; U-159 slice 2 ACCEPTED.
+- U-174 for review (the dig run, data-driven): the Surface Line, tiers and stroke time, dirt store and drops, the pack's weight and load, the Sell panel; DigRunTests +5, DigRunPlayTests +2, u174/ captures. Open: each tier's own fill (shader proposal sent), the giants' kg.
+- U-173 Build 0.5.1 (603fe1c3). U-172, U-169, U-170, U-168 DONE; the sweep; D-176 / D-177.
 
 ## Next up
-U-174 → U-175 (the Skill Tree; modifiers take a global expedition multiplier) → U-178 (prestige, D-175) → U-176 (ways back up) → U-177 (the planet ladder, Mercury / Venus smooth). U-179 beside U-174. Parked: U-167, U-171 (after B-202), U-162. PawsOnTheGround re-run with the next check (B-207 in).
+U-175 → U-178 (prestige) → U-176 (ways back up) → U-177 (the planet ladder). Beside: U-179 (boot loads), U-180 (POI pads / the Archive's chamber), U-181 (paper grain). Parked: U-167, U-171, U-162, U-174b (tier fills, on LEAD's ruling). The next check: WaystationPlay's restage, PawsOnTheGround.
 
 ## Ready for review
 U-166 (b9d553de; smoke_42 with the next build). Earlier, still unjudged: U-129 slice 1 (SaturnStageTests ×4); U-130 slice 1 (UranusStageTests ×7); U-133 slice 1 (NeptuneStageTests ×8); U-146 (the survey scan pulse; UranusStageTests +1); U-144 (Neptune's -x zones, the drift, the anchor, the gust warning; NeptuneStageTests +3).
