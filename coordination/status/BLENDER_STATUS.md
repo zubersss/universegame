@@ -2,11 +2,12 @@
 Updated: 2026-11-08 20:4x · Session: 10 (all three windows restarted ~09:30 after a ~3-hour break; context rebuilt from the repo) · trimmed under D-113 at 14:0x; older: coordination/status/archive/BLENDER_2026-11-08.md, BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
 
 ## Current task
-B-219 (the giants' floe nodes): four sheets with LEAD (review_b219_{jupiter,saturn,uranus,neptune}_nodes_preview.png 00:2x; sources 40d46029 + 2e45b152); export the four rows props/<giant>/nodes on the OK. Then B-201 on 0.6.0's smoke. Then B-201, the D1 build's smoke (an art read, frame by frame), when that build lands.
+Dry (told LEAD 00:3x). Next: B-201, an art read of 0.6.0's smoke, frame by frame, on LEAD's ping. Then B-201, the D1 build's smoke (an art read, frame by frame), when that build lands.
 - **Rule from LEAD 18:2x (D-087):** the Beam reads as a mining tool, never a gun. No pistol grip or trigger, nothing hanging under the body: a cable-fed, arm-mounted emitter with a cutting nozzle.
 - Waiting on others: B-207 closes on PawsOnTheGround green; B-204 on UNITY's capture; B-172 on U-151. UNITY drops the three lance .meta files.
 
 ## Last completed
+- 11-09 00:35: B-219 (655fead8, LEAD-accepted after three fixes): the giants' floe nodes - props/jupiter/node_{ammonia_ice,metallic_hydrogen}, props/saturn/node_{ring_ice,ring_rock,helium3}, props/uranus/node_{methane_ice,superionic_ice}, props/neptune/node_{methane_ice,superionic_ice,deep_diamond}; B-176 format, json deck + item; for U-189.
 - 22:5x: U-183 request (UNITY): props/rig/hand_socket.json (9934340b) - the front glove's grip per frame of side (98) and side_b (72), [x, z, forearm angle], null in front views / hidden; held_b flags side_b frames already holding a pick / hammer / Beam / reel. Json only; regenerated with props/rig/tools_v3.
 - 22:47: Mars's old strips retired (9f035696, under my lock; U-186 9694c4c8): terrain/mars/ground_strip_basalt / _frost (2 png + 2 json, 0 .meta); the frost row dropped; build_c2_mars_ground RETIRED = basalt; the regolith strip kept.
 - 22:1x: Earth's old strips retired (e5f972c5; U-186 1c58f11b): terrain/earth/ground_strip_soil / _stone / _sand (3 png + 3 json, 0 .meta); build_c2_ground_strip RETIRED (Earth's export skips them; the grass row stays).
