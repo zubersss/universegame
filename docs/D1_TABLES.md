@@ -56,7 +56,7 @@ Mercury's buried solarite has no twilight window (only the surface clusters keep
 
 ## 5. The Skill Tree
 
-Six branches, five rings, two nodes per ring (three at ring 3); 66 nodes. A node needs one bought node linked to it (ring 1 links to the centre). "↔" marks a sideways link into the neighbouring branch (the branch order round the circle: Dig · Haul · Ascent · Survey · Endurance · Voyage · back to Dig). Costs: Scrip + materials. Effects stack additively unless marked ×.
+Six branches, five rings, two nodes per ring (three at ring 3); 66 nodes. A node needs one bought node linked to it (ring 1 links to the centre). "↔" marks a sideways link into the neighbouring branch (the branch order round the circle: Dig · Haul · Ascent · Survey · Endurance · Voyage · back to Dig). Costs: Scrip + materials. Effects stack additively unless marked ×. **Stacking rule** (18:5x, for U-175): "+" amounts on a stat add up (oxygen +30 %, +50 %, +80 % = +160 %; Beam power 1 + 0.5 + 1 + 1.5 + 2 + 3); a "×" on a stat does NOT compound with an earlier "×" on the same stat: the largest bought × applies (jet thrust ×1.3 then ×1.6 = ×1.6; power use ×0.7 then ×0.5 = ×0.5), and it multiplies the additive total (oxygen (1 + 1.6) × 2 at end_air_4); set values (grapple line 12 / 24 / 40 m, load factor k 0.5 → 0.35 → 0.2, hold 100 / 300 / 1 000 kg) take the best bought; then the expedition multiplier (§7) on top.
 
 **Links (revised 17:1x, B-204)**: laid out for a crossing-free radial chart (BLENDER's check: 0 crossings); each border between neighbouring branches carries exactly one sideways link at ring 3 and one at ring 5; a comma in the links column means any one of them.
 
