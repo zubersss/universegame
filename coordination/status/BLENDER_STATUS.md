@@ -2,11 +2,13 @@
 Updated: 2026-11-08 20:4x · Session: 10 (all three windows restarted ~09:30 after a ~3-hour break; context rebuilt from the repo) · trimmed under D-113 at 14:0x; older: coordination/status/archive/BLENDER_2026-11-08.md, BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
 
 ## Current task
-Dry (told LEAD 20:5x). Next: B-201, the D1 build's smoke (an art read, frame by frame), on LEAD's ping. docs/credits/blender.md updated 20:5x (the baked Limelight lettering rows + the session's upkeep check). Then B-201, the D1 build's smoke (an art read, frame by frame), when that build lands.
+Dry (told LEAD 21:3x). Next: B-201, the D1 build's smoke (an art read, frame by frame), on LEAD's ping; offered a card for v3 Survey + Builder tools and their FX (B-215 finding 3). Then B-201, the D1 build's smoke (an art read, frame by frame), when that build lands.
 - **Rule from LEAD 18:2x (D-087):** the Beam reads as a mining tool, never a gun. No pistol grip or trigger, nothing hanging under the body: a cable-fed, arm-mounted emitter with a cutting nozzle.
 - Waiting on others: B-207 closes on PawsOnTheGround green; B-204 on UNITY's capture; B-172 on U-151. UNITY drops the three lance .meta files.
 
 ## Last completed
+- 21:35: B-215 the D1 key audit (b19effe0): coordination/reports/blender/d1_key_audit.md. 321 requested keys, 0 missing (29 decor probe slots empty by design); 8 v2 assets in the D1 loop (dig_sparks, dust, beam_ray/base, survey + builder tools without json, survey_scan, builder_ghost); 133 present keys unrequested (58 D1 deliveries awaiting wiring, 75 older ground pieces). Re-run: blender/scripts/audit_d1_keys.py.
+- 20:5x: docs/credits/blender.md: the baked Limelight lettering rows + the B-193 to B-214 upkeep check (84a0c2e3).
 - 20:5x: B-214 (2ccf8993, LEAD-accepted as drawn): fx/ui/{scrip_shower (8), node_bought (8, ring r 35), rank_up (10, insignia_track), expedition_seal (10, ends on the certificate's seal; seal 58,58 in from bottom-right)}.
 - 20:4x: B-213 (36b60e46, LEAD-accepted as drawn): ui/hints/{dig_down, surface_line, sell, skill_tree, climb_up, pack_full} (320x200, 9-slice [152,52,44,144], title / body / keycap rects, binding) + ui/hints/arrow (pivot at the tip). For U-185.
 - 20:0x-20:3x, all LEAD-accepted, reviews stamped:
