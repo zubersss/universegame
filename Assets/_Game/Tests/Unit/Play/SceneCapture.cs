@@ -2639,8 +2639,78 @@ namespace Meridian.Tests
             UnityEngine.Object.Destroy(uiGo);
         }
 
-        /// <summary>U-181 (B-208): the paper grain tiled at 1 texel = 1 px → coordination/reports/unity/u181/: 1_inventory (the inventory panel)
-        /// and 2_skill_tree_card (the tree's node card and cost tag) at 1080p, 1×.</summary>
+        /// <summary>U-180: the two Earth POIs on the smooth ground, re-shot as the build smoke frames them → coordination/reports/unity/u180/:
+        /// smoke_44_earth_survey_archive (the funnel into the shaft, the rounded room, the door beside the funnel, the terminal on its floor) and
+        /// smoke_45_earth_launch_complex (the gantry and the tower ruin on their pad).</summary>
+        [UnityTest, Timeout(300000)]
+        public IEnumerator CaptureU180Pois()
+        {
+            var name = Environment.GetEnvironmentVariable(Variable);
+            if (string.IsNullOrEmpty(name)) Assert.Ignore($"Set {Variable} (tools/unity_capture.ps1).");
+            if (SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.Null)
+                Assert.Fail("No graphics device: run without -nographics.");
+            bool wasCartoon = Meridian.View2D.CartoonStage.Enabled;
+            Meridian.View2D.CartoonStage.Enabled = true;
+            try
+            {
+#if UNITY_EDITOR
+                yield return UnityEditor.SceneManagement.EditorSceneManager.LoadSceneAsyncInPlayMode(
+                    CorePath, new LoadSceneParameters(LoadSceneMode.Single));
+#endif
+                var director = UnityEngine.Object.FindAnyObjectByType<SceneDirector>();
+                float timeout = Time.realtimeSinceStartup + 30f;
+                while ((!director.IsReady || !director.PlanetSide.terrain.IsSettled) && Time.realtimeSinceStartup < timeout) yield return null;
+                var side = director.PlanetSide;
+                side.creatures.autoSpawn = false;
+                side.creatures.DespawnAll();
+                if (side.dayNight != null) side.dayNight.Override = 0.45f;
+                var dir = "coordination/reports/unity/u180";
+                Directory.CreateDirectory(dir);
+                var player = side.player;
+                player.externalInput = true;
+                var follow = side.sideCamera.GetComponent<Meridian.Player.CameraFollow>();
+                IEnumerator At(float x, float upFromRoom, string file)
+                {
+                    var p = new Vector2(x, side.terrain.SurfaceAt(x) + 0.5f + upFromRoom);
+                    player.Body.position = p; player.transform.position = p; player.Body.linearVelocity = Vector2.zero;
+                    float until = Time.realtimeSinceStartup + 12f;
+                    yield return null;
+                    while (!side.terrain.IsSettled && Time.realtimeSinceStartup < until) yield return null;
+                    for (int i = 0; i < 40; i++) yield return new WaitForFixedUpdate();
+                    if (follow != null) follow.SnapToTarget();
+                    yield return new WaitForSeconds(1.5f);
+                    yield return Save(side.sideCamera, $"{name}_{file}");
+                    File.Copy($"logs/capture_{name}_{file}.png", $"{dir}/{file}.png", true);
+                }
+                var archive = Meridian.Planet.POI.PoiCatalog.SurveyArchive;
+                // the surveyor down in the archive's room (as 0.5.1's smoke stood them)
+                var room = new Vector2(archive.x + 10.5f, 0f);
+                var placed = side.pois.placed.Find(pp => pp.def == archive);
+                float floorY = Meridian.Planet.POI.PoiStamp.RowY(archive, 12, placed.groundY) + 0.05f;
+                player.Body.position = new Vector2(room.x, floorY); player.transform.position = player.Body.position;
+                yield return At(archive.x + 7.5f, 0f, "smoke_44_earth_survey_archive");
+                // and down in the rounded room, beside the terminal
+                {
+                    var rp = new Vector2(archive.x + 8.5f, floorY);
+                    player.Body.position = rp; player.transform.position = rp; player.Body.linearVelocity = Vector2.zero;
+                    for (int i = 0; i < 40; i++) yield return new WaitForFixedUpdate();
+                    if (follow != null) follow.SnapToTarget();
+                    yield return new WaitForSeconds(1.5f);
+                    yield return Save(side.sideCamera, $"{name}_smoke_44b_archive_room");
+                    File.Copy($"logs/capture_{name}_smoke_44b_archive_room.png", $"{dir}/smoke_44b_archive_room.png", true);
+                }
+                var lc = Meridian.Planet.POI.PoiCatalog.LaunchComplex;
+                yield return At(lc.CenterX, 0f, "smoke_45_earth_launch_complex");
+                foreach (var pp in side.pois.placed)
+                    foreach (var sr in pp.props)
+                        TestContext.Out.WriteLine($"[MERIDIAN] u180 {pp.def.id}/{sr.name}: base at {sr.transform.position.y:0.00}, the drawn ground under it {side.terrain.SurfaceAt(sr.transform.position.x):0.00}");
+                LogAssert.NoUnexpectedReceived();
+            }
+            finally { Meridian.View2D.CartoonStage.Enabled = wasCartoon; }
+        }
+
+        /// <summary>U-181 (B-208): the paper grain tiled at 1 texel = 1 px → coordination/reports/unity/u181/: 1_inventory (the inventory panel, its
+        /// slots holding 1, 12 and 99 on their count chips) and 2_skill_tree_card (the tree's node card and cost tag) at 1080p, 1×.</summary>
         [UnityTest, Timeout(300000)]
         public IEnumerator CaptureU181Grain()
         {
@@ -2666,11 +2736,28 @@ namespace Meridian.Tests
                 var dir = "coordination/reports/unity/u181";
                 Directory.CreateDirectory(dir);
                 var state = GameState.Instance;
+                // LEAD (u181 review): the stack counts on their chips: 1, 12 and 99 (the pack's weight limit lifted for the shot)
+                state.inventory.Clear();
+                state.inventory.LimitKg = float.PositiveInfinity;
+                state.inventory.Add(Meridian.Items.ItemRegistry.Get("iron").id, 1);
                 state.inventory.Add(Meridian.Items.ItemRegistry.Get("clay").id, 12);
-                state.inventory.Add(Meridian.Items.ItemRegistry.Get("iron").id, 5);
+                state.inventory.Add(Meridian.Items.ItemRegistry.Get("carbon").id, 99);
                 var hud = side.sideHud;
                 hud.Inventory.SetOpen(true);
                 yield return new WaitForSeconds(2.5f);
+                var inv = hud.Inventory;
+                for (int i = 0; i < 3; i++)
+                {
+                    var c = inv.Counts[i];
+                    int used = c.fontSize; // canvas px at 1080p (the batch screen scales the canvas down)
+                    var chip = inv.ChipOf(i).rectTransform; var icon = inv.Icons[i].rectTransform;
+                    Vector3 iconMid = icon.TransformPoint(icon.rect.center);
+                    bool overMiddle = RectTransformUtility.RectangleContainsScreenPoint(chip, RectTransformUtility.WorldToScreenPoint(null, iconMid));
+                    TestContext.Out.WriteLine($"[MERIDIAN] u181 slot {i}: '{c.text}' at {used} px ({c.color}), chip {chip.rect.size}, over the icon's middle {overMiddle}");
+                    Assert.GreaterOrEqual(used, 24, $"slot {i}: the count at ≥ 24 px Patrick Hand (digits ≥ 18 px)");
+                    Assert.IsFalse(overMiddle, $"slot {i}: the chip clear of the icon's middle");
+                    Assert.AreEqual(Meridian.UI.UiKit.Ink, c.color, "in ink");
+                }
                 Canvas invCanvas = null;
                 foreach (var cv in hud.Inventory.GetComponentsInChildren<Canvas>(true)) if (cv.name == "InventoryCanvas") invCanvas = cv;
                 Assert.NotNull(invCanvas, "the inventory's canvas");

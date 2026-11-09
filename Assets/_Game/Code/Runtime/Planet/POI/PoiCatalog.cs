@@ -20,7 +20,9 @@ namespace Meridian.Planet.POI
         public readonly Meridian.Crafting.Station craftStation;
         /// <summary>U-076: copies of the model side by side across `size.x` (the 2 m landing-pad module, D-068); 1 = one model.</summary>
         public readonly int tiles;
-        public PoiProp(string key, float dx, float dy, Vector2 size, bool solid = false, int topRow = 0, float shelterRadius = 0f, Meridian.Crafting.Station craftStation = Meridian.Crafting.Station.Hand, int tiles = 1) { this.key = key; this.dx = dx; this.dy = dy; this.size = size; this.solid = solid; this.topRow = topRow; this.shelterRadius = shelterRadius; this.craftStation = craftStation; this.tiles = tiles; }
+        /// <summary>U-180: embedded in the ground by design (a wreck's hull in its gouge): it does not stand on the outline.</summary>
+        public readonly bool sunk;
+        public PoiProp(string key, float dx, float dy, Vector2 size, bool solid = false, int topRow = 0, float shelterRadius = 0f, Meridian.Crafting.Station craftStation = Meridian.Crafting.Station.Hand, int tiles = 1, bool sunk = false) { this.sunk = sunk; this.key = key; this.dx = dx; this.dy = dy; this.size = size; this.solid = solid; this.topRow = topRow; this.shelterRadius = shelterRadius; this.craftStation = craftStation; this.tiles = tiles; }
     }
 
     /// <summary>
@@ -60,7 +62,10 @@ namespace Meridian.Planet.POI
     /// <summary>U-030 POIs v1 (Bible §7.1, §7.2): two on Earth, two on Mars.</summary>
     public static class PoiCatalog
     {
-        /// <summary>Survey Archive (story start, Bible §2): within 200 m of the Earth spawn (x 64).</summary>
+        /// <summary>Survey Archive (story start, Bible §2): within 200 m of the Earth spawn (x 64). U-180 (D-162 (1), like Mars's skylights): on the
+        /// smooth ground the way in reads as drawn shapes, not tile edges: a funnel (8, 6, then 4 m wide) into the shaft, and a rounded room (an
+        /// ellipse in whole cells, which the outline rounds); the archive's door stands on the flat ground beside the funnel (nothing over the
+        /// hole) and its terminal on the room's flat floor.</summary>
         public static readonly PoiDef SurveyArchive = new PoiDef
         {
             id = "survey_archive", label = "SURVEY ARCHIVE", planet = PlanetId.Earth, x = 184, groundRow = 4,
@@ -70,18 +75,21 @@ namespace Meridian.Planet.POI
                 "....................",
                 "....................",
                 "....................",
-                "gggggggg....gggggggg",
+                "gggggg........gggggg",
+                "#######......#######",
                 "########....########",
                 "########....########",
-                "###................#",
-                "###................#",
-                "###................#",
+                "#####..........#####",
+                "###..............###",
+                "##................##",
+                "###..............###",
+                "#####..........#####",
                 "####################",
             },
             props = new[]
             {
-                new PoiProp("props/earth/archive_door", 10f, 0f, new Vector2(4f, 3f)),
-                new PoiProp("props/earth/archive_terminal", 14f, -6f, new Vector2(1.5f, 2f)),
+                new PoiProp("props/earth/archive_door", 17f, 0f, new Vector2(4f, 3f)),
+                new PoiProp("props/earth/archive_terminal", 10f, -9f, new Vector2(1.5f, 2f)),
                 new PoiProp("props/earth/beacon", 3f, 0f, new Vector2(0.8f, 3f)),
             },
         };
@@ -106,8 +114,9 @@ namespace Meridian.Planet.POI
             },
             props = new[]
             {
-                new PoiProp("props/earth/launch_gantry", 10f, 1f, new Vector2(5f, 14f)),
-                new PoiProp("props/earth/launch_tower_ruin", 24f, 1f, new Vector2(4f, 9f)),
+                // U-180: on the pad itself (dy 1 lifted them onto a pad row the smooth ground no longer stamps: they hovered ~1.2 m)
+                new PoiProp("props/earth/launch_gantry", 10f, 0f, new Vector2(5f, 14f)),
+                new PoiProp("props/earth/launch_tower_ruin", 24f, 0f, new Vector2(4f, 9f)),
             },
         };
 
@@ -130,9 +139,9 @@ namespace Meridian.Planet.POI
             },
             props = new[]
             {
-                new PoiProp("props/mars/hauler_hull_a", 9f, -1.5f, new Vector2(9f, 4f)),
-                new PoiProp("props/mars/hauler_hull_b", 18f, -1f, new Vector2(7f, 3.5f)),
-                new PoiProp("props/mars/hauler_cargo", 24f, 0f, new Vector2(2f, 1.6f)),
+                new PoiProp("props/mars/hauler_hull_a", 9f, -1.5f, new Vector2(9f, 4f), sunk: true),
+                new PoiProp("props/mars/hauler_hull_b", 18f, -1f, new Vector2(7f, 3.5f), sunk: true),
+                new PoiProp("props/mars/hauler_cargo", 24f, -1f, new Vector2(2f, 1.6f)), // U-180: on the gouge's rim (row 7), not a metre over it
             },
         };
 
@@ -156,9 +165,10 @@ namespace Meridian.Planet.POI
             },
             props = new[]
             {
-                new PoiProp("props/mars/warden_pylon", 4f, 1f, new Vector2(1.2f, 6f)),
-                new PoiProp("props/mars/warden_pylon", 20f, 1f, new Vector2(1.2f, 6f)),
-                new PoiProp("props/mars/meridian_beacon", 12f, 1f, new Vector2(1f, 3f)),
+                // U-180: on the ground (dy 1 stood them on a pad row the smooth ground no longer stamps: they hovered 1 m)
+                new PoiProp("props/mars/warden_pylon", 4f, 0f, new Vector2(1.2f, 6f)),
+                new PoiProp("props/mars/warden_pylon", 20f, 0f, new Vector2(1.2f, 6f)),
+                new PoiProp("props/mars/meridian_beacon", 12f, 0f, new Vector2(1f, 3f)),
             },
         };
 

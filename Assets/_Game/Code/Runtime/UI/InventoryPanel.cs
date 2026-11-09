@@ -18,6 +18,12 @@ namespace Meridian.UI
     {
         public const int Columns = 10;
         public const float Cell = 84f, Gap = 8f;
+        /// <summary>U-181 (LEAD): the count chip (canvas px) and the count's size before UiKit's Patrick Hand scale (×1.35: 26 px, digits ~18 px).</summary>
+        public const float ChipW = 46f, ChipH = 26f;
+        public const int CountSize = 19;
+        Image[] chips;
+        /// <summary>The count chips (tests, captures).</summary>
+        public Image ChipOf(int slot) => chips != null ? chips[slot] : null;
 
         public PlayerController player;
         public Meridian.Terrain.TerrainStreamer terrain;
@@ -98,6 +104,7 @@ namespace Meridian.UI
             Counts = new Text[Inventory.SlotCount];
             frames = new Image[Inventory.SlotCount];
             bands = new Image[Inventory.SlotCount];
+            chips = new Image[Inventory.SlotCount];
             var tl = new Vector2(0f, 1f);
             for (int i = 0; i < Inventory.SlotCount; i++)
             {
@@ -111,13 +118,20 @@ namespace Meridian.UI
                 bands[i] = UiKit.GoldBand(cell); // the selected slot's gold band
                 int slot = i;
                 cell.gameObject.AddComponent<Button>().onClick.AddListener(() => { if (inventory != null) inventory.Select(slot); });
-                var icon = UiKit.Panel(cell, "Icon", center, Vector2.zero, new Vector2(Cell - 20f, Cell - 20f), Color.white);
+                var icon = UiKit.Panel(cell, "Icon", center, new Vector2(-3f, 3f), new Vector2(Cell - 24f, Cell - 24f), Color.white); // U-181 (LEAD): nudged up-left of the count chip
                 icon.preserveAspect = true;
                 icon.enabled = false;
                 Icons[i] = icon;
-                var count = UiKit.Text(cell, "Count", new Vector2(1f, 0f), new Vector2(-6f, 14f), new Vector2(Cell - 8f, 22f), 16, true, TextAnchor.MiddleRight, theme.text);
-                count.rectTransform.pivot = new Vector2(1f, 0.5f);
+                // U-181 (LEAD, u181 review): the stack count on a small paper chip in the slot's bottom-right corner, in ink at ≥ 18 px, crisp
+                // (no rim), never over the icon's middle: selling by the pack makes the counts matter
+                var chip = UiKit.PaperTag(cell, "CountChip", new Vector2(1f, 0f), new Vector2(-3f, 3f), new Vector2(ChipW, ChipH), new Vector2(1f, 0f));
+                chip.raycastTarget = false;
+                var count = UiKit.Text(chip.transform, "Count", new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(ChipW - 4f, ChipH), CountSize, true, TextAnchor.MiddleCenter, UiKit.Ink);
+                UiKit.InkOn(count);
+                count.horizontalOverflow = HorizontalWrapMode.Overflow; // a fixed 26 px: "999" fits the chip's 42 px
+                chip.gameObject.SetActive(false);
                 Counts[i] = count;
+                chips[i] = chip;
             }
             root.SetActive(false);
             enabled = false;
@@ -138,7 +152,8 @@ namespace Meridian.UI
                 var s = inventory[i];
                 bool selected = i == inventory.Selected;
                 if (bands[i].enabled != selected) bands[i].enabled = selected; // U-135: the gold band, not an accent fill
-                if (s.IsEmpty) { Icons[i].enabled = false; Counts[i].text = ""; continue; }
+                if (s.IsEmpty) { Icons[i].enabled = false; Counts[i].text = ""; if (chips[i].gameObject.activeSelf) chips[i].gameObject.SetActive(false); continue; }
+                if (!chips[i].gameObject.activeSelf) chips[i].gameObject.SetActive(true);
                 var sprite = IconOf(s.itemId);
                 Icons[i].sprite = sprite;
                 Icons[i].enabled = sprite != null;

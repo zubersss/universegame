@@ -73,7 +73,7 @@ namespace Meridian.Planet.POI
             // Bottom-center pivot (contract §4): the prop stands on the ground line (top of the ground tile).
             go.transform.position = new Vector3(poi.x + prop.dx, groundY + 1f + prop.dy, 0f);
             var sr = go.AddComponent<SpriteRenderer>();
-            sr.sortingOrder = -2; // behind the player and ship, in front of terrain
+            sr.sortingOrder = OrderOf(prop); // behind the player and ship; U-180: inside a carved space, in front of the ground's back wall
             if (box == null)
             {
                 box = Sprite.Create(Texture2D.whiteTexture, new Rect(0, 0, 4, 4), new Vector2(0.5f, 0f), 4f);
@@ -116,12 +116,20 @@ namespace Meridian.Planet.POI
             return sr;
         }
 
+        /// <summary>A POI prop's sorting order: −2 on the surface (behind the player and the ship, over the sky and the stage); U-180: a prop
+        /// standing below its stamp's ground line (the archive's terminal in its room) draws at UndergroundOrder, in front of the smooth
+        /// ground's mesh (its back wall drew over it: the terminal never showed); a prop sunk by design (a hull in its gouge) stays behind it.</summary>
+        public static int OrderOf(PoiProp prop) => prop.dy < -0.5f && !prop.sunk ? UndergroundOrder : -2;
+        public const int UndergroundOrder = 2;
+
         readonly List<Meridian.Art.ModelSwap> swaps = new List<Meridian.Art.ModelSwap>();
         /// <summary>U-076: the placed props' model swaps (tests, captures).</summary>
         public IReadOnlyList<Meridian.Art.ModelSwap> ModelSwaps => swaps;
         readonly List<BoxCollider2D> solids = new List<BoxCollider2D>();
         readonly Dictionary<SpriteRenderer, BoxCollider2D> colliderOf = new Dictionary<SpriteRenderer, BoxCollider2D>();
         public IReadOnlyList<BoxCollider2D> Solids => solids;
+        /// <summary>U-180: a solid prop's own collider (null for the rest; tests).</summary>
+        public BoxCollider2D ColliderOf(SpriteRenderer prop) => prop != null && colliderOf.TryGetValue(prop, out var c) ? c : null;
 
         /// <summary>Whether column x lies in a placed POI stamp, and that stamp's ground line (U-040 walls follow it).</summary>
         SolidWorldGenerator shapeWorld;
