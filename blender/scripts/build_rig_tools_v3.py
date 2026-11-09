@@ -160,6 +160,93 @@ def back_sockets():
     return out
 
 
+# ---------------------------------------------------------------- the export (on LEAD's OK)
+def cable_socket(mk):
+    x0 = 0.36 - (0.24 + 0.035 * (mk - 1)) - 0.12
+    return [round(x0 + 0.03, 3), -0.17]
+
+
+def kit():
+    """[(key, rgba, meta extras)]: the tools (props/rig/beam and props/rig/grapple are the Mk1 copies, the keys RigModules
+    loads), the jetpack overlays with their back sockets, the beam ray sheets (2 columns x 4 rows, gutter 4)."""
+    out = []
+    for mk in range(1, 6):
+        img = render(beam_tool(mk), TW, TH, TPPU, TPIV)[0]
+        meta = {"ppu": TPPU, "pivot": list(TPIV), "muzzle": list(MUZZLE["beam"]), "cable_socket": cable_socket(mk), "mk": mk,
+                "ray": f"fx/beam_ray/mk{mk}", "note": "B-205: the Beam, arm-mounted and cable-fed (no grip or trigger: a mining tool, D-087)"}
+        out.append((f"props/rig/beam_mk{mk}", img, meta))
+        if mk == 1:
+            out.append(("props/rig/beam", img, dict(meta, note="B-205: = beam_mk1 (the key RigModules loads); replaces the v2 render")))
+    for mk in range(1, 4):
+        img = render(grapple_tool(mk), TW, TH, TPPU, TPIV)[0]
+        meta = {"ppu": TPPU, "pivot": list(TPIV), "muzzle": list(MUZZLE["grapple"]), "mk": mk,
+                "note": "B-205: the Grapple, a hand reel with the hook seated forward (no barrel)" + ("; twin anchors" if mk == 3 else "")}
+        out.append((f"props/rig/grapple_mk{mk}", img, meta))
+        if mk == 1:
+            out.append(("props/rig/grapple", img, dict(meta, note="B-205: = grapple_mk1 (RigModules.ArtKey(Grapple)); replaces the Lance stand-in (U-183)")))
+    socks = back_sockets()
+    for mk in (2, 3):
+        img = render(jetpack(mk), 64, 64, 64, (0.5, 0.5))[0]
+        out.append((f"props/rig/jetpack_mk{mk}", img, {"ppu": 64, "pivot": [0.5, 0.5], "mk": mk, "socket_sheet": "characters/surveyor/side",
+                                                       "back_socket": socks,
+                                                       "socket_units": "per sheet frame: [x, z] m from the sheet's pivot (the feet; x right, z up, facing right), the pack's swing (rad, CCW), the body's squash sx / sz; null = the pack hidden (front views)",
+                                                       "note": "B-205: drawn over the surveyor at the frame's back socket (mirror x when facing left); Mk1 is the float pack as drawn"}))
+    for mk in range(1, 6):
+        frames = [render(beam_ray(mk, k), 256, 32, TPPU, (0.0, 0.5))[0] for k in range(8)]
+        sheet = np.zeros((4 * 32 + 3 * 4, 2 * 256 + 4, 4), np.uint8)
+        for k, f in enumerate(frames):
+            r, c = divmod(k, 2)
+            sheet[r * 36:r * 36 + 32, c * 260:c * 260 + 256] = f
+        out.append((f"fx/beam_ray/mk{mk}", sheet, {"ppu": TPPU, "frame_width": 256, "frame_height": 32, "columns": 2, "gutter": 4, "frames": 8, "fps": 12,
+                                                  "pivot": [0.0, 0.5], "facing": "right", "tile_x": True,
+                                                  "animations": [{"name": "flow", "start": 0, "length": 8, "loop": True}],
+                                                  "note": f"B-205: the Beam Mk{mk}'s ray (teal to gold with the Mk), tiled in x from the muzzle; 0.25 m tall"}))
+    return out
+
+
+V2_REMOVE = ["props/rig/beam_normal.png", "props/rig/beam_emission.png"]          # the v2 beam's maps (UNITY deletes the .meta files)
+
+
+def export(art):
+    import json
+    from meridian import pngio
+    built, problems = [], []
+    for key, img, extra_meta in kit():
+        h, w = img.shape[:2]
+        meta = {"key": key, "style": "v3", "width": w, "height": h, "palette": "earth", **extra_meta}
+        hit = v3.palette_hits(img, "earth")[0]
+        m = v3.EDGE_MARGIN
+        if w % 4 or h % 4:
+            problems.append(f"{key}: {w}x{h} not a multiple of 4")
+        if hit < 0.995:
+            problems.append(f"{key}: palette {hit * 100:.1f}%")
+        if not key.startswith("fx/") and (img[:m, :, 3].any() or img[-m:, :, 3].any() or img[:, :m, 3].any() or img[:, -m:, 3].any()):
+            problems.append(f"{key}: touches the {m} px edge")
+        built.append((key, img, meta))
+    if problems:
+        raise ValueError("B-205 tool checks: " + "; ".join(problems))
+    out = []
+    for key, img, meta in built:
+        base = os.path.join(art, *key.split("/"))
+        os.makedirs(os.path.dirname(base), exist_ok=True)
+        n = pngio.write_png(base + "_color.png", img)
+        with open(base + ".json", "w", encoding="utf-8", newline="\n") as f:
+            json.dump(meta, f, indent=2)
+            f.write("\n")
+        out.append((key, img.shape[1], img.shape[0], n))
+    for rel in V2_REMOVE:
+        p = os.path.join(art, *rel.split("/"))
+        if os.path.isfile(p):
+            os.remove(p)
+    return out
+
+
+def keys():
+    return [k for k, _i, _m in [(f"props/rig/beam_mk{m}", 0, 0) for m in range(1, 6)] + [("props/rig/beam", 0, 0)]
+            + [(f"props/rig/grapple_mk{m}", 0, 0) for m in range(1, 4)] + [("props/rig/grapple", 0, 0)]
+            + [(f"props/rig/jetpack_mk{m}", 0, 0) for m in (2, 3)] + [(f"fx/beam_ray/mk{m}", 0, 0) for m in range(1, 6)]]
+
+
 # ---------------------------------------------------------------- the review sheet (lock-free)
 def preview(out, footnote=None):
     import time
