@@ -471,6 +471,76 @@ def preview_continue(planet, out, footnote=None):
         print(ln)
 
 
+def preview_storm_anchor(out, footnote=None):
+    """B-220 / B-161 (LEAD 15:5x): Neptune's storm and spot at the scene's anchor - layer0 (the vortex core, now on a fixed
+    wrap) under layer1 (the rim, the pulse layer) as their json places them at parallax rest (the tile's x 1024 on the screen's
+    centre, the ground row 732), each layer's band continued below it, at 1/2; then layer0's wrap at 1x: 480 px either side of
+    the new seam (the tile's last columns, then its first). Prints where the old automatic roll put the wrap, both seam scores
+    (the export's limit is 2.0) and the core's / the rim's centres on the frame."""
+    import time
+    sys.path.insert(0, os.path.dirname(HERE))
+    import review
+    import build_backdrop_v3 as BB
+    paper = np.array(review.PAPER, np.float32)
+    gl, FW, FH, x0 = 732, 1920, 1080, 64                       # x0: the tile's column on the frame's left edge (1024 - 960)
+    man = {e["key"]: e for e in continue_rows_for("neptune")}
+    frames, lines, strip = [], [], None
+    for scene in ("storm", "spot"):
+        e = man[f"backgrounds/neptune/{scene}"]
+        imgs, layers = BB.SCENES[("neptune", scene)](int(e.get("seed", 1)))
+        F = np.empty((FH, FW, 3), np.float32)
+        F[:] = paper
+        for (rgb, a), L in list(zip(imgs, layers))[:2]:
+            rgb, a, how = continue_layer(rgb, a, L)
+            h = rgb.shape[0]
+            y_bot = gl + int(round(-L["y_m"] * v3.PPU))
+            y_top = y_bot - h
+            s0, s1 = max(y_top, 0), min(y_bot, FH)
+            sr, sa = rgb[s0 - y_top:s1 - y_top, x0:x0 + FW], a[s0 - y_top:s1 - y_top, x0:x0 + FW, None]
+            F[s0:s1] = sr * sa + F[s0:s1] * (1 - sa)
+            nb = L.get("continue_rows")
+            if nb and y_bot < FH:                                 # its band repeated below it, as U-191 will
+                reps = -(-(FH - y_bot) // nb)
+                br = np.tile(rgb[-nb:, x0:x0 + FW], (reps, 1, 1))[:FH - y_bot]
+                ba = np.tile(a[-nb:, x0:x0 + FW, None], (reps, 1, 1))[:FH - y_bot]
+                F[y_bot:] = br * ba + F[y_bot:] * (1 - ba)
+            if L["n"] == 0:
+                u8 = to_u8(rgb, a)
+                k_old = BB.seam_column(u8)                        # where finish()'s automatic roll would put the wrap
+                s_new, s_old = seam(u8), seam(np.roll(u8, -k_old, axis=1))
+                lines.append(f"{scene} layer0: fixed wrap (roll 0), seam {s_new:.2f} (limit 2.0; the automatic wrap at column {k_old} scored "
+                             f"{s_old:.2f}); the core at tile x 1024 = frame ({1024 - x0}, {y_top + 470}); as exported today it sits at tile x "
+                             f"{(1024 - k_old) % rgb.shape[1]}")
+                if strip is None:                                 # storm's and spot's layer0 differ only by the Meridian (x 1014-1160)
+                    strip = np.hstack([rgb[:, -480:], rgb[:, :480]]).copy()
+            else:
+                lines.append(f"{scene} layer1: the rim's centre at tile x 1024 = frame ({1024 - x0}, {y_top + 320}), {how}; pulse pivot_uv {L.get('pulse', {}).get('pivot_uv')}")
+        del imgs
+        frames.append(F.reshape(FH // 2, 2, FW // 2, 2, 3).mean(axis=(1, 3)))
+    Wd = 2 * (FW // 2) + 30
+    head = np.tile(paper, (28, Wd, 1)).astype(np.float32)
+    review._label(head, "b-220 / b-161 neptune storm + spot at the anchor: layer0 (the core, fixed wrap) under layer1 (the rim), 1/2; below: layer0's new wrap at 1x", 6, 8)
+    r1 = np.tile(paper, (FH // 2 + 22, Wd, 1)).astype(np.float32)
+    for i, (F, name) in enumerate(zip(frames, ("storm", "spot"))):
+        x = 10 + i * (FW // 2 + 10)
+        r1[20:20 + FH // 2, x:x + FW // 2] = F
+        review._label(r1, f"backgrounds/neptune/{name}: layer0 + layer1 at parallax rest (1/2)", x, 4, scale=1)
+    r2 = np.tile(paper, (strip.shape[0] + 34, Wd, 1)).astype(np.float32)
+    review._label(r2, "storm layer0 at 1x across its wrap: the tile's last 480 columns, then its first 480 (the red ticks mark the seam)", 10, 4, scale=1)
+    r2[24:24 + strip.shape[0], 10:10 + 960] = strip
+    r2[18:24, 10 + 479:10 + 481] = (0.85, 0.2, 0.2)
+    r2[24 + strip.shape[0]:30 + strip.shape[0], 10 + 479:10 + 481] = (0.85, 0.2, 0.2)
+    foot = np.tile(paper, (24 + 16 * len(lines), Wd, 1)).astype(np.float32)
+    for i, ln in enumerate(lines):
+        review._label(foot, ln, 6, 6 + 16 * i, scale=1)
+    img = np.vstack([head, r1, r2, foot])
+    review.draw(img, time.strftime("%m-%d %H:%M") + " " + (footnote or "B-220 / B-161 design preview (numpy; not exported)"), 2, img.shape[0] - 14, (1.0, 1.0, 0.85))
+    review.write(out, img)
+    print("written", out, img.shape[1], "x", img.shape[0])
+    for ln in lines:
+        print(ln)
+
+
 def export_background(entry, art):
     _cat, planet, scene = entry["key"].split("/")
     fn = SCENES.get((planet, scene))
@@ -524,6 +594,8 @@ def export_palette(entry, art):
 
 if __name__ == "__main__" and len(sys.argv) > 3 and sys.argv[1] == "--continue":   # B-220: python -I gen_painted_bg.py --continue <planet> <png>
     preview_continue(sys.argv[2], sys.argv[3])
+elif __name__ == "__main__" and len(sys.argv) > 2 and sys.argv[1] == "--anchor":   # python -I gen_painted_bg.py --anchor <png>
+    preview_storm_anchor(sys.argv[2])
 elif __name__ == "__main__":
     # scripts-only test: write the layers into a scratch folder and print seams
     out = sys.argv[1]

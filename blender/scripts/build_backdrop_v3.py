@@ -2152,7 +2152,11 @@ def neptune_scene(seed, deck="deck1"):
             ell(core, mx, my - 44, 4, 4)
             stack.append(tint(mrng, H, halo, pal["red"], 0.45, var=0.0, edge_dark=0.0, bleed=5.0))
             stack.append(tint(mrng, H, core, pal["red"], 1.0, var=0.0, edge_dark=0.0, bleed=0.5))
-    out.append(finish(stack, rng, H))
+    # B-161 reopened with B-220's export (LEAD 15:5x): the storm's layer0 keeps a fixed wrap too. The automatic roll put the
+    # wrap on the quietest column, which is the eye's flat dark centre, so the exported core sat half a tile from layer1's rim
+    # (roll 0, the pulse pivot) and split across the tile's edges. finish() draws nothing from rng for the roll, so layers 1-2
+    # stay byte-identical; the other decks keep the automatic wrap
+    out.append(finish(stack, rng, H, roll=0 if storm else None))
     # layer1: the nearer sheared banks with the bright cirrus and their shadows painted on the tops, one storm-violet flash
     # (deck2); the storm's rim with its white companion clouds alone (storm / spot: the pulse layer, a fixed wrap)
     H = 640
