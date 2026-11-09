@@ -33,7 +33,8 @@ import gp_raster as GR  # noqa: E402
 O, I = G.OUTER, G.INNER
 TAU = 2 * math.pi
 TPPU, TW, TH, TPIV = 128, 128, 64, (0.375, 0.5)
-MUZZLE = {"beam": (0.47, 0.03), "grapple": (0.52, 0.035)}
+MUZZLE = {"beam": (0.47, 0.03), "grapple": (0.52, 0.035), "survey": (0.30, 0.06), "builder": (0.44, 0.03)}   # B-217: survey /
+                                                                                     # builder at RigModule.Muzzle's constants (no code change)
 BEAM_TONES = {1: ("teal", "off"), 2: ("teal", "mustard"), 3: ("green", "off"), 4: ("mustard_sh", "off"), 5: ("mustard", "off")}
 
 
@@ -130,6 +131,150 @@ def grapple_tool(mk):
     return fn
 
 
+# ---------------------------------------------------------------- B-217: the Survey and the Builder (forearm-strapped, no grip)
+def cuff(d, M, r):
+    """The arm cuff at the hand, as the Beam's: brown, two brass straps."""
+    G.stroke(d, [(-0.06, -r - 0.035), (0.06, -r - 0.035), (0.06, r + 0.035), (-0.06, r + 0.035)], M["brown_i"], O, cyclic=True)
+    for x in (-0.025, 0.025):
+        G.stroke(d, [(x - 0.008, -r - 0.035), (x + 0.008, -r - 0.035), (x + 0.008, r + 0.035), (x - 0.008, r + 0.035)], M["mustard"], 0.0, cyclic=True)
+
+
+def tool_cable(x0, z0=0.0):
+    """A cable from the case's back end, backward and up toward the pack (its end: the json's cable_socket)."""
+    return [(x0 - 0.01, z0), (x0 - 0.07, z0 + 0.03), (x0 - 0.12, z0 + 0.08), (x0 - 0.15, z0 + 0.14)]
+
+
+SURVEY_CABLE = tool_cable(-0.07, 0.01)
+BUILDER_CABLE = tool_cable(-0.07, 0.0)
+
+
+def survey_tool():
+    """The Survey: a teal instrument case on the forearm, a brass compass dial on top, a short whip aerial with a red tip,
+    a small brass dish at the front (its focus = the muzzle (0.30, 0.06)). Nothing under the body."""
+    def fn(d, M):
+        G.stroke(d, hose(SURVEY_CABLE, 0.028), M["brown_sh_i"], I, cyclic=True)
+        G.stroke(d, hose([(0.03, 0.08), (0.0, 0.13), (-0.025, 0.17)], 0.012), M["sky_sh_i"], I, cyclic=True)    # the aerial (rev: its
+        G.stroke(d, circ_pts(-0.027, 0.18, 0.017, 10), M["red_i"], I, cyclic=True)          # tip touched the frame's top)
+        body = [(-0.06, -0.05), (0.19, -0.05), (0.215, -0.025), (0.215, 0.065), (0.19, 0.085), (-0.06, 0.085)]
+        G.stroke(d, body, M["teal_sh_i"], O, cyclic=True)                                    # the case
+        G.stroke(d, [(-0.06, 0.03), (0.215, 0.03), (0.215, 0.065), (0.19, 0.085), (-0.06, 0.085)], M["teal"], 0.0, cyclic=True)
+        G.stroke(d, body, M["ink"], O, cyclic=True)
+        cuff(d, M, 0.05)
+        G.stroke(d, circ_pts(0.135, 0.095, 0.055, 22), M["mustard_i"], I, cyclic=True)      # the compass dial on top, clear of the
+        G.stroke(d, circ_pts(0.135, 0.095, 0.04, 18), M["sky_i"], I, cyclic=True)           # cuff; a pale glass face and a long
+        a_n = math.radians(50)                                                               # diagonal needle (rev: a white face with
+        ux, uz = math.cos(a_n), math.sin(a_n)                                                # a dark centre read as an eye)
+        G.stroke(d, [(0.135 + 0.034 * ux, 0.095 + 0.034 * uz), (0.135 - 0.006 * uz, 0.095 + 0.006 * ux),
+                     (0.135 - 0.026 * ux, 0.095 - 0.026 * uz), (0.135 + 0.006 * uz, 0.095 - 0.006 * ux)], M["red_i"], I * 0.5, cyclic=True)
+        G.stroke(d, hose([(0.215, 0.035), (0.262, 0.05)], 0.022), M["sky_sh_i"], I, cyclic=True)   # the dish's arm
+        outer = [(0.37 + 0.105 * math.cos(a), 0.06 + 0.105 * math.sin(a)) for a in np.linspace(math.radians(128), math.radians(232), 13)]
+        inner = [(0.37 + 0.088 * math.cos(a), 0.06 + 0.088 * math.sin(a)) for a in np.linspace(math.radians(232), math.radians(128), 13)]
+        G.stroke(d, outer + inner, M["mustard_i"], I, cyclic=True)                          # the dish: a brass "(" open forward (rev: the
+        G.stroke(d, hose([(0.283, 0.06), (0.3, 0.06)], 0.009), M["sky_sh_i"], I * 0.6, cyclic=True)   # crescent + rim read as a bow-tie)
+        G.stroke(d, circ_pts(0.3, 0.06, 0.013, 10), M["teal_i"], I, cyclic=True)             # the pick-up at its focus = the muzzle
+    return fn
+
+
+def builder_tool():
+    """The Builder: a wooden dirt hopper on the forearm, dirt heaped in its mouth, a steel scoop forward whose lip is the muzzle
+    (0.44, 0.03); a dirt hose back to the pack (the dirt store). A scoop, not a barrel: nothing flares, nothing hangs below."""
+    def fn(d, M):
+        G.stroke(d, hose(BUILDER_CABLE, 0.034), M["brown_sh_i"], I, cyclic=True)           # the dirt hose
+        for x, z, rr in ((0.0, 0.085, 0.045), (0.07, 0.1, 0.05), (0.15, 0.088, 0.042)):    # dirt heaped high in the crate's open top
+            G.stroke(d, IT.lump(x, z, rr, rr * 0.75, int(x * 100) + 7, n=10, jit=0.12), M["brown_i"], I, cyclic=True)
+        box = [(-0.07, -0.075), (0.2, -0.075), (0.2, 0.08), (-0.07, 0.08)]                   # rev: a taller plank crate (the long thin
+        G.stroke(d, box, M["mustard_sh_i"], O, cyclic=True)                                  # pointed version read as a long gun)
+        for x in (0.02, 0.11):
+            G.seam(d, [(x, -0.07), (x, 0.075)], M["ink"])
+        G.stroke(d, [(-0.07, -0.02), (0.2, -0.02), (0.2, 0.005), (-0.07, 0.005)], M["sky_sh_i"], I, cyclic=True)   # an iron band
+        cuff(d, M, 0.065)
+        bowl = [(0.2, 0.06), (0.2, -0.06)] + [(0.33 + 0.11 * math.cos(a), 0.0 + 0.075 * math.sin(a)) for a in np.linspace(-math.pi * 0.62, 0.32, 10)]
+        G.stroke(d, bowl, M["sky_sh_i"], O, cyclic=True)                                     # the scoop: a deep round bowl, its lip
+        for x, z, rr in ((0.27, 0.07, 0.04), (0.34, 0.075, 0.045), (0.405, 0.05, 0.032)):  # (0.44, 0.03) up front; dirt piled in it
+            G.stroke(d, IT.lump(x, z, rr, rr * 0.75, int(x * 100) + 3, n=10, jit=0.12), M["brown_i"], I, cyclic=True)
+    return fn
+
+
+def survey_scan(k):
+    """Frame k of 12 (240x240 @ PPU 128 = 1.875 m; PlayerRigInput plays it at scale 2 at the chest): an ink pulse ring in teal
+    expanding with compass ticks, a fainter echo behind it, breaking into dashes as it fades. No glow."""
+    def fn(d, M):
+        t = k / 11.0
+        R = 0.12 + 0.72 * math.sqrt(t)
+        bw = 0.05 * (1 - t) + 0.014
+        n = 96
+        if k <= 1:                                                                           # the ping at the centre
+            s = (0.11, 0.07)[k]
+            st = [((s if j % 2 == 0 else s * 0.35) * math.cos(TAU * j / 8), (s if j % 2 == 0 else s * 0.35) * math.sin(TAU * j / 8)) for j in range(8)]
+            G.stroke(d, st, M["teal_i"], I, cyclic=True)
+        if k >= 3:                                                                           # the echo
+            r2 = R * 0.62
+            G.stroke(d, circ_pts(0, 0, r2, n), M["ink"], I * 0.6, cyclic=True)
+        dashes = k >= 8
+        seg = 24
+        for j in range(seg):
+            if dashes and j % 2:
+                continue
+            a0, a1 = TAU * j / seg, TAU * (j + 1) / seg - (0.06 if dashes else 0.0)
+            outer = [((R + bw / 2) * math.cos(a), (R + bw / 2) * math.sin(a)) for a in np.linspace(a0, a1, 5)]
+            inner = [((R - bw / 2) * math.cos(a), (R - bw / 2) * math.sin(a)) for a in np.linspace(a1, a0, 5)]
+            G.stroke(d, outer + inner, M["teal"], 0.0, cyclic=True)
+            if dashes:
+                G.stroke(d, outer + inner, M["ink"], I * 0.7, cyclic=True)
+        if not dashes:
+            G.stroke(d, circ_pts(0, 0, R + bw / 2, n), M["ink"], I, cyclic=True)
+            G.stroke(d, circ_pts(0, 0, R - bw / 2, n), M["ink"], I * 0.8, cyclic=True)
+        if 2 <= k <= 8:                                                                      # compass ticks outside the ring
+            for j in range(8):
+                a = TAU * j / 8
+                L = 0.05 if j % 2 == 0 else 0.03
+                G.stroke(d, [((R + bw / 2 + 0.015) * math.cos(a), (R + bw / 2 + 0.015) * math.sin(a)),
+                             ((R + bw / 2 + 0.015 + L) * math.cos(a), (R + bw / 2 + 0.015 + L) * math.sin(a))], M["ink"], I * 1.2)
+    return fn
+
+
+def builder_ghost(k):
+    """Frame k of 8 (144x144 @ PPU 128; RigToolView scales the sprite to one tile): ink corner brackets and a dashed cream
+    outline marching round the tile, a small plus at its centre. Cream + ink, so the Blocked tint (red) reads through."""
+    def fn(d, M):
+        h = 0.47                                                                             # the outline's half side (60 px)
+        per = 0.12
+        L = 8 * h
+        ph = per * k / 8
+        pts = [(-h, -h), (h, -h), (h, h), (-h, h)]
+
+        def at(s):
+            s %= L
+            side = int(s // (2 * h))
+            u = s - side * 2 * h
+            (x0, z0), (x1, z1) = pts[side], pts[(side + 1) % 4]
+            return (x0 + (x1 - x0) * u / (2 * h), z0 + (z1 - z0) * u / (2 * h))
+        s = ph
+        while s < L + ph - 1e-6:                                                             # marching dashes (cream, inked)
+            seg = [at(s + per * 0.55 * i / 4) for i in range(5)]
+            G.stroke(d, hose(seg, 0.022), M["off_i"], I * 0.8, cyclic=True)
+            s += per
+        c = 0.13
+        for sx in (-1, 1):                                                                   # the corner brackets
+            for sz in (-1, 1):
+                G.stroke(d, hose([(sx * (h + 0.02), sz * (h + 0.02 - c)), (sx * (h + 0.02), sz * (h + 0.02)), (sx * (h + 0.02 - c), sz * (h + 0.02))], 0.03),
+                         M["off_i"], I, cyclic=True)
+        for a, b in (((-0.06, 0.0), (0.06, 0.0)), ((0.0, -0.06), (0.0, 0.06))):            # the centre plus
+            G.stroke(d, hose([a, b], 0.022), M["off_i"], I * 0.8, cyclic=True)
+    return fn
+
+
+def fx_sheet(frames, cols):
+    fh, fw = frames[0].shape[:2]
+    rows = -(-len(frames) // cols)
+    g = 4
+    sheet = np.zeros((rows * fh + (rows - 1) * g, cols * fw + (cols - 1) * g, 4), np.uint8)
+    for i, f in enumerate(frames):
+        r, c = divmod(i, cols)
+        sheet[r * (fh + g):r * (fh + g) + fh, c * (fw + g):c * (fw + g) + fw] = f
+    return sheet
+
+
 # ---------------------------------------------------------------- the jetpack overlays, Mk2-3 (metres from the pack's centre)
 def jetpack(mk):
     def fn(d, M):
@@ -208,6 +353,25 @@ def kit():
         out.append((f"props/rig/grapple_mk{mk}", img, meta))
         if mk == 1:
             out.append(("props/rig/grapple", img, dict(meta, note="B-205: = grapple_mk1 (RigModules.ArtKey(Grapple)); replaces the Lance stand-in (U-183)")))
+    for name, fn, cab, note in (("survey", survey_tool(), SURVEY_CABLE, "B-217: the Survey, a forearm-strapped instrument case: compass dial, "
+                                 "whip aerial, a brass dish at the front (its focus = the muzzle); no grip; replaces the v2 render"),
+                                ("builder", builder_tool(), BUILDER_CABLE, "B-217: the Builder, a forearm-strapped dirt hopper with a steel scoop "
+                                 "forward (its lip = the muzzle) and a dirt hose to the pack; no grip, nothing flared; replaces the v2 render")):
+        img = render(fn, TW, TH, TPPU, TPIV)[0]
+        out.append((f"props/rig/{name}", img, {"ppu": TPPU, "pivot": list(TPIV), "muzzle": list(MUZZLE[name]),
+                                                "cable_socket": [round(v, 3) for v in cab[-1]], "note": note}))
+    scan = [render(survey_scan(k), 240, 240, TPPU, (0.5, 0.5))[0] for k in range(12)]
+    out.append(("fx/survey_scan/base", fx_sheet(scan, 4), {"ppu": TPPU, "frame_width": 240, "frame_height": 240, "columns": 4, "gutter": 4,
+                                                          "frames": 12, "fps": 12, "pivot": [0.5, 0.5], "facing": "right",
+                                                          "animations": [{"name": "pulse", "start": 0, "length": 12, "loop": False}], "_frames": scan,
+                                                          "note": "B-217: the Survey's scan - a teal ink pulse ring with compass ticks and an echo, "
+                                                                  "breaking into dashes as it fades (no glow; v3 replaces B-037)"}))
+    ghost = [render(builder_ghost(k), 144, 144, TPPU, (0.5, 0.5))[0] for k in range(8)]
+    out.append(("fx/builder_ghost/base", fx_sheet(ghost, 4), {"ppu": TPPU, "frame_width": 144, "frame_height": 144, "columns": 4, "gutter": 4,
+                                                             "frames": 8, "fps": 8, "pivot": [0.5, 0.5], "facing": "right",
+                                                             "animations": [{"name": "idle", "start": 0, "length": 8, "loop": True}], "_frames": ghost,
+                                                             "note": "B-217: the Builder's placement ghost (tile planets; RigToolView scales it to one tile) - "
+                                                                     "cream dashes marching round the tile, ink-edged corner brackets; the Blocked tint reads through"}))
     socks = back_sockets()
     for mk in (2, 3):
         img = render(jetpack(mk), 64, 64, 64, (0.5, 0.5))[0]
@@ -229,7 +393,9 @@ def kit():
     return out
 
 
-V2_REMOVE = ["props/rig/beam_normal.png", "props/rig/beam_emission.png"]          # the v2 beam's maps (UNITY deletes the .meta files)
+V2_REMOVE = ["props/rig/beam_normal.png", "props/rig/beam_emission.png",          # the v2 maps (UNITY deletes the .meta files)
+             "props/rig/survey_normal.png", "props/rig/survey_emission.png", "props/rig/builder_normal.png", "props/rig/builder_emission.png",
+             "fx/survey_scan/base_emission.png", "fx/builder_ghost/base_emission.png"]                                  # (B-217)
 
 
 def export(art):
@@ -238,9 +404,13 @@ def export(art):
     built, problems = [], []
     for key, img, extra_meta in kit():
         h, w = img.shape[:2]
+        frames = extra_meta.pop("_frames", None)
         meta = {"key": key, "style": "v3", "width": w, "height": h, "palette": "earth", **extra_meta}
         hit = v3.palette_hits(img, "earth")[0]
         m = v3.EDGE_MARGIN
+        for i, f in enumerate(frames or []):                                                 # B-217: framed fx, each frame clear
+            if f[:m, :, 3].any() or f[-m:, :, 3].any() or f[:, :m, 3].any() or f[:, -m:, 3].any():
+                problems.append(f"{key} frame {i}: touches the {m} px edge")
         if w % 4 or h % 4:
             problems.append(f"{key}: {w}x{h} not a multiple of 4")
         if hit < 0.995:
@@ -269,7 +439,8 @@ def export(art):
 def keys():
     return [k for k, _i, _m in [(f"props/rig/beam_mk{m}", 0, 0) for m in range(1, 6)] + [("props/rig/beam", 0, 0)]
             + [(f"props/rig/grapple_mk{m}", 0, 0) for m in range(1, 4)] + [("props/rig/grapple", 0, 0)]
-            + [(f"props/rig/jetpack_mk{m}", 0, 0) for m in (2, 3)] + [(f"fx/beam_ray/mk{m}", 0, 0) for m in range(1, 6)]]
+            + [(f"props/rig/jetpack_mk{m}", 0, 0) for m in (2, 3)] + [(f"fx/beam_ray/mk{m}", 0, 0) for m in range(1, 6)]
+            + [("props/rig/survey", 0, 0), ("props/rig/builder", 0, 0), ("fx/survey_scan/base", 0, 0), ("fx/builder_ghost/base", 0, 0)]]
 
 
 # ---------------------------------------------------------------- the review sheet (lock-free)
@@ -388,8 +559,146 @@ def preview(out, footnote=None):
     print("written", out, img.shape[1], "x", img.shape[0])
     for ln in lines:
         print(ln)
+    if footnote:                                                                             # the export: B-217's sheet, stamped too
+        preview_b217(os.path.join(os.path.dirname(out), "review_b217_survey_builder.png"), footnote)
 
 
-if __name__ == "__main__":                       # python -I build_rig_tools_v3.py <review png>
-    preview(sys.argv[1])
+def _half(img):
+    """PPU 128 art -> the surveyor's 64 (2x2 means)."""
+    h, w = img.shape[0] // 2 * 2, img.shape[1] // 2 * 2
+    return np.rint(img[:h, :w].astype(np.float32).reshape(h // 2, 2, w // 2, 2, 4).mean(axis=(1, 3))).astype(np.uint8)
+
+
+def _rot(img, deg, piv):
+    h, w = img.shape[:2]
+    R = int(math.ceil(math.hypot(w, h)))
+    outi = np.zeros((2 * R, 2 * R, 4), np.uint8)
+    yy, xx = np.mgrid[0:2 * R, 0:2 * R]
+    a = math.radians(deg)
+    u = (xx - R) * math.cos(a) - (yy - R) * math.sin(a) + piv[0]
+    v = (xx - R) * math.sin(a) + (yy - R) * math.cos(a) + piv[1]
+    ok = (u >= 0) & (u < w) & (v >= 0) & (v < h)
+    outi[ok] = img[v[ok].astype(int), u[ok].astype(int)]
+    return outi, (R, R)
+
+
+def _ov(dst, fr, x, y, tint=None):
+    h, w = fr.shape[:2]
+    x0, y0, x1, y1 = max(x, 0), max(y, 0), min(x + w, dst.shape[1]), min(y + h, dst.shape[0])
+    if x1 > x0 and y1 > y0:
+        f = fr[y0 - y:y1 - y, x0 - x:x1 - x].astype(np.float32) / 255.0
+        rgb = f[..., :3] * (tint if tint is not None else 1.0)
+        a = f[..., 3:4]
+        dst[y0:y1, x0:x1] = rgb * a + dst[y0:y1, x0:x1] * (1 - a)
+
+
+def preview_b217(out, footnote=None):
+    """B-217's sheet: the Survey and the Builder on the surveyor (as RigToolView holds them), the scan at its in-game size over
+    the surveyor's chest, the builder ghost at one tile (white and Blocked-red), everything at 2x."""
+    import time
+    from meridian import pngio
+    sys.path.insert(0, os.path.dirname(HERE))
+    import review
+    ART = os.path.join(os.path.dirname(os.path.dirname(HERE)), "Assets", "_Game", "Art")
+    side = pngio.read_png_np(os.path.join(ART, "characters", "surveyor", "side_color.png"))
+    FW = FH = 192
+    surv = side[:FH, :FW]
+    paper = np.array(review.PAPER, np.float32)
+    pal = {k: np.array(v3.hex_rgb(v), np.float32) / 255.0 for k, v in v3.PALETTES["earth"].items()}
+    K = {k: (img, m) for k, img, m in kit() if k in ("props/rig/survey", "props/rig/builder", "fx/survey_scan/base", "fx/builder_ghost/base")}
+    scan, ghost = K["fx/survey_scan/base"][1]["_frames"], K["fx/builder_ghost/base"][1]["_frames"]
+    W = 1560
+    rows = []
+    head = np.tile(paper, (28, W, 1)).astype(np.float32)
+    review._label(head, "B-217 the Survey and the Builder (forearm-strapped, no grip), the scan pulse and the builder ghost, v3 ink; 1x = in game (64 px/m)", 6, 8)
+    rows.append(head)
+    HAND = (0.12, 0.95)
+    r = np.empty((FH + 44, W, 3), np.float32)
+    r[:] = pal["sky"]
+    r[FH + 18:] = pal["green"]
+    r[FH + 22:] = pal["brown"]
+    review._label(r, "on the surveyor (RigToolView: the hand at (0.12, 0.95) m): Survey level / up 20; Builder level / down 30 (placing) - the muzzle dot in red", 6, 4, scale=1)
+    for k, (name, aim) in enumerate((("survey", 0), ("survey", 20), ("builder", 0), ("builder", -30))):
+        x0 = 10 + k * 300
+        _ov(r, surv, x0, 24)
+        fx, fz = x0 + FW // 2, 24 + FH
+        t = _half(K[f"props/rig/{name}"][0])
+        timg, tpiv = _rot(t, aim, (TW * TPIV[0] / 2, TH * TPIV[1] / 2))
+        hx, hy = fx + HAND[0] * 64, fz - HAND[1] * 64
+        _ov(r, timg, int(hx - tpiv[0]), int(hy - tpiv[1]))
+        mx, mz = MUZZLE[name]
+        a = math.radians(aim)
+        px, py = hx + 64 * (mx * math.cos(a) - mz * math.sin(a)), hy - 64 * (mx * math.sin(a) + mz * math.cos(a))
+        r[int(py) - 1:int(py) + 2, int(px) - 1:int(px) + 2] = pal["red"]
+        review._label(r, f"{name} {aim:+d} deg", x0 + 4, FH + 26, scale=1)
+    rows.append(r)
+    per = 6
+    for half in (0, 1):                                                                       # the scan, 1x, over the chest
+        rr = np.empty((260, W, 3), np.float32)
+        rr[:] = pal["sky"]
+        rr[236:] = pal["green"]
+        rr[240:] = pal["brown"]
+        if half == 0:
+            review._label(rr, "fx/survey_scan/base at 1x (scale 2: 3.75 m), centred 0.9 m up the surveyor, frames 0-11", 6, 4, scale=1)
+        for i in range(per):
+            k = half * per + i
+            x0 = 10 + i * 252
+            _ov(rr, surv, x0 + 120 - 96, 240 - FH)
+            _ov(rr, scan[k], x0, 240 - int(0.9 * 64) - 120)
+            review._label(rr, f"{k}", x0 + 4, 22, scale=1)
+        rows.append(rr)
+    g = np.tile(paper, (180, W, 1)).astype(np.float32)                                        # the ghost: native, then one tile
+    review._label(g, "fx/builder_ghost/base: frames 0-7 at native 1x (144 px), then at one tile (64 px) white and Blocked (red tint) over a dug cell", 6, 4, scale=1)
+    for k, f in enumerate(ghost):
+        cell = np.empty((144, 144, 3), np.float32)
+        cell[:] = pal["brown"] * 0.6
+        _ov(cell, f, 0, 0)
+        g[22:166, 10 + k * 150:154 + k * 150] = cell
+    rows.append(g)
+    g2 = np.tile(paper, (100, W, 1)).astype(np.float32)
+    small = []
+    for f in ghost:
+        s = f.astype(np.float32)
+        h2 = 64
+        idx = (np.arange(h2) * 144 / h2).astype(int)
+        small.append(np.rint(s[idx][:, idx]).astype(np.uint8))
+    for k, f in enumerate(small[:4]):
+        for j, tint in enumerate((None, np.array([0.95, 0.35, 0.3], np.float32))):
+            x0 = 10 + (k * 2 + j) * 90
+            cell = np.empty((64, 64, 3), np.float32)
+            cell[:] = pal["brown"] * 0.6
+            _ov(cell, f, 0, 0, tint)
+            g2[20:84, x0:x0 + 64] = cell
+    rows.append(g2)
+    z = np.tile(paper, (TH * 2 + 40, W, 1)).astype(np.float32)
+    x = 10
+    for name in ("survey", "builder"):
+        im2 = np.repeat(np.repeat(K[f"props/rig/{name}"][0], 2, 0), 2, 1)
+        _ov(z, im2, x, 24)
+        review._label(z, f"props/rig/{name} at 2x (native 128 ppu)", x, 6, scale=1)
+        x += im2.shape[1] + 30
+    rows.append(z)
+    lines = []
+    m_ = v3.EDGE_MARGIN
+    for key, (img, meta) in K.items():
+        hit = v3.palette_hits(img, "earth")[0] * 100
+        frs = meta.get("_frames") or [img]
+        bad = [i for i, f in enumerate(frs) if f[:m_, :, 3].any() or f[-m_:, :, 3].any() or f[:, :m_, 3].any() or f[:, -m_:, 3].any()]
+        lines.append(f"{key}: {img.shape[1]}x{img.shape[0]}, palette {hit:.1f}%" + (f"; EDGE {bad}" if bad else ""))
+    foot = np.tile(paper, (24 + 16 * 2, W, 1)).astype(np.float32)
+    for i, ln in enumerate(lines):
+        review._label(foot, ln, 6 + (i % 2) * 760, 6 + 16 * (i // 2), scale=1)
+    img = np.vstack(rows + [foot])
+    review.draw(img, time.strftime("%m-%d %H:%M") + " " + (footnote or "design preview (lock-free, fakegp + numpy)"), 2, img.shape[0] - 14, (1.0, 1.0, 0.85))
+    review.write(out, img)
+    print("written", out, img.shape[1], "x", img.shape[0])
+    for ln in lines:
+        print(ln)
+
+
+if __name__ == "__main__":                       # python -I build_rig_tools_v3.py <review png> [--b217]
+    if "--b217" in sys.argv:
+        preview_b217(sys.argv[1])
+    else:
+        preview(sys.argv[1])
     fakegp.restore()
