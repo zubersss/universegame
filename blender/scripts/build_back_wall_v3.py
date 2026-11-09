@@ -193,8 +193,22 @@ def draw_tier(planet, t):
                 bx, by = main[j]
                 stroke(roots, wander(rng, bx, by, rng.uniform(0, math.tau), 8, 5, 0.6), 1.8, 0.6)
         holes, rims = np.zeros((N, N), np.float32), np.zeros((N, N), np.float32)
-        for _ in range(14):
+        spots, tries = [], 0
+        def too_near(cx, cy):
+            """Within 35 px (1x) of another hole, or level with one (within 13 px of its height and 60 px to its side):
+            two ringed dots side by side read as a pair of eyes (D-101). Distances wrap with the tile."""
+            for x, y in spots:
+                dx, dy = abs((cx - x + N / 2) % N - N / 2), abs((cy - y + N / 2) % N - N / 2)
+                if math.hypot(dx, dy) < 70 or (dy < 26 and dx < 120):
+                    return True
+            return False
+        spots, tries = [], 0
+        while len(spots) < 9 and tries < 800:                             # rev 2 / 3 (the 17:03 and 17:04 sheets at 3x)
+            tries += 1
             cx, cy, r = rng.uniform(0, N), rng.uniform(0, N), rng.uniform(5, 10)
+            if too_near(cx, cy):
+                continue
+            spots.append((cx, cy))
             ellipse(rims, cx, cy, r + 3, r * 0.8 + 3, rng.uniform(0, 3))
             ellipse(holes, cx, cy, r, r * 0.8, rng.uniform(0, 3))
         layers += [(roots, R["light"]), (rims, R["light"]), (holes, R["dark"])]
