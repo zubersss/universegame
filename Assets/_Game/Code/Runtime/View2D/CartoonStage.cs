@@ -240,6 +240,65 @@ namespace Meridian.View2D
         public int Crossfades { get; private set; }
         public const float CrossfadeSeconds = 1.5f;
         public const int IncomingOrder = 3;
+
+        // ---- U-171 (B-200's read, B-202's art): the sea from below ----
+        /// <summary>B-202's backgrounds/earth/sea_under under the water line over Earth's sea (its own set: the water column, the far and the near
+        /// seabed, the surface seen from below), anchored on the water line and following the camera down; null off Earth's smooth sea.</summary>
+        public ParallaxLayers SeaUnder { get; private set; }
+        /// <summary>Over the land sets (the base set and an incoming one), under the terrain.</summary>
+        public const int SeaUnderOrder = 20;
+        /// <summary>The shore's crossfade (m): the sea weight is the sea columns' share within half of it either side of the camera (U-128's 3 m).</summary>
+        public const float ShoreBlend = 3f;
+        /// <summary>sea_under's layers that continue down (B-202's json gives them continue_rows 64): the water column, the far and the near seabed.</summary>
+        static readonly int[] SeaContinues = { 0, 1, 2 };
+        /// <summary>The sea weight at the camera now (0 over land, 1 out at sea): sea_under's alpha; the land set's nearest layer fades by 1 − it.</summary>
+        public float SeaWeight { get; private set; }
+        float waterLine = float.NegativeInfinity;
+        Meridian.Terrain.SolidWorldGenerator seaWorld;
+
+        /// <summary>The sea columns' share within ShoreBlend / 2 of x (sampled per half metre: 7 samples). Pure over `sea`.</summary>
+        public static float SeaShare(float x, System.Func<int, bool> sea)
+        {
+            int n = 0, s = 0;
+            for (float d = -ShoreBlend * 0.5f; d <= ShoreBlend * 0.5f + 1e-3f; d += 0.5f, n++) if (sea(Mathf.FloorToInt(x + d))) s++;
+            return n > 0 ? (float)s / n : 0f;
+        }
+
+        void ConfigureSea(PlanetSideRoot side, Meridian.Planets.PlanetConfig config)
+        {
+            seaWorld = config.id == Meridian.Planets.PlanetId.Earth && side.terrain != null && side.terrain.SmoothGround ? side.terrain.BaseGenerator as Meridian.Terrain.SolidWorldGenerator : null;
+            SeaWeight = 0f;
+            if (seaWorld == null) { if (SeaUnder != null) { SeaUnder.Release(); SeaUnder.gameObject.SetActive(false); } waterLine = float.NegativeInfinity; return; }
+            waterLine = config.datumY + 1f; // PlanetBackdrop's sea level: the water fills the datum row
+            if (SeaUnder == null) { var g = new GameObject("CartoonSeaUnder"); g.transform.SetParent(transform, false); SeaUnder = g.AddComponent<ParallaxLayers>(); }
+            SeaUnder.gameObject.SetActive(false); // until the camera is out at sea and under the surface
+            SeaUnder.view = Layers.view;
+            SeaUnder.orderOffset = SeaUnderOrder;
+            SeaUnder.followBelow = true;
+            SeaUnder.alpha = 0f;
+            SeaUnder.continueOnly = SeaContinues; // the water column and the two seabeds go on down past their sheets (to any depth); the surface band does not
+            seaConfigured = false;
+        }
+        bool seaConfigured;
+
+        /// <summary>Out at sea the land set's nearest layer gives way and sea_under shows under the water line; at the shore they crossfade over
+        /// ShoreBlend; above the water, or on land, sea_under is off (no draw).</summary>
+        void FollowSea()
+        {
+            if (seaWorld == null || Layers == null || Layers.view == null) { SeaWeight = 0f; return; }
+            var cam = Layers.view;
+            var c = cam.transform.position;
+            float w = SeaShare(c.x, x => seaWorld.SeaAt(x));
+            SeaWeight = w;
+            Layers.nearAlpha = 1f - w;
+            if (Incoming != null) Incoming.nearAlpha = 1f - w;
+            float half = Meridian.CameraRig.SideView.HalfHeight(cam);
+            bool under = w > 0f && c.y - half < waterLine; // some of the frame is under the water line
+            if (SeaUnder.gameObject.activeSelf != under) SeaUnder.gameObject.SetActive(under);
+            if (!under) return;
+            if (!seaConfigured) { SeaUnder.ConfigureFor("earth", "sea_under", waterLine); SeaUnder.anchorY = waterLine; seaConfigured = true; }
+            SeaUnder.alpha = w;
+        }
         /// <summary>The incoming set's alpha `t` seconds into a border crossfade (a smooth step over CrossfadeSeconds). Pure.</summary>
         public static float CrossfadeAlpha(float t, float seconds) { float k = seconds > 0f ? Mathf.Clamp01(t / seconds) : 1f; return k * k * (3f - 2f * k); }
         Meridian.Planets.PlanetId planetId;
@@ -366,6 +425,8 @@ namespace Meridian.View2D
             Layers.upperScene = UpperOf(Scene); // U-133: the spot shares the storm's layers 1–2
             Layers.mirrorX = MirrorOf(Scene); // U-144
             Layers.ConfigureFor(planetName, SetOf(Scene), DatumFor(Scene, surfaceDatum), FallbackFor(config.id));
+            Layers.nearAlpha = 1f;
+            ConfigureSea(side, config); // U-171
             // U-128: from here the datum and the set follow the camera's band (FollowBand); the spawn's band keeps this surface, so the camp frames do not move.
             // D-146: Mercury's bands take the generator's own surface (noise + the cold-trap bowls, no small craters): the plain by the spawn, each trap per column.
             // U-139: Mercury and Venus follow the walking surface — the band surface's noise averaged, the bowls exact, each POI's stamped ground across
@@ -484,6 +545,7 @@ namespace Meridian.View2D
                 if (Incoming != null && Incoming.groundTile != tile) Incoming.groundTile = tile;
             }
             if (Active && Layers != null && Layers.view != null && Datum != null) FollowBand(Layers.view.transform.position.x);
+            if (Active) FollowSea(); // U-171: after the band (a crossfade may swap the base set)
             if (Active && planetId == Meridian.Planets.PlanetId.Mercury && Ground != null && worldWidth > 0)
             {
                 // U-123: the terminator creeps 1 m per 6 s; when its dawn column moves, the strips lay out again (slate ↔ regolith at the band's edges; ~35 columns, no allocation).

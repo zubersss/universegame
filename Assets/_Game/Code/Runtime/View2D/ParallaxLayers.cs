@@ -124,6 +124,24 @@ namespace Meridian.View2D
         public float scrollX;
         /// <summary>U-118: added to the sorting orders (BackOrder + orderOffset + n): the storm veil draws over the base set.</summary>
         public int orderOffset;
+        /// <summary>U-171: the layers follow the camera below the anchor too (the sea from below: the seabed rises past as the camera dives); a land
+        /// set holds its datum pose under it. Set before ConfigureFor.</summary>
+        public bool followBelow;
+        /// <summary>U-171: the nearest layer and its continuation fade by this on top of `alpha` (Earth's land set out over the sea: no beach or
+        /// meadow on or under the water).</summary>
+        public float nearAlpha = 1f;
+        float appliedNear = -1f;
+        /// <summary>U-171: when set, exactly these layers (by n) go on down past their sheets with their continue_rows (U-164's strips), and no
+        /// other fill draws (sea_under: the water column and the two seabeds continue, the surface band does not). Set before ConfigureFor.</summary>
+        public int[] continueOnly;
+        /// <summary>The nearest drawn layer's index (-1 before the layers are built).</summary>
+        int NearestIndex()
+        {
+            int k = -1;
+            for (int i = 0; i < renderers.Count && i < Layout.layers.Length; i++)
+                if (renderers[i] != null && (onlyLayer < 0 || Layout.layers[i].n == onlyLayer) && (k < 0 || Layout.layers[i].n > Layout.layers[k].n)) k = i;
+            return k;
+        }
         /// <summary>U-118: true when the scene asked for had no json and the fallback scene was configured instead (B-141's plains until it lands).</summary>
         public bool UsedFallback { get; private set; }
         float appliedAlpha = -1f;
@@ -269,6 +287,13 @@ namespace Meridian.View2D
 
         void PlaceFill(Vector3 c)
         {
+            if (continueOnly != null)
+            {
+                if (fill != null && fill.enabled) fill.enabled = false;
+                FillTop = float.NaN;
+                ContinueOthers(-1);
+                return;
+            }
             if (!groundFill.HasValue) { if (fill != null && fill.enabled) fill.enabled = false; FillTop = float.NaN; HideOthers(); return; }
             if (fill == null)
             {
@@ -353,7 +378,7 @@ namespace Meridian.View2D
             }
             if (!nearOpaque) return false;
             if (fill.sprite != nearFill) { fill.sprite = nearFill; fill.drawMode = SpriteDrawMode.Tiled; }
-            var tint = new Color(1f, 1f, 1f, alpha);
+            var tint = new Color(1f, 1f, 1f, alpha * nearAlpha); // U-171: the near layer's strip fades with it
             if (fill.color != tint) fill.color = tint;
             fill.flipX = near.flipX;
             fill.sortingOrder = BackOrder + orderOffset + l.n;
@@ -388,7 +413,8 @@ namespace Meridian.View2D
                 while (layerFills.Count <= i) { layerFills.Add(null); layerFillFrom.Add(null); layerFillSprite.Add(null); }
                 var r = renderers[i];
                 var f = layerFills[i];
-                bool want = i != nearIndex && r != null && r.enabled && r.sprite != null && r.sprite != white;
+                bool listed = continueOnly != null ? System.Array.IndexOf(continueOnly, Layout.layers[i].n) >= 0 : i != nearIndex;
+                bool want = listed && r != null && r.enabled && r.sprite != null && r.sprite != white;
                 if (!want) { if (f != null && f.enabled) f.enabled = false; continue; }
                 if (f == null)
                 {
@@ -439,10 +465,11 @@ namespace Meridian.View2D
         {
             if (view == null) return;
             var c = view.transform.position;
-            if (alpha != appliedAlpha)
+            if (alpha != appliedAlpha || nearAlpha != appliedNear)
             {
-                for (int i = 0; i < renderers.Count; i++) { var r = renderers[i]; if (r == null) continue; var col = r.color; col.a = alpha; r.color = col; }
-                appliedAlpha = alpha;
+                int near = NearestIndex();
+                for (int i = 0; i < renderers.Count; i++) { var r = renderers[i]; if (r == null) continue; var col = r.color; col.a = alpha * (i == near ? nearAlpha : 1f); r.color = col; }
+                appliedAlpha = alpha; appliedNear = nearAlpha;
             }
             float frameW = FrameWidth();
             for (int i = 0; i < renderers.Count && i < Layout.layers.Length; i++)
@@ -460,7 +487,7 @@ namespace Meridian.View2D
                 float x = ParallaxMath.LayerX(c.x, l.parallax) + scrollX; // U-118: the storm's wind
                 // Keep the 3-wide strip centred on the camera: shift by whole tile widths (tileable art, no seam).
                 if (w > 0f) x += Mathf.Round((c.x - x) / w) * w;
-                var pos = new Vector3(x, ParallaxMath.LayerY(FollowY(c.y, anchorY), anchorY, datumY, l.y_m, l.parallax), 0f);
+                var pos = new Vector3(x, ParallaxMath.LayerY(followBelow ? c.y : FollowY(c.y, anchorY), anchorY, datumY, l.y_m, l.parallax), 0f);
                 if (ParallaxMath.Pulsed(l.pulse))
                 {
                     // U-133 (D-148): the storm rim breathes about its pulse pivot; its alpha rides on the set's.

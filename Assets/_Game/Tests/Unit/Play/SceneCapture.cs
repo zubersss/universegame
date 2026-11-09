@@ -2639,6 +2639,68 @@ namespace Meridian.Tests
             UnityEngine.Object.Destroy(uiGo);
         }
 
+        /// <summary>U-171 (B-200 / B-202): Earth's sea from below → coordination/reports/unity/u171/: smoke_43_earth_sea (the build smoke's frame:
+        /// 3 m under, off the shore), 2_sea_3m, 3_sea_10m, 4_seabed out at sea, 5_coast (the shore above the water, unchanged).</summary>
+        [UnityTest, Timeout(300000)]
+        public IEnumerator CaptureU171Sea()
+        {
+            var name = Environment.GetEnvironmentVariable(Variable);
+            if (string.IsNullOrEmpty(name)) Assert.Ignore($"Set {Variable} (tools/unity_capture.ps1).");
+            if (SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.Null)
+                Assert.Fail("No graphics device: run without -nographics.");
+            bool wasCartoon = Meridian.View2D.CartoonStage.Enabled;
+            Meridian.View2D.CartoonStage.Enabled = true;
+            try
+            {
+#if UNITY_EDITOR
+                yield return UnityEditor.SceneManagement.EditorSceneManager.LoadSceneAsyncInPlayMode(
+                    CorePath, new LoadSceneParameters(LoadSceneMode.Single));
+#endif
+                var director = UnityEngine.Object.FindAnyObjectByType<SceneDirector>();
+                float timeout = Time.realtimeSinceStartup + 30f;
+                while ((!director.IsReady || !director.PlanetSide.terrain.IsSettled) && Time.realtimeSinceStartup < timeout) yield return null;
+                var side = director.PlanetSide;
+                if (side.hazards != null) side.hazards.enabled = false;
+                if (side.dayNight != null) side.dayNight.Override = 0.45f;
+                side.creatures.autoSpawn = false;
+                side.creatures.DespawnAll();
+                var dir = "coordination/reports/unity/u171";
+                Directory.CreateDirectory(dir);
+                var player = side.player;
+                var stage = UnityEngine.Object.FindAnyObjectByType<Meridian.View2D.CartoonStage>();
+                var gen = (Meridian.Terrain.SolidWorldGenerator)side.terrain.BaseGenerator;
+                var follow = side.sideCamera.GetComponent<Meridian.Player.CameraFollow>();
+                int datum = side.Config.datumY;
+                float water = datum + 1f;
+                Meridian.Terrain.EarthBiomes.Range(Meridian.Terrain.Biome.Ocean, out int os, out int len);
+                int swim = os + 16, deep = os + 40;
+                for (int x = os + 16; x < os + 400; x++) if (gen.SurfaceHeight(x) <= datum - 4) { swim = x; break; }
+                for (int x = os + 20; x < os + len - 20; x++) if (gen.SeaAt(x) && gen.SurfaceHeight(x) <= water - 18) { deep = x; break; }
+                IEnumerator Shot(string label, Vector2 at)
+                {
+                    player.Body.simulated = false;
+                    player.Body.position = at; player.transform.position = at;
+                    float until = Time.realtimeSinceStartup + 12f;
+                    yield return null;
+                    while (!side.terrain.IsSettled && Time.realtimeSinceStartup < until) yield return null;
+                    if (follow != null) follow.SnapToTarget();
+                    yield return new WaitForSeconds(2f);
+                    if (stage.SeaUnder != null) for (float w = Time.realtimeSinceStartup + 6f; stage.SeaUnder.gameObject.activeSelf && stage.SeaUnder.placeholders.Contains(true) && Time.realtimeSinceStartup < w;) yield return null;
+                    yield return Save(side.sideCamera, $"{name}_{label}");
+                    File.Copy($"logs/capture_{name}_{label}.png", $"{dir}/{label}.png", true);
+                    TestContext.Out.WriteLine($"[MERIDIAN] u171 {label}: x {at.x:0}, {water - at.y:0.0} m under the surface, sea weight {stage.SeaWeight:0.00}, the land set's near layer {stage.Layers.nearAlpha:0.00}, sea_under {(stage.SeaUnder != null && stage.SeaUnder.gameObject.activeSelf ? stage.SeaUnder.alpha.ToString("0.00") : "off")}");
+                }
+                yield return Shot("smoke_43_earth_sea", new Vector2(swim + 0.5f, water - 3f));
+                yield return Shot("2_sea_3m", new Vector2(deep + 0.5f, water - 3f));
+                yield return Shot("3_sea_10m", new Vector2(deep + 0.5f, water - 10f));
+                yield return Shot("4_seabed", new Vector2(deep + 0.5f, gen.SurfaceHeight(deep) + 1.5f));
+                yield return Shot("5_coast", new Vector2(os - 12.5f, side.terrain.SurfaceAt(os - 12.5f) + 0.5f));
+                player.Body.simulated = true;
+                LogAssert.NoUnexpectedReceived();
+            }
+            finally { Meridian.View2D.CartoonStage.Enabled = wasCartoon; }
+        }
+
         /// <summary>U-180: the two Earth POIs on the smooth ground, re-shot as the build smoke frames them → coordination/reports/unity/u180/:
         /// smoke_44_earth_survey_archive (the funnel into the shaft, the rounded room, the door beside the funnel, the terminal on its floor) and
         /// smoke_45_earth_launch_complex (the gantry and the tower ruin on their pad).</summary>
