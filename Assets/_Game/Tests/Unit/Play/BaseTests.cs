@@ -118,9 +118,24 @@ namespace Meridian.Tests
             for (int wx = sx - 3; wx <= sx + 3; wx++) Assert.NotNull(bases.Place(new Vector2(wx + 0.5f, roof + 0.5f), PieceKind.Wall), $"roof at {wx}");
             Assert.NotNull(bases.Place(new Vector2(sx + 1.5f, t.TopSolidY(sx + 1) + 1.5f), PieceKind.Lamp), "the lamp");
             for (int i = 0; i < 5; i++) yield return new WaitForFixedUpdate();
+            // The pieces' v3 sheets dress their views a few frames after the placement, and a sheet brings its own fit (0.6.1's first
+            // smoke_18: a bottom wall fitted to its cell alone stood on the slope with a slit under the wall above): judged once they are in.
+            float dressed = Time.realtimeSinceStartup + 10f;
+            while (Time.realtimeSinceStartup < dressed)
+            {
+                bool all = true;
+                foreach (var p in bases.pieces)
+                {
+                    var sheet = p.go.transform.Find("View").GetComponent<Meridian.Art.SheetProp>();
+                    if (sheet == null || !sheet.Ready) { all = false; break; }
+                }
+                if (all) break;
+                yield return null;
+            }
+            yield return null;
             var log = new System.Text.StringBuilder();
             var failures = new System.Collections.Generic.List<string>();
-            int onGround = 0;
+            int onGround = 0, stretched = 0;
             float maxFoot = 0f;
             foreach (var p in bases.pieces)
             {
@@ -129,6 +144,16 @@ namespace Meridian.Tests
                 onGround++;
                 maxFoot = Mathf.Max(maxFoot, p.foot);
                 float drawnBase = p.go.transform.Find("View").position.y;
+                if (p.spec.stretch)
+                {
+                    // A wall on its foot still fills its cells: its drawing ends at their top, where the wall stacked on it begins.
+                    stretched++;
+                    var drawn = p.go.transform.Find("View").GetComponent<SpriteRenderer>();
+                    float drawnTop = drawn.bounds.max.y, cellTop = y + p.spec.size.y;
+                    log.Append($" {p.go.name} top {drawnTop - cellTop:+0.00;-0.00}");
+                    if (drawn.sprite == null || drawnTop < cellTop - 0.05f || drawnTop > cellTop + 0.2f)
+                        failures.Add($"{p.go.name}: drawn top {drawnTop:0.00}, its cells' top {cellTop:0.00} (a slit under the piece above, or an overlap), foot {p.foot:0.00}");
+                }
                 float ground = float.NaN;
                 foreach (float q in new[] { 0.1f, 0.5f, 0.9f })
                 {
@@ -141,7 +166,8 @@ namespace Meridian.Tests
             }
             TestContext.Out.WriteLine($"[MERIDIAN] u194 shelter at {sx}:{log}");
             Assert.AreEqual(3, onGround, "two wall columns and the lamp on the ground");
-            Assert.IsEmpty(failures, "a piece over a gap or sunk into the slope (base more than 0.1 m off the drawn ground): " + string.Join("; ", failures));
+            Assert.AreEqual(2, stretched, "both bottom walls' drawings judged against their cells' top");
+            Assert.IsEmpty(failures, "a piece over a gap or sunk into the slope (base more than 0.1 m off the drawn ground), or a wall not filling its cells: " + string.Join("; ", failures));
             Assert.Greater(maxFoot, 0.05f, "smoke_18's spot stands the grid's tiles over the drawn slope (the case under test)");
             LogAssert.NoUnexpectedReceived();
         }

@@ -287,8 +287,11 @@ namespace Meridian.Building
             Dress(view, spec, piece.foot);
             // U-076: the piece's model on the footprint's bottom centre, scaled like the sprite (stretch pieces fill
             // their cells; the others keep their proportions at the footprint's height).
+            // U-194 (0.6.1's first smoke_18): a stretched piece's sheet fills its cells and its foot. The sheet's own fit replaces the
+            // sprite's scale, so fitted to the cells alone a bottom wall kept one cell's height from the foot down: a slit under the wall above.
+            var fitTo = new Vector2(spec.size.x, spec.size.y + (spec.stretch ? piece.foot : 0f));
             piece.model = Meridian.Art.ModelSwap.Attach(view, spec.artKey, go.transform, viewGo.transform.localPosition,
-                fit: spec.stretch ? Meridian.Art.ModelSwap.Fit.Stretch : Meridian.Art.ModelSwap.Fit.Height, footprint: spec.size);
+                fit: spec.stretch ? Meridian.Art.ModelSwap.Fit.Stretch : Meridian.Art.ModelSwap.Fit.Height, footprint: fitTo);
             if (spec.kind == PieceKind.Lamp)
             {
                 var lightT = go.transform.Find("Light");
