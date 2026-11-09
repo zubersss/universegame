@@ -175,6 +175,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 3db3794ec1825984a88d01d85e4ab4d6
+    m_Address: icons/tools/shovel
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 3ebea58593b1e5a4c885d049aae32d13
     m_Address: icons/nodes/sur_rare
     m_ReadOnly: 0
@@ -610,11 +615,6 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: f27b5962baa15424db77b3fee89c76d9
-    m_Address: icons/thruster_mk2/base
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: f5ec467e6931cae40b800e8adbf491e7
     m_Address: icons/soil/base
     m_ReadOnly: 0
@@ -622,6 +622,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: f5f2df56f839b3441a56bbd101c5faff
     m_Address: icons/nodes/asc_jet_2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: fe2fdb31d3e6a204ea5601dc092e247f
+    m_Address: icons/thruster_mk2/base
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

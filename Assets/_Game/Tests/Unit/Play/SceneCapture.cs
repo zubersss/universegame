@@ -3707,6 +3707,94 @@ namespace Meridian.Tests
             LogAssert.NoUnexpectedReceived();
         }
 
+        /// <summary>U-193 (D-182, B-226): the shovel first → coordination/reports/unity/u193/: 1_shovel_midswing (a held stroke at the camp's
+        /// edge, halfway), 2_shovel_flick (just after the stroke: the dirt flick), 3_tree_the_beam (the Skill Tree, The Beam selected).</summary>
+        [UnityTest, Timeout(300000)]
+        public IEnumerator CaptureU193Shovel()
+        {
+            var name = Environment.GetEnvironmentVariable(Variable);
+            if (string.IsNullOrEmpty(name)) Assert.Ignore($"Set {Variable} (tools/unity_capture.ps1).");
+            if (SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.Null)
+                Assert.Fail("No graphics device: run without -nographics.");
+            bool wasCartoon = Meridian.View2D.CartoonStage.Enabled;
+            Meridian.View2D.CartoonStage.Enabled = true;
+            var state = GameState.Instance;
+            try
+            {
+#if UNITY_EDITOR
+                yield return UnityEditor.SceneManagement.EditorSceneManager.LoadSceneAsyncInPlayMode(
+                    CorePath, new LoadSceneParameters(LoadSceneMode.Single));
+#endif
+                var director = UnityEngine.Object.FindAnyObjectByType<SceneDirector>();
+                float timeout = Time.realtimeSinceStartup + 30f;
+                while ((!director.IsReady || !director.PlanetSide.terrain.IsSettled) && Time.realtimeSinceStartup < timeout) yield return null;
+                var side = director.PlanetSide;
+                state = GameState.Instance;
+                if (side.hazards != null) side.hazards.enabled = false;
+                if (side.dayNight != null) side.dayNight.Override = 0.45f;
+                side.creatures.autoSpawn = false; side.creatures.DespawnAll();
+                state.skillNodes.Clear();
+                Meridian.Progress.SkillStats.Apply(state);
+                var dir = "coordination/reports/unity/u193";
+                Directory.CreateDirectory(dir);
+                var player = side.player;
+                player.externalInput = true; player.intent = default;
+                var input = player.GetComponent<Meridian.Player.PlayerRigInput>();
+                var view = player.GetComponentInChildren<Meridian.Player.RigToolView>();
+                var follow = side.sideCamera.GetComponent<Meridian.Player.CameraFollow>();
+                int camp = Mathf.FloorToInt(Meridian.Planet.POI.PoiCatalog.SpawnCamp.CenterX);
+                float x = camp + 16.5f;
+                var feet = new Vector2(x, side.terrain.SurfaceAt(x) + 0.05f);
+                player.Body.position = feet; player.transform.position = feet; player.Body.linearVelocity = Vector2.zero;
+                for (int i = 0; i < 40; i++) yield return new WaitForFixedUpdate();
+                if (follow != null) follow.SnapToTarget();
+                input.module = Meridian.Rig.RigModule.Beam;
+                var target = player.Body.position + new Vector2(1.3f, -0.6f);
+                input.AimAt(target);
+                float until = Time.realtimeSinceStartup + 10f;
+                while ((view.Tool.sprite == null || !view.Tool.sprite.name.Contains("shovel")) && Time.realtimeSinceStartup < until) yield return null;
+                yield return new WaitForSeconds(1f);
+                IEnumerator Shot(string label, Canvas ui = null)
+                {
+                    if (ui != null) yield return SaveWithUi(side.sideCamera, ui, $"{name}_{label}");
+                    else yield return Save(side.sideCamera, $"{name}_{label}");
+                    File.Copy($"logs/capture_{name}_{label}.png", $"{dir}/{label}.png", true);
+                }
+                // a held stroke, shot halfway
+                float need = side.rig.StrokeSeconds(target);
+                input.holdUse = true;
+                while (input.StrokeProgress < 0.5f) yield return null;
+                yield return Shot("1_shovel_midswing", side.sideHud.RankSlot.canvas);
+                TestContext.Out.WriteLine($"[MERIDIAN] u193 1_shovel_midswing: tool {side.rig.Tool}, stroke {need:0.00} s, progress {input.StrokeProgress:0.00}, arc {view.ScoopArcDegrees:0.0} deg, sprite {(view.Tool.sprite != null ? view.Tool.sprite.name : "-")}");
+                // the stroke lands: the flick
+                bool dug = false;
+                System.Action<Vector2> onDug = _ => dug = true;
+                side.rig.Dug += onDug;
+                until = Time.realtimeSinceStartup + 5f;
+                while (!dug && Time.realtimeSinceStartup < until) yield return null;
+                side.rig.Dug -= onDug;
+                input.holdUse = false;
+                yield return new WaitForSeconds(0.12f);
+                yield return Shot("2_shovel_flick", side.sideHud.RankSlot.canvas);
+                TestContext.Out.WriteLine($"[MERIDIAN] u193 2_shovel_flick: dug {dug}");
+                // the tree: The Beam selected
+                state.scrip = 300;
+                var panel = side.sideHud.Skills;
+                panel.SetOpen(true);
+                panel.Select("dig_power_1");
+                yield return new WaitForSeconds(2f);
+                yield return Shot("3_tree_the_beam", panel.Title.canvas);
+                TestContext.Out.WriteLine($"[MERIDIAN] u193 3_tree_the_beam: '{panel.Status.text}', cost '{panel.CostText.text}', BUY {(panel.Buy.interactable ? "on" : "greyed")}");
+                panel.SetOpen(false);
+                LogAssert.NoUnexpectedReceived();
+            }
+            finally
+            {
+                Meridian.View2D.CartoonStage.Enabled = wasCartoon;
+                if (state != null) { state.skillNodes.Clear(); Meridian.Progress.SkillStats.Apply(state); }
+            }
+        }
+
         /// <summary>U-175 (D-174): the Skill Tree panel topside at Earth's camp, B-204's mock-up state (six bought, Beam Power III chosen):
         /// 1_skill_tree.png with 2 of its 6 hematite (BUY greyed, the reason), 2_skill_tree_ready.png with 6 → coordination/reports/unity/u175/.</summary>
         [UnityTest, Timeout(240000)]

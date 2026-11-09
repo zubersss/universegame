@@ -57,7 +57,7 @@ namespace Meridian.Tests
                 foreach (var c in node.items) Assert.NotNull(ItemRegistry.Get(c.item), $"{node.id}: {c.item} is an item");
                 Assert.Greater(node.mods.Length, 0, $"{node.id}: an effect");
             }
-            Assert.AreEqual(80, t.Get("dig_power_1").scrip);
+            Assert.AreEqual(250, t.Get("dig_power_1").scrip, "U-193 (D-182): The Beam, 250 Scrip");
             Assert.AreEqual(1, t.Get("dig_core_bit").datacores);
             Assert.AreEqual("deep_diamond", t.Get("dig_core_bit").items[0].item);
         }
@@ -69,11 +69,11 @@ namespace Meridian.Tests
             Assert.AreEqual(SkillTree.BuyResult.Locked, t.CanBuy(s, "dig_power_2", true), "ring 2 needs its link");
             Assert.AreEqual(SkillTree.BuyResult.NotTopside, t.CanBuy(s, "dig_power_1", false), "topside only");
             s.scrip = 50;
-            Assert.AreEqual(SkillTree.BuyResult.Scrip, t.CanBuy(s, "dig_power_1", true), "80 Scrip");
+            Assert.AreEqual(SkillTree.BuyResult.Scrip, t.CanBuy(s, "dig_power_1", true), "250 Scrip (D-182)");
             s.scrip = 100000;
             int before = s.scrip;
             Assert.AreEqual(SkillTree.BuyResult.Ok, t.Buy(s, "dig_power_1", true));
-            Assert.AreEqual(before - 80, s.scrip, "the Scrip spent");
+            Assert.AreEqual(before - 250, s.scrip, "the Scrip spent");
             Assert.AreEqual(SkillTree.BuyResult.AlreadyBought, t.CanBuy(s, "dig_power_1", true));
             Assert.AreEqual(SkillTree.BuyResult.Ok, t.Buy(s, "dig_power_2", true), "the link opens ring 2");
             Assert.AreEqual(SkillTree.BuyResult.Materials, t.CanBuy(s, "dig_power_3", true), "ring 3 needs hematite × 6 from the pack");

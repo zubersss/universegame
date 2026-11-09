@@ -540,6 +540,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d07a422dae8269940a53524f63afbcdd
+    m_Address: fx/shovel_flick/base/animator
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: d2373a10433b1b04698fd0ef2859acaf
     m_Address: fx/rare/sparkle_t3
     m_ReadOnly: 0
@@ -622,6 +627,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: f57130768d03b9b4393239172bcd67ae
     m_Address: fx/ship/vapor_cone
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f5fbc30df89a77448ad2c1bd37194ad1
+    m_Address: fx/shovel_flick/base
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

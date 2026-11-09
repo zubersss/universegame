@@ -33,8 +33,9 @@ namespace Meridian.FX
             }
         }
 
-        /// <summary>Starts `key` at `position` (its sheet pivot lands there). Returns false when the art isn't loaded yet.</summary>
-        public bool Play(string key, Vector2 position, float scale = 1f, float rotationDeg = 0f)
+        /// <summary>Starts `key` at `position` (its sheet pivot lands there), mirrored with `flipX` and multiplied by `tint` (U-193: the
+        /// shovel's flick; white and unmirrored otherwise). Returns false when the art isn't loaded yet.</summary>
+        public bool Play(string key, Vector2 position, float scale = 1f, float rotationDeg = 0f, bool flipX = false, Color? tint = null)
         {
             var sheet = FxSheet.Get(key);
             if (!sheet.Ready) return false;
@@ -53,6 +54,8 @@ namespace Meridian.FX
             if (sheet.material != null) sr.sharedMaterial = sheet.material;
             sr.transform.SetPositionAndRotation(new Vector3(position.x, position.y, 0f), Quaternion.Euler(0f, 0f, rotationDeg));
             sr.transform.localScale = new Vector3(scale, scale, 1f);
+            sr.flipX = flipX;
+            sr.color = tint ?? Color.white;
             sr.enabled = true;
             return true;
         }

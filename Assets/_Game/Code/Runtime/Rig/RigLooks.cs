@@ -10,15 +10,21 @@ namespace Meridian.Rig
     /// </summary>
     public static class RigLooks
     {
+        /// <summary>U-193 (D-182): the dig slot's look: 0 the shovel until The Beam; then the Beam by Dig power, one node later than U-183's
+        /// chain: dig_power_1 (The Beam) Mk1, _2 Mk2, _3 Mk3, _4 Mk4, _5 Mk5.</summary>
         public static int BeamMk(ICollection<string> bought)
         {
-            if (bought == null) return 1;
+            if (bought == null) return 0;
             if (bought.Contains("dig_power_5")) return 5;
-            if (bought.Contains("dig_power_4") || bought.Contains("dig_power_3")) return 4;
-            if (bought.Contains("dig_power_2")) return 3;
-            if (bought.Contains("dig_power_1")) return 2;
-            return 1;
+            if (bought.Contains("dig_power_4")) return 4;
+            if (bought.Contains("dig_power_3")) return 3;
+            if (bought.Contains("dig_power_2")) return 2;
+            if (bought.Contains("dig_power_1")) return 1;
+            return 0;
         }
+
+        /// <summary>U-193: the shovel's sprite (B-226; the Beam Mk1 stands in until it is exported).</summary>
+        public const string ShovelKey = "props/rig/shovel";
 
         public static int GrappleMk(ICollection<string> bought)
         {
@@ -42,7 +48,8 @@ namespace Meridian.Rig
         /// <summary>The tool's sprite key at a Mk: Mk1 the module's own (props/rig/beam = beam_mk1), else props/rig/beam_mk&lt;n&gt; /
         /// grapple_mk&lt;n&gt;. The archived v2 Lance is never a look (D-087).</summary>
         public static string ToolKey(RigModule m, int mk) =>
-            mk <= 1 || (m != RigModule.Beam && m != RigModule.Grapple) ? RigModules.ArtKey(m) : $"{RigModules.ArtKey(m)}_mk{mk}";
+            m == RigModule.Beam && mk <= 0 ? ShovelKey
+            : mk <= 1 || (m != RigModule.Beam && m != RigModule.Grapple) ? RigModules.ArtKey(m) : $"{RigModules.ArtKey(m)}_mk{mk}";
 
         /// <summary>The Beam's ray at a Mk (fx/beam_ray/mk&lt;n&gt;; the v2 base sheet is not used).</summary>
         public static string RayKey(int mk) => $"fx/beam_ray/mk{System.Math.Clamp(mk, 1, 5)}";

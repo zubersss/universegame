@@ -59,9 +59,9 @@ namespace Meridian.Tests
                 Meridian.Progress.SkillStats.Apply(state);
                 rig.module = RigModule.Beam;
                 float until = Time.realtimeSinceStartup + 10f;
-                while ((tool.Tool.sprite == null || !tool.Tool.sprite.name.Contains("beam_mk3")) && Time.realtimeSinceStartup < until) yield return null;
-                Assert.AreEqual(3, tool.MkOf(RigModule.Beam));
-                StringAssert.Contains("beam_mk3", tool.Tool.sprite.name, "the Beam Mk3 in hand");
+                while ((tool.Tool.sprite == null || !tool.Tool.sprite.name.Contains("beam_mk2")) && Time.realtimeSinceStartup < until) yield return null;
+                Assert.AreEqual(2, tool.MkOf(RigModule.Beam), "U-193: The Beam is Mk1, dig_power_2 Mk2");
+                StringAssert.Contains("beam_mk2", tool.Tool.sprite.name, "the Beam Mk2 in hand");
                 rig.module = RigModule.Grapple;
                 until = Time.realtimeSinceStartup + 10f;
                 while ((tool.Tool.sprite == null || !tool.Tool.sprite.name.Contains("grapple_mk2")) && Time.realtimeSinceStartup < until) yield return null;

@@ -29,18 +29,23 @@
  "nodes": [
   {
    "id": "dig_power_1",
-   "name": "Beam Power I",
+   "name": "The Beam",
    "branch": "dig",
    "ring": 1,
    "slot": 0,
    "angle": -15,
-   "effect": "Beam power +0.5",
-   "scrip": 80,
+   "effect": "The Beam replaces the shovel: faster strokes, a longer reach",
+   "scrip": 250,
    "items": [],
    "datacores": 0,
    "requires": [],
    "sideways": "",
    "mods": [
+    {
+     "stat": "beam",
+     "op": "flag",
+     "value": 1
+    },
     {
      "stat": "beam_power",
      "op": "add",

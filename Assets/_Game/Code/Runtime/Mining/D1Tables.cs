@@ -27,6 +27,8 @@ namespace Meridian.Mining
         [Serializable] public sealed class Material { public string item; public float scrip; public float kg; }
 
         public float surfaceLineDepth = 2f, strokeBaseSeconds = 0.25f, strokeCapSeconds = 8f, beamPowerStart = 1f;
+        /// <summary>U-193 (D-182, D1_TABLES §1): the shovel a new surveyor digs with: its stroke base and cap (s), its power and reach (m).</summary>
+        public float shovelStrokeBaseSeconds = 0.5f, shovelCapSeconds = 12f, shovelPower = 1f, shovelReachM = 2f;
         public float packLimitKg = 30f, loadK = 0.5f, waystationBonus = 0.25f;
         public int dirtStoreStart = 60, pocketCount = 3;
 
@@ -118,10 +120,15 @@ namespace Meridian.Mining
         public float PlanetHardness(PlanetId id) => PlanetOf(id)?.hardness ?? 1f;
 
         /// <summary>A Beam stroke's time: base × planet hardness × tier hardness ÷ Beam power, capped (no depth gate).</summary>
-        public float StrokeSeconds(PlanetId id, float depthM, float beamPower)
+        public float StrokeSeconds(PlanetId id, float depthM, float beamPower) => StrokeSeconds(id, depthM, beamPower, Meridian.Rig.DigTool.Beam);
+
+        /// <summary>U-193: a stroke's time with the given tool: its base × planet hardness × tier hardness ÷ its power, capped at its cap (the
+        /// shovel 0.5 s / 12 s, the Beam 0.25 s / 8 s).</summary>
+        public float StrokeSeconds(PlanetId id, float depthM, float power, Meridian.Rig.DigTool tool)
         {
             float h = tiers.Length > 0 ? tiers[TierIndex(depthM)].hardness : 1f;
-            return Mathf.Min(strokeCapSeconds, strokeBaseSeconds * PlanetHardness(id) * h / Mathf.Max(0.01f, beamPower));
+            bool beam = tool == Meridian.Rig.DigTool.Beam;
+            return Mathf.Min(beam ? strokeCapSeconds : shovelCapSeconds, (beam ? strokeBaseSeconds : shovelStrokeBaseSeconds) * PlanetHardness(id) * h / Mathf.Max(0.01f, power));
         }
 
         /// <summary>The item's weight in the pack (kg; 0 for anything the tables do not list: crafted goods, tools).</summary>

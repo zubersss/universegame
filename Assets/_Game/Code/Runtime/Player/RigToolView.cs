@@ -142,6 +142,23 @@ namespace Meridian.Player
         void LoadTool(RigModule m, int level)
         {
             string key = RigLooks.ToolKey(m, level);
+            if (key == RigLooks.ShovelKey)
+            {
+                // U-193: B-226's shovel, probed quietly (D-143); the Beam Mk1 stands in until it is exported
+                var loc = UnityEngine.AddressableAssets.Addressables.LoadResourceLocationsAsync(key);
+                loc.Completed += l =>
+                {
+                    bool exists = l.Status == AsyncOperationStatus.Succeeded && l.Result != null && l.Result.Count > 0;
+                    global::Meridian.Art.ArtLoad.Release(l);
+                    if (this != null && mk[(int)m] == level) LoadSprite(m, level, exists ? key : RigLooks.ToolKey(m, 1));
+                };
+                return;
+            }
+            LoadSprite(m, level, key);
+        }
+
+        void LoadSprite(RigModule m, int level, string key)
+        {
             if (toolHandles[(int)m].IsValid()) global::Meridian.Art.ArtLoad.Release(toolHandles[(int)m]);
             var h = ArtLoad.Asset<IList<Sprite>>(key);
             toolHandles[(int)m] = h;
@@ -183,7 +200,10 @@ namespace Meridian.Player
             if (dir.sqrMagnitude < 1e-4f) dir = left ? Vector2.left : Vector2.right;
             AimDegrees = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
             Tool.transform.position = HandWorld;
-            Tool.transform.rotation = Quaternion.Euler(0f, 0f, AimDegrees);
+            // U-193: the shovel swings a scoop arc over the held stroke (raised at its start, through the aim, down at its end)
+            bool shovel = input.module == RigModule.Beam && mk[(int)RigModule.Beam] <= 0;
+            ScoopArcDegrees = shovel && input.Using ? Mathf.Lerp(ScoopRaise, -ScoopFollow, Mathf.SmoothStep(0f, 1f, input.StrokeProgress)) * (left ? -1f : 1f) : 0f;
+            Tool.transform.rotation = Quaternion.Euler(0f, 0f, AimDegrees + ScoopArcDegrees);
             Tool.flipY = left; // keep the tool upright when pointing left
             var muzzle = RigModules.Muzzle(input.module, mk[(int)input.module]);
             if (left) muzzle.y = -muzzle.y;
@@ -216,9 +236,13 @@ namespace Meridian.Player
             }
         }
 
+        /// <summary>U-193: the shovel's swing now (degrees off the aim; 0 between strokes) and its arc's ends.</summary>
+        public float ScoopArcDegrees { get; private set; }
+        public const float ScoopRaise = 55f, ScoopFollow = 35f;
+
         void UpdateBeam(Vector2 dir)
         {
-            bool on = input.module == RigModule.Beam && input.Using && beamSheet != null && beamSheet.Ready;
+            bool on = input.module == RigModule.Beam && mk[(int)RigModule.Beam] >= 1 && input.Using && beamSheet != null && beamSheet.Ready; // U-193: no ray from a shovel
             if (Beam.enabled != on) Beam.enabled = on;
             if (!on) { beamAge = 0f; BeamLength = 0f; return; }
             // To the first terrain hit, at most the Rig's reach, never past the aim point.

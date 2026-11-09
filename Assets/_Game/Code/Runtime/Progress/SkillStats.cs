@@ -81,6 +81,12 @@ namespace Meridian.Progress
 
         // The stats the game reads (bases from the D1 tables or the systems they replace).
         public static float BeamPower => Value("beam_power", D1Tables.Current.beamPowerStart);
+        /// <summary>U-193 (D-182, the owner): the dig tool: the shovel until The Beam (dig_power_1, its "beam" flag), then the Beam for good.</summary>
+        public static Meridian.Rig.DigTool DigTool => Has("beam") ? Meridian.Rig.DigTool.Beam : Meridian.Rig.DigTool.Shovel;
+        /// <summary>U-193: the dig tool's power (the shovel's from the tables; the Beam's BeamPower, raised by dig_power_2..5).</summary>
+        public static float DigPower => DigTool == Meridian.Rig.DigTool.Beam ? BeamPower : D1Tables.Current.shovelPower;
+        /// <summary>U-193: the dig tool's reach (m): the shovel's from the tables (2 m), the Beam's RigTools.Reach.</summary>
+        public static float DigReach => DigTool == Meridian.Rig.DigTool.Beam ? Meridian.Rig.RigTools.Reach : D1Tables.Current.shovelReachM;
         public static float BrushRadius => Value("brush_radius", 0.9f);
         public static float PackKg => Value("pack_kg", D1Tables.Current.packLimitKg);
         public static int DirtStore => Mathf.RoundToInt(Value("dirt_store", D1Tables.Current.dirtStoreStart));

@@ -130,6 +130,8 @@ namespace Meridian.Art
             public const string Thruster = "fx/thruster/base";
             public const string Dust = "fx/dust/base";
             public const string DigSparks = "fx/dig_sparks/base";
+            /// <summary>U-193: B-226's dirt flick from the shovel's scoop (tinted per ground, 6 frames).</summary>
+            public const string ShovelFlick = "fx/shovel_flick/base";
             public const string EscapeBand = "fx/escape_band/base";
             public const string HeatShimmer = "fx/heat_shimmer/base";
             // U-046 rig modules (B-037)

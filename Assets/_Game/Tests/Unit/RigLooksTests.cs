@@ -16,12 +16,14 @@ namespace Meridian.Tests
         [Test]
         public void EachSlotsLookFollowsItsChainLevel()
         {
-            Assert.AreEqual(1, RigLooks.BeamMk(Nodes()));
-            Assert.AreEqual(2, RigLooks.BeamMk(Nodes("dig_power_1")));
-            Assert.AreEqual(3, RigLooks.BeamMk(Nodes("dig_power_1", "dig_power_2")));
-            Assert.AreEqual(4, RigLooks.BeamMk(Nodes("dig_power_1", "dig_power_2", "dig_power_3")));
+            // U-193 (D-182): the shovel (0) until The Beam; the Beam's looks one node later than U-183's chain
+            Assert.AreEqual(0, RigLooks.BeamMk(Nodes()), "a new surveyor's shovel");
+            Assert.AreEqual(1, RigLooks.BeamMk(Nodes("dig_power_1")), "The Beam: Mk1");
+            Assert.AreEqual(2, RigLooks.BeamMk(Nodes("dig_power_1", "dig_power_2")));
+            Assert.AreEqual(3, RigLooks.BeamMk(Nodes("dig_power_1", "dig_power_2", "dig_power_3")));
             Assert.AreEqual(4, RigLooks.BeamMk(Nodes("dig_power_1", "dig_power_2", "dig_power_3", "dig_power_4")));
             Assert.AreEqual(5, RigLooks.BeamMk(Nodes("dig_power_5")));
+            Assert.AreEqual(RigLooks.ShovelKey, RigLooks.ToolKey(RigModule.Beam, 0), "the shovel's own sprite");
             Assert.AreEqual(1, RigLooks.GrappleMk(Nodes("asc_grapple_1")), "asc_grapple_1: the Mk1 grapple");
             Assert.AreEqual(2, RigLooks.GrappleMk(Nodes("asc_grapple_1", "asc_grapple_2")));
             Assert.AreEqual(3, RigLooks.GrappleMk(Nodes("asc_grapple_3")));

@@ -28,6 +28,10 @@ namespace Meridian.Mining
         public static float StrokeSeconds(TerrainStreamer t, Vector2 p, float beamPower) =>
             D1Tables.Current.StrokeSeconds(t.Config != null ? t.Config.id : PlanetId.Earth, Depth(t, p), beamPower);
 
+        /// <summary>U-193: a stroke's time (s) at p with the given tool and its power.</summary>
+        public static float StrokeSeconds(TerrainStreamer t, Vector2 p, float power, Meridian.Rig.DigTool tool) =>
+            D1Tables.Current.StrokeSeconds(t.Config != null ? t.Config.id : PlanetId.Earth, Depth(t, p), power, tool);
+
         /// <summary>A dug tile's two rolls, hashed from its cell and a salt (the same tile always gives the same: no save-scum).</summary>
         public static void Rolls(int x, int y, int salt, out float materialRoll, out float pickRoll)
         {

@@ -41,12 +41,12 @@ namespace Meridian.UI
         /// <summary>The card's words; `key` is the bound key the card names (lettered on its cap too).</summary>
         public static string Body(string id, string key) => id switch
         {
-            DigDown => "Hold the left button: the Beam digs. Go down: deeper ground pays more.",
+            DigDown => "Hold the left button: the shovel digs. Go down: deeper ground pays more.", // U-193 (D-182)
             SurfaceLine => "Below this line you are on a dig run. Fill your pack, then climb back above it to sell.",
             PackFull => "Your pack is full. What you dig now stays on the ground.",
             ClimbUp => $"Hold {key} to fly the jetpack up past the Surface Line. A heavy pack climbs slower.",
             Sell => $"Topside with a haul: press {key} to sell it for Scrip.",
-            SkillTree => $"Spend your Scrip on upgrades: press {key} for the Skill Tree.",
+            SkillTree => "Your first upgrade: The Beam, in the Dig branch. It digs three times as fast.", // U-193 (D-182)
             _ => "",
         };
 

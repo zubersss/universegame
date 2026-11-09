@@ -32,6 +32,9 @@ namespace Meridian.Rig
         /// <summary>U-174: the Beam's power (1 at the start; U-175: the Dig branch raises it): a stroke's time divides by it. Setting it pins
         /// a value (tests); 0 or less: the tree's again.</summary>
         public float BeamPower { get => beamPin > 0f ? beamPin : Meridian.Progress.SkillStats.BeamPower; set => beamPin = value; }
+        /// <summary>U-193: the dig tool now (the shovel until The Beam) and its power (a pinned BeamPower overrides either, tests).</summary>
+        public DigTool Tool => Meridian.Progress.SkillStats.DigTool;
+        public float DigPower => beamPin > 0f ? beamPin : Meridian.Progress.SkillStats.DigPower;
         float beamPin;
         /// <summary>U-174: raised when a dug tile gives dirt (true: into the store; false: the store was full, a puff only).</summary>
         public event System.Action<bool> DirtDug;
@@ -63,11 +66,20 @@ namespace Meridian.Rig
 
         bool InReach(Vector2 point) => owner == null || (point - (Vector2)owner.position).sqrMagnitude <= Reach * Reach;
 
-        /// <summary>Beam: removes the solid tile at the world point (on a smooth planet, the brush's tiles) and spawns its item.</summary>
+        /// <summary>U-193: within the dig tool's reach (the shovel's 2 m, the Beam's Reach); building keeps Reach.</summary>
+        bool InDigReach(Vector2 point)
+        {
+            if (owner == null) return true;
+            float r = Meridian.Progress.SkillStats.DigReach;
+            return (point - (Vector2)owner.position).sqrMagnitude <= r * r;
+        }
+
+        /// <summary>The dig tool (the shovel, then the Beam): removes the solid tile at the world point (on a smooth planet, the brush's
+        /// tiles) and spawns its item.</summary>
         public bool Dig(Vector2 world)
         {
             var t = TileOf(world);
-            if (terrain == null || !(Brush ? InReach(world) : InReach(t))) return false;
+            if (terrain == null || !InDigReach(Brush ? world : new Vector2(t.x + 0.5f, t.y + 0.5f))) return false;
             // U-056: base pieces come down first (their item comes back).
             if (dismantle != null && dismantle(world)) { Dug?.Invoke(world); return true; }
             // U-059: harvestable props first (Mercury's Solarite crystals): -1 not one, 0 glanced off, 1 cut.
@@ -126,7 +138,7 @@ namespace Meridian.Rig
         public bool D1 => terrain != null && terrain.Config != null && Meridian.Mining.D1Tables.Current.PlanetOf(terrain.Config.id) != null;
 
         /// <summary>U-174: a Beam stroke's time at p (0 where the planet does not dig by the D1 tables: a stroke a frame, as before).</summary>
-        public float StrokeSeconds(Vector2 p) => D1 ? Meridian.Mining.DigRun.StrokeSeconds(terrain, p, BeamPower) : 0f;
+        public float StrokeSeconds(Vector2 p) => D1 ? Meridian.Mining.DigRun.StrokeSeconds(terrain, p, DigPower, Tool) : 0f;
 
         /// <summary>The dug tile's item (and the planet's only-here finds) at the tile's centre.</summary>
         void DropFor(byte id, int x, int y)

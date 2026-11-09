@@ -42,10 +42,14 @@ namespace Meridian.FX
         {
             // U-157: the round brush throws B-175's dirt puff from the scoop; a block planet keeps the tile's sparks. U-186: in the stroke's
             // band set (the desert's sand, the canyon's talus ...) where B-190 / B-191 drew one.
+            bool shovel = rig != null && rig.Tool == Meridian.Rig.DigTool.Shovel;
+            // U-193: the shovel flicks its clod up and back (B-226's fx/shovel_flick, once exported) over the scoop's puff
+            if (shovel && FxSheet.Get(ArtKeys.Fx.ShovelFlick).Ready)
+                pool.Play(ArtKeys.Fx.ShovelFlick, at, 1f, 0f, player != null && at.x < player.Body.position.x, FlickTint(puffPlanet)); // thrown back over the shoulder
             var puff = PuffAt(at);
             if (puff != null && FxSheet.Get(puff).Ready) { pool.Play(puff, at, 1f); return; }
             var t = RigTools.TileOf(at);
-            pool.Play(ArtKeys.Fx.DigSparks, new Vector2(t.x + 0.5f, t.y + 0.5f), 2f);
+            pool.Play(shovel ? ArtKeys.Fx.Dust : ArtKeys.Fx.DigSparks, new Vector2(t.x + 0.5f, t.y + 0.5f), shovel ? 1f : 2f); // sparks are the Beam's
         }
 
         /// <summary>U-157: a mound's puff where the earth lands.</summary>
@@ -54,6 +58,15 @@ namespace Meridian.FX
             var puff = PuffAt(at);
             if (puff != null && FxSheet.Get(puff).Ready) pool.Play(puff, at, 1f);
         }
+
+        /// <summary>U-193: the flick's cream-and-ink art multiplied toward the planet's earth (B-226: tinted per ground like the dust).</summary>
+        public static Color FlickTint(Meridian.Planets.PlanetId p) => p switch
+        {
+            Meridian.Planets.PlanetId.Mars => new Color(0.86f, 0.58f, 0.44f, 1f),
+            Meridian.Planets.PlanetId.Mercury => new Color(0.74f, 0.72f, 0.70f, 1f),
+            Meridian.Planets.PlanetId.Venus => new Color(0.86f, 0.80f, 0.56f, 1f),
+            _ => new Color(0.80f, 0.66f, 0.50f, 1f), // Earth's soil
+        };
 
         string puffKey;
         Meridian.Planets.PlanetId puffPlanet;
