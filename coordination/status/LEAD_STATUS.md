@@ -16,11 +16,11 @@ Cycle 284 (15:05–17:0x): THE OWNER'S 0.5.0 PLAYTEST → D-174 (a progression d
 Cycles 281–283 (09:3x–15:0x): the resume; Build 0.5.0 (page https://claude.ai/artifact/CHnmoFrDg2jzUuM42BVi83); D-168..D-173; U-159 Mars smooth.
 (cycles 231–280: coordination/status/archive/LEAD_2026-11-06.md and REVIEW_LOG)
 ## Current task
-0.6.1 for the owner's shovel ask (D-182). UNITY: U-193 slice 2 in its lock now (compile + EditMode, the PlayMode slice + LeadQA D1DigRun, CaptureU193Shovel) → U-194 Build 0.6.1 after BLENDER's B-227 export. BLENDER: B-227 rev 2 sheet + export → B-220's five sheets → B-224 → B-223 → B-225 → B-228 on U-194's smoke. After 0.6.1: U-189 + U-191, U-177, U-192, U-179.
+0.6.1 for the owner's shovel ask (D-182). UNITY: U-193 Done; U-194 Build 0.6.1 (code in, 4b0490ed) in its lock once BLENDER's B-227 export commit lands. BLENDER: B-227 export (in its lock now) → B-229 (the DIG DOWN hint picture) → B-220's remaining four sheets → B-224 → B-223 → B-225 → B-228 on U-194's smoke. After 0.6.1: U-189 + U-191, U-177, U-192, U-179.
 ## Last completed
-Cycle 296: USER-37 closed, UNITY pinged at the open gate, B-228 carded, queues rewritten. Cycle 295: B-221 / B-222 / B-226 Done; U-194 + B-227 cards; B-220's sparse-layer rule; B-227's first sheet judged.
+13:3x: U-193 DONE (DoD checked: compile 0/0, 493/493, slices green, LeadQA 1/1, u193/1..4 viewed); B-229 carded; B-227 rev 2 and B-220 Jupiter accepted; the LeadQA HeldStroke fix (cceb9e6d). Cycle 296: USER-37 closed, UNITY pinged at the open gate, B-228 carded, queues rewritten. Cycle 295: B-221 / B-222 / B-226 Done; U-194 + B-227 cards; B-220's sparse-layer rule; B-227's first sheet judged.
 ## Next up
-1. U-193's slice result + the u193 captures (the shovel mid-swing, the flick, the tool slot, The Beam bought) → judge; U-193 Done on them. 2. B-227's rev 2 sheet → judge (the builder off the crosshair read, the grapple at 40 px). 3. U-194 Build 0.6.1 → view its smoke with B-228 → the owner page + a short playtest item. 4. B-220's five sheets, B-224, B-223, B-225 previews → judge. 5. The owner's USER-36 notes → cards.
+1. B-227's export commit (git show --stat, 0 .meta) → UNITY files U-194's want. 2. B-229's hint-card preview → judge. 3. U-194 Build 0.6.1 → view its smoke with B-228 → the owner page + a short playtest item. 4. B-220's five sheets, B-224, B-223, B-225 previews → judge. 5. The owner's USER-36 notes → cards.
 ## Pending decisions
 none open.
 ## Waiting on the user
