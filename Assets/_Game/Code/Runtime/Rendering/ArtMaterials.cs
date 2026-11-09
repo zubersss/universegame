@@ -26,6 +26,8 @@ namespace Meridian.Rendering
         public Material cartoon;
         /// <summary>U-117: MERIDIAN/Sprite_LitDisc for the painted planet discs and moons (planets/*/disc, luna): the limb resolved at the sampled alpha's iso-line, so the 64-px frames' hard edge is a smooth contour at the near-range zoom, not texel stairs.</summary>
         public Material disc;
+        /// <summary>U-182: MERIDIAN/GroundTiers, the smooth ground's fill by depth tier (B-203's ground_fill_t2..t5 under the Surface Line).</summary>
+        public Material groundTiers;
         /// <summary>U-073 / B-080: block material textures per planet (ArtImporter fills it; the arrays are built at runtime).</summary>
         public List<BlockTexture> blockTextures = new List<BlockTexture>();
 

@@ -89,7 +89,8 @@ namespace Meridian.View2D
         public const int BeachRise = 3;
 
         // Submeshes, back to front (a later one draws over an earlier one).
-        const int SubBack = 0, SubBackSand = 1, SubBody = 2, SubBodySand = 3, SubBand = 4, SubRim = SubBand + Variants, SubCount = SubRim + 1;
+        const int SubBack = 0, SubBackSand = 1, SubBody = 2, SubBodySand = 3, SubDecor = 4, DecorSubs = 3, SubBand = SubDecor + DecorSubs,
+            SubRim = SubBand + Variants, SubCount = SubRim + 1;
 
         public TerrainStreamer terrain;
         public GroundStrip strips;
@@ -109,6 +110,264 @@ namespace Meridian.View2D
         bool biomes;
         readonly Sprite[] bands = new Sprite[Variants];
         Sprite fill, fillSand, rim;
+
+        // ---------- U-182: the fill by depth tier ----------
+
+        /// <summary>B-203's transition between tiers (each tier json's transition_m), centred on the tier's depth.</summary>
+        public const float TierTransition = 1f;
+        /// <summary>Tiers 2..5's fills (B-203's ground_fill_t2..t5; null until loaded or where a planet has none).</summary>
+        readonly Sprite[] tierFills = new Sprite[4];
+        readonly Dictionary<Texture, Material> tierMaterials = new Dictionary<Texture, Material>(4);
+        Texture2D lineTex;
+        static readonly int Tier2Id = Shader.PropertyToID("_Tier2Tex"), Tier3Id = Shader.PropertyToID("_Tier3Tex"), Tier4Id = Shader.PropertyToID("_Tier4Tex"),
+            Tier5Id = Shader.PropertyToID("_Tier5Tex"), LineTexId = Shader.PropertyToID("_LineTex"), LineParamsId = Shader.PropertyToID("_LineParams"),
+            TierFromId = Shader.PropertyToID("_TierFrom"), TierBlendId = Shader.PropertyToID("_TierBlend");
+        static readonly int[] TierIds = { Tier2Id, Tier3Id, Tier4Id, Tier5Id };
+
+        // ---------- U-182 (folds in U-167): the fill_decor scatter by tier ----------
+
+        /// <summary>One piece at most per DecorCell-metre world cell (cells line up across the planet's seam: every width divides by 4),
+        /// with DecorChance; never within DecorBorderGap of a tier border, wholly under the natural surface, and only where every tile
+        /// under it is solid (a dug piece goes with its tile).</summary>
+        public const float DecorCell = 4f, DecorChance = 0.22f, DecorBorderGap = 1.2f, DecorUnderSurface = 0.4f;
+        /// <summary>The decor sets: 0 tier 1 (fill_decor_n), 1 the region fill's (fill_decor_sand_n / _basalt_n), 2..5 tiers 2..5 (fill_decor_tk_n).</summary>
+        public const int DecorSets = 6, DecorPerSet = 4;
+        readonly Sprite[][] decor = new Sprite[DecorSets][];
+        readonly Texture[] decorTex = new Texture[DecorSubs];
+        int decorPending;
+        bool decorDirty;
+        public int LastDecorQuads { get; private set; }
+        public bool DecorArt(int set) { if (decor[set] == null) return false; foreach (var d in decor[set]) if (d != null) return true; return false; }
+
+        void ProbeDecor()
+        {
+            for (int i = 0; i < DecorSets; i++) { if (decor[i] == null) decor[i] = new Sprite[DecorPerSet]; System.Array.Clear(decor[i], 0, DecorPerSet); }
+            string alt = AltFillKey(planetId);
+            alt = alt != null && alt.StartsWith("ground_fill_") ? alt.Substring("ground_fill_".Length) : null;
+            decorPending = 0;
+            for (int set = 0; set < DecorSets; set++)
+            {
+                if (set == 1 && alt == null) continue;
+                for (int n = 1; n <= DecorPerSet; n++)
+                {
+                    string key = set == 0 ? $"terrain/{planet}/fill_decor_{n}" : set == 1 ? $"terrain/{planet}/fill_decor_{alt}_{n}" : $"terrain/{planet}/fill_decor_t{set}_{n}";
+                    int si = set, ni = n - 1;
+                    decorPending++;
+                    var loc = Addressables.LoadResourceLocationsAsync(key);
+                    loc.Completed += l =>
+                    {
+                        bool exists = l.Status == AsyncOperationStatus.Succeeded && l.Result != null && l.Result.Count > 0;
+                        ArtLoad.Release(l);
+                        if (this == null || !Active) return;
+                        if (!exists) { DecorArrived(); return; }
+                        var h = ArtLoad.Asset<IList<Sprite>>(key);
+                        handles.Add(h);
+                        h.Completed += op =>
+                        {
+                            if (this == null || !Active) return;
+                            if (op.Status == AsyncOperationStatus.Succeeded && op.Result != null && op.Result.Count > 0) decor[si][ni] = op.Result[0];
+                            DecorArrived();
+                        };
+                    };
+                }
+            }
+        }
+
+        /// <summary>The decor rebuilds the chunks once, when the last of its probes is in (not once per sprite).</summary>
+        void DecorArrived()
+        {
+            if (--decorPending <= 0) decorDirty = true;
+        }
+
+        /// <summary>The cell's world-wrapped column index (so a piece is the same on both sides of the seam).</summary>
+        int DecorCellX(int gx)
+        {
+            int cells = terrain != null && terrain.Config != null ? Mathf.Max(1, Mathf.RoundToInt(terrain.Config.worldWidth / DecorCell)) : 1;
+            return ((gx % cells) + cells) % cells;
+        }
+
+        void Decor(float wx0, float wy0)
+        {
+            for (int i = 0; i < DecorSubs; i++) decorTex[i] = null;
+            int quads = 0;
+            const int C = TerrainConstants.ChunkSize;
+            var t = Meridian.Mining.D1Tables.Current;
+            bool any = false;
+            for (int i = 0; i < DecorSets && !any; i++) any = DecorArt(i);
+            if (!any || terrain == null || terrain.Config == null) { LastDecorQuads = 0; return; }
+            int gx0 = Mathf.FloorToInt((wx0 - 0.5f) / DecorCell), gx1 = Mathf.FloorToInt((wx0 + C - 0.5f) / DecorCell);
+            int gy0 = Mathf.FloorToInt((wy0 - 0.5f) / DecorCell), gy1 = Mathf.FloorToInt((wy0 + C - 0.5f) / DecorCell);
+            var white = Color.white;
+            for (int gx = gx0; gx <= gx1; gx++)
+            {
+                int hx = DecorCellX(gx);
+                for (int gy = gy0; gy <= gy1; gy++)
+                {
+                    if (Meridian.Mining.DigRun.Hash01(hx, gy, 7171) > DecorChance) continue;
+                    float wx = gx * DecorCell + Meridian.Mining.DigRun.Hash01(hx, gy, 7172) * DecorCell;
+                    float wy = gy * DecorCell + Meridian.Mining.DigRun.Hash01(hx, gy, 7173) * DecorCell;
+                    if (wx < wx0 - 0.5f || wx >= wx0 + C - 0.5f || wy < wy0 - 0.5f || wy >= wy0 + C - 0.5f) continue; // the chunk holding its centre draws it
+                    float depth = Meridian.Mining.DigRun.LineAt(terrain, wx) - wy;
+                    bool border = false;
+                    for (int k = 1; k < t.tiers.Length; k++) if (Mathf.Abs(depth - t.tiers[k].fromM) < DecorBorderGap) border = true;
+                    if (border) continue;
+                    int tier = TierShown(depth, t);
+                    int set = tier > 0 ? tier + 1 : (DecorArt(1) && SandWeight(wx) > 0.5f ? 1 : 0);
+                    var pick = DecorPick(set, Meridian.Mining.DigRun.Hash01(hx, gy, 7174));
+                    if (pick == null) continue;
+                    var size = pick.rect.size / pick.pixelsPerUnit;
+                    if (terrain.SurfaceAt(wx) - (wy + size.y * 0.5f) < DecorUnderSurface) continue; // wholly inside the natural ground
+                    bool solid = true;
+                    int tx0 = Mathf.RoundToInt(wx - size.x * 0.5f), tx1 = Mathf.RoundToInt(wx + size.x * 0.5f);
+                    int ty0 = Mathf.RoundToInt(wy - size.y * 0.5f), ty1 = Mathf.RoundToInt(wy + size.y * 0.5f);
+                    for (int tx = tx0; tx <= tx1 && solid; tx++)
+                        for (int ty = ty0; ty <= ty1 && solid; ty++)
+                            solid = TileId.IsSolid(terrain.GetTile(tx, ty));
+                    if (!solid) continue;
+                    int slot = -1;
+                    for (int i = 0; i < DecorSubs; i++) if (decorTex[i] == pick.texture || decorTex[i] == null) { slot = i; break; }
+                    if (slot < 0) continue; // more atlas pages than decor submeshes: this one waits
+                    decorTex[slot] = pick.texture;
+                    var o = UnityEngine.Sprites.DataUtility.GetOuterUV(pick);
+                    float lx = wx - wx0, ly = wy - wy0, hw = size.x * 0.5f, hh = size.y * 0.5f;
+                    int b = v.Count;
+                    Add(new Vector3(lx - hw, ly - hh, 0f), new Vector2(o.x, o.y), white);
+                    Add(new Vector3(lx + hw, ly - hh, 0f), new Vector2(o.z, o.y), white);
+                    Add(new Vector3(lx + hw, ly + hh, 0f), new Vector2(o.z, o.w), white);
+                    Add(new Vector3(lx - hw, ly + hh, 0f), new Vector2(o.x, o.w), white);
+                    var into = tris[SubDecor + slot];
+                    into.Add(b); into.Add(b + 2); into.Add(b + 1); into.Add(b); into.Add(b + 3); into.Add(b + 2);
+                    quads++;
+                }
+            }
+            LastDecorQuads = quads;
+        }
+
+        Sprite DecorPick(int set, float roll)
+        {
+            var arr = decor[set];
+            if (arr == null) return null;
+            int n = 0;
+            foreach (var d in arr) if (d != null) n++;
+            if (n == 0) return null;
+            int want = Mathf.Min(n - 1, Mathf.FloorToInt(roll * n));
+            foreach (var d in arr) { if (d == null) continue; if (want-- == 0) return d; }
+            return null;
+        }
+
+        /// <summary>U-182: the fill through the tier shader (false: the plain lit fill, as before U-182; the perf probe's A/B).</summary>
+        public static bool TierShader = true;
+        /// <summary>Chunks waiting for their rebuild when the decor arrives, spread DecorRebuildsPerFrame a frame (no one-frame spike).</summary>
+        readonly Queue<TerrainChunk> rebuildQueue = new Queue<TerrainChunk>(64);
+        public const int DecorRebuildsPerFrame = 3;
+
+        /// <summary>Every chunk again now (tests, the perf probe).</summary>
+        public void RebuildNow() => RebuildAll();
+
+        void QueueAll()
+        {
+            if (!Active || terrain == null) return;
+            foreach (Transform child in terrain.transform)
+            {
+                var c = child.GetComponent<TerrainChunk>();
+                if (c != null && c.smooth) rebuildQueue.Enqueue(c);
+            }
+        }
+
+        /// <summary>The Surface Line by column (world y at x = column + 0.5; one RFloat texel each, Repeat), built once per planet.</summary>
+        public Texture2D LineTexture => lineTex;
+        /// <summary>True once the tier shader draws this planet's fill (the registry's material and the line texture are in).</summary>
+        public bool TierFill => lineTex != null && Meridian.Rendering.ArtMaterials.Active != null && Meridian.Rendering.ArtMaterials.Active.groundTiers != null;
+        public bool TierArt(int tier) => tier >= 2 && tier <= 5 && tierFills[tier - 2] != null;
+
+        /// <summary>The shader's tier weights (GroundTiers.hlsl) for a depth under the Surface Line: tiers 2..5 each fade in across
+        /// TierTransition centred on its depth, smoothstepped. Pure.</summary>
+        public static Vector4 TierWeights(float depth, Meridian.Mining.D1Tables t)
+        {
+            var w = Vector4.zero;
+            for (int k = 0; k < 4; k++)
+            {
+                float from = t.tiers.Length > k + 1 ? t.tiers[k + 1].fromM : 1e6f;
+                float x = Mathf.Clamp01((depth - (from - 0.5f * TierTransition)) / TierTransition);
+                w[k] = x * x * (3f - 2f * x);
+            }
+            return w;
+        }
+
+        /// <summary>The tier the fill shows at a depth (0 = T1 ... 4 = T5): the deepest tier whose weight has reached a half. Pure.</summary>
+        public static int TierShown(float depth, Meridian.Mining.D1Tables t)
+        {
+            var w = TierWeights(depth, t);
+            for (int k = 3; k >= 0; k--) if (w[k] >= 0.5f) return k + 1;
+            return 0;
+        }
+
+        /// <summary>The line texture's range: texel = (line - lineBase) / lineSpan (R16 UNorm: full-rate bilinear on the iGPU, ~1 cm steps
+        /// over the planet's span; the float format filtered at a fraction of the rate: the U-182 perf probe).</summary>
+        float lineBase, lineSpan = 1f;
+
+        void BuildLine()
+        {
+            if (terrain == null || terrain.Config == null) return;
+            int w = terrain.Config.worldWidth;
+            if (w <= 0) return;
+            var heights = new float[w];
+            float lo = float.MaxValue, hi = float.MinValue;
+            for (int x = 0; x < w; x++) { float h = Meridian.Mining.DigRun.LineAt(terrain, x + 0.5f); heights[x] = h; if (h < lo) lo = h; if (h > hi) hi = h; }
+            lineBase = lo; lineSpan = Mathf.Max(1f, hi - lo);
+            bool r16 = SystemInfo.SupportsTextureFormat(TextureFormat.R16);
+            var fmt = r16 ? TextureFormat.R16 : TextureFormat.RFloat;
+            if (lineTex == null || lineTex.width != w || lineTex.format != fmt)
+            {
+                if (lineTex != null) Destroy(lineTex);
+                lineTex = new Texture2D(w, 1, fmt, false, true) { wrapMode = TextureWrapMode.Repeat, filterMode = FilterMode.Bilinear, name = "SurfaceLine_" + planet };
+            }
+            if (r16)
+            {
+                var px = new ushort[w];
+                for (int x = 0; x < w; x++) px[x] = (ushort)Mathf.RoundToInt(Mathf.Clamp01((heights[x] - lineBase) / lineSpan) * 65535f);
+                lineTex.SetPixelData(px, 0);
+            }
+            else
+            {
+                lineBase = 0f; lineSpan = 1f;
+                lineTex.SetPixelData(heights, 0);
+            }
+            lineTex.Apply(false, false);
+            foreach (var m in tierMaterials.Values) if (m != null) DressTiers(m);
+        }
+
+        /// <summary>The line's world height the shader reads at column texel x (the texture's value, decoded). Tests.</summary>
+        public float LineTexel(int x) => lineTex == null ? float.NaN : lineBase + lineTex.GetPixel(x, 0).r * lineSpan;
+
+        /// <summary>The tier material for a base fill (the planet's ground_fill, or the desert's sand): MERIDIAN/GroundTiers with the tiers,
+        /// the line texture and D1_TABLES section 1's depths. Null where the registry has no tier material (the lit material draws instead).</summary>
+        Material TierMaterialFor(Texture tex)
+        {
+            var proto = Meridian.Rendering.ArtMaterials.Active != null ? Meridian.Rendering.ArtMaterials.Active.groundTiers : null;
+            if (proto == null || lineTex == null || tex == null) return null;
+            if (tierMaterials.TryGetValue(tex, out var m) && m != null) return m;
+            m = new Material(proto) { name = "GroundTiers_" + tex.name };
+            m.mainTexture = tex;
+            DressTiers(m);
+            tierMaterials[tex] = m;
+            return m;
+        }
+
+        void DressTiers(Material m)
+        {
+            var t = Meridian.Mining.D1Tables.Current;
+            var from = Vector4.zero;
+            for (int k = 0; k < 4; k++)
+            {
+                var s = tierFills[k];
+                m.SetTexture(TierIds[k], s != null ? s.texture : Texture2D.whiteTexture);
+                from[k] = s != null && t.tiers.Length > k + 1 ? t.tiers[k + 1].fromM : 1e6f; // a tier without its art never fades in
+            }
+            m.SetVector(TierFromId, from);
+            m.SetVector(TierBlendId, new Vector4(TierTransition, TierTransition, TierTransition, TierTransition));
+            if (lineTex != null) { m.SetTexture(LineTexId, lineTex); m.SetVector(LineParamsId, new Vector4(1f / lineTex.width, 8f, lineBase, lineSpan)); }
+        }
         readonly List<AsyncOperationHandle> handles = new List<AsyncOperationHandle>(8);
         readonly Dictionary<TerrainChunk, MeshFilter> meshes = new Dictionary<TerrainChunk, MeshFilter>(64);
         readonly Dictionary<Texture, Material> materials = new Dictionary<Texture, Material>(8);
@@ -157,6 +416,14 @@ namespace Meridian.View2D
             string altFill = AltFillKey(id); // U-159: slot 1's own fill (Earth's sand, Mars's basalt)
             if (altFill != null) Probe($"terrain/{planet}/{altFill}", s => { fillSand = s; Repeat(s); RebuildAll(); });
             Probe($"terrain/{planet}/dig_rim", s => { rim = s; RebuildAll(); });
+            // U-182: the tiers' fills, and the Surface Line by column for the shader.
+            for (int k = 0; k < 4; k++)
+            {
+                int tier = k;
+                Probe($"terrain/{planet}/ground_fill_t{k + 2}", s => { tierFills[tier] = s; Repeat(s); foreach (var m in tierMaterials.Values) if (m != null) DressTiers(m); });
+            }
+            BuildLine();
+            ProbeDecor();
             RebuildAll();
         }
 
@@ -170,7 +437,7 @@ namespace Meridian.View2D
             Release();
         }
 
-        void OnDestroy() { TerrainChunk.OutlineBuilt -= OnOutline; Release(); }
+        void OnDestroy() { TerrainChunk.OutlineBuilt -= OnOutline; Release(); if (lineTex != null) Destroy(lineTex); }
 
         void Release()
         {
@@ -178,6 +445,10 @@ namespace Meridian.View2D
             handles.Clear();
             for (int i = 0; i < Variants; i++) bands[i] = null;
             fill = fillSand = rim = null;
+            for (int k = 0; k < tierFills.Length; k++) tierFills[k] = null;
+            rebuildQueue.Clear();
+            foreach (var m in tierMaterials.Values) if (m != null) Destroy(m);
+            tierMaterials.Clear();
         }
 
         /// <summary>A key not exported yet is probed quietly (D-143) and its placeholder stays.</summary>
@@ -201,6 +472,12 @@ namespace Meridian.View2D
             if (!Active || strips == null) return;
             int seen = strips.MaterialsLoaded;
             if (seen != stripsSeen) { stripsSeen = seen; RebuildAll(); }
+            if (decorDirty) { decorDirty = false; QueueAll(); } // U-182: the decor goes in over the next frames
+            for (int n = 0; n < DecorRebuildsPerFrame && rebuildQueue.Count > 0; n++)
+            {
+                var c = rebuildQueue.Dequeue();
+                if (c != null && c.smooth && c.transform.parent == terrain.transform) Build(c);
+            }
         }
 
         void RebuildAll()
@@ -344,6 +621,7 @@ namespace Meridian.View2D
             for (int i = 0; i < k.fillVerts.Count; i++) { var p = k.fillVerts[i]; Add(p, FillUv(p.x, p.y), fillTint); }
             for (int i = 0; i < k.fillTris.Count; i++) tris[SubBody].Add(fb + k.fillTris[i]);
             if (sandFill) SandBody(k, wx0, WorldUv);
+            Decor(wx0, wy0); // U-182: the tier's buried pieces, over the fill
 
             // 3 / 4. The band along upward-facing stretches (by biome, crossfaded), the rim along the rest.
             for (int i = 0; i < Variants; i++) { variantCount[i] = BandSprites(i, out variantWidth[i]); LastVariantQuads[i] = 0; }
@@ -378,10 +656,12 @@ namespace Meridian.View2D
             mesh.subMeshCount = SubCount;
             for (int i = 0; i < SubCount; i++) mesh.SetTriangles(tris[i], i, false);
             mesh.bounds = new Bounds(new Vector3(C * 0.5f - 0.5f, C * 0.5f - 0.5f, 0f), new Vector3(C + 2f, C + 2f, 1f));
-            mats[SubBack] = MaterialFor(fillSprite != null ? fillSprite.texture : null);
+            // U-182: the fills draw by depth tier where the tier shader is in (worldFill: the uv is world / 8, which the shader reads back).
+            mats[SubBack] = (worldFill && TierShader ? TierMaterialFor(fillSprite.texture) : null) ?? MaterialFor(fillSprite != null ? fillSprite.texture : null);
             mats[SubBody] = mats[SubBack];
-            mats[SubBackSand] = MaterialFor(fillSand != null ? fillSand.texture : null);
+            mats[SubBackSand] = (fillSand != null && TierShader ? TierMaterialFor(fillSand.texture) : null) ?? MaterialFor(fillSand != null ? fillSand.texture : null);
             mats[SubBodySand] = mats[SubBackSand];
+            for (int i = 0; i < DecorSubs; i++) mats[SubDecor + i] = MaterialFor(decorTex[i]);
             for (int i = 0; i < Variants; i++) mats[SubBand + i] = MaterialFor(variantCount[i] > 0 ? variantSprites[i][0].texture : null);
             mats[SubRim] = MaterialFor(rim != null ? rim.texture : null);
             f.GetComponent<MeshRenderer>().sharedMaterials = mats;

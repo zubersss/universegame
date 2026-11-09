@@ -20,6 +20,7 @@ MonoBehaviour:
   terrainBlocks: {fileID: 2100000, guid: be7a751b1d75b894583b11ad32ea7065, type: 2}
   cartoon: {fileID: 2100000, guid: bd7db89ae8ba1634c816e9a4045db5ac, type: 2}
   disc: {fileID: 2100000, guid: 97d70ffb38d52334d90b23bb0bfdf9a4, type: 2}
+  groundTiers: {fileID: 2100000, guid: 085b96c5e840eee408e0be19db906e26, type: 2}
   blockTextures:
   - planet: earth
     material: grass
@@ -1739,6 +1740,34 @@ MonoBehaviour:
       start: 0
       length: 8
       loop: 1
+  - key: fx/ui/expedition_seal
+    fps: 12
+    clips:
+    - name: press
+      start: 0
+      length: 10
+      loop: 0
+  - key: fx/ui/node_bought
+    fps: 12
+    clips:
+    - name: stamp
+      start: 0
+      length: 8
+      loop: 0
+  - key: fx/ui/rank_up
+    fps: 12
+    clips:
+    - name: rank_up
+      start: 0
+      length: 10
+      loop: 0
+  - key: fx/ui/scrip_shower
+    fps: 12
+    clips:
+    - name: shower
+      start: 0
+      length: 8
+      loop: 0
   - key: fx/warden_bolt/base
     fps: 12
     clips:

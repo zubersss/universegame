@@ -2639,6 +2639,202 @@ namespace Meridian.Tests
             UnityEngine.Object.Destroy(uiGo);
         }
 
+        /// <summary>U-182: the tier shader's cost, A/B in one session (BudgetGate's rows swing run to run on this machine): Earth at the camp
+        /// (the surface view) and in a T3 room, 300 frames each with the tier shader, the plain lit fill, the tier shader again.</summary>
+        [UnityTest, Timeout(300000)]
+        public IEnumerator CaptureU182Perf()
+        {
+            var name = Environment.GetEnvironmentVariable(Variable);
+            if (string.IsNullOrEmpty(name)) Assert.Ignore($"Set {Variable} (tools/unity_capture.ps1).");
+            bool wasCartoon = Meridian.View2D.CartoonStage.Enabled;
+            Meridian.View2D.CartoonStage.Enabled = true;
+            int vsync = QualitySettings.vSyncCount, target = Application.targetFrameRate;
+            QualitySettings.vSyncCount = 0; Application.targetFrameRate = -1;
+            try
+            {
+#if UNITY_EDITOR
+                yield return UnityEditor.SceneManagement.EditorSceneManager.LoadSceneAsyncInPlayMode(
+                    CorePath, new LoadSceneParameters(LoadSceneMode.Single));
+#endif
+                var director = UnityEngine.Object.FindAnyObjectByType<SceneDirector>();
+                float timeout = Time.realtimeSinceStartup + 30f;
+                while ((!director.IsReady || !director.PlanetSide.terrain.IsSettled) && Time.realtimeSinceStartup < timeout) yield return null;
+                var side = director.PlanetSide;
+                if (side.hazards != null) side.hazards.enabled = false;
+                if (side.dayNight != null) side.dayNight.Override = 0.45f;
+                side.creatures.autoSpawn = false;
+                side.creatures.DespawnAll();
+                var ground = UnityEngine.Object.FindAnyObjectByType<Meridian.View2D.SmoothGround>();
+                var times = new float[300];
+
+                // As BudgetGate: the side view rendered at 1920x1080 each frame; a one-pixel read-back waits for the GPU, so each time is the
+                // render's own cost (CPU and GPU), the ground's fill shader in it.
+                var rt = new RenderTexture(1920, 1080, 24, RenderTextureFormat.ARGB32);
+                var px = new Texture2D(1, 1, TextureFormat.RGBA32, false);
+                var cam = side.sideCamera;
+                IEnumerator Measure(string label)
+                {
+                    for (int k = 0; k < 60; k++) yield return null; // settle
+                    for (int k = 0; k < times.Length; k++)
+                    {
+                        yield return null;
+                        var w = System.Diagnostics.Stopwatch.StartNew();
+                        cam.targetTexture = rt; cam.Render(); cam.targetTexture = null;
+                        var prev = RenderTexture.active; RenderTexture.active = rt; px.ReadPixels(new Rect(0, 0, 1, 1), 0, 0); px.Apply(); RenderTexture.active = prev;
+                        times[k] = (float)w.Elapsed.TotalMilliseconds;
+                    }
+                    var sorted = (float[])times.Clone();
+                    System.Array.Sort(sorted);
+                    float avg = 0f; foreach (var x in times) avg += x; avg /= times.Length;
+                    TestContext.Out.WriteLine($"[MERIDIAN] u182 perf {label}: avg {avg:F2} ms, p50 {sorted[times.Length / 2]:F2}, p99 {sorted[(int)(times.Length * 0.99f)]:F2}, max {sorted[times.Length - 1]:F2} (tier shader {Meridian.View2D.SmoothGround.TierShader})");
+                }
+
+                IEnumerator AB(string where)
+                {
+                    foreach (bool on in new[] { false, true, false, true })
+                    {
+                        Meridian.View2D.SmoothGround.TierShader = on;
+                        ground.RebuildNow();
+                        yield return Measure($"{where} {(on ? "tier" : "lit")}");
+                    }
+                }
+
+                yield return AB("surface");
+                // a T3 room (as CaptureU182Tiers)
+                var t = side.terrain;
+                float x = side.player.Body.position.x + 175f;
+                float cy = Meridian.Mining.DigRun.LineAt(t, x) - 70f;
+                var body = side.player.Body; body.simulated = false;
+                body.position = new Vector2(x, cy - 2.6f); side.player.transform.position = body.position;
+                var follow = side.sideCamera.GetComponent<Meridian.Player.CameraFollow>();
+                yield return null;
+                float until = Time.realtimeSinceStartup + 20f;
+                while (!t.IsSettled && Time.realtimeSinceStartup < until) yield return null;
+                var rig = side.rig; var owner = rig.owner; rig.owner = null;
+                try { for (float dy = -3.6f; dy <= 3.6f; dy += 0.6f) for (float dx = -6f; dx <= 6f; dx += 0.6f) rig.Dig(new Vector2(x + dx, cy + dy)); }
+                finally { rig.owner = owner; }
+                var drops = UnityEngine.Object.FindAnyObjectByType<Meridian.Rig.ItemDrops>();
+                if (drops != null) for (int k = drops.Live.Count - 1; k >= 0; k--) drops.Collect(drops.Live[k]);
+                if (follow != null) follow.SnapToTarget();
+                yield return AB("T3 room");
+                rt.Release(); UnityEngine.Object.Destroy(rt); UnityEngine.Object.Destroy(px);
+                LogAssert.NoUnexpectedReceived();
+            }
+            finally
+            {
+                Meridian.View2D.SmoothGround.TierShader = true;
+                QualitySettings.vSyncCount = vsync; Application.targetFrameRate = target;
+                Meridian.View2D.CartoonStage.Enabled = wasCartoon;
+            }
+        }
+
+        /// <summary>U-182 (D1; B-203): the fill by depth tier at 1x → coordination/reports/unity/u182/: Earth T1..T5 (a room dug at 5, 25, 70,
+        /// 150, 230 m under the Surface Line by the camp), the T1 / T2 border on Earth's steepest nearby slope (the band follows the tilted
+        /// line, soft), Mars at T4. Mercury and Venus are block planets until U-177 smooths them (GroundField.Smooth).</summary>
+        [UnityTest, Timeout(600000)]
+        public IEnumerator CaptureU182Tiers()
+        {
+            var name = Environment.GetEnvironmentVariable(Variable);
+            if (string.IsNullOrEmpty(name)) Assert.Ignore($"Set {Variable} (tools/unity_capture.ps1).");
+            if (SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.Null)
+                Assert.Fail("No graphics device: run without -nographics.");
+            bool wasCartoon = Meridian.View2D.CartoonStage.Enabled;
+            Meridian.View2D.CartoonStage.Enabled = true;
+            try
+            {
+#if UNITY_EDITOR
+                yield return UnityEditor.SceneManagement.EditorSceneManager.LoadSceneAsyncInPlayMode(
+                    CorePath, new LoadSceneParameters(LoadSceneMode.Single));
+#endif
+                var director = UnityEngine.Object.FindAnyObjectByType<SceneDirector>();
+                float timeout = Time.realtimeSinceStartup + 30f;
+                while ((!director.IsReady || !director.PlanetSide.terrain.IsSettled) && Time.realtimeSinceStartup < timeout) yield return null;
+                var dir = "coordination/reports/unity/u182";
+                Directory.CreateDirectory(dir);
+                var side = director.PlanetSide;
+
+                void Calm()
+                {
+                    if (side.hazards != null) side.hazards.enabled = false;
+                    if (side.dayNight != null) side.dayNight.Override = 0.45f;
+                    side.creatures.autoSpawn = false;
+                    side.creatures.DespawnAll();
+                }
+                Calm();
+
+                // A room dug with Beam strokes round (x, the Surface Line - depth), the player parked in it, the camera on it.
+                IEnumerator Room(float x, float depth, float halfW, float halfH, string label)
+                {
+                    var t = side.terrain;
+                    float line = Meridian.Mining.DigRun.LineAt(t, x);
+                    float cy = line - depth;
+                    var body = side.player.Body;
+                    var follow = side.sideCamera.GetComponent<Meridian.Player.CameraFollow>();
+                    if (follow != null) follow.enabled = true;
+                    body.simulated = false;
+                    body.position = new Vector2(x, cy - halfH + 1f); side.player.transform.position = body.position;
+                    yield return null;
+                    float until = Time.realtimeSinceStartup + 20f;
+                    while (!t.IsSettled && Time.realtimeSinceStartup < until) yield return null;
+                    var rig = side.rig; var owner = rig.owner; rig.owner = null;
+                    try
+                    {
+                        for (float dy = -halfH; dy <= halfH + 1e-3f; dy += 0.6f)
+                            for (float dx = -halfW; dx <= halfW + 1e-3f; dx += 0.6f)
+                                rig.Dig(new Vector2(x + dx, cy + dy));
+                    }
+                    finally { rig.owner = owner; }
+                    for (int k = 0; k < 20; k++) yield return null;
+                    var drops = UnityEngine.Object.FindAnyObjectByType<Meridian.Rig.ItemDrops>(); // the room's drops off the shot (back to their pool)
+                    if (drops != null) for (int k = drops.Live.Count - 1; k >= 0; k--) drops.Collect(drops.Live[k]);
+                    if (follow != null) follow.SnapToTarget();
+                    for (int k = 0; k < 20; k++) yield return null;
+                    yield return new WaitForSeconds(0.6f);
+                    yield return Save(side.sideCamera, $"{name}_{label}");
+                    File.Copy($"logs/capture_{name}_{label}.png", $"{dir}/{label}.png", true);
+                    var g = side.cartoon != null ? side.cartoon.GetComponentInChildren<Meridian.View2D.SmoothGround>(true) : UnityEngine.Object.FindAnyObjectByType<Meridian.View2D.SmoothGround>();
+                    var tables = Meridian.Mining.D1Tables.Current;
+                    TestContext.Out.WriteLine($"[MERIDIAN] u182 {label}: {t.Config.id} x {x:F0}, line {line:F1}, room centre {cy:F1} ({depth:F0} m under), " +
+                        $"shown T{Meridian.View2D.SmoothGround.TierShown(depth, tables) + 1}, DigRun T{Meridian.Mining.DigRun.TierAt(t, new Vector2(x, cy)) + 1}, " +
+                        $"tier fill {(g != null && g.TierFill)}, art t2..t5 {(g != null ? $"{g.TierArt(2)} {g.TierArt(3)} {g.TierArt(4)} {g.TierArt(5)}" : "-")}, decor quads {(g != null ? g.LastDecorQuads : -1)}");
+                }
+
+                var earth = side.terrain;
+                float camp = side.player.Body.position.x;
+                // The line texture the shader reads holds DigRun's Surface Line at every column (decoded from its R16 texels).
+                var sg = UnityEngine.Object.FindAnyObjectByType<Meridian.View2D.SmoothGround>();
+                float worst = 0f;
+                for (int x = 0; x < earth.Config.worldWidth; x++) worst = Mathf.Max(worst, Mathf.Abs(sg.LineTexel(x) - Meridian.Mining.DigRun.LineAt(earth, x + 0.5f)));
+                TestContext.Out.WriteLine($"[MERIDIAN] u182 line texture: {earth.Config.worldWidth} columns, {sg.LineTexture.format}, worst |texel - DigRun.LineAt| {worst:F3} m");
+                Assert.Less(worst, 0.05f, "the shader's Surface Line is DigRun's");
+                string[] labels = { "1_earth_t1", "2_earth_t2", "3_earth_t3", "4_earth_t4", "5_earth_t5" };
+                float[] depths = { 5f, 25f, 70f, 150f, 230f };
+                for (int i = 0; i < labels.Length; i++) yield return Room(camp + 30f + i * 40f, depths[i], 6f, 3.6f, labels[i]);
+
+                // The T1 / T2 border (10 m) on the steepest stretch of the Surface Line within 300 m of the camp.
+                float best = camp, slope = 0f;
+                for (float x = camp - 300f; x < camp + 300f; x += 2f)
+                {
+                    float s = Mathf.Abs(Meridian.Mining.DigRun.LineAt(earth, x + 4f) - Meridian.Mining.DigRun.LineAt(earth, x - 4f)) / 8f;
+                    if (s > slope && s < 0.8f) { slope = s; best = x; }
+                }
+                TestContext.Out.WriteLine($"[MERIDIAN] u182 border spot: x {best:F0}, line slope {slope:F2}");
+                yield return Room(best, 10f, 8f, 4.2f, "6_earth_border_t1_t2");
+
+                // Mars at T4.
+                var mars = Meridian.Planets.PlanetId.Mars;
+                GameState.Instance.EditsFor(mars).Clear();
+                yield return director.LoadPlanetSide(GameState.Instance.catalog.Get(mars));
+                side = director.PlanetSide;
+                float wait = Time.realtimeSinceStartup + 20f;
+                while (!side.terrain.IsSettled && Time.realtimeSinceStartup < wait) yield return null;
+                Calm();
+                yield return Room(600f, 150f, 6f, 3.6f, "7_mars_t4");
+                LogAssert.NoUnexpectedReceived();
+            }
+            finally { Meridian.View2D.CartoonStage.Enabled = wasCartoon; }
+        }
+
         /// <summary>U-184 (D-178): the space minimap and the system map at 1080p → coordination/reports/unity/u184/: 1_minimap.png (between
         /// Earth and Mars, heading 30°), 2_minimap_far.png (out by Jupiter: the rim arrows and their distances), 3_system_map.png (M; Mars
         /// ticked as landed).</summary>
