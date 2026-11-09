@@ -414,7 +414,8 @@ def draw_veil_serpent(d, M, pose=None, seed=0):
     K.eyes(dh, M, hx + 0.06, hz + 0.03, 0.035, 0.045, 0.06, p, seed)
     if p["shrink"] > 0.05:                                                                # thinning into the haze: a few wisps behind
         for j in range(3):
-            x = tip[0] - 0.2 - 0.18 * j
+            x = tip[0] - 0.15 - 0.14 * j                                                  # desk-check: at - 0.2 - 0.18 j the last wisp of
+                                                                                          # death's first frame crossed the frame's left edge
             G.stroke(d, G.lumpy_ellipse(x, tip[1] + 0.05 * (j - 1), 0.06 * (1 - 0.2 * j), 0.035, n=10, lump=0.1, seed=seed + 60 + j),
                      M["puff"], I * 0.8, cyclic=True)
 
