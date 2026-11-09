@@ -89,6 +89,7 @@ namespace Meridian.Tests.LeadQA
             var feet = player.Body.position;
             // Stand at the hollow's right side so the wall cell sits ~1.2 m off, inside the shovel's 2 m reach (D-182).
             player.Body.position = new Vector2(Mathf.Floor(feet.x) + 1.3f, feet.y);
+            player.transform.position = player.Body.position; // StandAtDepth leaves the body unsimulated: it snaps back to its transform next step unless both move
             player.Body.linearVelocity = Vector2.zero;
             yield return new WaitForFixedUpdate();
             feet = player.Body.position;
