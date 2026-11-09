@@ -3056,14 +3056,14 @@ Goal: The sky serpent in v3 (B-201 #15: smoke_16 shows soft gradients and a glow
 Accept: the check's answer; if redrawn, a preview beside the Venus deck at 1×.
 Files: Assets/_Game/Art/creatures/
 Depends: —
-Lead notes: Cycle 291 (06:4x). After 0.6.0. 09:5x: CHECKED (read-only): creatures/venus/veil_serpent is B-044's v2 sheet (10-31, no style field), the only v2 creature on Venus (acidmoth, pressure_crab, sulfur_drifter, vent_eel are v3) → REDRAW NEEDED. It was the old combat serpent (D-173 retired its ammo): the v3 version reads passive and harmless: a drifting ribbon-like cloud serpent with soft fins, closed mouth, no fangs, spines or barbs, no glow halo; it meanders and parts around the ship; same frames and sockets.
+Lead notes: Cycle 291 (06:4x). After 0.6.0. 09:5x: CHECKED (read-only): creatures/venus/veil_serpent is B-044's v2 sheet (10-31, no style field), the only v2 creature on Venus (acidmoth, pressure_crab, sulfur_drifter, vent_eel are v3) → REDRAW NEEDED. It was the old combat serpent (D-173 retired its ammo): the v3 version reads passive and harmless: a drifting ribbon-like cloud serpent with soft fins, closed mouth, no fangs, spines or barbs, no glow halo; it meanders and parts around the ship; same frames and sockets. 10:1x: SOURCES IN (f95c5461, files only): a haze ribbon with a cream belly, soft fin lobes, a calm eye and closed mouth, a soft forked tail; no fangs / spines / barbs / glow; the 25 frames kept (attack now bows up and away to part round the ship; hurt a startled curl; death thinning into the haze); 4 m at artScale 3. Preview in BLENDER's lock after UNITY's runs. (A third self-reported slip: a no-op python beside UNITY's want, ~09:4x; struck.)
 
 ### U-192 · UNITY · Ready · G1
 Goal: The docking bay's art and the catalogue's Camp icon (B-201 #11 / #17): DockingBay requests B-223's backdrop keys (no grey 3D panels or photographic starfield); the catalogue's Camp entry shows B-223's icon.
 Accept: captures of the bay with the ship docked and the catalogue page; tests for the keys.
 Files: Code/Runtime/ (DockingBay, the catalogue UI)
 Depends: B-223
-Lead notes: Cycle 291 (06:4x). After 0.6.0.
+Lead notes: Cycle 291 (06:4x). After 0.6.0. + (10:1x) the veil serpent's behaviour to match B-224's passive redraw: CreatureSpecies veil_serpent temper Hunts / senseRange 18 → a gentle drifter that meanders and parts around the ship (its attack clip as the swerve), never bumping it; with B-224's import.
 
 ### U-154 · UNITY · Ready · C2
 Goal: P-51 (UNITY, ruled yes in cycle 279): the Builder's aerostat pieces draw the re-inked kit on the four giants: PieceSpec gains a per-planet art key, so the Deck / Strut / Lift cell pieces draw `props/common/aerostat_{deck,strut,cell}` (B-156) on Jupiter, Saturn, Uranus and Neptune and keep `props/venus/aerostat_deck` on Venus; nothing else about the pieces changes (sizes, costs, saves).
