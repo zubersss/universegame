@@ -438,6 +438,81 @@ namespace Meridian.Tests
             LogAssert.NoUnexpectedReceived();
         }
 
+        /// <summary>
+        /// U-201 (LEAD's read of smoke_42 and of the Editor capture u193/1: an empty outlined bar with a small box between the Rank medallion
+        /// and PACK, topside): the depth tag, its chip and their eight ink edges are on exactly while a depth is shown. Awake used to switch
+        /// off the two fills only, so the edges drew from every boot until the first dig below the Surface Line and back. A fresh boot
+        /// topside, a board and an exit, the inventory opened and closed: all off; below the line: all on with the depth; back up: all off.
+        /// </summary>
+        [UnityTest]
+        public IEnumerator TheDepthTagDrawsOnlyWithADepth()
+        {
+            var settings = UnityEngine.InputSystem.InputSystem.settings;
+            var savedEditor = settings.editorInputBehaviorInPlayMode;
+            var savedBackground = settings.backgroundBehavior;
+            settings.editorInputBehaviorInPlayMode = UnityEngine.InputSystem.InputSettings.EditorInputBehaviorInPlayMode.AllDeviceInputAlwaysGoesToGameView;
+            settings.backgroundBehavior = UnityEngine.InputSystem.InputSettings.BackgroundBehavior.IgnoreFocus;
+            var keys = UnityEngine.InputSystem.InputSystem.AddDevice<UnityEngine.InputSystem.Keyboard>("U201Keys");
+            try
+            {
+                SceneDirector director = null;
+                yield return Boot(d => director = d);
+                var side = director.PlanetSide;
+                var hud = side.sideHud;
+                side.hazards.enabled = false;
+                side.creatures.autoSpawn = false; side.creatures.DespawnAll();
+                for (int i = 0; i < 5; i++) yield return null;
+                Assert.AreEqual(10, hud.DepthParts.Count, "the tag and the chip, each with its four ink edges");
+                void AllOff(string when)
+                {
+                    Assert.AreEqual("", hud.DepthText.text, $"{when}: no depth string topside");
+                    foreach (var img in hud.DepthParts) Assert.IsFalse(img.enabled, $"{when}: {img.transform.parent.name}/{img.name} draws with no depth shown");
+                }
+                Assert.IsTrue(Meridian.Mining.DigRun.Topside(side.terrain, side.player.Body.position), "the surveyor starts topside");
+                AllOff("a fresh boot topside");
+
+                var boarding = side.ship.GetComponent<ShipBoarding>();
+                boarding.ForceAboard();
+                yield return null; yield return null;
+                Assert.IsTrue(boarding.TryExit(), "the surveyor steps out again");
+                for (int i = 0; i < 30 && !side.player.Grounded; i++) yield return new WaitForFixedUpdate();
+                yield return null; yield return null;
+                if (Meridian.Mining.DigRun.Topside(side.terrain, side.player.Body.position)) AllOff("after a board and an exit");
+
+                var inventory = Object.FindAnyObjectByType<InventoryPanel>();
+                Assert.NotNull(inventory, "the inventory panel in the game");
+                yield return Tap(keys, UnityEngine.InputSystem.Key.Tab);
+                Assert.IsTrue(inventory.IsOpen, "Tab opens the inventory");
+                yield return null;
+                yield return Tap(keys, UnityEngine.InputSystem.Key.Tab);
+                Assert.IsFalse(inventory.IsOpen, "Tab closes it");
+                yield return null; yield return null;
+                if (Meridian.Mining.DigRun.Topside(side.terrain, side.player.Body.position)) AllOff("after the inventory opened and closed");
+
+                // Below the Surface Line (the body held there, its transform with it): the tag, the chip and every edge with the depth.
+                var body = side.player.Body;
+                var up = body.position;
+                var below = new Vector2(up.x, Meridian.Mining.DigRun.LineAt(side.terrain, up.x) - 4.5f);
+                body.simulated = false;
+                body.position = below; side.player.transform.position = below;
+                yield return null; yield return null;
+                StringAssert.StartsWith("DEPTH 4 m", hud.DepthText.text, "4.5 m under the Surface Line");
+                foreach (var img in hud.DepthParts) Assert.IsTrue(img.enabled, $"below the line: {img.transform.parent.name}/{img.name} is off");
+
+                body.position = up; side.player.transform.position = up;
+                body.simulated = true;
+                yield return null; yield return null;
+                AllOff("back topside");
+                LogAssert.NoUnexpectedReceived();
+            }
+            finally
+            {
+                if (keys != null) UnityEngine.InputSystem.InputSystem.RemoveDevice(keys);
+                settings.editorInputBehaviorInPlayMode = savedEditor;
+                settings.backgroundBehavior = savedBackground;
+            }
+        }
+
         [UnityTest]
         public IEnumerator TopHudShowsSpeedAndWell()
         {

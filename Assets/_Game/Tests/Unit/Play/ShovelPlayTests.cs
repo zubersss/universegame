@@ -163,5 +163,114 @@ namespace Meridian.Tests
                 SkillStats.ToolOverride = suiteTool;
             }
         }
+
+        /// <summary>
+        /// U-203 (BLENDER's read of 0.6.1's smoke_66: the surveyor swung a pickaxe beside the helmet while the slot said SHOVEL): through
+        /// two held strokes and the 0.45 s after them, the held tool's sprite is on in every rendered frame and the drawn body is never one
+        /// of side_b's baked-tool frames (props/rig/hand_socket held_b: the dig clip's pick, the build clip's hammer). The shovel first,
+        /// then The Beam bought topside.
+        /// </summary>
+        [UnityTest, Timeout(240000)]
+        public IEnumerator AStrokeKeepsTheHeldToolInHandAndNeverABakedTool()
+        {
+#if UNITY_EDITOR
+            yield return UnityEditor.SceneManagement.EditorSceneManager.LoadSceneAsyncInPlayMode(CorePath, new LoadSceneParameters(LoadSceneMode.Single));
+#endif
+            var director = Object.FindAnyObjectByType<SceneDirector>();
+            float timeout = Time.realtimeSinceStartup + 30f;
+            while ((!director.IsReady || !director.PlanetSide.terrain.IsSettled) && Time.realtimeSinceStartup < timeout) yield return null;
+            var side = director.PlanetSide;
+            if (side.hazards != null) side.hazards.enabled = false;
+            side.creatures.autoSpawn = false; side.creatures.DespawnAll();
+            var state = GameState.Instance;
+            var suiteTool = SkillStats.ToolOverride;
+            try
+            {
+                SkillStats.ToolOverride = null;
+                state.skillNodes.Clear();
+                SkillStats.Apply(state);
+                var player = side.player;
+                player.externalInput = true; player.intent = default;
+                int camp = Mathf.FloorToInt(Meridian.Planet.POI.PoiCatalog.SpawnCamp.CenterX);
+                float x = camp + 14.5f;
+                var feet = new Vector2(x, side.terrain.SurfaceAt(x) + 0.05f);
+                player.Body.position = feet; player.transform.position = feet; player.Body.linearVelocity = Vector2.zero;
+                for (int i = 0; i < 40; i++) yield return new WaitForFixedUpdate();
+                var drawn = side.cartoon != null && side.cartoon.Active ? side.cartoon.Surveyor : null;
+                Assert.NotNull(drawn, "the drawn surveyor (the cartoon stage)");
+                var input = player.GetComponent<PlayerRigInput>();
+                var view = player.GetComponentInChildren<RigToolView>();
+                Assert.NotNull(view, "the tool view");
+                input.module = RigModule.Beam;
+                float until = Time.realtimeSinceStartup + 15f;
+                while ((drawn.Renderer.sprite == null || view.Tool.sprite == null || !view.Tool.sprite.name.Contains("shovel")) && Time.realtimeSinceStartup < until) yield return null;
+                Assert.AreEqual(DigTool.Shovel, side.rig.Tool, "a new surveyor's shovel");
+                yield return HeldStrokes(side, drawn, input, view, "shovel", 1.2f, 0.8f);
+
+                state.scrip = 1000;
+                Assert.AreEqual(SkillTree.BuyResult.Ok, SkillTree.Current.Buy(state, "dig_power_1", true));
+                Assert.AreEqual(DigTool.Beam, side.rig.Tool);
+                until = Time.realtimeSinceStartup + 15f;
+                while ((view.Tool.sprite == null || !view.Tool.sprite.name.Contains("beam")) && Time.realtimeSinceStartup < until) yield return null;
+                yield return HeldStrokes(side, drawn, input, view, "beam", 2.6f, 1.6f);
+                LogAssert.NoUnexpectedReceived();
+            }
+            finally
+            {
+                state.skillNodes.Clear();
+                SkillStats.Apply(state);
+                SkillStats.ToolOverride = suiteTool;
+            }
+        }
+
+        /// <summary>Two held strokes with `tool` in hand (the first `reach` m to the right and `down` m under the feet, the second mirrored
+        /// to the left on fresh ground), sampled every frame until 0.45 s after the second: the tool shown, no baked-tool body frame.</summary>
+        static IEnumerator HeldStrokes(PlanetSideRoot side, Meridian.View2D.SpriteCharacterView drawn, PlayerRigInput input, RigToolView view, string tool, float reach, float down)
+        {
+            var baked = Meridian.Rendering.ArtMaterials.SocketFor("props/rig/hand_socket", "held_b");
+            Assert.NotNull(baked, "hand_socket's held_b table (side_b's frames with a tool drawn in the hand)");
+            int dug = 0;
+            System.Action<Vector2> onDug = _ => dug++;
+            side.rig.Dug += onDug;
+            int frames = 0, toolOff = 0, bakedFrames = 0;
+            string first = null;
+            try
+            {
+                var body = side.player.Body;
+                input.AimAt(body.position + new Vector2(reach, -down));
+                input.holdUse = true;
+                int aimed = 0;
+                float tail = -1f, until = Time.realtimeSinceStartup + 40f;
+                while (Time.realtimeSinceStartup < until)
+                {
+                    yield return null;
+                    if (dug > aimed && dug < 2) { aimed = dug; input.AimAt(body.position + new Vector2(-reach, -down)); }
+                    var sprite = drawn.Renderer.sprite;
+                    if (sprite != null && drawn.Renderer.enabled)
+                    {
+                        frames++;
+                        int f = JetpackOverlay.FrameOf(sprite);
+                        if (JetpackOverlay.SheetB(sprite) && baked.Has(f))
+                        {
+                            bakedFrames++;
+                            first ??= $"body frame side_b {f} (clip {drawn.Clip}) after {dug} strokes";
+                        }
+                        if (!view.Tool.enabled || view.Tool.sprite == null || !view.Tool.sprite.name.Contains(tool))
+                        {
+                            toolOff++;
+                            first ??= $"tool {(view.Tool.sprite != null ? view.Tool.sprite.name : "(none)")} enabled {view.Tool.enabled} on body clip {drawn.Clip} after {dug} strokes";
+                        }
+                    }
+                    if (dug >= 2 && tail < 0f) { tail = Time.time + SurveyorAnim.DigTime + 0.1f; input.holdUse = false; }
+                    if (tail > 0f && Time.time >= tail) break;
+                }
+            }
+            finally { input.holdUse = false; side.rig.Dug -= onDug; }
+            TestContext.Out.WriteLine($"[MERIDIAN] u203 {tool}: {dug} strokes over {frames} frames; tool off in {toolOff}, baked-tool body frames {bakedFrames}{(first != null ? "; first: " + first : "")}");
+            Assert.GreaterOrEqual(dug, 2, $"two {tool} strokes landed");
+            Assert.Greater(frames, 10, "frames sampled");
+            Assert.AreEqual(0, bakedFrames, $"a body frame with a tool baked in (held_b) played during a {tool} stroke: {first}");
+            Assert.AreEqual(0, toolOff, $"the {tool} left the hand during its stroke: {first}");
+        }
     }
 }

@@ -39,8 +39,7 @@ namespace Meridian.View2D
         ArtClipSet clips;
         ArtClip current;
         bool hasCurrent;
-        float clipTime, sinceLand = 99f, sinceBump = 99f, sinceJump = 99f, sinceDig = 99f, landSpeed;
-        Meridian.Rig.RigTools rig;
+        float clipTime, sinceLand = 99f, sinceBump = 99f, sinceJump = 99f, landSpeed;
         int facing = 1;
         bool hooked;
 
@@ -146,12 +145,11 @@ namespace Meridian.View2D
             player.Landed += OnLanded;
             player.Jumped += OnJumped;
             player.Bumped += OnBumped;
-            rig = player.GetComponentInChildren<Meridian.Rig.RigTools>(true);
-            if (rig == null) rig = player.GetComponentInParent<Meridian.Rig.RigTools>();
-            if (rig == null) rig = FindAnyObjectByType<Meridian.Rig.RigTools>(); // PlanetSideRoot's rig (side.rig), once
-            if (rig != null) rig.Dug += OnDug; // U-121: the drawn surveyor digs like PlayerView does (side_b's dig clip, U-115)
+            // U-203: no dig hook. side_b's dig and build clips carry a baked pick and hammer (props/rig/hand_socket held_b), and the held
+            // tool hides on those frames: since U-121 every stroke had ended in a pick swing with the shovel or the Beam gone from the hand
+            // (BLENDER's read of 0.6.1's smoke_66). The body keeps its stand / walk pose through a stroke and the tool in the hand carries it
+            // (RigToolView: the shovel's scoop arc, the Beam's ray).
         }
-        void OnDug(Vector2 at) => sinceDig = 0f;
 
         void OnLanded(float speed) { sinceLand = 0f; landSpeed = speed; Squash.Land(speed); }
         void OnJumped() { sinceJump = 0f; Squash.TakeOff(); }
@@ -235,13 +233,13 @@ namespace Meridian.View2D
             if (player != null)
             {
                 Hook();
-                sinceLand += dt; sinceBump += dt; sinceJump += dt; sinceDig += dt;
+                sinceLand += dt; sinceBump += dt; sinceJump += dt;
                 var v = player.Body != null ? player.Body.linearVelocity : Vector2.zero;
                 var vitals = player.Vitals;
                 var input = new AnimInputs
                 {
                     dead = vitals != null && vitals.Dead, grounded = player.Grounded, vx = v.x, vy = v.y,
-                    sinceBuild = 99f, sinceSurprise = 99f, sinceHurt = 99f, sinceLand = sinceLand, sinceDig = sinceDig, sinceBump = sinceBump, sinceJump = sinceJump,
+                    sinceBuild = 99f, sinceSurprise = 99f, sinceHurt = 99f, sinceLand = sinceLand, sinceDig = 99f, sinceBump = sinceBump, sinceJump = sinceJump,
                     landSpeed = landSpeed, dashing = player.Dash.Active, jetpacking = player.Jetpack != null && player.Jetpack.Firing, climbingIn = ClimbingIn,
                     ladder = player.ClimbingOn == Meridian.Player.ClimbKind.Ladder, reeling = player.Reeling || player.ClimbingOn == Meridian.Player.ClimbKind.Winch,
                 };
@@ -298,7 +296,7 @@ namespace Meridian.View2D
         void OnDestroy()
         {
             Meridian.Hazards.HazardSystem.SuitEquipped -= SetSuitTier;
-            if (hooked && player != null) { player.Landed -= OnLanded; if (rig != null) rig.Dug -= OnDug; player.Jumped -= OnJumped; player.Bumped -= OnBumped; }
+            if (hooked && player != null) { player.Landed -= OnLanded; player.Jumped -= OnJumped; player.Bumped -= OnBumped; }
             Release();
         }
     }

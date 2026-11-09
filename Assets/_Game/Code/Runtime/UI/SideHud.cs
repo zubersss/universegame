@@ -147,7 +147,13 @@ namespace Meridian.UI
             DepthChip.rectTransform.pivot = new Vector2(0f, 1f);
             DepthChip.rectTransform.anchoredPosition = new Vector2(-160f, -24f);
             UiKit.InkEdges(DepthChip.rectTransform, 1f, UiKit.Ink);
-            DepthTag.enabled = false; DepthChip.enabled = false;
+            // U-201: the tag, the chip and their ink edges go on and off together. Awake used to switch off the two fills only: the eight
+            // edge Images stayed on (an empty outlined bar and a small box topside) until the first dig below the Surface Line and back.
+            var parts = new System.Collections.Generic.List<Image>();
+            parts.AddRange(DepthTag.GetComponentsInChildren<Image>(true));
+            parts.AddRange(DepthChip.GetComponentsInChildren<Image>(true));
+            depthParts = parts.ToArray();
+            ShowDepthTag(false);
             BuildPack(root, top, theme);
             BuildRank(root, tl);
             BuildScrip(root, tl);
@@ -249,7 +255,7 @@ namespace Meridian.UI
             {
                 shownDepth = d;
                 bool on = d >= 0;
-                if (DepthTag.enabled != on) { DepthTag.enabled = on; DepthChip.enabled = on; foreach (var e in DepthChip.GetComponentsInChildren<Image>()) e.enabled = on; foreach (var e in DepthTag.GetComponentsInChildren<Image>()) e.enabled = on; }
+                if (depthTagOn != on) ShowDepthTag(on);
                 if (d < 0) DepthText.text = "";
                 else
                 {
@@ -276,6 +282,18 @@ namespace Meridian.UI
             }
             bool cue = Time.time < packCueUntil;
             if (PackText.enabled != cue) PackText.enabled = cue;
+        }
+
+        /// <summary>U-201: the depth tag's Images (the tag and the chip with their ink edges), cached in Awake: one switch for all of them.</summary>
+        Image[] depthParts;
+        bool depthTagOn = true;
+        /// <summary>U-201 (tests): every Image of the depth tag and its chip.</summary>
+        public System.Collections.Generic.IReadOnlyList<Image> DepthParts => depthParts;
+
+        void ShowDepthTag(bool on)
+        {
+            depthTagOn = on;
+            for (int i = 0; i < depthParts.Length; i++) if (depthParts[i] != null) depthParts[i].enabled = on;
         }
 
         void OnPackRefused() => packCueUntil = Time.time + 2f;

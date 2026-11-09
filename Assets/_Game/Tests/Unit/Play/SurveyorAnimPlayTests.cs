@@ -126,7 +126,10 @@ namespace Meridian.Tests
             Assert.IsTrue(side.rig.Dig(new Vector2(p.x - 2.2f, p.y - 1.2f)), "Beam digs the ground ahead"); // D-133: a full tile ahead, never under the drawn surveyor's own foot (07:05: the dug tile dropped them into `fall`)
             yield return Frames(2);
             for (int i = 0; i < 12 && !player.Grounded; i++) yield return null; // the dug chunk's collider rebuilds: the ground contact returns within a few frames (07:26: `fall` read at v 0)
-            AssertClip(SurveyorAnim.Dig);
+            // U-203: the drawn surveyor keeps its stand pose through a dig (side_b's dig clip carries a baked pick and hid the held tool);
+            // the 3D path's model still plays its dig.
+            if (drawn != null) Assert.AreEqual(SurveyorAnim.Idle, CurrentClip, $"the drawn surveyor's clip after a dig ({player.Body.linearVelocity}, grounded {player.Grounded})");
+            else AssertClip(SurveyorAnim.Dig);
 
             samples.Sort();
             int over = samples.FindAll(s => s > 0.05).Count;
