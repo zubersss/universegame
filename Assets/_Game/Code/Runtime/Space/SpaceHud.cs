@@ -36,7 +36,12 @@ namespace Meridian.Space
             Label(root, "WELL u/s²", 1);
             Well = Value(root, 1);
             WellName = UiKit.Text(root, "WellName", tl, new Vector2(24f + 1 * 200f, -98f), new Vector2(180f, 20f), 14, false, TextAnchor.MiddleLeft, theme.label);
+            // U-184 (D-178): the minimap (top right) and the system map (M).
+            Map = gameObject.AddComponent<SpaceMap>();
+            Map.ship = ship;
         }
+
+        public SpaceMap Map { get; private set; }
 
         static void Label(Transform root, string text, int column) =>
             UiKit.Text(root, text, new Vector2(0f, 1f), new Vector2(24f + column * 200f, -36f), new Vector2(180f, 18f), 13,

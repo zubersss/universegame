@@ -223,6 +223,7 @@ namespace Meridian.Transitions
             int x = ColumnAt(longitude, config.worldWidth);
             LastEntryAngle = Mathf.Repeat(angle, 360f);
             State.currentPlanet = body.planet;
+            State.SetFlag(Meridian.Space.SpaceMap.LandedFlag(body.planet)); // U-184: the system map ticks the planets landed on
             State.view = ViewMode.PlanetSide;
             scenes.Space.gameObject.SetActive(false); // before PlanetSide loads: one global 2D light at a time
             if (spaceCam != null) spaceCam.orthographicSize = SpaceDefaultSize;

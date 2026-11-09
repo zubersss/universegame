@@ -115,6 +115,7 @@ namespace Meridian.Creatures
                 if (night) nightHandles[s] = h; else artHandles[s] = h;
                 h.Completed += op =>
                 {
+                    if (this == null) return; // the planet side unloaded before its sheet arrived
                     if (op.Status != AsyncOperationStatus.Succeeded || op.Result == null || op.Result.Count == 0) return;
                     var list = new Sprite[op.Result.Count];
                     foreach (var sp in op.Result)
@@ -129,7 +130,7 @@ namespace Meridian.Creatures
                     // U-108: bodies that spawned before the sheet (the stage's load-time gull) take it now instead of keeping the placeholder box.
                     var arrived = SpeciesSpec.Get((Species)s);
                     foreach (var live in pool)
-                        if (live.Alive && live.Spec != null && live.Spec.id == (Species)s && live.IsPlaceholder)
+                        if (live != null && live.Alive && live.Spec != null && live.Spec.id == (Species)s && live.IsPlaceholder) // U-184: a body destroyed before its sheet arrived
                             live.ApplyArt(list[0], list, nightFrames[s], ArtMaterials.ClipsFor(arrived.artKey));
                 };
             };

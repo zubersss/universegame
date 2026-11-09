@@ -2639,6 +2639,57 @@ namespace Meridian.Tests
             UnityEngine.Object.Destroy(uiGo);
         }
 
+        /// <summary>U-184 (D-178): the space minimap and the system map at 1080p → coordination/reports/unity/u184/: 1_minimap.png (between
+        /// Earth and Mars, heading 30°), 2_minimap_far.png (out by Jupiter: the rim arrows and their distances), 3_system_map.png (M; Mars
+        /// ticked as landed).</summary>
+        [UnityTest, Timeout(240000)]
+        public IEnumerator CaptureU184Map()
+        {
+            var name = Environment.GetEnvironmentVariable(Variable);
+            if (string.IsNullOrEmpty(name)) Assert.Ignore($"Set {Variable} (tools/unity_capture.ps1).");
+            if (SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.Null)
+                Assert.Fail("No graphics device: run without -nographics.");
+#if UNITY_EDITOR
+            yield return UnityEditor.SceneManagement.EditorSceneManager.LoadSceneAsyncInPlayMode(
+                CorePath, new LoadSceneParameters(LoadSceneMode.Single));
+#endif
+            var director = UnityEngine.Object.FindAnyObjectByType<SceneDirector>();
+            float timeout = Time.realtimeSinceStartup + 30f;
+            while (!director.IsReady && Time.realtimeSinceStartup < timeout) yield return null;
+            director.SetView(ViewMode.Space);
+            for (int i = 0; i < 10; i++) yield return null;
+            var ship = director.Space.GetComponentInChildren<Meridian.Space.SpaceShip>();
+            var map = director.Space.GetComponentInChildren<Meridian.Space.SpaceHud>().Map;
+            ship.externalInput = true;
+            ship.intent = default;
+            timeout = Time.realtimeSinceStartup + 10f;
+            while ((!map.Built || ship.Invulnerable) && Time.realtimeSinceStartup < timeout) yield return null;
+            var cam = director.Space.GetComponentInChildren<Camera>();
+            var dir = "coordination/reports/unity/u184";
+            Directory.CreateDirectory(dir);
+            GameState.Instance.SetFlag(Meridian.Space.SpaceMap.LandedFlag(Meridian.Planets.PlanetId.Mars));
+
+            IEnumerator Shot(Vector2 at, float heading, string label, Canvas canvas)
+            {
+                for (float t = 0f; t < 2.5f; t += Time.unscaledDeltaTime) { ship.Position = at; ship.Velocity = Vector2.zero; ship.Heading = heading; yield return null; }
+                yield return SaveWithUi(cam, canvas, $"{name}_{label}");
+                File.Copy($"logs/capture_{name}_{label}.png", $"{dir}/{label}.png", true);
+                int inside = 0, rims = 0;
+                foreach (var m in map.Marks) { if (m.disc.gameObject.activeSelf) inside++; if (m.rim != null && m.rim.gameObject.activeSelf) rims++; }
+                TestContext.Out.WriteLine($"[MERIDIAN] u184 {label}: ship ({at.x:F0}, {at.y:F0}) heading {heading:F0}, range {map.Range:F0} u, {inside} marks inside, {rims} rim arrows, art frame {map.HasArt("ui/map/minimap_frame")} discs {map.HasArt("ui/map/planet_earth")}, orbits {map.MiniOrbits.Quads} quads ({(map.MiniOrbits.Sprite != null ? map.MiniOrbits.Sprite.name : "no sprite")}), wells {map.MiniWells.Quads} quads ({(map.MiniWells.Sprite != null ? map.MiniWells.Sprite.name : "no sprite")})");
+            }
+
+            var earth = ship.world.Find("earth").Value;
+            var minimapCanvas = map.Minimap.GetComponentInParent<Canvas>();
+            yield return Shot(earth.position + new Vector2(earth.WellRadius + 140f, -60f), 30f, "1_minimap", minimapCanvas);
+            var jupiter = ship.world.Find("jupiter").Value;
+            yield return Shot(jupiter.position + new Vector2(jupiter.WellRadius + 260f, -180f), 200f, "2_minimap_far", minimapCanvas);
+            map.SetSystemOpen(true);
+            yield return Shot(earth.position + new Vector2(earth.WellRadius + 140f, -60f), 30f, "3_system_map", map.SystemShip.GetComponentInParent<Canvas>());
+            map.SetSystemOpen(false);
+            LogAssert.NoUnexpectedReceived();
+        }
+
         /// <summary>U-175 (D-174): the Skill Tree panel topside at Earth's camp, B-204's mock-up state (six bought, Beam Power III chosen):
         /// 1_skill_tree.png with 2 of its 6 hematite (BUY greyed, the reason), 2_skill_tree_ready.png with 6 → coordination/reports/unity/u175/.</summary>
         [UnityTest, Timeout(240000)]

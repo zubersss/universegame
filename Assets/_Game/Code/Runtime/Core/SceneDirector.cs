@@ -42,6 +42,9 @@ namespace Meridian.Core
             // Warm the top-down view now, while it is the only view loaded (one global 2D light), so the
             // first launch never stalls on shader/pipeline setup (U-028).
             if (Space != null) RenderWarmup.WarmUp(Space.GetComponentInChildren<Camera>());
+            // U-184: the space maps build here too (behind the boot cover), not on the first frame in space.
+            var spaceHud = Space != null ? Space.GetComponentInChildren<Meridian.Space.SpaceHud>(true) : null;
+            if (spaceHud != null && spaceHud.Map != null) spaceHud.Map.Prepare();
             if (Space != null) Space.gameObject.SetActive(gameState.view == ViewMode.Space);
 
             yield return LoadPlanetSide(gameState.CurrentPlanetConfig);

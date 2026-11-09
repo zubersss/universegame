@@ -91,7 +91,7 @@ namespace Meridian.UI
             if (pause != null && pause.WasPressedThisFrame())
             {
                 if (SettingsOpen) CloseSettings(); // Esc backs out of the settings to the menu that opened them
-                else if (!MainMenuOpen) { if (PauseOpen) Resume(); else OpenPause(); }
+                else if (!MainMenuOpen) { if (PauseOpen) Resume(); else if (!Meridian.Space.SpaceMap.CloseOnEscape()) OpenPause(); } // U-184: Esc closes the system map first
             }
         }
 
