@@ -2203,6 +2203,9 @@ def neptune_scene(seed, deck="deck1"):
             bx, by = rng.uniform(300, 1700), 430
             ell(glow, bx, by + 60, 150, 70)
             bolt(bolts, rng, bx, by, 150)
+            # B-220 rev: lifted 96 px (the same draws, so the rng stream and every later layer stay as accepted) so the flash and
+            # its bolt end above the bottom 2 x 64 rows: tile_bottom would ghost them into the band and repeat a dash under the deck
+            glow, bolts = np.roll(glow, -96, 0), np.roll(bolts, -96, 0)
             stack.paint(tint(rng, H, glow, BG._mix(pal["mustard"], pal["offwhite"], 0.4), 0.5, var=0.03, edge_dark=0.0, bleed=12.0))
             stack.paint(tint(rng, H, bolts, pal["offwhite"], 1.0, var=0.0, edge_dark=0.0, bleed=0.5))
         out.append(finish(stack, rng, H))

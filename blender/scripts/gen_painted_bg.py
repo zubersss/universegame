@@ -363,21 +363,34 @@ def wants_continue(entry):
     return bool(entry.get("continue_rows")) or planet in CONTINUE_PLANETS or entry["key"] in CONTINUE_KEYS
 
 
-def tile_bottom(rgb, a, rows=CONTINUE_ROWS):
-    """B-220: make a layer's bottom `rows` rows repeat seamlessly downward (UNITY tiles them below the layer: json continue_rows).
-    The band is cross-faded with the `rows` rows above it: its first row stays the original (so it follows the row above it) and its
-    last row becomes the row just above the band (so it flows back into its own first row, the original adjacency) -> any number of
-    repeats join without a seam. Painted washes only (the decks' lower layers carry no inked detail there)."""
-    H = rgb.shape[0]
-    if H < 2 * rows:
-        return rgb, a
-    s = np.linspace(0.0, 1.0, rows, dtype=np.float32)[:, None]
-    rgb, a = rgb.copy(), a.copy()
-    lo, up = rgb[H - rows:].copy(), rgb[H - 2 * rows:H - rows]
-    rgb[H - rows:] = lo * (1 - s[..., None]) + up * s[..., None]
-    alo, aup = a[H - rows:].copy(), a[H - 2 * rows:H - rows]
-    a[H - rows:] = alo * (1 - s) + aup * s
+CONTINUE_MIN_COVER = 0.25         # B-220 rev (11:4x sheets): a band continues only where it is a fill (cloud body, sky, ice pillars)
+
+
+def band_cover(a, rows=CONTINUE_ROWS):
+    """The share of the bottom band's pixels that are solid (alpha > 0.5)."""
+    return float((a[-rows:] > 0.5).mean())
+
+
+def feather_bottom(rgb, a, rows=CONTINUE_ROWS):
+    """B-220 rev: a sparse bottom (lightning, the storm ring's haze) fades to transparent over its last `rows` rows (smoothstep)
+    instead of repeating - a repeated bolt / streak stacked as slats and dashes under the layer."""
+    t = 1.0 - np.arange(rows, dtype=np.float32) / (rows - 1)
+    a = a.copy()
+    a[-rows:] = a[-rows:] * (t * t * (3 - 2 * t))[:, None]
     return rgb, a
+
+
+def continue_layer(rgb, a, L):
+    """B-220: one layer's bottom for the floating decks. Its own band kept; a fill gets D-169's tileable band (tile_bottom above:
+    json continue_rows, UNITY repeats it); a sparse bottom is feathered out and gets no continue_rows. Returns rgb, a, the decision."""
+    if "continue_rows" in L:
+        return rgb, a, "own band"
+    if rgb.shape[0] >= 2 * CONTINUE_ROWS and band_cover(a) >= CONTINUE_MIN_COVER:
+        rgb, a = tile_bottom(rgb.copy(), a.copy())
+        L["continue_rows"] = CONTINUE_ROWS
+        return rgb, a, "continues"
+    rgb, a = feather_bottom(rgb, a)
+    return rgb, a, "feathered"
 
 
 def band_seam(rgb, a, rows=CONTINUE_ROWS):
@@ -395,8 +408,9 @@ def continue_rows_for(planet):
 
 
 def preview_continue(planet, out, footnote=None):
-    """B-220's sheet for one planet: every floating-deck scene, each layer at 1/4 with its new bottom band repeated 3x below it (the
-    way UNITY will continue it), the band's repeat seam per layer and its step from the row above. One scene in memory at a time."""
+    """B-220's sheet for one planet: every floating-deck scene, each layer at 1/4 as export_background makes it (continue_layer): a
+    fill's band repeated 3x below it (the way UNITY will continue it) with its repeat seam and its step from the row above; a sparse
+    layer feathered out, nothing under it. One scene in memory at a time."""
     import time
     sys.path.insert(0, os.path.dirname(HERE))
     import review
@@ -405,7 +419,7 @@ def preview_continue(planet, out, footnote=None):
     paper = np.array(review.PAPER, np.float32)
     rows, lines = [], []
     head = np.tile(paper, (28, 3 * (2048 // q) + 40, 1)).astype(np.float32)
-    review._label(head, f"b-220 {planet}: each deck layer (1/{q}) with its new 64-row band repeated 3x below it, as UNITY continues it", 6, 8)
+    review._label(head, f"b-220 {planet}: deck layers (1/{q}); a fill's 64-row band repeated 3x below it as UNITY continues it, a sparse layer feathered out", 6, 8)
     rows.append(head)
     for e in continue_rows_for(planet):
         _c, _p, scene = e["key"].split("/")
@@ -413,12 +427,13 @@ def preview_continue(planet, out, footnote=None):
         imgs, layers = fn(int(e.get("seed", 1)))
         cells = []
         for (rgb, a), L in zip(imgs, layers):
-            had = "continue_rows" in L
-            if not had:
-                rgb, a = tile_bottom(rgb, a)
-            band_rgb, band_a = rgb[-CONTINUE_ROWS:], a[-CONTINUE_ROWS:]
-            stack_rgb = np.vstack([rgb] + [band_rgb] * 3)
-            stack_a = np.vstack([a] + [band_a] * 3)
+            cover = band_cover(a)
+            rgb, a, how = continue_layer(rgb, a, L)
+            nb = int(L.get("continue_rows", CONTINUE_ROWS))
+            reps = 0 if how == "feathered" else 3
+            band_rgb, band_a = rgb[-nb:], a[-nb:]
+            stack_rgb = np.vstack([rgb] + [band_rgb] * reps)
+            stack_a = np.vstack([a] + [band_a] * reps)
             hh = stack_rgb.shape[0] // q * q
             ww = stack_rgb.shape[1] // q * q
             sr = stack_rgb[:hh, :ww].reshape(hh // q, q, ww // q, q, 3).mean(axis=(1, 3))
@@ -428,10 +443,13 @@ def preview_continue(planet, out, footnote=None):
             y_cut = rgb.shape[0] // q                                                     # mark where the layer ends
             cell[y_cut:y_cut + 1, ::6] = (0.85, 0.2, 0.2)
             cells.append(cell)
-            js = band_seam(rgb, a)
-            step = float(np.abs(rgb[-CONTINUE_ROWS] * a[-CONTINUE_ROWS, :, None] - rgb[-CONTINUE_ROWS - 1] * a[-CONTINUE_ROWS - 1, :, None]).mean())
-            lines.append(f"{scene} layer{L['n']}: {rgb.shape[1]}x{rgb.shape[0]}{' (had its own band)' if had else ''}, repeat seam {js:.2f}, "
-                         f"step into the band {step * 255:.1f}/255")
+            if how == "feathered":
+                tail = f", alpha of the last row {float(a[-1].max()):.2f}: ends, no continue_rows"
+            else:
+                js = band_seam(rgb, a, nb)
+                step = float(np.abs(rgb[-nb] * a[-nb, :, None] - rgb[-nb - 1] * a[-nb - 1, :, None]).mean())
+                tail = f", repeat seam {js:.2f}, step into the band {step * 255:.1f}/255"
+            lines.append(f"{scene} layer{L['n']}: {rgb.shape[1]}x{rgb.shape[0]}, band cover {cover:.2f} -> {how}{tail}")
         del imgs
         Hc = max(c.shape[0] for c in cells)
         r = np.tile(paper, (Hc + 22, 3 * (2048 // q) + 40, 1)).astype(np.float32)
@@ -460,12 +478,11 @@ def export_background(entry, art):
         import build_backdrop_v3 as BB
         fn = BB.SCENES[(planet, scene)]
     imgs, layers = fn(int(entry.get("seed", 1)))
-    if wants_continue(entry):                                        # B-220: a tileable bottom band on every layer that lacks one
+    if wants_continue(entry):                                        # B-220: a fill's tileable band, a sparse bottom feathered
         out = []
         for (rgb, a), L in zip(imgs, layers):
-            if "continue_rows" not in L:
-                rgb, a = tile_bottom(rgb, a)
-                L["continue_rows"] = CONTINUE_ROWS
+            rgb, a, how = continue_layer(rgb, a, L)
+            print(f"B-220 {entry['key']} layer{L['n']}: {how}")
             out.append((rgb, a))
         imgs = out
     d = os.path.join(art, "backgrounds", planet, scene)
