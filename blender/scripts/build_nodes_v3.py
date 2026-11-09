@@ -99,7 +99,8 @@ def colours(planet):
     if planet == "neptune":                     # methane ice (deck 1), superionic ice (deck 3, violet), deep diamond (the deep)
         return {"rock": sh("offwhite"), "rock_sh": dp("offwhite"), "rock_hi": P["offwhite"], "meth": P["teal"], "meth_sh": sh("teal"),
                 "meth_hi": P["offwhite"], "super": P["mustard"], "super_sh": sh("mustard"), "super_hi": P["offwhite"],
-                "diamond": P["offwhite"], "diamond_sh": P["teal"], "diamond_dp": P["sky"], "pit": sh("offwhite"), "glint": P["offwhite"],
+                "diamond": P["offwhite"], "diamond_sh": P["teal"], "diamond_dp": sh("teal"), "pit": sh("offwhite"), "glint": P["offwhite"],
+                # (rev: diamond_dp was Neptune's "sky", the backdrop's own blue: the gem's pavilion vanished into it)
                 "dark": P["brown"]}
     raise ValueError(f"B-176: no node tones for {planet}")
 
@@ -675,17 +676,31 @@ def _slab(d, M, cx, cz, w, h, tilt, fill, shade, hi, seed, ink=O):
     return R(w * 0.4, h * 0.6)
 
 
+def _shard(d, M, x, z, r, tall, lean, seed, fill, shade):
+    """An irregular chipped ice shard (rev, LEAD 00:3x: no right angles - square tiles read as crates / sugar cubes): 6-7 jittered
+    corners, one drawn out to a point, the lower-left facet shaded, a facet line from the point."""
+    rnd = random.Random(seed)
+    n = rnd.choice((6, 7))
+    pts = []
+    for i in range(n):
+        a = math.pi / 2 + lean + TAU * i / n + rnd.uniform(-0.25, 0.25)
+        rr = r * (rnd.uniform(0.62, 0.95) if i else tall)                                      # vertex 0: the point
+        pts.append((x + rr * math.cos(a) * 0.8, max(z + rr * math.sin(a), 0.10)))
+    G.stroke(d, pts, M[fill], 0.0, cyclic=True)
+    G.stroke(d, [pts[0]] + [p for p in pts[1:] if p[0] < x] + [(x, z)], M[shade], 0.0, cyclic=True)
+    G.stroke(d, pts, M["ink"], O, cyclic=True)
+    G.seam(d, [pts[0], (x + r * 0.1, z), pts[n // 2]], M["ink"])
+    return (pts[0][0] * 0.7 + x * 0.3, pts[0][1] * 0.7 + z * 0.3)
+
+
 def node_ring_ice(d, M, state, k=0):
-    """Saturn, deck 1: a heap of angular ring-ice fragments, offwhite with blue shading and cracks."""
+    """Saturn, deck 1: a heap of chipped ring-ice shards leaning together, offwhite with blue shading and facet lines."""
     mound(d, M, 0.66, 0.16, 41)
     full = state != "harvested"
-    chunks = [(-0.36, 0.30, 0.20, 0.15, 0.25), (0.20, 0.28, 0.24, 0.16, -0.18), (-0.06, 0.62, 0.22, 0.17, 0.10), (0.42, 0.62, 0.14, 0.12, -0.4),
-              (-0.42, 0.66, 0.12, 0.10, 0.5)] if full else [(-0.10, 0.22, 0.16, 0.10, 0.2), (0.24, 0.18, 0.12, 0.08, -0.3)]
-    spots = []
-    for j, (x, z, w, h, t) in enumerate(chunks):
-        spots.append(_slab(d, M, x, z, w, h, t, "ice", "ice_sh", "ice", 50 + j))
-        G.seam(d, [(x - w * 0.3, z + h * 0.4), (x, z), (x + w * 0.2, z - h * 0.3)], M["ink"])
-    return spots
+    shards = [(-0.34, 0.34, 0.24, 1.30, 0.45), (0.26, 0.34, 0.25, 1.40, -0.35), (-0.04, 0.52, 0.27, 1.50, 0.08), (0.48, 0.20, 0.15, 1.15, -1.25),
+              (-0.52, 0.20, 0.13, 1.20, 1.10)] if full else [(-0.10, 0.18, 0.13, 1.2, 0.3), (0.22, 0.16, 0.10, 1.2, -0.9)]
+    # (rev: chunkier, varied, two lying on their sides: five tall points in a row edged toward a row of teeth)
+    return [_shard(d, M, x, z, r, t, ln, 50 + j, "ice", "ice_sh") for j, (x, z, r, t, ln) in enumerate(shards)]
 
 
 def node_ring_rock(d, M, state, k=0):
@@ -770,12 +785,12 @@ def node_methane_ice(d, M, state, k=0):
     return spots if full else []
 
 
-def _cube(d, M, cx, cz, s, tilt, fill, shade, hi):
-    """A cubic crystal in a three-quarter view: the top face lit, the front face the body tone, the side face shaded; one
-    diagonal facet line across the front (rev: nested squares read as crates)."""
+def _cube(d, M, cx, cz, s, tilt, fill, shade, hi, height=None):
+    """A cubic crystal (a square prism) in a three-quarter view: the top face lit, the front face the body tone, the side face
+    shaded; one diagonal facet line across the front (rev: nested squares read as crates)."""
     ca, sa = math.cos(tilt), math.sin(tilt)
     R = lambda u, v: (cx + u * ca - v * sa, cz + u * sa + v * ca)  # noqa: E731
-    a, b, c = s, s * 0.55, s * 1.9                                                           # half width, depth skew, height
+    a, b, c = s, s * 0.55, (height if height is not None else s * 1.9)                      # half width, depth skew, height
     top = [R(-a, c), R(-a + b, c + b * 0.6), R(a + b, c + b * 0.6), R(a, c)]
     left = [R(-a, 0), R(a, 0), R(a, c), R(-a, c)]
     right = [R(a, 0), R(a + b, b * 0.6), R(a + b, c + b * 0.6), R(a, c)]
@@ -786,7 +801,8 @@ def _cube(d, M, cx, cz, s, tilt, fill, shade, hi):
     for face in (left, right, top):
         G.stroke(d, face, M["ink"], O * 0.8, cyclic=True)
     G.seam(d, [R(-a * 0.7, c * 0.15), R(a * 0.75, c * 0.9)], M["ink"])
-    return R(a * 0.3, c + b * 0.3)
+    return R(a * 0.2, c * 0.72)                                                              # the glint on the face (the tip ran
+                                                                                             # past the frame's top on the tall prism)
 
 
 def node_superionic_ice(d, M, state, k=0):
@@ -794,14 +810,16 @@ def node_superionic_ice(d, M, state, k=0):
     rays round the cluster for the faint glow (ink only)."""
     mound(d, M, 0.62, 0.16, 49)
     full = state != "harvested"
-    cubes = [(-0.26, 0.10, 0.13, 0.20), (0.10, 0.10, 0.16, -0.08), (0.38, 0.10, 0.10, -0.32), (-0.48, 0.10, 0.08, 0.40), (0.0, 0.52, 0.08, 0.30)] \
-        if full else [(-0.06, 0.10, 0.10, 0.12)]
-    spots = [_cube(d, M, x, z, s, t, "super", "super_sh", "super_hi") for x, z, s, t in cubes]
-    if full:                                                                                 # the glow, in ink: short rays round it
-        for j in range(9):
-            a = math.pi * (0.12 + 0.76 * j / 8)
-            r0, r1 = 0.62, (0.72 if j % 2 == 0 else 0.68)
-            G.stroke(d, [(r0 * math.cos(a), 0.30 + r0 * 0.95 * math.sin(a)), (r1 * math.cos(a), 0.30 + r1 * 0.95 * math.sin(a))], M["ink"], I)
+    # rev (LEAD 00:3x): the deep reward stands tallest - a central prism ~0.95 m drawn (x1.35 = 1.28 m), its flanks leaning on it,
+    # every prism seated on the mound (the old top cube floated)
+    prisms = [(-0.30, 0.10, 0.11, 0.24, 0.52), (0.30, 0.10, 0.11, -0.26, 0.58), (-0.08, 0.10, 0.15, 0.04, 0.84),
+              (0.46, 0.10, 0.07, -0.42, 0.24), (-0.50, 0.10, 0.07, 0.46, 0.22)] if full else [(-0.06, 0.10, 0.10, 0.12, 0.22)]
+    spots = [_cube(d, M, x, z, s, t, "super", "super_sh", "super_hi", height=h) for x, z, s, t, h in prisms]
+    if full:                                                                                 # the glow, in ink: short rays at its sides
+        for j in range(8):
+            a = math.pi * ((0.10 + 0.32 * j / 3) if j < 4 else (0.58 + 0.32 * (j - 4) / 3))
+            r0, r1 = 0.56, (0.66 if j % 2 == 0 else 0.62)
+            G.stroke(d, [(r0 * math.cos(a), 0.36 + r0 * 0.95 * math.sin(a)), (r1 * math.cos(a), 0.36 + r1 * 0.95 * math.sin(a))], M["ink"], I)
     return spots
 
 
@@ -820,13 +838,46 @@ def _octa(d, M, cx, cz, s, buried, fill, shade, deep):
     return (cx - s * 0.2, cz + s * 0.55)
 
 
+def _gem(d, M, gx, gz, gw, tilt):
+    """A big brilliant-cut diamond in side view, half-buried (rev, LEAD 00:3x: the plain triangle read as a tent): the flat table on
+    top, the crown's facets sloping to the girdle, the pavilion's facets running down into the floe; tilted about its buried
+    point; light facets left, shaded right, a white streak on the table."""
+    ca, sa = math.cos(tilt), math.sin(tilt)
+    R = lambda u, v: (gx + u * ca - v * sa, max(gz + u * sa + v * ca, 0.11))  # noqa: E731
+    tw, ch, pd, zg = gw * 0.55, gw * 0.62, gw * 1.30, gw * 0.95                               # table, crown height, pavilion depth
+    girdle = [-gw, -gw * 0.45, gw * 0.45, gw]
+    table = [-tw, -tw * 0.35, tw * 0.35, tw]
+    tones = ("diamond", "diamond", "diamond_sh")
+    for i in range(3):                                                                       # the pavilion (into the floe)
+        G.stroke(d, [R(girdle[i], zg), R(girdle[i + 1], zg), R(0.0, zg - pd)], M[("diamond_sh", "diamond_dp", "diamond_dp")[i]], 0.0, cyclic=True)
+    for i in range(3):                                                                       # the crown's facets
+        G.stroke(d, [R(girdle[i], zg), R(girdle[i + 1], zg), R(table[i + 1], zg + ch), R(table[i], zg + ch)], M[tones[i]], 0.0, cyclic=True)
+    G.stroke(d, [R(-tw * 0.8, zg + ch * 0.92), R(-tw * 0.1, zg + ch * 0.92), R(-tw * 0.3, zg + ch * 0.55), R(-tw * 0.95, zg + ch * 0.55)],
+             M["glint"], 0.0, cyclic=True)                                                     # the white streak
+    outline = [R(-gw, zg), R(-tw, zg + ch), R(tw, zg + ch), R(gw, zg), R(0.0, zg - pd)]
+    G.stroke(d, outline, M["ink"], O, cyclic=True)
+    G.seam(d, [R(-gw, zg), R(gw, zg)], M["ink"])                                             # the girdle
+    for i in range(1, 3):
+        G.seam(d, [R(girdle[i], zg), R(table[i], zg + ch)], M["ink"])                       # crown facet lines
+        G.seam(d, [R(girdle[i], zg), R(0.0, zg - pd)], M["ink"])                            # pavilion facet lines
+    for i in range(3):                                                                       # the star facets under the table
+        G.seam(d, [R(table[i], zg + ch), R((girdle[i] + girdle[i + 1]) / 2, zg + ch * 0.45), R(table[i + 1], zg + ch)], M["ink"])
+    return R(tw * 0.2, zg + ch * 0.75)
+
+
 def node_deep_diamond(d, M, state, k=0):
-    """Neptune, the deep: diamond hail half-buried in a patch of floe crust: a big stone and a scatter of small ones."""
+    """Neptune, the deep: one big faceted diamond half-buried in a patch of floe crust (the most striking thing on the floe), with
+    diamond hail scattered round it."""
     full = state != "harvested"
-    mound(d, M, 0.74, 0.14, 51)
-    stones = [(0.0, 0.32, 0.34, 0.42), (-0.42, 0.20, 0.17, 0.4), (0.42, 0.18, 0.16, 0.35), (-0.20, 0.13, 0.10, 0.3), (0.60, 0.10, 0.09, 0.3),
-              (-0.62, 0.10, 0.08, 0.3), (0.22, 0.12, 0.09, 0.35)] if full else [(0.30, 0.12, 0.10, 0.35)]          # (rev: bigger)
+    mound(d, M, 0.62, 0.14, 51)
     spots = []
+    if full:
+        spots.append(_gem(d, M, 0.0, 0.10, 0.46, -0.22))                                    # ~0.86 m drawn, x1.45 = 1.25 m
+        for j, (x, rx) in enumerate(((-0.24, 0.13), (-0.06, 0.12), (0.12, 0.13), (0.30, 0.11))):     # floe crust heaped against its
+            G.stroke(d, G.lumpy_ellipse(x, 0.15, rx, 0.075, n=14, lump=0.12, seed=80 + j), M["rock"], O * 0.8, cyclic=True)   # foot: buried
+            G.stroke(d, G.lumpy_ellipse(x - rx * 0.3, 0.13, rx * 0.5, 0.035, n=10, lump=0.1, seed=90 + j), M["rock_sh"], 0.0, cyclic=True)
+    stones = [(-0.44, 0.16, 0.10, 0.4), (-0.24, 0.12, 0.07, 0.3), (0.52, 0.12, 0.07, 0.35), (-0.58, 0.10, 0.05, 0.3),
+              (0.30, 0.11, 0.05, 0.3)] if full else [(0.30, 0.12, 0.10, 0.35)]
     for x, z, s, b in stones:
         spots.append(_octa(d, M, x, z, s, b, "diamond", "diamond_sh", "diamond_dp"))
     if not full:                                                                             # the pits the hail left
@@ -842,7 +893,7 @@ GIANT_DECK = {"jupiter": {"ammonia_ice": "deck1", "metallic_hydrogen": "deep"}, 
               "neptune": {"methane_ice": "deck1", "superionic_ice": "deck3", "deep_diamond": "deep"}}
 ITEM_OF = {"helium3": "helium3_condensate"}                                                # the node's name -> the item it drops
 GIANT_SCALE = {"ammonia_ice": 1.30, "metallic_hydrogen": 1.25, "ring_ice": 1.35, "ring_rock": 1.35, "helium3": 1.35,   # rev: drawn
-               "methane_ice": 1.35, "superionic_ice": 1.35, "deep_diamond": 1.25}  # small, scaled about the pivot to B-176's 1.2-1.4 m
+               "methane_ice": 1.35, "superionic_ice": 1.35, "deep_diamond": 1.45}  # small, scaled about the pivot to B-176's 1.2-1.4 m
 
 
 PLANET_NODES = {"earth": {"iron": node_iron, "copper": node_copper, "carbon": node_carbon, "silica": node_silica, "water_ice": node_water_ice},
