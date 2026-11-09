@@ -1,0 +1,24 @@
+{
+  "key": "fx/ui/scrip_shower",
+  "style": "v3",
+  "ppu": 64,
+  "gutter": 4,
+  "fps": 12,
+  "pivot": [
+    0.5,
+    0.151
+  ],
+  "frame_width": 192,
+  "frame_height": 192,
+  "columns": 8,
+  "frames": 8,
+  "animations": [
+    {
+      "name": "shower",
+      "start": 0,
+      "length": 8,
+      "loop": false
+    }
+  ],
+  "note": "B-214: selling - brass Scrip coins pop up and arc off toward the frame's top-left; place the pivot at the sell point, the tag up and to the left (UNITY may slide the sprite toward the tag over the clip)"
+}

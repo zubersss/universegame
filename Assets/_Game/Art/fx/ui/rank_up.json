@@ -1,0 +1,67 @@
+{
+  "key": "fx/ui/rank_up",
+  "style": "v3",
+  "ppu": 64,
+  "gutter": 4,
+  "fps": 12,
+  "pivot": [
+    0.5,
+    0.4583
+  ],
+  "frame_width": 256,
+  "frame_height": 192,
+  "columns": 7,
+  "frames": 10,
+  "animations": [
+    {
+      "name": "rank_up",
+      "start": 0,
+      "length": 10,
+      "loop": false
+    }
+  ],
+  "note": "B-214: a new Rank - draw ui/rank/insignia_<n> ON TOP at the pivot, offset / scaled per frame by insignia_track; the ribbons unfurl behind it, the confetti tumbles",
+  "insignia_track": [
+    {
+      "dy_px": 40,
+      "scale": 0.7
+    },
+    {
+      "dy_px": 22,
+      "scale": 0.86
+    },
+    {
+      "dy_px": 8,
+      "scale": 1.0
+    },
+    {
+      "dy_px": -4,
+      "scale": 1.12
+    },
+    {
+      "dy_px": -2,
+      "scale": 1.05
+    },
+    {
+      "dy_px": 0,
+      "scale": 1.0
+    },
+    {
+      "dy_px": 0,
+      "scale": 1.0
+    },
+    {
+      "dy_px": 0,
+      "scale": 1.0
+    },
+    {
+      "dy_px": 0,
+      "scale": 1.0
+    },
+    {
+      "dy_px": 0,
+      "scale": 1.0
+    }
+  ],
+  "insignia_track_note": "per frame: the insignia's offset from the pivot (px, + = down) and its scale (1 = its 96 px panel size)"
+}

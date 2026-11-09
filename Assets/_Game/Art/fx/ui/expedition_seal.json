@@ -1,0 +1,28 @@
+{
+  "key": "fx/ui/expedition_seal",
+  "style": "v3",
+  "ppu": 64,
+  "gutter": 4,
+  "fps": 12,
+  "pivot": [
+    0.5,
+    0.3542
+  ],
+  "frame_width": 160,
+  "frame_height": 192,
+  "columns": 10,
+  "frames": 10,
+  "animations": [
+    {
+      "name": "press",
+      "start": 0,
+      "length": 10,
+      "loop": false
+    }
+  ],
+  "note": "B-214: a New Expedition - play over ui/rank/certificate with the pivot on its seal (58 px in from its right and bottom edges); frames 7-9 match the baked seal, so the hand-off at the end is seamless",
+  "seal_from_bottom_right_px": [
+    58,
+    58
+  ]
+}
