@@ -170,7 +170,7 @@ namespace Meridian.UI
         {
             var canvas = UiKit.Canvas(transform, "SkillTreeCanvas", 115);
             var back = UiKit.ModalPanel(canvas.transform, "SkillTree", new Vector2(1640f, 980f), out root);
-            UiPaper.ApplyModal(back, ArtKeys.Ui.PanelScroll, _ => { if (IsOpen) Redraw(); }); // the paper inks every text: the browns again
+            UiPaper.ApplyModal(back, "ui/skilltree/panel", _ => { if (IsOpen) Redraw(); }); // B-204's chart paper (LEAD 22:1x); the paper inks every text: the browns again
             var tree = SkillTree.Current;
             var bt = back.transform;
 

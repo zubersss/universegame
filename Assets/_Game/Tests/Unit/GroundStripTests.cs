@@ -36,6 +36,8 @@ namespace Meridian.Tests
             for (int m = 0; m < GroundStrip.Keys.Length; m++)
             {
                 string path = "Assets/_Game/Art/" + GroundStrip.Keys[m] + ".json";
+                // U-186 (LEAD 22:1x): smooth Earth's soil / stone / sand strips were retired (e5f972c5); the grass strip stays, SmoothGround's placeholder.
+                if (m != GroundStrip.Grass && !File.Exists(path)) continue;
                 Assert.IsTrue(File.Exists(path), path);
                 var s = JsonUtility.FromJson<Sheet>(File.ReadAllText(path));
                 Assert.AreEqual(64, s.frame_width, path); Assert.AreEqual(152, s.frame_height, path);
@@ -84,7 +86,7 @@ namespace Meridian.Tests
                     Assert.AreEqual(TextureWrapMode.Clamp, ti.wrapModeV, key + ": clamps in y");
                     checkedSheets++;
                 }
-            Assert.GreaterOrEqual(checkedSheets, 9, "the nine strips (Earth 4, Mars 3, Mercury 2) are on disk");
+            Assert.GreaterOrEqual(checkedSheets, 4, "the strips still drawn are on disk: Earth's grass and Mars's regolith (U-186 retired the other smooth-planet kinds), Mercury's two");
         }
 
         /// <summary>U-126 (D-137): a giant's floe is cap + n tiles + cap at any n ≥ 1 — cap_left (frame 8) in the air column just left of the floe,

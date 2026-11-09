@@ -50,7 +50,7 @@ namespace Meridian.Tests
             TestContext.Out.WriteLine($"[MERIDIAN] mars stage: spawn x {side.spawnX}, region {Meridian.Planet.Backdrop.StageRegions.At(PlanetId.Mars, side.spawnX)}, scene {stage.Scene} → {layers.SceneKey} (fallback used: {layers.UsedFallback}), placeholders {layers.placeholders.Contains(true)}, ground {stage.Ground.MaterialsLoaded}/{Meridian.View2D.GroundStrip.KeysFor(PlanetId.Mars).Length} strips, flora ready {stage.Flora.Ready}");
             Assert.IsFalse(layers.placeholders.Contains(true), "the painted Mars layers are in (canyon, or plains once B-141 lands it)");
             Assert.IsTrue(stage.Ground.Ready, "the Mars strips");
-            Assert.GreaterOrEqual(stage.Ground.MaterialsLoaded, 2, "regolith + basalt strips in (the frost strip once B-140 adds it, D-143)");
+            Assert.AreEqual(1, stage.Ground.MaterialsLoaded, "smooth Mars loads only its regolith strip, SmoothGround's placeholder (U-186, LEAD 22:1x: the basalt / frost strips retired; a stale count, not a loosened bound)");
             Assert.IsTrue(stage.Flora.Ready, "the Mars rig set (B-140)");
             int plants = stage.Flora.transform.childCount;
             Assert.Greater(plants, 0, "Mars plants around the camp");

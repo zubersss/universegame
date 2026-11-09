@@ -257,9 +257,12 @@ namespace Meridian.View2D
 
         // ---------- U-186: the brink lips and the surface decor ----------
 
-        /// <summary>A brink: where the natural surface's band turns into a drop of at least LipMinDrop within LipMaxRun sideways (searched
-        /// over LipSearch of outline); lips at least LipSpacing apart.</summary>
-        public const float LipMinDrop = 1f, LipMaxRun = 1f, LipSearch = 2.5f, LipSpacing = 2f;
+        /// <summary>A natural brink (LEAD 22:1x: natural only; a dug edge has its dig_rim): a node of the natural surface curve where a gentle
+        /// stretch (|slope| at most LipGentle) turns into a fall of at least LipSteep a metre over the next LipRun metres, the sharpest node of
+        /// the turn. The lip's pivot sits on the node, turned to the gentle side's tangent, mirrored for a drop to the left: its curl wraps down
+        /// over the edge.</summary>
+        public const float LipGentle = 0.3f, LipSteep = 0.55f, LipTurn = 0.6f;
+        public const int LipRun = 2;
         /// <summary>The surface decor: one piece at most per SurfaceDecorCell metres of surface (SurfaceDecorChance), on stretches no steeper
         /// than SurfaceDecorMaxSlope, never on a POI's pad or a dug cell (only the natural surface carries the band).</summary>
         public const float SurfaceDecorCell = 3f, SurfaceDecorChance = 0.3f, SurfaceDecorMaxSlope = 0.45f;
@@ -267,7 +270,6 @@ namespace Meridian.View2D
         readonly Sprite[] lips = new Sprite[Variants];
         readonly Sprite[][] surfaceDecor = new Sprite[Variants][];
         readonly Texture[] topTex = new Texture[TopSubs];
-        readonly List<Vector2> lipsPlaced = new List<Vector2>(8);
         int topPending;
         /// <summary>Lips / decor pieces left out because their chunk already had TopSubs atlas pages (diagnostics).</summary>
         public int TopSlotRejects { get; private set; }
@@ -280,6 +282,36 @@ namespace Meridian.View2D
         public Vector2Int TopShown { get { var t = Vector2Int.zero; foreach (var kv in topCounts) if (kv.Key != null && kv.Key.gameObject.activeInHierarchy) t += kv.Value; return t; } }
         public bool LipArt(int variant) => lips[variant] != null;
         public bool SurfaceDecorArt(int variant) { var a = surfaceDecor[variant]; if (a == null) return false; foreach (var d in a) if (d != null) return true; return false; }
+
+        /// <summary>The gentle side's slope (rise toward the drop, m a metre) and the fall's (m a metre, positive falling) at node n over
+        /// LipRun metres each side: the curve's smoothing rounds a cliff's corner over a few nodes, so one node's step never shows it.</summary>
+        public static void BrinkSlopes(System.Func<int, float> curve, int n, int side, out float gentle, out float fall)
+        {
+            gentle = side > 0 ? (curve(n) - curve(n - LipRun)) / LipRun : (curve(n) - curve(n + LipRun)) / LipRun;
+            fall = side > 0 ? (curve(n) - curve(n + LipRun)) / LipRun : (curve(n) - curve(n - LipRun)) / LipRun;
+        }
+
+        static float Turn(System.Func<int, float> curve, int n, int side) { BrinkSlopes(curve, n, side, out float g, out float f); return g + f; }
+
+        /// <summary>U-186: is node n of the natural surface curve (CurveAt(n) at x = n + 0.5) a brink? `side` +1 for a drop to the right, -1
+        /// to the left; `angleDeg` the gentle side's tangent. Pure over the curve.</summary>
+        public static bool NaturalBrink(System.Func<int, float> curve, int n, out int side, out float angleDeg)
+        {
+            side = 0; angleDeg = 0f;
+            for (int sd = 1; sd >= -1; sd -= 2)
+            {
+                BrinkSlopes(curve, n, sd, out float gentle, out float fall);
+                if (Mathf.Abs(gentle) > LipGentle || fall < LipSteep) continue;
+                float turn = gentle + fall;
+                if (turn < LipTurn) continue;
+                // the sharpest node of the turn (one lip a brink, not one a column round a rounded crest)
+                if (Turn(curve, n - sd, sd) > turn || Turn(curve, n + sd, sd) >= turn) continue;
+                side = sd;
+                angleDeg = Mathf.Atan(sd > 0 ? gentle : -gentle) * Mathf.Rad2Deg; // the tangent of the surface leading to the brink
+                return true;
+            }
+            return false;
+        }
 
         /// <summary>A band set's suffix (ground_band_sand: "sand"; the planet's base set: null). Pure.</summary>
         public static string VariantSuffix(Meridian.Planets.PlanetId id, int variant)
@@ -356,11 +388,10 @@ namespace Meridian.View2D
 
         bool IsBand(TerrainChunk c, Vector2 p, Vector2 q, float wy0) => Normal(q - p).y > SurfaceFacing && OnSurface(c, (p + q) * 0.5f, wy0);
 
-        /// <summary>The lips and the surface decor over the chunk's band (after the band and the rim: drawn over both).</summary>
+        /// <summary>The lips (on the natural brinks) and the surface decor over the chunk's band (after the band and the rim: drawn over both).</summary>
         void TopSprites(TerrainChunk c, GroundContour k, float wx0, float wy0)
         {
             for (int i = 0; i < TopSubs; i++) topTex[i] = null;
-            lipsPlaced.Clear();
             int lipsN = 0, decorN = 0;
             const int C = TerrainConstants.ChunkSize;
             for (int line = 0; line < k.Lines; line++)
@@ -372,55 +403,28 @@ namespace Meridian.View2D
                 for (int a = 0; a < segs; a++)
                 {
                     Vector2 p = k.points[s0 + a], q = k.points[s0 + (a + 1) % n];
-                    bool bandA = IsBand(c, p, q, wy0);
-                    if (bandA) decorN += SurfaceDecorOn(p, q, wx0, wy0, C);
-                    if (a + 1 >= segs && !closed) continue;
-                    Vector2 r = k.points[s0 + (a + 2) % n];
-                    bool bandB = IsBand(c, q, r, wy0);
-                    // The walk keeps the air on its left, so the top runs left to right: band then a fall is a drop to the right, a climb
-                    // then band a drop to the left.
-                    if (bandA != bandB)
-                    {
-                        int side = bandA ? +1 : -1;
-                        if (Falls(k.points, s0, n, closed, a + 1, side, q)) lipsN += Lip(q, side, wx0, wy0);
-                    }
+                    if (IsBand(c, p, q, wy0)) decorN += SurfaceDecorOn(p, q, wx0, wy0, C);
                 }
+            }
+            // The natural brinks whose node lies in this chunk (x = n + 0.5 in [wx0 - 0.5, wx0 + C - 0.5)).
+            int x0 = Mathf.RoundToInt(wx0);
+            System.Func<int, float> curve = terrain.CurveAt;
+            for (int nn = x0 - 1; nn < x0 + C - 1; nn++)
+            {
+                if (!NaturalBrink(curve, nn, out int side, out float angle)) continue;
+                float y = terrain.CurveAt(nn);
+                float ly = y - wy0;
+                if (ly < -0.5f || ly >= C - 0.5f) continue;
+                if (terrain.PadTop(nn) != int.MinValue || terrain.PadTop(nn + 1) != int.MinValue) continue;
+                // intact: the high side's two cells under the brink still stand (dug away, the lip goes with them)
+                int top = side > 0 ? nn : nn + 1, row = Mathf.FloorToInt(y - 0.5f);
+                if (!TileId.IsSolid(terrain.GetTile(top, row)) || !TileId.IsSolid(terrain.GetTile(top, row - 1))) continue;
+                int variant = VariantAt(top);
+                var sprite = lips[variant] != null ? lips[variant] : lips[Grass];
+                if (sprite != null && TopQuad(sprite, new Vector2(nn + 0.5f - wx0, ly), side < 0, angle)) lipsN++;
             }
             LastLips = lipsN; LastSurfaceDecor = decorN;
             topCounts[c] = new Vector2Int(lipsN, decorN);
-        }
-
-        /// <summary>From outline point `at` (index i), walking `dir` along the line: does it fall LipMinDrop within LipMaxRun sideways
-        /// before LipSearch of outline?</summary>
-        static bool Falls(List<Vector2> pts, int s0, int n, bool closed, int i, int dir, Vector2 at)
-        {
-            float arc = 0f;
-            var prev = at;
-            for (int step = 1; step < n; step++)
-            {
-                int j = i + dir * step;
-                if (!closed && (j < 0 || j >= n)) break;
-                var z = pts[s0 + ((j % n) + n) % n];
-                arc += (z - prev).magnitude;
-                prev = z;
-                if (Mathf.Abs(z.x - at.x) > LipMaxRun) break;
-                if (at.y - z.y >= LipMinDrop) return true;
-                if (arc > LipSearch) break;
-            }
-            return false;
-        }
-
-        int Lip(Vector2 at, int side, float wx0, float wy0)
-        {
-            float wx = wx0 + at.x;
-            if (OnPad(wx)) return 0;
-            foreach (var o in lipsPlaced) if ((o - at).sqrMagnitude < LipSpacing * LipSpacing) return 0;
-            int variant = VariantAt(Mathf.RoundToInt(wx));
-            var sprite = lips[variant] != null ? lips[variant] : lips[Grass];
-            if (sprite == null) return 0;
-            if (!TopQuad(sprite, at, side < 0)) return 0;
-            lipsPlaced.Add(at);
-            return 1;
         }
 
         int SurfaceDecorOn(Vector2 p, Vector2 q, float wx0, float wy0, int C)
@@ -464,8 +468,9 @@ namespace Meridian.View2D
             return null;
         }
 
-        /// <summary>A sprite as a quad at its pivot (chunk-local), mirrored in x when asked; into the top submesh of its texture.</summary>
-        bool TopQuad(Sprite sprite, Vector2 at, bool mirror)
+        /// <summary>A sprite as a quad at its pivot (chunk-local), mirrored in x when asked and turned by `angleDeg` about the pivot; into the
+        /// top submesh of its texture.</summary>
+        bool TopQuad(Sprite sprite, Vector2 at, bool mirror, float angleDeg = 0f)
         {
             int slot = -1;
             for (int i = 0; i < TopSubs; i++) if (topTex[i] == sprite.texture || topTex[i] == null) { slot = i; break; }
@@ -473,16 +478,18 @@ namespace Meridian.View2D
             topTex[slot] = sprite.texture;
             var size = sprite.rect.size / sprite.pixelsPerUnit;
             var piv = new Vector2(sprite.pivot.x / sprite.rect.width, sprite.pivot.y / sprite.rect.height);
-            float left = mirror ? at.x - (1f - piv.x) * size.x : at.x - piv.x * size.x;
-            float bottom = at.y - piv.y * size.y;
+            // corners about the pivot (mirrored: the sprite flipped in its own x), turned, then placed
+            float l = mirror ? -(1f - piv.x) * size.x : -piv.x * size.x, r = l + size.x, bt = -piv.y * size.y, tp = bt + size.y;
+            float rad = angleDeg * Mathf.Deg2Rad, cs = Mathf.Cos(rad), sn = Mathf.Sin(rad);
+            Vector3 P(float x, float y) => new Vector3(at.x + x * cs - y * sn, at.y + x * sn + y * cs, -0.01f);
             var o = UnityEngine.Sprites.DataUtility.GetOuterUV(sprite);
             float u0 = mirror ? o.z : o.x, u1 = mirror ? o.x : o.z;
             var white = Color.white;
             int b = v.Count;
-            Add(new Vector3(left, bottom, -0.01f), new Vector2(u0, o.y), white);
-            Add(new Vector3(left + size.x, bottom, -0.01f), new Vector2(u1, o.y), white);
-            Add(new Vector3(left + size.x, bottom + size.y, -0.01f), new Vector2(u1, o.w), white);
-            Add(new Vector3(left, bottom + size.y, -0.01f), new Vector2(u0, o.w), white);
+            Add(P(l, bt), new Vector2(u0, o.y), white);
+            Add(P(r, bt), new Vector2(u1, o.y), white);
+            Add(P(r, tp), new Vector2(u1, o.w), white);
+            Add(P(l, tp), new Vector2(u0, o.w), white);
             var into = tris[SubTop + slot];
             into.Add(b); into.Add(b + 2); into.Add(b + 1); into.Add(b); into.Add(b + 3); into.Add(b + 2);
             return true;

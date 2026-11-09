@@ -2,6 +2,7 @@ using System.IO;
 using Meridian.Planets;
 using Meridian.View2D;
 using NUnit.Framework;
+using UnityEngine;
 
 namespace Meridian.Tests
 {
@@ -46,6 +47,35 @@ namespace Meridian.Tests
             Assert.AreEqual(13, lips, "the audit's 13 lips");
             Assert.AreEqual(51, decor, "the audit's 51 surface decor pieces");
             Assert.AreEqual(8, puffs, "the audit's 8 variant puffs");
+        }
+
+        /// <summary>LEAD 22:1x: a lip sits on a natural brink only, one a brink (the sharpest node of the turn), its tangent the gentle side's,
+        /// mirrored for a drop to the left; a gentle slope or a steady steep one is no brink.</summary>
+        [Test]
+        public void ANaturalBrinkIsItsSharpestNode()
+        {
+            // flat to x = 10.5, then a 1.2 m a metre fall: the brink at node 10, a drop to the right, level
+            System.Func<int, float> cliff = n => n <= 10 ? 50f : 50f - 1.2f * (n - 10);
+            int found = 0;
+            for (int n = 0; n < 30; n++)
+                if (SmoothGround.NaturalBrink(cliff, n, out int side, out float angle)) { found++; Assert.AreEqual(10, n); Assert.AreEqual(1, side); Assert.AreEqual(0f, angle, 1e-3f); }
+            Assert.AreEqual(1, found, "one lip for the cliff");
+            // the same cliff mirrored: a drop to the left at the first node of the plateau
+            System.Func<int, float> left = n => cliff(20 - n);
+            found = 0;
+            for (int n = 0; n < 30; n++)
+                if (SmoothGround.NaturalBrink(left, n, out int side, out _)) { found++; Assert.AreEqual(-1, side); }
+            Assert.AreEqual(1, found, "one lip, mirrored");
+            // a rising approach of 0.2: the lip turns to that tangent
+            System.Func<int, float> rising = n => n <= 10 ? 50f + 0.2f * n : 52f - 1.2f * (n - 10);
+            Assert.IsTrue(SmoothGround.NaturalBrink(rising, 10, out _, out float tilt));
+            Assert.AreEqual(Mathf.Atan(0.2f) * Mathf.Rad2Deg, tilt, 1e-3f);
+            // a 0.45 slope everywhere, and a steady 1.2 fall: no brink anywhere
+            for (int n = 0; n < 30; n++)
+            {
+                Assert.IsFalse(SmoothGround.NaturalBrink(x => 0.45f * x, n, out _, out _), "a walkable slope");
+                Assert.IsFalse(SmoothGround.NaturalBrink(x => -1.2f * x, n, out _, out _), "mid-cliff");
+            }
         }
 
         [Test]

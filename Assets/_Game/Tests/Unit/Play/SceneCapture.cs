@@ -2639,8 +2639,8 @@ namespace Meridian.Tests
             UnityEngine.Object.Destroy(uiGo);
         }
 
-        /// <summary>U-186 (B-215's audit): the ground art never requested before, at 1x → coordination/reports/unity/u186/: 1 an Earth brink
-        /// with its lip and the surface decor, 2 a stroke in Earth's desert throwing the sand puff, 3 a Mars brink. Mercury and Venus are block
+        /// <summary>U-186 (B-215's audit): the ground art never requested before, at 1x → coordination/reports/unity/u186/: 1 a natural brink
+        /// on Earth's coast with its lip and the surface decor, 2 a stroke in Earth's desert throwing the sand puff, 3 a natural Mars brink. Mercury and Venus are block
         /// planets until U-177 (their lips and decor come with their smooth ground).</summary>
         [UnityTest, Timeout(480000)]
         public IEnumerator CaptureU186Ground()
@@ -2690,47 +2690,39 @@ namespace Meridian.Tests
                     yield return new WaitForSeconds(1.5f); // the lip / decor probes and the spread rebuild
                 }
 
-                // The steepest natural drop near x (the surface curve's largest step between neighbouring columns), standing on its high side.
-                float Brink(Meridian.Terrain.TerrainStreamer t, int from, int to, out float drop)
+                // The planet's sharpest natural turns (diagnostics for the brink thresholds): the five best by fall where the approach is gentle.
+                void Candidates(Meridian.Terrain.TerrainStreamer t, System.Func<int, string> region)
                 {
-                    int best = from; drop = 0f;
-                    for (int x = from; x < to; x++)
-                    {
-                        float d = t.CurveAt(x) - t.CurveAt(x + 1);
-                        if (Mathf.Abs(d) > Mathf.Abs(drop) && t.PadTop(x) == int.MinValue && t.PadTop(x + 1) == int.MinValue) { drop = d; best = x; }
-                    }
-                    return drop > 0f ? best - 1.5f : best + 2.5f; // the high side, a step back from the edge
+                    System.Func<int, float> curve = t.CurveAt;
+                    var best = new System.Collections.Generic.List<(float fall, int n, int side, float gentle)>();
+                    for (int n = 2; n < t.Config.worldWidth - 2; n++)
+                        for (int sd = 1; sd >= -1; sd -= 2)
+                        {
+                            Meridian.View2D.SmoothGround.BrinkSlopes(curve, n, sd, out float g, out float f);
+                            if (Mathf.Abs(g) <= Meridian.View2D.SmoothGround.LipGentle) best.Add((f, n, sd, g));
+                        }
+                    best.Sort((a, b) => b.fall.CompareTo(a.fall));
+                    for (int i = 0; i < Mathf.Min(6, best.Count); i++)
+                        TestContext.Out.WriteLine($"[MERIDIAN] u186 {t.Config.id} candidate: node {best[i].n} ({region(best[i].n)}) side {best[i].side}, gentle {best[i].gentle:F2}, fall {best[i].fall:F2} a metre over {Meridian.View2D.SmoothGround.LipRun} m");
                 }
 
-                // The nearest spot, stepping by dir, with no POI stamp (pad) within 4 m: a lip is never drawn on a pad (U-186).
-                float PadFree(Meridian.Terrain.TerrainStreamer t, float x, int dir)
+                // A natural brink (U-186: lips on natural brinks only): the first node in [from, to) that SmoothGround.NaturalBrink takes, off
+                // the POIs, `prefer` first (Earth's coast); the spot to stand is 2.5 m back on its high side.
+                bool FindBrink(Meridian.Terrain.TerrainStreamer t, int from, int to, System.Func<int, bool> prefer, out float stand, out int node)
                 {
-                    for (int step = 0; step < 200; step++)
+                    stand = 0f; node = int.MinValue;
+                    System.Func<int, float> curve = t.CurveAt;
+                    int fallback = int.MinValue, fallbackSide = 0;
+                    for (int n = from; n < to; n++)
                     {
-                        bool free = true;
-                        for (int k = -4; k <= 4 && free; k++) free = t.PadTop(Mathf.RoundToInt(x) + k) == int.MinValue;
-                        if (free) return x;
-                        x += dir;
+                        if (!Meridian.View2D.SmoothGround.NaturalBrink(curve, n, out int side, out _)) continue;
+                        if (t.PadTop(n) != int.MinValue || t.PadTop(n + 1) != int.MinValue) continue;
+                        if (prefer == null || prefer(n)) { node = n; stand = n + 0.5f - side * 2.5f; return true; }
+                        if (fallback == int.MinValue) { fallback = n; fallbackSide = side; }
                     }
-                    return x;
-                }
-
-                // A pit dug beside the surveyor: its two edges are brinks (a dug drop carries the lip like a natural one).
-                IEnumerator Pit(float x)
-                {
-                    var t = side.terrain;
-                    var rig = side.rig; var owner = rig.owner; rig.owner = null;
-                    try
-                    {
-                        float top = t.SurfaceAt(x);
-                        for (float dy = -0.4f; dy >= -4.2f; dy -= 0.6f)
-                            for (float dx = -1.5f; dx <= 1.5f + 1e-3f; dx += 0.6f) rig.Dig(new Vector2(x + dx, top + dy));
-                    }
-                    finally { rig.owner = owner; }
-                    var drops = UnityEngine.Object.FindAnyObjectByType<Meridian.Rig.ItemDrops>();
-                    if (drops != null) for (int k = drops.Live.Count - 1; k >= 0; k--) drops.Collect(drops.Live[k]);
-                    for (int k = 0; k < 30; k++) yield return null;
-                    yield return new WaitForSeconds(0.6f);
+                    if (fallback == int.MinValue) return false;
+                    node = fallback; stand = fallback + 0.5f - fallbackSide * 2.5f;
+                    return true;
                 }
 
                 Meridian.View2D.SmoothGround Ground() => UnityEngine.Object.FindAnyObjectByType<Meridian.View2D.SmoothGround>();
@@ -2745,13 +2737,14 @@ namespace Meridian.Tests
 
                 var earth = side.terrain;
                 float camp = side.player.Body.position.x;
-                float bx = Brink(earth, Mathf.RoundToInt(camp) - 2500, Mathf.RoundToInt(camp) + 2500, out float bd);
-                TestContext.Out.WriteLine($"[MERIDIAN] u186 earth brink: x {bx:F0}, drop {bd:F2} m between columns{(Mathf.Abs(bd) < 1f ? " (no natural cliff: the pit's edges)" : "")}");
-                // No natural cliff near the camp: a pit on flat, pad-free ground beside the camp shows the lips at its two edges.
-                float pitX = PadFree(earth, camp + 40f, 1);
-                yield return Stand(pitX - 4f);
-                yield return Pit(pitX);
-                yield return Shot("1_earth_brink");
+                Candidates(earth, n => Meridian.Terrain.EarthBiomes.At(n).ToString());
+                if (FindBrink(earth, 0, earth.Config.worldWidth, n => Meridian.Terrain.EarthBiomes.At(n) == Meridian.Terrain.Biome.Ocean, out float bx, out int bn))
+                {
+                    TestContext.Out.WriteLine($"[MERIDIAN] u186 earth brink: node {bn} ({Meridian.Terrain.EarthBiomes.At(bn)}), curve {earth.CurveAt(bn - 2):F1} {earth.CurveAt(bn):F1} {earth.CurveAt(bn + 2):F1}");
+                    yield return Stand(bx);
+                    yield return Shot("1_earth_coast_brink");
+                }
+                else TestContext.Out.WriteLine("[MERIDIAN] u186 earth brink: none");
 
                 // A stroke in the desert: the sand puff.
                 int desert = int.MinValue;
@@ -2780,12 +2773,14 @@ namespace Meridian.Tests
                 float wait = Time.realtimeSinceStartup + 20f;
                 while (!side.terrain.IsSettled && Time.realtimeSinceStartup < wait) yield return null;
                 Calm();
-                float mx = Brink(side.terrain, 200, 2400, out float md);
-                TestContext.Out.WriteLine($"[MERIDIAN] u186 mars brink: x {mx:F0}, drop {md:F2} m between columns");
-                float marsPit = PadFree(side.terrain, 620f, 1); // the plains
-                yield return Stand(marsPit - 4f);
-                yield return Pit(marsPit);
-                yield return Shot("3_mars_brink");
+                Candidates(side.terrain, n => Meridian.Terrain.MarsLandforms.At(n).ToString());
+                if (FindBrink(side.terrain, 0, side.terrain.Config.worldWidth, null, out float mx, out int mn))
+                {
+                    TestContext.Out.WriteLine($"[MERIDIAN] u186 mars brink: node {mn} ({Meridian.Terrain.MarsLandforms.At(mn)}), curve {side.terrain.CurveAt(mn - 2):F1} {side.terrain.CurveAt(mn):F1} {side.terrain.CurveAt(mn + 2):F1}");
+                    yield return Stand(mx);
+                    yield return Shot("3_mars_brink");
+                }
+                else TestContext.Out.WriteLine("[MERIDIAN] u186 mars brink: none");
                 LogAssert.NoUnexpectedReceived();
             }
             finally { Meridian.View2D.CartoonStage.Enabled = wasCartoon; }
