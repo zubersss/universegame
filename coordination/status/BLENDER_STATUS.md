@@ -1,13 +1,16 @@
 # BLENDER STATUS
-Updated: 2026-11-09 09:2x · Session: 10 (all three windows restarted ~09:30 after a ~3-hour break; context rebuilt from the repo) · trimmed under D-113 at 14:0x; older: coordination/status/archive/BLENDER_2026-11-08.md, BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
+Updated: 2026-11-09 11:5x · Session: 11 (resumed ~11:45 after a restart; context rebuilt from the repo) · trimmed under D-113 at 14:0x; older: coordination/status/archive/BLENDER_2026-11-08.md, BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
 
 ## Current task
-Sources in, renders waiting on UNITY's 0.6.0 release run (want_unity at the RAM gate): B-222 icons/thruster_mk2 (00f2b605, export in a gap), B-221 the v3 title scene (1c80affe; 1080p preview with the menu rectangles to LEAD BEFORE export), B-220 the giants' + venus/deck continue_rows bands (d0c32d8b + 1a40cddd; a 3x-repeat preview per giant, export after 0.6.0). Later: B-223 (a painted docking bay + the catalogue Camp icon), B-224 (the Venus sky serpent's key; redraw if v2). B-222 / B-221 make 0.6.0 only if exported before the release build starts.
+B-220 rev (files only: UNITY's want for U-193 slice 2 waits at the RAM gate, 0.66 GB free at 11:49). The 11:27 / 11:31 / 11:40 sheets (review_b220_{jupiter,saturn,neptune}_continue.png, not sent) showed the cloud bodies continuing cleanly, but every sparse bottom repeated badly: layer2's wisps / rain / lightning as stacked dashes, the deep's CRUSH band ghosted by tile_bottom into grey stripes, Neptune's storm / spot ring haze as slats, and Neptune deck2's violet flash bolt as a vertical dash. Fix in the tree (uncommitted until a parse check): gen_painted_bg.continue_layer - a layer continues (tile_bottom + json continue_rows 64) only where its bottom 64 rows are >= 25 % solid (cloud bodies, Saturn's ice pillars); a sparse bottom is feathered to transparent over its last 64 rows and gets no continue_rows; preview_continue draws exactly that (feathered layers end, no repeat) with the cover and the decision per layer; build_backdrop_v3 neptune deck2's flash lifted 96 px (the same rng draws). Next, in my lock after UNITY's slice 2: ast check, all five sheets (jupiter, saturn, uranus, neptune, venus) → LEAD → export only after ACCEPTED. Then B-224's preview (sources f95c5461), B-223, B-225.
 - **Rule (LEAD 09:2x, after two slips):** the first line of ANY call that starts python lists coordination/locks (abort on another role's heavy_ / want_) and reads RAM.
 - **Rule from LEAD 18:2x (D-087):** the Beam reads as a mining tool, never a gun. No pistol grip or trigger, nothing hanging under the body: a cable-fed, arm-mounted emitter with a cutting nozzle.
 - Waiting on others: B-207 closes on PawsOnTheGround green; B-204 on UNITY's capture; B-172 on U-151. UNITY drops the three lance .meta files.
 
 ## Last completed
+- 11-09 11:2x: B-222 exported (02462247, LEAD-accepted): icons/thruster_mk2/base, a steel bell with a brass collar; the other 49 item icons byte-identical. For 0.6.1.
+- 11-09 11:2x: B-226 exported (ab1c524f, LEAD-accepted after the icon fix): props/rig/shovel 192x64 (pivot at the D-grip; json grip / blade_tip / muzzle), fx/shovel_flick/base (6 x 128, clip flick), icons/tools/shovel 128. For U-193 / 0.6.1.
+- 11-09 11:10: B-221 exported (ea3f75fb, LEAD-accepted 10:5x): ui/title/background, the v3 title scene (Earth's camp at dusk), 1920x1080 + json. For 0.6.1.
 - 11-09 06:0x-09:1x: B-201 (0.6.0 smoke read, all 75 shots; coordination/reports/blender/smoke_read_0.6.0.md, 517ae849 + 1008f40c): 17 defects routed by LEAD; mine fixed: terrain/earth/fill_decor_t2_1 (root_knot -> a pale root tangle) + fill_decor_t3_3 (mica_book -> a pale layered slab), b47759a4.
 - 11-09 00:4x: props/dig/winch_post json stands_on = the drawn surface at the shaft's mouth (379b0b89; UNITY's U-176 question; json only).
 - 11-09 00:35: B-219 (655fead8, LEAD-accepted after three fixes): the giants' floe nodes - props/jupiter/node_{ammonia_ice,metallic_hydrogen}, props/saturn/node_{ring_ice,ring_rock,helium3}, props/uranus/node_{methane_ice,superionic_ice}, props/neptune/node_{methane_ice,superionic_ice,deep_diamond}; B-176 format, json deck + item; for U-189.
@@ -67,4 +70,4 @@ none.
 none.
 
 ## HeavyJobLock
-none held (last: B-214's export 20:5x); no want on file. No background waiters: I poll in the foreground.
+none held (last: the B-220 sheets 11:2x-11:40); no want on file: UNITY's want (U-193 slice 2, 11:43) goes first and mine is filed only once heavy_unity.lock appears (D-039). No background waiters: I poll in the foreground.
