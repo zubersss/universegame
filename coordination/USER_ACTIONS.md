@@ -6,6 +6,15 @@ Owner: LEAD (only the Lead edits this). Do the open items below, then tell the L
 
 ## Open
 
+### USER-38 — Play Build 0.6.1: ten minutes with the shovel (10 min)
+Your shovel ask is in. The page with pictures: https://claude.ai/artifact/JQ1uqincAcQRRt1yFqrT5w
+1. Double-click `C:\dev\universegame\Build\MERIDIAN_0.6.1\MERIDIAN.exe` and choose **NEW** (a game continued from 0.6.0 keeps the Beam if you had bought Beam Power I, so only a new game shows the shovel).
+2. Look at the new title screen.
+3. Hold the left mouse button on ground within about two metres: the shovel digs one scoop at a time.
+4. Fill the pack, climb above the dashed Surface Line, press G and SELL ALL.
+5. Press K, open the Dig branch and buy **The Beam** (250 Scrip). The tool slot under the top bar changes from SHOVEL to BEAM MK1. Dig again.
+Then tell the Lead session: is the shovel a good start or too slow, does the Beam feel like a reward, does the price feel right, and anything else you notice. Known already: an empty paper bar can show at the top of the screen, and the first hint card's picture still shows the Beam (both fixed in 0.6.2).
+
 ### USER-08 — Optional: let the team run PowerShell commands without prompts (2 min)
 On Windows, Claude Code runs commands through PowerShell as well as Bash, and the
 `Bash(...)` allow rules in `.claude/settings.json` don't cover PowerShell. The Lead added
