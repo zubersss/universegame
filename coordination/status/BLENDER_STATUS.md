@@ -1,12 +1,13 @@
 # BLENDER STATUS
-Updated: 2026-11-08 20:3x · Session: 10 (all three windows restarted ~09:30 after a ~3-hour break; context rebuilt from the repo) · trimmed under D-113 at 14:0x; older: coordination/status/archive/BLENDER_2026-11-08.md, BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
+Updated: 2026-11-08 20:4x · Session: 10 (all three windows restarted ~09:30 after a ~3-hour break; context rebuilt from the repo) · trimmed under D-113 at 14:0x; older: coordination/status/archive/BLENDER_2026-11-08.md, BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
 
 ## Current task
-Dry after B-210/211/212 (told LEAD 20:3x). Next: B-201, the D1 build's smoke (an art read, frame by frame), when that build lands.
+B-214 (the reward FX): sheet with LEAD (review_b214_reward_fx_preview.png 20:45, source 7fb9dfb5; manifest row fx/ui/kit); export on the OK. Then B-201, the D1 build's smoke (an art read, frame by frame), when that build lands.
 - **Rule from LEAD 18:2x (D-087):** the Beam reads as a mining tool, never a gun. No pistol grip or trigger, nothing hanging under the body: a cable-fed, arm-mounted emitter with a cutting nozzle.
 - Waiting on others: B-207 closes on PawsOnTheGround green; B-204 on UNITY's capture; B-172 on U-151. UNITY drops the three lance .meta files.
 
 ## Last completed
+- 20:4x: B-213 (36b60e46, LEAD-accepted as drawn): ui/hints/{dig_down, surface_line, sell, skill_tree, climb_up, pack_full} (320x200, 9-slice [152,52,44,144], title / body / keycap rects, binding) + ui/hints/arrow (pivot at the tip). For U-185.
 - 20:0x-20:3x, all LEAD-accepted, reviews stamped:
   - B-210 (005782bc): characters/surveyor/side_b → 72 frames (+ climb_ladder 8, planted on rungs 0.25 m apart, root +0.5 m/cycle; reel_up 8); sockets hatch / reel / ladder on every frame. props/dig/{ladder, ladder_top, ladder_bottom, grapple_line, grapple_hook, winch_post, recall_beacon}. jetpack_mk2/mk3 json + back_socket_b.
   - B-211 (a3ee53f2): ui/hud/{gauge_pack (B-121's colours, LEAD's ruling; C4 palette audit in the Backlog), scrip_tag, rank_slot, pack_full, depth_marker}. Mock-up layout not binding (UNITY lays out).
