@@ -3870,7 +3870,7 @@ namespace Meridian.Tests
                 var target = player.Body.position + new Vector2(2.2f, -0.8f);
                 input.AimAt(target);
                 Assert.IsTrue(side.rig.Dig(target), "the Beam stroke at camp");
-                yield return new WaitForSeconds(0.12f);
+                yield return new WaitForSeconds(0.2f);
                 yield return Shot("1_beam_burst_t1");
                 TestContext.Out.WriteLine($"[MERIDIAN] u195 1_beam_burst_t1: {side.rig.LastDugCells} cells, {feel.LastBurst} clods ({(feel.LastBurstOnSheet ? "B-232's sheet" : "the stand-in")}), {feel.Alive} drawn at the shot");
                 yield return new WaitForSeconds(0.8f);
@@ -3903,7 +3903,7 @@ namespace Meridian.Tests
                 while (!dug && Time.realtimeSinceStartup < until) yield return null;
                 side.rig.Dug -= onDug;
                 input.holdUse = false;
-                yield return new WaitForSeconds(0.22f);
+                yield return new WaitForSeconds(0.2f);
                 yield return Shot("3_shovel_clod_fall");
                 TestContext.Out.WriteLine($"[MERIDIAN] u195 3_shovel_clod_fall: dug {dug}, tool {side.rig.Tool}, {feel.LastBurst} clods, {feel.Alive} drawn at the shot");
                 yield return new WaitForSeconds(0.8f);
@@ -3922,7 +3922,7 @@ namespace Meridian.Tests
                 while (!dug && Time.realtimeSinceStartup < until) yield return null;
                 side.rig.Dug -= onDug;
                 input.holdUse = false;
-                yield return new WaitForSeconds(0.16f);
+                yield return new WaitForSeconds(0.2f);
                 yield return Shot("5_camp_first_view_scoop");
                 TestContext.Out.WriteLine($"[MERIDIAN] u195 5_camp_first_view_scoop: at the spawn spot {spawn}, dug {dug}, {feel.LastBurst} clods, {feel.Alive} drawn at the shot");
                 yield return new WaitForSeconds(0.8f);
@@ -3954,7 +3954,7 @@ namespace Meridian.Tests
                 var wall = body.position + new Vector2(3.3f, 0.6f);
                 input.AimAt(wall);
                 Assert.IsTrue(side.rig.Dig(wall), "the Beam stroke on the room's wall");
-                yield return new WaitForSeconds(0.12f);
+                yield return new WaitForSeconds(0.2f);
                 yield return Shot("4_beam_burst_t3");
                 TestContext.Out.WriteLine($"[MERIDIAN] u195 4_beam_burst_t3: depth {Meridian.Mining.DigRun.Depth(t, wall):0} m, tier {Meridian.Mining.DigRun.TierAt(t, wall) + 1}, {feel.LastBurst} clods ({(feel.LastBurstOnSheet ? "B-232's sheet" : "the stand-in")}), {feel.Alive} drawn at the shot");
                 body.simulated = true;

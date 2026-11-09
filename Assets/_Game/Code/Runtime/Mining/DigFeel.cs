@@ -19,12 +19,12 @@ namespace Meridian.Mining
     {
         public const int MinClods = 4, MaxClods = 8, Pool = 48, Tiers = 5, ClipsPerSheet = 4;
         /// <summary>A clod's launch speed (m/s), its life (s), the fade at its end (s), the throw's half-angle about its axis (degrees).</summary>
-        public const float SpeedMin = 2f, SpeedMax = 4f, ClodLife = 0.6f, ClodFade = 0.15f, SpreadDeg = 50f;
+        public const float SpeedMin = 2f, SpeedMax = 4f, ClodLife = 0.6f, ClodFade = 0.15f, SpreadDeg = 35f;
         /// <summary>The camera kick (screen px, one frame) and the stand-in clods' tumble (degrees a second).</summary>
         public const float KickPixels = 2f, StandInSpinDeg = 540f;
         /// <summary>How far toward the open side a clod starts from the stroke's point (m: the bowl's mouth), and the stand-in clods' size
         /// (their 0.3-0.5 m blobs at 0.55: 0.15-0.3 m, a fist to a head against the surveyor).</summary>
-        public const float MouthM = 0.45f, StandInScale = 0.55f;
+        public const float MouthM = 0.45f, StandInScale = 0.3f; // LEAD 16:4x: no clod bigger than the surveyor's glove (the 0.3-0.5 m blobs at 0.3: 0.09-0.16 m)
         public const int SortingOrder = 41; // over the stroke's puff (FxPool, 40)
 
         public Meridian.Core.PlanetSideRoot side;
