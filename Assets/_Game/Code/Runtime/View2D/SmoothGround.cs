@@ -211,7 +211,7 @@ namespace Meridian.View2D
                     bool border = false;
                     for (int k = 1; k < t.tiers.Length; k++) if (Mathf.Abs(depth - t.tiers[k].fromM) < DecorBorderGap) border = true;
                     if (border) continue;
-                    int tier = TierShown(depth, t, wx);
+                    int tier = TierShown(depth, t, wx, WobbleKeepAt(wx));
                     int set = tier > 0 ? tier + 1 : (DecorArt(1) && SandWeight(wx) > 0.5f ? 1 : 0);
                     var pick = DecorPick(set, Meridian.Mining.DigRun.Hash01(hx, gy, 7174));
                     if (pick == null) continue;
@@ -533,24 +533,50 @@ namespace Meridian.View2D
 
         /// <summary>The shader's tier weights (GroundTiers.hlsl) for a depth under the Surface Line at world x: tiers 2..5 each fade in
         /// across TierTransition centred on its depth (wobbled), smoothstepped. Pure.</summary>
-        public static Vector4 TierWeights(float depth, Meridian.Mining.D1Tables t, float x = 0f)
+        public static Vector4 TierWeights(float depth, Meridian.Mining.D1Tables t, float x = 0f, float keep = 1f)
         {
             var w = Vector4.zero;
             for (int k = 0; k < 4; k++)
             {
                 float from = t.tiers.Length > k + 1 ? t.tiers[k + 1].fromM : 1e6f;
-                float u = Mathf.Clamp01((depth + TierWobble(k, x) - (from - 0.5f * TierTransition)) / TierTransition);
+                float u = Mathf.Clamp01((depth + keep * TierWobble(k, x) - (from - 0.5f * TierTransition)) / TierTransition);
                 w[k] = u * u * (3f - 2f * u);
             }
             return w;
         }
 
         /// <summary>The tier the fill shows at a depth and x (0 = T1 ... 4 = T5): the deepest tier whose weight has reached a half. Pure.</summary>
-        public static int TierShown(float depth, Meridian.Mining.D1Tables t, float x = 0f)
+        public static int TierShown(float depth, Meridian.Mining.D1Tables t, float x = 0f, float keep = 1f)
         {
-            var w = TierWeights(depth, t, x);
+            var w = TierWeights(depth, t, x, keep);
             for (int k = 3; k >= 0; k--) if (w[k] >= 0.5f) return k + 1;
             return 0;
+        }
+
+        // ---- U-196 (B-228's F7): a tier border under a slope ----
+        /// <summary>The Surface Line's slope (m per m) at which a border keeps half its wobble.</summary>
+        public const float WobbleSlope0 = 0.12f;
+        /// <summary>How much of its wobble a border keeps where the Surface Line has this slope: all of it on level ground, 15 % under a
+        /// 20-degree hill. The wobble's own slope reaches 1.0 (TierWobbleSlopeMax), steeper than a 30-degree hill's 0.58: at full strength a
+        /// border under a slope alternated flat treads and steep risers and, blurred by its transition, read as stair-steps (0.6.1's
+        /// smoke_54..57). Pure; the line texture's second channel holds it per column for the shader.</summary>
+        public static float WobbleKeep(float slope)
+        {
+            float k = slope / WobbleSlope0;
+            return 1f / (1f + k * k);
+        }
+        /// <summary>The steepest the wobble itself runs (m per m): the sum of its three sines' amplitude x frequency.</summary>
+        public const float TierWobbleSlopeMax = TierWobbleMax * (0.5f * 1.71f + 0.32f * 0.93f + 0.18f * 3.1f);
+
+        float[] wobbleKeep;
+        /// <summary>The wobble kept at world x (between column centres, linear: as the shader's bilinear sample); 1 before the line is built.</summary>
+        public float WobbleKeepAt(float x)
+        {
+            if (wobbleKeep == null || wobbleKeep.Length == 0) return 1f;
+            float fx = x - 0.5f;
+            int i = Mathf.FloorToInt(fx), n = wobbleKeep.Length;
+            int a = ((i % n) + n) % n;
+            return Mathf.Lerp(wobbleKeep[a], wobbleKeep[(a + 1) % n], fx - i);
         }
 
         /// <summary>The line texture's range: texel = (line - lineBase) / lineSpan (R16 UNorm: full-rate bilinear on the iGPU, ~1 cm steps
@@ -566,23 +592,33 @@ namespace Meridian.View2D
             float lo = float.MaxValue, hi = float.MinValue;
             for (int x = 0; x < w; x++) { float h = Meridian.Mining.DigRun.LineAt(terrain, x + 0.5f); heights[x] = h; if (h < lo) lo = h; if (h > hi) hi = h; }
             lineBase = lo; lineSpan = Mathf.Max(1f, hi - lo);
-            bool r16 = SystemInfo.SupportsTextureFormat(TextureFormat.R16);
-            var fmt = r16 ? TextureFormat.R16 : TextureFormat.RFloat;
+            // U-196 (F7): the wobble each column's borders keep, from the line's slope across the column (its neighbours' centres)
+            if (wobbleKeep == null || wobbleKeep.Length != w) wobbleKeep = new float[w];
+            for (int x = 0; x < w; x++) wobbleKeep[x] = WobbleKeep(Mathf.Abs(heights[(x + 1) % w] - heights[(x - 1 + w) % w]) * 0.5f);
+            // two channels: r the line, g the wobble kept (R16G16 UNorm: full-rate bilinear on the iGPU as R16 was; the float pair elsewhere)
+            bool rg16 = SystemInfo.SupportsTextureFormat(TextureFormat.RG32);
+            var fmt = rg16 ? TextureFormat.RG32 : TextureFormat.RGFloat;
             if (lineTex == null || lineTex.width != w || lineTex.format != fmt)
             {
                 if (lineTex != null) Destroy(lineTex);
                 lineTex = new Texture2D(w, 1, fmt, false, true) { wrapMode = TextureWrapMode.Repeat, filterMode = FilterMode.Bilinear, name = "SurfaceLine_" + planet };
             }
-            if (r16)
+            if (rg16)
             {
-                var px = new ushort[w];
-                for (int x = 0; x < w; x++) px[x] = (ushort)Mathf.RoundToInt(Mathf.Clamp01((heights[x] - lineBase) / lineSpan) * 65535f);
+                var px = new ushort[w * 2];
+                for (int x = 0; x < w; x++)
+                {
+                    px[x * 2] = (ushort)Mathf.RoundToInt(Mathf.Clamp01((heights[x] - lineBase) / lineSpan) * 65535f);
+                    px[x * 2 + 1] = (ushort)Mathf.RoundToInt(Mathf.Clamp01(wobbleKeep[x]) * 65535f);
+                }
                 lineTex.SetPixelData(px, 0);
             }
             else
             {
                 lineBase = 0f; lineSpan = 1f;
-                lineTex.SetPixelData(heights, 0);
+                var px = new float[w * 2];
+                for (int x = 0; x < w; x++) { px[x * 2] = heights[x]; px[x * 2 + 1] = wobbleKeep[x]; }
+                lineTex.SetPixelData(px, 0);
             }
             lineTex.Apply(false, false);
             foreach (var m in tierMaterials.Values) if (m != null) DressTiers(m);

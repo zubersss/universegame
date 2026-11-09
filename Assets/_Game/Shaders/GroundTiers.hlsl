@@ -11,9 +11,12 @@ float4 GroundTierWobble(float x)
 
 // U-182: the tier weights for a depth under the Surface Line (m) at world x: each of tiers 2..5 fades in across its transition centred on
 // its (wobbled) depth, smoothstepped. SmoothGround.TierWeights is this function in C# (GroundTierTests).
-float4 GroundTierWeights(float depth, float x)
+// U-196 (B-228's F7): `keep` is how much of the wobble the column keeps (the line texture's g: 1 on level ground, less as the Surface Line
+// slopes). The wobble's own slope reaches 1.0, steeper than a 30-degree hill's: under a slope the border alternated flat treads and steep
+// risers and, blurred by the transition, read as stair-steps across the cutaway.
+float4 GroundTierWeights(float depth, float x, float keep)
 {
-    float4 t = saturate((depth.xxxx + GroundTierWobble(x) - (_TierFrom - 0.5 * _TierBlend)) / max(_TierBlend, 1e-3));
+    float4 t = saturate((depth.xxxx + keep * GroundTierWobble(x) - (_TierFrom - 0.5 * _TierBlend)) / max(_TierBlend, 1e-3));
     return t * t * (3.0 - 2.0 * t);
 }
 
@@ -23,8 +26,9 @@ float4 GroundTierWeights(float depth, float x)
 half4 GroundTierColor(float2 uv)
 {
     float2 w = uv * _LineParams.y;
-    float lineY = _LineParams.z + _LineParams.w * SAMPLE_TEXTURE2D_LOD(_LineTex, sampler_LineTex, float2(w.x * _LineParams.x, 0.5), 0).r; // base + span x texel
-    float4 k = GroundTierWeights(lineY - w.y, w.x);
+    float2 column = SAMPLE_TEXTURE2D_LOD(_LineTex, sampler_LineTex, float2(w.x * _LineParams.x, 0.5), 0).rg; // r: the line (base + span x texel); g: the wobble kept
+    float lineY = _LineParams.z + _LineParams.w * column.r;
+    float4 k = GroundTierWeights(lineY - w.y, w.x, column.g);
     // Every sample sits in a branch: the mip level from the uv's derivatives here (every fill is one _TileTexels-pixel tile), then LOD
     // samples (full rate on the iGPU, where explicit-gradient samples ran at a fraction of it: the perf probe's T3 room).
     float2 dx = ddx(uv) * _TileTexels, dy = ddy(uv) * _TileTexels;

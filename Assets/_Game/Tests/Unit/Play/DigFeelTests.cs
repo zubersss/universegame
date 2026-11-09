@@ -84,7 +84,7 @@ namespace Meridian.Tests
                 if (!feel.Clod(i, out var cp, out var cv, out _)) continue;
                 seen++;
                 Assert.That(cv.magnitude, Is.InRange(DigFeel.SpeedMin - 1e-3f, DigFeel.SpeedMax + 1e-3f), "launch speed 2-4 m/s");
-                Assert.Less(Vector2.Distance(cp, at), 0.5f, "thrown from the cell");
+                Assert.Less(Vector2.Distance(cp, at), DigFeel.MouthM + 0.3f, "thrown from the cell's mouth");
             }
             Assert.AreEqual(feel.LastBurst, seen);
 

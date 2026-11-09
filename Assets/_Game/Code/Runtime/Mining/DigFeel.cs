@@ -22,6 +22,9 @@ namespace Meridian.Mining
         public const float SpeedMin = 2f, SpeedMax = 4f, ClodLife = 0.6f, ClodFade = 0.15f, SpreadDeg = 50f;
         /// <summary>The camera kick (screen px, one frame) and the stand-in clods' tumble (degrees a second).</summary>
         public const float KickPixels = 2f, StandInSpinDeg = 540f;
+        /// <summary>How far toward the open side a clod starts from the stroke's point (m: the bowl's mouth), and the stand-in clods' size
+        /// (their 0.3-0.5 m blobs at 0.55: 0.15-0.3 m, a fist to a head against the surveyor).</summary>
+        public const float MouthM = 0.45f, StandInScale = 0.55f;
         public const int SortingOrder = 41; // over the stroke's puff (FxPool, 40)
 
         public Meridian.Core.PlanetSideRoot side;
@@ -139,7 +142,9 @@ namespace Meridian.Mining
                 int i = Take();
                 float a = (axisDeg + Random.Range(-SpreadDeg, SpreadDeg)) * Mathf.Deg2Rad;
                 float speed = Random.Range(SpeedMin, SpeedMax);
-                pos[i] = at + new Vector2(Random.Range(-0.25f, 0.25f), Random.Range(-0.1f, 0.2f));
+                // from the cell's mouth, not its middle: 2-4 m/s clears 0.2-0.8 m, and thrown from the bowl's centre (u195's first captures)
+                // the burst stayed in the hole as one clump
+                pos[i] = at + axis * MouthM + new Vector2(Random.Range(-0.2f, 0.2f), Random.Range(-0.08f, 0.12f));
                 vel[i] = new Vector2(Mathf.Cos(a), Mathf.Sin(a)) * speed;
                 born[i] = now;
                 landed[i] = false;
@@ -153,12 +158,14 @@ namespace Meridian.Mining
                     if (clips != null && clip < clips.clips.Count && clips.clips[clip].length > 0) { clipStart[i] = clips.clips[clip].start; clipLength[i] = clips.clips[clip].length; }
                     else { clipLength[i] = Mathf.Max(1, sheet.frames.Length / ClipsPerSheet); clipStart[i] = clip * clipLength[i]; }
                     if (sheet.material != null) sr.sharedMaterial = sheet.material;
+                    sr.transform.localScale = Vector3.one;
                     spin[i] = 0f; angle[i] = 0f; // the sheet's frames tumble
                 }
                 else
                 {
                     sheetOf[i] = null;
                     sr.sprite = StandIn(clip);
+                    sr.transform.localScale = new Vector3(StandInScale, StandInScale, 1f);
                     if (standInMaterial == null) standInMaterial = ArtMaterials.MaterialFor(Meridian.Art.ArtKeys.Fx.ShovelFlick); // lit as the shovel's flick is
                     if (standInMaterial != null) sr.sharedMaterial = standInMaterial;
                     spin[i] = Random.Range(-StandInSpinDeg, StandInSpinDeg);

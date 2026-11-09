@@ -57,5 +57,41 @@ namespace Meridian.Tests
                 prev = w;
             }
         }
+
+        /// <summary>U-196 (B-228's F7: under a slope a tier border read as blurred stair-steps): the border keeps all its wobble on level
+        /// ground and loses it as the Surface Line slopes, so from a 20-degree hill up the border under the slope falls all the way along
+        /// it (the wobble never turns it back uphill: no treads and risers).</summary>
+        [Test]
+        public void ABorderUnderASlopeDoesNotStep()
+        {
+            Assert.AreEqual(1f, SmoothGround.WobbleKeep(0f), 1e-6f, "level ground: the whole wobble");
+            Assert.Greater(SmoothGround.WobbleKeep(0.03f), 0.9f, "a 2-degree lie keeps it");
+            Assert.AreEqual(0.5f, SmoothGround.WobbleKeep(SmoothGround.WobbleSlope0), 1e-6f, "half at the reference slope");
+            Assert.AreEqual(1.0264f, SmoothGround.TierWobbleSlopeMax, 1e-3f, "the wobble's steepest run (the three sines' amplitude x frequency)");
+            var t = D1Tables.Load();
+            float border = t.tiers[1].fromM;
+            foreach (float slope in new[] { Mathf.Tan(20f * Mathf.Deg2Rad), 0.65f, 1f, 2f })
+            {
+                float keep = SmoothGround.WobbleKeep(slope);
+                Assert.Less(keep * SmoothGround.TierWobbleSlopeMax, slope, $"slope {slope:0.00}: the kept wobble runs gentler than the hill");
+                // the T1 / T2 border's height under a line falling at `slope`: where the T2 weight crosses a half, column by column
+                float prev = float.NaN;
+                for (float x = 0f; x <= 40f; x += 0.05f)
+                {
+                    float line = -slope * x, lo = line - border - 2f, hi = line - border + 2f;
+                    for (int i = 0; i < 40; i++)
+                    {
+                        float mid = 0.5f * (lo + hi);
+                        if (SmoothGround.TierWeights(line - mid, t, x, keep)[0] >= 0.5f) lo = mid; else hi = mid; // T2 at mid: the border is above it
+                    }
+                    float y = 0.5f * (lo + hi);
+                    Assert.That(y, Is.InRange(line - border - SmoothGround.TierWobbleMax - 0.01f, line - border + SmoothGround.TierWobbleMax + 0.01f), "the border found within its wobble of the tier's depth");
+                    if (!float.IsNaN(prev)) Assert.Less(y, prev + 1e-3f, $"slope {slope:0.00}: the border climbs back at x {x:0.00} (a tread)");
+                    prev = y;
+                }
+            }
+            // unattenuated, the same border under a 20-degree hill does climb back: the fault
+            Assert.Greater(SmoothGround.TierWobbleSlopeMax, Mathf.Tan(20f * Mathf.Deg2Rad), "at full strength the wobble out-runs a 20-degree hill");
+        }
     }
 }

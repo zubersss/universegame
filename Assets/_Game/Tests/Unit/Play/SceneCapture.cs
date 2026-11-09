@@ -3844,6 +3844,7 @@ namespace Meridian.Tests
                 var feel = side.digFeel;
                 Assert.NotNull(feel, "DigFeel on the planet side");
                 var player = side.player;
+                var spawn = player.Body.position; // the owner's first view of the camp
                 player.externalInput = true; player.intent = default;
                 var input = player.GetComponent<Meridian.Player.PlayerRigInput>();
                 var view = player.GetComponentInChildren<Meridian.Player.RigToolView>();
@@ -3907,6 +3908,25 @@ namespace Meridian.Tests
                 TestContext.Out.WriteLine($"[MERIDIAN] u195 3_shovel_clod_fall: dug {dug}, tool {side.rig.Tool}, {feel.LastBurst} clods, {feel.Alive} drawn at the shot");
                 yield return new WaitForSeconds(0.8f);
 
+                // 5 (LEAD 16:2x): the same scoop where the owner first sees it: the surveyor at the spawn spot by the rocket, the clods mid-air
+                player.Body.position = spawn; player.transform.position = spawn; player.Body.linearVelocity = Vector2.zero;
+                for (int i = 0; i < 40; i++) yield return new WaitForFixedUpdate();
+                if (follow != null) follow.SnapToTarget();
+                yield return new WaitForSeconds(0.5f);
+                var firstScoop = player.Body.position + new Vector2(1.3f, -0.6f);
+                input.AimAt(firstScoop);
+                dug = false;
+                side.rig.Dug += onDug;
+                input.holdUse = true;
+                until = Time.realtimeSinceStartup + 10f;
+                while (!dug && Time.realtimeSinceStartup < until) yield return null;
+                side.rig.Dug -= onDug;
+                input.holdUse = false;
+                yield return new WaitForSeconds(0.16f);
+                yield return Shot("5_camp_first_view_scoop");
+                TestContext.Out.WriteLine($"[MERIDIAN] u195 5_camp_first_view_scoop: at the spawn spot {spawn}, dug {dug}, {feel.LastBurst} clods, {feel.Alive} drawn at the shot");
+                yield return new WaitForSeconds(0.8f);
+
                 // 4: a Beam stroke in a room 56 m under the Surface Line (the third tier's clods)
                 Meridian.Progress.SkillStats.ToolOverride = Meridian.Rig.DigTool.Beam;
                 Meridian.Progress.SkillStats.Apply(state);
@@ -3946,6 +3966,109 @@ namespace Meridian.Tests
                 if (state != null) { state.skillNodes.Clear(); Meridian.Progress.SkillStats.Apply(state); }
                 Meridian.Progress.SkillStats.ToolOverride = suiteTool;
             }
+        }
+
+        /// <summary>U-200 / U-196 (F7) → coordination/reports/unity/u200/: 1_shelter_walls (smoke_18's shelter on Mars's slope: each bottom wall
+        /// down to the ground at both corners, no wedge, no slit), 2_border_t1_t2_slope (Earth: the T1 / T2 border 10 m under the camp
+        /// shoulder's 0.65 slope: a line along the slope, no stair-steps).</summary>
+        [UnityTest, Timeout(300000)]
+        public IEnumerator CaptureU200Walls()
+        {
+            var name = Environment.GetEnvironmentVariable(Variable);
+            if (string.IsNullOrEmpty(name)) Assert.Ignore($"Set {Variable} (tools/unity_capture.ps1).");
+            if (SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.Null)
+                Assert.Fail("No graphics device: run without -nographics.");
+            bool wasCartoon = Meridian.View2D.CartoonStage.Enabled;
+            Meridian.View2D.CartoonStage.Enabled = true;
+            try
+            {
+#if UNITY_EDITOR
+                yield return UnityEditor.SceneManagement.EditorSceneManager.LoadSceneAsyncInPlayMode(
+                    CorePath, new LoadSceneParameters(LoadSceneMode.Single));
+#endif
+                var director = UnityEngine.Object.FindAnyObjectByType<SceneDirector>();
+                float timeout = Time.realtimeSinceStartup + 30f;
+                while ((!director.IsReady || !director.PlanetSide.terrain.IsSettled) && Time.realtimeSinceStartup < timeout) yield return null;
+                var dir = "coordination/reports/unity/u200";
+                Directory.CreateDirectory(dir);
+                var side = director.PlanetSide;
+                void Calm()
+                {
+                    if (side.hazards != null) side.hazards.enabled = false;
+                    if (side.dayNight != null) side.dayNight.Override = 0.45f;
+                    side.creatures.autoSpawn = false;
+                    side.creatures.DespawnAll();
+                }
+                Calm();
+                var follow = side.sideCamera.GetComponent<Meridian.Player.CameraFollow>();
+                IEnumerator Park(Vector2 at)
+                {
+                    var body = side.player.Body;
+                    body.simulated = false;
+                    body.position = at; side.player.transform.position = at;
+                    yield return null;
+                    float until = Time.realtimeSinceStartup + 20f;
+                    while (!side.terrain.IsSettled && Time.realtimeSinceStartup < until) yield return null;
+                    if (follow != null) follow.SnapToTarget();
+                    for (int k = 0; k < 30; k++) yield return null;
+                }
+                IEnumerator Shot(string label)
+                {
+                    yield return new WaitForSeconds(1f); // art sheets in, a dig's clods gone
+                    yield return Save(side.sideCamera, $"{name}_{label}");
+                    File.Copy($"logs/capture_{name}_{label}.png", $"{dir}/{label}.png", true);
+                }
+
+                // 2: Earth, the T1 / T2 border under the camp shoulder's slope (as u182/6: a pocket dug at the border, the camera on it)
+                {
+                    var t = side.terrain;
+                    int camp = Mathf.FloorToInt(Meridian.Planet.POI.PoiCatalog.SpawnCamp.CenterX);
+                    float bx = camp + 30.5f;
+                    for (float probe = camp + 18.5f; probe < camp + 60f; probe += 1f) // the steepest stretch of the shoulder
+                        if (Mathf.Abs(t.SurfaceAt(probe + 1f) - t.SurfaceAt(probe - 1f)) > Mathf.Abs(t.SurfaceAt(bx + 1f) - t.SurfaceAt(bx - 1f))) bx = probe;
+                    float by = Meridian.Mining.DigRun.LineAt(t, bx) - Meridian.Mining.D1Tables.Current.tiers[1].fromM;
+                    yield return Park(new Vector2(bx, by - 0.5f));
+                    var rig = side.rig; var owner = rig.owner; rig.owner = null;
+                    try { for (float dx = -0.6f; dx <= 0.6f + 1e-3f; dx += 0.6f) for (float dy = -0.6f; dy <= 0.6f + 1e-3f; dy += 0.6f) rig.Dig(new Vector2(bx + dx, by + dy)); }
+                    finally { rig.owner = owner; }
+                    var drops = side.rig.drops;
+                    for (int k = 0; k < 20; k++) yield return null;
+                    if (drops != null) for (int k = drops.Live.Count - 1; k >= 0; k--) drops.Collect(drops.Live[k]);
+                    yield return Shot("2_border_t1_t2_slope");
+                    var ground = UnityEngine.Object.FindAnyObjectByType<Meridian.View2D.SmoothGround>();
+                    float slope = Mathf.Abs(t.SurfaceAt(bx + 0.5f) - t.SurfaceAt(bx - 0.5f));
+                    TestContext.Out.WriteLine($"[MERIDIAN] u200 2_border_t1_t2_slope: x {bx:0.0}, the line's slope {slope:0.00} ({Mathf.Atan(slope) * Mathf.Rad2Deg:0} deg), wobble kept {(ground != null ? ground.WobbleKeepAt(bx) : float.NaN):0.000}");
+                }
+
+                // 1: Mars, smoke_18's shelter on the slope
+                yield return director.LoadPlanetSide(GameState.Instance.catalog.Get(Meridian.Planets.PlanetId.Mars));
+                side = director.PlanetSide;
+                timeout = Time.realtimeSinceStartup + 30f;
+                while (!side.terrain.IsSettled && Time.realtimeSinceStartup < timeout) yield return null;
+                Calm();
+                follow = side.sideCamera.GetComponent<Meridian.Player.CameraFollow>();
+                {
+                    var t = side.terrain;
+                    var bases = side.bases;
+                    int sx = side.spawnX + 200; // smoke_18's spot
+                    yield return Park(new Vector2(sx + 0.5f, t.SurfaceAt(sx + 0.5f) + 0.05f));
+                    int top = t.TopSolidY(sx);
+                    for (int dx = -3; dx <= 3; dx++) top = Mathf.Max(top, t.TopSolidY(sx + dx));
+                    int roof = top + 5;
+                    foreach (int wx in new[] { sx - 3, sx + 3 })
+                        for (int wy = t.TopSolidY(wx) + 1; wy < roof; wy++)
+                            if (bases.PieceAt(new Vector2Int(wx, wy)) == null) bases.Place(new Vector2(wx + 0.5f, wy + 0.5f), Meridian.Building.PieceKind.Wall);
+                    for (int wx = sx - 3; wx <= sx + 3; wx++) bases.Place(new Vector2(wx + 0.5f, roof + 0.5f), Meridian.Building.PieceKind.Wall);
+                    bases.Place(new Vector2(sx + 1.5f, t.TopSolidY(sx + 1) + 1.5f), Meridian.Building.PieceKind.Lamp);
+                    yield return new WaitForSeconds(1.5f);
+                    yield return Shot("1_shelter_walls");
+                    var log = new System.Text.StringBuilder();
+                    foreach (var p in bases.pieces) if (p.foot != 0f || p.viewFoot != 0f) log.Append($" {p.go.name} foot {p.foot:0.00} view foot {p.viewFoot:0.00}");
+                    TestContext.Out.WriteLine($"[MERIDIAN] u200 1_shelter_walls at {sx}:{log}");
+                }
+                LogAssert.NoUnexpectedReceived();
+            }
+            finally { Meridian.View2D.CartoonStage.Enabled = wasCartoon; }
         }
 
         /// <summary>U-175 (D-174): the Skill Tree panel topside at Earth's camp, B-204's mock-up state (six bought, Beam Power III chosen):
