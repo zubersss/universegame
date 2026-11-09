@@ -1,4 +1,4 @@
-"""B-232 (D-183 / D-184): dig debris in v3 ink, cream + ink so UNITY tints it to the ground, as B-226's shovel flick.
+"""B-232 (D-183 / D-184): dig debris in v3 ink, cream + ink so UNITY tints it to the dug cell's tier, as B-226's shovel flick.
 
   fx/dig_clods/t<n>   n = 1..5 (Topsoil, Subsoil, Stone, Deep, Core). LEAD's ruling 14:2x (it replaces the card's 128 px burst
                       frames): 24 frames x 64x64 @ PPU 64 (1 m) in 4 rows of 6 (404x268 with the contract's 4 px gutters),
@@ -11,9 +11,12 @@
   fx/rubble/base      3 frames x 64x64 @ PPU 64 (1 m = one cell), pivot [0.5, 0.5], tileable in x and y: loose clods heaped as
                       a fallen cell (D-184's rubble), three variants (json "variants": 3, no clip); tinted per tier as the clods.
 
-  python -I build_dig_debris_v3.py <review png>   the lock-free sheet, on Earth T1 and T3 ground (tinted by multiply): each
-                                                  tier's four clips as rows, a mock burst per tier (the clips placed on arcs,
-                                                  as U-195's code would throw them), the rubble tiles 2x2
+  python -I build_dig_debris_v3.py <review png>   the lock-free sheet, shared with B-238 (LEAD 16:5x): each tier's four clips
+                                                  over ITS OWN fill in its own tone; the dig stroke on Topsoil and on Stone -
+                                                  B-238's new low dust (build_ground_v3.draw_puff) with the clods thrown over
+                                                  it, at 1x and frames 2-4 at 4x, beside the old puff; the flick without its
+                                                  clod (build_shovel_v3.flick_frame) at 1x and 2x; the rubble tiles 2x2.
+                                                  Tints are UNITY's DigFeel.Tone: the tier's chip colour 35 % toward white
 """
 import json
 import math
@@ -32,15 +35,21 @@ G, O, I = U.G, U.O, U.I
 TAU = 2 * math.pi
 ART = os.path.normpath(os.path.join(HERE, "..", "..", "Assets", "_Game", "Art"))
 TIER_NAMES = {1: "Topsoil", 2: "Subsoil", 3: "Stone", 4: "Deep", 5: "Core"}
+TIER_CHIP = {1: "#8C5A33", 2: "#B8843F", 3: "#7E7F86", 4: "#46516F", 5: "#9E3828"}   # D1Tables.json: each tier's chip colour
 FW = 64                                                                              # one clod per frame (LEAD 14:2x)
 RW = 64
 COLS = 6                                                                             # a clip per row
 CLODS = ((10.0, 1), (8.5, -1), (7.5, 1), (6.5, -1))                                  # clod_1..clod_4: (radius px, turn direction)
-MOCK = ((-2.2, 34), (-1.25, 42), (-0.55, 30), (-2.75, 26))                           # the sheet's mock burst: (launch rad, speed)
+THROW = ((60, 3.2), (105, 2.6), (135, 3.4), (40, 2.4))                               # the sheet's mock throw: (deg up from +x, m/s)
 
 
 def keys():
     return [f"fx/dig_clods/t{t}" for t in range(1, 6)] + ["fx/rubble/base"]
+
+
+def tone_of(tier):
+    """UNITY's DigFeel.Tone: the tier's chip colour lifted 35 % toward white - the multiply tint of the clods and the puff."""
+    return np.array(v3.hex_rgb(TIER_CHIP[tier]), np.float32) / 255.0 * 0.65 + 0.35
 
 
 def _turn(cx, cy, rot, pts):
@@ -144,7 +153,7 @@ def kit():
                      "pivot": [0.5, 0.5], "tier": t, "tier_name": TIER_NAMES[t],
                      "animations": [{"name": f"clod_{j + 1}", "start": 6 * j, "length": 6, "loop": True, "loop_from": 0} for j in range(4)],
                      "note": "B-232 (D-183, LEAD 14:2x): four clips, each ONE clod turning in place (no travel): spawn 4-8 per opened "
-                             "cell, a random clip each, and move them in code (U-195); cream + ink: tint per ground (as dig_puff); "
+                             "cell, a random clip each, and move them in code (U-195); cream + ink: tint by the dug cell's tier tone; "
                              "mirror freely"}, frames))
     tiles = [rubble_tile(v) for v in range(3)]
     sheet, cols = FR.sheet_of(tiles)
@@ -186,74 +195,145 @@ def export(art):
     return out
 
 
+def _bbox_m(fr):
+    """A frame's drawn width and height in metres at PPU 64 (0, 0 when empty)."""
+    a = fr[..., 3] > 8
+    if not a.any():
+        return 0.0, 0.0
+    ys, xs = np.where(a.any(axis=1))[0], np.where(a.any(axis=0))[0]
+    return (xs[-1] - xs[0] + 1) / 64.0, (ys[-1] - ys[0] + 1) / 64.0
+
+
 def preview(out, footnote=None):
     import time
     from meridian import pngio
     sys.path.insert(0, os.path.dirname(HERE))
     import review
     import build_rig_tools_v3 as RT
+    import build_ground_v3 as GV                                                           # B-238's puff
+    import build_shovel_v3 as BS                                                           # B-238's flick
     K = kit()
+    puff = [GV.render_piece("dig_puff", "earth", k)[0] for k in range(8)]
+    flick = [BS.flick_frame(k) for k in range(6)]
+    oldp = os.path.join(ART, "terrain", "earth", "dig_puff_color.png")                     # the puff as exported (B-184)
+    old = None
+    if os.path.isfile(oldp):
+        osh = pngio.read_png_np(oldp)
+        old = [osh[:, i * (128 + v3.GUTTER):i * (128 + v3.GUTTER) + 128] for i in range(8)]
     paper = np.array(review.PAPER, np.float32)
+    sky = np.array(v3.hex_rgb(v3.PALETTES["earth"]["sky"]), np.float32) / 255.0
     W = 1760
-    CLIP_H, BURST = 84, 128
     rows = []
     head = np.tile(paper, (28, W, 1)).astype(np.float32)
-    review._label(head, "B-232 dig debris at 1x on Earth T1 and T3 ground: each tier's clips clod_1..4 (one clod turning in place), a mock burst, the rubble tiles", 6, 8)
+    review._label(head, "B-232 + B-238 at 1x: each tier's clod clips on its own fill in its own tone; the dig stroke (the new low dust under the clods) on Topsoil and Stone", 6, 8)
     rows.append(head)
-    for tier in (1, 3):                                                                    # tinted on two grounds
-        fp = os.path.join(ART, "terrain", "earth", "ground_fill_color.png" if tier == 1 else f"ground_fill_t{tier}_color.png")
-        fill = pngio.read_png_np(fp).astype(np.float32) / 255.0 if os.path.isfile(fp) else None
-        tint = (fill[..., :3][fill[..., 3] > 0.9].mean(axis=0) if fill is not None else np.array([0.5, 0.4, 0.3], np.float32))
-        tint = 0.45 + 0.55 * tint / max(float(tint.max()), 1e-3)
 
-        def ground(h, w):
-            """An h x w patch of the tier's fill (tiled), or flat grey without it."""
-            if fill is None:
-                return np.full((h, w, 3), 0.5, np.float32)
-            return np.tile(fill[..., :3], (-(-h // fill.shape[0]), -(-w // fill.shape[1]), 1))[:h, :w].copy()
+    fills = {}
 
-        def tinted(f):
-            ff = f.astype(np.float32).copy()
-            ff[..., :3] *= tint
-            return ff.astype(np.uint8)
-        y0 = 24 + 5 * CLIP_H + 20
-        r = np.tile(paper, (y0 + 5 * 140 + 170, W, 1)).astype(np.float32)
-        review._label(r, f"on Earth T{tier} ground (tinted by multiply): each tier's four clips, 6 frames each", 6, 4, scale=1)
-        for i, (key, _sheet, _extra, frames) in enumerate(K[:5]):
-            y = 24 + i * CLIP_H
-            review._label(r, key, 6, y + 30, scale=1)
-            for j in range(4):
-                cell = ground(FW, 6 * FW)
-                for k in range(6):
-                    RT._ov(cell, tinted(frames[6 * j + k]), k * FW, 0)
-                r[y + 10:y + 10 + FW, 150 + j * 400:150 + j * 400 + 6 * FW] = cell
-        review._label(r, "a mock burst per tier: the four clips placed on arcs over 6 steps, as U-195's code would throw them (128 px = 2 m cells)", 6, y0 - 12, scale=1)
-        for i, (key, _sheet, _extra, frames) in enumerate(K[:5]):
-            y = y0 + i * 140
-            review._label(r, key.split("/")[-1], 6, y + 60, scale=1)
+    def fill_of(tier):
+        if tier not in fills:
+            fp = os.path.join(ART, "terrain", "earth", "ground_fill_color.png" if tier == 1 else f"ground_fill_t{tier}_color.png")
+            fills[tier] = pngio.read_png_np(fp).astype(np.float32)[..., :3] / 255.0 if os.path.isfile(fp) else None
+        return fills[tier]
+
+    def ground(tier, h, w):
+        """An h x w patch of the tier's fill (tiled), or flat grey without it."""
+        f = fill_of(tier)
+        if f is None:
+            return np.full((h, w, 3), 0.5, np.float32)
+        return np.tile(f, (-(-h // f.shape[0]), -(-w // f.shape[1]), 1))[:h, :w].copy()
+
+    def scene(tier, h, w, line):
+        """The dug cell's mouth on row `line`: the tier's ground from it down; above it the sky (Topsoil) or, deeper, the
+        room's back (the fill at 62 %)."""
+        g = ground(tier, h, w)
+        g[:line] = sky if tier == 1 else g[:line] * 0.62
+        return g
+
+    # ---- B-232: every tier's four clips, on that tier's fill, in that tier's tone
+    CLIP_H = 84
+    r = np.tile(paper, (24 + 5 * CLIP_H + 8, W, 1)).astype(np.float32)
+    review._label(r, "fx/dig_clods/t1..t5: clips clod_1..4 (one clod turning in place, 6 frames), each tier on its own fill, tinted by its own tone (DigFeel.Tone)", 6, 4, scale=1)
+    for i, (key, _sheet, _extra, frames) in enumerate(K[:5]):
+        y = 24 + i * CLIP_H
+        review._label(r, key, 6, y + 30, scale=1)
+        for j in range(4):
+            cell = ground(i + 1, FW, 6 * FW)
             for k in range(6):
-                tt = k / 5.0
-                cell = ground(BURST, BURST)
-                for j, (a, sp) in enumerate(MOCK):
-                    x = 64 + math.cos(a) * sp * tt * 2.0
-                    yy = 70 + math.sin(a) * sp * tt * 2.0 + 70 * tt * tt                   # up and out, then gravity
-                    RT._ov(cell, tinted(frames[6 * j + k]), int(round(x)) - FW // 2, int(round(yy)) - FW // 2)
-                r[y + 4:y + 4 + BURST, 150 + k * 136:150 + k * 136 + BURST] = cell
-        y = y0 + 5 * 140
-        review._label(r, "fx/rubble/base: 3 variants, each tiled 2x2", 6, y + 2, scale=1)
-        for v, tile in enumerate(K[5][3]):
-            big = np.tile(tile, (2, 2, 1)).astype(np.float32)
-            big[..., :3] *= tint
-            cell = ground(2 * RW, 2 * RW)
-            RT._ov(cell, big.astype(np.uint8), 0, 0)
-            r[y + 16:y + 16 + 2 * RW, 150 + v * 140:150 + v * 140 + 2 * RW] = cell
+                RT._ov(cell, frames[6 * j + k], k * FW, 0, tint=tone_of(i + 1))
+            r[y + 10:y + 10 + FW, 150 + j * 400:150 + j * 400 + 6 * FW] = cell
+    rows.append(r)
+
+    # ---- B-238 + B-232: the stroke on Topsoil and on Stone
+    CW_, CH_, CX, LINE = 208, 150, 104, 112                                                # a stroke cell; the mouth at (CX, LINE)
+    for tier in (1, 3):
+        tint = tone_of(tier)
+        cl = K[tier - 1][3]
+        r = np.tile(paper, (24 + CH_ + 26 + 256 + 26 + 128 + 12, W, 1)).astype(np.float32)
+        review._label(r, f"the dig stroke on {TIER_NAMES[tier]} (tone {TIER_CHIP[tier]} lifted 35 %): B-238's dust, 8 frames, with four t{tier} clods thrown over it as U-195 does (2.4-3.4 m/s, gravity, gone at 0.6 s)", 6, 4, scale=1)
+        cells = []
+        for k in range(8):
+            cell = scene(tier, CH_, CW_, LINE)
+            RT._ov(cell, puff[k], CX - 64, LINE - 96, tint=tint)                           # the puff's pivot (0.5, 0.25)
+            t = (k + 0.5) / 12.0
+            if t <= 0.6:
+                for j, (a, v) in enumerate(THROW):
+                    x = v * math.cos(math.radians(a)) * t
+                    z = v * math.sin(math.radians(a)) * t - 4.9 * t * t
+                    if z > -0.05:
+                        RT._ov(cell, cl[6 * j + k % 6], int(round(CX + x * 64)) - FW // 2, int(round(LINE - z * 64)) - FW // 2, tint=tint)
+            cells.append(cell)
+            r[24:24 + CH_, 10 + k * (CW_ + 4):10 + k * (CW_ + 4) + CW_] = cell
+        y = 24 + CH_ + 6
+        review._label(r, "frames 2, 3, 4 at 4x (the clods read first, the dust behind them)", 6, y, scale=1)
+        for i, k in enumerate((2, 3, 4)):
+            crop = cells[k][LINE - 52:LINE + 12, CX - 52:CX + 52]
+            r[y + 18:y + 18 + 256, 10 + i * 424:10 + i * 424 + 416] = np.repeat(np.repeat(crop, 4, 0), 4, 1)
+        y += 18 + 256 + 6
+        review._label(r, "the old puff (B-184, as exported) in the same place and tone, 8 frames, for comparison" if old else "the old puff: not found", 6, y, scale=1)
+        if old:
+            for k in range(8):
+                cell = scene(tier, 128, 128, 96)
+                RT._ov(cell, old[k], 0, 0, tint=tint)
+                r[y + 16:y + 16 + 128, 10 + k * 132:10 + k * 132 + 128] = cell
         rows.append(r)
+
+    # ---- B-238: the flick without its clod
+    r = np.tile(paper, (24 + 128 + 22 + 256 + 10, W, 1)).astype(np.float32)
+    review._label(r, "fx/shovel_flick (B-238: no big clod, a short lift of crumbs): frames 0-5 at 1x on Topsoil, then at 2x", 6, 4, scale=1)
+    for k in range(6):
+        cell = scene(1, 128, 128, 96)
+        RT._ov(cell, flick[k], 0, 0, tint=tone_of(1))
+        r[24:24 + 128, 10 + k * 132:10 + k * 132 + 128] = cell
+        r[24 + 128 + 22:24 + 128 + 22 + 256, 10 + k * 260:10 + k * 260 + 256] = np.repeat(np.repeat(cell, 2, 0), 2, 1)
+    rows.append(r)
+
+    # ---- B-232: the rubble tiles
+    r = np.tile(paper, (24 + 2 * RW + 10, W, 1)).astype(np.float32)
+    review._label(r, "fx/rubble/base: 3 variants, each tiled 2x2, on Topsoil (left three) and on Stone (right three), in the tier's tone", 6, 4, scale=1)
+    for n, tier in enumerate((1, 3)):
+        for v, tile in enumerate(K[5][3]):
+            cell = ground(tier, 2 * RW, 2 * RW)
+            RT._ov(cell, np.tile(tile, (2, 2, 1)), 0, 0, tint=tone_of(tier))
+            x = 10 + (3 * n + v) * 140
+            r[20:20 + 2 * RW, x:x + 2 * RW] = cell
+    rows.append(r)
+
+    m = v3.EDGE_MARGIN
     lines = [f"{key}: {img.shape[1]}x{img.shape[0]}, palette {v3.palette_hits(img, 'earth')[0] * 100:.1f}%" for key, img, _e, _f in K]
+    sizes = [_bbox_m(f) for f in puff]
+    edge = [k for k, f in enumerate(puff) if f[:m, :, 3].any() or f[-m:, :, 3].any() or f[:, :m, 3].any() or f[:, -m:, 3].any()]
+    lines.append("dig_puff (B-238, earth): drawn w x h per frame (m) " + ", ".join(f"{w_:.2f}x{h_:.2f}" for w_, h_ in sizes)
+                 + f"; tallest {max(h_ for _w, h_ in sizes):.2f} m (limit 0.35), widest cloud {max(w_ for w_, _h in sizes[:4]):.2f} m; "
+                 + f"palette {min(v3.palette_hits(f, 'earth')[0] for f in puff) * 100:.1f}%; " + ("inside the 2 px edge" if not edge else f"TOUCHES THE EDGE in frames {edge}"))
+    fs = [_bbox_m(f) for f in flick]
+    lines.append("shovel_flick (B-238): drawn w x h per frame (m) " + ", ".join(f"{w_:.2f}x{h_:.2f}" for w_, h_ in fs)
+                 + f"; empty frames: {[k for k, f in enumerate(flick) if not f[..., 3].any()] or 'none'}; palette {min(v3.palette_hits(f, 'earth')[0] for f in flick) * 100:.1f}%")
     foot = np.tile(paper, (24 + 16 * len(lines), W, 1)).astype(np.float32)
     for i, ln in enumerate(lines):
         review._label(foot, ln, 6, 6 + 16 * i, scale=1)
     img = np.vstack(rows + [foot])
-    review.draw(img, time.strftime("%m-%d %H:%M") + " " + (footnote or "B-232 design preview (lock-free, fakegp + numpy)"), 2, img.shape[0] - 14, (1.0, 1.0, 0.85))
+    review.draw(img, time.strftime("%m-%d %H:%M") + " " + (footnote or "B-232 + B-238 design preview (lock-free, fakegp + numpy)"), 2, img.shape[0] - 14, (1.0, 1.0, 0.85))
     review.write(out, img)
     print("written", out, img.shape[1], "x", img.shape[0])
     for ln in lines:

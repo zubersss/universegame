@@ -3,9 +3,9 @@
   props/rig/shovel        192x64 @ PPU 128 (1.5 x 0.5 m), pivot at the D-grip (the hand): a sturdy field shovel - a brass D-grip,
                           a teal-painted haft (~0.85 m) with a brass ferrule, a steel round-point blade (~0.37 m) on a teal socket, its
                           step shoulders and a dirt smear; json grip [0, 0], blade_tip and the dig point (muzzle) in metres from the grip
-  fx/shovel_flick/base    6 frames 128x128 @ PPU 64 (2 m), pivot [0.5, 0.25] (the dig point, as dig_puff), clip 'flick' (once): a dirt
-                          clod and crumbs flicked up and back over the shoulder (-x when facing right). Cream + ink: UNITY tints it per
-                          ground, as the dust
+  fx/shovel_flick/base    6 frames 128x128 @ PPU 64 (2 m), pivot [0.5, 0.25] (the dig point, as dig_puff), clip 'flick' (once): a short
+                          lift of crumbs off the blade, up and back (-x when facing right); B-238: its big clod is gone (B-232's
+                          clods are the debris). Cream + ink: UNITY tints it by the dug cell's tier tone, as the dust
   icons/tools/shovel      128x128 @ PPU 128: the shovel on a diagonal, for the HUD tool slot and the tree (B-199's item-icon style)
 
   python -I build_shovel_v3.py <review png>     the lock-free sheet: the shovel in the surveyor's hand at three scoop angles beside
@@ -94,22 +94,17 @@ def flick_frame(k, seed=1500):
     d, M = c.dm, ST.extra(c)
     px, py = 64, 96                                                                          # the dig point (pivot 0.5, 0.25)
     rng = np.random.default_rng(seed)
-    t = k / 5.0
-    cx, cy = px - 52 * t, py - 70 * math.sin(math.pi * min(1.0, t * 1.15)) + 18 * t * t        # the clod: up and back, over the top
-    r = 11 - 3 * t
-    if k <= 4:
-        G.stroke(d, G.lumpy_ellipse(cx, cy, r, r * 0.82, n=14, lump=0.18, seed=seed + k), M["offwhite"], O * 0.8, cyclic=True)
-        G.stroke(d, G.lumpy_ellipse(cx + r * 0.25, cy + r * 0.3, r * 0.45, r * 0.3, n=10, lump=0.1, seed=seed + 10 + k), M["offwhite_sh"], 0.0, cyclic=True)
-    for j in range(9):                                                                       # crumbs spraying after it
-        a = math.radians(rng.uniform(110, 175))
-        s = rng.uniform(18, 46)
-        x, y = px + s * t * math.cos(a) * 1.2, py - s * t * math.sin(a) * 1.3 + 30 * t * t
-        rr = (3.2 - 1.6 * t) * (0.7 + 0.3 * (j % 3))
-        if k == 0 or rr < 0.9 or not (rr + 4 < x < 124 - rr and rr + 4 < y < 124 - rr):
-            continue
+    # B-238 (D-183, LEAD 16:5x; B-226's flick reopened on the owner's playtest): the big clod and the "ground lifting" oval
+    # are gone - B-232's clods are the debris now, and the oval read as a brown plate (B-228 F1b). What stays is a short lift
+    # of seven crumbs off the blade, up and back (-x), ~0.15 m high and ~0.3 m far, settling by frame 5; every frame holds
+    # crumbs (the first was empty but for the oval)
+    t = (k + 1) / 6.0
+    for j in range(7):
+        a = math.radians(rng.uniform(110, 172))
+        s = rng.uniform(10, 22)
+        x, y = px + s * t * math.cos(a) * 1.1, py - s * t * math.sin(a) * 1.6 + 26 * t * t
+        rr = (3.0 - 1.4 * t) * (0.7 + 0.3 * (j % 3))
         G.stroke(d, G.lumpy_ellipse(x, y, rr, rr * 0.85, n=8, lump=0.15, seed=seed + 20 + j), M["offwhite"], I * 0.8, cyclic=True)
-    if k <= 1:                                                                               # the ground lifting at the dig point
-        G.stroke(d, G.lumpy_ellipse(px, py + 4, 16 - 4 * k, 5, n=16, lump=0.15, seed=seed + 30), M["offwhite"], I, cyclic=True)
     return ST.done(c, seed + k)[0]
 
 
@@ -126,8 +121,9 @@ def kit():
             ("fx/shovel_flick/base", sheet, {"ppu": 64, "frame_width": 128, "frame_height": 128, "columns": cols, "gutter": v3.GUTTER, "frames": 6,
                                              "fps": 12, "pivot": [0.5, 0.25], "facing": "right",
                                              "animations": [{"name": "flick", "start": 0, "length": 6, "loop": False}],
-                                             "note": "B-226: a dirt clod and crumbs flicked up and back over the shoulder; cream + ink: tint per ground "
-                                                     "(as the dust); mirror x when facing left"}, frames),
+                                             "note": "B-226 / B-238: a short lift of crumbs off the blade, up and back (the big clod is gone: "
+                                                     "fx/dig_clods are the debris); cream + ink: tint by the dug cell's tier tone (as the dust); "
+                                                     "mirror x when facing left"}, frames),
             ("icons/tools/shovel", icon, {"ppu": IT.PPU, "pivot": [0.5, 0.5], "note": "B-226: the shovel's icon (the HUD tool slot, the tree)"}, None)]
 
 

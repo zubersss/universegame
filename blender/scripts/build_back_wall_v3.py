@@ -248,10 +248,11 @@ def draw_tier(planet, t):
                 x, y = x + math.cos(a) * L, y + math.sin(a) * L
                 pts.append((x, y))
             stroke(seams, pts, 2.6, 1.4)
-        for _ in range(16):
-            cx, cy, r = rng.uniform(0, N), rng.uniform(0, N), rng.uniform(4, 8)
-            ellipse(glints, cx, cy, r, 1.2, 0.0)
-            ellipse(glints, cx, cy, 1.2, r, 0.0)
+            if _ % 2 == 0:                                               # LEAD 17:1x: a spark ON a facet of every other seam
+                cx, cy = pts[int(rng.integers(1, 4))]                    # (four a tile), none loose in the field: sixteen
+                r = rng.uniform(4, 6.5)                                  # scattered ones with the gold zig-zags read as a night
+                ellipse(glints, cx, cy, r, 1.2, 0.0)                     # sky with constellations
+                ellipse(glints, cx, cy, 1.2, r, 0.0)
         layers += [(seams, R["bright"]), (glints, toward_ink(pal["offwhite"], 0.2))]
     else:                                                                # Core: dark glassy veins, a few embers
         veins, gloss, emb = np.zeros((N, N), np.float32), np.zeros((N, N), np.float32), np.zeros((N, N), np.float32)
@@ -380,6 +381,12 @@ def preview(out, planet="earth", footnote=None):
             r[24:24 + 2 * S, 30 + 2 * S:30 + 4 * S] = ft
             r[24:24 + 2 * S, 50 + 4 * S:50 + 6 * S] = dug(ft, tiled(img, 2 * S, 2 * S), 160, 96, 352, 416)
         rows.append(r)
+    r = np.tile(paper, (3 * S + 34, W, 1)).astype(np.float32)                                  # LEAD 17:1x: the pair check seen
+    review._label(r, "t1 at 3x, one whole tile: the worm holes (no two within 35 px, none level with another within 60 px: D-101) | t4 at 3x: every glint on a seam", 6, 4, scale=1)
+    for i, t in enumerate((1, 4)):
+        big = np.repeat(np.repeat(walls[t][..., :3].astype(np.float32) / 255.0, 3, 0), 3, 1)
+        r[24:24 + 3 * S, 10 + i * (3 * S + 14):10 + i * (3 * S + 14) + 3 * S] = big
+    rows.append(r)
     fill1 = fill_png(planet, 1)                                                                # a 10 m shaft (640 px) from the surface
     if fill1 is not None:
         r = np.tile(paper, (800, W, 1)).astype(np.float32)

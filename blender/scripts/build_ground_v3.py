@@ -90,7 +90,12 @@ def colours(planet):
 
 def mats(gp, planet):
     """M[role] = the flat fill (no ink), M[role + '_i'] = the fill with its ink line; 'ink' a line only; 'tuft' inked behind."""
-    C = colours(planet)
+    C = dict(colours(planet))
+    # B-238 (LEAD 16:5x): the base dig puff is cream + ink on every planet, because UNITY multiplies it by the dug cell's
+    # tier tone (DigFeel.Tone, U-195); in the ground's own dust colour the tint coloured it twice. "dust" / "dust_sh" stay
+    # for what else uses them (the variants' roles)
+    C.setdefault("puff", v3.PALETTES[planet]["offwhite"])
+    C.setdefault("puff_sh", v3.shadow_of(v3.PALETTES[planet]["offwhite"], planet))
 
     def m(name, fill=None, ink=True, behind=False, ink_hex=v3.INK):
         return G.mat(gp, f"gr_{planet}_{name}", fill=fill, ink=ink, behind=behind, ink_hex=ink_hex)
@@ -304,36 +309,62 @@ def draw_lip(d, M):
         G.seam(d, [(x, -0.07), (x + 0.012, -0.025)], M["ink"])
 
 
-PUFF_BILLOWS = [(84, 0.00, 1.00), (48, 0.62, 0.66), (128, 0.46, 0.80), (24, 1.00, 0.46), (156, 0.86, 0.52), (104, 0.95, 0.50),
-                (66, 1.18, 0.36)]                       # asymmetric: no pair of 'ears' over the central billow (no faces, D-101)
+# B-238 (D-183, LEAD 16:5x; B-184's puff reopened on the owner's playtest): the dig's dust as LOW, WIDE dust. The first puff
+# peaked as a lobed ball 0.6 m across with satellites, an inner shade oval and five flying clods: beside U-195's small clods it
+# was the largest thing on screen, and at 4x a bear's head (two top lobes, an oval inside). Now a flat-footed scalloped cloud
+# hugging the dug cell's mouth, <= 0.35 m tall and ~0.7 m wide at its peak (frames 0-3), then four unequal wisps thinning
+# away (frames 4-7). No pair of top lobes (one clear peak right of centre, unequal shoulders), no oval inside (the shade is a
+# band along the foot), no clods (B-232's clods are the debris; the variants' clod tone goes unused). Roles as before
+# (dust_i, dust_sh, ink), so every planet's variant follows from this one drawing; frame, pivot, clip and json unchanged.
+DUST_FOOT = 0.015                                                        # the cloud's foot, m above the dig point
+DUST_BUMPS = ((0.9, 0.42), (1.1, 0.72), (1.4, 1.0), (1.0, 0.55))         # the scallops, left to right: (rel width, rel height)
+DUST_WH = ((0.26, 0.10), (0.42, 0.19), (0.54, 0.27), (0.60, 0.25))       # frames 0-3: the cloud's width and height (m) before
+#                                                                          the end bumps' reach (x 1.08), the boil (x 1.06), the
+#                                                                          foot and the ink (+ 0.055): the first run measured
+#                                                                          0.83 x 0.39 m drawn from (0.72, 0.32); this is 0.69 x 0.34
+DUST_WISPS = ((-0.27, 0.06, 0.085, -1.0), (-0.10, 0.13, 0.12, -0.4), (0.14, 0.21, 0.17, 0.5), (0.29, 0.09, 0.09, 1.0))   # x, z, rx, drift
+
+
+def _dust_top(x, W, H, k):
+    """The cloud's scalloped top at x (m from the dig point): the highest of its bumps' half-ellipses (each overlaps its
+    neighbours, so the dips between them stay shallow), boiling a little from frame to frame."""
+    total = sum(w for w, _h in DUST_BUMPS)
+    z, x0 = 0.0, -W / 2
+    for i, (w, h) in enumerate(DUST_BUMPS):
+        bw = W * w / total
+        u = (x - (x0 + bw / 2)) / (bw * 0.68)
+        if abs(u) < 1:
+            z = max(z, H * h * (1 + 0.06 * math.sin(1.7 * k + 2.1 * i)) * math.sqrt(1 - u * u))
+        x0 += bw
+    return z
 
 
 def draw_puff(d, M, k):
-    """A billowing dust cluster: a big central billow and satellites drifting out and up, swelling then thinning and
-    shrinking away; dark clods flying on their arcs. Drawn far satellites first, the central billow last."""
-    t = k / 7.0
-    grow = math.sin(math.pi * (0.15 + 0.80 * t)) ** 0.6           # swells to t 0.43, lingers, thins
-    R = 0.30 * (0.35 + 0.65 * grow) * (1.0 if t < 0.72 else 1.0 - 1.4 * (t - 0.72))
-    D = 0.15 + 0.45 * (1 - (1 - t) ** 2)
-    rise = 0.12 + 0.28 * t
-    for j in range(5):                                                                        # flying clods on their arcs, drawn BEHIND the
-        a = math.radians(40 + 100 * j / 4)                                                    # billows (LEAD 10:4x, B-182: drawn over them,
-        v = 1.25 + 0.25 * (j % 3)                                                             # frames 1-2's clods sat on the ball as two dark
-        x = v * t * math.cos(a) * 0.7                                                         # marks over the fold: a face); they show once
-        z = 0.1 + v * t * math.sin(a) * 0.75 - 1.5 * t * t                                  # they fly clear of the dust
-        if z > -0.2 and t > 0.05:
-            G.stroke(d, G.lumpy_ellipse(x, z, 0.045, 0.035, n=10, lump=0.15, seed=j), M["clod_i"], I, cyclic=True)
-    for j, (a_deg, df, sf) in sorted(enumerate(PUFF_BILLOWS), key=lambda e: -e[1][1]):
-        a = math.radians(a_deg)
-        r = R * sf
-        if r < 0.03:
-            continue
-        x, z = D * df * math.cos(a), rise + D * df * math.sin(a) * 0.75
-        pts = G.lumpy_ellipse(x, z, r, r * 0.9, n=20, lump=0.07, seed=j + 10 * k)
-        G.stroke(d, pts, M["dust_i"], O, cyclic=True)
-        G.stroke(d, G.lumpy_ellipse(x - r * 0.28, z - r * 0.25, r * 0.55, r * 0.42, n=12, lump=0.05, seed=j + 3), M["dust_sh"], 0.0, cyclic=True)
-        if r > 0.12:                                    # a short billow fold on the upper right (not a smile: no faces)
-            G.seam(d, G.bezier((x + r * 0.15, z + r * 0.62), (x + r * 0.55, z + r * 0.55), (x + r * 0.68, z + r * 0.18), n=6), M["ink"])
+    """Frame k (0..7) of the dig puff: see the B-238 note above."""
+    if k <= 3:
+        W, H = DUST_WH[k]
+        total = sum(w for w, _h in DUST_BUMPS)
+        xa = -W / 2 - 0.18 * W * DUST_BUMPS[0][0] / total                # where the end bumps reach the foot
+        xb = W / 2 + 0.18 * W * DUST_BUMPS[-1][0] / total
+        xs = [xa + (xb - xa) * i / 47 for i in range(48)]
+        cloud = [(x, DUST_FOOT + _dust_top(x, W, H, k)) for x in xs] + [(xb, DUST_FOOT), (xa, DUST_FOOT)]
+        G.stroke(d, cloud, M["dust_i"], O, cyclic=True)
+        band = [(x, DUST_FOOT + 0.03 + 0.30 * max(_dust_top(x, W, H, k) - 0.04, 0.0)) for x in xs[4:-4]]   # the dense foot
+        G.stroke(d, band + [(xs[-5], DUST_FOOT + 0.022), (xs[4], DUST_FOOT + 0.022)], M["dust_sh"], 0.0, cyclic=True)
+        G.stroke(d, cloud, M["ink"], O, cyclic=True)
+        if k >= 1:                                                       # ONE billow fold, on the peak's left flank
+            c = -W / 2 + W * (DUST_BUMPS[0][0] + DUST_BUMPS[1][0] + DUST_BUMPS[2][0] / 2) / total
+            G.seam(d, [(x, DUST_FOOT + 0.62 * _dust_top(x, W, H, k)) for x in (c - 0.20 * W, c - 0.13 * W, c - 0.06 * W, c - 0.01 * W)], M["ink"])
+        return
+    tw = (k - 3) / 4.0                                                   # frames 4-7: the cloud broken into wisps
+    s = 1.0 - 0.78 * tw
+    for j, (x0, z0, rx0, drift) in enumerate(DUST_WISPS if k < 6 else DUST_WISPS[:3]):
+        rx = rx0 * s
+        pts = G.lumpy_ellipse(x0 + drift * 0.07 * tw, DUST_FOOT + z0 + 0.06 * tw, rx, rx * 0.45, n=14, lump=0.10, seed=40 + j + 7 * k)
+        if rx >= 0.05:
+            G.stroke(d, pts, M["dust_i"], I * 1.2, cyclic=True)
+        else:                                                            # the last specks: the shade tone, no ink (an inked
+            G.stroke(d, pts, M["dust_sh"], 0.0, cyclic=True)             # 2 px blob is a dark dot)
 
 
 # ---------------------------------------------------------------- the dig rim (x 0..4 m; the ink at z = 0, the solid below)
@@ -862,7 +893,7 @@ def render_piece(name, planet="earth", k=0, mx=1, mz=1, ss=None):
     else:
         {"ground_band": lambda: draw_band(d, M, planet), "ground_fill": lambda: draw_fill(d, M, planet),
          "ground_decor": lambda: draw_decor(d, M, k), "ground_lip": lambda: draw_lip(d, M), "dig_rim": lambda: draw_rim(d, M),
-         "dig_puff": lambda: draw_puff(d, M, k)}[name]()
+         "dig_puff": lambda: draw_puff(d, {**M, "dust_i": M["puff_i"], "dust_sh": M["puff_sh"]}, k)}[name]()
     _CUR = None
     st = fakegp.strokes_of(d, gp)
     for master, ranges in _GROUPS:                      # a wrapped element's copies share the master's id: the same ink
