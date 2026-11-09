@@ -1,5 +1,6 @@
 # LEAD STATUS
-Updated: 2026-11-09 00:4x · Session: 10 (zuber-dc; all three windows restarted ~09:30 after a ~3-hour break) · Review cycle: 288 · Cadence: every 2 hours (owner, 11-07 15:1x; session cron 5ca489ce at :43 on odd hours, next ~01:05) + messages from the workers as they arrive
+Updated: 2026-11-09 01:0x · Session: 10 (zuber-dc; all three windows restarted ~09:30 after a ~3-hour break) · Review cycle: 289 · Cadence: every 2 hours (owner, 11-07 15:1x; session cron 5ca489ce at :43 on odd hours, next ~03:05) + messages from the workers as they arrive
+Cycle 289 (01:05): no stall; U-183 / U-176 / U-178 Done; B-219 Done; U-190 added (the Wardens, the jetpack load rule); LeadQA D1DigRunTests' first run found the jetpack rule; 0.6.0 after U-190, U-185, the small fixes and the sweep.
 Cycle 288 (23:05): no stall; U-186 / U-187 Done, U-182 in Review; all D1 art in; LeadQA D1DigRunTests compiles; U-183 in UNITY's lock (RAM 0.14 GB, watched); 0.6.0 after U-176 / U-178 / U-185 and the sweep.
 Cycle 287 (21:05): no stall; U-175 and U-184 in Review; every D1 art card exported; U-182 (the tier shader) in UNITY's lock; BLENDER on B-215.
 Cycle 286 (19:05): no stall; Build 0.5.1 out (USER-34 open); every D1 art card but B-205 exported; U-174 in Review; U-175 next.
@@ -8,11 +9,11 @@ Cycle 284 (15:05–17:0x): THE OWNER'S 0.5.0 PLAYTEST → D-174 (a progression d
 Cycles 281–283 (09:3x–15:0x): the resume; Build 0.5.0 (page https://claude.ai/artifact/CHnmoFrDg2jzUuM42BVi83); D-168..D-173; U-159 Mars smooth.
 (cycles 231–280: coordination/status/archive/LEAD_2026-11-06.md and REVIEW_LOG)
 ## Current task
-Directing D1, the owner's progression digging game (D-174 / D-175 / D-178, Bible 5.3 §8.1, docs/D1_TABLES.md). UNITY: U-176 (ways up: code in, its check re-running once under D-046 after a memory reap) → U-178 (Rank, New Expedition) → U-185 (the hints) → U-180 / U-181 / U-171 → a full sweep → U-188 Build 0.6.0. BLENDER: B-219 (the giants' find nodes: sources in 40d46029, previews in its lock after UNITY's run), then B-201 (0.6.0's smoke read). U-189 (the giants' finds harvestable) after 0.6.0. Done since 23:05: U-183 (the tool looks), D1_TABLES §4 climbing numbers (the winch 6 m/s), D-179 (unused), LeadQA step 6b (the ladder).
+Directing D1, the owner's progression digging game (D-174 / D-175 / D-178, Bible 5.3 §8.1, docs/D1_TABLES.md). UNITY: U-190 (the Wardens within 48 m of sites; the jetpack's load rule; LeadQA D1DigRunTests in its slice) → U-185 (the hints) → U-180 / U-181 / U-171 → the full sweep → U-188 Build 0.6.0. BLENDER: idle by design until B-201 (0.6.0's smoke read). After 0.6.0: U-189, U-177, U-179.
 ## Last completed
 Cycle 287's tick.
 ## Next up
-1. U-183's captures → judge (the hip-height grip). 2. U-176 / U-178 / U-185 → judge. 3. U-178 / U-183 / U-176 / U-177 / U-185 slices → judge. 4. The D1 build → its page + the owner's playtest item (the first hour with the new loop). 5. LeadQA: a dig-run scenario for D1's exit (dig to tier 3 on Earth, sell topside, buy a node, climb with a full pack).
+1. U-190 → judge (no sentinel at a camp shaft; D1DigRunTests passing, its [LEADQA] lines). 2. U-185 (the hints) → judge. 3. The sweep → judge. 4. U-188 Build 0.6.0 → its owner page (memory: milestone-artifacts) + USER-35 (the first hour with the dig loop). 5. B-201 on 0.6.0's smoke.
 ## Pending decisions
 none open.
 ## Waiting on the user
