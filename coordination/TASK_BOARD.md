@@ -3021,7 +3021,7 @@ Goal: (+ backgrounds/venus/deck, B-201 #14) The giants' deck backdrops continue 
 Accept: a preview per giant of each deck layer repeated 3× below its sheet (no seam, no streak); json continue_rows; palette 100 %.
 Files: blender/scripts/ (the giants' backdrop builders), Assets/_Game/Art/backgrounds/<giant>/
 Depends: —
-Lead notes: Cycle 291 (06:0x). After 0.6.0's release; U-191 repeats the bands.
+Lead notes: Cycle 291 (06:0x). After 0.6.0's release; U-191 repeats the bands. 09:5x: sources part 1 (d0c32d8b) and part 2 (1a40cddd: preview_continue, a 3× repeat per giant) in; previews in BLENDER's lock after UNITY's release run and B-221 / B-222.
 
 ### U-191 · UNITY · Ready · G1
 Goal: The giants' decks assembled right (B-201 #1 / #4; + #13: Mars canyon and Mercury twilight declare continue_rows 64 but the band isn't repeated, smoke_5 / 6 / 14; + Venus's deck): repeat B-220's continue_rows below every deck backdrop (no clamped streaks); B-177's rounded island_belly under each floe instead of the flat block; no cap-to-cap gaps between floe segments.
@@ -3056,7 +3056,7 @@ Goal: The sky serpent in v3 (B-201 #15: smoke_16 shows soft gradients and a glow
 Accept: the check's answer; if redrawn, a preview beside the Venus deck at 1×.
 Files: Assets/_Game/Art/creatures/
 Depends: —
-Lead notes: Cycle 291 (06:4x). After 0.6.0.
+Lead notes: Cycle 291 (06:4x). After 0.6.0. 09:5x: CHECKED (read-only): creatures/venus/veil_serpent is B-044's v2 sheet (10-31, no style field), the only v2 creature on Venus (acidmoth, pressure_crab, sulfur_drifter, vent_eel are v3) → REDRAW NEEDED. It was the old combat serpent (D-173 retired its ammo): the v3 version reads passive and harmless: a drifting ribbon-like cloud serpent with soft fins, closed mouth, no fangs, spines or barbs, no glow halo; it meanders and parts around the ship; same frames and sockets.
 
 ### U-192 · UNITY · Ready · G1
 Goal: The docking bay's art and the catalogue's Camp icon (B-201 #11 / #17): DockingBay requests B-223's backdrop keys (no grey 3D panels or photographic starfield); the catalogue's Camp entry shows B-223's icon.
