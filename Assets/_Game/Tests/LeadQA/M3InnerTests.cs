@@ -195,21 +195,34 @@ namespace Meridian.Tests.LeadQA
             var rig = side.rig;
             int solarite = ItemRegistry.Get("solarite").id;
 
-            Assert.Less(30f, OnlyHere.SolariteWindow, "+30 s is inside the window");
-            crystals.flares.EndedAt(Time.time - 30f);
-            yield return null;
-            Assert.IsTrue(crystals.Harvestable, "harvestable at +30 s");
-            int before = rig.drops.Live.Count(d => d.itemId == solarite);
-            Assert.IsTrue(rig.Dig(near), "the Beam cuts Solarite at +30 s");
-            Assert.AreEqual(SolariteCrystals.Result.Harvested, crystals.LastResult);
-            Assert.AreEqual(before + 1, rig.drops.Live.Count(d => d.itemId == solarite), "a Solarite drop");
+            // D-182: Boot(false) is a new surveyor, who holds the shovel (reach 2 m). A surveyor on Mercury has long since
+            // bought The Beam, and this step is about the flare window, so it digs with the Beam through the test-only override.
+            var toolBefore = Meridian.Progress.SkillStats.ToolOverride;
+            try
+            {
+                Meridian.Progress.SkillStats.ToolOverride = Meridian.Rig.DigTool.Beam;
+                Assert.AreEqual(Meridian.Rig.RigTools.Reach, Meridian.Progress.SkillStats.DigReach, 0.01f, "the Beam's reach for this step");
 
-            Assert.Greater(120f, OnlyHere.SolariteWindow, "+120 s is outside the window");
-            crystals.flares.EndedAt(Time.time - 120f);
-            yield return null;
-            Assert.IsFalse(crystals.Harvestable, "crusted at +120 s");
-            Assert.IsFalse(rig.Dig(near), "nothing at +120 s");
-            Assert.AreEqual(SolariteCrystals.Result.Crusted, crystals.LastResult);
+                Assert.Less(30f, OnlyHere.SolariteWindow, "+30 s is inside the window");
+                crystals.flares.EndedAt(Time.time - 30f);
+                yield return null;
+                Assert.IsTrue(crystals.Harvestable, "harvestable at +30 s");
+                int before = rig.drops.Live.Count(d => d.itemId == solarite);
+                Assert.IsTrue(rig.Dig(near), "the Beam cuts Solarite at +30 s");
+                Assert.AreEqual(SolariteCrystals.Result.Harvested, crystals.LastResult);
+                Assert.AreEqual(before + 1, rig.drops.Live.Count(d => d.itemId == solarite), "a Solarite drop");
+
+                Assert.Greater(120f, OnlyHere.SolariteWindow, "+120 s is outside the window");
+                crystals.flares.EndedAt(Time.time - 120f);
+                yield return null;
+                Assert.IsFalse(crystals.Harvestable, "crusted at +120 s");
+                Assert.IsFalse(rig.Dig(near), "nothing at +120 s");
+                Assert.AreEqual(SolariteCrystals.Result.Crusted, crystals.LastResult);
+            }
+            finally
+            {
+                Meridian.Progress.SkillStats.ToolOverride = toolBefore;
+            }
 
             Spend(nameof(Step3_SolariteMineableAt30sNotAt120s));
             LogAssert.NoUnexpectedReceived();
