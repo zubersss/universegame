@@ -104,6 +104,24 @@ CORRECTION to the column: I wrote "first" on every row down to smoke_35 as I rea
 | smoke_43 Earth sea | respun | the Hadal Maw at the beach in 2 m of water, its jaw drawn across the sand slope: F17. The water below the surface is a flat pale tint (B-225's shallows, coming) |
 | smoke_44 Earth Survey Archive | respun | ok: the bunker door on the flat beside the funnel, the beacon, the rounded room below. The top bar reads "DEPTH 6 m · TOPSOIL" here, so F5's empty bar is this readout with nothing in it topside |
 | smoke_45 Earth Launch Complex | respun | ok: the gantry and the ruin on their pads |
+| smoke_46a-d Earth downhill walk | respun | ok: four walk frames down the slope, the feet on the ground line in each |
+| smoke_47 D1 first dig, DIG DOWN | respun | the card's picture is still the Beam drilling: expected in this smoke (B-229 was exported at 15:44 and rides 0.6.1b). The card covers the slot's name plate (F4). The first scoop's bowl ok |
+| smoke_48 D1 Surface Line | respun | ok: the card, its arrow pointing up at the depth readout, a 5 m shaft with the back wall a flat darker copy of the fill (B-230 / U-196, coming) |
+| smoke_49 D1 T1 room | respun | ok |
+| smoke_50 D1 T2 room | respun | ok. 0.6.0's #7 (the "spider"): the knot with a body is gone; a thin crossed-twig mark is there (760, 775), darker than the "pale tangle" I intended but it reads as twigs: fixed |
+| smoke_51 D1 T3 room | respun | ok. 0.6.0's #6 (the "vent grate"): now small pale layered slabs (1493, 408) and (15, 925): fixed |
+| smoke_52 D1 T4 room | respun | ok: gold crystal seams, lenses, a dark faceted stone at the right edge |
+| smoke_53 D1 T5 room | respun | ok: the dark glassy core, red crack veins, diamond nodules, lava lenses |
+| smoke_54 D1 pack full | respun | ok: the PACK FULL card and stamp, the red lettering under the readout, the arrow at the pack; the card over the slot's name (F4); the tier border as blurred steps (F7) |
+| smoke_55 D1 jetpack, full pack | respun | the jetpack's flame and puffs ok. The shovel is held straight up above the helmet while flying: F18. F7 |
+| smoke_56 D1 ladder | respun | ok: the surveyor on the rungs, no tool in hand. F7 |
+| smoke_57 D1 winch | respun | ok: on the winch line, no tool in hand. F7 |
+| smoke_58 D1 grapple reel | respun | ok: the slot shows GRAPPLE with B-227's icon; the hook set in a rock at the shaft's lip, the line to the hand. F7 |
+| smoke_59 D1 sell | respun | ok: the scroll panel, five item icons readable at list size, the camp behind it |
+| smoke_60 D1 skill tree | respun | ok for the art: The Beam's node selected, the 66 node icons readable; "×1.00" inside the header (0.6.0's #9: fixed). The description runs off the panel: F19 |
+| smoke_61 Mars T4 room | respun | ok: Mars's Deep fill, the slot showing BEAM MK1 |
+| smoke_62 space, minimap | respun | ok: the starfield, the Pilgrim, the minimap frame; its labels crowd each other (HUD, low) |
+| smoke_63 system map | respun | ok for the art: the paper map, the cartouche, the discs. The planet labels look struck through by their plates: F20 |
 | smoke_41 Earth coast cliff | first or respun | ok for the art (the stone lip on the brink, shells in the sand). The sand fill and the soil fill meet in a soft upright band about 100 px wide where their strata do not line up: F15. Dark smudges at the lower left (F7) |
 
 ## 4. Findings
@@ -119,7 +137,10 @@ Owner = who would fix it. HUD layout items are listed for LEAD to route to UNITY
 | F4 | smoke_2, 2b, 4 (any hint card) | The hint card covers the tool slot's name plate (SHOVEL hidden while a card shows); new with the slot | the card's top-left corner, (650-798, 163-187) | UNITY | high |
 | F5 | smoke_2, 2b, 2c, 3, 3b, 3c, 3d, 4 | An empty paper bar with a small empty square at the top centre: it is the depth / tier readout (smoke_44 shows it filled: "DEPTH 6 m · TOPSOIL") drawn empty while topside. Reads as an unfilled placeholder | (790-1130, 17-48) | UNITY (hide it topside, or letter it "TOPSIDE") | medium |
 | F6 | smoke_3 | "Earth night" has the day's sky and light | whole frame | UNITY (or the shot's staging) | medium |
-| F7 | smoke_5, 6; also 31, 32 | A darker region of the fill ends in a stair-stepped edge: on Mars's canyon wall (steps about 180 px apart at that zoomed-out view), and as a dark smudge with stepped edges at the lower left of Earth's slope shots. It looks like the deeper tier's border following a stepped surface height instead of the slope | Mars: from (60, 380) to (1100, 1000); Earth: (0-350, 780-1080) | UNITY (the tier border on slopes) | medium |
+| F7 | smoke_5, 6; 31, 32, 36, 41; clearest in 54-57 | The border between two depth tiers (T1 / T2, 20 m under the Surface Line) is drawn as a blurred stair-step wherever the surface above it slopes: soft-edged blocks 1-3 m wide instead of a line that follows the slope. It reads as a dark cloud or smudge in the cutaway (Mars's canyon wall; the lower corners of Earth's slope shots; the whole upper right of the D1 shaft shots) | smoke_55: from (1100, 130) to (1900, 560) | UNITY (the tier shader samples a stepped surface height: per-column or per-cell; it wants the smoothed Surface Line) | high that it is there; the cause is my guess |
+| F19 | smoke_60 | The selected node's description runs past the detail panel's right border and off the screen ("...faster strokes, a longer reach") | (1740-1920, 415) | UNITY (wrap the text) | high |
+| F20 | smoke_63 | On the system map each planet's label has a plate line through or tight against its letters ("Earth", "Mercury", "Venus" read as struck through) | every label | UNITY (the plate's height against the font) | medium |
+| F18 | smoke_55 | On the jetpack the shovel is held straight up above the helmet like a flag (the prop follows the raised hand of the jetpack frames); on the ladder and the winch no tool shows | (995, 440) | UNITY (hide the dig tool while flying, as on the ladder) | low |
 | F8 | smoke_7 | Saturn's disc is the far disc scaled up: a stair-stepped ink edge, no bands; `planets/saturn` has no `disc_near` (Earth, Mars and Venus do) | the lower third | BLENDER (near discs for the giants: a card) | medium |
 | F9 | smoke_8 | Two neighbouring item icons (slots 2 and 3, 999 and 210) read as the same pale blue-grey lump at inventory size | (637, 420), (729, 420) | BLENDER (tell me which items; one gets a clearer tone or mark) | low |
 | F10 | smoke_10 | The market's goods list runs past the panel's bottom border: "Ring ice" straddles it, "Methane ice" is outside | y 1030-1080 | UNITY | high |
@@ -130,3 +151,21 @@ Owner = who would fix it. HUD layout items are listed for LEAD to route to UNITY
 | F17 | smoke_43 (respun) | The Hadal Maw, the deep-sea apex, floats at the beach in 2 m of water and its jaw is drawn across the sand slope (in front of the terrain where they overlap) | (1230-1500, 740-880) | UNITY (the smoke's staging, or its spawn depth and a keep-off-the-seabed rule) | medium |
 | F15 | smoke_41 | Where two biome fills meet (sand / soil at the coast) the crossfade is a soft upright band about 100 px wide; the strata of the two fills do not line up, so it reads as a blurred vertical stripe through the cutaway | x 900-1000 and x 1380-1450 | UNITY (the crossfade's width or shape); BLENDER if a transition tile is wanted | low |
 | F14 | smoke_21 Mars | A flat pale square floats in the backdrop behind the Pilgrim; it is in 0.6.0's shot too (I missed it there): an untextured sprite? | (1350-1395, 660-695) | UNITY to name the object; BLENDER if a key has no art | medium |
+
+## 5. Summary (15:5x, all 79 shots read)
+
+**Does the art of 0.6.1 hold?** Yes, with one fault in the owner's first minute, already routed.
+
+- The 0.6.1 changes are in and read right: the v3 title (smoke_1), thruster Mk2's icon (smoke_64), the shovel in hand and
+  the tool slot with the shovel's, the Beam's and the Grapple's icons (smoke_65, 67, 58), the shelter walls on the slope
+  (smoke_18, respun; a small wedge left, F16).
+- **F1, the first minute:** the shovel's stroke shows a pickaxe swing (the v4 dig frames' baked pick). U-203, Build 0.6.1b.
+- The DIG DOWN card still draws the Beam in this smoke; B-229 was exported at 15:44 and rides 0.6.1b.
+- 21 findings in all (F1, F1b, F2-F20). For BLENDER: F8 (near discs for the giants: a card if wanted), F9 and F11 (two icon
+  questions that need the item keys from UNITY), F14 (a pale square on Mars: needs its key). The rest are HUD layout, text
+  and staging for UNITY (F2-F6, F10, F12, F13, F16-F20) and the tier border's blurred steps (F7), the most visible art-side
+  blemish in the dig shots after F1.
+
+**The 0.6.0 findings (B-201), as observed in this smoke:** fixed: #5 (no hint during the climb), #6, #7, #9, #10, #12, #16
+(F16 is its residue); #3 not seen (no land animal in the sea); #2 not shown (no shot from under the surface); still open as
+expected: #1, #4, #8, #11, #13, #14, #15, #17.
