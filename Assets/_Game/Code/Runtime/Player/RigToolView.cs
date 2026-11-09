@@ -35,8 +35,47 @@ namespace Meridian.Player
         public bool GhostBlocked { get; private set; }
 
         readonly Sprite[] tools = new Sprite[RigModules.Count + 1];
-        readonly List<AsyncOperationHandle<IList<Sprite>>> handles = new List<AsyncOperationHandle<IList<Sprite>>>();
+        readonly AsyncOperationHandle<IList<Sprite>>[] toolHandles = new AsyncOperationHandle<IList<Sprite>>[RigModules.Count + 1];
         FxSheet beamSheet, ghostSheet;
+        // U-183: each tool's look by its chain level (RigLooks), re-read when the Skill Tree changes; the Beam's cable to the pack.
+        readonly int[] mk = new int[RigModules.Count + 1];
+        int lookVersion = -1;
+        public int MkOf(RigModule m) => mk[(int)m];
+        public LineRenderer Cable { get; private set; }
+        /// <summary>U-183: the grip sits on the drawn frame's hand socket (false: the fixed Hand).</summary>
+        public bool HandOnSocket { get; private set; }
+        /// <summary>The drawn frame the grip was placed for, and the grip in the surveyor's squash-root space (mirrored with the drawing).</summary>
+        public int HandFrame { get; private set; } = -1;
+        public Vector2 HandLocal { get; private set; }
+
+        /// <summary>The drawn surveyor's front glove for its current frame (props/rig/hand_socket: hand_socket on the side sheet,
+        /// hand_socket_b on side_b), mirrored with the drawing; `held` where the sheet draws a tool in that hand.</summary>
+        Vector2? DrawnHand(out bool onSocket, out bool held)
+        {
+            onSocket = held = false;
+            if (body == null) body = GetComponentInParent<Transform>().GetComponentInChildren<Meridian.View2D.SpriteCharacterView>();
+            if (body == null || body.Renderer == null || !body.Renderer.enabled) return null;
+            bool b = body.key == ArtKeys.Characters.SurveyorSideB;
+            var table = ArtMaterials.SocketFor("props/rig/hand_socket", b ? "hand_socket_b" : "hand_socket");
+            int i = JetpackOverlay.FrameOf(body.Renderer.sprite);
+            if (b)
+            {
+                var heldTable = ArtMaterials.SocketFor("props/rig/hand_socket", "held_b");
+                held = heldTable != null && heldTable.Has(i);
+            }
+            if (table == null || !table.Has(i)) return null;
+            bool flip = body.Renderer.flipX;
+            onSocket = true;
+            HandFrame = i;
+            HandLocal = new Vector2(flip ? -table[i, 0] : table[i, 0], table[i, 1]);
+            return body.SquashRoot.TransformPoint(HandLocal);
+        }
+        public Vector2 CableFrom { get; private set; }
+        public Vector2 CableTo { get; private set; }
+        const int CablePoints = 7;
+        const float CableSag = 0.14f, CableWidth = 0.035f;
+        static readonly Color CableInk = new Color(0.13f, 0.10f, 0.08f, 1f);
+        Meridian.View2D.SpriteCharacterView body;
         float beamAge, ghostAge;
         readonly RaycastHit2D[] hits = new RaycastHit2D[8];
         static readonly ContactFilter2D AnyCollider = ContactFilter2D.noFilter;
@@ -49,6 +88,18 @@ namespace Meridian.Player
             Beam.tileMode = SpriteTileMode.Continuous;
             Ghost = Child("BuilderGhost", 6);
             Beam.enabled = Ghost.enabled = false;
+            var cg = new GameObject("BeamCable");
+            cg.transform.SetParent(transform, false);
+            Cable = cg.AddComponent<LineRenderer>();
+            Cable.positionCount = CablePoints;
+            Cable.useWorldSpace = true;
+            Cable.startWidth = Cable.endWidth = CableWidth;
+            Cable.startColor = Cable.endColor = CableInk;
+            Cable.numCapVertices = 2;
+            Cable.sortingOrder = 6;
+            var unlit = ArtMaterials.Active != null ? ArtMaterials.Active.unlit : null;
+            if (unlit != null) Cable.sharedMaterial = unlit;
+            Cable.enabled = false;
         }
 
         SpriteRenderer Child(string name, int order)
@@ -62,24 +113,40 @@ namespace Meridian.Player
 
         void Start()
         {
-            for (int m = 1; m <= RigModules.Count; m++) LoadTool((RigModule)m);
-            beamSheet = FxSheet.Get(ArtKeys.Fx.BeamRay);
+            ReadLooks();
             ghostSheet = FxSheet.Get(ArtKeys.Fx.BuilderGhost);
         }
 
         void OnDestroy()
         {
-            foreach (var h in handles) if (h.IsValid()) global::Meridian.Art.ArtLoad.Release(h);
+            foreach (var h in toolHandles) if (h.IsValid()) global::Meridian.Art.ArtLoad.Release(h);
         }
 
-        void LoadTool(RigModule m)
+        /// <summary>U-183: each module's Mk from the bought nodes; a changed look loads its sprite (the old one released) and the Beam's ray.</summary>
+        void ReadLooks()
         {
-            string key = RigModules.LoadKey(m);
+            lookVersion = Meridian.Progress.SkillStats.Version;
+            var bought = RigLooks.Bought;
+            for (int m = 1; m <= RigModules.Count; m++)
+            {
+                int want = RigLooks.MkOf((RigModule)m, bought);
+                if (want == mk[m] && toolHandles[m].IsValid()) continue;
+                mk[m] = want;
+                LoadTool((RigModule)m, want);
+            }
+            beamSheet = FxSheet.Get(RigLooks.RayKey(mk[(int)RigModule.Beam]));
+        }
+
+        void LoadTool(RigModule m, int level)
+        {
+            string key = RigLooks.ToolKey(m, level);
+            if (toolHandles[(int)m].IsValid()) global::Meridian.Art.ArtLoad.Release(toolHandles[(int)m]);
             var h = ArtLoad.Asset<IList<Sprite>>(key);
-            handles.Add(h);
+            toolHandles[(int)m] = h;
             h.Completed += op =>
             {
-                if (op.Status != AsyncOperationStatus.Succeeded || op.Result == null || op.Result.Count == 0) return;
+                if (this == null || op.Status != AsyncOperationStatus.Succeeded || op.Result == null || op.Result.Count == 0) return;
+                if (mk[(int)m] != level) return; // a later look superseded it
                 tools[(int)m] = op.Result[0];
                 if (Tool != null && input != null && input.module == m) Show(m);
             };
@@ -91,7 +158,7 @@ namespace Meridian.Player
         {
             shown = m;
             Tool.sprite = tools[(int)m];
-            var mat = ArtMaterials.MaterialFor(RigModules.LoadKey(m));
+            var mat = ArtMaterials.MaterialFor(RigLooks.ToolKey(m, mk[(int)m]));
             if (mat != null) Tool.sharedMaterial = mat;
         }
 
@@ -99,23 +166,52 @@ namespace Meridian.Player
         void LateUpdate()
         {
             if (input == null) return;
-            if (shown != input.module || Tool.sprite == null) Show(input.module);
+            if (lookVersion != Meridian.Progress.SkillStats.Version) { ReadLooks(); Show(input.module); }
+            if (shown != input.module || Tool.sprite != tools[(int)input.module]) Show(input.module);
 
             bool left = input.AimWorld.x < transform.position.x;
             var feet = (Vector2)transform.position;
-            HandWorld = feet + new Vector2(left ? -Hand.x : Hand.x, Hand.y);
+            // U-183 (B-218's hand_socket): the grip on the drawn frame's front glove where BLENDER's pose maths has one, else the fixed hand;
+            // hidden where the sheet draws its own tool in that hand (held_b: the dig / build / climb clips).
+            bool held;
+            HandWorld = DrawnHand(out bool onSocket, out held) is Vector2 h && onSocket ? h : feet + new Vector2(left ? -Hand.x : Hand.x, Hand.y);
+            HandOnSocket = onSocket;
+            if (Tool.enabled == held) Tool.enabled = !held;
             Vector2 dir = input.AimWorld - HandWorld;
             if (dir.sqrMagnitude < 1e-4f) dir = left ? Vector2.left : Vector2.right;
             AimDegrees = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
             Tool.transform.position = HandWorld;
             Tool.transform.rotation = Quaternion.Euler(0f, 0f, AimDegrees);
             Tool.flipY = left; // keep the tool upright when pointing left
-            var muzzle = RigModules.Muzzle(input.module);
+            var muzzle = RigModules.Muzzle(input.module, mk[(int)input.module]);
             if (left) muzzle.y = -muzzle.y;
             MuzzleWorld = HandWorld + (Vector2)(Tool.transform.rotation * muzzle);
 
             UpdateBeam(dir.normalized);
             UpdateGhost();
+            UpdateCable(left);
+        }
+
+        /// <summary>U-183: the Beam's cable (B-205: arm-mounted, cable-fed): from the tool's cable_socket to the pack on the surveyor's back
+        /// (the jetpack's back socket for the drawn frame; the pack's usual place when there is none), sagging a little.</summary>
+        void UpdateCable(bool left)
+        {
+            bool on = input.module == RigModule.Beam && Tool.sprite != null && Tool.enabled;
+            var key = RigLooks.ToolKey(RigModule.Beam, mk[(int)RigModule.Beam]);
+            var socket = ArtMaterials.SocketFor(key, "cable_socket");
+            on &= socket != null && socket.Has(0);
+            if (Cable.enabled != on) Cable.enabled = on;
+            if (!on) return;
+            var local = new Vector2(socket[0, 0], left ? -socket[0, 1] : socket[0, 1]);
+            CableFrom = HandWorld + (Vector2)(Tool.transform.rotation * local);
+            CableTo = JetpackOverlay.PackWorld(body, transform, left);
+            var mid = (CableFrom + CableTo) * 0.5f + Vector2.down * CableSag;
+            for (int i = 0; i < CablePoints; i++)
+            {
+                float t = i / (CablePoints - 1f), u = 1f - t;
+                var p = u * u * CableFrom + 2f * u * t * mid + t * t * CableTo;
+                Cable.SetPosition(i, new Vector3(p.x, p.y, 0.01f));
+            }
         }
 
         void UpdateBeam(Vector2 dir)

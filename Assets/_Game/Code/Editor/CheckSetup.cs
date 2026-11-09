@@ -21,6 +21,7 @@ namespace Meridian.EditorTools
             int discs = ArtImporter.ReimportSpaceDiscs(); // U-117: the discs' full-rect mesh reaches the metas
             DiscSetup.Run(); // U-117: the disc material (MERIDIAN/Sprite_LitDisc) in the registry
             GroundTiersSetup.Run(); // U-182: the tier fill material (MERIDIAN/GroundTiers) in the registry
+            ArtSockets.Register(); // U-183: the tools' muzzles / cable sockets and the jetpack's back sockets from their jsons
             int sceneLayers = ArtImporter.ReimportSceneLayers(); // U-109: the side-scene layers clamp in y (the climb frames' thin line)
             if (sceneLayers > 0) Debug.Log($"[CheckSetup] re-imported {sceneLayers} scene layer(s): wrap-in-y per U-109.");
             var theme = AssetDatabase.LoadAssetAtPath<Meridian.UI.UiTheme>(SceneAuthoring.UiThemePath);

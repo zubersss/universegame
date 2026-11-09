@@ -470,6 +470,7 @@ namespace Meridian.View2D
                 Surveyor = go.AddComponent<SpriteCharacterView>();
                 Surveyor.player = side.player;
                 Surveyor.key = SurveyorKey;
+                go.AddComponent<Meridian.Player.JetpackOverlay>().view = Surveyor; // U-183: the jetpack upgrades on the back
             }
         }
 

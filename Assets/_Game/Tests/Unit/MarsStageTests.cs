@@ -74,6 +74,8 @@ namespace Meridian.Tests
             foreach (var k in keys)
             {
                 string json = "Assets/_Game/Art/" + k + ".json";
+                // U-186 (LEAD 22:1x): smooth Mars draws SmoothGround's bands; its basalt / frost strips were retired (9f035696), the regolith strip stays.
+                if (k != keys[GroundStrip.Regolith] && !File.Exists(json)) { TestContext.Out.WriteLine("[MERIDIAN] " + k + ": retired (U-186); the regolith strip stands in"); continue; }
                 if (k.EndsWith("_frost") && !File.Exists(json)) { TestContext.Out.WriteLine("[MERIDIAN] " + k + ": not exported yet (D-143: BLENDER's B-140 kind); the regolith strip stands in"); continue; }
                 Assert.IsTrue(File.Exists(json), json);
                 var s = JsonUtility.FromJson<GroundStripTests.Sheet>(File.ReadAllText(json));

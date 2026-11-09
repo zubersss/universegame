@@ -55,6 +55,62 @@ namespace Meridian.Rendering
         /// <summary>Animation clips of frame sheets (U-032), copied from each sheet's .json by ArtImporter.</summary>
         public List<ArtClipSet> clipSets = new List<ArtClipSet>();
 
+        /// <summary>U-183: a json's named point(s), copied by ArtImporter.RegisterSockets: a tool's muzzle / cable_socket ([x, y] m from its
+        /// pivot, stride 2), the jetpack's back_socket per surveyor frame ([x, z, swing rad, sx, sz], stride 5, NaN where the json says null).</summary>
+        [System.Serializable]
+        public sealed class ArtSocket
+        {
+            public string key, name;
+            public int stride;
+            public float[] values;
+            public int Count => stride > 0 && values != null ? values.Length / stride : 0;
+            public bool Has(int i) => i >= 0 && i < Count && !float.IsNaN(values[i * stride]);
+            public float this[int i, int c] => values[i * stride + c];
+        }
+        public List<ArtSocket> sockets = new List<ArtSocket>();
+        static Dictionary<string, ArtSocket> socketLookup;
+        static int socketLookupCount = -1;
+
+        /// <summary>A key's named socket, or null (no json field, or no registry).</summary>
+        public static ArtSocket SocketFor(string key, string name)
+        {
+            var a = Active;
+            if (a == null || a.sockets == null || key == null) return null;
+            if (socketLookup == null || socketLookupCount != a.sockets.Count)
+            {
+                socketLookup = new Dictionary<string, ArtSocket>(a.sockets.Count);
+                foreach (var s in a.sockets) if (s != null) socketLookup[s.key + "#" + s.name] = s;
+                socketLookupCount = a.sockets.Count;
+            }
+            return socketLookup.TryGetValue(key + "#" + name, out var found) ? found : null;
+        }
+
+        /// <summary>A tool's [x, y] socket, or `fallback` where the json has none.</summary>
+        public static Vector2 PointFor(string key, string name, Vector2 fallback)
+        {
+            var s = SocketFor(key, name);
+            return s != null && s.stride >= 2 && s.Has(0) ? new Vector2(s[0, 0], s[0, 1]) : fallback;
+        }
+
+        /// <summary>Editor: ArtImporter records a json's socket. Returns true when it changed.</summary>
+        public bool SetSocket(string key, string name, int stride, float[] values)
+        {
+            sockets ??= new List<ArtSocket>();
+            int i = sockets.FindIndex(s => s.key == key && s.name == name);
+            if (values == null || values.Length == 0)
+            {
+                if (i < 0) return false;
+                sockets.RemoveAt(i);
+                return true;
+            }
+            var set = new ArtSocket { key = key, name = name, stride = stride, values = values };
+            if (i >= 0 && JsonUtility.ToJson(sockets[i]) == JsonUtility.ToJson(set)) return false;
+            if (i >= 0) sockets[i] = set; else sockets.Add(set);
+            sockets.Sort((x, y) => string.CompareOrdinal(x.key + "#" + x.name, y.key + "#" + y.name));
+            socketLookupCount = -1;
+            return true;
+        }
+
         static ArtMaterials active;
         static HashSet<string> lookup;
 

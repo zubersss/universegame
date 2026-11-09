@@ -22,8 +22,12 @@ namespace Meridian.Progress
         public static float ExpeditionFactor => expedition;
 
         /// <summary>Rebuilds the stats from the state's bought nodes and expedition.</summary>
+        /// <summary>U-183: bumped on every recompute, so views re-read the chain levels only when the tree changed.</summary>
+        public static int Version { get; private set; }
+
         public static void Recompute(GameState s)
         {
+            Version++;
             adds.Clear(); muls.Clear(); sets.Clear(); mins.Clear(); flags.Clear();
             var tree = SkillTree.Current;
             expedition = s != null ? 1f + tree.expeditionStep * Mathf.Max(0, s.expedition - 1) : 1f;

@@ -2639,6 +2639,78 @@ namespace Meridian.Tests
             UnityEngine.Object.Destroy(uiGo);
         }
 
+        /// <summary>U-183 (B-205 / B-218): the tool looks on the surveyor at 1x → coordination/reports/unity/u183/: the Beam Mk1..Mk5 (aimed,
+        /// its Mk ray and its cable to the pack), the Grapple Mk1..Mk3, the jetpack Mk1 (as drawn), Mk2, Mk3; the grip on the drawn hand.</summary>
+        [UnityTest, Timeout(480000)]
+        public IEnumerator CaptureU183Looks()
+        {
+            var name = Environment.GetEnvironmentVariable(Variable);
+            if (string.IsNullOrEmpty(name)) Assert.Ignore($"Set {Variable} (tools/unity_capture.ps1).");
+            if (SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.Null)
+                Assert.Fail("No graphics device: run without -nographics.");
+            bool wasCartoon = Meridian.View2D.CartoonStage.Enabled;
+            Meridian.View2D.CartoonStage.Enabled = true;
+            try
+            {
+#if UNITY_EDITOR
+                yield return UnityEditor.SceneManagement.EditorSceneManager.LoadSceneAsyncInPlayMode(
+                    CorePath, new LoadSceneParameters(LoadSceneMode.Single));
+#endif
+                var director = UnityEngine.Object.FindAnyObjectByType<SceneDirector>();
+                float timeout = Time.realtimeSinceStartup + 30f;
+                while ((!director.IsReady || !director.PlanetSide.terrain.IsSettled) && Time.realtimeSinceStartup < timeout) yield return null;
+                var side = director.PlanetSide;
+                if (side.hazards != null) side.hazards.enabled = false;
+                if (side.dayNight != null) side.dayNight.Override = 0.45f;
+                side.creatures.autoSpawn = false;
+                side.creatures.DespawnAll();
+                var dir = "coordination/reports/unity/u183";
+                Directory.CreateDirectory(dir);
+                var state = GameState.Instance;
+                var rig = side.player.GetComponent<Meridian.Player.PlayerRigInput>();
+                var tool = rig.ToolView;
+                var view = side.player.GetComponentInChildren<Meridian.View2D.SpriteCharacterView>();
+                var pack = view != null ? view.GetComponent<Meridian.Player.JetpackOverlay>() : null;
+                // a clear stretch beside the camp
+                var body = side.player.Body;
+                float x = body.position.x + 14f;
+                body.position = new Vector2(x, side.terrain.SurfaceAt(x) + 1f); side.player.transform.position = body.position;
+                for (int k = 0; k < 90; k++) yield return new WaitForFixedUpdate();
+                var follow = side.sideCamera.GetComponent<Meridian.Player.CameraFollow>();
+                if (follow != null) follow.SnapToTarget();
+
+                IEnumerator Look(string label, Meridian.Rig.RigModule module, bool use, params string[] nodes)
+                {
+                    state.skillNodes.Clear();
+                    foreach (var n in nodes) state.skillNodes.Add(n);
+                    Meridian.Progress.SkillStats.Apply(state);
+                    rig.module = module;
+                    float until = Time.realtimeSinceStartup + 5f;
+                    for (float t = 0f; t < 1.2f || Time.realtimeSinceStartup < until && (tool.Tool.sprite == null); t += Time.unscaledDeltaTime)
+                    {
+                        rig.AimAt(side.player.Body.position + new Vector2(3.2f, 1.6f));
+                        if (use) rig.holdUse = true;
+                        yield return null;
+                    }
+                    yield return Save(side.sideCamera, $"{name}_{label}");
+                    if (use) rig.holdUse = false;
+                    File.Copy($"logs/capture_{name}_{label}.png", $"{dir}/{label}.png", true);
+                    TestContext.Out.WriteLine($"[MERIDIAN] u183 {label}: tool {(tool.Tool.sprite != null ? tool.Tool.sprite.name : "-")}, Mk {tool.MkOf(module)}, grip on the hand socket {tool.HandOnSocket}, cable {tool.Cable.enabled}, pack Mk {(pack != null ? pack.Mk : 0)} shown {(pack != null && pack.Overlay.enabled)}");
+                }
+
+                string[][] beam = { new string[0], new[] { "dig_power_1" }, new[] { "dig_power_1", "dig_power_2" }, new[] { "dig_power_1", "dig_power_2", "dig_power_3" }, new[] { "dig_power_1", "dig_power_2", "dig_power_3", "dig_power_4", "dig_power_5" } };
+                for (int i = 0; i < beam.Length; i++) yield return Look($"beam_mk{i + 1}", Meridian.Rig.RigModule.Beam, true, beam[i]);
+                string[][] grapple = { new[] { "asc_grapple_1" }, new[] { "asc_grapple_1", "asc_grapple_2" }, new[] { "asc_grapple_1", "asc_grapple_2", "asc_grapple_3" } };
+                for (int i = 0; i < grapple.Length; i++) yield return Look($"grapple_mk{i + 1}", Meridian.Rig.RigModule.Grapple, false, grapple[i]);
+                string[][] jet = { new string[0], new[] { "asc_jet_1", "asc_jet_2" }, new[] { "asc_jet_1", "asc_jet_2", "asc_jet_3" } };
+                for (int i = 0; i < jet.Length; i++) yield return Look($"jetpack_mk{i + 1}", Meridian.Rig.RigModule.Survey, false, jet[i]);
+                state.skillNodes.Clear();
+                Meridian.Progress.SkillStats.Apply(state);
+                LogAssert.NoUnexpectedReceived();
+            }
+            finally { Meridian.View2D.CartoonStage.Enabled = wasCartoon; }
+        }
+
         /// <summary>U-186 (B-215's audit): the ground art never requested before, at 1x → coordination/reports/unity/u186/: 1 a natural brink
         /// on Earth's coast with its lip and the surface decor, 2 a stroke in Earth's desert throwing the sand puff, 3 a natural Mars brink. Mercury and Venus are block
         /// planets until U-177 (their lips and decor come with their smooth ground).</summary>

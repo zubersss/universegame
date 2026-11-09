@@ -25,7 +25,10 @@ namespace Meridian.Rig
         /// <summary>The key the tool view loads: each module's own (U-183: B-205's props/rig/grapple replaced the v2 Lance stand-in).</summary>
         public static string LoadKey(RigModule m) => ArtKey(m);
 
-        /// <summary>Muzzle offset from the grip in the tool's own space (m, tool pointing +x).</summary>
+        /// <summary>U-183: the muzzle of the module's look at a Mk, from its json (ArtSockets; B-205 / B-217), else the constants below.</summary>
+        public static Vector2 Muzzle(RigModule m, int mk) => Meridian.Rendering.ArtMaterials.PointFor(RigLooks.ToolKey(m, mk), "muzzle", Muzzle(m));
+
+        /// <summary>Muzzle offset from the grip in the tool's own space (m, tool pointing +x): the fallback where a json has none.</summary>
         public static Vector2 Muzzle(RigModule m) => m switch
         {
             RigModule.Beam => new Vector2(0.47f, 0.03f),
