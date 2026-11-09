@@ -9,7 +9,13 @@ clamped bottom row is transparent, so no streaks).
 Source: blender/scripts/gen_painted_bg.py (continue_layer, CONTINUE_MIN_COVER 0.25); export logs one line per layer
 ("B-220 <key> layer<n>: continues | feathered | own band"). Sheets: blender/preview/review_b220_<planet>_continue.png.
 
-Status: Jupiter, Saturn, Uranus ACCEPTED (LEAD 13:2x / 13:4x); Neptune and Venus deck to render; all export together.
+Status: Jupiter, Saturn, Uranus ACCEPTED (LEAD 13:2x / 13:4x); Neptune ACCEPTED (LEAD 15:4x, review_b220_neptune_continue.png
+15:42); the Venus deck to render; all export together. NOT EXPORTED YET: no scene json carries these `continue_rows` until
+the export lands (this file is updated then).
+
+Neptune's storm and spot, one more change riding the export (LEAD 15:5x, B-161 reopened): layer0 (the vortex core) keeps a
+fixed wrap like layer1 (the rim, the pulse layer), so the core sits under the rim at the scene's anchor (the tile's x 1024).
+Today's exported layer0 has the core rolled about half a tile away. LEAD judges a preview first.
 
 | Planet | Scenes | layer0 | layer1 | layer2 |
 |--------|--------|--------|--------|--------|
@@ -18,11 +24,13 @@ Status: Jupiter, Saturn, Uranus ACCEPTED (LEAD 13:2x / 13:4x); Neptune and Venus
 | Saturn | deck1, deck2, deck3, deep | continues | continues | fades |
 | Saturn | hexagon | continues | fades (translucent ice pillars, 4 % solid; LEAD: fade, not repeat) | fades |
 | Uranus | deck1-3 and deep, each in sun_left / sun_right / night / survey (16 scenes) | continues | continues | fades |
-| Neptune | deck1, deck2, deck3, deep, storm, spot | (pending sheet) | (expected: decks continue; storm / spot ring fades) | (expected: fades) |
+| Neptune | deck1, deck2, deck3, deep | continues | continues | fades |
+| Neptune | storm, spot | continues | fades (the violet rim alone, band cover 0.00) | fades |
 | Venus | deck | (pending sheet) | | |
 
 Watch item for U-191's in-game check (LEAD 13:2x): Jupiter deck3 layer0's faint horizontal lines, in case they repeat every
 64 rows at 1x.
 
 Measured on the sheets: the repeat seam (the band's last row into its first, vs its mean row step) 1.17-1.30 on every
-continuing layer (< ~1.5 reads clean); the step from the row above into the band 1.0-3.2 / 255.
+continuing layer (< ~1.5 reads clean); the step from the row above into the band 1.0-3.2 / 255. Neptune (15:42): seam
+1.17-1.27, step 1.1-2.5 / 255 on its ten continuing layers.
