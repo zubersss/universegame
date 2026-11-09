@@ -65,8 +65,8 @@ def arrow(d, M, a, b, w, role, head=2.2):
 
 
 # ---------------------------------------------------------------- the motifs (each takes a level; the chain's steps share one)
-BEAM_TOP_HANDLE = True        # LEAD to rule (18:0x flag): the Beam held by a top carry handle, not a pistol grip (D-087); the
-                              # exported dig_power_1 / _2 still have the grip until re-exported
+BEAM_CABLE = True             # LEAD to rule (18:1x flag): the Beam on a cable to the rig, no pistol grip (D-087); the exported
+                              # dig_power_1 / _2 (and ui/skilltree/emblem_dig) still have the grip until re-exported
 BEAM_TONE = {1: ("teal", "off"), 2: ("teal", "mustard"), 3: ("green", "off"), 4: ("mustard_sh", "off"), 5: ("mustard", "off")}   # B-205's
                                                                                                # Mk1-5: the beam warms from teal to gold
 
@@ -82,11 +82,11 @@ def m_beam(d, M, lv=1):
     for a in (2.2, 2.75, 3.5, 4.05):                                                                                   # sparks
         G.stroke(d, G.hose_outline([(0.18 + 0.06 * math.cos(a), 0.04 + 0.06 * math.sin(a)), (0.18 + 0.14 * math.cos(a), 0.04 + 0.14 * math.sin(a))], 0.024),
                  M["mustard"], 0.0, cyclic=True)
-    if not BEAM_TOP_HANDLE:
+    if not BEAM_CABLE:
         G.stroke(d, G.hose_outline(R([(-0.22, -0.08), (-0.27, -0.27)]), 0.09), M["brown_i"], I, cyclic=True)       # the grip
-    else:                                                                                                               # (rev 18:0x: a pistol
-        G.stroke(d, G.hose_outline(R(arc(-0.19, 0.1, 0.11, math.pi, 0.0, 10)), 0.06), M["brown_i"], I, cyclic=True)  # grip read as a ray
-                                                                                                                         # gun: a carry handle)
+    else:                                                                    # rev 18:1x: no grip (a pistol grip read as a ray gun, a top
+        G.stroke(d, G.hose_outline([(-0.42, -0.02), (-0.46, -0.16), (-0.38, -0.3), (-0.2, -0.36), (0.0, -0.4)], 0.05),   # handle as a
+                 M["brown_sh_i"], I, cyclic=True)                            # padlock): a cable from its back to the rig, off below
     G.stroke(d, R([(-0.34, -0.1), (-0.05, -0.1), (-0.05, 0.1), (-0.34, 0.1)]), M["teal_sh_i"], O, cyclic=True)     # the body
     G.stroke(d, R([(-0.34, 0.02), (-0.05, 0.02), (-0.05, 0.1), (-0.34, 0.1)]), M["teal"], 0.0, cyclic=True)
     G.stroke(d, R([(-0.34, -0.1), (-0.05, -0.1), (-0.05, 0.1), (-0.34, 0.1)]), M["ink"], O, cyclic=True)
@@ -165,7 +165,7 @@ def m_grapple(d, M, lv=1):
 def m_ladder(d, M, lv=1):
     """A Builder ladder: brown rails and rungs, its feet in a heap of the dirt it is made from."""
     R = rot(0.0, 0.0, -0.18)
-    top, n, step = (0.4, 5, 0.13) if lv == 1 else (0.44, 6, 0.11)                                                     # step 2: sections
+    top, n, step = (0.4, 5, 0.13) if lv == 1 else (0.4, 6, 0.1)                                                       # step 2: sections
     for u in (-0.15, 0.15):                                                                                             # clamped, taller
         G.stroke(d, G.hose_outline(R([(u, -0.3), (u, top)]), 0.06), M["brown_i"], O, cyclic=True)
     for k in range(n):
@@ -351,14 +351,27 @@ def m_heat(d, M, lv=1):
                  (0.11, -0.06), (0.0, -0.18)], M["red_i"], I, cyclic=True)                                            # the flame,
     G.stroke(d, [(0.06, -0.4), (0.32, -0.4), (0.37, -0.18), (0.36, 0.02), (0.28, -0.1), (0.24, 0.06), (0.17, -0.12), (0.08, -0.2)],
              M["mustard"], 0.0, cyclic=True)                                                                            # leaning away
+    def blanket(dx, dz, fill, shade):                                                   # rev 18:1x: a soft silver blanket, diamond
+        x0, x1, z0, z1, r = -0.42 + dx, -0.04 + dx, -0.38 + dz, 0.36 + dz, 0.07         # quilting (a gridded panel by a flame read
+        pts = (arc(x1 - r, z1 - r, r, 0.0, math.pi / 2, 4) + arc(x0 + r, z1 - r, r, math.pi / 2, math.pi, 4)    # as a burning door)
+               + arc(x0 + r, z0 + r, r, math.pi, 1.5 * math.pi, 4) + arc(x1 - r, z0 + r, r, 1.5 * math.pi, 2 * math.pi, 4))
+        G.stroke(d, pts, M[fill + "_i"], O, cyclic=True)
+        G.stroke(d, [(x1 - 0.1, z0 + 0.02), (x1 - 0.01, z0 + 0.06), (x1 - 0.01, z1 - 0.06), (x1 - 0.1, z1 - 0.02)], M[shade], 0.0, cyclic=True)
+        G.stroke(d, pts, M["ink"], O, cyclic=True)
+        return x0, x1, z0, z1
     if lv >= 2:                                                                                                         # a second layer
-        G.stroke(d, [(-0.36, -0.34), (0.02, -0.34), (0.02, 0.42), (-0.36, 0.42)], M["mustard_dp_i"], O, cyclic=True)
-    G.stroke(d, [(-0.06, -0.38), (0.0, -0.34), (0.0, 0.4), (-0.06, 0.36)], M["mustard_dp_i"], I, cyclic=True)        # its thickness
-    G.stroke(d, [(-0.42, -0.38), (-0.06, -0.38), (-0.06, 0.36), (-0.42, 0.36)], M["mustard_sh_i"], O, cyclic=True)    # the panel
-    G.stroke(d, [(-0.42, -0.02), (-0.06, -0.02), (-0.06, 0.07), (-0.42, 0.07)], M["red_i"], I, cyclic=True)           # its band
-    G.stroke(d, [(-0.16, -0.02), (-0.06, -0.02), (-0.06, 0.07), (-0.16, 0.07)], M["red_sh"], 0.0, cyclic=True)
-    for seg in ([(-0.24, -0.38), (-0.24, -0.02)], [(-0.24, 0.07), (-0.24, 0.36)], [(-0.42, -0.2), (-0.06, -0.2)], [(-0.42, 0.22), (-0.06, 0.22)]):
-        G.seam(d, seg, M["ink"])                                                                                         # the quilting
+        blanket(0.06, 0.06, "sky_sh", "sky_dp")
+    x0, x1, z0, z1 = blanket(0.0, 0.0, "off", "off_sh")
+    xa, xb, za, zb = x0 + 0.03, x1 - 0.03, z0 + 0.05, z1 - 0.05                         # the diamond quilting: soft grey stitch
+    xm = (xa + xb) / 2                                                                   # lines both ways, clipped to the blanket
+    for s in (1, -1):
+        for k in range(-6, 7):
+            c = 0.14 * k
+            xs = sorted([xm + (za - c) * s, xm + (zb - c) * s])
+            lo, hi = max(xa, xs[0]), min(xb, xs[1])
+            if hi - lo > 0.04:
+                G.stroke(d, G.hose_outline([(lo, c + s * (lo - xm)), (hi, c + s * (hi - xm))], 0.014), M["sky_sh"], 0.0, cyclic=True)
+    G.stroke(d, [(x0, -0.03), (x1, -0.03), (x1, 0.05), (x0, 0.05)], M["red_i"], I, cyclic=True)                        # the red band
 
 
 def m_thrust(d, M, lv=2):
@@ -408,10 +421,10 @@ def m_magnet(d, M, lv=1):
     G.stroke(d, G.hose_outline(arc(-0.12, 0.0, 0.2, math.radians(90), math.radians(270), 16), 0.14), M["red_i"], O, cyclic=True)
     for z in (0.2, -0.2):
         G.stroke(d, [(-0.12, z - 0.07), (0.04, z - 0.07), (0.04, z + 0.07), (-0.12, z + 0.07)], M["off_i"], O, cyclic=True)   # the poles
-    for (x, z, s) in ((0.24, 0.12, 81), (0.3, -0.14, 82)):
+    for (x, z, s) in ((0.2, 0.12, 81), (0.25, -0.14, 82)):                              # (pulled in: the lines ran past the edge)
         IT.faceted(d, M, IT.lump(x, z, 0.07, 0.06, s, n=7), "brown_sh", "brown", "brown_dp", x, z)
         for dz in (-0.03, 0.03):
-            G.stroke(d, G.hose_outline([(x + 0.1, z + dz), (x + 0.2, z + dz)], 0.02), M["sky_sh"], 0.0, cyclic=True)
+            G.stroke(d, G.hose_outline([(x + 0.1, z + dz), (x + 0.18, z + dz)], 0.02), M["sky_sh"], 0.0, cyclic=True)
 
 
 def m_sorter(d, M, lv=1):
@@ -430,6 +443,9 @@ def m_rare(d, M, lv=1):
              M["brown_i"], O, cyclic=True)
     G.stroke(d, [(-0.42, -0.4), (0.42, -0.4), (0.42, -0.2), (-0.42, -0.2)], M["brown_sh"], 0.0, cyclic=True)
     G.seam(d, [(-0.42, -0.2), (0.42, -0.2)], M["ink"])
+    G.stroke(d, [(-0.42, 0.04)] + [(x, 0.06 + 0.012 * math.sin(25 * x)) for x in (-0.3, -0.1, 0.1, 0.3)] + [(0.42, 0.04), (0.42, 0.11)]
+             + [(x + 0.05 * (k % 2), 0.11 + 0.04 * (k % 2)) for k, x in enumerate((0.36, 0.28, 0.2, 0.12, 0.04, -0.04, -0.12, -0.2, -0.28, -0.36))]
+             + [(-0.42, 0.11)], M["green_i"], I, cyclic=True)                                  # rev 18:1x: grass on top (it read as a chest)
     IT.faceted(d, M, [(0.0, -0.06), (0.1, -0.16), (0.0, -0.3), (-0.1, -0.16)], "mustard", "off", "mustard_sh", 0.0, -0.17)
     for a in (55, 75, 90, 105, 125):                                                                                    # glint rays
         t = math.radians(a)
@@ -438,14 +454,21 @@ def m_rare(d, M, lv=1):
 
 
 def m_skip(d, M, lv=1):
-    """The Skip Drive: a brass drive ring seen at a slant, teal fire inside it, speed lines and a chevron leaving it."""
-    for k, z in enumerate((0.16, 0.0, -0.16)):                                                                          # speed lines
-        G.stroke(d, G.hose_outline([(-0.44, z), (-0.2 - 0.04 * k, z)], 0.03), M["sky_sh"], 0.0, cyclic=True)
-    G.stroke(d, circ(-0.02, 0.0, 0.17, 36, rz=0.34), M["mustard_i"], O, cyclic=True)                                 # the ring
-    G.stroke(d, circ(-0.02, 0.0, 0.1, 30, rz=0.25), M["teal"], 0.0, cyclic=True)
-    G.stroke(d, circ(-0.02, 0.0, 0.1, 30, rz=0.25), M["ink"], I, cyclic=True)
-    G.stroke(d, G.hose_outline(arc(-0.02, 0.0, 0.135, math.radians(100), math.radians(160), 6), 0.025), M["off"], 0.0, cyclic=True)
-    G.stroke(d, [(0.16, 0.12), (0.3, 0.12), (0.44, 0.0), (0.3, -0.12), (0.16, -0.12), (0.3, 0.0)], M["off_i"], I, cyclic=True)   # the chevron
+    """The Skip Drive: a dashed hop from a small teal world to a ringed one, its arrowhead landing (rev 18:1x: a teal oval in a
+    brass ring read as an eye); one more dash-hop a step."""
+    G.stroke(d, circ(-0.28, -0.24, 0.11, 28), M["teal_i"], O, cyclic=True)                                           # from
+    G.stroke(d, arc(-0.28, -0.24, 0.11, -0.6, 1.2, 8) + arc(-0.28, -0.24, 0.07, 1.2, -0.6, 8), M["teal_sh"], 0.0, cyclic=True)
+    G.stroke(d, circ(-0.28, -0.24, 0.11, 28), M["ink"], O, cyclic=True)
+    G.stroke(d, circ(0.22, -0.16, 0.15, 32), M["mustard_i"], O, cyclic=True)                                         # to: a ringed world
+    ring = [(0.22 + 0.21 * math.cos(t), -0.18 + 0.06 * math.sin(t)) for t in [math.pi * (1.02 + 0.96 * i / 13) for i in range(14)]]
+    G.stroke(d, G.hose_outline(ring, 0.035), M["red_sh_i"], I, cyclic=True)
+    hop = arc(-0.02, -0.08, 0.27, math.radians(150), math.radians(45), 24)                                             # the dashed hop
+    for i in range(0, 20, 4):
+        G.stroke(d, G.hose_outline(hop[i:i + 3], 0.04), M["off_i"], I * 0.8, cyclic=True)
+    t = math.radians(45)
+    ex, ez = hop[-1]
+    tx, tz, nx, nz = math.sin(t), -math.cos(t), math.cos(t), math.sin(t)                                                # travel: clockwise
+    G.stroke(d, [(ex + tx * 0.09, ez + tz * 0.09), (ex + nx * 0.06, ez + nz * 0.06), (ex - nx * 0.06, ez - nz * 0.06)], M["off_i"], I, cyclic=True)
 
 
 MOTIF = {"dig_power": m_beam, "dig_brush": m_brush, "haul_pack": m_pack, "haul_dirt": m_dirt, "asc_grapple": m_grapple,
@@ -534,25 +557,28 @@ def preview(out, batch=1, footnote=None):
             f = np.repeat(np.repeat(f, 5, axis=0), 5, axis=1)
         k = f.shape[0] // s
         return np.rint(f.reshape(s, k, s, k, 4).mean(axis=(1, 3))).astype(np.uint8)
-    TW = 214
-    W = 8 + len(names) * TW
-    r1 = np.empty((156, W, 3), np.float32)
-    r1[:] = paper
-    review._label(r1, f"B-204 node icons, batch {batch} (1x, 128 px)", 8, 4, scale=1)
-    r2 = np.empty((150, W, 3), np.float32)
-    r2[:] = paper
-    review._label(r2, "at 40 px in the chart's frames: locked (0.4) / available / bought; below, at 32 px", 8, 4, scale=1)
-    for i, n in enumerate(names):
-        x = 8 + i * TW
-        r1[20:148, x:x + 128] = paper * 0.9
-        review._over(r1, imgs[n], x, 20)
-        review._label(r1, n, x + 132, 24, scale=1)
-        sm = down(imgs[n], 40)
-        for k, st in enumerate(("locked", "available", "bought")):
-            ST.ov(r2, frames[st], x + 68 * k, 18)
-            ST.ov(r2, sm, x + 68 * k + 12, 30, 0.4 if st == "locked" else 1.0)
-        review._over(r2, down(imgs[n], 32), x + 16, 90)
-        review._label(r2, n, x + 56, 100, scale=1)
+    TW, PER = 214, 10                                                                  # 10 icons a row (a 20-icon row was unreadable)
+    W = 8 + min(len(names), PER) * TW
+    blocks = []
+    for c0 in range(0, len(names), PER):
+        r1 = np.empty((156, W, 3), np.float32)
+        r1[:] = paper
+        review._label(r1, f"B-204 node icons, batch {batch} (1x, 128 px)", 8, 4, scale=1)
+        r2 = np.empty((150, W, 3), np.float32)
+        r2[:] = paper
+        review._label(r2, "at 40 px in the chart's frames: locked (0.4) / available / bought; below, at 32 px", 8, 4, scale=1)
+        for i, n in enumerate(names[c0:c0 + PER]):
+            x = 8 + i * TW
+            r1[20:148, x:x + 128] = paper * 0.9
+            review._over(r1, imgs[n], x, 20)
+            review._label(r1, n, x + 132, 24, scale=1)
+            sm = down(imgs[n], 40)
+            for k, st in enumerate(("locked", "available", "bought")):
+                ST.ov(r2, frames[st], x + 68 * k, 18)
+                ST.ov(r2, sm, x + 68 * k + 12, 30, 0.4 if st == "locked" else 1.0)
+            review._over(r2, down(imgs[n], 32), x + 16, 90)
+            review._label(r2, n, x + 56, 100, scale=1)
+        blocks += [r1, r2]
     lines = []
     for n in names:
         p, hit = checks(imgs[n])
@@ -561,7 +587,7 @@ def preview(out, batch=1, footnote=None):
     foot[:] = paper
     for i, ln in enumerate(lines):
         review._label(foot, ln, 6 + (i % 2) * (W // 2), 6 + 16 * (i // 2), scale=1)
-    img = np.vstack([r1, r2, foot])
+    img = np.vstack(blocks + [foot])
     review.draw(img, time.strftime("%m-%d %H:%M") + " " + (footnote or "design preview (lock-free, fakegp + numpy)"), 2, img.shape[0] - 16, (1.0, 1.0, 0.85))
     review.write(out, img)
     print("written", out, img.shape[1], "x", img.shape[0])
