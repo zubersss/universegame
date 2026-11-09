@@ -195,6 +195,61 @@ def pieces():
     return {n: render(fn, w, h, piv, seed=40 + i) for i, (n, (fn, w, h, piv, _m)) in enumerate(PIECES.items())}
 
 
+# ---------------------------------------------------------------- the export (on LEAD's OK)
+KEY = "props/dig/{}"
+
+
+def export(art):
+    import json
+    from meridian import pngio
+    built, problems = [], []
+    P = pieces()
+    for n, (_fn, w, h, piv, extra_meta) in PIECES.items():
+        img = P[n]
+        meta = {"key": KEY.format(n), "style": "v3", "ppu": PPU, "pivot": list(piv), "width": w, "height": h, "palette": "earth", **extra_meta}
+        if n == "ladder":
+            meta.update({"rung_spacing_m": 0.25, "rungs_at_m": [0.0, 0.25, 0.5, 0.75],
+                         "note": "B-210: the Builder ladder, 1 m a piece, stacked in y; ladder_top over the highest, ladder_bottom under the lowest. "
+                                 "climb_ladder (side_b) steps on these rungs: its root climbs 0.5 m a cycle, at the 'ladder' socket"})
+        hit = v3.palette_hits(img, "earth")[0]
+        m = v3.EDGE_MARGIN
+        ty = n in ("ladder", "grapple_line")
+        top_open, bottom_open = ty or n == "ladder_bottom", ty or n == "ladder_top"
+        if w % 4 or h % 4:
+            problems.append(f"{n}: {w}x{h} not a multiple of 4")
+        if hit < 0.995:
+            problems.append(f"{n}: palette {hit * 100:.1f}%")
+        if (not top_open and img[:m, :, 3].any()) or (not bottom_open and img[-m:, :, 3].any()) or img[:, :m, 3].any() or img[:, -m:, 3].any():
+            problems.append(f"{n}: touches the {m} px edge")
+        built.append((meta["key"], img, meta))
+    frames, sheet, smeta = beacon_sheet()
+    hit = v3.palette_hits(sheet, "earth")[0]
+    if hit < 0.995:
+        problems.append(f"recall_beacon: palette {hit * 100:.1f}%")
+    m = v3.EDGE_MARGIN
+    for i, f in enumerate(frames):
+        if f[:m, :, 3].any() or f[:, :m, 3].any() or f[:, -m:, 3].any():
+            problems.append(f"recall_beacon frame {i}: touches the {m} px edge")
+    built.append((KEY.format("recall_beacon"), sheet, {"key": KEY.format("recall_beacon"), "style": "v3", "ppu": PPU, "squash_root": False, **smeta,
+                                                        "note": "B-210: the recall beacon - pulse (the lamp + two ink rings, no glow) while it waits; liftoff when it fires"}))
+    if problems:
+        raise ValueError("B-210 dig props checks: " + "; ".join(problems))
+    out = []
+    for key, img, meta in built:
+        base = os.path.join(art, *key.split("/"))
+        os.makedirs(os.path.dirname(base), exist_ok=True)
+        n = pngio.write_png(base + "_color.png", img)
+        with open(base + ".json", "w", encoding="utf-8", newline="\n") as f:
+            json.dump(meta, f, indent=2)
+            f.write("\n")
+        out.append((key, img.shape[1], img.shape[0], n))
+    return out
+
+
+def keys():
+    return [KEY.format(n) for n in list(PIECES) + ["recall_beacon"]]
+
+
 # ---------------------------------------------------------------- the review sheet (lock-free)
 def preview(out, footnote=None):
     import time
