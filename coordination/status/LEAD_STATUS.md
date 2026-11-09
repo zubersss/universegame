@@ -28,5 +28,7 @@ USER-37 (11:59): close the ChatGPT desktop app (1.27 GB, 14 processes; free RAM 
 BLENDER_STATUS.md unchanged since 09:19 while it committed through 11:24 (asked to rewrite it at the restart); UNITY_STATUS.md 14.3 KB, over D-113 (trim listed). The stag is U-162 (D-167 (6)).
 ## Session addresses (ListAgents, 11-09 11:4x)
 This session: zuber-67. zuber-15 = UNITY. zuber-61 = BLENDER (both started ~11:45; both sent their next steps 11:5x).
+## Gate watch
+12:2x: UNITY's want live (refreshed 12:24, U-193 slice 2), waiting at the gate (0.53–0.70 GB, 12:03–12:23); it ended its turn per no-background-waiters and asked for a ping. Session cron 04dc3e04 checks RAM every 10 min and pings zuber-15 at ≥ 1.5 GB, then deletes itself. BLENDER after UNITY: the B-227 rev sheet (light), then B-220's five sheets.
 ## HeavyJobLock
 none (LEAD runs no heavy jobs while a worker holds the lock or a want)
