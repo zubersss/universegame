@@ -2780,6 +2780,9 @@ def earth_sea_under(seed):
     haze = BG._mix(water, pal["teal"], 0.25)
     fl = BG.ridge(rng, [(2, 0.5), (5, 0.3), (11, 0.2)], base=H - 150, amp=14)
     floor = BG._ridge_mask(H, fl)
+    # rev (LEAD, B-202 export): at 40 m the far floor's nearly flat top read as one straight edge across the frame; low dunes
+    # and mounds of sand along it break the line (drawn after the arches' seats so nothing above moves)
+    dunes = np.zeros((H, W), np.float32)
     rocks, kelp = np.zeros((H, W), np.float32), np.zeros((H, W), np.float32)
     for _k in range(3):
         cx, R = rng.uniform(0, W), rng.uniform(70, 130)
@@ -2790,6 +2793,11 @@ def earth_sea_under(seed):
     for _k in range(16):
         cx = rng.uniform(0, W)
         _kelp(kelp, None, rng, cx, float(fl[int(cx) % W]) + 4, rng.uniform(160, 330), rng.uniform(5, 9), rng.uniform(10, 30))
+    drng = np.random.default_rng(seed + 7)                                                    # its own stream: the rest stays put
+    for _k in range(14):
+        cx = drng.uniform(0, W)
+        ell(dunes, cx, float(fl[int(cx) % W]) + 6, drng.uniform(90, 260), drng.uniform(14, 34), cut=0.5)
+    floor = np.maximum(floor, dunes)
     stack = Stack()
     stack.append(wash32(rng, H, kelp, BG._mix(haze, pal["green"], 0.3), var=0.04, edge_dark=0.04, bleed=2.5))
     stack.append(wash32(rng, H, rocks, BG._mix(haze, pal["brown"], 0.22), var=0.04, edge_dark=0.05, bleed=2.0))
