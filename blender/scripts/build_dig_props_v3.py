@@ -7,8 +7,9 @@
   props/dig/grapple_line     16x64: the grapple line, a twisted rope, tiles in y
   props/dig/grapple_hook     96x96, pivot [0.5, 0.5]: the three-pronged hook bitten into a rock; json "line_socket" (where the line
                              tile hangs from)
-  props/dig/winch_post       96x160, pivot [0.5, 0.2] = its base on the Surface Line: a brass post staked down, a drum of line,
-                             a crank, the Surface Line's red pennant on top; json "line_socket"
+  props/dig/winch_post       96x160, pivot [0.5, 0.2] = its base on the drawn ground surface beside the shaft's mouth (rev, UNITY
+                             U-176: not the Surface Line, 2 m below): a brass post staked down, a drum of line, a crank, the red
+                             pennant on top; json "line_socket"
   props/dig/recall_beacon    64x192 frames, pivot [0.5, 0]: clips pulse (4, loop: the lamp and two ink rings, no glow) and
                              liftoff (6, once: a squash, then it shoots up trailing paper streamers)
 
@@ -188,7 +189,7 @@ PIECES = {"ladder": (ladder, 48, 64, (0.5, 0.0), {"tile_y": True, "repeat_px": 6
           "ladder_bottom": (ladder_bottom, 64, 48, (0.5, 0.25), {}),
           "grapple_line": (grapple_line, 16, 64, (0.5, 0.0), {"tile_y": True, "repeat_px": 64}),
           "grapple_hook": (grapple_hook, 96, 96, (0.5, 0.5), {"line_socket": list(HOOK_LINE)}),
-          "winch_post": (winch_post, 96, 160, (0.5, 0.2), {"line_socket": list(WINCH_LINE), "stands_on": "the Surface Line (its base on the line)"})}
+          "winch_post": (winch_post, 96, 160, (0.5, 0.2), {"line_socket": list(WINCH_LINE), "stands_on": "the drawn ground surface at the shaft's mouth (its base on the turf; not the Surface Line 2 m below)"})}
 
 
 def pieces():

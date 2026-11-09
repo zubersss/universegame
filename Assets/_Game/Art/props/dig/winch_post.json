@@ -13,5 +13,5 @@
     0.27,
     0.62
   ],
-  "stands_on": "the Surface Line (its base on the line)"
+  "stands_on": "the drawn ground surface at the shaft's mouth (its base on the turf; not the Surface Line 2 m below)"
 }
