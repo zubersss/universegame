@@ -200,6 +200,13 @@ Files: docs/D1_TABLES.md
 Depends: D-174
 Lead notes: Cycle 284 (16:2x). LEAD's own; blocks U-174's data, U-175 and B-204's icons. Today.
 
+
+### L-014 · LEAD · Ready · D1
+Goal: The D1 exit scenario in LeadQA (charter: write LeadQA tests for the next milestone's exit criteria): Tests/LeadQA/D1DigRunTests.cs: on Earth, scripted input digs from the camp to tier 3 (a stroke time per tier within the tables' formula), fills the pack past its limit (the refusal and the stamp), climbs back above the Surface Line by a ladder and by the jetpack with a full pack (the load factor), sells topside (the Scrip and Rank change by the tables), buys a ring-1 node (its stat changes), and saves / loads with the pack, Scrip, nodes and Rank kept; LogAssert.NoUnexpectedReceived; ≤ 10 min game time.
+Accept: passes twice on U-188's build code; its numbers logged in the REVIEW_LOG.
+Files: Assets/_Game/Tests/LeadQA/D1DigRunTests.cs
+Depends: U-174, U-175, U-176
+Lead notes: Cycle 287 (22:2x). LEAD's own; written now against the D1 APIs, run in U-188's lock.
 ---
 
 ## UNITY
@@ -2948,12 +2955,12 @@ Files: Code/Runtime/UI/ (a Hints controller), Save/, Tests/
 Depends: B-213, U-174, U-175
 Lead notes: Cycle 286 (20:3x). Before the D1 build: the owner's first hour with the new loop.
 
-### U-186 · UNITY · Ready · D1
+### U-186 · UNITY · In Progress · D1
 Goal: Wire the ground art that was drawn but never requested (B-215's audit, coordination/reports/blender/d1_key_audit.md): (1) the brink lips: at every steep brink of the smooth ground draw the band's lip (`ground_lip_<variant>`, `ground_lip` the fallback: 13 keys over the four inner planets; B-175 / B-180 / B-198's format, pivot at the brink); (2) the surface decor: scatter each band's `ground_decor_<variant>_<n>` (51 keys) sparsely on the walking surface, seeded per chunk, never on a pad, a POI or a dug cell; (3) the dig puff by the stroke's band variant (`dig_puff_<variant>`, 8 keys; `dig_puff` the fallback); (4) the decor probe: SmoothGround probes the number of fill_decor pieces present per set (2–3), not a fixed 4; (5) retire Earth's three old ground strips (ground_strip_sand / _soil / _stone, replaced by B-175's bands): confirm no path loads them, then BLENDER removes them.
 Accept: a capture per inner planet of a brink with its lip and a stretch of surface decor at 1×; a dig in the desert showing the sand puff; GroundArtTests +1 (every band variant resolves its lip, decor and puff keys); D1's key audit re-run shows them requested.
 Files: Code/Runtime/Terrain/, View2D/, FX/, Tests/
 Depends: —
-Lead notes: Cycle 287 (21:2x). Before the D1 build: the owner's ground has had no lips or surface decor since 0.5.0.
+Lead notes: Cycle 287 (21:2x). Before the D1 build: the owner's ground has had no lips or surface decor since 0.5.0. 22:2x: IN, NOT YET DONE (17685ad7; the B-216 / B-217 import 1c58f11b; GroundArtTests ×2 resolve 13 lips / 51 decor / 8 puffs; EditMode 467/467; BudgetGate green; Editor draw calls 95 → 105 Earth, 125 → 153 Earth C0 until atlased, under 250). Viewed u186/1_earth_brink and 3_mars_brink: (1) THE LIPS ARE MIS-SEATED: each draws as a flat horizontal bar with its curl hanging in the air above and beside the brink (Earth x ~1020 and ~1370; Mars x ~990–1090 above the surface), not curling over the edge: seat the lip's pivot (0.55, 0.6) on the brink point, rotate it to the surface tangent there, mirror it by the drop's side so the curl wraps DOWN over the edge; (2) lips on NATURAL brinks only (a dug edge already gets B-175's dig_rim; two rims fight); (3) the capture pits have straight vertical walls (tile-staged), the blockiness D-168 removed: stage them with real brush strokes; and capture a natural brink (the coast's cliffs, smoke_41's place) since Earth has no natural ≥ 1 m step near the camp. Surface decor and the desert's sand puff: good. Rulings on UNITY's answers: Earth's ground_strip_sand / _soil / _stone RETIRE (BLENDER removes them after this card's commit); Mars's old basalt / frost strips RETIRE too (replaced by the bands; MarsStagePlayTests' "≥ 2 strips load" becomes "1", a stale count, not a loosened threshold); the Skill Tree backs onto B-204's ui/skilltree/panel (a small change in U-175's slot).
 
 ### U-187 · UNITY · Ready · D1
 Goal: Draw the ground's back wall only where it shows (UNITY's U-182 proposal): today the fill draws twice everywhere because the back wall sits under the whole body; draw the back wall only behind dug cells plus a one-cell margin, roughly halving the fill's pixels and recovering more than U-182's +1.5 ms on a full-screen room (Bible §11: 60 FPS on integrated graphics).
@@ -2961,6 +2968,13 @@ Accept: CaptureU182Perf's A/B: a full-screen T3 room at or under the old lit pat
 Files: Code/Runtime/Terrain/ (the chunk mesh), Tests/
 Depends: U-182
 Lead notes: Cycle 287 (21:5x). After U-186, before the full sweep and the D1 build (the tier fill's cost lands in that build).
+
+### U-188 · UNITY · Ready · D1
+Goal: Build 0.6.0, the digging game's first build for the owner (D-174 / D-175 / D-178): Earth and Mars as dig planets with the Surface Line, five tiers with their fills (U-182, U-187), materials, the pack and selling (U-174), the Skill Tree (U-175), Rank and the New Expedition (U-178), the tool looks by Mk (U-183), the ways back up (U-176), the first-hour hints (U-185), the brink lips / surface decor / material puffs (U-186), the space minimap and system map (U-184), the sea from below (U-171 if in), the POI fixes (U-180), the panels' grain (U-181), and today's v3 art; Mercury and Venus as in 0.5.1 (their smooth ground and tiers, U-177, ride 0.6.1). The probe (D-152's two-run rule); BudgetGate incl. Boot settle · Earth; the smoke with the D1 shots: the camp topside with the HUD (PACK, Scrip, Rank), a dig at each Earth tier, the Surface Line from below, the Sell panel, the Skill Tree, a node bought, a ladder climb, a grapple reel, the jetpack with a full pack, a Mars T4 room, the minimap and the system map, two hints; every text frame checked crisp in the PLAYER (U-174 / U-175 / U-184's closes).
+Accept: BUILD OK, SMOKE OK, the probe green; a FULL PlayMode sweep green on the build's code; LeadQA M1Loop + M3Inner + a new LeadQA dig-run scenario green (L-014); GameInfo 0.6.0.
+Files: Build/MERIDIAN_0.6.0/, coordination/reports/unity/smoke_0.6.0/
+Depends: U-186, U-187, U-183, U-176, U-178, U-185, U-180, U-181 (U-171 optional)
+Lead notes: Cycle 287 (22:2x). ORDER: U-186's fixes → U-187 → U-183 → U-176 → U-178 → U-185 → U-180 / U-181 / U-171 → the full sweep → this build. U-177 (Mercury / Venus) and U-179 after it. LEAD writes the page and the owner's first-hour playtest item.
 
 ### U-154 · UNITY · Ready · C2
 Goal: P-51 (UNITY, ruled yes in cycle 279): the Builder's aerostat pieces draw the re-inked kit on the four giants: PieceSpec gains a per-planet art key, so the Deck / Strut / Lift cell pieces draw `props/common/aerostat_{deck,strut,cell}` (B-156) on Jupiter, Saturn, Uranus and Neptune and keep `props/venus/aerostat_deck` on Venus; nothing else about the pieces changes (sizes, costs, saves).
