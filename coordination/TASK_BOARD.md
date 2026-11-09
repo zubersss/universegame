@@ -2933,12 +2933,12 @@ Files: Code/Runtime/Planet/ (PoiCatalog, PoiPlacer, PoiStamp), Tests/
 Depends: —
 Lead notes: Cycle 285 (17:5x). In 0.5.1 as known (the owner's page lists it); lock-free beside U-174.
 
-### U-181 · UNITY · Ready · C3
+### U-181 · UNITY · Done · C3
 Goal: The paper grain as a tiled overlay (B-208): each UiKit paper panel gets a child Image with ui/panels/grain, Image Type Tiled, pixelsPerUnitMultiplier so 1 texel = 1 screen px, under a Mask (show graphic on) on the panel so the grain stays inside its wavy edge (not a RectMask2D, which shows grain in the 6 px transparent margin); the panels use B-208's flat exports.
 Accept: MenuHudTests (or the nearest) +1: every paper panel has the grain child, tiled at 1 texel = 1 px at 1080p; captures of the inventory and the Skill Tree's node card at 1× with no blotch; the UI frame cost unchanged.
 Files: Code/Runtime/UI/ (UiKit, UiPaper), Tests/
 Depends: B-208's export
-Lead notes: Cycle 285 (17:5x). Small; beside U-175 (the Skill Tree's node card uses the same panel).
+Lead notes: Cycle 285 (17:5x). Small; beside U-175 (the Skill Tree's node card uses the same panel). 02:1x: DONE (3d1e9615): a masked "Grain" child on every flat paper whose json asks (panels, the system map panel, the certificate, the hint cards) at 1 texel = 1 canvas px, clipping only the grain (seals and key caps whole); PaperUiTests +1, MenuHudTests +1 (9 papers in game); viewed u181/1_inventory: an even speckle. FOUND beside it: the slot stack counts ("12", "5") are tiny and smudged at 1080p, half over the icon → fix before the build (with U-180): counts ≥ 18 px in the UI ink, crisp (U-184's rule), on a small paper chip at the slot's bottom-right, never over the icon's middle; a capture of a slot with 1, 12 and 99.
 
 ### U-182 · UNITY · Review · D1
 Goal: Each depth tier draws its own fill (D1; B-203's ground_fill_t2..t5 per planet): the fill shader samples a 1-px-tall per-column texture of the Surface Line (built once per planet, like PlanetBackdrop's wall map) and blends the tier textures by depth below it with B-203's 1 m transitions (each json's transition_m), so the bands follow the curved line; tier 1 stays ground_fill; the tiers' fill_decor scatter by tier (U-167's scatter); a 2D-lit custom shader in the URP 2D renderer, no visible step anywhere.
