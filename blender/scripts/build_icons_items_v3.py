@@ -577,6 +577,20 @@ def thruster_mk3(d, M):
     G.stroke(d, [(-0.11, 0.19), (0.11, 0.19), (0.09, 0.32), (-0.09, 0.32)], M["sky_dp_i"], O, cyclic=True)
 
 
+def thruster_mk2(d, M):
+    """B-222 (B-201 0.6.0 #12: the crafting panel showed a flat teal square): the Mk2 nozzle - a smaller, plain steel bell on a
+    brass collar (the Mk3 adds the orange collar and the dark heat-blued bell)."""
+    cone = [(-0.10, 0.12), (0.10, 0.12), (0.25, -0.25), (-0.25, -0.25)]
+    G.stroke(d, G.lumpy_ellipse(0.0, -0.25, 0.25, 0.06, n=24, lump=0.0, seed=231), M["brown_dp"], 0.0, cyclic=True)   # the bell's mouth
+    G.stroke(d, cone, M["sky_sh"], 0.0, cyclic=True)
+    G.stroke(d, [(0.03, 0.12), (0.10, 0.12), (0.25, -0.25), (0.08, -0.25)], M["sky_dp"], 0.0, cyclic=True)        # the shaded side
+    G.stroke(d, [(-0.06, 0.09), (-0.03, 0.09), (-0.12, -0.2), (-0.17, -0.2)], M["sky"], 0.0, cyclic=True)          # a lit streak
+    G.stroke(d, cone, M["ink"], O, cyclic=True)
+    G.stroke(d, [(-0.12, 0.12), (0.12, 0.12), (0.12, 0.17), (-0.12, 0.17)], M["mustard_i"], I, cyclic=True)        # the brass collar
+    G.stroke(d, [(-0.085, 0.17), (0.085, 0.17), (0.07, 0.29), (-0.07, 0.29)], M["sky_sh_i"], O, cyclic=True)       # the feed
+    glint(d, M, -0.11, -0.02, 0.022)
+
+
 def basalt(d, M):
     for x, zt, w in ((-0.14, 0.3, 0.12), (0.12, 0.18, 0.12), (-0.02, 0.06, 0.1)):            # hexagonal columns
         G.stroke(d, [(x - w, -0.3), (x + w, -0.3), (x + w, zt), (x - w, zt)], M["sky_dp"], 0.0, cyclic=True)
@@ -729,7 +743,7 @@ ITEMS = {"iron": iron, "copper": copper, "nickel": nickel, "aluminium": aluminiu
          "smelter_bar_copper": smelter_bar_copper, "smelter_bar_iron": smelter_bar_iron, "solarite_capacitor": solarite_capacitor,
          "suit_patch": suit_patch, "survey_module": survey_module,
          "jetpack_mk2": jetpack_mk2, "jetpack_mk3": jetpack_mk3, "skip_drive_mk2": skip_drive_mk2, "thruster_mk3": thruster_mk3,
-         "basalt": basalt, "clay": clay, "perchlorate": perchlorate, "phosphorus_pigment": phosphorus_pigment, "sand": sand,
+         "thruster_mk2": thruster_mk2, "basalt": basalt, "clay": clay, "perchlorate": perchlorate, "phosphorus_pigment": phosphorus_pigment, "sand": sand,
          "stone": stone, "sulfur": sulfur, "vitriol_glass": vitriol_glass, "deep_diamond_tip": deep_diamond_tip,
          "deep_core_sample": deep_core_sample, "ring_rock": ring_rock, "living_seed": living_seed, "wood": wood}
 BATCHES = {1: ["iron", "copper", "nickel", "aluminium", "carbon", "graphite", "hematite", "silica", "solarite", "deep_diamond"],
@@ -739,8 +753,9 @@ BATCHES = {1: ["iron", "copper", "nickel", "aluminium", "carbon", "graphite", "h
                                                                                               # (D-173: Veil Serpent ammo, combat cancelled D-087)
                "radiation_liner", "smelter_bar_copper", "smelter_bar_iron", "solarite_capacitor", "suit_patch", "survey_module"],
            4: ["jetpack_mk2", "jetpack_mk3", "skip_drive_mk2", "thruster_mk3", "basalt", "clay", "perchlorate", "phosphorus_pigment",
-               "sand", "stone", "sulfur", "vitriol_glass", "deep_diamond_tip", "deep_core_sample", "ring_rock", "living_seed", "wood"]}
-EXPORT_BATCHES = (1, 2, 3, 4)                                                                 # only LEAD-accepted batches export
+               "sand", "stone", "sulfur", "vitriol_glass", "deep_diamond_tip", "deep_core_sample", "ring_rock", "living_seed", "wood"],
+           5: ["thruster_mk2"]}                                                               # B-222 (LEAD 09:2x)
+EXPORT_BATCHES = (1, 2, 3, 4, 5)                                                              # only LEAD-accepted batches export
 ITEM_PLANET = {"superionic_ice": "neptune", "skip_drive_mk2": "neptune",                      # the violet is Neptune's (its 'mustard' slot)
                "helium3_condensate": "saturn"}                                                # LEAD 15:3x: its source planet; Saturn's red is
                                                                                               # the dusty rose nearest the v2 pink (Earth's coral
