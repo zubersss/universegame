@@ -6,6 +6,14 @@ Owner: LEAD (only the Lead edits this). Do the open items below, then tell the L
 
 ## Open
 
+### USER-37 — Close the ChatGPT desktop app while the team works (10 seconds)
+At 11:59 the ChatGPT app held 1.3 GB of the laptop's 8 GB (14 processes). The team needs
+1.5 GB free to run its tests and renders, and only 0.46 GB was free, so the 0.6.1 work is
+waiting. Close the app fully (right-click its icon in the taskbar tray, near the clock →
+Quit; closing the window alone may leave it running). You can reopen it when the team is
+idle or when you play a build. Nothing else to do; tell the Lead `done: USER-37` or just
+close it.
+
 ### USER-36 — Play the first hour of 0.6.0, the digging game (about an hour)
 The page with pictures and the route: https://claude.ai/artifact/S3LfXBpfBbcjhJxDQYhBVx
 1. Double-click `C:\dev\universegame\Build\MERIDIAN_0.6.0\MERIDIAN.exe` and start a new game.

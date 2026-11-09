@@ -23,7 +23,7 @@ Cycle 295 resume: B-221 / B-222 / B-226 → Done; U-194 + B-227 cards; queues re
 ## Pending decisions
 none open.
 ## Waiting on the user
-USER-36 (10:4x): the owner's first hour with 0.6.0, the digging game (page https://claude.ai/artifact/S3LfXBpfBbcjhJxDQYhBVx). USER-08 optional.
+USER-37 (11:59): close the ChatGPT desktop app (1.27 GB, 14 processes; free RAM 0.46 GB, the gate shut for U-193 / B-220). USER-36 (10:4x): the owner's first hour with 0.6.0, the digging game (page https://claude.ai/artifact/S3LfXBpfBbcjhJxDQYhBVx). USER-08 optional.
 ## Loop / stall watch
 BLENDER_STATUS.md unchanged since 09:19 while it committed through 11:24 (asked to rewrite it at the restart); UNITY_STATUS.md 14.3 KB, over D-113 (trim listed). The stag is U-162 (D-167 (6)).
 ## Session addresses (ListAgents, 11-09 11:4x)
