@@ -847,27 +847,40 @@ namespace Meridian.View2D
             if (biomes && fillSand != null && fillSand.texture != null)
                 for (int i = -2; i <= C + 2 && !sandFill; i++) sandFill = SandWeight(wx0 + i) > 0f;
 
-            // 1. The back wall: under the natural surface curve, from the chunk's foot, shaded (and the desert's sand over it, faded in).
+            // 1. The back wall: under the natural surface curve, shaded (and the desert's sand over it, faded in). U-187: only where it can show,
+            // behind the cells dug (or a cave's air) under the natural surface and one cell round them; the body covers the rest, so the
+            // solid ground's pixels draw once, not twice (U-182's A/B room).
             if (k.Lines > 0 || k.fillVerts.Count > 0)
             {
-                float yb = -0.5f, yt = C - 0.5f;
+                float yt = C - 0.5f;
+                BackAir(wx0, wy0);
+                BackMask(C, backAir, backMask);
                 for (int i = 0; i < C; i++)
                 {
                     float h0 = c.SurfaceCurve[i] - wy0, h1 = c.SurfaceCurve[i + 1] - wy0;
                     if (float.IsNaN(h0) || float.IsNaN(h1)) continue;
                     h0 = Mathf.Min(h0, yt); h1 = Mathf.Min(h1, yt);
-                    if (h0 <= yb && h1 <= yb) continue;
                     float x0 = i - 0.5f, x1 = i + 0.5f;
-                    BackQuad(tris[SubBack], x0, x1, yb, h0, h1, back, back, FillUv);
-                    if (sandFill)
+                    for (int j = 0; j < C; j++)
                     {
-                        float s0 = SandWeight(wx0 + x0), s1 = SandWeight(wx0 + x1);
-                        if (s0 > 0f || s1 > 0f)
-                            BackQuad(tris[SubBackSand], x0, x1, yb, h0, h1, new Color(BackShade, BackShade, BackShade, s0), new Color(BackShade, BackShade, BackShade, s1), WorldUv);
+                        if (!backMask[i + j * C]) continue;
+                        int run = j;
+                        while (j + 1 < C && backMask[i + (j + 1) * C]) j++;
+                        float yb = run - 0.5f, top = j + 0.5f;
+                        float t0 = Mathf.Min(h0, top), t1 = Mathf.Min(h1, top);
+                        if (t0 <= yb && t1 <= yb) continue;
+                        BackQuad(tris[SubBack], x0, x1, yb, t0, t1, back, back, FillUv);
+                        if (sandFill)
+                        {
+                            float s0 = SandWeight(wx0 + x0), s1 = SandWeight(wx0 + x1);
+                            if (s0 > 0f || s1 > 0f)
+                                BackQuad(tris[SubBackSand], x0, x1, yb, t0, t1, new Color(BackShade, BackShade, BackShade, s0), new Color(BackShade, BackShade, BackShade, s1), WorldUv);
+                        }
                     }
                 }
             }
 
+            LastBackQuads = tris[SubBack].Count / 6; // U-187
             // 2. The body (and the desert's sand over it, faded in across the border).
             int fb = v.Count;
             for (int i = 0; i < k.fillVerts.Count; i++) { var p = k.fillVerts[i]; Add(p, FillUv(p.x, p.y), fillTint); }
@@ -920,6 +933,46 @@ namespace Meridian.View2D
             for (int i = 0; i < TopSubs; i++) mats[SubTop + i] = MaterialFor(topTex[i]);
             f.GetComponent<MeshRenderer>().sharedMaterials = mats;
             ChunksBuilt++;
+        }
+
+        // ---------- U-187: the back wall only where it shows ----------
+
+        bool[] backAir, backMask;
+        /// <summary>Back-wall quads laid on the last build (tests, the perf report).</summary>
+        public int LastBackQuads { get; private set; }
+
+        /// <summary>The chunk's cells (and a one-cell ring round it) that are air under the natural surface: dug, or a cave's. Index
+        /// (i + 1) + (j + 1) * (C + 2) for i, j in -1..C.</summary>
+        void BackAir(float wx0, float wy0)
+        {
+            const int C = TerrainConstants.ChunkSize, W = C + 2;
+            if (backAir == null || backAir.Length != W * W) { backAir = new bool[W * W]; backMask = new bool[C * C]; }
+            for (int i = -1; i <= C; i++)
+            {
+                int wx = Mathf.RoundToInt(wx0) + i;
+                float surface = terrain.SurfaceAt(wx);
+                for (int j = -1; j <= C; j++)
+                {
+                    int wy = Mathf.RoundToInt(wy0) + j;
+                    backAir[(i + 1) + (j + 1) * W] = wy < surface && !TileId.IsSolid(terrain.GetTile(wx, wy));
+                }
+            }
+        }
+
+        /// <summary>U-187: the cells whose back wall can show: any cell within one of air under the natural surface (`air`, (C+2)² with its
+        /// one-cell ring) → `mask` (C², i + j * C). A dug cell always has its back wall; an undug cell with no dug neighbour has none. Pure.</summary>
+        public static void BackMask(int C, bool[] air, bool[] mask)
+        {
+            int W = C + 2;
+            for (int j = 0; j < C; j++)
+                for (int i = 0; i < C; i++)
+                {
+                    bool need = false;
+                    for (int dj = 0; dj <= 2 && !need; dj++)
+                        for (int di = 0; di <= 2 && !need; di++)
+                            need = air[(i + di) + (j + dj) * W];
+                    mask[i + j * C] = need;
+                }
         }
 
         /// <summary>U-157: a chunk-local point lies on the natural surface (within NaturalBand of the column's surface curve), not on a dug floor
