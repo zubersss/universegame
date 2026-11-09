@@ -535,7 +535,7 @@ recovery fee).
 
 ### 8.1 The dig run (D-174, milestone D1)
 
-**The loop.** Land at a planet's camp, dig down with the Beam, fill your pack with what you dig, climb back above the **Surface Line**, sell the haul for Scrip, spend it in the **Skill Tree**, dig deeper. Deeper ground is harder and holds rarer, more valuable material. Harder planets hold rarer material still.
+**The loop.** Land at a planet's camp, dig down (the shovel first, then the Beam), fill your pack with what you dig, climb back above the **Surface Line**, sell the haul for Scrip, spend it in the **Skill Tree**, dig deeper. Deeper ground is harder and holds rarer, more valuable material. Harder planets hold rarer material still.
 
 **The Surface Line.** An inked dashed line with small marker pegs, 2 m under the drawn surface everywhere on a solid planet, drawn in the cutaway whenever the camera is below the surface. With your feet above it you are **topside**: the Sell panel and the Skill Tree open anywhere (no shop to walk to); below it they are closed and the HUD shows your depth (0 at the line). The challenge is getting back up with a full pack.
 
@@ -551,7 +551,9 @@ recovery fee).
 
 Each tier's fill is drawn differently (colour, texture, the buried details), so you can see how deep you are. Buried pockets (D-162 (5)) carry their tier's rarest items and are worth a detour; Survey reveals them. Surface resource rocks stay as small topside income.
 
-**Digging speed.** A Beam stroke takes 0.25 s × planet base × tier hardness ÷ Beam power, never more than 8 s. There is **no hard gate**: a starting Beam can dig the Core, slowly; upgrades make it fast.
+**The shovel and the Beam (D-182, owner 11-09).** Every surveyor starts with a **shovel**: half the Beam's speed, a 2 m reach, a visible scoop. The **Beam** is the Dig branch's first node (250 Scrip, bought after the first haul) and replaces the shovel for good; a New Expedition starts you on the shovel again.
+
+**Digging speed.** A Beam stroke takes 0.25 s × planet base × tier hardness ÷ Beam power, never more than 8 s (a shovel scoop 0.5 s on the same terms, never more than 12 s). There is **no hard gate**: a starting Beam can dig the Core, slowly; upgrades make it fast.
 
 **The planet ladder** (base hardness; rarer materials up the ladder): Earth 1 → Mars 1.6 → Mercury 2.5 → Venus surface 4 (heat and pressure with depth). The giants have no solid ground: their rare finds (metallic hydrogen, helium-3, superionic ice, deep diamond from the floes' cores and the deep) feed the Skill Tree's outer rings.
 

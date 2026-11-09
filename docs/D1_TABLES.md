@@ -6,10 +6,11 @@ in code. Item ids are the existing ItemRegistry ids; none is new.
 
 ## 1. Digging
 
-- **Stroke time** = 0.25 s × planet base hardness × tier hardness ÷ Beam power, capped at **8 s**. No depth gate.
+- **The first tool is a shovel (D-182, owner 11-09).** Every surveyor starts with a **shovel**: stroke base **0.5 s**, reach **2 m** (the cells in front of the surveyor), one scoop at a time with a visible scoop and a dirt flick, capped at **12 s**. The **Beam** is bought in the Dig branch's first node (dig_power_1, now "The Beam", 250 Scrip: a new surveyor's 200 plus a first haul) and replaces the shovel for good: stroke base **0.25 s**, its full reach, the cap **8 s**. A New Expedition returns you to the shovel.
+- **Stroke time** = stroke base (shovel 0.5 s, Beam 0.25 s) × planet base hardness × tier hardness ÷ dig power, capped at 12 s (shovel) / **8 s** (Beam). No depth gate: the shovel digs every tier, slowly.
 - **Planet base hardness**: Earth 1 · Mars 1.6 · Mercury 2.5 · Venus surface 4.
 - **Tier hardness** (depth below the Surface Line): T1 Topsoil 0–10 m ×1 · T2 Subsoil 10–40 m ×2 · T3 Stone 40–100 m ×4 · T4 Deep 100–200 m ×8 · T5 Core 200 m to the world floor ×16.
-- **Beam power**: 1 at the start; the Dig branch raises it (§5).
+- **Dig power** ("Beam power" in the nodes below): 1 at the start, with the shovel; the Beam node adds +0.5 and the Dig branch raises it further (§5). It applies to whichever tool is held; the rhythm and heat-sink nodes need the Beam.
 - **What a dug tile gives**: either **dirt** (the tile's matrix: soil, regolith, stone, basalt …) into the **dirt store**, or a **material** into the pack, by the tier's material chance: T1 5 % · T2 9 % · T3 11 % · T4 12 % · T5 12 %. A material roll picks from the planet's tier table (§3) by weight.
 - **Dirt store**: weightless, 60 tiles at the start (Haul raises it); the Builder spends it on mounds, ramps and ladders; not sellable. Full: dug dirt is dropped as a puff, nothing lost but the dirt.
 - **Pockets** (U-158, D-162 (5)): unchanged in placement; a pocket gives 3 of its tier's **rarest** item (the last row of the tier's table).
@@ -71,7 +72,7 @@ Six branches, five rings, two nodes per ring (three at ring 3); 66 nodes. A node
 ### Dig
 | id | R | effect | cost | links |
 |----|---|--------|------|-------|
-| dig_power_1 | 1 | Beam power +0.5 | 80 | centre |
+| dig_power_1 | 1 | **The Beam**: replaces the starting shovel (stroke base 0.25 s instead of 0.5, full reach, cap 8 s) and Beam power +0.5 | 250 | centre |
 | dig_brush_1 | 1 | brush radius +0.1 m | 100 | centre |
 | dig_power_2 | 2 | Beam power +1 | 300 | dig_power_1 |
 | dig_rhythm_1 | 2 | each consecutive stroke on the same face −10 % time (max −30 %) | 350 | dig_power_1, dig_brush_1 |
