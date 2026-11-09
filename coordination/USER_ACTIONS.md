@@ -13,7 +13,7 @@ Your shovel ask is in. The page with pictures: https://claude.ai/artifact/JQ1uqi
 3. Hold the left mouse button on ground within about two metres: the shovel digs one scoop at a time.
 4. Fill the pack, climb above the dashed Surface Line, press G and SELL ALL.
 5. Press K, open the Dig branch and buy **The Beam** (250 Scrip). The tool slot under the top bar changes from SHOVEL to BEAM MK1. Dig again.
-Then tell the Lead session: is the shovel a good start or too slow, does the Beam feel like a reward, does the price feel right, and anything else you notice. Known already: an empty paper bar can show at the top of the screen, and the first hint card's picture still shows the Beam (both fixed in 0.6.2).
+Then tell the Lead session: is the shovel a good start or too slow, does the Beam feel like a reward, does the price feel right, and anything else you notice. Known already: a pickaxe flashes in the surveyor's hand during each shovel stroke (an old drawing inside the dig animation), an empty paper bar can show at the top of the screen, and the first hint card's picture still shows the Beam. The pickaxe and the bar are fixed in Build 0.6.1b, being made now (15:4x); you can play 0.6.1 now or wait for the Lead to say 0.6.1b is ready.
 
 ### USER-08 — Optional: let the team run PowerShell commands without prompts (2 min)
 On Windows, Claude Code runs commands through PowerShell as well as Bash, and the
