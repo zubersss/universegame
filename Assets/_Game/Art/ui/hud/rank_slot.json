@@ -1,0 +1,13 @@
+{
+  "key": "ui/hud/rank_slot",
+  "style": "v3",
+  "ppu": 64,
+  "pivot": [
+    0.5,
+    0.5
+  ],
+  "width": 72,
+  "height": 72,
+  "insignia_px": 48,
+  "note": "B-211: the Rank insignia (ui/rank/insignia_<n>) sits centred in it at 48 px"
+}

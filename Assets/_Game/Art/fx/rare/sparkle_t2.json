@@ -1,0 +1,26 @@
+{
+  "key": "fx/rare/sparkle_t2",
+  "style": "v3",
+  "ppu": 64,
+  "gutter": 4,
+  "fps": 12,
+  "pivot": [
+    0.5,
+    0.5
+  ],
+  "facing": "right",
+  "frame_width": 96,
+  "frame_height": 96,
+  "columns": 8,
+  "frames": 8,
+  "tier": 2,
+  "animations": [
+    {
+      "name": "burst",
+      "start": 0,
+      "length": 8,
+      "loop": false
+    }
+  ],
+  "note": "B-212: a drop's sparkle burst in tier 2's colours (no glow); played once where the drop lands"
+}

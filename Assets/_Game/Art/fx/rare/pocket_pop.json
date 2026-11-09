@@ -1,0 +1,25 @@
+{
+  "key": "fx/rare/pocket_pop",
+  "style": "v3",
+  "ppu": 64,
+  "gutter": 4,
+  "fps": 12,
+  "pivot": [
+    0.5,
+    0.5
+  ],
+  "facing": "right",
+  "frame_width": 128,
+  "frame_height": 128,
+  "columns": 8,
+  "frames": 8,
+  "animations": [
+    {
+      "name": "pop",
+      "start": 0,
+      "length": 8,
+      "loop": false
+    }
+  ],
+  "note": "B-212: the 'pocket found' pop: a paper burst swells, holds, tears into scraps; played once at the pocket"
+}

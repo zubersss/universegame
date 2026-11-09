@@ -1,0 +1,41 @@
+{
+  "key": "ui/hud/depth_marker",
+  "style": "v3",
+  "ppu": 64,
+  "pivot": [
+    0.5,
+    0.5
+  ],
+  "width": 140,
+  "height": 68,
+  "rect_origin": "bottom_left",
+  "parts": [
+    {
+      "name": "topside",
+      "rect": [
+        0,
+        0,
+        68,
+        68
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "name": "below",
+      "rect": [
+        72,
+        0,
+        68,
+        68
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    }
+  ],
+  "note": "B-211: topside above the Surface Line, below under it (with the depth lettered beside it)"
+}

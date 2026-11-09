@@ -1,0 +1,19 @@
+{
+  "key": "ui/hud/scrip_tag",
+  "style": "v3",
+  "ppu": 64,
+  "pivot": [
+    0.5,
+    0.5
+  ],
+  "width": 176,
+  "height": 56,
+  "slice": [
+    60,
+    14,
+    18,
+    14
+  ],
+  "lettering": "runtime",
+  "note": "B-211: the Scrip purse; the amount in Patrick Hand, ink"
+}

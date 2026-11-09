@@ -1,0 +1,55 @@
+{
+  "key": "ui/hud/gauge_pack",
+  "style": "v3",
+  "ppu": 64,
+  "pivot": [
+    0.5,
+    0.5
+  ],
+  "width": 384,
+  "height": 320,
+  "rect_origin": "bottom_left",
+  "parts": [
+    {
+      "name": "dial_pack",
+      "rect": [
+        0,
+        0,
+        320,
+        320
+      ],
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "name": "needle_pack",
+      "rect": [
+        324,
+        0,
+        48,
+        150
+      ],
+      "pivot": [
+        0.5,
+        0.1733
+      ]
+    }
+  ],
+  "needles": {
+    "pack": {
+      "dial": "dial_pack",
+      "needle": "needle_pack",
+      "hub": [
+        0.5,
+        0.5
+      ],
+      "min_deg": 125.0,
+      "max_deg": -125.0,
+      "danger_above": 0.9,
+      "reads": "the pack's kg / its limit"
+    }
+  },
+  "note": "B-211: the fourth brass gauge, the pack's kg against its limit; B-121's colours (LEAD: matching the three)"
+}

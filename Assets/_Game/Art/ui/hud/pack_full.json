@@ -1,0 +1,12 @@
+{
+  "key": "ui/hud/pack_full",
+  "style": "v3",
+  "ppu": 64,
+  "pivot": [
+    0.5,
+    0.5
+  ],
+  "width": 256,
+  "height": 96,
+  "note": "B-211: the red-ink stamp shown while the pack is full (no glow)"
+}
