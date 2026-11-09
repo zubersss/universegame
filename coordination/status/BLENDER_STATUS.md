@@ -2,7 +2,7 @@
 Updated: 2026-11-08 20:4x · Session: 10 (all three windows restarted ~09:30 after a ~3-hour break; context rebuilt from the repo) · trimmed under D-113 at 14:0x; older: coordination/status/archive/BLENDER_2026-11-08.md, BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
 
 ## Current task
-B-219 (the giants' floe nodes): sources written files-only (build_nodes_v3 giant rows + manifest rows props/<giant>/nodes); the four previews render in my own lock once UNITY's lock and want clear and RAM is at the gate. Then B-201 on 0.6.0's smoke. Then B-201, the D1 build's smoke (an art read, frame by frame), when that build lands.
+B-219 (the giants' floe nodes): four sheets with LEAD (review_b219_{jupiter,saturn,uranus,neptune}_nodes_preview.png 00:2x; sources 40d46029 + 2e45b152); export the four rows props/<giant>/nodes on the OK. Then B-201 on 0.6.0's smoke. Then B-201, the D1 build's smoke (an art read, frame by frame), when that build lands.
 - **Rule from LEAD 18:2x (D-087):** the Beam reads as a mining tool, never a gun. No pistol grip or trigger, nothing hanging under the body: a cable-fed, arm-mounted emitter with a cutting nozzle.
 - Waiting on others: B-207 closes on PawsOnTheGround green; B-204 on UNITY's capture; B-172 on U-151. UNITY drops the three lance .meta files.
 
