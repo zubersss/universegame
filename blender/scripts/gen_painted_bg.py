@@ -353,6 +353,40 @@ def seam(img):
     return float(np.abs(f[:, -1] - f[:, 0]).mean() / max(interior, 0.5))
 
 
+CONTINUE_PLANETS = ("jupiter", "saturn", "uranus", "neptune")          # B-220 (B-201 0.6.0 #1 / #14): the floating-deck scenes,
+CONTINUE_KEYS = ("backgrounds/venus/deck",)                          # where the camera drops below the layers' bottoms
+
+
+def wants_continue(entry):
+    """B-220: does this painted row get a tileable bottom band on every layer?"""
+    _c, planet, _s = entry["key"].split("/")
+    return bool(entry.get("continue_rows")) or planet in CONTINUE_PLANETS or entry["key"] in CONTINUE_KEYS
+
+
+def tile_bottom(rgb, a, rows=CONTINUE_ROWS):
+    """B-220: make a layer's bottom `rows` rows repeat seamlessly downward (UNITY tiles them below the layer: json continue_rows).
+    The band is cross-faded with the `rows` rows above it: its first row stays the original (so it follows the row above it) and its
+    last row becomes the row just above the band (so it flows back into its own first row, the original adjacency) -> any number of
+    repeats join without a seam. Painted washes only (the decks' lower layers carry no inked detail there)."""
+    H = rgb.shape[0]
+    if H < 2 * rows:
+        return rgb, a
+    s = np.linspace(0.0, 1.0, rows, dtype=np.float32)[:, None]
+    rgb, a = rgb.copy(), a.copy()
+    lo, up = rgb[H - rows:].copy(), rgb[H - 2 * rows:H - rows]
+    rgb[H - rows:] = lo * (1 - s[..., None]) + up * s[..., None]
+    alo, aup = a[H - rows:].copy(), a[H - 2 * rows:H - rows]
+    a[H - rows:] = alo * (1 - s) + aup * s
+    return rgb, a
+
+
+def band_seam(rgb, a, rows=CONTINUE_ROWS):
+    """The repeat junction (the band's last row -> its first) vs the band's mean row step, on premultiplied colour (< ~1.5 = clean)."""
+    f = rgb[-rows:] * a[-rows:, :, None]
+    interior = float(np.abs(np.diff(f, axis=0)).mean())
+    return float(np.abs(f[-1] - f[0]).mean() / max(interior, 1e-4))
+
+
 def export_background(entry, art):
     _cat, planet, scene = entry["key"].split("/")
     fn = SCENES.get((planet, scene))
@@ -360,6 +394,14 @@ def export_background(entry, art):
         import build_backdrop_v3 as BB
         fn = BB.SCENES[(planet, scene)]
     imgs, layers = fn(int(entry.get("seed", 1)))
+    if wants_continue(entry):                                        # B-220: a tileable bottom band on every layer that lacks one
+        out = []
+        for (rgb, a), L in zip(imgs, layers):
+            if "continue_rows" not in L:
+                rgb, a = tile_bottom(rgb, a)
+                L["continue_rows"] = CONTINUE_ROWS
+            out.append((rgb, a))
+        imgs = out
     d = os.path.join(art, "backgrounds", planet, scene)
     os.makedirs(d, exist_ok=True)
     info = []
