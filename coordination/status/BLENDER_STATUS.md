@@ -7,6 +7,7 @@ Dry (told LEAD 22:4x). Next: B-201, an art read of 0.6.0's smoke, frame by frame
 - Waiting on others: B-207 closes on PawsOnTheGround green; B-204 on UNITY's capture; B-172 on U-151. UNITY drops the three lance .meta files.
 
 ## Last completed
+- 22:5x: U-183 request (UNITY): props/rig/hand_socket.json (9934340b) - the front glove's grip per frame of side (98) and side_b (72), [x, z, forearm angle], null in front views / hidden; held_b flags side_b frames already holding a pick / hammer / Beam / reel. Json only; regenerated with props/rig/tools_v3.
 - 22:47: Mars's old strips retired (9f035696, under my lock; U-186 9694c4c8): terrain/mars/ground_strip_basalt / _frost (2 png + 2 json, 0 .meta); the frost row dropped; build_c2_mars_ground RETIRED = basalt; the regolith strip kept.
 - 22:1x: Earth's old strips retired (e5f972c5; U-186 1c58f11b): terrain/earth/ground_strip_soil / _stone / _sand (3 png + 3 json, 0 .meta); build_c2_ground_strip RETIRED (Earth's export skips them; the grass row stays).
 - 22:0x: B-217 (320d45fa, LEAD-accepted as drawn): props/rig/survey + builder in v3 (json muzzle at RigModule's constants + cable_socket), fx/survey_scan/base + fx/builder_ghost/base; six v2 maps deleted (UNITY drops the .meta files).
