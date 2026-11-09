@@ -387,6 +387,72 @@ def band_seam(rgb, a, rows=CONTINUE_ROWS):
     return float(np.abs(f[-1] - f[0]).mean() / max(interior, 1e-4))
 
 
+def continue_rows_for(planet):
+    """The manifest's painted rows that get B-220's band, for one planet (venus: its deck only)."""
+    man = json.load(open(os.path.join(os.path.dirname(HERE), "manifest.json"), encoding="utf-8"))
+    rows = man["assets"] if isinstance(man, dict) else man
+    return [e for e in rows if e.get("painted_bg") and e["key"].startswith(f"backgrounds/{planet}/") and wants_continue(e)]
+
+
+def preview_continue(planet, out, footnote=None):
+    """B-220's sheet for one planet: every floating-deck scene, each layer at 1/4 with its new bottom band repeated 3x below it (the
+    way UNITY will continue it), the band's repeat seam per layer and its step from the row above. One scene in memory at a time."""
+    import time
+    sys.path.insert(0, os.path.dirname(HERE))
+    import review
+    import build_backdrop_v3 as BB
+    q = 4
+    paper = np.array(review.PAPER, np.float32)
+    rows, lines = [], []
+    head = np.tile(paper, (28, 3 * (2048 // q) + 40, 1)).astype(np.float32)
+    review._label(head, f"b-220 {planet}: each deck layer (1/{q}) with its new 64-row band repeated 3x below it, as UNITY continues it", 6, 8)
+    rows.append(head)
+    for e in continue_rows_for(planet):
+        _c, _p, scene = e["key"].split("/")
+        fn = SCENES.get((planet, scene)) or BB.SCENES[(planet, scene)]
+        imgs, layers = fn(int(e.get("seed", 1)))
+        cells = []
+        for (rgb, a), L in zip(imgs, layers):
+            had = "continue_rows" in L
+            if not had:
+                rgb, a = tile_bottom(rgb, a)
+            band_rgb, band_a = rgb[-CONTINUE_ROWS:], a[-CONTINUE_ROWS:]
+            stack_rgb = np.vstack([rgb] + [band_rgb] * 3)
+            stack_a = np.vstack([a] + [band_a] * 3)
+            hh = stack_rgb.shape[0] // q * q
+            ww = stack_rgb.shape[1] // q * q
+            sr = stack_rgb[:hh, :ww].reshape(hh // q, q, ww // q, q, 3).mean(axis=(1, 3))
+            sa = stack_a[:hh, :ww].reshape(hh // q, q, ww // q, q).mean(axis=(1, 3))[..., None]
+            cell = np.tile(paper, (sr.shape[0], sr.shape[1], 1)).astype(np.float32)
+            cell = sr * sa + cell * (1 - sa)
+            y_cut = rgb.shape[0] // q                                                     # mark where the layer ends
+            cell[y_cut:y_cut + 1, ::6] = (0.85, 0.2, 0.2)
+            cells.append(cell)
+            js = band_seam(rgb, a)
+            step = float(np.abs(rgb[-CONTINUE_ROWS] * a[-CONTINUE_ROWS, :, None] - rgb[-CONTINUE_ROWS - 1] * a[-CONTINUE_ROWS - 1, :, None]).mean())
+            lines.append(f"{scene} layer{L['n']}: {rgb.shape[1]}x{rgb.shape[0]}{' (had its own band)' if had else ''}, repeat seam {js:.2f}, "
+                         f"step into the band {step * 255:.1f}/255")
+        del imgs
+        Hc = max(c.shape[0] for c in cells)
+        r = np.tile(paper, (Hc + 22, 3 * (2048 // q) + 40, 1)).astype(np.float32)
+        x = 10
+        for c in cells:
+            r[20:20 + c.shape[0], x:x + c.shape[1]] = c
+            x += c.shape[1] + 10
+        review._label(r, f"{e['key']} (seed {e.get('seed')})", 6, 4, scale=1)
+        rows.append(r)
+    Wd = max(r.shape[1] for r in rows)
+    foot = np.tile(paper, (24 + 16 * len(lines), Wd, 1)).astype(np.float32)
+    for i, ln in enumerate(lines):
+        review._label(foot, ln, 6, 6 + 16 * i, scale=1)
+    img = np.vstack([np.pad(r, ((0, 0), (0, Wd - r.shape[1]), (0, 0)), constant_values=0.9) for r in rows] + [foot])
+    review.draw(img, time.strftime("%m-%d %H:%M") + " " + (footnote or "B-220 design preview (lock-free, numpy)"), 2, img.shape[0] - 14, (1.0, 1.0, 0.85))
+    review.write(out, img)
+    print("written", out, img.shape[1], "x", img.shape[0])
+    for ln in lines:
+        print(ln)
+
+
 def export_background(entry, art):
     _cat, planet, scene = entry["key"].split("/")
     fn = SCENES.get((planet, scene))
@@ -439,7 +505,9 @@ def export_palette(entry, art):
     return p, strip
 
 
-if __name__ == "__main__":
+if __name__ == "__main__" and len(sys.argv) > 3 and sys.argv[1] == "--continue":   # B-220: python -I gen_painted_bg.py --continue <planet> <png>
+    preview_continue(sys.argv[2], sys.argv[3])
+elif __name__ == "__main__":
     # scripts-only test: write the layers into a scratch folder and print seams
     out = sys.argv[1]
     info, meta = export_background({"key": "backgrounds/earth/plains", "seed": 11401}, out)
