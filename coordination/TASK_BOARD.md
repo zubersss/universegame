@@ -2926,12 +2926,12 @@ Files: Code/Runtime/Core/ (boot, prefetch), Art residency, Tests/
 Depends: U-173
 Lead notes: Cycle 285 (17:4x). After 0.5.1, beside U-174 (lock-free code; its check rides U-174's).
 
-### U-180 · UNITY · Ready · D1
+### U-180 · UNITY · Done · D1
 Goal: The two Earth POIs on smooth ground (LEAD's read of 0.5.1's smoke): (1) smoke_45_earth_launch_complex: the gantry's and the tower ruin's pads hover ~1.2 m over the sand (PoiCatalog's dy 1 m assumed the old stamped pad, which the smooth ground no longer raises): seat each structure on the drawn ground (or stamp a low rounded concrete pad under it, flat to its ends like the Pilgrim's pad), so nothing floats; (2) smoke_44_earth_survey_archive: the archive's underground chamber and its entry shaft are straight-walled rectangles (the stamp carved as tile edges): round them like the Mars skylight (D-162 (1)): a funnel into the shaft, a rounded room, the ink rim on the curve.
 Accept: smoke_44 and smoke_45 re-shot: no structure over a gap, no straight-walled hole; a test +1: every POI structure's base within 0.1 m of the outline; PoiPlay green.
 Files: Code/Runtime/Planet/ (PoiCatalog, PoiPlacer, PoiStamp), Tests/
 Depends: —
-Lead notes: Cycle 285 (17:5x). In 0.5.1 as known (the owner's page lists it); lock-free beside U-174.
+Lead notes: Cycle 285 (17:5x). In 0.5.1 as known (the owner's page lists it); lock-free beside U-174. 02:3x: DONE (ad272f59, with the slot counts): the Launch Complex's gantry and tower on their pad (a stale dy 1); the Survey Archive a funnel (8 / 6 / 4 m) into a rounded room with the ink rim, the door on flat ground beside it, the terminal on the floor (new worlds; stamped saves keep theirs); FOUND: props in carved spaces drew under the back wall (order −2 < 1), so the archive terminal never showed, 0.5.1 included → order 2 (by-design sunk hulls flagged); Mars's outpost pylons / beacon and the hauler's cargo hovered 1 m → seated; PoiPlayTests +1 (every POI structure on four planets within 0.1 m of the ground; all ±0.05); EditMode 486/486. Viewed u180/smoke_44b: the terminal in the rimmed room beside the surveyor, the door on the grass. Slot counts on a paper chip, 26 px ink, the icon's middle clear, asserted for 1 / 12 / 99. Batch captures soften lettering (small batch screen): crispness judged in 0.6.0's player smoke.
 
 ### U-181 · UNITY · Done · C3
 Goal: The paper grain as a tiled overlay (B-208): each UiKit paper panel gets a child Image with ui/panels/grain, Image Type Tiled, pixelsPerUnitMultiplier so 1 texel = 1 screen px, under a Mask (show graphic on) on the panel so the grain stays inside its wavy edge (not a RectMask2D, which shows grain in the 6 px transparent margin); the panels use B-208's flat exports.
