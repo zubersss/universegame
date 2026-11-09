@@ -75,8 +75,18 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 22c3e4793e43f6f49b9524b91e4f4a3c
+    m_Address: fx/beam_ray/mk5/animator
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 2882b8f74e9126f4a9e1db7032dae691
     m_Address: fx/dust/base
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 29c795793c6639245b950aad309b2903
+    m_Address: fx/beam_ray/mk1/animator
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -175,6 +185,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 54cf74287268e7d438a49c1e8d22f8b1
+    m_Address: fx/beam_ray/mk4
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 568bbd6f78a0f0249915ee6cbc3dccb3
     m_Address: fx/floe_sublimate/base
     m_ReadOnly: 0
@@ -252,6 +267,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 7c43a867e0c17f548894812ae5894989
     m_Address: fx/film/dust
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 807612a62c1a6264585d5bc51e13e0cb
+    m_Address: fx/beam_ray/mk4/animator
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -345,6 +365,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a6d3b20c89b2c7443aeac86d165e5b08
+    m_Address: fx/beam_ray/mk1
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: a73a2fa04abd32d4aab12c5b39621655
     m_Address: props/common/float_cell_pack_mk1
     m_ReadOnly: 0
@@ -377,6 +402,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: b4f5ac20e4e4d604d9b55fe9a3b41732
     m_Address: fx/ship/shock_ring
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b54539bd878aeae43b75b8bf52282406
+    m_Address: fx/beam_ray/mk2
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -430,6 +460,21 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d62e4933998173c4b89835102d67b785
+    m_Address: fx/beam_ray/mk5
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: da9e52c08cec3104dac438f8156bd69f
+    m_Address: fx/beam_ray/mk3/animator
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e00098f02ccaf6e4db0b46e3644b5254
+    m_Address: fx/beam_ray/mk2/animator
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: e0da0d4d096855647ab3c6b3c141e940
     m_Address: fx/methane_hail/base
     m_ReadOnly: 0
@@ -467,6 +512,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: f114f31ae58332f4398d677146073051
     m_Address: props/common/calibration
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f16e9e53e201d4b478746873072810dc
+    m_Address: fx/beam_ray/mk3
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

@@ -331,7 +331,6 @@ MonoBehaviour:
   - planets/uranus/glow
   - planets/venus/glow
   - props/common/calibration
-  - props/rig/beam
   - props/rig/builder
   - props/rig/lance
   - props/rig/survey
@@ -1502,6 +1501,41 @@ MonoBehaviour:
       length: 8
       loop: 0
   - key: fx/beam_ray/base
+    fps: 12
+    clips:
+    - name: flow
+      start: 0
+      length: 8
+      loop: 1
+  - key: fx/beam_ray/mk1
+    fps: 12
+    clips:
+    - name: flow
+      start: 0
+      length: 8
+      loop: 1
+  - key: fx/beam_ray/mk2
+    fps: 12
+    clips:
+    - name: flow
+      start: 0
+      length: 8
+      loop: 1
+  - key: fx/beam_ray/mk3
+    fps: 12
+    clips:
+    - name: flow
+      start: 0
+      length: 8
+      loop: 1
+  - key: fx/beam_ray/mk4
+    fps: 12
+    clips:
+    - name: flow
+      start: 0
+      length: 8
+      loop: 1
+  - key: fx/beam_ray/mk5
     fps: 12
     clips:
     - name: flow
