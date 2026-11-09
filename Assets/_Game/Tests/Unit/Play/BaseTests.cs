@@ -160,6 +160,22 @@ namespace Meridian.Tests
                     float g = OutlineUnder(x + q * p.spec.size.x, y + 1.5f);
                     if (!float.IsNaN(g) && (float.IsNaN(ground) || g > ground)) ground = g;
                 }
+                if (p.spec.stretch)
+                {
+                    // U-200: a wall's drawing reaches the ground under BOTH its bottom corners (no wedge of sky under the downhill one: at or
+                    // below the drawn surface there, 0.02 m of slack), no deeper than the lower corner needs; its collider stays on the
+                    // highest ground under it (nothing sinks into the slope).
+                    float left = OutlineUnder(x + 0.02f, y + 1.5f), right = OutlineUnder(x + p.spec.size.x - 0.02f, y + 1.5f);
+                    float low = Mathf.Min(left, right);
+                    log.Append($" {p.go.name} foot {p.foot:0.00} view foot {p.viewFoot:0.00} corners {drawnBase - left:+0.00;-0.00} / {drawnBase - right:+0.00;-0.00}");
+                    if (float.IsNaN(left) || float.IsNaN(right) || drawnBase > low + 0.02f || drawnBase < low - 0.1f)
+                        failures.Add($"{p.go.name}: drawn base {drawnBase:0.00}, the ground under its corners {left:0.00} / {right:0.00}, view foot {p.viewFoot:0.00}");
+                    var box = p.go.GetComponent<BoxCollider2D>();
+                    float solidBase = box != null ? box.bounds.min.y : float.NaN;
+                    if (float.IsNaN(solidBase) || Mathf.Abs(solidBase - ground) > 0.1f) failures.Add($"{p.go.name}: collider base {solidBase:0.00}, the highest ground under it {ground:0.00}, foot {p.foot:0.00}");
+                    Assert.GreaterOrEqual(p.viewFoot, p.foot - 1e-4f, $"{p.go.name}: the drawing reaches at least as far down as the collider");
+                    continue;
+                }
                 float gap = drawnBase - ground;
                 log.Append($" {p.go.name} foot {p.foot:0.00} gap {gap:+0.00;-0.00}");
                 if (float.IsNaN(gap) || Mathf.Abs(gap) > 0.1f) failures.Add($"{p.go.name}: base {drawnBase:0.00}, ground {ground:0.00}, foot {p.foot:0.00}");

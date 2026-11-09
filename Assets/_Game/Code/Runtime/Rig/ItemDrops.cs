@@ -23,7 +23,13 @@ namespace Meridian.Rig
         /// <summary>Raised per picked-up drop with its item id (pickup sound, HUD).</summary>
         public event System.Action<int> PickedUp;
         /// <summary>U-158: an item that went straight into the pack (a pocket's yield) raises the same pickup cue.</summary>
-        public void NotifyPicked(int itemId) => PickedUp?.Invoke(itemId);
+        public void NotifyPicked(int itemId)
+        {
+            PickedUp?.Invoke(itemId);
+            if (collector != null) PickedUpAt?.Invoke(itemId, (Vector2)collector.position + new Vector2(0f, 0.9f));
+        }
+        /// <summary>U-195: as PickedUp, with where the drop was when the pack took it (the icon's flight to the PACK readout starts there).</summary>
+        public event System.Action<int, Vector2> PickedUpAt;
 
         void Start()
         {
@@ -42,8 +48,10 @@ namespace Meridian.Rig
                 if (((Vector2)d.transform.position - c).sqrMagnitude > PickupRadius * PickupRadius) continue;
                 if (inventory.Add(d.itemId, 1) != 0) continue; // full: it stays on the ground
                 int id = d.itemId;
+                Vector2 at = d.transform.position;
                 Collect(d);
                 PickedUp?.Invoke(id);
+                PickedUpAt?.Invoke(id, at);
             }
         }
 

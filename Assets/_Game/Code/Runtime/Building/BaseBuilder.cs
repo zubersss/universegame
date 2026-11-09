@@ -44,6 +44,8 @@ namespace Meridian.Building
             public Meridian.Art.ModelSwap model;
             /// <summary>U-194: how far its drawing and collider reach below its cells to the drawn ground (negative: cut short above it); 0 off it.</summary>
             public float foot;
+            /// <summary>U-200: how far its drawing reaches below its cells (a stretched piece: the lowest ground under its width; else `foot`).</summary>
+            public float viewFoot;
         }
 
         public sealed class Aerostat
@@ -242,6 +244,8 @@ namespace Meridian.Building
                 for (int dx = 0; dx < spec.size.x; dx++)
                     for (int dy = 0; dy < spec.size.y; dy++) ground[new Vector2Int(save.x + dx, save.y + dy)] = piece;
                 piece.foot = FootOf(terrain, save.x, save.y, spec.size.x); // U-194: on the drawn ground, not the grid's tile top
+                // U-200: a stretched piece's drawing reaches the lowest ground under its width (its collider stays on the highest)
+                piece.viewFoot = spec.stretch ? Mathf.Max(piece.foot, ViewFootOf(terrain, save.x, save.y, spec.size.x)) : piece.foot;
             }
             if (spec.solid)
             {
@@ -281,15 +285,15 @@ namespace Meridian.Building
             }
             var viewGo = new GameObject("View");
             viewGo.transform.SetParent(go.transform, false);
-            viewGo.transform.localPosition = new Vector3(spec.size.x * 0.5f, -piece.foot, 0f);
+            viewGo.transform.localPosition = new Vector3(spec.size.x * 0.5f, -piece.viewFoot, 0f);
             var view = viewGo.AddComponent<SpriteRenderer>();
             view.sortingOrder = 3;
-            Dress(view, spec, piece.foot);
+            Dress(view, spec, piece.viewFoot);
             // U-076: the piece's model on the footprint's bottom centre, scaled like the sprite (stretch pieces fill
             // their cells; the others keep their proportions at the footprint's height).
             // U-194 (0.6.1's first smoke_18): a stretched piece's sheet fills its cells and its foot. The sheet's own fit replaces the
             // sprite's scale, so fitted to the cells alone a bottom wall kept one cell's height from the foot down: a slit under the wall above.
-            var fitTo = new Vector2(spec.size.x, spec.size.y + (spec.stretch ? piece.foot : 0f));
+            var fitTo = new Vector2(spec.size.x, spec.size.y + (spec.stretch ? piece.viewFoot : 0f));
             piece.model = Meridian.Art.ModelSwap.Attach(view, spec.artKey, go.transform, viewGo.transform.localPosition,
                 fit: spec.stretch ? Meridian.Art.ModelSwap.Fit.Stretch : Meridian.Art.ModelSwap.Fit.Height, footprint: fitTo);
             if (spec.kind == PieceKind.Lamp)
@@ -396,6 +400,25 @@ namespace Meridian.Building
             return float.IsNegativeInfinity(top) ? 0f : Mathf.Clamp(y - top, -MaxFootUp, MaxFootDown);
         }
         static readonly float[] FootSamples = { 0.1f, 0.5f, 0.9f };
+
+        /// <summary>U-200 (LEAD's read of 0.6.1's smoke_18: a wall on a slope stood on its uphill corner with a wedge of sky under the
+        /// downhill one): how far a stretched piece's DRAWING reaches down: to the lowest drawn ground under its two bottom corners and its
+        /// middle, so the wall meets the ground at the downhill corner and its uphill corner is buried. The collider keeps FootOf (the
+        /// highest ground: nothing sinks into the slope). 0 where the piece does not stand on its columns' natural top row.</summary>
+        public static float ViewFootOf(TerrainStreamer t, int x, int y, int width)
+        {
+            if (t == null || !t.SmoothGround || t.Config == null) return 0f;
+            float low = float.PositiveInfinity;
+            foreach (float q in ViewFootSamples)
+            {
+                float sx = x + q * width;
+                int column = Mathf.Min(Mathf.FloorToInt(sx), x + width - 1); // the right corner belongs to the piece's last column
+                if (t.NaturalTop(column) != y - 1) continue;
+                low = Mathf.Min(low, t.SurfaceAt(sx));
+            }
+            return float.IsPositiveInfinity(low) ? 0f : Mathf.Clamp(y - low, -MaxFootUp, MaxFootDown);
+        }
+        static readonly float[] ViewFootSamples = { 0f, 0.5f, 1f };
         /// <summary>The foot's limits (m): down to the tile's bottom and a little past it; cut short at most to a sliver of the cell.</summary>
         public const float MaxFootDown = 1.2f, MaxFootUp = 0.8f;
 

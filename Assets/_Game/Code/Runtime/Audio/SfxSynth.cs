@@ -75,5 +75,56 @@ namespace Meridian.Audio
             clip.SetData(data, 0);
             return clip;
         }
+
+        public const float ClodFallSeconds = 0.5f, PackTickSeconds = 0.07f;
+
+        /// <summary>U-195 (D-183): the scoop's clods coming down: five soft thuds of low-passed noise over a low body, the first 0.16 s in (the
+        /// clods' flight), each quieter and a little higher than the last, a little grit between. Stands in until D-186's recorded sample
+        /// (U-198). Deterministic, mono at `rate`, in [−1, 1].</summary>
+        public static float[] ClodFall(int rate = Rate)
+        {
+            var s = new float[Mathf.CeilToInt(ClodFallSeconds * rate)];
+            var rng = new System.Random(195);
+            double lp = 0;
+            for (int i = 0; i < s.Length; i++)
+            {
+                float t = i / (float)rate;
+                float noise = (float)rng.NextDouble() * 2f - 1f;
+                lp += (noise - lp) * 0.09;
+                float v = 0f;
+                for (int k = 0; k < ClodThuds.Length; k++)
+                {
+                    float tk = t - ClodThuds[k];
+                    if (tk < 0f) continue;
+                    float gain = 0.75f - 0.11f * k;
+                    v += gain * (2.4f * (float)lp * Mathf.Exp(-tk * 55f) + 0.5f * Mathf.Sin(2f * Mathf.PI * (70f + 9f * k) * tk) * Mathf.Exp(-tk * 34f));
+                }
+                s[i] = Mathf.Clamp(v, -1f, 1f) * 0.8f;
+            }
+            return s;
+        }
+        static readonly float[] ClodThuds = { 0.16f, 0.21f, 0.27f, 0.31f, 0.38f };
+
+        /// <summary>U-195: the pack's tick as a dug material lands in the PACK readout: a short bright two-tone click (1.9 kHz with its octave),
+        /// gone in 70 ms. Stands in until D-186's sample. Deterministic, mono at `rate`, in [−1, 1].</summary>
+        public static float[] PackTick(int rate = Rate)
+        {
+            var s = new float[Mathf.CeilToInt(PackTickSeconds * rate)];
+            for (int i = 0; i < s.Length; i++)
+            {
+                float t = i / (float)rate;
+                float env = Mathf.Clamp01(t / 0.002f) * Mathf.Exp(-t * 70f);
+                s[i] = Mathf.Clamp((0.7f * Mathf.Sin(2f * Mathf.PI * 1900f * t) + 0.3f * Mathf.Sin(2f * Mathf.PI * 3800f * t)) * env, -1f, 1f) * 0.6f;
+            }
+            return s;
+        }
+
+        /// <summary>A synthesized sound as a clip (allocates once per call: callers keep it).</summary>
+        public static AudioClip Clip(string name, float[] data)
+        {
+            var clip = AudioClip.Create(name, data.Length, 1, Rate, false);
+            clip.SetData(data, 0);
+            return clip;
+        }
     }
 }

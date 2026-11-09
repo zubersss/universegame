@@ -101,9 +101,37 @@ namespace Meridian.Player
         public int Entries { get; private set; }
         public int StepsApplied { get; private set; }
 
+        // ---- U-195 (D-183): the dig stroke's kick ----
+        /// <summary>The drawn camera moves `pixels` screen pixels along `direction` (world) for the next rendered frame only: position only,
+        /// after the follow, so the stage's own state and physics never see it.</summary>
+        public void Kick(Vector2 direction, float pixels)
+        {
+            if (cam == null || direction.sqrMagnitude < 1e-8f) return;
+            pendingKick = direction.normalized * (pixels * WorldPerPixel);
+        }
+        /// <summary>World metres one screen pixel covers at the play plane.</summary>
+        public float WorldPerPixel => (StageActive ? Stage.Frame : cam != null && cam.orthographic ? cam.orthographicSize * 2f : BaseFrame) / Mathf.Max(1, cam != null ? cam.pixelHeight : Screen.height);
+        /// <summary>The kick drawn this frame (zero on every other frame) and the frames one has been drawn since load (tests).</summary>
+        public Vector2 KickNow { get; private set; }
+        public int KickFrames { get; private set; }
+        Vector2 pendingKick;
+        Vector3 kickApplied;
+
+        void ApplyKick()
+        {
+            if (pendingKick == Vector2.zero) return;
+            kickApplied = new Vector3(pendingKick.x, pendingKick.y, 0f);
+            transform.position += kickApplied;
+            KickNow = pendingKick;
+            KickFrames++;
+            pendingKick = Vector2.zero;
+        }
+
         void LateUpdate()
         {
             Entries++;
+            if (kickApplied != Vector3.zero) { transform.position -= kickApplied; kickApplied = Vector3.zero; } // last frame's kick is gone before this frame's follow
+            KickNow = Vector2.zero;
             if (target == null) return;
             if (haveLast && (target.position - lastTarget).sqrMagnitude > Teleport * Teleport) SnapToTarget();
             lastTarget = target.position; haveLast = true;
@@ -125,6 +153,7 @@ namespace Meridian.Player
             {
                 var goal = new Vector3(target.position.x + offset.x, target.position.y + offset.y, transform.position.z);
                 transform.position = Vector3.SmoothDamp(transform.position, goal, ref velocity, smoothTime);
+                ApplyKick();
                 return;
             }
             Hook();
@@ -133,6 +162,7 @@ namespace Meridian.Player
             Stage.Rumble = flown != null ? flown.Rumble : 0f; // U-150: the engine rumble while boosting, position only
             Stage.Step(BuildInput(Time.deltaTime));
             Apply();
+            ApplyKick();
             StepsApplied++;
         }
 

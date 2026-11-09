@@ -161,6 +161,10 @@ namespace Meridian.UI
             ToolSlot = gameObject.AddComponent<HudToolSlot>();
             ToolSlot.hud = this;
             ToolSlot.Build(root);
+            // U-195 (D-183): a dug material's icon flies to the PACK readout (built last: it draws over the other tags)
+            PackFlight = gameObject.AddComponent<HudPackFlight>();
+            PackFlight.hud = this;
+            PackFlight.Build(root);
             // U-147 (D-149): the hazard row and the suit row on paper tags in ink; the suit bar an ink-ruled strip with a gold fill.
             Tag(root, "HazardTag", tl, new Vector2(18f, -243f), new Vector2(128f, 23f), tl, HazardLabel, CryoText);
             Tag(root, "SuitTag", tl, new Vector2(18f, -267f), new Vector2(312f, 32f), tl, suitWord, SuitRateText);
@@ -229,6 +233,8 @@ namespace Meridian.UI
         public HintCards Hints { get; private set; }
         /// <summary>U-193: the held tool's slot (its icon, name and the Q / E caps).</summary>
         public HudToolSlot ToolSlot { get; private set; }
+        /// <summary>U-195: the material icons' flight to the PACK readout.</summary>
+        public HudPackFlight PackFlight { get; private set; }
 
         /// <summary>U-174: the depth readout under the Surface Line ("DEPTH 12 m · SUBSOIL"; blank topside) and the pack-full cue.</summary>
         public Text DepthText { get; private set; }
@@ -351,9 +357,35 @@ namespace Meridian.UI
             ScripTag = Tag(ScripRoot, "ScripTag", tl, new Vector2(rankX - 6f, -17f), new Vector2(124f, 32f), new Vector2(1f, 1f), ScripText);
         }
 
+        // ---- U-195 (D-183): the pack readout bumps as a dug material's icon lands in it ----
+        /// <summary>The bump's size (10 % at its start) and how long it eases back.</summary>
+        public const float PackBump = 0.10f, PackBumpSeconds = 0.18f;
+        /// <summary>The pack tag's centre from the HUD's top-centre anchor (canvas units): where a material's flight ends, and the point the
+        /// bump scales about.</summary>
+        public static readonly Vector2 PackCentre = new Vector2(PackTagX + PackTagW * 0.5f, -33f);
+        /// <summary>The readout's scale now (1 between bumps) and the bumps since load (tests).</summary>
+        public float PackScale { get; private set; } = 1f;
+        public int PackBumps { get; private set; }
+        float packBumpAt = -99f;
+        /// <summary>The HUD canvas's root (the material icons fly on it, HudPackFlight).</summary>
+        public Transform HudRoot => hudRoot;
+
+        public void BumpPack() { packBumpAt = Time.time; PackBumps++; }
+
+        void StepPackBump()
+        {
+            float k = (Time.time - packBumpAt) / PackBumpSeconds;
+            float scale = k >= 0f && k < 1f ? 1f + PackBump * (1f - k) : 1f;
+            if (Mathf.Approximately(scale, PackScale)) return;
+            PackScale = scale;
+            PackRoot.localScale = new Vector3(scale, scale, 1f);
+            PackRoot.anchoredPosition = PackCentre * (1f - scale); // about the tag's centre, not the anchor
+        }
+
         void UpdatePack()
         {
             if (PackRoot == null) return;
+            StepPackBump();
             var s = Meridian.Core.GameState.Instance;
             var inv = s != null ? s.inventory : null;
             bool show = inv != null && !float.IsPositiveInfinity(inv.LimitKg) && inv.LimitKg > 0f;

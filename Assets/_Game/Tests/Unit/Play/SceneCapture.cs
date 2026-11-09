@@ -3807,6 +3807,147 @@ namespace Meridian.Tests
             }
         }
 
+        /// <summary>U-195 (D-183): the stroke's feel → coordination/reports/unity/u195/: 1_beam_burst_t1 (a Beam stroke at the camp's edge,
+        /// 0.12 s after it lands: the clods in the air), 2_icon_in_flight (a material's icon between its drop and the PACK readout),
+        /// 3_shovel_clod_fall (a new surveyor's scoop, its clods coming down), 4_beam_burst_t3 (a Beam stroke in a room 56 m under the
+        /// Surface Line: the tier's clods).</summary>
+        [UnityTest, Timeout(300000)]
+        public IEnumerator CaptureU195DigFeel()
+        {
+            var name = Environment.GetEnvironmentVariable(Variable);
+            if (string.IsNullOrEmpty(name)) Assert.Ignore($"Set {Variable} (tools/unity_capture.ps1).");
+            if (SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.Null)
+                Assert.Fail("No graphics device: run without -nographics.");
+            bool wasCartoon = Meridian.View2D.CartoonStage.Enabled;
+            Meridian.View2D.CartoonStage.Enabled = true;
+            var state = GameState.Instance;
+            var suiteTool = Meridian.Progress.SkillStats.ToolOverride;
+            try
+            {
+                Meridian.Progress.SkillStats.ToolOverride = Meridian.Rig.DigTool.Beam;
+#if UNITY_EDITOR
+                yield return UnityEditor.SceneManagement.EditorSceneManager.LoadSceneAsyncInPlayMode(
+                    CorePath, new LoadSceneParameters(LoadSceneMode.Single));
+#endif
+                var director = UnityEngine.Object.FindAnyObjectByType<SceneDirector>();
+                float timeout = Time.realtimeSinceStartup + 30f;
+                while ((!director.IsReady || !director.PlanetSide.terrain.IsSettled) && Time.realtimeSinceStartup < timeout) yield return null;
+                var side = director.PlanetSide;
+                state = GameState.Instance;
+                if (side.hazards != null) side.hazards.enabled = false;
+                if (side.dayNight != null) side.dayNight.Override = 0.45f;
+                side.creatures.autoSpawn = false; side.creatures.DespawnAll();
+                state.skillNodes.Clear();
+                Meridian.Progress.SkillStats.Apply(state);
+                var dir = "coordination/reports/unity/u195";
+                Directory.CreateDirectory(dir);
+                var feel = side.digFeel;
+                Assert.NotNull(feel, "DigFeel on the planet side");
+                var player = side.player;
+                player.externalInput = true; player.intent = default;
+                var input = player.GetComponent<Meridian.Player.PlayerRigInput>();
+                var view = player.GetComponentInChildren<Meridian.Player.RigToolView>();
+                var follow = side.sideCamera.GetComponent<Meridian.Player.CameraFollow>();
+                int camp = Mathf.FloorToInt(Meridian.Planet.POI.PoiCatalog.SpawnCamp.CenterX);
+                float x = camp + 16.5f;
+                var feet = new Vector2(x, side.terrain.SurfaceAt(x) + 0.05f);
+                player.Body.position = feet; player.transform.position = feet; player.Body.linearVelocity = Vector2.zero;
+                for (int i = 0; i < 40; i++) yield return new WaitForFixedUpdate();
+                if (follow != null) follow.SnapToTarget();
+                input.module = Meridian.Rig.RigModule.Beam;
+                float until = Time.realtimeSinceStartup + 10f;
+                while ((view.Tool.sprite == null || !view.Tool.sprite.name.Contains("beam")) && Time.realtimeSinceStartup < until) yield return null;
+                yield return new WaitForSeconds(1f);
+                var hudCanvas = side.sideHud.RankSlot.canvas;
+                IEnumerator Shot(string label)
+                {
+                    yield return SaveWithUi(side.sideCamera, hudCanvas, $"{name}_{label}");
+                    File.Copy($"logs/capture_{name}_{label}.png", $"{dir}/{label}.png", true);
+                }
+
+                // 1: a Beam stroke at T1, the clods in the air
+                var target = player.Body.position + new Vector2(2.2f, -0.8f);
+                input.AimAt(target);
+                Assert.IsTrue(side.rig.Dig(target), "the Beam stroke at camp");
+                yield return new WaitForSeconds(0.12f);
+                yield return Shot("1_beam_burst_t1");
+                TestContext.Out.WriteLine($"[MERIDIAN] u195 1_beam_burst_t1: {side.rig.LastDugCells} cells, {feel.LastBurst} clods ({(feel.LastBurstOnSheet ? "B-232's sheet" : "the stand-in")}), {feel.Alive} drawn at the shot");
+                yield return new WaitForSeconds(0.8f);
+
+                // 2: a material's icon on its way to the PACK readout
+                var iron = Meridian.Items.ItemRegistry.Get("iron");
+                until = Time.realtimeSinceStartup + 10f;
+                while (Meridian.UI.ItemIcons.Get(iron.id, side.terrain) == null && Time.realtimeSinceStartup < until) yield return null;
+                int flights = feel.Flights;
+                side.rig.drops.Spawn(iron.id, player.Body.position + new Vector2(0.9f, 0.4f), null);
+                until = Time.realtimeSinceStartup + 10f;
+                while (feel.Flights == flights && Time.realtimeSinceStartup < until) yield return null;
+                yield return new WaitForSeconds(0.1f);
+                yield return Shot("2_icon_in_flight");
+                TestContext.Out.WriteLine($"[MERIDIAN] u195 2_icon_in_flight: flights {feel.Flights - flights}, in the air at the shot {side.sideHud.PackFlight.InFlight}, from {side.sideHud.PackFlight.LastFrom} to {Meridian.UI.SideHud.PackCentre}");
+                yield return new WaitForSeconds(0.6f);
+
+                // 3: a new surveyor's shovel scoop, its clods coming down
+                Meridian.Progress.SkillStats.ToolOverride = null;
+                Meridian.Progress.SkillStats.Apply(state);
+                until = Time.realtimeSinceStartup + 10f;
+                while ((view.Tool.sprite == null || !view.Tool.sprite.name.Contains("shovel")) && Time.realtimeSinceStartup < until) yield return null;
+                var scoop = player.Body.position + new Vector2(-1.3f, -0.6f);
+                input.AimAt(scoop);
+                bool dug = false;
+                System.Action<Vector2> onDug = _ => dug = true;
+                side.rig.Dug += onDug;
+                input.holdUse = true;
+                until = Time.realtimeSinceStartup + 10f;
+                while (!dug && Time.realtimeSinceStartup < until) yield return null;
+                side.rig.Dug -= onDug;
+                input.holdUse = false;
+                yield return new WaitForSeconds(0.22f);
+                yield return Shot("3_shovel_clod_fall");
+                TestContext.Out.WriteLine($"[MERIDIAN] u195 3_shovel_clod_fall: dug {dug}, tool {side.rig.Tool}, {feel.LastBurst} clods, {feel.Alive} drawn at the shot");
+                yield return new WaitForSeconds(0.8f);
+
+                // 4: a Beam stroke in a room 56 m under the Surface Line (the third tier's clods)
+                Meridian.Progress.SkillStats.ToolOverride = Meridian.Rig.DigTool.Beam;
+                Meridian.Progress.SkillStats.Apply(state);
+                var t = side.terrain;
+                float rx = camp + 60.5f, cy = Meridian.Mining.DigRun.LineAt(t, rx) - 56f;
+                var body = player.Body;
+                body.simulated = false;
+                body.position = new Vector2(rx, cy - 0.5f); player.transform.position = body.position;
+                yield return null;
+                until = Time.realtimeSinceStartup + 20f;
+                while (!t.IsSettled && Time.realtimeSinceStartup < until) yield return null;
+                var rig = side.rig; var owner = rig.owner; rig.owner = null;
+                try
+                {
+                    for (float dy = -1.5f; dy <= 1.5f + 1e-3f; dy += 0.6f)
+                        for (float dx = -2.4f; dx <= 2.4f + 1e-3f; dx += 0.6f)
+                            rig.Dig(new Vector2(rx + dx, cy + dy));
+                }
+                finally { rig.owner = owner; }
+                for (int k = 0; k < 20; k++) yield return null;
+                var drops = side.rig.drops;
+                if (drops != null) for (int k = drops.Live.Count - 1; k >= 0; k--) drops.Collect(drops.Live[k]);
+                if (follow != null) follow.SnapToTarget();
+                yield return new WaitForSeconds(1f); // the carving's own clods are gone
+                var wall = body.position + new Vector2(3.3f, 0.6f);
+                input.AimAt(wall);
+                Assert.IsTrue(side.rig.Dig(wall), "the Beam stroke on the room's wall");
+                yield return new WaitForSeconds(0.12f);
+                yield return Shot("4_beam_burst_t3");
+                TestContext.Out.WriteLine($"[MERIDIAN] u195 4_beam_burst_t3: depth {Meridian.Mining.DigRun.Depth(t, wall):0} m, tier {Meridian.Mining.DigRun.TierAt(t, wall) + 1}, {feel.LastBurst} clods ({(feel.LastBurstOnSheet ? "B-232's sheet" : "the stand-in")}), {feel.Alive} drawn at the shot");
+                body.simulated = true;
+                LogAssert.NoUnexpectedReceived();
+            }
+            finally
+            {
+                Meridian.View2D.CartoonStage.Enabled = wasCartoon;
+                if (state != null) { state.skillNodes.Clear(); Meridian.Progress.SkillStats.Apply(state); }
+                Meridian.Progress.SkillStats.ToolOverride = suiteTool;
+            }
+        }
+
         /// <summary>U-175 (D-174): the Skill Tree panel topside at Earth's camp, B-204's mock-up state (six bought, Beam Power III chosen):
         /// 1_skill_tree.png with 2 of its 6 hematite (BUY greyed, the reason), 2_skill_tree_ready.png with 6 → coordination/reports/unity/u175/.</summary>
         [UnityTest, Timeout(240000)]

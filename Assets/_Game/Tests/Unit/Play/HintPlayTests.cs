@@ -266,5 +266,53 @@ namespace Meridian.Tests
             Assert.AreEqual(HintCards.DigDown, hints.Showing, "on again: it fires");
             LogAssert.NoUnexpectedReceived();
         }
+
+        /// <summary>
+        /// U-204 F4 / F13 (B-228's read of 0.6.1's smoke): a card in the upper band leaves the tool slot readable (its paper, its name plate
+        /// and both key caps clear of the card: at -160 the card covered the name), and while a planet's title card is on the screen the
+        /// hint and its arrow step aside (the arrow had stuck out over the title card), back when it leaves.
+        /// </summary>
+        [UnityTest, Timeout(300000)]
+        public IEnumerator ACardLeavesTheToolSlotReadableAndStepsAsideForATitleCard()
+        {
+            var titles0 = TitleCard.ShowOverride;
+            yield return Boot();
+            try
+            {
+                yield return Frames(5);
+                hints.Show(HintCards.PackFull); // a card with an arrow (to the PACK readout)
+                yield return Frames(5);
+                Assert.AreEqual(HintCards.PackFull, hints.Showing);
+                Assert.IsTrue(hints.AtTop, "the surveyor stands at camp: the card is in the upper band");
+                var slot = hud.ToolSlot;
+                Assert.IsTrue(slot.Root.gameObject.activeInHierarchy, "the tool slot shows on foot");
+                var cardRect = hints.CardScreenRect;
+                Assert.Greater(cardRect.width, 0f, "the card's rect");
+                foreach (var part in new[] { slot.Slot.rectTransform, slot.NameTag.rectTransform, slot.Name.rectTransform, slot.PrevKey.rectTransform, slot.NextKey.rectTransform })
+                {
+                    var r = HintCards.ScreenRect(part);
+                    Assert.IsFalse(cardRect.Overlaps(r), $"the card {cardRect} covers the tool slot's {part.name} {r}");
+                }
+                Assert.IsTrue(hints.Arrow.enabled, "PACK FULL's arrow shows with its card");
+
+                TitleCard.ShowOverride = true;
+                var titles = MenuController.Instance.TitleCards;
+                titles.Show(Meridian.Planets.PlanetId.Earth);
+                yield return Until(() => titles.Showing != null, 6f);
+                Assert.NotNull(titles.Showing, "Earth's title card is up");
+                yield return Frames(3);
+                Assert.IsFalse(hints.Card.gameObject.activeSelf, "the hint steps aside under a title card");
+                Assert.IsFalse(hints.Arrow.enabled, "and its arrow with it");
+                Assert.AreEqual(HintCards.PackFull, hints.Showing, "it is held, not dismissed");
+                titles.Hide();
+                yield return Until(() => titles.Showing == null && hints.Card.gameObject.activeSelf, 6f);
+                yield return Frames(3);
+                Assert.IsTrue(hints.Card.gameObject.activeSelf, "the hint is back when the title leaves");
+                Assert.IsTrue(hints.Arrow.enabled, "with its arrow");
+                hints.Dismiss();
+                LogAssert.NoUnexpectedReceived();
+            }
+            finally { TitleCard.ShowOverride = titles0; }
+        }
     }
 }

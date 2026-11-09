@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace Meridian.Audio
 {
-    public enum Sfx { Jump, Land, Dig, Place, UiClick, Boom, Shovel } // U-150: Boom, U-193: Shovel appended (every older value stays)
+    public enum Sfx { Jump, Land, Dig, Place, UiClick, Boom, Shovel, ClodFall, PackTick } // U-150: Boom, U-193: Shovel, U-195: ClodFall, PackTick appended (every older value stays)
 
     /// <summary>
     /// Plays the game's sounds (Bible §10.3, Core): pooled one-shot sources, a thrust loop and an
@@ -22,6 +22,9 @@ namespace Meridian.Audio
         public AudioClip boom;
         /// <summary>U-193 (D-182): the shovel's scoop, for a dig while the shovel is the tool (the Beam keeps `dig`); unset, SfxSynth's placeholder.</summary>
         public AudioClip shovel;
+        /// <summary>U-195 (D-183): a scoop's clods landing and the pack's tick as a material arrives; unset, SfxSynth's placeholders (U-198 wires
+        /// D-186's recorded samples).</summary>
+        public AudioClip clodFall, packTick;
         /// <summary>U-150: after a boom the engine sound rises (louder, higher) and settles back over RiseSeconds.</summary>
         public const float RiseSeconds = 0.6f, RiseVolume = 0.35f, RisePitch = 0.12f;
         /// <summary>U-150: 1 right after a boom, back to 0 over RiseSeconds (tests read it).</summary>
@@ -134,7 +137,10 @@ namespace Meridian.Audio
             var clip = id switch
             {
                 Sfx.Jump => jump, Sfx.Land => land, Sfx.Dig => dig, Sfx.Place => place, Sfx.Boom => boom != null ? boom : (boom = SfxSynth.BoomClip()),
-                Sfx.Shovel => shovel != null ? shovel : (shovel = SfxSynth.ShovelClip()), _ => uiClick,
+                Sfx.Shovel => shovel != null ? shovel : (shovel = SfxSynth.ShovelClip()),
+                Sfx.ClodFall => clodFall != null ? clodFall : (clodFall = SfxSynth.Clip("clod_fall_placeholder", SfxSynth.ClodFall())),
+                Sfx.PackTick => packTick != null ? packTick : (packTick = SfxSynth.Clip("pack_tick_placeholder", SfxSynth.PackTick())),
+                _ => uiClick,
             };
             LastPlayed = id;
             PlayCount++;

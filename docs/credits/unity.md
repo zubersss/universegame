@@ -21,6 +21,8 @@ domain under **CC0 1.0** (https://creativecommons.org/publicdomain/zero/1.0/).
 | `Assets/_Game/Audio/ambient/ambient_wind.wav` | ambient loop | AudioSynth.cs, seed 6 (gusting wind, 20 s loop) | CC0 1.0 (original) |
 | (no file: built at run time) | sonic boom placeholder (U-150, D-158) | `Code/Runtime/Audio/SfxSynth.cs` Boom(), seed 158 (two N-wave cracks 0.11 s apart, a 45 Hz thump, a low rumble; 1.4 s) | CC0 1.0 (original) |
 | (no file: built at run time) | shovel scoop placeholder (U-193, D-182) | `Code/Runtime/Audio/SfxSynth.cs` Shovel(), seed 193 (a low-passed soil scrape, a 90 Hz thud as the clod comes loose, a crumble of grit; 0.28 s) | CC0 1.0 (original) |
+| (no file: built at run time) | clod-fall placeholder (U-195, D-183; until D-186's sample) | `Code/Runtime/Audio/SfxSynth.cs` ClodFall(), seed 195 (silent 0.16 s for the clods' flight, then five soft low-passed thuds over 70-106 Hz bodies; 0.5 s) | CC0 1.0 (original) |
+| (no file: built at run time) | pack tick placeholder (U-195, D-183; until D-186's sample) | `Code/Runtime/Audio/SfxSynth.cs` PackTick() (a 1.9 kHz tone with its octave, 70 ms, no noise source) | CC0 1.0 (original) |
 
 ## Fonts
 

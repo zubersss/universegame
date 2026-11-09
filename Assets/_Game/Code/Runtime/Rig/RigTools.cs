@@ -92,6 +92,7 @@ namespace Meridian.Rig
         public bool Dig(Vector2 world)
         {
             var t = TileOf(world);
+            LastDugCells = 0;
             if (terrain == null || !InDigReach(Brush ? world : new Vector2(t.x + 0.5f, t.y + 0.5f))) return false;
             // U-056: base pieces come down first (their item comes back).
             if (dismantle != null && dismantle(world)) { Dug?.Invoke(world); return true; }
@@ -117,10 +118,15 @@ namespace Meridian.Rig
             byte id = terrain.GetTile(t.x, t.y);
             if (!TileId.IsSolid(id)) return false;
             if (!terrain.SetTile(t.x, t.y, TileId.Air)) return false;
+            LastDugCells = 1;
             Dug?.Invoke(world);
             DropFor(id, t.x, t.y);
             return true;
         }
+
+        /// <summary>U-195: the ground cells the last Dig opened, set before Dug is raised (0: a base piece came down, a node was cut, or
+        /// nothing was dug; a mound's skirt carved with no tile counts as 1). The stroke's feel reads it (DigFeel).</summary>
+        public int LastDugCells { get; private set; }
 
         /// <summary>U-157: the Beam's round scoop: every solid tile within BrushRadius of the point, one outline rebuild per chunk.</summary>
         bool DigBrush(Vector2 p)
@@ -143,6 +149,7 @@ namespace Meridian.Rig
             }
             finally { terrain.EndBatch(); }
             if (dug == 0) return false;
+            LastDugCells = dug > 0 ? dug : 1;
             Dug?.Invoke(p);
             return true;
         }

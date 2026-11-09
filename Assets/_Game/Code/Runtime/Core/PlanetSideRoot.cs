@@ -37,6 +37,8 @@ namespace Meridian.Core
         public Meridian.Hazards.SolariteCrystals solarite { get; private set; }
         /// <summary>U-158: the planet's resource nodes and buried finds.</summary>
         public Meridian.Mining.ResourceFinds finds { get; private set; }
+        /// <summary>U-195 (D-183): the stroke's feel (the clods, the camera kick, a material's flight to the PACK readout).</summary>
+        public Meridian.Mining.DigFeel digFeel { get; private set; }
         public Meridian.Building.BaseBuilder bases { get; private set; }
         /// <summary>U-176: the Builder's ladders, the winch, the recall beacon.</summary>
         public Meridian.Building.Ladders ladders { get; private set; }
@@ -203,6 +205,8 @@ namespace Meridian.Core
             if (finds == null) finds = gameObject.AddComponent<Meridian.Mining.ResourceFinds>();
             finds.flares = hazards != null ? hazards.flares : null;
             finds.Configure(config, terrain, rig, GameState.Instance != null ? GameState.Instance.worldSeed : 1969);
+            // U-195 (D-183): the stroke's feel, drawn only (it hooks the rig and the drops by itself)
+            if (digFeel == null) { digFeel = gameObject.AddComponent<Meridian.Mining.DigFeel>(); digFeel.side = this; }
             // U-056: this planet's base, rebuilt from the save; the Builder and the Beam work on its pieces.
             if (bases == null) { bases = gameObject.AddComponent<Meridian.Building.BaseBuilder>(); bases.terrain = terrain; bases.rig = rig; bases.player = player != null ? player.transform : null; }
             bases.ConfigureFor(config.id);

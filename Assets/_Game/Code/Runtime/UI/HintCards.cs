@@ -22,7 +22,7 @@ namespace Meridian.UI
         public const float ShowSeconds = 6f, Scale = 1.25f;
         /// <summary>LEAD (u185 review): the card stays clear of the surveyor. Up top, under the depth readout and the PACK FULL cue (clear of
         /// the gauges left and the site list right); down at the lower centre only while the surveyor is up there. Canvas px from the edge.</summary>
-        public const float TopY = -160f, BottomY = 150f; // U-188: room over the card for a 72 px arrow up to the HUD's top row (the medallion ends at -82)
+        public const float TopY = -196f, BottomY = 150f; // U-188: room over the card for a 72 px arrow up to the HUD's top row (the medallion ends at -82); U-204 F4: under the tool slot's name plate (it ends at -188; the card at -160 covered it)
         /// <summary>The surveyor's box for the overlap test: the capsule plus the pack and the held tool (m).</summary>
         public const float BodyHalfWidth = 0.7f, BodyHeight = 2.1f;
         /// <summary>The card is in the upper band (false: the lower centre).</summary>
@@ -183,11 +183,14 @@ namespace Meridian.UI
             if (arrow != null) arrow.enabled = false;
         }
 
+        /// <summary>U-204 F13: a planet's title card is on the screen (it draws over the HUD).</summary>
+        static bool TitleUp => MenuController.Instance != null && MenuController.Instance.TitleCards != null && MenuController.Instance.TitleCards.Showing != null;
+
         bool IsBlocked()
         {
             if (Blocked != null) return Blocked();
             if (transitions == null) transitions = FindAnyObjectByType<Meridian.Transitions.TransitionDirector>();
-            return (transitions != null && transitions.Busy) || MenuController.HudHidden || InventoryPanel.AnyOpen || CraftingPanel.AnyOpen
+            return (transitions != null && transitions.Busy) || TitleUp || MenuController.HudHidden || InventoryPanel.AnyOpen || CraftingPanel.AnyOpen
                 || CataloguePanel.AnyOpen || SellPanel.AnyOpen || SkillTreePanel.AnyOpen;
         }
 
@@ -334,6 +337,15 @@ namespace Meridian.UI
             // the card up: its time, or its action done
             if (Showing != null)
             {
+                // U-204 F13 (B-228's read of smoke_21: a hint's arrow stuck out over the planet's title card, its own card under it): while a
+                // title card holds the stage the hint and its arrow step aside and its clock waits; they come back as the title leaves.
+                if (TitleUp)
+                {
+                    if (card.gameObject.activeSelf) card.gameObject.SetActive(false);
+                    if (arrow.enabled) arrow.enabled = false;
+                    return;
+                }
+                if (!card.gameObject.activeSelf) card.gameObject.SetActive(true);
                 ShownFor += Time.unscaledDeltaTime;
                 bool done = Showing switch
                 {
