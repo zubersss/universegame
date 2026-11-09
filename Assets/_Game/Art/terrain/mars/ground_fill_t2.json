@@ -22,6 +22,7 @@
   "wrap": "repeat",
   "variant": "t2",
   "mapping": "as ground_fill: u = x x 64 mod 512, v = -y x 64 mod 512; a standalone texture (Repeat wrap); strata only (D-165)",
+  "tone_hex": "#5C3A2B",
   "tier": 2,
   "tier_name": "Subsoil",
   "depth_m": [

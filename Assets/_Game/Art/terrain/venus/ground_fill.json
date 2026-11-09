@@ -20,5 +20,6 @@
   "world_space": true,
   "standalone": true,
   "wrap": "repeat",
-  "mapping": "u = x x 64 mod 512, v = -y x 64 mod 512; a standalone texture (outside the atlases, Repeat wrap)"
+  "mapping": "u = x x 64 mod 512, v = -y x 64 mod 512; a standalone texture (outside the atlases, Repeat wrap)",
+  "tone_hex": "#586257"
 }

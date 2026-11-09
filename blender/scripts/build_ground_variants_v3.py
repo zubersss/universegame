@@ -1945,7 +1945,8 @@ def sheet_meta(kn, frames):
     elif kn.startswith("ground_fill_"):
         v = kn.rsplit("_", 1)[1]
         meta.update({"tile_x": True, "tile_y": True, "world_space": True, "standalone": True, "wrap": "repeat", "variant": v,
-                     "mapping": "as ground_fill: u = x x 64 mod 512, v = -y x 64 mod 512; a standalone texture (Repeat wrap); strata only (D-165)"})
+                     "mapping": "as ground_fill: u = x x 64 mod 512, v = -y x 64 mod 512; a standalone texture (Repeat wrap); strata only (D-165)",
+                     "tone_hex": B.fill_tone(sheet, PLANET)[1]})                              # D-190: the fill's main tone, for the puff's tint
         if PART == "tiers":                                                                   # B-203: the json names its tier
             t = int(v[1:])
             meta.update({"tier": t, "tier_name": TIERS[t][0], "depth_m": list(TIERS[t][1]), "transition_m": 1.0,

@@ -21,5 +21,6 @@
   "standalone": true,
   "wrap": "repeat",
   "variant": "basalt",
-  "mapping": "as ground_fill: u = x x 64 mod 512, v = -y x 64 mod 512; a standalone texture (Repeat wrap); strata only (D-165)"
+  "mapping": "as ground_fill: u = x x 64 mod 512, v = -y x 64 mod 512; a standalone texture (Repeat wrap); strata only (D-165)",
+  "tone_hex": "#64665D"
 }

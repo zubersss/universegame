@@ -983,6 +983,22 @@ def copy_diff(name):
     return p
 
 
+def fill_tone(sheet, planet):
+    """A fill's main tone -> (the palette role, '#RRGGBB'): its opaque pixels snapped to the planet's palette with shadows, the
+    tone with the largest share. The same rule as build_back_wall_v3.tier_colours (B-230's footers name it per tier); UNITY
+    reads it as "tone_hex" to tint the dig puff and clods by the fill drawn at the dug cell (D-190)."""
+    import numpy as np
+    pal = v3.palette_with_shadows(planet)
+    names = list(pal)
+    P = np.stack([np.array(v3.hex_rgb(pal[k]), np.float32) / 255.0 for k in names])
+    px = sheet[..., :3][sheet[..., 3] > 250].astype(np.float32) / 255.0
+    px = px[:: max(1, len(px) // 20000)]
+    idx = np.abs(px[:, None, :] - P[None, :, :]).sum(-1).argmin(-1)
+    u, c = np.unique(idx, return_counts=True)
+    k = names[int(u[int(np.argmax(c))])]
+    return k, pal[k].upper()
+
+
 def sheet_meta(kn, frames):
     import numpy as np
     base = "ground_decor" if kn.startswith("ground_decor_") else kn
@@ -1004,7 +1020,8 @@ def sheet_meta(kn, frames):
                      "note": "low scallops only: the art stretches <= 22 % along the band on a 35 deg slope"})
     elif kn == "ground_fill":
         meta.update({"tile_x": True, "tile_y": True, "world_space": True, "standalone": True, "wrap": "repeat",
-                     "mapping": "u = x x 64 mod 512, v = -y x 64 mod 512; a standalone texture (outside the atlases, Repeat wrap)"})
+                     "mapping": "u = x x 64 mod 512, v = -y x 64 mod 512; a standalone texture (outside the atlases, Repeat wrap)",
+                     "tone_hex": fill_tone(sheet, PLANET)[1]})
     elif kn == "dig_rim":
         meta.update({"tile_x": True, "repeat_px": RIM_W, "ink_row": RIM_ROW,
                      "mapping": "along each carved hole's outline; the rows below the ink lie in the solid (the normal points into the air); the sprite pivot is ON the ink row 4"})
