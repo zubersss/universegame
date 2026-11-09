@@ -25,6 +25,9 @@ the next live rank runs now and the skipped role goes next after it files. A rol
 keeps its want filed and refreshed (D-075) and works its `## While waiting` list. Cycle 278 (11-08 01:4x: all three windows restarted ~01:27; lock B's tests green (MarsStage 3/3, the Jupiter PlayMode slice 20/20) but its captures died with the restart; B-170 in; THE OWNER'S 0.4.7 PLAYTEST → D-158: the flight overhaul goes first and rides 0.4.8). A role files its want only when the queue says it is next after the running job:
 Cycle 281 (11-08 09:4x, the resume: all three windows restarted ~09:30 after a ~3-hour break; no lock, no want; free RAM 0.69 GB at 09:33 while the sessions started, 1.83 GB at 09:4x: the gate is open). Done since 05:1x: U-156 accepted; B-176 exported for the four inner planets; B-177's islands for all four giants; B-178 Earth's bands; B-179's desert and taiga exported, the tundra accepted with one fix; D-167.
 Cycle 282 (11:0x, 2-hour tick): every 0.5.0 art item is in and verified (B-178 frost, B-179 tundra, B-180 lips, B-181 all, B-183 forest / coast / plains with D-169's layer2, Earth's dig_puff). UNITY's short lock (U-157's D-168 fix + U-164) is in its capture part (11:04); the re-shot u157/1_scoop (a round bowl) and u158/4_pocket_dug (a U-bottomed shaft) viewed at 11:0x.
+Cycle 297 (11-09 14:0x, the resume: all three windows restarted ~14:00 on Fable 5.2). The restart cut U-194's chain mid-run: heavy_unity.lock (13:56:50, PlayMode slice C) is ORPHANED (no Unity / Blender process at 14:03; the log ends without a result). Standing, no code changed since: compile 0 / 0 (13:38), EditMode 493/493 (13:40), slice A 23/24 (13:46), slice B 25/29 (13:51; its 1 fail is the AI worst-frame row, 1.31 ms against 1.0: RULED as in 0.6.0's sweep where it read 1.68 ms: noted, not blocking 0.6.1, the threshold stays). Free RAM 1.39 → 1.49 GB while the sessions start (gate 1.5). UNITY removes its own lock and the stray Assets/InitTestScene* pair, then resumes at slice C (a restart kill, not a memory stop: D-046's re-run is not used). BLENDER files only until the chain releases. Added B-233 (the ten site icons; BLENDER's 12:2x proposal accepted, D-187).
+1. UNITY · NOW: U-194 Build 0.6.1 from slice C (C → D → F → LeadQA M1Loop / M3Inner / D1DigRun → BudgetGate → the release → the 79-shot smoke → the dev probe; one lock per slice) → U-195 → U-196 → U-197 → U-198 → U-199; the giants (U-189 / U-191) after.
+2. BLENDER · after U-194's release, in its lock: B-229 sheet → B-220 Neptune → Venus deck → the export of all bands → B-230 → B-232 → the B-231 design sheet → B-224 / B-223 / B-225 / B-233 previews. Once 0.6.1 is out the two roles are of equal rank (D-037 alternation): BLENDER's sheets take turns with UNITY's U-195 / U-196 checks.
 13:5x THE OWNER'S 0.6.0 PLAYTEST (USER-36): "I like the digging so far" + four asks → D-183 (the stroke and the hole: U-195, U-196, B-230, B-232), D-184 (ground that collapses when undercut: U-197), D-185 (art v5, a modern hand-drawn cartoon with rigged jointed characters; a style test first: C5, B-231 then U-199), D-186 (recorded audio: U-198). Order after 0.6.1: UNITY U-195 → U-196 → U-197 → U-198 → U-199; the giants' U-189 / U-191 after. BLENDER: B-229 → B-220's exports → B-230 → B-232 → B-231 (design, files-only, interleaved). U-194 (Build 0.6.1, in UNITY's lock since 13:38) is unchanged.
 Cycle 296 (12:5x, 2-hour tick): the owner closed the ChatGPT app (USER-37 resolved); free RAM 1.99 GB at 12:51, no lock → UNITY pinged at 12:51 (want live since 12:03). Since 11:5x: U-193's fixes + the tool slot + U-194's wall seating coded (uncompiled, UNITY's tree); BLENDER's sources all in (B-220 rev, B-227 rev 2, B-223, B-225); B-227 beam / survey accepted, builder / grapple in rev. Not paused: UNITY 12:24, BLENDER 12:19. Added B-228 (the 0.6.1 smoke read).
 1. UNITY · NOW: U-193 slice 2 (compile + EditMode, the PlayMode slice + LeadQA D1DigRun, CaptureU193Shovel) → U-194 Build 0.6.1 (file the want after BLENDER's B-227 sheet + export, so the icons ride the build) → U-189 + U-191, U-177, U-192, U-179.
@@ -113,10 +116,14 @@ Rules: nothing here needs the lock; it stays under ~300 MB of extra RAM; no Unit
 did in your status before the next poll. LEAD tops each list up to ≥ 3 items every cycle.
 
 **UNITY**
-(Cycle 296, 12:5x; the tool slot, the wall seating and the status trim are done)
-- U-194's release prep as files: the 79-shot smoke list (smoke_1 the title, smoke_18 the walls, smoke_64..67), the 0.6.1 notes for the owner page (what changed since 0.6.0, in plain words).
-- U-189 (the giants' finds) as code against B-219's nodes (already imported); U-191's island_belly / gap fixes as code (the continue_rows repeat waits for B-220).
-- U-192's veil serpent temper (a gentle drifter) as code, ahead of B-224's import.
+(Cycle 297, 14:0x; U-194's chain resumes at slice C; pull these at the RAM gate and whenever BLENDER holds the lock)
+- U-195 (dig feel) as code against placeholders: DigFeel (the clods, the camera kick, the icon's flight to PACK) and DigFeelTests; its check after 0.6.1's release.
+- U-196's two darkening terms in the tier shader and the rim shadow as code (a procedural back wall until B-230 lands), GroundTierTests +2.
+- U-198's sourcing list as a file (coordination/reports/unity/audio_sources.md: per AudioBank key a CC0 candidate, where it comes from and its licence; nothing downloaded yet).
+- The AI worst-frame row (CreatureTests.AiTakesAtMostHalfAMillisecondWith20Creatures: 1.31 ms at 13:51, 1.68 ms in 0.6.0's sweep, limit 1.0): read the test and the 20-creature tick for the spike's cause (a first-frame warm-up, a GC, the machine under load) and report it; the threshold stays (LEAD-only).
+- The 0.6.1 notes for the owner page (what changed since 0.6.0, in plain words).
+- U-189 (the giants' finds) as code against B-219's nodes (already imported); U-191's island_belly / gap fixes as code (the continue_rows repeat waits for B-220's export).
+- U-192's veil serpent temper (a gentle drifter) and its catalogue Site branch (IconOf for icons/catalogue/<label>, D-187) as code, ahead of B-224 / B-223 / B-233's imports.
 - U-179's boot-settle trace as code (what loads in Earth's first 2 s; the prefetch move), its check riding a later lock.
 Then one batched check per hand-off when your turn in the queue comes (compile + EditMode as one lock, PlayMode A / B as two, D-122).
 
@@ -128,11 +135,11 @@ Then one batched check per hand-off when your turn in the queue comes (compile +
 
 
 **BLENDER** (numpy / scripts only while UNITY holds the lock or a want; bpy only under your own lock; under 0.3 GB free, code only; otherwise only pre-measured ≤ 150 MB jobs beside another role's lock; the lock / RAM check is its own call)
-(Cycle 296, 12:5x; every queued source is in)
-- B-228 prep: re-read coordination/reports/blender/smoke_read_0.6.0.md and list which of its findings 0.6.1 should show fixed (the title, the walls, thruster_mk2), so the read is quick when U-194's smoke lands.
-- The D1 key audit (blender/scripts/audit_d1_keys.py, scripts only) re-run for the new keys: icons/tools/*, props/rig/shovel, fx/shovel_flick, ui/title/background.
-- `docs/credits/blender.md` upkeep for B-221 / B-222 / B-226 / B-227.
-- Draft the reports for B-223 / B-224 / B-225 (what each preview must show), so each preview call is one render.
+(Cycle 297, 14:0x; files only until U-194's chain has released: no want, no python; B-228's prep, the audit keys and the credits are done)
+- B-233's source (the ten catalogue site icons in the camp icon's style, D-187): files only; its sheet after B-223's preview is judged.
+- B-231's source by reading: the four poses (idle, crouch, jump apex with bent knees, dig) and the bone JSON checked against D-185's kept / changed list, so the design sheet's first run is close.
+- Draft what each of B-229 / B-230 / B-232's previews must show (coordination/reports/blender/), so each preview call is one render; then the same for B-223 / B-224 / B-225.
+- `docs/credits/blender.md` upkeep for B-229..B-233 as their sources land.
 
 **LEAD**
 - The charter idle list, plus: the C1 LeadQA scenario draft (pad → Escape Line → space → entry → touchdown under scripted input), the C1_REPORT skeleton, the owner's v4.1 look-over page, Bible gap closure, credits audit, a status-size check each cycle (D-113).
@@ -3077,7 +3084,7 @@ Goal: The docking bay's art and the catalogue's Camp icon (B-201 #11 / #17): Doc
 Accept: captures of the bay with the ship docked and the catalogue page; tests for the keys.
 Files: Code/Runtime/ (DockingBay, the catalogue UI)
 Depends: B-223
-Lead notes: Cycle 291 (06:4x). After 0.6.0. + (10:1x) the veil serpent's behaviour to match B-224's passive redraw: CreatureSpecies veil_serpent temper Hunts / senseRange 18 → a gentle drifter that meanders and parts around the ship (its attack clip as the swerve), never bumping it; with B-224's import.
+Lead notes: Cycle 291 (06:4x). After 0.6.0. + (10:1x) the veil serpent's behaviour to match B-224's passive redraw: CreatureSpecies veil_serpent temper Hunts / senseRange 18 → a gentle drifter that meanders and parts around the ship (its attack clip as the swerve), never bumping it; with B-224's import. + (cycle 297, D-187) the catalogue's Site branch: CataloguePanel.IconOf returns the icon for every EntryKind.Site at icons/catalogue/<label lowercased, spaces as _> (camp from B-223, the other ten from B-233), a placeholder until each key lands; a test for the eleven keys.
 
 ### B-225 · BLENDER · Ready · G1
 Goal: The sea reads underwater from the first metre (U-171 / U-188: in 5 m shallows sea_under stays soft: its surface band is a thin white line, layer0's light shafts faint, the seabeds 12–33 m down): a taller, bolder surface band under the water line (a rippled light ceiling ~1.5 m deep), stronger slanting light shafts in the top of layer0, and a shallow seabed layer (sand ripples, shells, sea grass) that sits within 3–6 m of the surface for the shore's first 40 m.
@@ -3105,7 +3112,7 @@ Goal: Build 0.6.1 (the owner's shovel ask, D-182): U-193 (the shovel start, The 
 Accept: BUILD OK, SMOKE OK, the probe green, BudgetGate green (no row above Bible §11.1); Build/MERIDIAN_0.6.1/MERIDIAN.exe; the smoke list adds: the title scene (smoke_1), a new game digging with the shovel at camp (mid-swing, the flick), the HUD tool slot with the shovel then The Beam Mk1 after buying it, crafting showing thruster_mk2, smoke_18 re-shot with the walls on the slope; a PlayMode test for the walls (each built wall's base within 0.1 m of the drawn surface under it).
 Files: Build/, Code/Runtime/Building/ (the walls), Tests/, coordination/reports/unity/
 Depends: U-193
-Lead notes: Cycle 295 (11:4x). Card written at the resume (cycle 293's plan named it; no card existed). One lock per slice as for 0.6.0; LEAD views the smoke before the owner page. B-227 waits for nobody: if its export misses the build start, the slot keeps the placeholders and the icons ride 0.6.2. 13:3x: PART 1 IN (4b0490ed: BaseBuilder.FootOf seats ground pieces on the drawn surface; BaseTests.TheShelterWallsStandOnTheDrawnGround, smoke_18's shelter every base +0.00 m; smoke_64..67; GameInfo 0.6.1). The release lock after BLENDER's B-227 export commit; B-229 rides it only if already exported. 13:3x: B-227 landed (3a46eb91); UNITY's want filed; the release runs when BLENDER's Uranus render releases the lock (RAM 2.35 GB). B-229 is not exported: it rides 0.6.2.
+Lead notes: Cycle 295 (11:4x). Card written at the resume (cycle 293's plan named it; no card existed). One lock per slice as for 0.6.0; LEAD views the smoke before the owner page. B-227 waits for nobody: if its export misses the build start, the slot keeps the placeholders and the icons ride 0.6.2. 13:3x: PART 1 IN (4b0490ed: BaseBuilder.FootOf seats ground pieces on the drawn surface; BaseTests.TheShelterWallsStandOnTheDrawnGround, smoke_18's shelter every base +0.00 m; smoke_64..67; GameInfo 0.6.1). The release lock after BLENDER's B-227 export commit; B-229 rides it only if already exported. 13:3x: B-227 landed (3a46eb91); UNITY's want filed; the release runs when BLENDER's Uranus render releases the lock (RAM 2.35 GB). B-229 is not exported: it rides 0.6.2. 14:0x (cycle 297): THE RESTART CUT THE CHAIN in PlayMode slice C (lock 13:56:50, orphaned; no Unity process; the log has no result). Standing: the icons imported (7a13536a), compile 0 / 0, EditMode 493/493, slice A 23/24, slice B 25/29 with the AI worst-frame row at 1.31 ms (as 0.6.0's 1.68 ms: noted, not blocking; threshold unchanged). UNITY clears its own lock + the stray Assets/InitTestScene* pair and resumes at slice C; nothing before it is redone unless code changes.
 
 ### B-227 · BLENDER · Done · D1
 Goal: The HUD tool slot's icons (U-193 ruling, 11:3x: "modules without an icon get a placeholder and a BLENDER card"): icons/tools/beam, icons/tools/grapple, icons/tools/survey, icons/tools/builder in the proportion and ink weight of B-226's icons/tools/shovel (128 px, inside the 2 px margin, readable at 48 / 40 px): the Beam a cable-fed, arm-mounted emitter with its cutting nozzle (D-087: never a gun, no grip or trigger), the Grapple its hook and coiled line, the Survey its scanner dish, the Builder its placing tool; teal / brass / steel as the props/rig sheets; palette 100 %.
@@ -3183,6 +3190,13 @@ Accept: LEAD passes the design against D-185's kept / changed list; the pose she
 Files: blender/scripts/ (build_surveyor_v5.py), Assets/_Game/Art/characters/surveyor_v5/
 Depends: —
 Lead notes: Cycle 296 (13:5x). C5's first card; a DESIGN task: previews only until the owner's look-over; no export before. After B-230 / B-232, or interleaved when UNITY holds the lock (design is files-only). The remaining C5 cards (one creature, one plant, a background band) follow the surveyor's acceptance so the look is set by its hero first.
+
+### B-233 · BLENDER · Ready · G1
+Goal: The catalogue's site icons (BLENDER's 12:2x proposal, accepted in cycle 297, D-187; B-201 #17 named only Camp, but CataloguePanel.IconOf returns null for every EntryKind.Site): icons/catalogue/<label lowercased, spaces as _> for survey_archive, launch_complex, halcyon_hauler, warden_outpost, flare_shelter, warden_vault, mercury_beacon, solarite_field, meridian_station and vent_harvester, in the style, size and ink weight of B-223's icons/catalogue/camp: each the site's own silhouette taken from its props' art, no faces, nothing weapon-like (D-087: the Warden sites read as guarded survey posts, never forts); palette 100 %.
+Accept: one preview sheet of the eleven site icons (camp included) at 128 / 48 / 40 px beside their catalogue neighbours; LEAD accepts before the export; json per key as the camp icon's.
+Files: blender/scripts/ (B-223's icon builder or a sibling), Assets/_Game/Art/icons/catalogue/
+Depends: B-223 (the camp icon's accepted style; the sources need nothing)
+Lead notes: Cycle 297 (14:0x). Sources now, files only; the sheet after B-223's preview is judged, so the ten follow an accepted camp icon. U-192 adds the Site branch for these keys.
 
 ### U-154 · UNITY · Ready · C2
 Goal: P-51 (UNITY, ruled yes in cycle 279): the Builder's aerostat pieces draw the re-inked kit on the four giants: PieceSpec gains a per-planet art key, so the Deck / Strut / Lift cell pieces draw `props/common/aerostat_{deck,strut,cell}` (B-156) on Jupiter, Saturn, Uranus and Neptune and keep `props/venus/aerostat_deck` on Venus; nothing else about the pieces changes (sizes, costs, saves).
