@@ -6,14 +6,6 @@ Owner: LEAD (only the Lead edits this). Do the open items below, then tell the L
 
 ## Open
 
-### USER-37 — Close the ChatGPT desktop app while the team works (10 seconds)
-At 11:59 the ChatGPT app held 1.3 GB of the laptop's 8 GB (14 processes). The team needs
-1.5 GB free to run its tests and renders, and only 0.46 GB was free, so the 0.6.1 work is
-waiting. Close the app fully (right-click its icon in the taskbar tray, near the clock →
-Quit; closing the window alone may leave it running). You can reopen it when the team is
-idle or when you play a build. Nothing else to do; tell the Lead `done: USER-37` or just
-close it.
-
 ### USER-36 — Play the first hour of 0.6.0, the digging game (about an hour)
 The page with pictures and the route: https://claude.ai/artifact/S3LfXBpfBbcjhJxDQYhBVx
 1. Double-click `C:\dev\universegame\Build\MERIDIAN_0.6.0\MERIDIAN.exe` and start a new game.
@@ -31,6 +23,7 @@ If you get too many "allow this command?" prompts, tell the Lead "approve PowerS
 allow rules" and accept the edit when Claude Code asks you. Otherwise skip this.
 
 ## Done
+- 2026-11-09 12:5x · USER-37 done: the ChatGPT app is closed (it held 1.27 GB); free RAM 1.99 GB at 12:51 and UNITY's U-193 check started. You can reopen it when the team is idle.
 - 2026-11-09 10:2x · USER-35 resolved: free RAM rose to 2.5–2.9 GB around 09:59 (apps closed or gone idle) and UNITY's 0.6.0 checks ran at the flat gate; nothing left to do. Edge can be reopened.
 - 2026-11-08 19:3x · USER-34 done: the owner checked 0.5.1: "the walking seems fixed"; and asked for a minimap in space → D-178, U-184, B-209.
 - 2026-11-08 16:2x · USER-33 done: the owner played 0.5.0 and likes it so far; the walking animation glitches when walking downhill (→ U-172, first); and they really like the digging: make MERIDIAN a progression digging game (better tools unlocked to dig deeper and faster, money from collected materials, rarer deeper, no hard gate, a boundary line underground marking topside where upgrading happens, better ways up and bigger packs, a Skill Tree with branches people choose themselves, planets as a difficulty ladder with rarer materials) → D-174, Bible 5.2 §8.1, milestone D1 (L-013, U-174..U-177, B-203..B-205); Build 0.5.1 (U-173) brings the walk fix first.

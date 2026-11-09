@@ -1,5 +1,6 @@
 # LEAD STATUS
-Updated: 2026-11-09 11:5x · Session: 11 (zuber-67; all three windows restarted ~11:45) · Review cycle: 295 · Cadence: every 2 hours (owner, 11-07 15:1x; session cron 1eb60286 at :43 on even hours, next ~12:50) + messages from the workers as they arrive
+Updated: 2026-11-09 12:5x · Session: 11 (zuber-67; all three windows restarted ~11:45) · Review cycle: 296 · Cadence: every 2 hours (owner, 11-07 15:1x; session cron 1eb60286 at :43 on even hours, next ~14:50) + messages from the workers as they arrive
+Cycle 296 (12:5x): no stall; USER-37 done (the ChatGPT app closed, 1.99 GB) → UNITY pinged for U-193 slice 2; B-227 beam / survey accepted, builder / grapple in rev; all BLENDER sources in; B-228 (the 0.6.1 smoke read) added.
 Cycle 295 (11:4x, the resume): no stall; B-221 / B-222 / B-226 Done (in LFS, imported); U-194 (Build 0.6.1) and B-227 (the tool-slot icons) written; While-waiting lists rewritten; UNITY's want live, gate open (2.41 GB).
 Cycle 294 (11:05): no stall; BUILD 0.6.0 OUT, its page + USER-36; the owner's shovel ask → D-182 / U-193 / B-226 for 0.6.1; UNITY's post-build sweep in its lock (RAM 0.48 GB).
 Cycle 293 (09:05): both workers paused 2 h (no commit, no edit, RAM 1.30 GB under the gate) → nudged; USER-35 (close Edge).
@@ -15,20 +16,18 @@ Cycle 284 (15:05–17:0x): THE OWNER'S 0.5.0 PLAYTEST → D-174 (a progression d
 Cycles 281–283 (09:3x–15:0x): the resume; Build 0.5.0 (page https://claude.ai/artifact/CHnmoFrDg2jzUuM42BVi83); D-168..D-173; U-159 Mars smooth.
 (cycles 231–280: coordination/status/archive/LEAD_2026-11-06.md and REVIEW_LOG)
 ## Current task
-D1 shipped as 0.6.0; now 0.6.1 for the owner's shovel ask (D-182). UNITY: U-193 part 2 (the HUD tool slot) + its PlayMode slice with LeadQA D1DigRunTests → U-194 Build 0.6.1. BLENDER: B-220 previews → B-224 preview → B-227 (tool icons) → B-223 → B-225. After 0.6.1: U-189 + U-191, U-177, U-192, U-179.
+0.6.1 for the owner's shovel ask (D-182). UNITY: U-193 slice 2 in its lock now (compile + EditMode, the PlayMode slice + LeadQA D1DigRun, CaptureU193Shovel) → U-194 Build 0.6.1 after BLENDER's B-227 export. BLENDER: B-227 rev 2 sheet + export → B-220's five sheets → B-224 → B-223 → B-225 → B-228 on U-194's smoke. After 0.6.1: U-189 + U-191, U-177, U-192, U-179.
 ## Last completed
-Cycle 295 resume: B-221 / B-222 / B-226 → Done; U-194 + B-227 cards; queues refreshed. Before: LeadQA D1DigRunTests on the shovel start (a80f6a07); BUILD 0.6.0 OUT with its owner page (https://claude.ai/artifact/S3LfXBpfBbcjhJxDQYhBVx).
+Cycle 296: USER-37 closed, UNITY pinged at the open gate, B-228 carded, queues rewritten. Cycle 295: B-221 / B-222 / B-226 Done; U-194 + B-227 cards; B-220's sparse-layer rule; B-227's first sheet judged.
 ## Next up
-1. U-193's slice result (D1DigRunTests on the shovel) + captures (the shovel mid-swing, the flick, the tool slot, The Beam bought) → judge. 2. B-220's 3× previews per giant → judge. 3. B-224's veil serpent preview → judge. 4. B-227's icon sheet → judge. 5. U-194 Build 0.6.1 → view its smoke → the owner page + a short playtest item. 6. The owner's USER-36 notes → cards.
+1. U-193's slice result + the u193 captures (the shovel mid-swing, the flick, the tool slot, The Beam bought) → judge; U-193 Done on them. 2. B-227's rev 2 sheet → judge (the builder off the crosshair read, the grapple at 40 px). 3. U-194 Build 0.6.1 → view its smoke with B-228 → the owner page + a short playtest item. 4. B-220's five sheets, B-224, B-223, B-225 previews → judge. 5. The owner's USER-36 notes → cards.
 ## Pending decisions
 none open.
 ## Waiting on the user
-USER-37 (11:59): close the ChatGPT desktop app (1.27 GB, 14 processes; free RAM 0.46 GB, the gate shut for U-193 / B-220). USER-36 (10:4x): the owner's first hour with 0.6.0, the digging game (page https://claude.ai/artifact/S3LfXBpfBbcjhJxDQYhBVx). USER-08 optional.
+USER-36 (10:4x): the owner's first hour with 0.6.0, the digging game (page https://claude.ai/artifact/S3LfXBpfBbcjhJxDQYhBVx). USER-08 optional.
 ## Loop / stall watch
-BLENDER_STATUS.md unchanged since 09:19 while it committed through 11:24 (asked to rewrite it at the restart); UNITY_STATUS.md 14.3 KB, over D-113 (trim listed). The stag is U-162 (D-167 (6)).
+none (both workers committed within 35 min; both status files current and under 12 KB). The stag is U-162 (D-167 (6)).
 ## Session addresses (ListAgents, 11-09 11:4x)
-This session: zuber-67. zuber-15 = UNITY. zuber-61 = BLENDER (both started ~11:45; both sent their next steps 11:5x).
-## Gate watch
-12:2x: UNITY's want live (refreshed 12:24, U-193 slice 2), waiting at the gate (0.53–0.70 GB, 12:03–12:23); it ended its turn per no-background-waiters and asked for a ping. Session cron 04dc3e04 checks RAM every 10 min and pings zuber-15 at ≥ 1.5 GB, then deletes itself. BLENDER after UNITY: the B-227 rev sheet (light), then B-220's five sheets.
+This session: zuber-67. zuber-15 = UNITY. zuber-61 = BLENDER.
 ## HeavyJobLock
 none (LEAD runs no heavy jobs while a worker holds the lock or a want)
