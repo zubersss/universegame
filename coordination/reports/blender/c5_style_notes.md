@@ -20,14 +20,19 @@ eyebrow; a nose; a soft cheek; a small smile; an ear; a mustard hair tuft with a
 three-quarter view. v4's pie-cut eyes and bulb nose are gone.
 
 **Paint.** Every part is flat colour first, then painted:
-- a shadow shape down the lower-left side of each form (the light comes from the upper right), about a fifth of the part
-  wide, with a ragged dry-brush edge instead of a smooth fade;
+- the light comes from above (LEAD's ruling, 14:5x: the rig is mirrored when the surveyor turns, so a side light would
+  swap sides at every turn), leaning only slightly to the upper left, the side today's props and icons are lit from;
+- a shadow shape on the underside of each form, about a fifth of the part deep, with a ragged dry-brush edge instead of
+  a smooth fade; a cast shadow where one part sits over another (the helmet's ring on the shoulders, the belt on the hips);
 - the shadow is cooler, not just darker: it leans toward a blue-grey mixed from the palette's sky and brown;
-- a thin lit rim on the upper-right edge;
+- a thin lit rim along the top edges;
 - short brush streaks across all the colour and a light paper grain;
 - the ink is never painted over;
 - limbs on the far side of the body are one step darker and cooler, so near and far read apart;
-- the helmet is a clear bubble: a faint sky tint inside its rim and two white glints.
+- the helmet is a clear bubble: a faint sky tint inside its rim and two white glints on its top.
+
+**The blink.** One closed-eye swap part per facing (a small patch shown over the eye for a few frames), so the face can
+look alive; the rest of the expressions come as a face-swap set after the surveyor is accepted.
 
 **Colour.** Earth's eight palette colours, as now. New in v5: materials may be an in-between mix of two palette colours
 (skin is off-white with a little red; the suit's shadow is off-white with some sky; knee pads, belt, steel ring, boot sole
@@ -59,25 +64,33 @@ and the helmet's top. Poses are bone angles: the sheet shows idle, crouch (a dee
 | The 2.0 m height and the collider | Suit detail (seams, pads, belt, treads); crouch and bent-knee jump from the rig; far less texture memory |
 | The painted backgrounds (D-185) | Characters now carry painted light, so the band behind them gets a matching pass (section 4) |
 
-## 3. Points for LEAD to rule on the first sheet
+## 3. The four points, as LEAD ruled them (14:5x, before the first sheet)
 
-1. **The light.** The source lights every part from the upper right (the contract's own convention for lit art). The v3
-   props and icons shade their right or lower-right side. v5 needs one light for characters, props and backgrounds; I
-   propose upper right and will say on the sheet how it sits beside a v3 prop.
-2. **The palette check.** "Palette 100 %" cannot be measured on painted parts. Proposal: every flat colour is a palette
-   colour or a named mix of two (listed in the source's TONES), checked before the paint pass.
-3. **Drawing size.** Parts are drawn at 128 px per metre, twice the game's 64, so the rig stays sharp when parts turn and
-   squash. The sheet shows v5 at half size beside v4.
-4. **Expressions.** The head is one part per facing. Blinks, a surprised look and smears would be swap parts (eyes, mouth)
-   or drawn frames, as D-185 allows; none is drawn yet. Proposal: a small face-swap set after the surveyor is accepted.
+1. **The light: from above.** I had proposed the upper right. Ruled: v5 characters are lit from above, at most a slight
+   lean to the upper left (the side the v3 props and icons are already lit from, so nothing existing is re-shaded). The
+   source is changed to it; the sheet shows the surveyor facing both ways beside two v3 camp props so the light can be
+   seen to read the same. Contract v4 will state the light (neither the Bible nor the contract does today).
+2. **The palette check: accepted.** Every flat colour is a palette colour or a named mix of two (the source's TONES),
+   checked before the paint pass.
+3. **Drawing size: accepted.** Rig parts are drawn at 128 px per metre, twice the game's 64.
+4. **Expressions: one blink now**, a closed-eye swap part per facing (in the source and the bone JSON's `swaps`); the
+   rest of the face-swap set after acceptance.
 
-## 4. C5's other three pieces (proposal; no drawing source before the surveyor is accepted)
+One thing the rig could add later, not drawn on the sheet because it would be UNITY's work: a contact shade, a darkened
+copy of each part 2-3 px straight down and one sorting step under it, which would put a moving shadow under the arms and
+the pack whichever way the surveyor faces.
+
+## 4. C5's other three pieces (ACCEPTED by LEAD 14:5x as B-234 / B-235 / B-236 in the Backlog, promoted when the owner accepts the surveyor; no drawing source before that)
+
+LEAD's notes: the band is a C5-only preview key (the shipped band untouched), lit from above too, sway cards only if the
+scene stays inside Bible 11.1; U-162 is the stag's flee AI only, independent of the rig; UNITY confirms the camp's scene
+key at U-199.
 
 ### The creature: the stag (`creatures/earth/stag`)
 
 Why: it lives on grass, so it stands at the camp; it is peaceful; and it has the most joints of any Earth land animal,
 on long thin legs where a bending knee and hock read clearly at 1x: the owner's "knees that actually bend", on an animal.
-Today it is a v3 frame sheet (52 frames, 192 x 176 px). U-162's pending stag work would then meet the rig, so LEAD orders the two.
+Today it is a v3 frame sheet (52 frames, 192 x 176 px). U-162 is its flee AI only, independent of the rig (LEAD).
 
 - **Size:** 1.5 m at the shoulder, antler tips at 2.0 m (as now), drawn at 128 px per metre; one sheet of about 512 x 300 px.
 - **Parts (17 drawn + 9 far-side copies):** haunch, barrel, lower neck, upper neck, head, jaw, ear, antler, tail base,
@@ -110,8 +123,8 @@ If the camp's meadow shows another plant more often, the curlfrond takes its pla
 
 D-185 keeps the painted backgrounds, so this is a matching pass, not a new look: the same watercolour masses, paper and
 no ink, tileable as now, plus the v5 brush streaks in the washes and two values per mass (a painted shadow shape under each
-tree crown and on the hills' lee side, lit from the same upper right as the characters), so the painted surveyor does not
-look pasted onto flat washes. LEAD or UNITY to confirm that the camp shows the plains scene (else the same pass on its scene).
+tree crown and on the undersides of the masses, lit from above as the characters), so the painted surveyor does not
+look pasted onto flat washes. UNITY confirms at U-199 which scene the camp shows (else the same pass on its scene).
 
 - **Parts:** the band; optionally three sway cards cut from it (two tree crowns, a row of grass tufts).
 - **Joints:** one pivot per sway card (the trunk's top, the tufts' base), a slow sway of about two degrees. Optional: it

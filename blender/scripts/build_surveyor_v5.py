@@ -111,22 +111,39 @@ def _blur(a, r):
     return np.apply_along_axis(lambda v: np.convolve(v, k, mode="same"), 1, a)
 
 
-def paint(u8, seed, depth=0.2, cool=0.35, glow=0.10, far=False):
-    """Gouache shading on a rendered part (light from the upper right): a shadow shape on the lower-left side of the form
-    with a ragged brushed edge (no smooth digital ramp), a cool shadow tint, a lit rim on the upper right, a streaky brush
-    texture and the paper grain. far: the far-side limb, one step darker and cooler."""
+LEAN = 0.15           # LEAD's ruling 14:5x: v5 characters are lit FROM ABOVE (the rig mirrors for left / right, so a side light
+#                       would swap sides at every turn), leaning at most slightly to the upper LEFT, the side the v3 props and
+#                       icons are lit from (they shade right / lower-right). LEAN = the sideways share of the shadow's offset
+
+
+def _shift(a, dy, dx):
+    """a moved dy rows down and dx columns right, zero-filled (np.roll would wrap the far edge back in)."""
+    out = np.zeros_like(a)
+    h, w = a.shape
+    ys, yd = (slice(0, h - dy), slice(dy, h)) if dy >= 0 else (slice(-dy, h), slice(0, h + dy))
+    xs, xd = (slice(0, w - dx), slice(dx, w)) if dx >= 0 else (slice(-dx, w), slice(0, w + dx))
+    out[yd, xd] = a[ys, xs]
+    return out
+
+
+def paint(u8, seed, depth=0.2, cool=0.35, glow=0.10, far=False, cast=None):
+    """Gouache shading on a rendered part, lit from above (LEAN a touch to the upper left): a shadow shape on the underside
+    of the form with a ragged brushed edge (no smooth digital ramp), a cool shadow tint, a lit rim along the top edges, a
+    streaky brush texture and the paper grain. cast = (row0, row1): a shadow cast across the part there (under the helmet's
+    ring, under the belt). far: the far-side limb, one step darker and cooler."""
     rng = np.random.default_rng(seed)
     f = u8.astype(np.float32) / 255.0
     a = f[..., 3]
     h, w = a.shape
     d = max(2, int(round(depth * min(h, w))))
-    shifted = np.roll(np.roll(a, -d, 0), d, 1)                                  # the shape seen from down-left
-    shade = np.clip(a - shifted, 0, 1)
+    shade = np.clip(a - _shift(a, -d, -int(round(d * LEAN))), 0, 1)             # the form's underside (a touch to its right)
+    if cast is not None:
+        shade[cast[0]:cast[1]] = np.maximum(shade[cast[0]:cast[1]], a[cast[0]:cast[1]])
     noise = _blur(rng.standard_normal((h, w)).astype(np.float32), 2)
     noise /= max(float(noise.std()), 1e-3)
     shade = np.clip((_blur(shade, max(1, d // 3)) - 0.35 + 0.18 * noise) * 3.0, 0, 1) * a   # a ragged painted edge
     dl = max(1, d // 3)
-    lit = np.clip(a - np.roll(np.roll(a, dl, 0), -dl, 1), 0, 1)                # the rim toward the light
+    lit = np.clip(a - _shift(a, dl, int(round(dl * LEAN))), 0, 1)               # the rim along the top edges
     lit = np.clip(_blur(lit, 1) * 1.6 - 0.2, 0, 1) * a
     ink = (f[..., :3].max(axis=2) < 0.22)                                       # leave the ink lines dark
     sh_col = rgb(PAL["sky"]) * 0.55 + rgb(PAL["brown"]) * 0.25
@@ -211,7 +228,7 @@ def boot(d, M):
     G.stroke(d, [(31, 12), (36, 9)], M["ink"], INN)                                                  # a lace
 
 
-@part("hips", 60, 34, (30, 8), depth=0.22)
+@part("hips", 60, 34, (30, 8), depth=0.22, cast=(12, 17))                                           # (the belt's shadow)
 def hips(d, M):
     G.stroke(d, [(9, 4), (51, 4), (54, 18), (48, 30), (12, 30), (6, 18)], M["suit"], OUT, cyclic=True)   # the seat of the suit
     G.stroke(d, [(7, 3), (53, 3), (53, 11), (7, 11)], M["belt"], OUT, cyclic=True)                 # the belt
@@ -219,7 +236,7 @@ def hips(d, M):
     G.stroke(d, [(40, 11), (51, 11), (50, 23), (41, 23)], M["belt"], INN, cyclic=True)            # a pouch
 
 
-@part("torso", 76, 84, (36, 76), depth=0.2)
+@part("torso", 76, 84, (36, 76), depth=0.2, cast=(11, 19))                                          # (the helmet's shadow on the shoulders)
 def torso(d, M):
     body = [(20, 76), (54, 76), (60, 52), (61, 26), (56, 12), (46, 6), (26, 6), (16, 12), (13, 28), (14, 54)]
     G.stroke(d, body, M["suit"], OUT, cyclic=True)                                                   # the chest (pivot: the hips)
@@ -279,11 +296,32 @@ def head34(d, M):
     G.stroke(d, [(28, 55), (46, 55), (44, 64), (30, 64)], M["skin"], INN, cyclic=True)
 
 
+# The blink (LEAD 14:5x: ONE closed-eye swap part per facing now; the rest of the face-swap set after acceptance): a skin
+# patch the size of the open eye and its ink, the closed lid's line on it; shown on the head bone at BLINK's offset
+@part("blink", 18, 20, (9, 10))
+def blink(d, M):
+    G.stroke(d, C(9, 10, 6.3, 16, ry=7.8), M["skin_f"], 0.0, cyclic=True)
+    G.stroke(d, C(9, 10, 4.3, 8, ry=2.8, a0=math.radians(15), a1=math.radians(165)), M["ink"], INN)   # the lid, bowed down
+
+
+@part("blink34", 30, 20, (15, 10))
+def blink34(d, M):
+    for cx, sc in ((7, 0.9), (23, 1.0)):                                                            # head34's eyes at x 31 / 47
+        G.stroke(d, C(cx, 10, 4.6 * sc + 1.3, 16, ry=7.6), M["skin_f"], 0.0, cyclic=True)
+        G.stroke(d, C(cx, 10, 3.9 * sc, 8, ry=2.7, a0=math.radians(15), a1=math.radians(165)), M["ink"], INN)
+
+
+# the blink's part and its pivot's offset (m) from the head's pivot, per facing: the open eye's centre (side: head (48, 28)
+# px against its pivot (32, 64); front34: the midpoint of the two eyes (39, 28) against (36, 64))
+BLINK = {"side": ("blink", (0.125, 0.28125)), "front34": ("blink34", (0.0234, 0.28125))}
+
+
 @part("helmet", 100, 100, (50, 92), depth=0.0, glow=0.0)
 def helmet(d, M):
     G.stroke(d, C(50, 52, 39, 48), M["ink"], OUT, cyclic=True)                                      # the bubble's rim (ink only; the glass
-    G.stroke(d, hose(C(50, 52, 37, 20, a0=math.radians(-75), a1=math.radians(-15)), 4.5), M["eye_f"], 0.0, cyclic=True)   # tint is numpy)
-    G.stroke(d, hose(C(50, 52, 32, 8, a0=math.radians(-60), a1=math.radians(-40)), 2.5), M["eye_f"], 0.0, cyclic=True)    # glints
+    G.stroke(d, hose(C(50, 52, 37, 20, a0=math.radians(-128), a1=math.radians(-72)), 4.5), M["eye_f"], 0.0, cyclic=True)   # tint is numpy)
+    G.stroke(d, hose(C(50, 52, 32, 8, a0=math.radians(-112), a1=math.radians(-92)), 2.5), M["eye_f"], 0.0, cyclic=True)    # glints: on
+    #                                                               top of the bubble, a touch to its left (lit from above, LEAD 14:5x)
     G.stroke(d, [(22, 86), (78, 86), (76, 94), (24, 94)], M["steel"], OUT, cyclic=True)            # the seal ring
 
 
@@ -295,7 +333,7 @@ def antenna(d, M):
     G.stroke(d, C(15, 4, 2.2, 8), M["brass"], INN, cyclic=True)
 
 
-@part("torso34", 80, 84, (40, 76), depth=0.2)
+@part("torso34", 80, 84, (40, 76), depth=0.2, cast=(11, 19))
 def torso34(d, M):
     body = [(20, 76), (60, 76), (66, 52), (66, 26), (60, 12), (50, 6), (28, 6), (17, 12), (12, 28), (13, 54)]
     G.stroke(d, body, M["suit"], OUT, cyclic=True)
@@ -309,7 +347,7 @@ def torso34(d, M):
     G.stroke(d, [(40, 46), (40, 72)], M["ink"], INN)
 
 
-@part("hips34", 64, 34, (32, 8), depth=0.22)
+@part("hips34", 64, 34, (32, 8), depth=0.22, cast=(12, 17))
 def hips34(d, M):
     G.stroke(d, [(8, 4), (56, 4), (58, 18), (52, 30), (12, 30), (6, 18)], M["suit"], OUT, cyclic=True)
     G.stroke(d, [(6, 3), (58, 3), (58, 11), (6, 11)], M["belt"], OUT, cyclic=True)
@@ -341,7 +379,9 @@ def render_part(name):
         out = (f[..., :3] * ia + g[..., :3] * g[..., 3:4] * (1 - ia)) / np.maximum(out_a, 1e-4)
         img = np.clip(np.rint(np.dstack([out, out_a]) * 255), 0, 255).astype(np.uint8)
         return img
-    return paint(img, 101 + len(name), **{k: v for k, v in kw.items() if k in ("depth", "cool", "glow")})
+    if name.startswith("blink"):                                               # a swap overlay: no form shading (a rim or a
+        return U.paper_grain(img, 101 + len(name), 0.03)                       # shade would outline the patch on the face)
+    return paint(img, 101 + len(name), **{k: v for k, v in kw.items() if k in ("depth", "cool", "glow", "cast")})
 
 
 # ---------------------------------------------------------------- the rig (metres; offsets from the parent's pivot at rest)
@@ -416,7 +456,9 @@ def rig_json(parts_rects):
                    {"chain": ["thigh_f", "shin_f"], "effector": "boot_f", "bend": "forward"},
                    {"chain": ["thigh_b", "shin_b"], "effector": "boot_b", "bend": "forward"}],
             "sockets": {"hand_f_grip": {"bone": "hand_f", "offset_m": [0.03, -0.09]},
-                        "helmet_top": {"bone": "antenna", "offset_m": [0.0, 0.3]}}})
+                        "helmet_top": {"bone": "antenna", "offset_m": [0.0, 0.3]}},
+            "swaps": {"blink": {"part": BLINK[facing][0], "bone": "head", "offset_m": [round(v, 4) for v in BLINK[facing][1]], "order": 14.5,
+                                "note": "shown over the head (under the helmet) while the eyes are closed; hidden otherwise"}}})
     # per state (LEAD 14:4x, for U-199 to read, not guess): the root's scale [x, z] about the ground point (the crouch's 0.92
     # squash), the root's lift, and the design pose in degrees added to each bone's rest angle (side facing)
     out["states"] = {k: {"root_scale": [1.0, v.get("root_scale_z", 1.0)], "lift_m": v.get("lift", 0.0),
@@ -512,9 +554,9 @@ def top_m(img, ground):
     return (ground - rows[0]) / PX if len(rows) else 0.0
 
 
-def pose_image(P, facing, pose, W=300, H=380, ground=350, cx=150, prop=None):
+def pose_image(P, facing, pose, W=300, H=380, ground=350, cx=150, prop=None, blink=False):
     """One posed figure on a transparent canvas (premultiplied float), the ground line at row `ground`; the pose's
-    root_scale_z (the crouch's squash) applied about the ground."""
+    root_scale_z (the crouch's squash) applied about the ground. blink: the closed-eye swap shown on the head."""
     dst = np.zeros((H, W, 4), np.float32)
     world = solve(facing, pose)
     for n, p, par, off, rest, L, order in sorted(bones(facing), key=lambda b: b[6]):
@@ -527,6 +569,11 @@ def pose_image(P, facing, pose, W=300, H=380, ground=350, cx=150, prop=None):
         img, pivot = P[p + ("_far" if n in FAR else "")]
         x, z, a = world[n]
         place(dst, img, pivot, a, (cx + x * PX, ground - z * PX))
+        if blink and n == "head":                                              # the swap, over the head and under the helmet
+            bp, (bx, bz) = BLINK[facing]
+            t = math.radians(a)
+            place(dst, P[bp][0], P[bp][1], a, (cx + (x + bx * math.cos(t) - bz * math.sin(t)) * PX,
+                                               ground - (z + bx * math.sin(t) + bz * math.cos(t)) * PX))
     return squash(dst, ground, pose.get("root_scale_z", 1.0))
 
 
@@ -601,19 +648,51 @@ def preview(out, footnote=None):
             review._label(r, name, x + 4, h - 30, scale=1)
             x += iw + 12
         return r
-    turn = [("side (idle)", pose_image(P, "side", POSES["idle"]), GROUND), ("front 3/4 (idle)", pose_image(P, "front34", POSES["idle"]), GROUND)]
+    side = pose_image(P, "side", POSES["idle"])
+    turn = [("side, facing right (idle)", side, GROUND), ("the rig mirrored: facing left", side[:, ::-1].copy(), GROUND),
+            ("front 3/4 (idle)", pose_image(P, "front34", POSES["idle"]), GROUND)]
+    rows = [np.tile(paper, (28, W, 1)).astype(np.float32)]
+    review._label(rows[0], "B-231 the v5 surveyor (C5 design, D-185): a rigged cut-out, jointed limbs, painted shading lit from above; 2.0 m = 256 px", 6, 8)
+    rows.append(strip(turn, "turnaround (posed from the rig): lit from above with a slight lean to the upper left, so the mirrored rig reads the same (LEAD 14:5x)"))
+
+    def half(im):
+        """The game's zoom: the 256 px drawing at 1/2."""
+        return im[:im.shape[0] // 2 * 2, :im.shape[1] // 2 * 2].reshape(im.shape[0] // 2, 2, im.shape[1] // 2, 2, 4).mean(axis=(1, 3))
+
+    def prop1x(name):
+        """A v3 camp prop's first frame at 1x (premultiplied float), or None."""
+        try:
+            import build_title_v3 as TT
+            p = TT.prop_frame(name).astype(np.float32).copy()
+            p[..., :3] *= p[..., 3:4]
+            return p
+        except Exception:  # noqa: BLE001  (the row still shows the surveyors)
+            return None
+    one = []
     v4 = os.path.join(ART, "characters", "surveyor", "side_color.png")
     if os.path.isfile(v4):
         s4 = pngio.read_png_np(v4).astype(np.float32) / 255.0
         f4 = s4[:192, :192].copy()
         f4[..., :3] *= f4[..., 3:4]
-        turn.append(("v4 surveyor at 1x (128 px tall)", f4, 192))                # its pivot: the frame's bottom row
-        side = pose_image(P, "side", POSES["idle"])
-        half = side[:side.shape[0] // 2 * 2, :side.shape[1] // 2 * 2].reshape(side.shape[0] // 2, 2, side.shape[1] // 2, 2, 4).mean(axis=(1, 3))
-        turn.append(("v5 at the v4's height (1/2)", half, GROUND // 2))
-    rows = [np.tile(paper, (28, W, 1)).astype(np.float32)]
-    review._label(rows[0], "B-231 the v5 surveyor (C5 design, D-185): a rigged cut-out, jointed limbs, painted shading; 2.0 m = 256 px", 6, 8)
-    rows.append(strip(turn, "turnaround (posed from the rig) beside the v4 surveyor"))
+        one.append(("v4 surveyor", f4, 192))                                     # its pivot: the frame's bottom row
+    one.append(("v5 facing right", half(side), GROUND // 2))
+    for pn, label in (("storage_crate", "crate (v3)"), ("smelter", "smelter (v3)")):
+        pr = prop1x(pn)
+        if pr is not None:
+            one.append((label, pr, pr.shape[0]))
+    one.append(("v5 facing left", half(side)[:, ::-1].copy(), GROUND // 2))
+    rows.append(strip(one, "at the game's zoom (1x): the v4 surveyor, v5 facing right, v3 camp props (lit from the upper left: they shade right / lower-right), v5 facing left", h=290))
+
+    def face(facing, closed):
+        """The head at 2x (a 112 px window on the bubble's centre), eyes open or with the blink swap."""
+        im = pose_image(P, facing, POSES["idle"], blink=closed)
+        hx, hz, ha = solve(facing, POSES["idle"])["helmet"]
+        t = math.radians(ha)
+        px_ = int(round(150 + (hx - 0.3125 * math.sin(t)) * PX))
+        py_ = int(round(GROUND - (hz + 0.3125 * math.cos(t)) * PX))
+        return np.repeat(np.repeat(im[max(py_ - 56, 0):py_ + 56, max(px_ - 56, 0):px_ + 56], 2, 0), 2, 1)
+    faces = [(f"{fc}: {'the blink swap' if cl else 'eyes open'}", face(fc, cl), None) for fc in ("side", "front34") for cl in (False, True)]
+    rows.append(strip([(n, im, im.shape[0]) for n, im, _g in faces], "the face at 2x: eyes open and the ONE blink swap part per facing (the rest of the face set after acceptance)", h=300))
     pimg = {k: pose_image(P, "side", POSES[k]) for k in ("idle", "crouch", "jump")}
     pimg["dig"] = pose_image(P, "side", POSES["dig"], W=400, cx=120, prop=prop)                    # (wider: the shovel reaches 1.25 m)
     csz, ctop = POSES["crouch"].get("root_scale_z", 1.0), top_m(pimg["crouch"], GROUND)

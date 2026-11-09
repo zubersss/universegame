@@ -16,7 +16,8 @@ NOT YET RUN (all desk-checked by reading in session 12; expect first-run fixes):
 - Waiting on others: B-207 closes on PawsOnTheGround green; B-204 on UNITY's capture; B-172 on U-151. UNITY drops the three lance .meta files.
 
 ## Last completed
-- 11-09 14:4x (files only, for the wait; LEAD's ask): coordination/reports/blender/c5_style_notes.md (v5 in plain words as the source draws it, kept / changed, four points to rule, the C5 pieces' proposal).
+- 11-09 14:5x (files only): B-231 to LEAD's four rulings: the paint pass lit from above (no wrap-around, cast shadows under the helmet's ring and the belt, glints on the bubble's top), the blink swap parts blink / blink34 + the JSON's swaps, the sheet's new rows (the rig mirrored, a 1x row beside two v3 camp props, the face at 2x with the blink).
+- 11-09 14:4x (files only, for the wait; LEAD's ask): coordination/reports/blender/c5_style_notes.md (v5 in plain words as the source draws it, kept / changed, the four rulings, the C5 pieces).
 - 11-09 14:03-14:4x (session 12, files only): B-233 source + B-229 glove rev (d593051c); B-232 to the ruled format (6970371f); B-230 / B-231 / B-224 desk-check fixes (65e2b1db, 8e9058ce); B-231's crouch to LEAD's direction (734ae6a7); reports/blender/preview_notes_0.6.2.md.
 - 11-09 13:10-13:38: B-220 Jupiter, Saturn, Uranus sheets ACCEPTED (the U-191 list in reports/blender/b220_continue_rows.md); export after Neptune + Venus.
 - Earlier (B-184 to B-227, all Done on the board): coordination/status/archive/BLENDER_2026-11-09.md, BLENDER_2026-11-08.md.
@@ -36,11 +37,8 @@ NOT YET RUN (all desk-checked by reading in session 12; expect first-run fixes):
 none. Waiting on: U-151 (B-172's export), U-152 (B-174).
 
 ## Proposals (undecided only)
-- P-C5 (14:4x, LEAD's ask; details and joints in reports/blender/c5_style_notes.md section 4; no drawing source before the surveyor is accepted):
-  - Creature: the STAG (creatures/earth/stag: on grass, so at the camp; peaceful; the most joints of Earth's land animals, long legs where a bending knee and hock read at 1x). 17 drawn parts + 9 far copies, 26 bones, four leg IK chains + a head look-at; ears, tail, jaw and breath move on their own; clips idle (grazing), walk, react. U-162's stag work would meet the rig: LEAD orders the two.
-  - Plant: the NODBELL (flora/earth/rigset, 4 bones today): 7 drawn parts + 1 far copy, 9 bones (three stem segments, two leaves, three bells each on its own stalk, a bud); sway travels up the stem, the bells swing behind it. Else the curlfrond.
-  - Background band: the camp scene's near band (backgrounds/earth/plains/layer2, if the camp shows plains): D-185 keeps the painted backgrounds, so a matching pass (brush streaks, two values per mass, the characters' light), no ink, tileable; optionally three sway cards (one pivot each).
-- P-v5 rules (same report, section 3): one light for v5 (the source lights from the upper right; v3 props shade their right side); the palette check on painted parts (flat colours = palette colours or named mixes of two); parts drawn at 128 px per metre; expressions as a face-swap set after the surveyor.
+none open. Decided 14:5x by LEAD (reports/blender/c5_style_notes.md sections 3 and 4): v5 characters are lit FROM ABOVE (the rig mirrors; at most a slight lean to the upper left, the v3 props' side), the palette check on flats and 128 px per metre accepted, ONE blink swap part per facing now; the stag / the nodbell / the camp's near band accepted as B-234 / B-235 / B-236 in the Backlog (promoted when the owner accepts the surveyor; no drawing source before).
+- Offered, not drawn (UNITY's work if wanted): a contact shade under each rig part (a darkened copy 2-3 px straight down), for moving shadows under the arms and the pack.
 
 ## Rules I keep (from slips)
 - (LEAD 13:4x) One lock <= 15 min; a painted planet with more than 8 scenes (Uranus: 16, 721 s) gets its own lock.
