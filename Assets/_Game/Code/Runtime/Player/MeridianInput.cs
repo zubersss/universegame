@@ -24,6 +24,11 @@ namespace Meridian.Player
             Button(foot, "Jump", "<Keyboard>/space", "<Gamepad>/buttonSouth");
             Button(foot, "Dash", "<Keyboard>/leftShift", "<Gamepad>/buttonEast");   // U-088 (D-078): Shift tapped while airborne
             Button(foot, "Crouch", "<Keyboard>/s", "<Gamepad>/leftStick/down");
+            // U-176: up / down a ladder or the winch line (W / S).
+            foot.AddAction("Climb", InputActionType.Value, expectedControlLayout: "Axis")
+                .AddCompositeBinding("1DAxis").With("Negative", "<Keyboard>/s").With("Positive", "<Keyboard>/w");
+            foot.FindAction("Climb").AddBinding("<Gamepad>/leftStick/y");
+            Button(foot, "Recall", "<Keyboard>/r", "<Gamepad>/dpad/up"); // U-176: the recall beacon (asc_recall)
             foot.AddAction("Aim", InputActionType.Value, "<Mouse>/position", expectedControlLayout: "Vector2");
             Button(foot, "RigPrimary", "<Mouse>/leftButton", "<Gamepad>/rightTrigger");
             Button(foot, "RigSecondary", "<Mouse>/rightButton", "<Gamepad>/leftTrigger");

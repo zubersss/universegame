@@ -38,10 +38,23 @@ namespace Meridian.Player
             return n;
         }
 
-        /// <summary>The socket table for the drawn sheet: back_socket for the side sheet, back_socket_b for side_b (from the Mk2 json: the
-        /// socket is the surveyor's, the same for every pack).</summary>
-        public static ArtMaterials.ArtSocket SocketTable(string sheetKey) =>
-            ArtMaterials.SocketFor("props/rig/jetpack_mk2", sheetKey == ArtKeys.Characters.SurveyorSideB ? "back_socket_b" : "back_socket");
+        static readonly Dictionary<Sprite, bool> sheetB = new Dictionary<Sprite, bool>(128);
+
+        /// <summary>U-176: whether a drawn frame is side_b's (D-121: side_b's clips play in the side sheet's controller, so the view's key stays
+        /// the side sheet's; the frame's sprite names its sheet: side_b_&lt;i&gt;).</summary>
+        public static bool SheetB(Sprite s)
+        {
+            if (s == null) return false;
+            if (sheetB.TryGetValue(s, out bool b)) return b;
+            b = s.name.StartsWith("side_b_", System.StringComparison.Ordinal);
+            sheetB[s] = b;
+            return b;
+        }
+
+        /// <summary>The socket table for the drawn frame's sheet: back_socket for the side sheet, back_socket_b for side_b (from the Mk2 json:
+        /// the socket is the surveyor's, the same for every pack).</summary>
+        public static ArtMaterials.ArtSocket SocketTable(Sprite drawn) =>
+            ArtMaterials.SocketFor("props/rig/jetpack_mk2", SheetB(drawn) ? "back_socket_b" : "back_socket");
 
         /// <summary>Where the pack sits now in the world (the Beam's cable runs there): the drawn frame's back socket, else 0.33 m behind and
         /// 0.93 m up from the feet.</summary>
@@ -49,7 +62,7 @@ namespace Meridian.Player
         {
             if (v != null && v.Renderer != null)
             {
-                var table = SocketTable(v.key);
+                var table = SocketTable(v.Renderer.sprite);
                 int i = FrameOf(v.Renderer.sprite);
                 if (table != null && table.Has(i))
                 {
@@ -94,7 +107,7 @@ namespace Meridian.Player
             if (Mk < 2 || Overlay.sprite == null || !view.Renderer.enabled) { Show(false); return; }
             if (sprite == lastSprite && flip == lastFlip && Overlay.enabled) return;
             lastSprite = sprite; lastFlip = flip;
-            var table = SocketTable(view.key);
+            var table = SocketTable(view.Renderer.sprite);
             FrameIndex = FrameOf(sprite);
             if (table == null || !table.Has(FrameIndex)) { Show(false); return; }
             int i = FrameIndex;

@@ -76,7 +76,7 @@ namespace Meridian.Tests
                 while ((pack.Mk != 2 || pack.Overlay.sprite == null) && Time.realtimeSinceStartup < until) yield return null;
                 Assert.AreEqual(2, pack.Mk);
 
-                var back = JetpackOverlay.SocketTable(view.key);
+                var back = JetpackOverlay.SocketTable(view.Renderer.sprite);
                 var hand = Meridian.Rendering.ArtMaterials.SocketFor("props/rig/hand_socket", "hand_socket");
                 Assert.NotNull(back); Assert.NotNull(hand);
                 const float Px = 1f / 64f;
@@ -90,6 +90,7 @@ namespace Meridian.Tests
                     yield return new WaitForFixedUpdate();
                     yield return null;
                     int i = JetpackOverlay.FrameOf(view.Renderer.sprite);
+                    back = JetpackOverlay.SocketTable(view.Renderer.sprite); // U-176: the drawn frame's sheet (side_b's clips under the side key)
                     bool flip = view.Renderer.flipX;
                     if (pack.Overlay.enabled && back.Has(i))
                     {

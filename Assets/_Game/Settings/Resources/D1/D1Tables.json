@@ -9,6 +9,7 @@
   "loadK": 0.5,
   "waystationBonus": 0.25,
   "pocketCount": 3,
+  "ascent": { "ladderClimb": 2.5, "ladderDirtPerM": 2, "grappleReel": 4, "hookSpeed": 40, "winchSpeed": 6, "recallSeconds": 5, "walkRampDeg": 35 },
   "rankScrip": [0, 300, 800, 1800, 3500, 7000, 14000, 28000, 50000, 80000],
   "tiers": [
     { "name": "Topsoil", "chip": "#8C5A33", "fromM": 0,   "hardness": 1,  "materialChance": 0.05 },

@@ -47,6 +47,8 @@ namespace Meridian.Save
         /// <summary>v2 (U-056): base pieces and aerostats.</summary>
         public List<Meridian.Building.BasePieceSave> basePieces = new List<Meridian.Building.BasePieceSave>();
         public List<Meridian.Building.AerostatSave> aerostats = new List<Meridian.Building.AerostatSave>();
+        /// <summary>U-176: ladders and the winch post (absent in older files: none).</summary>
+        public List<Meridian.Building.AscentSave> ascentPieces = new List<Meridian.Building.AscentSave>();
         public TimerSave timers = new TimerSave();
         /// <summary>U-158: harvested resource nodes (absent in older files: every node full).</summary>
         public List<Meridian.Mining.NodeSave> nodes = new List<Meridian.Mining.NodeSave>();

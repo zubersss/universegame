@@ -49,6 +49,8 @@ namespace Meridian.Core
         /// <summary>Bases (U-056): placed pieces and aerostats, every planet.</summary>
         public readonly System.Collections.Generic.List<Meridian.Building.BasePieceSave> basePieces = new System.Collections.Generic.List<Meridian.Building.BasePieceSave>();
         public readonly System.Collections.Generic.List<Meridian.Building.AerostatSave> aerostats = new System.Collections.Generic.List<Meridian.Building.AerostatSave>();
+        /// <summary>U-176: the Builder's ladder cells and the winch post, every planet.</summary>
+        public readonly System.Collections.Generic.List<Meridian.Building.AscentSave> ascentPieces = new System.Collections.Generic.List<Meridian.Building.AscentSave>();
         public readonly System.Collections.Generic.HashSet<string> catalogue = new System.Collections.Generic.HashSet<string>();
         /// <summary>Accepted Halcyon cargo contracts (U-052; done ones stay for the log).</summary>
         public readonly System.Collections.Generic.List<Meridian.Trade.Contract> contracts = new System.Collections.Generic.List<Meridian.Trade.Contract>();

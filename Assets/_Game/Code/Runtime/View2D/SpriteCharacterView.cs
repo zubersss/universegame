@@ -243,15 +243,25 @@ namespace Meridian.View2D
                     dead = vitals != null && vitals.Dead, grounded = player.Grounded, vx = v.x, vy = v.y,
                     sinceBuild = 99f, sinceSurprise = 99f, sinceHurt = 99f, sinceLand = sinceLand, sinceDig = sinceDig, sinceBump = sinceBump, sinceJump = sinceJump,
                     landSpeed = landSpeed, dashing = player.Dash.Active, jetpacking = player.Jetpack != null && player.Jetpack.Firing, climbingIn = ClimbingIn,
+                    ladder = player.ClimbingOn == Meridian.Player.ClimbKind.Ladder, reeling = player.Reeling || player.ClimbingOn == Meridian.Player.ClimbKind.Winch,
                 };
                 Play(overrideClip != null && Time.time < overrideUntil ? overrideClip : SurveyorAnim.Pick(input));
                 SetFacing(player.Facing);
             }
             SquashRoot.localScale = Squash.Step(dt);
-            clipTime += dt;
+            // U-176 (B-210): climb_ladder steps 0.5 m a cycle (8 frames at 12 fps): it paces with the climb, still on a rung; reel_up runs
+            // while a line pulls, still while the surveyor hangs
+            float pace = 1f;
+            if (player != null && Clip == Meridian.Player.SurveyorAnim.ClimbLadder) pace = Mathf.Min(4f, Mathf.Abs(player.ClimbRate) / LadderCycle);
+            else if (player != null && Clip == Meridian.Player.SurveyorAnim.ReelUp) pace = player.Reeling || Mathf.Abs(player.ClimbRate) > 0.05f ? 1.5f : 0f;
+            if (UsesAnimator && !Mathf.Approximately(Animator.speed, pace)) Animator.speed = pace;
+            clipTime += dt * pace;
             Apply();
             StepClimb();
         }
+
+        /// <summary>U-176: climb_ladder's climb a second at its own pace (B-210: 0.5 m a cycle of 8 frames at 12 fps).</summary>
+        public const float LadderCycle = 0.75f;
 
         /// <summary>Fallback drawing while no controller is loaded: the clip's frame on the 12 fps clock.</summary>
         void Apply()

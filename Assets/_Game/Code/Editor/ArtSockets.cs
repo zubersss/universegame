@@ -14,7 +14,7 @@ namespace Meridian.EditorTools
     /// </summary>
     public static class ArtSockets
     {
-        public static readonly string[] Fields = { "muzzle", "cable_socket", "back_socket", "back_socket_b", "hand_socket", "hand_socket_b", "held_b" };
+        public static readonly string[] Fields = { "muzzle", "cable_socket", "back_socket", "back_socket_b", "hand_socket", "hand_socket_b", "held_b", "reel" }; // U-176: side_b's reel (reel_up's hands)
         const string ArtRoot = "Assets/_Game/Art/";
 
         [MenuItem("MERIDIAN/Art/Register sockets (U-183)")]

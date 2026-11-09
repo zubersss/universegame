@@ -38,6 +38,10 @@ namespace Meridian.Core
         /// <summary>U-158: the planet's resource nodes and buried finds.</summary>
         public Meridian.Mining.ResourceFinds finds { get; private set; }
         public Meridian.Building.BaseBuilder bases { get; private set; }
+        /// <summary>U-176: the Builder's ladders, the winch, the recall beacon.</summary>
+        public Meridian.Building.Ladders ladders { get; private set; }
+        public Meridian.Building.Winch winch { get; private set; }
+        public RecallBeacon recall { get; private set; }
         /// <summary>U-093: Suit power 0 -> conk out, wake at the last base or the ship (created in Configure).</summary>
         public ConkOut conkOut { get; private set; }
         /// <summary>U-094: the v4 cartoon side view (on for converted planets while CartoonStage.Enabled).</summary>
@@ -200,10 +204,22 @@ namespace Meridian.Core
             // U-056: this planet's base, rebuilt from the save; the Builder and the Beam work on its pieces.
             if (bases == null) { bases = gameObject.AddComponent<Meridian.Building.BaseBuilder>(); bases.terrain = terrain; bases.rig = rig; bases.player = player != null ? player.transform : null; }
             bases.ConfigureFor(config.id);
+            // U-176: the ways back up: the Builder's ladders and the winch (rebuilt from the save)
+            if (ladders == null) ladders = gameObject.AddComponent<Meridian.Building.Ladders>();
+            ladders.terrain = terrain; ladders.player = player != null ? player.transform : null;
+            ladders.ConfigureFor(config.id);
+            if (winch == null) winch = gameObject.AddComponent<Meridian.Building.Winch>();
+            winch.terrain = terrain; winch.player = player != null ? player.transform : null;
+            winch.ConfigureFor(config.id);
             if (conkOut == null) conkOut = gameObject.AddComponent<ConkOut>();
             conkOut.player = player; conkOut.hazards = hazards; conkOut.bases = bases; conkOut.ship = ship; conkOut.terrain = terrain; conkOut.view = sideCamera;
             conkOut.vitals = player != null ? player.GetComponent<PlayerVitals>() : null;
             conkOut.Hook();
+            if (player != null)
+            {
+                recall = player.GetComponent<RecallBeacon>() ?? player.gameObject.AddComponent<RecallBeacon>(); // U-176: asc_recall
+                recall.controller = player; recall.conkOut = conkOut; recall.terrain = terrain;
+            }
             if (sideCamera != null)
             {
                 sideCamera.transform.position = new Vector3(spawnX + 0.5f, surface + 3f, sideCamera.orthographic ? -10f : -Meridian.CameraRig.SideView.DistanceFor(Meridian.CameraRig.SideView.HalfHeight(sideCamera)));

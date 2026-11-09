@@ -55,7 +55,7 @@ namespace Meridian.Player
             onSocket = held = false;
             if (body == null) body = GetComponentInParent<Transform>().GetComponentInChildren<Meridian.View2D.SpriteCharacterView>();
             if (body == null || body.Renderer == null || !body.Renderer.enabled) return null;
-            bool b = body.key == ArtKeys.Characters.SurveyorSideB;
+            bool b = JetpackOverlay.SheetB(body.Renderer.sprite); // U-176: the drawn frame's sheet (side_b's clips play under the side key)
             var table = ArtMaterials.SocketFor("props/rig/hand_socket", b ? "hand_socket_b" : "hand_socket");
             int i = JetpackOverlay.FrameOf(body.Renderer.sprite);
             if (b)
@@ -76,6 +76,8 @@ namespace Meridian.Player
         const float CableSag = 0.14f, CableWidth = 0.035f;
         static readonly Color CableInk = new Color(0.13f, 0.10f, 0.08f, 1f);
         Meridian.View2D.SpriteCharacterView body;
+        /// <summary>U-176: the drawn surveyor the tool sits on (null before it is found).</summary>
+        public Meridian.View2D.SpriteCharacterView Body => body;
         float beamAge, ghostAge;
         readonly RaycastHit2D[] hits = new RaycastHit2D[8];
         static readonly ContactFilter2D AnyCollider = ContactFilter2D.noFilter;

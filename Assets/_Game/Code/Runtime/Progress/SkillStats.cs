@@ -97,6 +97,16 @@ namespace Meridian.Progress
         public static float WaystationBonus => Value("waystation_bonus", D1Tables.Current.waystationBonus);
         public static float GrappleM => Value("grapple_m", 0f);
         public static float ReelSpeed => Value("reel_speed", 1f);
+        /// <summary>U-176: the metres one ladder placement fills (0: no ladders before asc_ladder_1) and the dirt each costs.</summary>
+        public static float LadderM => Value("ladder_m", 0f);
+        public static float LadderDirtPerM => Value("ladder_dirt_per_m", D1Tables.Current.ascent.ladderDirtPerM);
+        /// <summary>U-176: hooks the Grapple can hold at once (asc_grapple_3: two, a second hook takes over without a drop).</summary>
+        public static int GrappleAnchors => Mathf.Max(1, Mathf.RoundToInt(Value("grapple_anchors", 1f)));
+        /// <summary>U-176: the steepest ground the surveyor stands on without sliding (degrees; asc_climb_1: 40).</summary>
+        public static float NoSlideDeg => Value("no_slide_deg", D1Tables.Current.ascent.walkRampDeg);
+        /// <summary>U-176: the winch line from the Surface Line (asc_winch) and the recall beacons a run (asc_recall).</summary>
+        public static bool Winch => Has("winch");
+        public static int RecallBeacons => Mathf.RoundToInt(Value("recall_beacons", 0f));
         public static float HoldKg => Value("hold_kg", 0f);
         public static float OreWeight => Value("ore_weight", 1f);
         public static int TierShift => Mathf.RoundToInt(Value("tier_shift", 0f));

@@ -12,6 +12,8 @@ namespace Meridian.Player
         public bool dashing;
         /// <summary>U-105 (C1 clips): the jetpack firing; climbing into the ship; seconds since a build and a surprise (large when never).</summary>
         public bool jetpacking, climbingIn;
+        /// <summary>U-176 (B-210): on a ladder; riding a line up (the Grapple's reel, the winch).</summary>
+        public bool ladder, reeling;
         public float sinceBuild, sinceSurprise;
     }
 
@@ -29,13 +31,15 @@ namespace Meridian.Player
         public const string Bump = "bump", ConkOut = "conk_out";
         /// <summary>U-105 (C1, contract §11.2): the sheet's look_camera and the clips BLENDER adds in C1; ResolveOn names a stand-in until each lands.</summary>
         public const string LookCamera = "look_camera", Build = "build", Surprise = "surprise", Jetpack = "jetpack", ClimbIn = "climb_in";
+        /// <summary>U-176 (B-210, side_b): the ladder's climb and the reel up a line.</summary>
+        public const string ClimbLadder = "climb_ladder", ReelUp = "reel_up";
         public const float SurpriseTime = 0.5f;
 
         /// <summary>Every clip Pick can return (U-105: each must resolve to a real clip or a named stand-in on the live sheet).</summary>
         public static readonly string[] AllClips =
         {
             Idle, Walk, Run, Jump, Fall, Land, Dig, Aim, Hurt, Death, JumpAnticipate, LandHard, Dash, Bump, ConkOut,
-            LookCamera, Build, Surprise, Jetpack, ClimbIn,
+            LookCamera, Build, Surprise, Jetpack, ClimbIn, ClimbLadder, ReelUp,
         };
         public const float AnticipateTime = 0.06f, HardLanding = 6f;
 
@@ -50,6 +54,8 @@ namespace Meridian.Player
             if (a.sinceHurt < HurtTime) return Hurt;
             if (a.climbingIn) return ClimbIn;                 // U-105: boarding the ship
             if (a.sinceSurprise < SurpriseTime) return Surprise; // U-105: the eye-pop
+            if (a.ladder) return ClimbLadder;                 // U-176: the ways back up
+            if (a.reeling) return ReelUp;
             if (a.dashing) return Dash;
             if (a.sinceBuild < DigTime) return Build;          // U-105: the Builder placed a tile
             if (a.sinceDig < DigTime) return Dig;
@@ -75,6 +81,7 @@ namespace Meridian.Player
                 case Surprise: return LookCamera;
                 case Jetpack: return Jump;
                 case ClimbIn: return Land;
+                case ClimbLadder: case ReelUp: return Jump;
                 default: return clip;
             }
         }
@@ -89,7 +96,7 @@ namespace Meridian.Player
             switch (clip)
             {
                 case LandHard: case ClimbIn: return has(Land) ? Land : Idle;
-                case JumpAnticipate: case Dash: case Fall: case Jetpack: return has(Jump) ? Jump : Idle;
+                case JumpAnticipate: case Dash: case Fall: case Jetpack: case ClimbLadder: case ReelUp: return has(Jump) ? Jump : Idle;
                 case Run: return has(Walk) ? Walk : Idle;
                 case Hurt: return has(Bump) ? Bump : Idle;
                 case Bump: return has(Hurt) ? Hurt : Idle;

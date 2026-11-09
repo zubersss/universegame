@@ -20,7 +20,9 @@ namespace Meridian.Player
         public PlayerController controller;
         public RigModule module = RigModule.Beam;
 
-        InputAction aim, primary, prev, next;
+        InputAction aim, primary, secondary, prev, next;
+        /// <summary>U-176: the Grapple's line (added here; PlayerController reads its reel).</summary>
+        public GrappleLine Grapple { get; private set; }
         readonly InputAction[] slots = new InputAction[RigModules.Count + 1];
         float nextSurvey;
 
@@ -41,7 +43,7 @@ namespace Meridian.Player
         {
             if (controller == null || controller.actions == null) { enabled = false; return; }
             var foot = controller.actions.FindActionMap(MeridianInput.OnFoot, true);
-            aim = foot.FindAction("Aim"); primary = foot.FindAction("RigPrimary");
+            aim = foot.FindAction("Aim"); primary = foot.FindAction("RigPrimary"); secondary = foot.FindAction("RigSecondary", false);
             for (int i = 1; i <= RigModules.Count; i++) slots[i] = foot.FindAction("Module" + i);
             prev = foot.FindAction("ModulePrev"); next = foot.FindAction("ModuleNext");
             AimWorld = (Vector2)transform.position + new Vector2(2f, 1f);
@@ -49,6 +51,10 @@ namespace Meridian.Player
             ToolView = GetComponent<RigToolView>() ?? gameObject.AddComponent<RigToolView>();
             ToolView.input = this;
             ToolView.rig = rig;
+            Grapple = GetComponent<GrappleLine>() ?? gameObject.AddComponent<GrappleLine>();
+            Grapple.controller = controller;
+            Grapple.tool = ToolView;
+            controller.grapple = Grapple;
             Fx = FindAnyObjectByType<FxPool>();
             // Load now: a first pulse would otherwise find its sheet not ready (as SideFx does).
             FxSheet.Get(ArtKeys.Fx.SurveyScan);
@@ -64,7 +70,12 @@ namespace Meridian.Player
             var screen = aim.ReadValue<Vector2>();
             if (view != null && !externalAim) AimWorld = (Vector2)view.ScreenToWorldPoint(new Vector3(screen.x, screen.y, -view.transform.position.z));
             // While the inventory panel is open, clicks select slots, not tiles (U-045).
-            bool pressed = (primary.IsPressed() || holdUse) && !Meridian.UI.InventoryPanel.AnyOpen && !Meridian.UI.CraftingPanel.AnyOpen && !Meridian.UI.CataloguePanel.AnyOpen && !Meridian.UI.SellPanel.AnyOpen && !Meridian.UI.SkillTreePanel.AnyOpen;
+            bool uiFree = !Meridian.UI.InventoryPanel.AnyOpen && !Meridian.UI.CraftingPanel.AnyOpen && !Meridian.UI.CataloguePanel.AnyOpen && !Meridian.UI.SellPanel.AnyOpen && !Meridian.UI.SkillTreePanel.AnyOpen;
+            bool pressed = (primary.IsPressed() || holdUse) && uiFree;
+            // U-176: the right click: the Builder's ladder (or the winch at a shaft's mouth), the Grapple's second hook (asc_grapple_3)
+            if (uiFree && rig != null && ((secondary != null && secondary.WasPressedThisFrame()) || secondaryLatched)) Secondary();
+            secondaryLatched = false;
+            if (Grapple != null) Grapple.held = pressed && module == RigModule.Grapple && rig != null;
             bool edge = primary.WasPressedThisFrame() || (holdUse && !heldLast);
             heldLast = holdUse;
             Using = rig != null && view != null && pressed;
@@ -91,7 +102,7 @@ namespace Meridian.Player
             {
                 case RigModule.Beam: rig.Dig(AimWorld); break;
                 case RigModule.Builder: rig.Place(AimWorld); break;
-                case RigModule.Grapple: break; // its own task (Bible: M4)
+                case RigModule.Grapple: if (pressedNow && Grapple != null) Grapple.Fire(AimWorld); break; // U-176: the hook flies; held, it reels
                 case RigModule.Survey:
                     if (!pressedNow || Time.time < nextSurvey) break;
                     nextSurvey = Time.time + SurveyCooldown;
@@ -105,6 +116,30 @@ namespace Meridian.Player
         float strokeHeld;
         /// <summary>U-174: the Beam stroke under way (0..1; the tool view and tests read it).</summary>
         public float StrokeProgress { get; private set; }
+
+        /// <summary>Tests: a right click on the next frame.</summary>
+        [System.NonSerialized] public bool secondaryLatched;
+        /// <summary>U-176: what the last right click did (metres of ladder placed; the winch stood; a second hook thrown).</summary>
+        public int LastLadderMetres { get; private set; }
+
+        /// <summary>
+        /// U-176: the right click at the aim. The Builder: the winch at a shaft's mouth (asc_winch), else ladder metres upward (asc_ladder_1);
+        /// the Grapple: a second hook while the first holds (asc_grapple_3). Returns whether it did anything.
+        /// </summary>
+        public bool Secondary()
+        {
+            LastLadderMetres = 0;
+            switch (module)
+            {
+                case RigModule.Builder:
+                    if (Meridian.Building.Winch.Instance != null && Meridian.Building.Winch.Instance.Place(AimWorld)) return true;
+                    if (Meridian.Building.Ladders.Instance != null) LastLadderMetres = Meridian.Building.Ladders.Instance.Place(AimWorld);
+                    return LastLadderMetres > 0;
+                case RigModule.Grapple:
+                    return Grapple != null && Grapple.Attached && Meridian.Progress.SkillStats.GrappleAnchors >= 2 && Grapple.Fire(AimWorld);
+            }
+            return false;
+        }
 
         /// <summary>Points the rig at a world point without the mouse (tests, scripted demos).</summary>
         public void AimAt(Vector2 world) { externalAim = true; AimWorld = world; }

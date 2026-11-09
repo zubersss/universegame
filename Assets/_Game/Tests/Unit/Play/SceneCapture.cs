@@ -2639,6 +2639,141 @@ namespace Meridian.Tests
             UnityEngine.Object.Destroy(uiGo);
         }
 
+        /// <summary>U-176 (B-210): each way back up in a shaft at 1x → coordination/reports/unity/u176/: the ladder climbed (climb_ladder on
+        /// the rungs), the Grapple reeling (reel_up, the line to the hook in the wall), the winch post at the mouth and its line ridden, the
+        /// recall beacon pulsing, the jetpack in the shaft.</summary>
+        [UnityTest, Timeout(480000)]
+        public IEnumerator CaptureU176Ascent()
+        {
+            var name = Environment.GetEnvironmentVariable(Variable);
+            if (string.IsNullOrEmpty(name)) Assert.Ignore($"Set {Variable} (tools/unity_capture.ps1).");
+            if (SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.Null)
+                Assert.Fail("No graphics device: run without -nographics.");
+            bool wasCartoon = Meridian.View2D.CartoonStage.Enabled;
+            Meridian.View2D.CartoonStage.Enabled = true;
+            var state = GameState.Instance;
+            try
+            {
+#if UNITY_EDITOR
+                yield return UnityEditor.SceneManagement.EditorSceneManager.LoadSceneAsyncInPlayMode(
+                    CorePath, new LoadSceneParameters(LoadSceneMode.Single));
+#endif
+                var director = UnityEngine.Object.FindAnyObjectByType<SceneDirector>();
+                float timeout = Time.realtimeSinceStartup + 30f;
+                while ((!director.IsReady || !director.PlanetSide.terrain.IsSettled) && Time.realtimeSinceStartup < timeout) yield return null;
+                var side = director.PlanetSide;
+                state = GameState.Instance;
+                if (side.hazards != null) side.hazards.enabled = false;
+                if (side.dayNight != null) side.dayNight.Override = 0.45f;
+                side.creatures.autoSpawn = false;
+                side.creatures.DespawnAll();
+                var dir = "coordination/reports/unity/u176";
+                Directory.CreateDirectory(dir);
+                var player = side.player;
+                var rig = player.GetComponent<Meridian.Player.PlayerRigInput>();
+                var follow = side.sideCamera.GetComponent<Meridian.Player.CameraFollow>();
+                int x0 = Mathf.FloorToInt(player.Body.position.x) + 18;
+                float surface = side.terrain.SurfaceAt(x0 + 1.5f);
+                int yb = Mathf.FloorToInt(surface) - 24;
+                for (int y = yb; y <= Mathf.CeilToInt(surface) + 2; y++)
+                    for (int x = x0; x < x0 + 3; x++) side.terrain.SetTile(x, y, Meridian.Terrain.TileId.Air);
+                for (int i = 0; i < 10; i++) yield return null;
+                player.externalInput = true;
+                void Nodes(params string[] ids) { state.skillNodes.Clear(); foreach (var id in ids) state.skillNodes.Add(id); Meridian.Progress.SkillStats.Apply(state); }
+                IEnumerator Floor()
+                {
+                    player.LetGo(); player.intent = default; rig.holdUse = false;
+                    var at = new Vector2(x0 + 1.5f, yb + 0.05f);
+                    player.Body.position = at; player.transform.position = at; player.Body.linearVelocity = Vector2.zero;
+                    for (int i = 0; i < 30; i++) yield return new WaitForFixedUpdate();
+                    if (follow != null) follow.SnapToTarget();
+                }
+                IEnumerator Shot(string label, int settle = 20)
+                {
+                    for (int i = 0; i < settle; i++) yield return null;
+                    yield return Save(side.sideCamera, $"{name}_{label}");
+                    File.Copy($"logs/capture_{name}_{label}.png", $"{dir}/{label}.png", true);
+                    var v = player.GetComponentInChildren<Meridian.View2D.SpriteCharacterView>();
+                    TestContext.Out.WriteLine($"[MERIDIAN] u176 {label}: clip {(v != null ? v.Clip : "-")}, frame {(v != null && v.Renderer.sprite != null ? v.Renderer.sprite.name : "-")}, on {player.ClimbingOn}, reeling {player.Reeling}, feet {player.Body.position.y - yb:0.0} m up");
+                    var near = new System.Text.StringBuilder();
+                    foreach (var r in UnityEngine.Object.FindObjectsByType<SpriteRenderer>(FindObjectsSortMode.None))
+                    {
+                        if (!r.enabled || r.sprite == null || !r.gameObject.activeInHierarchy) continue;
+                        var d = (Vector2)r.transform.position - player.Body.position;
+                        if (d.magnitude > 3f) continue;
+                        string path = r.name; for (var t = r.transform.parent; t != null; t = t.parent) path = t.name + "/" + path;
+                        near.Append($" [{path} : {r.sprite.name} at {d.x:0.00},{d.y:0.00}]");
+                    }
+                    TestContext.Out.WriteLine($"[MERIDIAN] u176 {label} drawn near:{near}");
+                    var b = side.recall != null ? side.recall.Beacon : null;
+                    TestContext.Out.WriteLine($"[MERIDIAN] u176 {label} beacon: waiting {side.recall != null && side.recall.Waiting}, drawn {(b != null && b.enabled)}, sprite {(b != null && b.sprite != null ? b.sprite.name : "-")}, at {(b != null ? (Vector2)b.transform.position - player.Body.position : Vector2.zero)}");
+                }
+
+                // the ladder: 20 m from the floor, climbed to 9 m
+                Nodes("asc_ladder_1", "asc_ladder_2");
+                state.dirt.count = state.dirt.capacity;
+                side.ladders.player = null;
+                for (int k = 0; k < 20; k += 3) side.ladders.Place(new Vector2(x0 + 1.5f, yb + k + 0.5f));
+                side.ladders.player = player.transform;
+                yield return Floor();
+                player.intent = new Meridian.Player.PlayerIntent { climb = 1f };
+                for (int k = 0; k < 600 && player.Body.position.y < yb + 9f; k++) yield return new WaitForFixedUpdate();
+                yield return Shot("ladder", 6);
+                player.intent = default;
+                yield return Shot("ladder_still");
+                foreach (var c in new System.Collections.Generic.List<Vector2Int>(side.ladders.Cells)) side.ladders.Remove(c);
+
+                // the Grapple: thrown at the left wall 10 m up, caught at 4 m of the reel
+                Nodes("asc_grapple_1");
+                yield return Floor();
+                rig.module = Meridian.Rig.RigModule.Grapple;
+                var hands = rig.Grapple.Hands;
+                rig.AimAt(new Vector2(x0 - 0.6f, hands.y + 10.5f * 2.1f / 1.5f));
+                rig.holdUse = true;
+                for (int k = 0; k < 150 && !rig.Grapple.Attached; k++) yield return new WaitForFixedUpdate();
+                for (int k = 0; k < 400 && rig.Grapple.Attached && player.Body.position.y < yb + 4f; k++) yield return new WaitForFixedUpdate();
+                yield return Shot("grapple", 4);
+                rig.holdUse = false;
+
+                // the winch: its post at the mouth, ridden from the floor
+                Nodes("asc_winch");
+                side.winch.player = null;
+                side.winch.Place(new Vector2(x0 + 1.5f, surface - 0.5f));
+                side.winch.player = player.transform;
+                yield return Floor();
+                player.intent = new Meridian.Player.PlayerIntent { climb = 1f };
+                for (int k = 0; k < 600 && player.Body.position.y < yb + 12f; k++) yield return new WaitForFixedUpdate();
+                yield return Shot("winch", 4);
+                for (int k = 0; k < 600 && player.ClimbingOn == Meridian.Player.ClimbKind.Winch && player.Body.position.y < side.winch.RideTop - 0.05f; k++) yield return new WaitForFixedUpdate();
+                player.intent = default;
+                yield return Shot("winch_top");
+                side.winch.Remove();
+
+                // the recall beacon at the floor, pulsing
+                Nodes("asc_recall");
+                yield return Floor();
+                side.recall.Activate();
+                float until = Time.time + 2f;
+                while (Time.time < until) yield return null;
+                yield return Shot("recall", 1);
+                while (side.recall.Waiting) yield return null;
+
+                // the jetpack in the shaft
+                Nodes();
+                yield return Floor();
+                player.intent = new Meridian.Player.PlayerIntent { jumpPressed = true, jumpHeld = true };
+                for (int i = 0; i < 45; i++) { yield return new WaitForFixedUpdate(); player.intent.jumpPressed = false; player.intent.jumpHeld = true; }
+                yield return Shot("jetpack", 2);
+                player.intent = default;
+                LogAssert.NoUnexpectedReceived();
+            }
+            finally
+            {
+                Meridian.View2D.CartoonStage.Enabled = wasCartoon;
+                if (state != null) { state.skillNodes.Clear(); Meridian.Progress.SkillStats.Apply(state); }
+            }
+        }
+
         /// <summary>U-183 (B-205 / B-218): the tool looks on the surveyor at 1x → coordination/reports/unity/u183/: the Beam Mk1..Mk5 (aimed,
         /// its Mk ray and its cable to the pack), the Grapple Mk1..Mk3, the jetpack Mk1 (as drawn), Mk2, Mk3; the grip on the drawn hand.</summary>
         [UnityTest, Timeout(480000)]

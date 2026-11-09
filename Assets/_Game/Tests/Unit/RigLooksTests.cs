@@ -57,6 +57,26 @@ namespace Meridian.Tests
         }
 
         [Test]
+        public void TheDrawnFramesSheetPicksItsSocketTable()
+        {
+            // U-176: side_b's clips (dig, build, jetpack, climb_ladder, reel_up) play in the side sheet's controller (D-121), so the view's key
+            // stays the side sheet's: the frame's sprite names its sheet, and its sockets come from the _b tables.
+            var tex = new UnityEngine.Texture2D(4, 4);
+            var a = UnityEngine.Sprite.Create(tex, new UnityEngine.Rect(0, 0, 4, 4), UnityEngine.Vector2.zero); a.name = "side_57";
+            var b = UnityEngine.Sprite.Create(tex, new UnityEngine.Rect(0, 0, 4, 4), UnityEngine.Vector2.zero); b.name = "side_b_57";
+            try
+            {
+                Assert.IsFalse(Meridian.Player.JetpackOverlay.SheetB(a)); Assert.IsTrue(Meridian.Player.JetpackOverlay.SheetB(b));
+                Assert.AreEqual(57, Meridian.Player.JetpackOverlay.FrameOf(b));
+                Assert.AreSame(Meridian.Rendering.ArtMaterials.SocketFor("props/rig/jetpack_mk2", "back_socket_b"), Meridian.Player.JetpackOverlay.SocketTable(b));
+                Assert.AreSame(Meridian.Rendering.ArtMaterials.SocketFor("props/rig/jetpack_mk2", "back_socket"), Meridian.Player.JetpackOverlay.SocketTable(a));
+                var reel = Meridian.Rendering.ArtMaterials.SocketFor("characters/surveyor/side_b", "reel");
+                Assert.NotNull(reel, "B-210's reel socket (reel_up's hands)"); Assert.AreEqual(72, reel.Count);
+            }
+            finally { UnityEngine.Object.DestroyImmediate(a); UnityEngine.Object.DestroyImmediate(b); UnityEngine.Object.DestroyImmediate(tex); }
+        }
+
+        [Test]
         public void TheRegistryHoldsTheJsonsSockets()
         {
             var reg = Meridian.Rendering.ArtMaterials.Active;

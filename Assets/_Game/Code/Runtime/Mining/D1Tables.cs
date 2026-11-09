@@ -29,6 +29,22 @@ namespace Meridian.Mining
         public float surfaceLineDepth = 2f, strokeBaseSeconds = 0.25f, strokeCapSeconds = 8f, beamPowerStart = 1f;
         public float packLimitKg = 30f, loadK = 0.5f, waystationBonus = 0.25f;
         public int dirtStoreStart = 60, pocketCount = 3;
+
+        /// <summary>U-176 (D1_TABLES §4 "Climbing", LEAD 23:5x): the ways back up. The pack's load factor scales every speed here.</summary>
+        [Serializable] public sealed class AscentTable
+        {
+            /// <summary>The ladder's climb (m/s, × the Climb stat) and the dirt a ladder metre costs (asc_ladder_2 lowers it).</summary>
+            public float ladderClimb = 2.5f, ladderDirtPerM = 2f;
+            /// <summary>The Grapple's reel (m/s, × the reel stat) and the hook's flight (m/s).</summary>
+            public float grappleReel = 4f, hookSpeed = 40f;
+            /// <summary>The winch's ride (m/s): the ring-5 reward beats the grapple.</summary>
+            public float winchSpeed = 6f;
+            /// <summary>The recall beacon's wait before it lifts the surveyor topside (s).</summary>
+            public float recallSeconds = 5f;
+            /// <summary>The steepest ground (degrees) the surveyor stands and walks on; steeper slides (asc_climb_1 sets 40).</summary>
+            public float walkRampDeg = 35f;
+        }
+        public AscentTable ascent = new AscentTable();
         /// <summary>D1_TABLES §7 (D-175): the Scrip earned this expedition (sales only) for Surveyor Rank 1..10.</summary>
         public int[] rankScrip = { 0, 300, 800, 1800, 3500, 7000, 14000, 28000, 50000, 80000 };
 

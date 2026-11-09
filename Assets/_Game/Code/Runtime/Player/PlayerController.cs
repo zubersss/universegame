@@ -11,6 +11,7 @@ namespace Meridian.Player
         public bool jumpHeld;
         public bool jumpPressed; // went down since the last fixed step
         public bool dashPressed; // U-088: Shift tapped in the air, for one fixed step
+        public float climb;      // U-176: -1..1, down / up a ladder or the winch's line (W / S)
     }
 
     /// <summary>
@@ -68,7 +69,7 @@ namespace Meridian.Player
 
         readonly JumpTimer jumpTimer = new JumpTimer();
         readonly ContactPoint2D[] contacts = new ContactPoint2D[8];
-        InputAction moveAction, sprintAction, jumpAction, dashAction;
+        InputAction moveAction, sprintAction, jumpAction, dashAction, climbAction;
         bool jumpLatched, dashLatched, jumpHeldLast;
         float airTimeSinceJump;
         float fallSpeed;
@@ -95,6 +96,7 @@ namespace Meridian.Player
                 sprintAction = foot.FindAction("Sprint");
                 jumpAction = foot.FindAction("Jump");
                 dashAction = foot.FindAction("Dash", false);
+                climbAction = foot.FindAction("Climb", false); // U-176
                 foot.Enable();
             }
         }
@@ -105,6 +107,7 @@ namespace Meridian.Player
             intent.move = moveAction.ReadValue<float>();
             intent.sprint = sprintAction.IsPressed();
             intent.jumpHeld = jumpAction.IsPressed();
+            intent.climb = climbAction != null ? climbAction.ReadValue<float>() : 0f;
             if (jumpAction.WasPressedThisFrame()) jumpLatched = true;
             if (dashAction != null && dashAction.WasPressedThisFrame()) dashLatched = true;
         }
@@ -137,6 +140,17 @@ namespace Meridian.Player
             if (Grounded && !wasGrounded) Land(fallSpeed);
             fallSpeed = v.y < 0f ? -v.y : 0f;
 
+            // U-176 (D1_TABLES §4 "Climbing"): the ways back up drive the body while they hold it (the planet's g cancelled): the Grapple's
+            // reel while its button is held, a ladder or the winch's line while W / S is. A jump lets go with a full jump.
+            if (StepAscent(ref v, g, dt, jumpLatched || intent.jumpPressed))
+            {
+                jumpLatched = false; intent.jumpPressed = false; jumpHeldLast = intent.jumpHeld;
+                dashLatched = false; intent.dashPressed = false;
+                Body.linearVelocity = v;
+                return;
+            }
+            Sliding = false;
+
             // Horizontal: accelerate toward the target speed.
             // U-093: the knock stops dead when it ends, so a bump moves the surveyor KnockDistance, not a braking slide more.
             if (knockEnded) { v.x = 0f; knockEnded = false; }
@@ -151,7 +165,9 @@ namespace Meridian.Player
                 bool turning = !braking && Mathf.Abs(v.x) > 0.1f && Mathf.Sign(target) != Mathf.Sign(v.x);
                 accel = braking ? PlayerTuning.Braking : turning ? PlayerTuning.TurnAcceleration : PlayerTuning.GroundAcceleration;
             }
-            v.x = Mathf.MoveTowards(v.x, goalX, accel * dt);
+            // U-176: on ground too steep to stand on the slide keeps its speed (braking toward 0 would hold the body on the slope)
+            bool steep = Grounded && knockFor <= 0f && TooSteep(groundNormal, Meridian.Progress.SkillStats.NoSlideDeg);
+            if (!steep) v.x = Mathf.MoveTowards(v.x, goalX, accel * dt);
             if (Mathf.Abs(intent.move) > 0.01f) Facing = intent.move > 0 ? 1 : -1;
 
             // Jump. Physics applies gravity before moving the body, so starting at v₀ + g·dt/2
@@ -200,7 +216,14 @@ namespace Meridian.Player
             // U-156 (D-161 / D-162): the smooth ground's slopes. Standing or walking on a slope (not on flat ground, so the flat-ground jump
             // heights stay exact), the step follows the slope at the walking speed's horizontal pace, this step's gravity is cancelled (no slide
             // when standing) and a little push into the ground keeps the feet on it over a crest (the solver removes all of it: no drift).
-            if (Grounded && !jumped && !dashing && knockFor <= 0f && groundNormal.y < SlopeFlat)
+            // U-176 (D1_TABLES §4): ground steeper than the grip holds (35°; asc_climb_1 40°) is no ramp: the surveyor cannot walk up it and
+            // slides down it under the planet's g (the capsule has no friction).
+            if (Grounded && !jumped && !dashing && knockFor <= 0f && TooSteep(groundNormal, Meridian.Progress.SkillStats.NoSlideDeg))
+            {
+                Sliding = true;
+                if (v.x * -groundNormal.x > 0f) v.x = 0f; // no step uphill (a slope rises toward -normal.x)
+            }
+            else if (Grounded && !jumped && !dashing && knockFor <= 0f && groundNormal.y < SlopeFlat)
             {
                 var along = new Vector2(groundNormal.y, -groundNormal.x);
                 v = along * (v.x / along.x);
@@ -215,6 +238,70 @@ namespace Meridian.Player
 
             if (v.y < -terminalVelocity) v.y = -terminalVelocity;
             Body.linearVelocity = v;
+        }
+
+        // ---- U-176: the ways back up ----
+
+        /// <summary>U-176: the Grapple (PlayerRigInput adds it): its reel drives the body while it is attached and held.</summary>
+        [System.NonSerialized] public GrappleLine grapple;
+        ClimbSpot climb;
+        /// <summary>U-176: what the surveyor is climbing (None: not climbing), the climb's vertical speed this step, sliding down too steep ground.</summary>
+        public ClimbKind ClimbingOn => climb.kind;
+        public bool Climbing => climb.kind != ClimbKind.None;
+        public float ClimbRate { get; private set; }
+        public bool Sliding { get; private set; }
+        /// <summary>U-176: reeling up the Grapple's line (the reel_up clip).</summary>
+        public bool Reeling => grapple != null && grapple.Reeling;
+
+        /// <summary>U-176: ground whose normal leans past `noSlideDeg` from up (a slope steeper than that).</summary>
+        public static bool TooSteep(Vector2 normal, float noSlideDeg) => normal.y < Mathf.Cos(noSlideDeg * Mathf.Deg2Rad) - 1e-4f;
+
+        /// <summary>U-176: lets go of a climb (tests, the recall beacon).</summary>
+        public void LetGo() { climb = default; ClimbRate = 0f; if (grapple != null) grapple.Release(); }
+
+        bool StepAscent(ref Vector2 v, float g, float dt, bool jumpNow)
+        {
+            var feet = Body.position;
+            if (grapple != null && grapple.Attached && grapple.held)
+            {
+                climb = default; ClimbRate = 0f;
+                if (jumpNow) { grapple.Release(); HopOff(ref v, g, dt); return true; }
+                v = grapple.Pull(feet, LoadFactor, dt);
+                v.y += g * dt; // physics applies g·dt before it moves the body: the pull is the step's whole motion
+                return true;
+            }
+            float want = Mathf.Clamp(intent.climb, -1f, 1f);
+            if (climb.kind == ClimbKind.None)
+            {
+                if (jumpNow || Mathf.Abs(want) < 0.3f || Dash.Active || knockFor > 0f || !Ascent.Find(feet, out var spot)) return false;
+                if (want > 0f && feet.y >= spot.top - 0.02f) return false;          // already at its top
+                if (want < 0f && Grounded && feet.y <= spot.bottom + 0.3f) return false; // standing at its foot
+                climb = spot;
+            }
+            else
+            {
+                if (jumpNow) { climb = default; ClimbRate = 0f; HopOff(ref v, g, dt); return true; }
+                if (!Ascent.Find(new Vector2(climb.x, feet.y), out var spot) || spot.kind != climb.kind || Mathf.Abs(spot.x - climb.x) > 0.01f)
+                { climb = default; ClimbRate = 0f; return false; } // gone (a mound buried it) or left behind
+                climb = spot;
+            }
+            // A / D steps off at its top (onto the rim) or at its foot; mid-column they do nothing (no accidental fall)
+            if (Mathf.Abs(intent.move) > 0.5f && (feet.y >= climb.top - 0.3f || Grounded)) { climb = default; ClimbRate = 0f; return false; }
+            float rate = want * climb.speed * LoadFactor;
+            if (rate > 0f && feet.y + rate * dt > climb.top) rate = Mathf.Max(0f, (climb.top - feet.y) / dt);
+            if (rate < 0f && (Grounded || feet.y <= climb.bottom - 0.25f)) { climb = default; ClimbRate = 0f; return false; } // off its foot
+            float tx = climb.x - Facing * climb.beside; // the column in front of the surveyor (B-210's sockets)
+            v = new Vector2(Mathf.Clamp((tx - feet.x) / dt, -3f, 3f), rate + g * dt);
+            ClimbRate = rate;
+            return true;
+        }
+
+        void HopOff(ref Vector2 v, float g, float dt)
+        {
+            v = new Vector2(Mathf.Clamp(intent.move, -1f, 1f) * PlayerTuning.WalkSpeed, PlayerTuning.JumpStartSpeed(g, dt));
+            Grounded = false;
+            airTimeSinceJump = 0f;
+            Jumped?.Invoke();
         }
 
         void Land(float impactSpeed)
