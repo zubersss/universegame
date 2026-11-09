@@ -155,6 +155,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 2a4fcc6c7d6f86e4fb7f75d6d98015d4
+    m_Address: backgrounds/earth/sea_under/layer1
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 2ace6d8b6a502c240b2947b5c4c7fd8d
     m_Address: terrain/earth/soil
     m_ReadOnly: 0
@@ -375,6 +380,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 65a5adcbabfcb644585b9f6534b8160d
+    m_Address: backgrounds/earth/sea_under/layer3
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 65f139f4064a2fa45a46e71f0d2599a1
     m_Address: props/earth/pocket_water_ice/json
     m_ReadOnly: 0
@@ -392,6 +402,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 6ca3de721568b514ba1b50571db07a0f
     m_Address: terrain/earth/ground_strip_stone
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 6de93e277d7379843bbf95db87bff07c
+    m_Address: backgrounds/earth/sea_under
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -770,6 +785,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e32b28f9f52b88c479ebe33403aab22f
+    m_Address: backgrounds/earth/sea_under/layer0
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: e3858238d6768e4469c64723148c8610
     m_Address: terrain/earth/dig_puff
     m_ReadOnly: 0
@@ -777,6 +797,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: e47a633506824b74fbce51b1aaa167cf
     m_Address: terrain/earth/fill_decor_t2_3
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e4d14228e2d99c3449773474d230a888
+    m_Address: backgrounds/earth/sea_under/layer2
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

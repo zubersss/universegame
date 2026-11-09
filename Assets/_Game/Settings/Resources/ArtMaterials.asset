@@ -656,6 +656,14 @@ MonoBehaviour:
       start: 42
       length: 14
       loop: 0
+    - name: climb_ladder
+      start: 56
+      length: 8
+      loop: 1
+    - name: reel_up
+      start: 64
+      length: 8
+      loop: 1
   - key: creatures/earth/bear
     fps: 12
     clips:
@@ -1801,6 +1809,17 @@ MonoBehaviour:
       start: 0
       length: 8
       loop: 1
+  - key: props/dig/recall_beacon
+    fps: 12
+    clips:
+    - name: pulse
+      start: 0
+      length: 4
+      loop: 1
+    - name: liftoff
+      start: 4
+      length: 6
+      loop: 0
   - key: props/earth/archive_door
     fps: 12
     clips:

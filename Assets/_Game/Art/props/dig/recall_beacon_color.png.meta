@@ -1,0 +1,443 @@
+fileFormatVersion: 2
+guid: c560ca49f4af82f4bb3d6f1b0f5e52fe
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -4502116932970874373
+    second: recall_beacon_color_0
+  - first:
+      213: 5322879630860464758
+    second: recall_beacon_color_1
+  - first:
+      213: 258130660928955509
+    second: recall_beacon_color_2
+  - first:
+      213: 505961483492948749
+    second: recall_beacon_color_3
+  - first:
+      213: 7819818376212049585
+    second: recall_beacon_color_4
+  - first:
+      213: 6820124535857457060
+    second: recall_beacon_color_5
+  - first:
+      213: -871699887227499611
+    second: recall_beacon_color_6
+  - first:
+      213: -3255632224508720543
+    second: recall_beacon_color_7
+  - first:
+      213: -7380764533350081770
+    second: recall_beacon_color_8
+  - first:
+      213: 4454355164276536699
+    second: recall_beacon_color_9
+  - first:
+      213: -2622118202237418832
+    second: recall_beacon_color_10
+  - first:
+      213: -5579062923635787170
+    second: recall_beacon_color_11
+  - first:
+      213: 7662725342159892481
+    second: recall_beacon_color_12
+  - first:
+      213: -4633485461363514062
+    second: recall_beacon_color_13
+  - first:
+      213: 8737550652128362133
+    second: recall_beacon_color_14
+  - first:
+      213: 514934440858261565
+    second: recall_beacon_color_15
+  - first:
+      213: -2465743435127500450
+    second: recall_beacon_color_16
+  - first:
+      213: -7609510953377623185
+    second: recall_beacon_color_17
+  - first:
+      213: 4979740225556885435
+    second: recall_beacon_color_18
+  - first:
+      213: -3685770861555607932
+    second: recall_beacon_color_19
+  - first:
+      213: 6930782918379585939
+    second: recall_beacon_color_20
+  - first:
+      213: 2857819925476274752
+    second: recall_beacon_color_21
+  - first:
+      213: 8797625041267705575
+    second: recall_beacon_color_22
+  - first:
+      213: -4756033337371236597
+    second: recall_beacon_color_23
+  - first:
+      213: 393249628805543706
+    second: recall_beacon_color_24
+  - first:
+      213: 5579404039888443834
+    second: recall_beacon_color_25
+  - first:
+      213: -8868858694909699865
+    second: recall_beacon_color_26
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 9
+  spritePivot: {x: 0.5, y: 0}
+  spritePixelsToUnits: 64
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationMethod: 0
+  spriteTessellationDetail: -1
+  spriteGeometrySubdivision: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 2
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: 25
+    textureCompression: 1
+    compressionQuality: 100
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 1
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: recall_beacon_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 64
+        height: 192
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ae34006486b986447b37dd628b7932d6
+      internalID: 1339723785
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: recall_beacon_1
+      rect:
+        serializedVersion: 2
+        x: 68
+        y: 0
+        width: 64
+        height: 192
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: af80b657950c28e49b238248a37db9c7
+      internalID: -2143209500
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: recall_beacon_2
+      rect:
+        serializedVersion: 2
+        x: 136
+        y: 0
+        width: 64
+        height: 192
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: cdf313e95a3fc88499b04e1017362f91
+      internalID: 1202112141
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: recall_beacon_3
+      rect:
+        serializedVersion: 2
+        x: 204
+        y: 0
+        width: 64
+        height: 192
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 94cd405ce07dc904b8cc1f3f3f4473ba
+      internalID: 1140970391
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: recall_beacon_4
+      rect:
+        serializedVersion: 2
+        x: 272
+        y: 0
+        width: 64
+        height: 192
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: eac8590d9adb709468cf58fec89cc844
+      internalID: 459149565
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: recall_beacon_5
+      rect:
+        serializedVersion: 2
+        x: 340
+        y: 0
+        width: 64
+        height: 192
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 993145f65d989c04f86906cd7e554086
+      internalID: -366028
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: recall_beacon_6
+      rect:
+        serializedVersion: 2
+        x: 408
+        y: 0
+        width: 64
+        height: 192
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f79867e74657be64ea3cb69de31f7302
+      internalID: -1134657921
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: recall_beacon_7
+      rect:
+        serializedVersion: 2
+        x: 476
+        y: 0
+        width: 64
+        height: 192
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 35b84829238f2074397e46f2b8a0039d
+      internalID: -1488035551
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: recall_beacon_8
+      rect:
+        serializedVersion: 2
+        x: 544
+        y: 0
+        width: 64
+        height: 192
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 53d7982dc71c8504facfd351babda00d
+      internalID: 1469239205
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: recall_beacon_9
+      rect:
+        serializedVersion: 2
+        x: 612
+        y: 0
+        width: 64
+        height: 192
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0255bff5c45b06949a65303678b4a438
+      internalID: -928230826
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: f35b6a51e292b4440827bf636d4c8018
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      recall_beacon_0: 1339723785
+      recall_beacon_1: -2143209500
+      recall_beacon_2: 1202112141
+      recall_beacon_3: 1140970391
+      recall_beacon_4: 459149565
+      recall_beacon_5: -366028
+      recall_beacon_6: -1134657921
+      recall_beacon_7: -1488035551
+      recall_beacon_8: 1469239205
+      recall_beacon_9: -928230826
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

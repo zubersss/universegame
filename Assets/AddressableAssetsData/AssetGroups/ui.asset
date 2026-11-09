@@ -25,6 +25,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 077ac70c2963b494c90f7c3f1668f724
+    m_Address: ui/map/planet_earth
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 07a99296c82d4a5499704672645310a8
     m_Address: ui/skilltree/cost_tag
     m_ReadOnly: 0
@@ -70,6 +75,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 2035d310a6d04964bbc06d0f2786b658
+    m_Address: ui/map/name_tag
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 2097e72c6fc4b2e4e88a5e0d6a5c2f9a
     m_Address: ui/rank/insignia_7
     m_ReadOnly: 0
@@ -92,6 +102,21 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 2976b37e9ace31544a72070269badc07
     m_Address: ui/skilltree/link_bought
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 2c556cf30ce606a4ea42833385b93c69
+    m_Address: ui/map/minimap_chart
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 2cd1fd1f644e70e4ead1923e69ea78b3
+    m_Address: ui/map/planet_mercury
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 2dfe4104bda326d449de5608f7fd5365
+    m_Address: ui/map/orbit_dot
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -125,6 +150,21 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 435dd1a43d6fb6c4086be42cdae12aa7
+    m_Address: ui/map/planet_saturn
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 44603a434f23dac4795d82d251343c76
+    m_Address: ui/map/minimap_frame
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 455a6e4bf2a63fd4fb1bea936b2069ac
+    m_Address: ui/map/planet_venus
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 485e19841eaa6484cb128cd932cf8714
     m_Address: ui/rank/insignia_8
     m_ReadOnly: 0
@@ -150,8 +190,18 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 57700429b399a3f45aebc9f5eb1a2ad5
+    m_Address: ui/map/ship
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 57768228d2badc34c8ddc4cbe6b82746
     m_Address: ui/skilltree/node_available
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 582887d3a3baee04dae6f6116cd96e24
+    m_Address: ui/map/planet_neptune
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -160,8 +210,23 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 5bd13ba8c1950ad44a450a4b406a4f16
+    m_Address: ui/map/station
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 5bed63cc22427ba47ad1c0c510424859
     m_Address: ui/panels/settings
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 686369921d69a5d4f8b30d6fcb47c5d9
+    m_Address: ui/map/planet_jupiter
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 6b6f10e499594e046920d48586e30ace
+    m_Address: ui/map/well_dash
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -172,6 +237,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 7253324ea7f9f1c4b8e530a27014162b
     m_Address: ui/title/logo
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 72d2affe6f79d0f4ba9074de24b41f01
+    m_Address: ui/map/planet_uranus
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -240,6 +310,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a6fc0a0194901474ea025f8b43a6701f
+    m_Address: ui/map/planet_mars
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: a74418972a0930b47a93b4a5d635b49d
     m_Address: ui/skilltree/node_cap_available
     m_ReadOnly: 0
@@ -260,13 +335,28 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b2ef42c0a579bdd418665c731e90e247
+    m_Address: ui/map/rim_arrow
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: b33ea718a4d94c24ebd867f13668ba9c
     m_Address: ui/hud/film_switch/json
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b36dcf1c1408ab444ab99ab2ffddbb16
+    m_Address: ui/map/system_panel
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: b77941714af710049986a3080604356b
     m_Address: ui/skilltree/node_locked
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b7fb7b47acbf36743a64defc5d1fc4de
+    m_Address: ui/map/landed
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -280,6 +370,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: beda99904029f214489a53b6c1d8367b
+    m_Address: ui/map/sun
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: c81fcedd36ebcc24f9cef9a9de925327
     m_Address: ui/skilltree/panel
     m_ReadOnly: 0
@@ -290,8 +385,18 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d0f3fcb8763597b439f4240890ec97a3
+    m_Address: ui/map/planet_luna
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: d1ea0b0b611f7d84ca81f53a03bf0f4d
     m_Address: ui/titlecards/saturn
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d2ce293fa428cde4f91dfa26318353f0
+    m_Address: ui/map/title_cartouche
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

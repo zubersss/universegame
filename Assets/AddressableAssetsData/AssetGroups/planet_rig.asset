@@ -70,11 +70,6 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 70d75fb1b039b2b4da8d35c7a8652cca
-    m_Address: props/rig/lance
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 7960c180c12937747b9537782618bbbc
     m_Address: props/rig/jetpack_mk2
     m_ReadOnly: 0

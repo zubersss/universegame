@@ -1,15 +1,15 @@
 fileFormatVersion: 2
-guid: 70d75fb1b039b2b4da8d35c7a8652cca
+guid: 2cd1fd1f644e70e4ead1923e69ea78b3
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -5995886349579387781
-    second: lance_color_0
+      213: 7742966105035114703
+    second: planet_mercury_color_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
     mipMapMode: 0
-    enableMipMap: 1
+    enableMipMap: 0
     sRGBTexture: 1
     linearTexture: 0
     fadeOut: 0
@@ -50,8 +50,8 @@ TextureImporter:
   spriteExtrude: 1
   spriteMeshType: 1
   alignment: 9
-  spritePivot: {x: 0.375, y: 0.5}
-  spritePixelsToUnits: 128
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 64
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -115,13 +115,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: lance_color_0
+      name: planet_mercury_color_0
       rect:
         serializedVersion: 2
-        x: 19
-        y: 9
-        width: 98
-        height: 38
+        x: 1
+        y: 1
+        width: 30
+        height: 30
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -130,8 +130,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: b7cf4b3f1255acca0800000000000000
-      internalID: -5995886349579387781
+      spriteID: fc8028606aa847b60800000000000000
+      internalID: 7742966105035114703
       vertices: []
       indices: 
       edges: []
@@ -146,11 +146,7 @@ TextureImporter:
     indices: 
     edges: []
     weights: []
-    secondaryTextures:
-    - texture: {fileID: 2800000, guid: 1fb4a2ca6efa2f04db54822d8bf16ddc, type: 3}
-      name: _NormalMap
-    - texture: {fileID: 2800000, guid: 2c975f76671efd445b431ced77580ab6, type: 3}
-      name: _EmissionMap
+    secondaryTextures: []
     spriteCustomMetadata:
       entries: []
     nameFileIdTable: {}

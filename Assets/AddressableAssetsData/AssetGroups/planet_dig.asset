@@ -1,0 +1,98 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
+  m_Name: planet_dig
+  m_EditorClassIdentifier: Unity.Addressables.Editor::UnityEditor.AddressableAssets.Settings.AddressableAssetGroup
+  m_GroupName: planet_dig
+  m_GUID: d83b5e816a82364448156a49b5cd2540
+  m_SerializeEntries:
+  - m_GUID: 08099e7fcb99f20428a938a2ae1de8f5
+    m_Address: props/dig/ladder_top
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 087461f93a39b344eaba1bf0d5ac6dbe
+    m_Address: props/dig/winch_post
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 0b9128e6cd45c3448a9e94c53628a61d
+    m_Address: props/dig/ladder_bottom
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 0e0b456379d9ca14da7247e59e3a5703
+    m_Address: props/dig/ladder_top/json
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 102b0d572d9a11f40917460de8d7784f
+    m_Address: props/dig/ladder/json
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 147bfbc5c073c87458910f350ddc472a
+    m_Address: props/dig/grapple_hook/json
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 48f958cd422ec504f800e889cef80d67
+    m_Address: props/dig/grapple_line/json
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 79dbd9bfea9372145bf20aa8265b51e6
+    m_Address: props/dig/ladder_bottom/json
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 7f5fec04b5cd0f24da4e55b89d39c949
+    m_Address: props/dig/recall_beacon/json
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 9d22eb44722b44542b02403e72db6a2b
+    m_Address: props/dig/recall_beacon/animator
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a017203705b580f4a925bf39ff7d4a24
+    m_Address: props/dig/ladder
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c560ca49f4af82f4bb3d6f1b0f5e52fe
+    m_Address: props/dig/recall_beacon
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c888db09e1dc30045892f84286daee25
+    m_Address: props/dig/winch_post/json
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e12891087ecc32c40b8499e6e98fff33
+    m_Address: props/dig/grapple_line
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: ec6115974fe6b2f4c97f1afba5a119aa
+    m_Address: props/dig/grapple_hook
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  m_ReadOnly: 0
+  m_Settings: {fileID: 11400000, guid: d9f264b254b7a2748a6b464f4e77a509, type: 2}
+  m_SchemaSet:
+    m_Schemas:
+    - {fileID: 11400000, guid: 5b5ae607ef7c6df46a80a3faf641bf51, type: 2}
+    - {fileID: 11400000, guid: 64d0a9c3fcaec274fb4073a35383d4e1, type: 2}
