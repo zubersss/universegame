@@ -304,10 +304,8 @@ MonoBehaviour:
   - creatures/space/ringmite
   - creatures/venus/veil_serpent
   - fx/beam_ray/base
-  - fx/builder_ghost/base
   - fx/crush_pulse/base
   - fx/diamond_rain/base
-  - fx/dig_sparks/base
   - fx/escape_band/base
   - fx/heat_shimmer/base
   - fx/lance_bolt/base
@@ -317,7 +315,6 @@ MonoBehaviour:
   - fx/ring_dust/base
   - fx/skip_spool/base
   - fx/skip_streak/base
-  - fx/survey_scan/base
   - fx/thruster/base
   - fx/warden_bolt/base
   - planets/earth/glow
@@ -332,9 +329,7 @@ MonoBehaviour:
   - planets/uranus/glow
   - planets/venus/glow
   - props/common/calibration
-  - props/rig/builder
   - props/rig/lance
-  - props/rig/survey
   - props/space/asteroid_01
   - props/space/asteroid_02
   - props/space/asteroid_03
@@ -1584,7 +1579,7 @@ MonoBehaviour:
     clips:
     - name: puff
       start: 0
-      length: 8
+      length: 6
       loop: 0
   - key: fx/escape_band/base
     fps: 10

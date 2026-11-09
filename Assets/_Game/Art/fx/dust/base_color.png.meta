@@ -123,7 +123,7 @@ TextureImporter:
   compressionQuality: 50
   spriteMode: 2
   spriteExtrude: 1
-  spriteMeshType: 0
+  spriteMeshType: 1
   alignment: 9
   spritePivot: {x: 0.5, y: 0.0625}
   spritePixelsToUnits: 128
@@ -194,7 +194,7 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 0
-        y: 132
+        y: 0
         width: 128
         height: 128
       alignment: 9
@@ -216,7 +216,7 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 132
-        y: 132
+        y: 0
         width: 128
         height: 128
       alignment: 9
@@ -238,7 +238,7 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 264
-        y: 132
+        y: 0
         width: 128
         height: 128
       alignment: 9
@@ -260,7 +260,7 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 396
-        y: 132
+        y: 0
         width: 128
         height: 128
       alignment: 9
@@ -281,7 +281,7 @@ TextureImporter:
       name: base_4
       rect:
         serializedVersion: 2
-        x: 0
+        x: 528
         y: 0
         width: 128
         height: 128
@@ -303,7 +303,7 @@ TextureImporter:
       name: base_5
       rect:
         serializedVersion: 2
-        x: 132
+        x: 660
         y: 0
         width: 128
         height: 128
@@ -317,50 +317,6 @@ TextureImporter:
       bones: []
       spriteID: dd84b3a0e0db7bd478a47a345ce7c6ff
       internalID: 882008857
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: base_6
-      rect:
-        serializedVersion: 2
-        x: 264
-        y: 0
-        width: 128
-        height: 128
-      alignment: 9
-      pivot: {x: 0.5, y: 0.0625}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: 8950b1128fa86564c857410e92e1ef7e
-      internalID: -1022685579
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: base_7
-      rect:
-        serializedVersion: 2
-        x: 396
-        y: 0
-        width: 128
-        height: 128
-      alignment: 9
-      pivot: {x: 0.5, y: 0.0625}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: ddab8b335f99fe440b94d71cb480fbbf
-      internalID: 709217847
       vertices: []
       indices: 
       edges: []
@@ -385,8 +341,6 @@ TextureImporter:
       base_3: -176567278
       base_4: -1805384066
       base_5: 882008857
-      base_6: -1022685579
-      base_7: 709217847
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

@@ -75,6 +75,16 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 17cd0f7313cab99408de2c0d9b293f21
+    m_Address: fx/survey_scan/base/animator
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 184cd5d23f1a72045a3c0988f3d93237
+    m_Address: fx/dust/base/animator
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 18fed079cf14bd440ba3ba7ba9947235
     m_Address: fx/ship/speed_lines
     m_ReadOnly: 0
