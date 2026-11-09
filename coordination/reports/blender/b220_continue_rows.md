@@ -12,8 +12,10 @@ Source: blender/scripts/gen_painted_bg.py (continue_layer, CONTINUE_MIN_COVER 0.
 ("B-220 <key> layer<n>: continues | feathered | own band"). Sheets: blender/preview/review_b220_<planet>_continue.png.
 
 Status: every sheet ACCEPTED by LEAD (Jupiter, Saturn, Uranus 13:2x / 13:4x; Neptune 15:4x; the Venus deck's rev 16:1x).
-**Exported so far: Jupiter (1fb6b29b, 16:16). Not yet: Saturn, Uranus, Neptune, venus/deck** (after UNITY's U-195 check;
-their scene jsons carry no `continue_rows` until then; this file is updated as each lands).
+**EXPORTED, all of it (2026-11-09 16:12-17:02, 33 scenes, 109 files, 0 .meta):** Jupiter 5 scenes (1fb6b29b), Saturn 5 (5d1da622),
+Neptune 6 (dadf2d6c; its storm / spot layer0 on the fixed wrap), Uranus 16 (20c1af38 deck1 + deck2, 82ee7e7a deck3 + deep), venus/deck
+(6dd385d0). Every exported scene json was read back against the table below: it holds exactly these `continue_rows`.
+Unchanged pngs (not in the commits): the fading layers whose last 64 rows were already empty.
 
 **For UNITY, venus/deck layer2 (changes with its export):** `y_m` goes from -0.5 to -1.5. The same drawing sits 64 rows
 higher inside the layer (still 2048 x 384) and the layer sits 1 m lower, so the cloud tops land on the same screen rows and
@@ -21,9 +23,10 @@ the layer's bottom 128 rows are plain under-deck (its lobes' feet and the vent g
 The vent glows moved with it: they now sit in the floor's upper 84 rows (layer rows 166-250). Nothing to change in code if
 the layer's place is read from its json; a hard-coded -0.5 for this layer would draw it 1 m too high.
 
-Neptune's storm and spot, one more change riding the export (LEAD 15:5x, B-161 reopened): layer0 (the vortex core) keeps a
-fixed wrap like layer1 (the rim, the pulse layer), so the core sits under the rim at the scene's anchor (the tile's x 1024).
-Today's exported layer0 has the core rolled about half a tile away. LEAD judges a preview first.
+Neptune's storm and spot, one more change that rode the export (LEAD 15:5x, B-161 reopened; accepted on
+review_b220_neptune_storm_anchor.png 16:04): layer0 (the vortex core) keeps a fixed wrap like layer1 (the rim, the pulse
+layer), so the core sits under the rim at the scene's anchor (the tile's x 1024; it sat at x 1939, half a tile away).
+Vertically the core stays 170 px above the rim's centre, as B-161 was accepted (LEAD: it reads as looking into a funnel).
 
 | Planet | Scenes | layer0 | layer1 | layer2 |
 |--------|--------|--------|--------|--------|
