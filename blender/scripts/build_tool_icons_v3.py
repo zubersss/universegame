@@ -9,8 +9,9 @@ proportion and ink weight (a chunky silhouette on a diagonal, heavy outer ink), 
                         hook seated forward on the arm and a slack loop of line between them
   icons/tools/survey    the Survey - its scanner: the teal case on the cuff with the compass dial and the red-tipped aerial, the
                         big brass dish open forward with the pick-up at its focus, two teal scan arcs
-  icons/tools/builder   the Builder - its placing tool: the plank hopper heaped with dirt, the steel scoop forward tipping a clod
-                        into a placing ghost (B-217's cream dashes and corner brackets)
+  icons/tools/builder   the Builder - building (rev 2, LEAD 12:0x): an open plank bucket of dirt with a steel bail, tipped up to
+                        pour, clods falling onto a ghost block (B-217's cream dashes, a brick bond inside; no plus, no brackets)
+                        standing on a short ground line
 
 All four: Earth palette, 128x128 at PPU 128, pivot centre, inside the 2 px margin (B-199's item-icon contract, as
 icons/tools/shovel); json key / style / size / ppu / pivot / note.
@@ -119,9 +120,9 @@ def grapple_icon(d, M):
 
     def at(o, a, b):
         return (o[0] + a * u[0] + b * p[0], o[1] + a * u[1] + b * p[1])
-    G.stroke(d, hose(smooth([(-0.21, 0.03), (-0.30, 0.16), (-0.24, 0.30), (-0.08, 0.33), (0.04, 0.24), (0.09, 0.13)]), 0.036),
-             M["mustard_sh_i"], I * 0.7, cyclic=True)                                                                  # the slack line (rev:
-                                                                                                                        # a smooth curve, not corners)
+    G.stroke(d, hose(smooth([(-0.21, 0.03), (-0.30, 0.16), (-0.24, 0.30), (-0.08, 0.33), (0.04, 0.24), (0.09, 0.13)]), 0.048),
+             M["mustard_sh_i"], O * 0.8, cyclic=True)                                                                  # the slack line (rev:
+                                                                                                                        # smooth; rev 2: heavier ink)
     G.stroke(d, hose([C, S0], 0.06), M["sky_sh_i"], I, cyclic=True)                                                   # the arm to the seat
     G.stroke(d, circle(C[0], C[1], R, 28), M["sky_sh_i"], O * 1.25, cyclic=True)                                       # the reel drum
     for k in range(3):                                                                                                  # the line, lap on lap
@@ -129,12 +130,13 @@ def grapple_icon(d, M):
         G.stroke(d, hose(circle(C[0], C[1], rr, 22)[:21], 0.034), M["mustard_sh_i"], I * 0.7, cyclic=True)
     G.stroke(d, hose([(C[0] - 0.09, C[1] + 0.025), (C[0] + 0.09, C[1] - 0.025)], 0.032), M["sky_i"], I, cyclic=True)  # the crank bar
     G.stroke(d, circle(C[0] + 0.09, C[1] - 0.025, 0.028, 12), M["mustard_i"], I, cyclic=True)                         # its knob
-    G.stroke(d, hose([S0, S1], 0.055), M["sky_sh_i"], I, cyclic=True)                                                 # the hook's shank
+    G.stroke(d, hose([S0, S1], 0.07), M["sky_sh_i"], O, cyclic=True)                                                  # the hook's shank (rev 2:
+                                                                                                                        # thicker, heavy ink: a thin fork at 40 px)
     G.stroke(d, [at(S0, 0.015, -0.04), at(S0, 0.06, -0.04), at(S0, 0.06, 0.04), at(S0, 0.015, 0.04)], M["mustard_i"], I, cyclic=True)   # collar
     T0 = (0.31, 0.31)
-    G.stroke(d, hose([T0, at(T0, 0.07, 0.0)], 0.04), M["sky_i"], I, cyclic=True)                                      # three prongs
+    G.stroke(d, hose([T0, at(T0, 0.07, 0.0)], 0.052), M["sky_i"], O, cyclic=True)                                     # three prongs
     for s in (1, -1):
-        G.stroke(d, hose([T0, at(T0, 0.01, 0.09 * s), at(T0, -0.06, 0.12 * s)], 0.04), M["sky_i"], I, cyclic=True)
+        G.stroke(d, hose([T0, at(T0, 0.01, 0.09 * s), at(T0, -0.06, 0.12 * s)], 0.052), M["sky_i"], O, cyclic=True)
 
 
 def survey_icon(d, M):
@@ -164,52 +166,48 @@ def survey_icon(d, M):
         G.stroke(d, T(hose(arc(0.28, 0.01, rr, math.radians(-38), math.radians(38), 8), 0.026)), M["teal_i"], I * 0.8, cyclic=True)
 
 
-def dashed_square(d, M, cx, cz, h, per_side=3):
-    """B-217's placing ghost at icon size: cream dashes round a square, bold corner brackets, a small plus."""
+def ghost_block(d, M, cx, cz, h, per_side=3):
+    """B-217's placing ghost at icon size, as a block being built (rev 2, LEAD 12:0x: no plus, no corner brackets - with them it
+    read as a crosshair): cream dashes round a square and a cream brick bond inside."""
     pts = [(cx - h, cz - h), (cx + h, cz - h), (cx + h, cz + h), (cx - h, cz + h)]
     for side in range(4):
         (xa, za), (xb, zb) = pts[side], pts[(side + 1) % 4]
         for j in range(per_side):
-            t0, t1 = (j + 0.25) / per_side, (j + 0.75) / per_side
-            G.stroke(d, hose([(xa + (xb - xa) * t0, za + (zb - za) * t0), (xa + (xb - xa) * t1, za + (zb - za) * t1)], 0.026),
-                     M["off_i"], I * 0.8, cyclic=True)
-    c, e = 0.055, h + 0.02
-    for sx in (-1, 1):
-        for sz in (-1, 1):
-            G.stroke(d, hose([(cx + sx * e, cz + sz * (e - c)), (cx + sx * e, cz + sz * e), (cx + sx * (e - c), cz + sz * e)], 0.032),
+            t0, t1 = (j + 0.2) / per_side, (j + 0.8) / per_side
+            G.stroke(d, hose([(xa + (xb - xa) * t0, za + (zb - za) * t0), (xa + (xb - xa) * t1, za + (zb - za) * t1)], 0.032),
                      M["off_i"], I, cyclic=True)
-    for a, b in (((cx - 0.035, cz), (cx + 0.035, cz)), ((cx, cz - 0.035), (cx, cz + 0.035))):
-        G.stroke(d, hose([a, b], 0.024), M["off_i"], I * 0.8, cyclic=True)
+    w = 0.018                                                                                                          # the brick bond
+    for a, b in (((cx - h * 0.75, cz), (cx + h * 0.75, cz)), ((cx, cz + h * 0.2), (cx, cz + h * 0.75)),
+                 ((cx - h * 0.45, cz - h * 0.2), (cx - h * 0.45, cz - h * 0.75)), ((cx + h * 0.45, cz - h * 0.2), (cx + h * 0.45, cz - h * 0.75))):
+        G.stroke(d, hose([a, b], w), M["off_i"], I * 0.5, cyclic=True)
 
 
 def builder_icon(d, M):
-    T = axis(-20, -0.05, 0.10)
-    dashed_square(d, M, 0.25, -0.28, 0.12)                                                                             # where it lands
-    G.stroke(d, IT.lump(0.29, -0.10, 0.036, 0.03, 2274, n=9, jit=0.15), M["brown_i"], I, cyclic=True)                 # a clod tipping out
-    G.stroke(d, T(hose([(-0.37, 0.0), (-0.41, 0.05), (-0.42, 0.12)], 0.045)), M["brown_sh_i"], I, cyclic=True)        # the dirt hose
-    for x, z, rr in ((-0.28, 0.15, 0.07), (-0.16, 0.17, 0.08), (-0.05, 0.15, 0.065)):                                # dirt heaped in the top
-        c = T([(x, z)])[0]
-        G.stroke(d, IT.lump(c[0], c[1], rr, rr * 0.75, int(abs(x) * 100) + 2277, n=10, jit=0.12), M["brown_i"], I, cyclic=True)
-    box = rect(-0.36, -0.12, 0.02, 0.13)
-    G.stroke(d, T(box), M["mustard_sh_i"], O, cyclic=True)                                                            # the plank hopper
-    for x in (-0.23, -0.10):
-        G.seam(d, T([(x, -0.115), (x, 0.125)]), M["ink"])
-    G.stroke(d, T(rect(-0.36, -0.045, 0.02, -0.005)), M["sky_sh_i"], I, cyclic=True)                                  # an iron band
-    G.stroke(d, T(box), M["ink"], O * 1.25, cyclic=True)
-    cuff(d, M, T, -0.27, -0.17, 0.16)
-    bowl = [(0.02, 0.10), (0.02, -0.10)] + [(0.20 + 0.18 * math.cos(a), 0.12 * math.sin(a)) for a in np.linspace(-math.pi * 0.62, 0.32, 10)]
-    G.stroke(d, T(bowl), M["sky_sh_i"], O, cyclic=True)                                                               # the steel scoop
-    G.stroke(d, T(bowl), M["ink"], O * 1.25, cyclic=True)
-    for x, z, rr in ((0.11, 0.09, 0.055), (0.21, 0.08, 0.06), (0.30, 0.05, 0.042)):                                  # dirt in the scoop
-        c = T([(x, z)])[0]
-        G.stroke(d, IT.lump(c[0], c[1], rr, rr * 0.75, int(x * 100) + 2283, n=10, jit=0.12), M["brown_i"], I, cyclic=True)
+    """rev 2 (LEAD 12:0x: the banded hopper and the scoop read as a launcher aimed at a crosshair, D-087): an open plank bucket of
+    dirt tipped up to pour, a clod falling from its lip onto a ghost block that stands on a short ground line."""
+    G.stroke(d, hose([(0.07, -0.40), (0.43, -0.40)], 0.036), M["brown_i"], I, cyclic=True)                           # the ground line
+    ghost_block(d, M, 0.25, -0.27, 0.11)                                                                               # the block being built
+    for (x, z), rr, s in (((0.13, 0.03), 0.036, 1), ((0.18, -0.045), 0.03, 2), ((0.215, -0.11), 0.024, 3)):         # clods poured out
+        G.stroke(d, IT.lump(x, z, rr, rr * 0.85, 2290 + s, n=9, jit=0.15), M["brown_i"], I, cyclic=True)
+    T = axis(-35, -0.15, 0.08)                                                                                         # the bucket, tipped to pour
+    bucket = [(-0.12, -0.17), (0.12, -0.17), (0.17, 0.15), (-0.17, 0.15)]                                             # an open plank bucket
+    G.stroke(d, T(bucket), M["mustard_sh_i"], O, cyclic=True)
+    G.stroke(d, T([(-0.04, -0.17), (0.04, -0.17), (0.0567, 0.15), (-0.0567, 0.15)]), M["mustard"], 0.0, cyclic=True)  # the boards: a lit
+    for xb, xt in ((-0.04, -0.0567), (0.04, 0.0567)):                                                                  # middle board, seams
+        G.seam(d, T([(xb, -0.165), (xt, 0.145)]), M["ink"])
+    G.stroke(d, T(bucket), M["ink"], O * 1.25, cyclic=True)
+    G.stroke(d, T(hose([(-0.165, 0.12)] + [(0.165 * math.cos(a), 0.12 + 0.2 * math.sin(a)) for a in np.linspace(math.pi * 0.97, math.pi * 0.03, 11)]
+                       + [(0.165, 0.12)], 0.026)), M["sky_sh_i"], I, cyclic=True)                                      # the steel bail
+    for x, z, rr in ((-0.10, 0.17, 0.075), (0.02, 0.20, 0.09), (0.125, 0.16, 0.065)):                                # the dirt heaped over
+        c = T([(x, z)])[0]                                                                                             # its open top
+        G.stroke(d, IT.lump(c[0], c[1], rr, rr * 0.8, 2295 + int(abs(x) * 100), n=10, jit=0.12), M["brown_i"], I, cyclic=True)
 
 
 ICONS = {"beam": beam_icon, "grapple": grapple_icon, "survey": survey_icon, "builder": builder_icon}
 NOTES = {"beam": "B-227: The Beam's icon (a cable-fed arm emitter with a cutting nozzle firing into rock; never a gun, D-087)",
          "grapple": "B-227: the Grapple's icon (the hand reel with its coiled line, the three-pronged hook seated forward)",
          "survey": "B-227: the Survey's icon (the scanner: the case, the compass dial, the aerial, the brass dish and its scan arcs)",
-         "builder": "B-227: the Builder's icon (the placing tool: the dirt hopper, the scoop tipping a clod into a placing ghost)"}
+         "builder": "B-227: the Builder's icon (building: a plank bucket of dirt tipped to pour onto a ghost block on the ground)"}
 
 
 # ---------------------------------------------------------------- kit / export
