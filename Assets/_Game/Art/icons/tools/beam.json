@@ -1,0 +1,13 @@
+{
+  "key": "icons/tools/beam",
+  "style": "v3",
+  "width": 128,
+  "height": 128,
+  "palette": "earth",
+  "ppu": 128,
+  "pivot": [
+    0.5,
+    0.5
+  ],
+  "note": "B-227: The Beam's icon (a cable-fed arm emitter with a cutting nozzle firing into rock; never a gun, D-087)"
+}

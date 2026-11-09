@@ -1,0 +1,13 @@
+{
+  "key": "icons/tools/survey",
+  "style": "v3",
+  "width": 128,
+  "height": 128,
+  "palette": "earth",
+  "ppu": 128,
+  "pivot": [
+    0.5,
+    0.5
+  ],
+  "note": "B-227: the Survey's icon (the scanner: the case, the compass dial, the aerial, the brass dish and its scan arcs)"
+}

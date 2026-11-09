@@ -1,0 +1,13 @@
+{
+  "key": "icons/tools/builder",
+  "style": "v3",
+  "width": 128,
+  "height": 128,
+  "palette": "earth",
+  "ppu": 128,
+  "pivot": [
+    0.5,
+    0.5
+  ],
+  "note": "B-227: the Builder's icon (building: a plank bucket of dirt tipped to pour onto a ghost block on the ground)"
+}
