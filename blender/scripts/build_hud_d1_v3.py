@@ -25,6 +25,11 @@ import build_hud_v3 as H  # noqa: E402
 from meridian import pngio, v3  # noqa: E402
 
 PAL, Canvas, circle, arc, mix, shade = H.PAL, H.Canvas, H.circle, H.arc, H.mix, H.shade
+
+
+def SH(k):
+    """A palette colour's shadow tone (palette-true; B-121's mix() tones are not)."""
+    return np.array(v3.hex_rgb(v3.shadow_of(v3.PALETTES["earth"][k], "earth")), np.float32) / 255.0
 OUT_W, IN_W, SWEEP = H.OUT_W, H.IN_W, H.SWEEP
 ART = os.path.join(os.path.dirname(os.path.dirname(HERE)), "Assets", "_Game", "Art")
 
@@ -99,10 +104,10 @@ def rank_slot(seed=61):
     S = 72
     c = Canvas(S, S)
     cx = cy = S / 2
-    c.shape(circle(cx, cy, 33, n=48, seed=seed), mix(PAL["brown"], PAL["mustard"], 0.35))
-    c.shape(circle(cx, cy, 27, n=44, seed=seed + 1), PAL["offwhite"], IN_W)
+    c.shape(circle(cx, cy, 31, n=48, seed=seed), SH("mustard"))                                   # (palette brass; inside the margin)
+    c.shape(circle(cx, cy, 25, n=44, seed=seed + 1), PAL["offwhite"], IN_W)
     for a in (0.785, 2.356, 3.927, 5.498):
-        c.shape(circle(cx + 30 * math.cos(a), cy + 30 * math.sin(a), 2.4, n=10, seed=int(a * 10)), mix(PAL["mustard"], PAL["offwhite"], 0.3), IN_W * 0.8)
+        c.shape(circle(cx + 28 * math.cos(a), cy + 28 * math.sin(a), 2.2, n=10, seed=int(a * 10)), PAL["mustard"], IN_W * 0.8)
     return c.image()
 
 
@@ -110,25 +115,29 @@ def pack_full(seed=71):
     """The red rubber stamp: a double border and PACK FULL in Limelight, rotated a little, the ink broken (no glow)."""
     import build_ui_v3 as U
     W_, H_ = 256, 96
-    m = np.zeros((H_, W_), np.float32)
     yy, xx = np.mgrid[0:H_, 0:W_].astype(np.float32)
-    ang = math.radians(-6)
-    u = (xx - W_ / 2) * math.cos(ang) + (yy - H_ / 2) * math.sin(ang)
-    v = -(xx - W_ / 2) * math.sin(ang) + (yy - H_ / 2) * math.cos(ang)
-    for half_w, half_h, t in ((112, 34, 4.5), (104, 26, 2.0)):                                   # the double border
-        ring = (np.abs(u) <= half_w) & (np.abs(v) <= half_h) & ~((np.abs(u) <= half_w - t) & (np.abs(v) <= half_h - t))
-        m = np.maximum(m, ring.astype(np.float32))
-    tm = U.text_mask(U.LIMELIGHT, "PACK FULL", 34, wobble=0.3, seed=seed)
+    m0 = np.zeros((H_, W_), np.float32)                                                           # drawn square first
+    cu, cv = xx + 0.5 - W_ / 2, yy + 0.5 - H_ / 2
+    for half_w, half_h, t in ((110, 33, 4.5), (102, 25, 2.0)):                                   # the double border
+        ring = (np.abs(cu) <= half_w) & (np.abs(cv) <= half_h) & ~((np.abs(cu) <= half_w - t) & (np.abs(cv) <= half_h - t))
+        m0 = np.maximum(m0, ring.astype(np.float32))
+    tm = U.text_mask(U.LIMELIGHT, "PACK  FULL", 38, wobble=0.3, seed=seed)                    # rev: larger, a wider word space
     th, tw = tm.shape
-    canvas = np.zeros((H_, W_), np.float32)
     y0, x0 = (H_ - th) // 2, (W_ - tw) // 2
-    canvas[y0:y0 + th, x0:x0 + tw] = tm
-    src_x = np.clip((u + W_ / 2).astype(int), 0, W_ - 1)                                          # rotate the lettering with it
-    src_y = np.clip((v + H_ / 2).astype(int), 0, H_ - 1)
-    m = np.maximum(m, canvas[src_y, src_x])
+    m0[y0:y0 + th, x0:x0 + tw] = np.maximum(m0[y0:y0 + th, x0:x0 + tw], tm)
+    ang = math.radians(-6)                                                                        # then turned a little, bilinear
+    su = cu * math.cos(ang) + cv * math.sin(ang) + W_ / 2 - 0.5                                   # (nearest sampling broke the
+    sv = -cu * math.sin(ang) + cv * math.cos(ang) + H_ / 2 - 0.5                                  # thin letters)
+    x_i, y_i = np.floor(su).astype(int), np.floor(sv).astype(int)
+    fx, fy = su - x_i, sv - y_i
+    pad = np.pad(m0, 1)
+
+    def at(yv, xv):
+        return pad[np.clip(yv + 1, 0, H_ + 1), np.clip(xv + 1, 0, W_ + 1)]
+    m = (at(y_i, x_i) * (1 - fx) * (1 - fy) + at(y_i, x_i + 1) * fx * (1 - fy) + at(y_i + 1, x_i) * (1 - fx) * fy + at(y_i + 1, x_i + 1) * fx * fy)
     rng = np.random.default_rng(seed)                                                             # the broken ink of a stamp
-    speck = rng.random((H_ // 3 + 1, W_ // 3 + 1)) < 0.12
-    holes = np.repeat(np.repeat(speck, 3, 0), 3, 1)[:H_, :W_]
+    speck = rng.random((H_ // 2 + 1, W_ // 2 + 1)) < 0.05                                         # rev: finer, sparser (12 % of 3 px
+    holes = np.repeat(np.repeat(speck, 2, 0), 2, 1)[:H_, :W_]                                    # cells ate the letters)
     m = m * np.where(holes, 0.0, 1.0)
     m[:2] = m[-2:] = 0
     m[:, :2] = m[:, -2:] = 0
@@ -142,23 +151,23 @@ def depth_marker(state, seed=81):
     S = 68
     c = Canvas(S, S)
     cx = cy = S / 2
-    c.shape(circle(cx, cy, 31, n=48, seed=seed), PAL["offwhite"], OUT_W)
-    if state == "topside":
-        c.fill(arc(cx, cy, 29, math.radians(160), math.radians(20), 20) + [(cx + 27, cy + 4), (cx - 27, cy + 4)], mix(PAL["sky"], PAL["offwhite"], 0.4))
+    c.shape(circle(cx, cy, 30, n=48, seed=seed), PAL["offwhite"], OUT_W)                         # (inside the 2 px margin)
+    if state == "topside":                                                                        # (palette tones only)
+        c.fill(arc(cx, cy, 29, math.radians(160), math.radians(20), 20) + [(cx + 27, cy + 4), (cx - 27, cy + 4)], PAL["sky"])
         c.shape(arc(cx - 6, cy + 4, 11, 0.0, math.pi, 12), PAL["mustard"], IN_W)                     # the sun over the line
         c.fill(arc(cx, cy, 29, math.radians(200), math.radians(340), 16), PAL["brown"])
         c.ink([(cx + 12, cy + 4), (cx + 12, cy - 18)], IN_W * 1.4)                                    # the pennant
         c.shape([(cx + 12, cy - 18), (cx + 12, cy - 9), (cx + 24, cy - 13)], PAL["red"], IN_W)
     else:
         c.fill(arc(cx, cy, 29, math.radians(200), math.radians(340), 16) + [(cx + 27, cy - 10), (cx - 27, cy - 10)], PAL["brown"])
-        c.fill(arc(cx, cy, 29, math.radians(160), math.radians(20), 20) + [(cx + 27, cy - 10), (cx - 27, cy - 10)], mix(PAL["brown"], PAL["mustard"], 0.35))
+        c.fill(arc(cx, cy, 29, math.radians(160), math.radians(20), 20) + [(cx + 27, cy - 10), (cx - 27, cy - 10)], SH("mustard"))
         c.shape([(cx - 9, cy - 2), (cx + 9, cy - 2), (cx, cy + 14)], PAL["mustard"], IN_W)            # the chevron down
     for k in range(5):                                                                            # the dashed Surface Line
         x0 = cx - 26 + 11 * k
         z = cy + 4 if state == "topside" else cy - 10
         c.fill([(x0, z - 2), (x0 + 7, z - 2), (x0 + 7, z + 2), (x0, z + 2)], PAL["offwhite"])
         c.ink([(x0 + 1, z), (x0 + 6, z)], IN_W)
-    c.ink(circle(cx, cy, 31, n=48, seed=seed), OUT_W, cyclic=True)
+    c.ink(circle(cx, cy, 30, n=48, seed=seed), OUT_W, cyclic=True)
     return c.image()
 
 
@@ -265,7 +274,14 @@ def preview(out, footnote=None):
     hud(low, False, 0.97)
     head = np.tile(np.array(review.PAPER, np.float32), (26, Wd, 1))
     review._label(head, "B-211 the D1 HUD at 1080p: topside (pack 35 %) | at 50 m below with the pack full (97 %: past the red line, the PACK FULL stamp)", 6, 6)
-    img = np.vstack([head, top, low])
+    spr = np.tile(np.array(review.PAPER, np.float32), (340, Wd, 1))                               # the new pieces at 2x
+    x = 10
+    for n, im in (("pack_full", stamp), ("scrip_tag", tag), ("rank_slot", slot), ("depth_marker", dm), ("dial_pack", dial_p)):
+        im2 = np.repeat(np.repeat(im, 2, 0), 2, 1) if n != "dial_pack" else im
+        ov(spr, im2, x, 24)
+        review._label(spr, n + (" (1x)" if n == "dial_pack" else " (2x)"), x, 6, scale=1)
+        x += im2.shape[1] + 30
+    img = np.vstack([head, top, low, spr])
     lines = []
     for n, im in (("gauge_pack", sheet), ("scrip_tag", tag), ("rank_slot", slot), ("pack_full", stamp), ("depth_marker", dm)):
         hit = v3.palette_hits(im, "earth")[0] * 100
