@@ -356,7 +356,94 @@ def eel_poses():
     return out
 
 
+# ---------------------------------------------------------------- veil serpent (B-224: the v2 combat serpent re-drawn passive)
+def serpent_spine(p, n=26):
+    """Head first, metres from the frame's centre (pivot): a long meandering ribbon; `arch` bows it up and away (parting round the
+    ship), `wave` runs the meander tailward, `shrink` thins it away into the haze (death)."""
+    s = 1.0 - 0.45 * p["shrink"]
+    pts = []
+    for i in range(n):
+        t = i / (n - 1)
+        x = (1.45 - 3.05 * t) * s
+        z = (0.22 * math.sin(p["wave"] - 2.4 * math.pi * t) * (0.35 + 0.65 * t) + p["arch"] * math.sin(math.pi * t) + p["bob"]) * s \
+            + 0.5 * p["shrink"]
+        pts.append((x, z))
+    return pts, s
+
+
+def draw_veil_serpent(d, M, pose=None, seed=0):
+    p = K.base_pose()
+    p.update(dict(wave=0.0, arch=0.0, shrink=0.0, curl=0.0))
+    p.update(pose or {})
+    spine, s = serpent_spine(p)
+    n = len(spine)
+    left, right = [], []
+    for i, (x, z) in enumerate(spine):
+        t = i / (n - 1)
+        w = (0.17 * (1 - t) + 0.05 * t) * s * (1 - 0.3 * p["curl"] * math.sin(math.pi * t))
+        a, b = spine[max(i - 1, 0)], spine[min(i + 1, n - 1)]
+        dx, dz = b[0] - a[0], b[1] - a[1]
+        L = math.hypot(dx, dz) or 1.0
+        nx, nz = -dz / L, dx / L
+        left.append((x + nx * w, z + nz * w))
+        right.append((x - nx * w, z - nz * w))
+    up, down = (left, right) if sum(q[1] for q in left) > sum(q[1] for q in right) else (right, left)
+    for i in range(3, n - 3, 4):                                                          # soft fins: rounded lobes along both edges
+        for edge, k in ((up, 1), (down, -1)):
+            q = edge[i]
+            G.stroke(d, G.lumpy_ellipse(q[0], q[1] + k * 0.04 * s, 0.10 * s, 0.05 * s, n=14, lump=0.05, seed=seed + i + (k > 0)),
+                     M["cream_sh"], I, cyclic=True)
+    tip = spine[-1]                                                                       # a soft forked tail fin (rounded lobes)
+    for k in (1, -1):
+        G.stroke(d, G.lumpy_ellipse(tip[0] - 0.08 * s, tip[1] + k * 0.07 * s, 0.13 * s, 0.05 * s, n=14, lump=0.05, seed=seed + 40 + k),
+                 M["cream"], I, cyclic=True)
+    shape = left + [tip] + right[::-1]
+    G.stroke(d, shape, M["haze_f"], 0.0, cyclic=True)                                     # the ribbon: haze, a cream belly band
+    mid = [((u[0] + 2 * v[0]) / 3, (u[1] + 2 * v[1]) / 3) for u, v in zip(up, down)]
+    G.stroke(d, down + mid[::-1], M["cream_f"], 0.0, cyclic=True)
+    for i in range(2, n - 2, 3):                                                          # soft bands across it
+        G.seam(d, [up[i], mid[i]], M["ink"])
+    G.stroke(d, shape, M["ink"], O, cyclic=True)
+    hx, hz = spine[0][0] + 0.08 * s, spine[0][1]                                          # the head: rounded, a calm eye, a closed mouth
+    dh = G.Xf(d, K.turn((hx, hz), p["head_rot"], (0.0, 0.0), K.scale_about((hx, hz), s)))
+    head = G.lumpy_ellipse(hx, hz, 0.21, 0.15, n=28, lump=0.03, seed=seed + 2)
+    G.stroke(dh, head, M["haze_f"], 0.0, cyclic=True)
+    G.stroke(dh, [q for q in head if q[1] < hz - 0.04] + [(hx, hz - 0.04)], M["cream_f"], 0.0, cyclic=True)
+    G.stroke(dh, head, M["ink"], O, cyclic=True)
+    G.seam(dh, G.bezier((hx + 0.20, hz - 0.035), (hx + 0.12, hz - 0.07), (hx + 0.03, hz - 0.06), n=5), M["ink"])   # closed, gently smiling
+    K.eyes(dh, M, hx + 0.06, hz + 0.03, 0.035, 0.045, 0.06, p, seed)
+    if p["shrink"] > 0.05:                                                                # thinning into the haze: a few wisps behind
+        for j in range(3):
+            x = tip[0] - 0.2 - 0.18 * j
+            G.stroke(d, G.lumpy_ellipse(x, tip[1] + 0.05 * (j - 1), 0.06 * (1 - 0.2 * j), 0.035, n=10, lump=0.1, seed=seed + 60 + j),
+                     M["puff"], I * 0.8, cyclic=True)
+
+
+def serpent_poses():
+    out = []
+    for i in range(5):                                                                    # idle: drifting, a slow meander, a breath
+        ph = TAU * i / 5
+        out.append(dict(wave=ph, bob=0.03 * math.sin(ph), look=(0.8, 0.0), blink={3: 0.8}.get(i, 0.0)))
+    for i in range(8):                                                                    # walk: meandering on, the wave quicker
+        ph = TAU * i / 8
+        out.append(dict(wave=2 * ph, bob=0.02 * math.sin(ph), look=(0.9, 0.0)))
+    for k, a in enumerate((0.15, 0.35, 0.55, 0.6, 0.4, 0.15)):                            # attack (kept for the code): it parts round
+        out.append(dict(wave=0.6 * k, arch=a, head_rot=0.12 * a, look=(0.7, 0.4)))        # the ship, bowing up and away, then back
+    out += [dict(curl=0.8, eye_pop=1.35, wave=0.3), dict(curl=0.4, eye_pop=1.15, wave=0.6)]   # hurt: a startled curl
+    for k in range(4):                                                                    # death (kept for the code): it thins away
+        out.append(dict(shrink=0.25 * (k + 1), wave=0.4 * k, blink=0.6 if k else 0.0))
+    return out
+
+
 SPECIES = {
+    "veil_serpent": dict(draw=draw_veil_serpent, poses=serpent_poses, mats=mats, frame=(256, 256), seed=55, pivot=(0.5, 0.5),
+                         clips=[("idle", 5, True), ("walk", 8, True), ("attack", 6, False), ("hurt", 2, False), ("death", 4, False)],
+                         self_check={"ink": "the ribbon's soft bands, the cream belly line, the fin lobes' edges, a mouth seam",
+                                     "motion": "a slow tailward meander; walk quicker; 'attack' (kept for the code) bows up and away round the "
+                                               "ship; hurt a startled curl; 'death' thins away into the haze",
+                                     "original": "our own cloud serpent: a ribbon with soft fins and a closed mouth - no fangs, spines, barbs "
+                                                 "or glow halo (B-224; D-087)"},
+                         ours="a long ribbon of a cloud serpent that meanders through the deck haze and parts round your ship"),
     "sulfur_drifter": dict(draw=draw_sulfur_drifter, poses=drifter_poses, mats=mats, frame=(112, 128), seed=51, pivot=(0.5, 0.5),
                            clips=[("idle", 10, True), ("drift", 12, True), ("react", 8, False), ("bump", 10, False), ("flee", 12, True)],
                            self_check={"ink": "gasbag panel seams, sulphur specks, the frill's lumpy edge, tendril hoses, fin edges",
@@ -421,6 +508,10 @@ def build_pressure_crab(out=None):          # manifest build_fn: render.py passe
 
 def build_vent_eel(out=None):          # manifest build_fn: render.py passes the source path
     return build("vent_eel", out)
+
+
+def build_veil_serpent(out=None):      # B-224: manifest build_fn
+    return build("veil_serpent", out)
 
 
 def entry_for(name):
