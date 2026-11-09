@@ -145,6 +145,21 @@ namespace Meridian.Core
             }
         }
 
+        /// <summary>
+        /// U-178 (D1_TABLES §7): a New Expedition sets the surveyor down at Earth's camp: Earth's planet side (loaded, or reconfigured when the
+        /// surveyor is already on a planet) with the surveyor at the camp's spawn, the ship landed beside it; then the slot is saved.
+        /// </summary>
+        public IEnumerator ReturnToEarthCamp()
+        {
+            gameState.currentPlanet = Meridian.Planets.PlanetId.Earth;
+            gameState.view = ViewMode.PlanetSide;
+            if (Space != null) Space.gameObject.SetActive(false);
+            if (PlanetSide != null) { PlanetSide.gameObject.SetActive(true); PlanetSide.spawnX = PlanetSideRoot.CampSpawnX; }
+            yield return LoadPlanetSide(gameState.CurrentPlanetConfig);
+            SetView(ViewMode.PlanetSide);
+            if (Meridian.Save.SaveSystem.Instance != null) Meridian.Save.SaveSystem.Instance.Save();
+        }
+
         /// <summary>Unloads PlanetSide (launch, Bible §5.2). Terrain edits live on in GameState.</summary>
         public AsyncOperation UnloadPlanetSide()
         {

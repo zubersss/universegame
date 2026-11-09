@@ -50,7 +50,9 @@ namespace Meridian.Core
         public Meridian.Hazards.HazardSystem hazards;
         public Meridian.Planet.POI.PoiPlacer pois;
         [Tooltip("Spawn column (tiles) when no save or transition gives one.")]
-        public int spawnX = 64;
+        public int spawnX = CampSpawnX;
+        /// <summary>U-178: Earth's camp spawn (the default; an entry from orbit moves spawnX to its landing column).</summary>
+        public const int CampSpawnX = 64;
         [Tooltip("The landed ship sits this many tiles right of the spawn column.")]
         public int shipOffsetX = 10;
 

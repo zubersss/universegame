@@ -2639,6 +2639,88 @@ namespace Meridian.Tests
             UnityEngine.Object.Destroy(uiGo);
         }
 
+        /// <summary>U-178 (B-206 / B-211 / B-214): Rank and the New Expedition → coordination/reports/unity/u178/: 1_tree_rank10 (the header's
+        /// insignia and badge, NEW EXPEDITION offered), 2_confirmation (the panel's certificate: wiped, kept, the new multiplier), 3_seal (B-214's
+        /// press mid-way), 4_camp_expedition_II (back at Earth's camp, the HUD's Rank slot at 1), 5_rank_up (Rank 2: B-214's rank_up).</summary>
+        [UnityTest, Timeout(480000)]
+        public IEnumerator CaptureU178Expedition()
+        {
+            var name = Environment.GetEnvironmentVariable(Variable);
+            if (string.IsNullOrEmpty(name)) Assert.Ignore($"Set {Variable} (tools/unity_capture.ps1).");
+            if (SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.Null)
+                Assert.Fail("No graphics device: run without -nographics.");
+            bool wasCartoon = Meridian.View2D.CartoonStage.Enabled;
+            Meridian.View2D.CartoonStage.Enabled = true;
+            string root = Path.Combine(Application.temporaryCachePath, "meridian_u178cap");
+            Meridian.Save.SaveSystem.RootOverride = root;
+            try
+            {
+#if UNITY_EDITOR
+                yield return UnityEditor.SceneManagement.EditorSceneManager.LoadSceneAsyncInPlayMode(
+                    CorePath, new LoadSceneParameters(LoadSceneMode.Single));
+#endif
+                var director = UnityEngine.Object.FindAnyObjectByType<SceneDirector>();
+                float timeout = Time.realtimeSinceStartup + 30f;
+                while ((!director.IsReady || !director.PlanetSide.terrain.IsSettled) && Time.realtimeSinceStartup < timeout) yield return null;
+                var side = director.PlanetSide;
+                side.creatures.autoSpawn = false;
+                side.creatures.DespawnAll();
+                if (side.dayNight != null) side.dayNight.Override = 0.45f;
+                var state = GameState.Instance;
+                var dir = "coordination/reports/unity/u178";
+                Directory.CreateDirectory(dir);
+                state.scrip = 41250;
+                state.scripEarned = 86400; // Rank 10
+                foreach (var id in new[] { "dig_power_1", "dig_brush_1", "dig_power_2", "haul_pack_1", "sur_depth_1", "voy_price_1", "asc_ladder_1", "asc_grapple_1" })
+                    state.skillNodes.Add(id);
+                Meridian.Progress.SkillStats.Apply(state);
+                var hud = side.sideHud;
+                var panel = hud.Skills;
+                panel.SetOpen(true);
+                panel.Select("dig_power_3");
+                yield return new WaitForSeconds(2.5f); // the chart, the insignia, the badge, the certificate's paper
+                IEnumerator Shot(string label, Canvas ui)
+                {
+                    yield return SaveWithUi(side.sideCamera, ui, $"{name}_{label}");
+                    File.Copy($"logs/capture_{name}_{label}.png", $"{dir}/{label}.png", true);
+                }
+                yield return Shot("1_tree_rank10", panel.Title.canvas);
+                TestContext.Out.WriteLine($"[MERIDIAN] u178 1_tree_rank10: header '{panel.Header.text}', insignia {(panel.Insignia.sprite != null ? panel.Insignia.sprite.name : "-")}, badge {(panel.Badge.sprite != null ? panel.Badge.sprite.name : "-")} '{panel.BadgeNumeral.text}', NEW EXPEDITION {(panel.NewExpedition.gameObject.activeSelf ? "offered" : "hidden")}");
+                panel.ShowConfirm(true);
+                yield return new WaitForSeconds(0.5f);
+                yield return Shot("2_confirmation", panel.Title.canvas);
+                TestContext.Out.WriteLine($"[MERIDIAN] u178 2_confirmation: '{panel.CertificateTitle.text}' / '{panel.CertificateText.text.Replace("\n", " | ")}'");
+                panel.Confirm();
+                yield return new WaitForSecondsRealtime(5f / 12f);
+                yield return Shot("3_seal", panel.Title.canvas);
+                float until = Time.realtimeSinceStartup + 40f;
+                int saves = Meridian.Save.SaveSystem.Instance != null ? Meridian.Save.SaveSystem.Instance.SaveCount : 0;
+                while (state.expedition < 2 && Time.realtimeSinceStartup < until) yield return null;
+                while (Meridian.Save.SaveSystem.Instance != null && Meridian.Save.SaveSystem.Instance.SaveCount == saves && Time.realtimeSinceStartup < until) yield return null;
+                side = director.PlanetSide;
+                side.creatures.autoSpawn = false;
+                side.creatures.DespawnAll();
+                yield return new WaitForSeconds(2f);
+                var follow = side.sideCamera.GetComponent<Meridian.Player.CameraFollow>();
+                if (follow != null) follow.SnapToTarget();
+                yield return new WaitForSeconds(0.5f);
+                hud = side.sideHud;
+                yield return Shot("4_camp_expedition_II", hud.RankSlot.canvas);
+                TestContext.Out.WriteLine($"[MERIDIAN] u178 4_camp_expedition_II: expedition {state.expedition}, Rank {hud.ShownRank}, nodes {state.skillNodes.Count}, Scrip {state.scrip}, at x {side.player.Body.position.x:0.0}, {state.currentPlanet}");
+                state.scripEarned = 300;
+                yield return new WaitForSecondsRealtime(0.42f);
+                yield return Shot("5_rank_up", hud.RankSlot.canvas);
+                TestContext.Out.WriteLine($"[MERIDIAN] u178 5_rank_up: Rank {hud.ShownRank}, rank-ups {hud.RankUps}, fx {(hud.RankUpFx.enabled && hud.RankUpFx.sprite != null ? hud.RankUpFx.sprite.name : "-")}");
+                LogAssert.NoUnexpectedReceived();
+            }
+            finally
+            {
+                Meridian.View2D.CartoonStage.Enabled = wasCartoon;
+                Meridian.Save.SaveSystem.RootOverride = null;
+                if (Directory.Exists(root)) Directory.Delete(root, true);
+            }
+        }
+
         /// <summary>U-176 (B-210): each way back up in a shaft at 1x → coordination/reports/unity/u176/: the ladder climbed (climb_ladder on
         /// the rungs), the Grapple reeling (reel_up, the line to the hook in the wall), the winch post at the mouth and its line ridden, the
         /// recall beacon pulsing, the jetpack in the shaft.</summary>
@@ -2696,7 +2778,7 @@ namespace Meridian.Tests
                     var v = player.GetComponentInChildren<Meridian.View2D.SpriteCharacterView>();
                     TestContext.Out.WriteLine($"[MERIDIAN] u176 {label}: clip {(v != null ? v.Clip : "-")}, frame {(v != null && v.Renderer.sprite != null ? v.Renderer.sprite.name : "-")}, on {player.ClimbingOn}, reeling {player.Reeling}, feet {player.Body.position.y - yb:0.0} m up");
                     var near = new System.Text.StringBuilder();
-                    foreach (var r in UnityEngine.Object.FindObjectsByType<SpriteRenderer>(FindObjectsSortMode.None))
+                    foreach (var r in UnityEngine.Object.FindObjectsByType<SpriteRenderer>())
                     {
                         if (!r.enabled || r.sprite == null || !r.gameObject.activeInHierarchy) continue;
                         var d = (Vector2)r.transform.position - player.Body.position;

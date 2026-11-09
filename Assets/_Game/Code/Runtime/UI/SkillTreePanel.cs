@@ -19,6 +19,9 @@ namespace Meridian.UI
     /// alpha while locked); the select ring on the chosen node. Right, the header ("Skill Tree", the Scrip held, the Surveyor Rank) and the
     /// chosen node's card on the kit's inventory paper: its frame and icon, name, branch and ring, effect, "needs:" its links, the cost on the
     /// cost tag (owned / needed), BUY greyed with the reason when it can't be bought. Buying is topside only. No per-frame work while closed.
+    /// U-178 (D-175, D1_TABLES §7, B-206 / B-214): the header shows the Rank's insignia (96 px) and the expedition's badge with its numeral;
+    /// at Rank 10, topside, NEW EXPEDITION opens a plain confirmation on B-206's certificate (what is wiped, what is kept, the new
+    /// multiplier; no system dialog); CONFIRM presses B-214's seal, begins the next expedition (Expedition.Begin) and returns to Earth's camp.
     /// </summary>
     public sealed class SkillTreePanel : MonoBehaviour
     {
@@ -36,6 +39,16 @@ namespace Meridian.UI
         public Text CostText { get; private set; }
         public Text Status { get; private set; }
         public Button Buy => buy;
+        /// <summary>U-178: NEW EXPEDITION (shown at Rank 10, topside), the confirmation and its text, and the seal pressing.</summary>
+        public Button NewExpedition => newExpedition;
+        public bool Confirming => confirmRoot != null && confirmRoot.activeSelf;
+        public Text CertificateText => certBody;
+        public Text CertificateTitle => certTitle;
+        public Button ConfirmButton => confirm;
+        public bool Sealing { get; private set; }
+        public Image Insignia => insignia;
+        public Image Badge => badge;
+        public Text BadgeNumeral => badgeNumeral;
 
         // chart.json (B-204): ring radii and branch axes at the chart's 960 px; drawn here at ChartPx.
         static readonly Dictionary<int, float> RingPx = new Dictionary<int, float> { { 1, 140f }, { 2, 210f }, { 3, 285f }, { 4, 355f }, { 5, 420f } };
@@ -50,6 +63,12 @@ namespace Meridian.UI
         GameObject root;
         InputAction toggle;
         Button buy;
+        Button newExpedition, confirm, cancel;
+        GameObject confirmRoot;
+        Image insignia, badge, certificate, certBadge, seal;
+        Text badgeNumeral, certTitle, certBody, certBadgeNumeral;
+        Sprite[] sealFrames;
+        AsyncOperationHandle<IList<Sprite>> sealHandle;
         Image chart, hub, select, card, cardFrame, cardIcon, costTag;
         Text sub;
         readonly Dictionary<string, Image> icons = new Dictionary<string, Image>();
@@ -74,6 +93,7 @@ namespace Meridian.UI
             PanelInput.Close(this);
             if (toggle != null) toggle.performed -= OnToggle;
             foreach (var h in handles) if (h.IsValid()) ArtLoad.Release(h);
+            if (sealHandle.IsValid()) ArtLoad.Release(sealHandle);
             if (IsOpen) AnyOpen = false;
         }
 
@@ -86,6 +106,7 @@ namespace Meridian.UI
             if (open) PanelInput.Open(this, toggle != null ? toggle.actionMap : null); else PanelInput.Close(this);
             AnyOpen = open;
             enabled = open;
+            if (!open && !Sealing && confirmRoot != null) confirmRoot.SetActive(false);
             if (open) { LoadArt(); Redraw(); UiKit.SelectFirst(root.transform, buy); }
         }
 
@@ -220,9 +241,117 @@ namespace Meridian.UI
 
             buy = UiKit.ActionButton(bt, "BUY", c, new Vector2(ColX - ColW * 0.5f + 120f, -170f), new Vector2(240f, 56f), () => BuySelected());
             Status = UiKit.Text(bt, "Status", c, new Vector2(ColX + 135f, -170f), new Vector2(360f, 56f), 22, false, TextAnchor.MiddleLeft, Brown);
+
+            // U-178 (B-206): the Rank's insignia and the expedition's badge at the header's right; NEW EXPEDITION under BUY at Rank 10, topside.
+            insignia = Img(bt, "RankInsignia", new Vector2(ColX + ColW * 0.5f - 56f, 396f), new Vector2(96f, 96f), Color.clear);
+            insignia.raycastTarget = false;
+            badge = Img(bt, "ExpeditionBadge", new Vector2(ColX + ColW * 0.5f - 158f, 396f), new Vector2(84f, 96f), Color.clear);
+            badge.raycastTarget = false;
+            badgeNumeral = Numeral(badge.transform, 0.75f);
+            newExpedition = UiKit.ActionButton(bt, "NEW EXPEDITION", c, new Vector2(ColX - ColW * 0.5f + 170f, -250f), new Vector2(340f, 56f), () => ShowConfirm(true));
+            newExpedition.gameObject.SetActive(false);
+
+            // The confirmation: B-206's certificate (B-208's paper) over the right column, in plain words; CONFIRM / CANCEL; B-214's seal.
+            certificate = Img(bt, "Certificate", new Vector2(ColX, 0f), CertSize, UiKit.Cream); // covers the header and the card
+            UiPaper.Apply(certificate, "ui/rank/certificate", _ => { if (IsOpen) Redraw(); });
+            confirmRoot = certificate.gameObject;
+            var cc = certificate.transform;
+            float hw = CertSize.x * 0.5f, hh = CertSize.y * 0.5f;
+            certTitle = UiKit.Text(cc, "CertTitle", c, new Vector2(0f, hh - 100f), new Vector2(CertSize.x - 100f, 64f), 44, false, TextAnchor.MiddleCenter, UiKit.Ink);
+            certTitle.font = UiTheme.Active.TitleFace;
+            certBadge = Img(cc, "CertBadge", new Vector2(0f, hh - 210f), new Vector2(112f, 128f), Color.clear);
+            certBadge.raycastTarget = false;
+            certBadgeNumeral = Numeral(certBadge.transform, 1f);
+            certBody = UiKit.Text(cc, "CertBody", c, new Vector2(0f, -40f), new Vector2(CertSize.x - 110f, 420f), 23, false, TextAnchor.UpperLeft, UiKit.Ink);
+            certBody.horizontalOverflow = HorizontalWrapMode.Wrap;
+            certBody.verticalOverflow = VerticalWrapMode.Truncate;
+            confirm = UiKit.ActionButton(cc, "CONFIRM", c, new Vector2(-170f, -hh + 110f), new Vector2(220f, 56f), () => Confirm());
+            cancel = UiKit.ActionButton(cc, "CANCEL", c, new Vector2(40f, -hh + 110f), new Vector2(180f, 56f), () => ShowConfirm(false));
+            seal = Img(cc, "Seal", Vector2.zero, new Vector2(160f, 192f), Color.white);
+            seal.rectTransform.pivot = new Vector2(0.5f, SealPivotY);
+            seal.rectTransform.anchoredPosition = new Vector2(hw - SealFromEdge, -hh + SealFromEdge); // B-214: 58 px in from the right and bottom
+            seal.raycastTarget = false;
+            seal.enabled = false;
+            confirmRoot.SetActive(false);
             Selected = tree.nodes.Length > 0 ? tree.nodes[0].id : null;
             root.SetActive(false);
             enabled = false;
+        }
+
+        /// <summary>B-214's seal: its pivot (on the seal) and its distance in from the certificate's right and bottom edges.</summary>
+        public const float SealPivotY = 0.3542f, SealFromEdge = 58f;
+        /// <summary>The certificate over the right column (it covers the header and the card while it is up).</summary>
+        static readonly Vector2 CertSize = new Vector2(640f, 920f);
+
+        /// <summary>The badge's numeral in Limelight ink, centred in B-206's numeral_rect [28, 30, 56, 40] (top-left px of the 112 × 128 badge).</summary>
+        static Text Numeral(Transform badgeTransform, float scale)
+        {
+            var t = UiKit.Text(badgeTransform, "Numeral", new Vector2(0.5f, 0.5f), new Vector2(0f, (64f - 50f) * scale), new Vector2(56f, 40f) * scale,
+                Mathf.RoundToInt(30f * scale), false, TextAnchor.MiddleCenter, UiKit.Ink);
+            t.font = UiTheme.Active.TitleFace;
+            t.raycastTarget = false;
+            var o = t.GetComponent<Outline>(); if (o != null) o.enabled = false;
+            return t;
+        }
+
+        /// <summary>U-178: opens (or closes) the New Expedition confirmation, its words filled from the state.</summary>
+        public void ShowConfirm(bool on)
+        {
+            if (confirmRoot == null || Sealing) return;
+            var s = GameState.Instance;
+            if (on && !Expedition.CanBegin(s, Topside)) on = false;
+            confirmRoot.SetActive(on);
+            if (!on) { Redraw(); return; }
+            int n = Mathf.Max(1, s.expedition), next = n + 1;
+            certTitle.text = "A New Expedition";
+            certBody.text = ConfirmationText(n);
+            certBadge.sprite = Art(Expedition.BadgeKey(next)); certBadge.color = certBadge.sprite != null ? Color.white : Color.clear;
+            certBadgeNumeral.text = Expedition.Roman(next);
+            certTitle.color = certBody.color = certBadgeNumeral.color = UiKit.Ink;
+            UiKit.SelectFirst(confirmRoot.transform, cancel);
+        }
+
+        /// <summary>The confirmation's words for leaving expedition n: what is wiped, what is kept, the new multiplier (pure; tests read it).</summary>
+        public static string ConfirmationText(int n)
+        {
+            int next = n + 1;
+            var sb = new System.Text.StringBuilder();
+            sb.Append("Expedition ").Append(Expedition.Roman(n)).Append(" ends. Expedition ").Append(Expedition.Roman(next)).Append(" begins at Earth's camp.\n\n");
+            sb.Append("Wiped: ").Append(string.Join(", ", Expedition.Wiped)).Append(".\n\n");
+            sb.Append("Kept: ").Append(string.Join(", ", Expedition.Kept)).Append(".\n\n");
+            sb.Append("Every Skill Tree stat ×").Append(Expedition.Multiplier(next).ToString("0.00", System.Globalization.CultureInfo.InvariantCulture))
+              .Append(" (now ×").Append(Expedition.Multiplier(n).ToString("0.00", System.Globalization.CultureInfo.InvariantCulture)).Append(").");
+            return sb.ToString();
+        }
+
+        /// <summary>U-178: CONFIRM: B-214's seal presses (10 frames, 12 fps), then the next expedition begins and the surveyor goes to Earth's camp.</summary>
+        public void Confirm()
+        {
+            if (Sealing || !Confirming) return;
+            if (!Expedition.CanBegin(GameState.Instance, Topside)) { ShowConfirm(false); return; }
+            StartCoroutine(SealAndBegin());
+        }
+
+        System.Collections.IEnumerator SealAndBegin()
+        {
+            Sealing = true;
+            confirm.interactable = cancel.interactable = false;
+            if (sealFrames != null && sealFrames.Length > 0)
+            {
+                seal.enabled = true;
+                foreach (var f in sealFrames) { seal.sprite = f; yield return new WaitForSecondsRealtime(1f / UiFrames.Fps); }
+                seal.enabled = false; // the certificate's baked seal matches the last frames (B-214)
+            }
+            bool began = Expedition.Begin(GameState.Instance, Topside);
+            Sealing = false;
+            confirm.interactable = cancel.interactable = true;
+            confirmRoot.SetActive(false);
+            SetOpen(false);
+            if (began)
+            {
+                var director = FindAnyObjectByType<SceneDirector>();
+                if (director != null) director.StartCoroutine(director.ReturnToEarthCamp());
+            }
         }
 
         Image Img(Transform parent, string name, Vector2 pos, Vector2 size, Color color)
@@ -269,6 +398,9 @@ namespace Meridian.UI
             foreach (var s in new[] { "chart", "hub", "node_bought", "node_available", "node_locked", "node_cap_bought", "node_cap_available", "node_cap_locked", "link_bought", "link_open", "link_locked", "select" })
                 Want("ui/skilltree/" + s);
             foreach (var e in emblems) Want(e.key);
+            for (int r = 1; r <= Expedition.MaxRank; r++) Want(Expedition.InsigniaKey(r));
+            Want(Expedition.BadgeKey(1)); Want(Expedition.BadgeKey(11));
+            if (!sealHandle.IsValid()) sealHandle = UiFrames.Load("fx/ui/expedition_seal", f => { if (this != null) sealFrames = f; });
             foreach (var n in SkillTree.Current.nodes) Want("icons/nodes/" + n.id);
         }
 
@@ -328,8 +460,17 @@ namespace Meridian.UI
                 foreach (var line in parts) { line.sprite = sprite; line.color = col; }
             }
 
-            Header.text = $"Scrip {Num(s.scrip)}   ·   Surveyor Rank {Meridian.Mining.D1Tables.Current.Rank(s.scripEarned)}";
+            // U-178: the Rank (and the Scrip earned the next one needs), the expedition and its multiplier
+            int rank = Expedition.Rank(s), nextAt = Expedition.NextRankScrip(s), expN = Mathf.Max(1, s.expedition);
+            Header.text = nextAt > 0
+                ? $"Scrip {Num(s.scrip)}   ·   Rank {rank} (next at {Num(nextAt)} earned)   ·   ×{Expedition.Multiplier(expN):0.00}"
+                : $"Scrip {Num(s.scrip)}   ·   Rank {rank}   ·   ×{Expedition.Multiplier(expN):0.00}";
             Header.color = UiKit.Ink;
+            insignia.sprite = Art(Expedition.InsigniaKey(rank)); insignia.color = insignia.sprite != null ? Color.white : Color.clear;
+            badge.sprite = Art(Expedition.BadgeKey(expN)); badge.color = badge.sprite != null ? Color.white : Color.clear;
+            badgeNumeral.text = Expedition.Roman(expN); badgeNumeral.color = UiKit.Ink;
+            bool offer = Expedition.CanBegin(s, Topside);
+            if (newExpedition.gameObject.activeSelf != offer) newExpedition.gameObject.SetActive(offer);
             var sel = tree.Get(Selected);
             select.sprite = Art("ui/skilltree/select");
             select.color = sel != null && select.sprite != null ? Color.white : Color.clear;

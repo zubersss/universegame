@@ -151,6 +151,7 @@ namespace Meridian.UI
             PackText = UiKit.Text(root, "PackFull", new Vector2(0.5f, 1f), new Vector2(-200f, -58f), new Vector2(400f, 26f), 17, true, TextAnchor.MiddleCenter, theme.warning);
             PackText.text = "PACK FULL";
             PackText.enabled = false;
+            BuildRank(root, tl);
             // U-147 (D-149): the hazard row and the suit row on paper tags in ink; the suit bar an ink-ruled strip with a gold fill.
             Tag(root, "HazardTag", tl, new Vector2(18f, -243f), new Vector2(128f, 23f), tl, HazardLabel, CryoText);
             Tag(root, "SuitTag", tl, new Vector2(18f, -267f), new Vector2(312f, 32f), tl, suitWord, SuitRateText);
@@ -432,9 +433,107 @@ namespace Meridian.UI
             t.alignment = TextAnchor.MiddleCenter;
         }
 
+        // ---- U-178 (D-175, D1_TABLES §7; B-211's rank slot, B-206's insignia, B-214's rank_up) ----
+
+        /// <summary>The Rank slot right of the dials (B-211, 72 px) with the Rank's insignia at 48 px; B-214's rank_up over the top centre when
+        /// the Rank rises (the new insignia on top of it at its pivot, moved and scaled by RankUpTrack).</summary>
+        public Image RankSlot { get; private set; }
+        public Image RankInsignia { get; private set; }
+        public Image RankUpFx { get; private set; }
+        public Image RankUpInsignia { get; private set; }
+        public int ShownRank { get; private set; }
+        /// <summary>Rank-ups played since load (tests).</summary>
+        public int RankUps { get; private set; }
+        public const float RankUpPivotY = 0.4583f, RankUpInsigniaPx = 96f;
+        /// <summary>B-214's insignia_track (fx/ui/rank_up.json): per frame, the insignia's rise above the pivot (px) and its scale.</summary>
+        public static readonly Vector2[] RankUpTrack =
+        {
+            new Vector2(40f, 0.7f), new Vector2(22f, 0.86f), new Vector2(8f, 1.0f), new Vector2(-4f, 1.12f), new Vector2(-2f, 1.05f),
+            new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f),
+        };
+        readonly Dictionary<int, Sprite> insignias = new Dictionary<int, Sprite>();
+        readonly List<AsyncOperationHandle<IList<Sprite>>> rankHandles = new List<AsyncOperationHandle<IList<Sprite>>>();
+        Sprite[] rankUpFrames;
+        int rankExpedition;
+        Coroutine rankUpPlaying;
+
+        void BuildRank(Transform root, Vector2 tl)
+        {
+            float x = 24f + 3f * (320f * DialScale + 16f) + 136f; // right of the dials, clear of Neptune's gust tag
+            RankSlot = UiKit.Panel(root, "RankSlot", tl, new Vector2(x, -10f), new Vector2(72f, 72f), Color.clear);
+            RankSlot.rectTransform.pivot = new Vector2(0f, 1f);
+            RankSlot.rectTransform.anchoredPosition = new Vector2(x, -10f);
+            RankSlot.raycastTarget = false;
+            RankInsignia = UiKit.Panel(RankSlot.transform, "Insignia", new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(48f, 48f), Color.clear);
+            RankInsignia.raycastTarget = false;
+            RankUpFx = UiKit.Panel(root, "RankUp", new Vector2(0.5f, 1f), new Vector2(0f, -250f), new Vector2(256f, 192f), Color.clear);
+            RankUpFx.rectTransform.pivot = new Vector2(0.5f, RankUpPivotY);
+            RankUpFx.rectTransform.anchoredPosition = new Vector2(0f, -250f);
+            RankUpFx.raycastTarget = false;
+            RankUpInsignia = UiKit.Panel(RankUpFx.transform, "Insignia", new Vector2(0.5f, RankUpPivotY), Vector2.zero, new Vector2(RankUpInsigniaPx, RankUpInsigniaPx), Color.clear);
+            RankUpInsignia.raycastTarget = false;
+            RankUpFx.enabled = RankUpInsignia.enabled = false;
+            var slot = ArtLoad.Asset<IList<Sprite>>("ui/hud/rank_slot");
+            rankHandles.Add(slot);
+            slot.Completed += op => { if (this != null && op.Status == AsyncOperationStatus.Succeeded && op.Result != null && op.Result.Count > 0) { RankSlot.sprite = op.Result[0]; RankSlot.color = Color.white; } };
+            for (int r = 1; r <= Meridian.Progress.Expedition.MaxRank; r++)
+            {
+                int rank = r;
+                var h = ArtLoad.Asset<IList<Sprite>>(Meridian.Progress.Expedition.InsigniaKey(rank));
+                rankHandles.Add(h);
+                h.Completed += op =>
+                {
+                    if (this == null || op.Status != AsyncOperationStatus.Succeeded || op.Result == null || op.Result.Count == 0) return;
+                    insignias[rank] = op.Result[0];
+                    if (rank == ShownRank) { RankInsignia.sprite = op.Result[0]; RankInsignia.color = Color.white; }
+                };
+            }
+            rankHandles.Add(UiFrames.Load("fx/ui/rank_up", f => { if (this != null) rankUpFrames = f; }));
+        }
+
+        void UpdateRank()
+        {
+            var s = GameState.Instance;
+            if (s == null || RankInsignia == null) return;
+            int rank = Meridian.Progress.Expedition.Rank(s);
+            if (rank == ShownRank && s.expedition == rankExpedition) return;
+            bool rose = ShownRank > 0 && rank > ShownRank && s.expedition == rankExpedition; // a new expedition's Rank 1 is no rank-up
+            ShownRank = rank;
+            rankExpedition = s.expedition;
+            if (insignias.TryGetValue(rank, out var sprite)) { RankInsignia.sprite = sprite; RankInsignia.color = Color.white; }
+            if (rose)
+            {
+                RankUps++;
+                if (rankUpPlaying != null) StopCoroutine(rankUpPlaying);
+                rankUpPlaying = StartCoroutine(PlayRankUp(rank));
+            }
+        }
+
+        System.Collections.IEnumerator PlayRankUp(int rank)
+        {
+            if (rankUpFrames == null || rankUpFrames.Length == 0) yield break;
+            RankUpFx.enabled = true;
+            RankUpInsignia.sprite = insignias.TryGetValue(rank, out var sp) ? sp : null;
+            RankUpInsignia.enabled = RankUpInsignia.sprite != null;
+            RankUpInsignia.color = Color.white;
+            for (int i = 0; i < rankUpFrames.Length; i++)
+            {
+                RankUpFx.sprite = rankUpFrames[i];
+                RankUpFx.color = Color.white;
+                var k = RankUpTrack[Mathf.Min(i, RankUpTrack.Length - 1)];
+                RankUpInsignia.rectTransform.anchoredPosition = new Vector2(0f, k.x);
+                RankUpInsignia.rectTransform.localScale = new Vector3(k.y, k.y, 1f);
+                yield return new WaitForSecondsRealtime(1f / UiFrames.Fps);
+            }
+            yield return new WaitForSecondsRealtime(0.6f); // the last frame holds a moment, then goes
+            RankUpFx.enabled = RankUpInsignia.enabled = false;
+            rankUpPlaying = null;
+        }
+
         void OnDestroy()
         {
             foreach (var h in gaugeHandles) if (h.IsValid()) ArtLoad.Release(h);
+            foreach (var h in rankHandles) if (h.IsValid()) ArtLoad.Release(h);
         }
 
         public void ConfigureFor(PlanetConfig p)
@@ -451,6 +550,7 @@ namespace Meridian.UI
         {
             bool hidden = MenuController.HudHidden || InventoryPanel.AnyOpen || CraftingPanel.AnyOpen || CataloguePanel.AnyOpen || SellPanel.AnyOpen || SkillTreePanel.AnyOpen; // U-058: nothing draws through a full-screen panel
             UpdateDepth(); // U-174
+            UpdateRank(); // U-178
             if (hudCanvas != null && hudCanvas.enabled == hidden) hudCanvas.enabled = !hidden;
             if (vitals == null && player != null) vitals = player.GetComponent<PlayerVitals>();
             if (vitals != null)
