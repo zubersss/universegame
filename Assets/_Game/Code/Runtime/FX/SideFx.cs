@@ -45,7 +45,11 @@ namespace Meridian.FX
             // U-193 / D-190 (4): the shovel's flick comes back with B-238's export (seven crumbs, no torso-sized clod: B-228's F1b), tinted
             // as the clods; until then DigFeel's clods are the scoop's debris alone.
             if (shovel && Meridian.Mining.DigFeel.PuffRedrawn && FxSheet.Get(ArtKeys.Fx.ShovelFlick).Ready)
-                pool.Play(ArtKeys.Fx.ShovelFlick, at, 1f, 0f, player != null && at.x < player.Body.position.x, Meridian.Mining.DigFeel.Tone(tier)); // thrown back over the shoulder
+            {
+                LastFlickTint = Meridian.Mining.DigFeel.Tone(tier);
+                Flicks++;
+                pool.Play(ArtKeys.Fx.ShovelFlick, at, 1f, 0f, player != null && at.x < player.Body.position.x, LastFlickTint); // thrown back over the shoulder
+            }
             if (PlayPuff(at, tier)) return;
             var t = RigTools.TileOf(at);
             pool.Play(shovel ? ArtKeys.Fx.Dust : ArtKeys.Fx.DigSparks, new Vector2(t.x + 0.5f, t.y + 0.5f), shovel ? 1f : 2f); // sparks are the Beam's
@@ -72,6 +76,9 @@ namespace Meridian.FX
         public Color LastPuffTint { get; private set; }
         public Vector2 LastPuffAt { get; private set; }
         public int Puffs { get; private set; }
+        /// <summary>Tests: the shovel flicks played since this planet came up and the last one's tint (D-190 (4): the clods' tone).</summary>
+        public int Flicks { get; private set; }
+        public Color LastFlickTint { get; private set; }
 
         /// <summary>U-193: the flick's cream-and-ink art multiplied toward the planet's earth (B-226: tinted per ground like the dust).</summary>
         public static Color FlickTint(Meridian.Planets.PlanetId p) => p switch

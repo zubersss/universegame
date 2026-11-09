@@ -98,12 +98,31 @@ namespace Meridian.Tests
             Assert.AreEqual(0, feel.Alive, "no clods before a stroke");
             Assert.AreEqual(Vector2.zero, follow.KickNow, "no kick before a stroke");
             int kicks0 = follow.KickFrames, bursts0 = feel.Bursts;
+            // B-232 / B-238 (imported, df2defa3): the clods' sheets and the shovel's crumbs are in before the first stroke
+            var fx0 = Object.FindAnyObjectByType<Meridian.FX.SideFx>();
+            Assert.NotNull(fx0, "SideFx on the planet side");
+            var clodSheet = Meridian.FX.FxSheet.Get(DigFeel.ClodsKey(0));
+            var flickSheet = Meridian.FX.FxSheet.Get(Meridian.Art.ArtKeys.Fx.ShovelFlick);
+            float sheetsBy = Time.realtimeSinceStartup + 15f;
+            while ((!clodSheet.Ready || !flickSheet.Ready) && Time.realtimeSinceStartup < sheetsBy) yield return null;
+            Assert.IsTrue(clodSheet.Ready, "B-232's fx/dig_clods/t1 loads");
+            Assert.AreEqual(24, clodSheet.frames.Length, "24 frames: four clods of six");
+            Assert.IsTrue(flickSheet.Ready, "B-238's fx/shovel_flick/base loads");
+            Assert.IsTrue(DigFeel.PuffRedrawn, "B-238's dust is in: the puff at scale 1 and 0.85 alpha, the flick back");
+            int flicks0 = fx0.Flicks;
 
             var at = p + new Vector2(1.5f, -0.5f);
-            Assert.IsTrue(side.rig.Dig(at), "the stroke opens the ground");
+            var toolWas = Meridian.Progress.SkillStats.ToolOverride;
+            Meridian.Progress.SkillStats.ToolOverride = Meridian.Rig.DigTool.Shovel; // the flick is the shovel's (whatever an earlier test left unlocked)
+            bool struck = side.rig.Dig(at);
+            Meridian.Progress.SkillStats.ToolOverride = toolWas;
+            Assert.IsTrue(struck, "the stroke opens the ground");
             int cells = side.rig.LastDugCells;
             Assert.GreaterOrEqual(cells, 1, "cells opened");
             Assert.AreEqual(bursts0 + 1, feel.Bursts, "one burst a stroke");
+            Assert.IsTrue(feel.LastBurstOnSheet, "the clods are B-232's, not the stand-in");
+            Assert.AreEqual(flicks0 + 1, fx0.Flicks, "the shovel's flick is back (D-190 (4))");
+            Assert.AreEqual(DigFeel.Tone(0), fx0.LastFlickTint, "the flick's crumbs in the clods' tone");
             Assert.AreEqual(DigFeel.ClodsFor(cells), feel.LastBurst, $"clods for {cells} cells");
             Assert.That(feel.LastBurst, Is.InRange(DigFeel.MinClods, DigFeel.MaxClods));
             Assert.AreEqual(feel.LastBurst, feel.Alive, "every clod of the burst is drawn");

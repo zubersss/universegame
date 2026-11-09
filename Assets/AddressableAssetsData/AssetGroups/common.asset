@@ -120,6 +120,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 2ac5fd618781473439a798befcd5c880
+    m_Address: fx/dig_clods/t3
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 2d15d114ea449c34a8b8eb88b6968525
     m_Address: characters/calibration/base
     m_ReadOnly: 0
@@ -127,6 +132,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 2ddf851f2c4f731498a9c1f278ae24ee
     m_Address: fx/rare/sparkle_t4/animator
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 340339b0d795966459f508793bad8e63
+    m_Address: fx/dig_clods/t4
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -172,6 +182,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 40e87f4dafdb3694b936aeeb574d948a
     m_Address: characters/calibration/base
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 430f7481500ef7b419c15d62456903a7
+    m_Address: fx/dig_clods/t4/animator
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -255,6 +270,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 58b64841cb923e042bb7a9941c172175
+    m_Address: fx/rubble/base
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 598d09268e30ad744af2a167ba43dcc1
     m_Address: props/common/shelter_door/json
     m_ReadOnly: 0
@@ -275,6 +295,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 66d45b346f633764e988495e99a04f05
+    m_Address: fx/dig_clods/t1
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 6800afe4b54a12347854e88cfe7bdf54
     m_Address: fx/grapple_line/base
     m_ReadOnly: 0
@@ -282,6 +307,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 685901aa5b0965d499d5ac592c9f18e2
     m_Address: ships/pilgrim/base
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 68dc8151cec1c184e8efe0372f9b30d9
+    m_Address: fx/dig_clods/t5/animator
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -362,6 +392,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 877666fbe9b11074f9de5da9bcf90afc
     m_Address: props/common/aerostat_deck
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 87d1c6c23a454a146bd49564f425eb54
+    m_Address: fx/dig_clods/t2
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -500,6 +535,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c33ba31def7b5d84aaea43948ea41399
+    m_Address: fx/dig_clods/t3/animator
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: c36d4610cb781c542993e0f0b0f50314
     m_Address: fx/crush_pulse/base
     m_ReadOnly: 0
@@ -560,6 +600,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d604c8e9f10fdef4d8c56ade7c5f02ee
+    m_Address: fx/dig_clods/t5
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: d62e4933998173c4b89835102d67b785
     m_Address: fx/beam_ray/mk5
     m_ReadOnly: 0
@@ -577,6 +622,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: e0da0d4d096855647ab3c6b3c141e940
     m_Address: fx/methane_hail/base
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e17581fbd1340bd4485c9680da5dd8ef
+    m_Address: fx/dig_clods/t2/animator
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -632,6 +682,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: f47993da48fb5c9459736069cfe846e5
     m_Address: fx/rare/sparkle_t5/animator
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f48080c347c127f42ba8b17321b3a023
+    m_Address: fx/dig_clods/t1/animator
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

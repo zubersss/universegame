@@ -34,7 +34,7 @@ namespace Meridian.Mining
 
         /// <summary>B-238's puff (a low, small dust, drawn to be played at scale 1 and 0.85 alpha) is imported: set with its import. Until
         /// then B-184's lobed ball plays at 0.6 scale and 0.7 alpha (LEAD 17:0x) and the shovel's flick stays off (D-190 (4)).</summary>
-        public static readonly bool PuffRedrawn = false;
+        public static readonly bool PuffRedrawn = true; // B-238 imported (df2defa3): the dust at scale 1 and 0.85 alpha, the flick's crumbs back
         public static float PuffScaleNow => PuffRedrawn ? 1f : 0.6f;
         public static float PuffAlphaNow => PuffRedrawn ? 0.85f : 0.7f;
 

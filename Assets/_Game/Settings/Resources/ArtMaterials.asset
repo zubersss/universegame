@@ -1569,6 +1569,101 @@ MonoBehaviour:
       start: 0
       length: 8
       loop: 1
+  - key: fx/dig_clods/t1
+    fps: 12
+    clips:
+    - name: clod_1
+      start: 0
+      length: 6
+      loop: 1
+    - name: clod_2
+      start: 6
+      length: 6
+      loop: 1
+    - name: clod_3
+      start: 12
+      length: 6
+      loop: 1
+    - name: clod_4
+      start: 18
+      length: 6
+      loop: 1
+  - key: fx/dig_clods/t2
+    fps: 12
+    clips:
+    - name: clod_1
+      start: 0
+      length: 6
+      loop: 1
+    - name: clod_2
+      start: 6
+      length: 6
+      loop: 1
+    - name: clod_3
+      start: 12
+      length: 6
+      loop: 1
+    - name: clod_4
+      start: 18
+      length: 6
+      loop: 1
+  - key: fx/dig_clods/t3
+    fps: 12
+    clips:
+    - name: clod_1
+      start: 0
+      length: 6
+      loop: 1
+    - name: clod_2
+      start: 6
+      length: 6
+      loop: 1
+    - name: clod_3
+      start: 12
+      length: 6
+      loop: 1
+    - name: clod_4
+      start: 18
+      length: 6
+      loop: 1
+  - key: fx/dig_clods/t4
+    fps: 12
+    clips:
+    - name: clod_1
+      start: 0
+      length: 6
+      loop: 1
+    - name: clod_2
+      start: 6
+      length: 6
+      loop: 1
+    - name: clod_3
+      start: 12
+      length: 6
+      loop: 1
+    - name: clod_4
+      start: 18
+      length: 6
+      loop: 1
+  - key: fx/dig_clods/t5
+    fps: 12
+    clips:
+    - name: clod_1
+      start: 0
+      length: 6
+      loop: 1
+    - name: clod_2
+      start: 6
+      length: 6
+      loop: 1
+    - name: clod_3
+      start: 12
+      length: 6
+      loop: 1
+    - name: clod_4
+      start: 18
+      length: 6
+      loop: 1
   - key: fx/dig_sparks/base
     fps: 15
     clips:
