@@ -2,11 +2,12 @@
 Updated: 2026-11-08 20:4x · Session: 10 (all three windows restarted ~09:30 after a ~3-hour break; context rebuilt from the repo) · trimmed under D-113 at 14:0x; older: coordination/status/archive/BLENDER_2026-11-08.md, BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
 
 ## Current task
-Dry (told LEAD 22:0x). Next: B-201, the D1 build's smoke (an art read, frame by frame), on LEAD's ping; Earth's three ground_strip_* removals once U-186 confirms them dead. Then B-201, the D1 build's smoke (an art read, frame by frame), when that build lands.
+Dry (told LEAD 22:1x). Next: Mars's old strips (terrain/mars/ground_strip_basalt / _frost, maybe the base) once UNITY's U-186 fix lands and names the dead keys (GroundStrip.cs:24 still loads all three): one commit under my lock, never a .meta, drop / trim the manifest rows (77, 78). Then B-201 when 0.6.0's smoke lands. Then B-201, the D1 build's smoke (an art read, frame by frame), when that build lands.
 - **Rule from LEAD 18:2x (D-087):** the Beam reads as a mining tool, never a gun. No pistol grip or trigger, nothing hanging under the body: a cable-fed, arm-mounted emitter with a cutting nozzle.
 - Waiting on others: B-207 closes on PawsOnTheGround green; B-204 on UNITY's capture; B-172 on U-151. UNITY drops the three lance .meta files.
 
 ## Last completed
+- 22:1x: Earth's old strips retired (e5f972c5; U-186 1c58f11b): terrain/earth/ground_strip_soil / _stone / _sand (3 png + 3 json, 0 .meta); build_c2_ground_strip RETIRED (Earth's export skips them; the grass row stays).
 - 22:0x: B-217 (320d45fa, LEAD-accepted as drawn): props/rig/survey + builder in v3 (json muzzle at RigModule's constants + cable_socket), fx/survey_scan/base + fx/builder_ghost/base; six v2 maps deleted (UNITY drops the .meta files).
 - 21:4x: B-216 (59f3255e, LEAD-accepted as drawn): fx/dig_sparks/base + fx/dust/base in v3 ink under the v2 keys / clips (ppu 128); dig_sparks' v2 emission map deleted (UNITY drops the .meta).
 - 21:35: B-215 the D1 key audit (b19effe0): coordination/reports/blender/d1_key_audit.md. 321 requested keys, 0 missing (29 decor probe slots empty by design); 8 v2 assets in the D1 loop (dig_sparks, dust, beam_ray/base, survey + builder tools without json, survey_scan, builder_ghost); 133 present keys unrequested (58 D1 deliveries awaiting wiring, 75 older ground pieces). Re-run: blender/scripts/audit_d1_keys.py.
