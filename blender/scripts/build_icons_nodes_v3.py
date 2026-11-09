@@ -637,8 +637,8 @@ def m_suit(d, M, lv=1):
     G.stroke(d, [(-0.18, 0.02), (0.18, 0.02), (0.18, 0.1), (-0.18, 0.1)], M["teal_i"], I, cyclic=True)                # the collar
     G.stroke(d, circ(0.0, 0.26, 0.18, 40), M["sky_i"], O, cyclic=True)                                               # the dome
     G.stroke(d, G.hose_outline(arc(0.0, 0.26, 0.12, math.radians(200), math.radians(262), 8), 0.03), M["off"], 0.0, cyclic=True)
-    G.stroke(d, [(0.12, 0.4), (0.18, 0.47)], M["ink"], I * 1.3)
-    G.stroke(d, circ(0.185, 0.47, 0.025, 10), M["teal_i"], I, cyclic=True)
+    G.stroke(d, [(0.12, 0.38), (0.16, 0.43)], M["ink"], I * 1.3)                       # the antenna (clear of the edge)
+    G.stroke(d, circ(0.165, 0.44, 0.024, 10), M["teal_i"], I, cyclic=True)
 
 
 def m_dray(d, M, lv=1):
