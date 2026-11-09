@@ -415,17 +415,39 @@ def climb_poses():
     return out
 
 
+RUNG = 0.25                     # B-210: the ladder's rung spacing (props/dig/ladder: four rungs a metre)
+CLIMB = 0.5                     # metres climbed per climb_ladder cycle (UNITY lifts the root 0.5 m every 8 frames: 0.75 m/s)
+
+
+def _arm_for(z, sh_z=1.0, reach=0.42):
+    """The arm angle that puts draw_surveyor's hand at height z (the glove's centre 0.04 below it closes on the rung)."""
+    c = -(z - sh_z) / reach
+    return math.acos(max(-1.0, min(1.0, c)))
+
+
 def ladder_poses():
-    """B-210 climb_ladder (8, loop): hand over hand up a ladder, the feet stepping rung to rung opposite the hands, looking
-    up; the Beam strapped on the forearm, the pack on the back."""
+    """B-210 climb_ladder (8, loop), rev (LEAD 20:0x): planted, not waved. In sprite space the rungs slide down 0.0625 m a
+    frame (the root climbs 0.5 m a cycle); each hand grips a rung for four frames, riding down with it, then reaches two rungs
+    up while the other grips; each foot stands on a rung the same way, half a cycle out of step with its hand. The ladder's
+    centre line is the 'ladder' socket (0.38 m ahead): the hands close on rungs between its rails. No bob (the planted hands
+    and feet set the body); looking up; the cable-fed Beam on the forearm, the pack on the back."""
+    step = CLIMB / 8
     out = []
     for i in range(8):
-        ph = TAU * i / 8
-        out.append(dict(arms=(2.0 + 0.32 * math.sin(ph), 2.0 - 0.32 * math.sin(ph)), lean=0.03,
-                        legs=((-0.04, 0.12 - 0.12 * math.sin(ph)), (0.06, 0.12 + 0.12 * math.sin(ph))),
-                        bob=0.06 + 0.03 * math.sin(2 * ph), sz=1.0 + 0.03 * math.cos(2 * ph), look=(0.2, 0.9),
-                        bob_tip=0.04 * math.sin(ph - 1.0), pack_swing=0.04 * math.sin(ph - 0.8), hose_lag=0.04 * math.sin(ph - 1.5),
-                        beam_arm=True))
+        def planted(k, z0):                                                                   # gripping 4 frames, then 4 to reach
+            if k < 4:                                                                         # two rungs up (lift on an arc)
+                return z0 - step * k, 0.0
+            t = (k - 4) / 4.0                                                                 # back to z0 at frame 8: +0.25 m in
+            return z0 - step * 4 * (1 - t), math.sin(math.pi * t)                              # sprite space = +0.5 m (2 rungs) in world
+        hz_a, arc_a = planted(i, 1.25 + 0.04)                                                 # the hands: rung 1.25 m at frame 0
+        hz_b, arc_b = planted((i + 4) % 8, 1.25 + 0.04)
+        fz_a, lift_a = planted((i + 4) % 8, RUNG)                                             # the feet: on the 0.25 m rung,
+        fz_b, lift_b = planted(i, RUNG)                                                       # opposite their hands
+        out.append(dict(arms=(_arm_for(hz_a) + 0.25 * arc_a, _arm_for(hz_b) + 0.25 * arc_b), lean=0.03,
+                        legs=((0.16 + 0.04 * lift_a, fz_a + 0.02 + 0.06 * lift_a), (0.2 + 0.04 * lift_b, fz_b + 0.02 + 0.06 * lift_b)),   # soles on the rungs
+                        bob=0.0, sz=1.0, look=(0.2, 0.9),
+                        bob_tip=0.03 * math.sin(TAU * i / 8 - 1.0), pack_swing=0.03 * math.sin(TAU * i / 8 - 0.8),
+                        hose_lag=0.03 * math.sin(TAU * i / 8 - 1.5), beam_arm=True))
     return out
 
 

@@ -69,8 +69,9 @@ def rung(d, M, z, seed):
 
 def ladder(d, M):
     rails(d, M, -0.2, 1.2)                                                                    # past both edges: tiles in y
-    for z, s in ((0.25, 11), (0.75, 12)):
-        rung(d, M, z, s)
+    for z, s in ((0.0, 11), (0.25, 12), (0.5, 13), (0.75, 14), (1.0, 11)):                     # rev (LEAD 20:0x): four rungs a metre,
+        rung(d, M, z, s)                                                                      # 0.25 m apart (the clip steps on them);
+                                                                                              # the one on the seam drawn at 0 and 1
 
 
 def ladder_top(d, M):
@@ -298,6 +299,65 @@ def preview(out, footnote=None):
         print(ln)
 
 
-if __name__ == "__main__":                       # python -I build_dig_props_v3.py <review png>
-    preview(sys.argv[1])
+def preview_climb(out, footnote=None):
+    """B-210 rev (LEAD 20:0x): climb_ladder alone - each frame over the ladder at its 'ladder' socket, the tiles at the frame's
+    rung phase (the root climbs 0.5 m a cycle, so in sprite space the rungs slide down 4 px a frame), at 1x and at 2x."""
+    import time
+    sys.path.insert(0, os.path.dirname(HERE))
+    import review
+    import build_surveyor_side_b as SB
+    lad = render(ladder, 48, 64, (0.5, 0.0), seed=40)
+    poses = SB.all_poses()
+    first = len(poses) - 16
+    frames = []
+    for f in range(first, first + 8):
+        gp = fakegp.FakeGP()
+        M = SB.materials(gp)
+        d = fakegp.FakeDrawing()
+        SB.draw_side_b(d, M, poses[f], seed=7 * f)
+        frames.append(GR.render_frame(fakegp.strokes_of(d, gp), 192, 192, 64, (0.5, 0.0), ss=2, seed=SB.SEED * 1000 + f + 1)[0])
+    dirt = np.array(v3.hex_rgb(v3.deep_of(v3.PALETTES["earth"]["mustard"], "earth")), np.float32) / 255.0
+
+    def ov(dst, fr, x, y):
+        h, w = fr.shape[:2]
+        x0, y0, x1, y1 = max(x, 0), max(y, 0), min(x + w, dst.shape[1]), min(y + h, dst.shape[0])
+        if x1 > x0 and y1 > y0:
+            f_ = fr[y0 - y:y1 - y, x0 - x:x1 - x].astype(np.float32) / 255.0
+            a = f_[..., 3:4]
+            dst[y0:y1, x0:x1] = f_[..., :3] * a + dst[y0:y1, x0:x1] * (1 - a)
+
+    def scene(k, scale):
+        S = np.empty((220, 210, 3), np.float32)
+        S[:] = dirt
+        feet = 210
+        cx = 105 + int(round(SB.LADDER[0] * 64))
+        off = int(round(SB.CLIMB / 8 * k * 64)) % 16                                           # the rungs' phase this frame
+        for j in range(-1, 5):
+            ov(S, lad, cx - 24, feet + off - 64 * (j + 1))
+        ov(S, frames[k], 105 - 96, feet - 192)
+        return np.repeat(np.repeat(S, scale, 0), scale, 1)
+    W = 8 * 220 + 10
+    r1 = np.empty((240, W, 3), np.float32)
+    r1[:] = np.array(review.PAPER, np.float32)
+    for k in range(8):
+        r1[20:240, 10 + k * 220:10 + k * 220 + 210] = scene(k, 1)
+        review._label(r1, f"climb_ladder {k}", 10 + k * 220, 4, scale=1)
+    r2 = np.empty((460, W, 3), np.float32)
+    r2[:] = np.array(review.PAPER, np.float32)
+    for j, k in enumerate((0, 2, 4, 6)):
+        r2[20:460, 10 + j * 440:10 + j * 440 + 420] = scene(k, 2)
+        review._label(r2, f"frame {k} at 2x", 10 + j * 440, 4, scale=1)
+    head = np.tile(np.array(review.PAPER, np.float32), (26, W, 1))
+    review._label(head, "B-210 climb_ladder rev: hands close on rungs, soles on rungs 0.25 m apart; the root climbs 0.5 m a cycle (the rungs slide 4 px a frame here)", 6, 6)
+    img = np.vstack([head, r1, r2])
+    m = v3.EDGE_MARGIN
+    bad = [k for k, f in enumerate(frames) if f[:m, :, 3].any() or f[:, :m, 3].any() or f[:, -m:, 3].any()]
+    review.draw(img, time.strftime("%m-%d %H:%M") + " " + (footnote or "design preview (lock-free, fakegp + numpy)") + (f"; EDGE frames {bad}" if bad else ""),
+                2, img.shape[0] - 14, (1.0, 1.0, 0.85))
+    review.write(out, img)
+    print("written", out, img.shape[1], "x", img.shape[0], "edge:", bad or "none")
+
+
+if __name__ == "__main__":                       # python -I build_dig_props_v3.py <review png> [--climb]
+    (preview_climb if "--climb" in sys.argv else preview)(sys.argv[1])
     fakegp.restore()
