@@ -6,15 +6,8 @@ Owner: LEAD (only the Lead edits this). Do the open items below, then tell the L
 
 ## Open
 
-### USER-35 — Close Edge while the team finishes the 0.6.0 build (1 min)
-Free memory has sat at about 1.3 GB this morning with nothing heavy running, and the team's
-heavy jobs (compiling, testing and building the game) need 1.5 GB free before they start.
-Microsoft Edge was using about 0.55 GB (0.2 GB at 09:5x). Please:
-1. Close every Edge window (and Chrome, and any other app you have open that you don't need).
-2. Tell the Lead `done: USER-35`.
-You can open them again once the Lead posts the 0.6.0 page (a couple of hours).
+(none open but the optional one below; the 0.6.0 playtest item comes with the build)
 
-(the 0.6.0 playtest item comes with the build)
 
 ### USER-08 — Optional: let the team run PowerShell commands without prompts (2 min)
 On Windows, Claude Code runs commands through PowerShell as well as Bash, and the
@@ -24,6 +17,7 @@ If you get too many "allow this command?" prompts, tell the Lead "approve PowerS
 allow rules" and accept the edit when Claude Code asks you. Otherwise skip this.
 
 ## Done
+- 2026-11-09 10:2x · USER-35 resolved: free RAM rose to 2.5–2.9 GB around 09:59 (apps closed or gone idle) and UNITY's 0.6.0 checks ran at the flat gate; nothing left to do. Edge can be reopened.
 - 2026-11-08 19:3x · USER-34 done: the owner checked 0.5.1: "the walking seems fixed"; and asked for a minimap in space → D-178, U-184, B-209.
 - 2026-11-08 16:2x · USER-33 done: the owner played 0.5.0 and likes it so far; the walking animation glitches when walking downhill (→ U-172, first); and they really like the digging: make MERIDIAN a progression digging game (better tools unlocked to dig deeper and faster, money from collected materials, rarer deeper, no hard gate, a boundary line underground marking topside where upgrading happens, better ways up and bigger packs, a Skill Tree with branches people choose themselves, planets as a difficulty ladder with rarer materials) → D-174, Bible 5.2 §8.1, milestone D1 (L-013, U-174..U-177, B-203..B-205); Build 0.5.1 (U-173) brings the walk fix first.
 - 2026-11-08 12:3x · USER-32 (the 0.4.8 feel check, unanswered since 04:3x) folded into USER-33: the 0.5.0 check asks for the rocket climb too.
