@@ -1599,14 +1599,28 @@ Goal: The dig run's HUD pieces (D1; the HUD's brass-gauge, paper-tag style, B-15
 Accept: the mock-up accepted by LEAD before the export; palette 100 %; the pieces sized to the existing gauges.
 Files: blender/scripts/ (the UI builder), Assets/_Game/Art/ui/hud/
 Depends: —
-Lead notes: Cycle 286 (19:5x). After B-210. UNITY wires it with U-174 / U-178's HUD. 20:1x: the existing B-121 gauges use mixed tones (~72 % palette); the PACK gauge copies them so the four match: ruled consistency first, no re-export now (a C4 palette audit item in the Backlog). 20:2x: PIECES ACCEPTED (review_b211_hud_mockup.png 20:18: gauge_pack with its red zone past 90 % (json danger_above 0.9) and needle, scrip_tag with the brass coin, rank_slot, the askew broken-ink PACK FULL stamp, depth_marker topside / below): export once the stamp's re-render keeps its lettering inside the border (the P and L clipped in the sheet). The mock-up's LAYOUT is not binding: the gauges stay where the game draws them (top-left, with their paper labels), PACK as the fourth in that row; the Scrip tag and rank slot under the row; the depth tag top-centre with its marker; the POI tags top-right; the minimap's corner free in space (UNITY lays it out with U-178).
+Lead notes: Cycle 286 (19:5x). After B-210. UNITY wires it with U-174 / U-178's HUD. 20:1x: the existing B-121 gauges use mixed tones (~72 % palette); the PACK gauge copies them so the four match: ruled consistency first, no re-export now (a C4 palette audit item in the Backlog). 20:2x: PIECES ACCEPTED (review_b211_hud_mockup.png 20:18: gauge_pack with its red zone past 90 % (json danger_above 0.9) and needle, scrip_tag with the brass coin, rank_slot, the askew broken-ink PACK FULL stamp, depth_marker topside / below): export once the stamp's re-render keeps its lettering inside the border (the P and L clipped in the sheet). The mock-up's LAYOUT is not binding: the gauges stay where the game draws them (top-left, with their paper labels), PACK as the fourth in that row; the Scrip tag and rank slot under the row; the depth tag top-centre with its marker; the POI tags top-right; the minimap's corner free in space (UNITY lays it out with U-178). 20:3x: EXPORTED (a3ee53f2; the stamp's lettering inside its border at 2×): ui/hud/{gauge_pack (rect_origin bottom_left, dial_pack / needle_pack, danger_above 0.9), scrip_tag (slice 60 14 18 14), rank_slot (insignia_px 48), pack_full, depth_marker (topside / below)}, ppu 64.
 
 ### B-212 · BLENDER · Ready · D1
 Goal: Rare finds feel rare (D1): an 8-frame ink sparkle burst for a material drop, coloured by tier from the palette (T2 copper, T3 teal, T4 violet-blue, T5 gold; T1 none), `fx/find_glint_t2..t5`; and a 10-frame "pocket found" pop when the brush opens a pocket (the scan X bursting into a starburst of ink rays and paper confetti), `fx/pocket_pop`; no glow, ink and paper only, readable over every tier fill.
 Accept: one stamped preview (each burst over its tier's fill at 1× and its frames at 2×) accepted by LEAD before the export; palette 100 %.
 Files: blender/scripts/ (the FX builder), Assets/_Game/Art/fx/
 Depends: —
-Lead notes: Cycle 286 (19:5x). After B-211. UNITY plays them on the drop / pocket events (U-174's). 20:2x: ACCEPTED AS DRAWN (review_b212_rare_finds_preview.png 20:18: fx/rare/sparkle_t2..t5, eight-frame ink bursts of four-point stars and diamonds with cream cores, red-gold / teal / gold / cream-ember by tier over a copper, silica, graphite and diamond drop; fx/rare/pocket_pop, a gold-and-cream paper starburst with a red star that swells, holds and tears into three scraps; no glow): export.
+Lead notes: Cycle 286 (19:5x). After B-211. UNITY plays them on the drop / pocket events (U-174's). 20:3x: EXPORTED (a3ee53f2 with B-211: 20 files, 0 .meta): fx/rare/sparkle_t2..t5 (clip burst, once) and fx/rare/pocket_pop (clip pop, once), pivot centre, 12 fps. 20:2x: ACCEPTED AS DRAWN (review_b212_rare_finds_preview.png 20:18: fx/rare/sparkle_t2..t5, eight-frame ink bursts of four-point stars and diamonds with cream cores, red-gold / teal / gold / cream-ember by tier over a copper, silica, graphite and diamond drop; fx/rare/pocket_pop, a gold-and-cream paper starburst with a red star that swells, holds and tears into three scraps; no glow): export.
+
+### B-213 · BLENDER · Ready · D1
+Goal: The first hour's hint cards (D1: the owner meets a new loop with no manual): six small paper hint cards in UiKit's style, each a drawn pictogram plus a key cap: (1) DIG DOWN (the Beam into the ground, the mouse), (2) THE SURFACE LINE (the dashed line with its pennant: "above it you're topside"), (3) SELL (the pack into coins, G), (4) THE SKILL TREE (the chart, K), (5) CLIMB BACK UP (a ladder, the jetpack, the grapple), (6) PACK FULL (the stamp, "climb up and sell"); the words lettered at runtime by UNITY (the card has a text area), the pictogram baked; 320×200 cards, 9-slice; plus a small pointing paper arrow (`ui/hints/arrow`) UNITY can aim at a HUD element.
+Accept: one stamped sheet of the six at 1× with sample lettering, accepted by LEAD before the export; palette 100 %; no faces.
+Files: blender/scripts/ (the UI builder), Assets/_Game/Art/ui/hints/
+Depends: —
+Lead notes: Cycle 286 (20:3x). BLENDER's next (dry); U-185 shows them.
+
+### B-214 · BLENDER · Ready · D1
+Goal: The dig run's reward moments, felt (D1): `fx/ui/scrip_shower` (selling: 8 frames of brass coins popping up and arcing toward the Scrip tag), `fx/ui/node_bought` (buying a node: 8 frames, an ink ring stamping onto the node frame with gold flecks), `fx/ui/rank_up` (a new Rank: 10 frames, the insignia rising with paper ribbons unfurling), `fx/ui/expedition_seal` (starting a New Expedition: 10 frames, the certificate's wax seal pressed down with a squash and a splash of red wax); ink and paper only, no glow, readable over the paper panels.
+Accept: one stamped sheet of the four at 1× (over the HUD, the tree panel and the certificate) and their frames at 2×, accepted by LEAD before the export; palette 100 %.
+Files: blender/scripts/ (the FX builder), Assets/_Game/Art/fx/ui/
+Depends: —
+Lead notes: Cycle 286 (20:3x). After B-213. UNITY plays them with U-174 / U-175 / U-178.
 
 ### B-202 · BLENDER · Ready · G1
 Goal: Earth's underwater set (B-200's finding, b200_underwater.md: below the surface the swimmer sees the coast / plains land set tinted, meadow and flowers filling the water, and at 15 m a flat green-grey with vertical strip streaks, no depth cue): `backgrounds/earth/sea_under` in D-169's format, drawn for below the sea surface: layer0 the water column (light under the surface with soft wavering light shafts, darkening with depth toward the Hadal trench's dark); layer1 far seabed silhouettes in the haze (rock arches, kelp stands); layer2 the near seabed on the sea floor's depth (sand ripples, rocks, kelp, shells), solid to its bottom with a tileable strip (continue_rows 64); a bright wavy band of the surface seen from below on layer0's top, its own json row naming it. Earth's palette with U-040's tint in mind (it multiplies on top), the straight finish, no faces, nothing that reads as a land plant.
@@ -2902,6 +2916,13 @@ Accept: SpaceMapTests: every planet and Waystation marked at its true position w
 Files: Code/Runtime/Space/ (SpaceHud, a new SpaceMap), UI/, Tests/
 Depends: —
 Lead notes: Cycle 286 (19:3x). The owner's ask: next after U-175, ahead of U-182.
+
+### U-185 · UNITY · Ready · D1
+Goal: The first hour's hints (D1; B-213's cards): show each hint once, in context, then never again (saved): DIG DOWN on the first landing at Earth's camp; THE SURFACE LINE the first time the feet cross below it; PACK FULL on the first refused pickup; CLIMB BACK UP right after it; SELL the first time topside with a non-empty pack; THE SKILL TREE after the first sale; each card at the screen's lower centre for ~6 s or until its action is done, the paper arrow aimed at the HUD element it names; a Settings toggle "Show hints" (on) and a "Reset hints".
+Accept: HintTests: each hint fires once on its trigger and not again after a save / load; none fires during a transition; the toggle hides them; a capture of each at 1080p.
+Files: Code/Runtime/UI/ (a Hints controller), Save/, Tests/
+Depends: B-213, U-174, U-175
+Lead notes: Cycle 286 (20:3x). Before the D1 build: the owner's first hour with the new loop.
 
 ### U-154 · UNITY · Ready · C2
 Goal: P-51 (UNITY, ruled yes in cycle 279): the Builder's aerostat pieces draw the re-inked kit on the four giants: PieceSpec gains a per-planet art key, so the Deck / Strut / Lift cell pieces draw `props/common/aerostat_{deck,strut,cell}` (B-156) on Jupiter, Saturn, Uranus and Neptune and keep `props/venus/aerostat_deck` on Venus; nothing else about the pieces changes (sizes, costs, saves).
