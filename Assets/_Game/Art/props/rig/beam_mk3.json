@@ -1,0 +1,23 @@
+{
+  "key": "props/rig/beam_mk3",
+  "style": "v3",
+  "width": 128,
+  "height": 64,
+  "palette": "earth",
+  "ppu": 128,
+  "pivot": [
+    0.375,
+    0.5
+  ],
+  "muzzle": [
+    0.47,
+    0.03
+  ],
+  "cable_socket": [
+    -0.24,
+    0.14
+  ],
+  "mk": 3,
+  "ray": "fx/beam_ray/mk3",
+  "note": "B-205: the Beam, arm-mounted and cable-fed (no grip or trigger: a mining tool, D-087)"
+}

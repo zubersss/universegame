@@ -1,0 +1,29 @@
+{
+  "key": "fx/beam_ray/mk3",
+  "style": "v3",
+  "width": 516,
+  "height": 140,
+  "palette": "earth",
+  "ppu": 128,
+  "frame_width": 256,
+  "frame_height": 32,
+  "columns": 2,
+  "gutter": 4,
+  "frames": 8,
+  "fps": 12,
+  "pivot": [
+    0.0,
+    0.5
+  ],
+  "facing": "right",
+  "tile_x": true,
+  "animations": [
+    {
+      "name": "flow",
+      "start": 0,
+      "length": 8,
+      "loop": true
+    }
+  ],
+  "note": "B-205: the Beam Mk3's ray (teal to gold with the Mk), tiled in x from the muzzle; 0.25 m tall"
+}

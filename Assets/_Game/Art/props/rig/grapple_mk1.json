@@ -1,0 +1,18 @@
+{
+  "key": "props/rig/grapple_mk1",
+  "style": "v3",
+  "width": 128,
+  "height": 64,
+  "palette": "earth",
+  "ppu": 128,
+  "pivot": [
+    0.375,
+    0.5
+  ],
+  "muzzle": [
+    0.52,
+    0.035
+  ],
+  "mk": 1,
+  "note": "B-205: the Grapple, a hand reel with the hook seated forward (no barrel)"
+}
