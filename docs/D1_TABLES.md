@@ -53,6 +53,12 @@ Mercury's buried solarite has no twilight window (only the surface clusters keep
 - **Pack limit**: 30 kg at the start (Haul raises it). Full: no more pickups, a HUD cue; the drop stays on the ground.
 - **Load factor**: climb speed, jetpack lift and grapple reel × (1 − k × load ÷ limit), k = 0.5 at the start (Haul lowers it to 0.35 and 0.2).
 - **Starting ways up**: walking ramps ≤ 35°; the jetpack Mk1 (suit power); Builder mounds from the dirt store. The Grapple and ladders open in Ascent ring 1.
+- **Climbing (U-176, 23:5x; data "ascent" in D1Tables.json)**: the load factor (above) scales every speed here.
+  - Ladder (opens at asc_ladder_1; the Builder's right click, filling air upward from the aim): 1 m a placement at 2 dirt a metre (asc_ladder_2: 3 m at 1 dirt); climb 2.5 m/s × the Climb stat (asc_climb_1 ×1.3) with W / S; jump leaves it. 30 m: 12 s empty, 24 s with a full pack.
+  - Grapple (opens at asc_grapple_1): the hook catches the first terrain along the line (12 / 24 / 40 m); hold to reel at 4 m/s × reel (×1.5 / ×2); release or jump to let go. 30 m with the 12 m line: ~3 hops, ~8.5 s empty, ~16 s full.
+  - Winch (asc_winch, ring 5): a post on the Surface Line above a shaft, its line hanging to any depth; hold W to ride up at **6 m/s** × load (the ring-5 reward must beat the grapple: 30 m in 5 s empty, 10 s full; 200 m in 33 s empty).
+  - Recall beacon (asc_recall, ring 5): one charge a run, topside in 5 s with the pack kept; refilled on reaching topside.
+  - Jetpack: today's physics; thrust and power use from the tree; lift × load.
 
 ## 5. The Skill Tree
 
