@@ -6,15 +6,6 @@ Owner: LEAD (only the Lead edits this). Do the open items below, then tell the L
 
 ## Open
 
-### USER-36 — Play the first hour of 0.6.0, the digging game (about an hour)
-The page with pictures and the route: https://claude.ai/artifact/S3LfXBpfBbcjhJxDQYhBVx
-1. Double-click `C:\dev\universegame\Build\MERIDIAN_0.6.0\MERIDIAN.exe` and start a new game.
-2. Follow the hint cards: dig down (left mouse), cross the Surface Line, fill the pack, fly
-   out (Space), sell topside (G), buy an upgrade (K), and keep going your own way.
-3. Tell the Lead what felt good, what felt slow or confusing, and what you'd change
-   (digging speed, prices and climbing speeds are each a single number to retune).
-
-
 ### USER-08 — Optional: let the team run PowerShell commands without prompts (2 min)
 On Windows, Claude Code runs commands through PowerShell as well as Bash, and the
 `Bash(...)` allow rules in `.claude/settings.json` don't cover PowerShell. The Lead added
@@ -23,6 +14,7 @@ If you get too many "allow this command?" prompts, tell the Lead "approve PowerS
 allow rules" and accept the edit when Claude Code asks you. Otherwise skip this.
 
 ## Done
+- 2026-11-09 13:5x · USER-36 done: the owner played 0.6.0: "I like the digging so far"; make digging more satisfying and rewarding (a dirt animation), the dug part should look like a hole rather than an opaque part, dirt should collapse when dug all the way under; then the big one: keep the cartoon but much higher quality, a modern hand-drawn or painted look rather than 1930s animation, never digital or 3D-cartoony; better art and more moving parts for the animals and characters, especially the surveyor, with crouching and jumps with knees that bend; and much better audio → D-183 / D-184 / D-185 / D-186; U-195..U-199, B-230..B-232; milestone C5 (the v5 style test) before any redraw.
 - 2026-11-09 12:5x · USER-37 done: the ChatGPT app is closed (it held 1.27 GB); free RAM 1.99 GB at 12:51 and UNITY's U-193 check started. You can reopen it when the team is idle.
 - 2026-11-09 10:2x · USER-35 resolved: free RAM rose to 2.5–2.9 GB around 09:59 (apps closed or gone idle) and UNITY's 0.6.0 checks ran at the flat gate; nothing left to do. Edge can be reopened.
 - 2026-11-08 19:3x · USER-34 done: the owner checked 0.5.1: "the walking seems fixed"; and asked for a minimap in space → D-178, U-184, B-209.

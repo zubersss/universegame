@@ -22,9 +22,9 @@ Cycles 281–283 (09:3x–15:0x): the resume; Build 0.5.0 (page https://claude.a
 ## Next up
 1. U-194's release (UNITY's want filed 13:3x; B-227 in, 3a46eb91 verified) → BUILD OK / SMOKE OK / the probe. 2. B-220 Saturn + Uranus sheets → judge. 3. U-194 Build 0.6.1 → view its smoke with B-228 → the owner page + a short playtest item. 4. B-220's five sheets, B-224, B-223, B-225 previews → judge. 5. The owner's USER-36 notes → cards.
 ## Pending decisions
-none open.
+none open (D-183..D-186 logged 13:5x from the owner's playtest).
 ## Waiting on the user
-USER-36 (10:4x): the owner's first hour with 0.6.0, the digging game (page https://claude.ai/artifact/S3LfXBpfBbcjhJxDQYhBVx). USER-08 optional.
+none (USER-36 done 13:5x). USER-08 optional. Next: the 0.6.1 page + playtest when U-194 lands; the C5 look-over page when B-231's pose sheet is accepted.
 ## Loop / stall watch
 none (both workers committed within 35 min; both status files current and under 12 KB). The stag is U-162 (D-167 (6)).
 ## Session addresses (ListAgents, 11-09 11:4x)
