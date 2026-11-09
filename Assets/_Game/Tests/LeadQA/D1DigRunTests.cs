@@ -20,7 +20,7 @@ namespace Meridian.Tests.LeadQA
     /// topside at the camp; a held Beam stroke at tier 1 and at tier 3 takes the tables' time; the pack refuses past its limit;
     /// a full pack climbs out of a shaft above the Surface Line by the jetpack; selling topside pays the tables' Scrip and counts
     /// toward the Surveyor Rank; a ring-1 node bought raises its stat; save and load keep the pack, Scrip, nodes and Rank.
-    /// Written by LEAD against the D1 APIs; the ladder step joins when U-176's ladder lands.
+    /// Written by LEAD against the D1 APIs; the ladder step (6b) uses U-176's Ladders.Place and the Climb intent.
     /// </summary>
     public class D1DigRunTests
     {
@@ -180,6 +180,36 @@ namespace Meridian.Tests.LeadQA
             Assert.AreEqual(SkillTree.BuyResult.NotTopside, tree.CanBuy(state, "dig_power_1", false), "6. no buying below the line");
             Assert.AreEqual(SkillTree.BuyResult.Ok, tree.Buy(state, "dig_power_1", true), "6. dig_power_1 bought topside");
             Assert.AreEqual(power0 + 0.5f, SkillStats.BeamPower, 1e-4f, "6. Beam power +0.5");
+
+            // 6b. Ladders (U-176): bought topside, built from the dirt store up a 6 m shaft, climbed out above the Surface Line.
+            Assert.AreEqual(SkillTree.BuyResult.Ok, tree.Buy(state, "asc_ladder_1", true), "6b. asc_ladder_1 bought topside");
+            state.dirt.Add(40);
+            float lx = camp - 100f;
+            int lbottom = Mathf.FloorToInt(DigRun.LineAt(t, lx) - 6f);
+            yield return StandAtDepth(lx, 6f);
+            for (int c = Mathf.FloorToInt(lx) - 1; c <= Mathf.FloorToInt(lx) + 1; c++)
+                for (int y = lbottom; y <= Mathf.CeilToInt(t.SurfaceAt(lx)) + 2; y++) t.SetTile(c, y, TileId.Air);
+            yield return new WaitForFixedUpdate();
+            player.Body.simulated = true;
+            for (int i = 0; i < 30; i++) yield return new WaitForFixedUpdate();
+            var ladders = Meridian.Building.Ladders.Instance;
+            Assert.NotNull(ladders, "6b. the ladders on the planet");
+            int dirtBefore = state.dirt.count, metres = 0;
+            Vector2 foot = player.Body.position + new Vector2(0f, 0.5f);
+            for (int k = 0; k < 9; k++) metres += ladders.Place(foot); // 6 m to the line, 2 m to the surface, 1 m over it
+            TestContext.Out.WriteLine($"[LEADQA] D1 ladder: {metres} m placed for {dirtBefore - state.dirt.count} dirt");
+            Assert.GreaterOrEqual(metres, 8, "6b. a ladder from the shaft's foot past the Surface Line");
+            Assert.AreEqual(metres * 2, dirtBefore - state.dirt.count, "6b. 2 dirt a metre at asc_ladder_1");
+            Assert.IsFalse(sell.Topside, "6b. at the shaft's foot: not topside");
+            float l0 = Time.time;
+            player.intent = new PlayerIntent { climb = 1f };
+            while (!sell.Topside && Time.time - l0 < 20f) yield return new WaitForFixedUpdate();
+            float ladderClimb = Time.time - l0;
+            player.intent = default;
+            for (int i = 0; i < 60; i++) yield return new WaitForFixedUpdate();
+            TestContext.Out.WriteLine($"[LEADQA] D1 ladder climb out of 6 m (empty pack): {ladderClimb:F2} s");
+            Assert.IsTrue(sell.Topside, "6b. the ladder climb reached topside");
+            Assert.Less(ladderClimb, 6f / 2.5f + 2f, "6b. about 2.5 m/s up the ladder with an empty pack");
             int scripAfterBuy = state.scrip;
 
             // 7. Save, disturb, load: the nodes, Scrip, earnings and the stat come back.
@@ -197,6 +227,8 @@ namespace Meridian.Tests.LeadQA
             Assert.AreEqual(rank, D1Tables.Current.Rank(state.scripEarned), "7. the Rank survives a load");
             Assert.AreEqual(2, state.inventory.Count(copper), "7. the pack survives a load");
             Assert.AreEqual(power0 + 0.5f, SkillStats.BeamPower, 1e-4f, "7. the node's stat applies after a load");
+            Assert.IsTrue(state.skillNodes.Contains("asc_ladder_1"), "7. the ladder node survives a load");
+            Assert.Greater(state.ascentPieces.Count, 0, "7. the placed ladder survives a load");
             LogAssert.NoUnexpectedReceived();
         }
     }
