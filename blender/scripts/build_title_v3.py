@@ -56,6 +56,18 @@ def frame(sheet_rel, json_rel, i=0):
     return s[r * (fh + g):r * (fh + g) + fh, c * (fw + g):c * (fw + g) + fw], m
 
 
+def prop_frame(name):
+    """props/common/<name>'s first frame (some are frame sheets), trimmed to its drawn rows so it can stand on the turf."""
+    base = os.path.join(ART, "props", "common", name)
+    img = png("props", "common", f"{name}_color.png")
+    if os.path.isfile(base + ".json"):
+        m = json.load(open(base + ".json", encoding="utf-8"))
+        if m.get("frames", 0) > 1 and m.get("frame_width"):
+            img = img[:m["frame_height"], :m["frame_width"]]
+    rows = np.where(img[..., 3].max(axis=1) > 0.02)[0]
+    return img[:rows[-1] + 1] if len(rows) else img
+
+
 def pilgrim():
     """The Pilgrim assembled at rest from ships/pilgrim/rig's side plant -> (RGBA, the root's ground point in px within it)."""
     m = json.load(open(os.path.join(ART, "ships", "pilgrim", "rig.json"), encoding="utf-8"))
@@ -96,11 +108,11 @@ def dusk_sky(sky):
     wash mixes palette tones like the backdrops do)."""
     h = sky.shape[0]
     t = np.linspace(0.0, 1.0, h, dtype=np.float32)[:, None, None]
-    deep = PAL["sky"] * 0.62 + PAL["brown"] * 0.18
-    warm = PAL["mustard"] * 0.55 + PAL["red"] * 0.25 + PAL["offwhite"] * 0.2
-    grade = deep * (1 - t) ** 1.4 + warm * (1 - (1 - t) ** 1.4)
+    deep = PAL["sky"] * 0.45 + PAL["brown"] * 0.35 + PAL["teal"] * 0.2                    # rev: a deeper evening blue overhead
+    warm = PAL["mustard"] * 0.5 + PAL["red"] * 0.35 + PAL["offwhite"] * 0.15                # and a warmer horizon (it read as overcast day)
+    grade = deep * (1 - t) ** 1.1 + warm * (1 - (1 - t) ** 1.1)
     out = sky.copy()
-    out[..., :3] = sky[..., :3] * 0.35 + grade * 0.65
+    out[..., :3] = sky[..., :3] * 0.25 + grade * 0.75
     return out
 
 
@@ -116,7 +128,7 @@ def compose():
             img[:] = band[ys][..., :3]                                                       # the sky fills the frame
             continue
         lay = lay.copy()
-        lay[..., :3] = lay[..., :3] * 0.82 + (PAL["red"] * 0.25 + PAL["mustard"] * 0.75) * 0.18   # a touch of dusk light on the land
+        lay[..., :3] = lay[..., :3] * 0.70 + (PAL["red"] * 0.35 + PAL["brown"] * 0.25 + PAL["mustard"] * 0.4) * 0.30   # dusk light on the land
         band = tile_x(lay, W)
         bottom = GY - int(round(L.get("y_m", 0.0) * PPU))
         over(img, band, 0, bottom - band.shape[0])
@@ -144,14 +156,14 @@ def compose():
     top = png("props", "dig", "ladder_top_color.png")
     over(img, top, (sx0 + sx1) // 2 - top.shape[1] // 2, GY - top.shape[0] + 6)
     # the camp: the pad and the Pilgrim, the smelter and the crates, the surveyor
-    pad = png("props", "common", "landing_pad_color.png")
+    pad = prop_frame("landing_pad")
     rocket, (rgx, rgy) = pilgrim()
     RX = 1170
     over(img, pad, RX - pad.shape[1] // 2, GY - pad.shape[0] + 10)
     over(img, rocket, RX - rgx, GY - 8 - rgy)
-    smelter = png("props", "common", "smelter_color.png")
+    smelter = prop_frame("smelter")                                                           # rev: frame 0 (the png is a sheet)
     over(img, smelter, 1440, GY - smelter.shape[0] + 6)
-    crate = png("props", "common", "storage_crate_color.png")
+    crate = prop_frame("storage_crate")
     for x, y in ((1530, 0), (1584, 0), (1556, 1)):
         over(img, crate, x, GY - crate.shape[0] * (y + 1) + 4)
     surv, sm = frame("characters/surveyor/side_color.png", "characters/surveyor/side.json", 0)
