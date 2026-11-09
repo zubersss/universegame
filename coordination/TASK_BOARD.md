@@ -3035,14 +3035,14 @@ Goal: A v3 title scene (B-201 #10: smoke_1 is still B-046's v2 render: 3D conife
 Accept: a stamped preview at 1920×1080 with the menu's rectangles outlined, accepted by LEAD before the export.
 Files: blender/scripts/ (a title builder), Assets/_Game/Art/ui/title/
 Depends: —
-Lead notes: Cycle 291 (06:4x). The first thing a player sees. Into 0.6.0 only if exported before UNITY's release build starts; else 0.6.1.
+Lead notes: Cycle 291 (06:4x). The first thing a player sees. Into 0.6.0 only if exported before UNITY's release build starts; else 0.6.1. 09:3x: source in 1c80affe (build_title_v3: the camp at dusk from v3 art); the preview (logo / menu rectangles outlined) in BLENDER's lock after UNITY's release run, to LEAD before the export. BLENDER self-reported a second slip (two python reads at 09:2x without listing the locks first; harmless, nothing ran beside a lock): reminded.
 
 ### B-222 · BLENDER · Ready · D1
 Goal: icons/thruster_mk2/base (B-201 #12: crafting shows a flat teal square; Mk3 exists): the v3 ink icon matching B-204's set and thruster_mk3's design one step down.
 Accept: a preview beside thruster_mk1 / mk3 at 1×; palette 100 %.
 Files: Assets/_Game/Art/icons/thruster_mk2/
 Depends: —
-Lead notes: Cycle 291 (06:4x). Small; same release rule as B-221.
+Lead notes: Cycle 291 (06:4x). Small; same release rule as B-221. 09:3x: source in 00f2b605 (icons/thruster_mk2, batch 5); preview in BLENDER's lock after UNITY's release run.
 
 ### B-223 · BLENDER · Ready · G1
 Goal: A painted docking bay interior and the catalogue's Camp icon (B-201 #11 / #17): the Earth waystation's docking bay as a v3 ink backdrop set (panels, a porthole on the painted starfield, cargo racks; layered for parallax) and icons/catalogue/camp.
