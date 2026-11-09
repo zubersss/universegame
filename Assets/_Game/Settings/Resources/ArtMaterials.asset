@@ -1648,6 +1648,41 @@ MonoBehaviour:
       start: 0
       length: 8
       loop: 1
+  - key: fx/rare/pocket_pop
+    fps: 12
+    clips:
+    - name: pop
+      start: 0
+      length: 8
+      loop: 0
+  - key: fx/rare/sparkle_t2
+    fps: 12
+    clips:
+    - name: burst
+      start: 0
+      length: 8
+      loop: 0
+  - key: fx/rare/sparkle_t3
+    fps: 12
+    clips:
+    - name: burst
+      start: 0
+      length: 8
+      loop: 0
+  - key: fx/rare/sparkle_t4
+    fps: 12
+    clips:
+    - name: burst
+      start: 0
+      length: 8
+      loop: 0
+  - key: fx/rare/sparkle_t5
+    fps: 12
+    clips:
+    - name: burst
+      start: 0
+      length: 8
+      loop: 0
   - key: fx/ring_dust/base
     fps: 12
     clips:

@@ -35,6 +35,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 11bc6d87054ce1140a1dd934e2b63626
+    m_Address: fx/rare/sparkle_t4
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 12a4d8babd8a6c342b4f5d2f9de47b29
     m_Address: ships/pilgrim/rig/animator
     m_ReadOnly: 0
@@ -95,8 +100,18 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 2ddf851f2c4f731498a9c1f278ae24ee
+    m_Address: fx/rare/sparkle_t4/animator
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 363d18841e934d94abaf1f55db0ab3dd
     m_Address: props/common/storage_crate
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 3681c2894e54c5b4c865d18f37a7684d
+    m_Address: fx/rare/sparkle_t3/animator
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -255,6 +270,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 75824d4f188b90341b8e51dfe1709383
+    m_Address: fx/rare/sparkle_t5
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 79e8def0cde0e544f91b7706edcf4d29
     m_Address: props/common/shelter_door/animator
     m_ReadOnly: 0
@@ -267,6 +287,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 7c43a867e0c17f548894812ae5894989
     m_Address: fx/film/dust
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 7f5de6dd9cdbc64498e505edae171abd
+    m_Address: fx/rare/sparkle_t2/animator
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -302,6 +327,16 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 8c73a022be83f5e4a9378d56953e3efd
     m_Address: props/common/storage_crate
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8f58c85754b5de44daa6fab3ab3832e3
+    m_Address: fx/rare/pocket_pop/animator
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 91d0ef08b3b9c334bb58996fc37c2187
+    m_Address: fx/rare/sparkle_t2
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -430,6 +465,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c875acd29398c8f429085cb02a60f8a4
+    m_Address: fx/rare/pocket_pop
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: c8d8025037eccd74b935b017af9f70aa
     m_Address: fx/diamond_rain/base
     m_ReadOnly: 0
@@ -452,6 +492,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: cba10469c095cfe4b96333b563769e1a
     m_Address: characters/surveyor/side_b/animator
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d2373a10433b1b04698fd0ef2859acaf
+    m_Address: fx/rare/sparkle_t3
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -522,6 +567,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: f31f033105d464d488291fc041408aad
     m_Address: characters/surveyor/base
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f47993da48fb5c9459736069cfe846e5
+    m_Address: fx/rare/sparkle_t5/animator
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

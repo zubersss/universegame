@@ -55,6 +55,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 136c0253407f0364ab1a97b14cb199a8
+    m_Address: ui/hud/depth_marker/json
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 14fdf11f5db19234aa0bded64e0f1cd7
     m_Address: ui/skilltree/emblem_endurance
     m_ReadOnly: 0
@@ -325,6 +330,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a90ad33b96d50e345ad87f6c10f47ee0
+    m_Address: ui/hud/scrip_tag
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: ad3c4339c54057d4295902845abb971c
     m_Address: ui/skilltree/link_open
     m_ReadOnly: 0
@@ -347,6 +357,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: b36dcf1c1408ab444ab99ab2ffddbb16
     m_Address: ui/map/system_panel
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b6af70037367fa2489de547fbc8e0614
+    m_Address: ui/hud/depth_marker
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -390,6 +405,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d17e0cdd15b64a54994136e03c2f5388
+    m_Address: ui/hud/gauge_pack
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: d1ea0b0b611f7d84ca81f53a03bf0f4d
     m_Address: ui/titlecards/saturn
     m_ReadOnly: 0
@@ -410,6 +430,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: db22cc725d51ff0469d136107213d6a3
+    m_Address: ui/hud/pack_full
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: df2e9725ba5fde0449f3923dcac28f3f
     m_Address: ui/skilltree/node_cap_locked
     m_ReadOnly: 0
@@ -417,6 +442,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: e3d27a1d2ea58e34eb5e3665e8af5ede
     m_Address: ui/app/icon_16
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e6fcde8f0d3f6ba43936f981fab7cd4d
+    m_Address: ui/hud/gauge_pack/json
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -437,6 +467,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: f5149b9175aac3d4ebdc57f353a9e07a
     m_Address: ui/app/icon_48
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f60ccc525ea82b64f94bfff7978e73d3
+    m_Address: ui/hud/rank_slot
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
