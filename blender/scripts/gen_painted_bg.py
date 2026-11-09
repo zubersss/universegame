@@ -363,7 +363,10 @@ def wants_continue(entry):
     return bool(entry.get("continue_rows")) or planet in CONTINUE_PLANETS or entry["key"] in CONTINUE_KEYS
 
 
-CONTINUE_MIN_COVER = 0.25         # B-220 rev (11:4x sheets): a band continues only where it is a fill (cloud body, sky, ice pillars)
+CONTINUE_MIN_COVER = 0.90         # B-220 (LEAD 16:0x, was 0.25): a band continues only where it is a FULL fill (cloud body, sky);
+#                                   anything less fades. Venus's deck layer1 (separate towers, cover 0.29) repeated as stacked slabs
+#                                   at 0.25. Checked on the four giants' accepted sheets (15:42 and the 13:10 / 13:25 / 13:37 footers):
+#                                   every continuing layer printed 1.00 and every fading one <= 0.04, so none of them changes
 
 
 def band_cover(a, rows=CONTINUE_ROWS):

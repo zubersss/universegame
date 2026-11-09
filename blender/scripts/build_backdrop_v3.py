@@ -1302,7 +1302,8 @@ def venus_deck(seed):
     for _k in range(7):
         cx = rng.uniform(0, W)
         base, h, w = rng.uniform(780, 900), rng.uniform(260, 460), rng.uniform(70, 115)
-        cloud_tower(towers, cx, base, h, w, rng)
+        base = min(base, 884 - 0.41 * w)        # B-220 (LEAD 16:0x): the towers' feet (base + up to 0.41 w) keep out of the bottom
+        cloud_tower(towers, cx, base, h, w, rng)   # 128 rows, which tile_bottom reserves (a foot there ghosted into the repeated band)
     rims = lining(towers, 6, 5)
     stack.append(tint(rng, H, rims, pal["offwhite"], 0.85, var=0.03, edge_dark=0.03, bleed=3.0))   # the backlit cream edges
     stack.append(wash32(rng, H, towers, BG._mix(pal["sky"], pal["red"], 0.15), var=0.05, edge_dark=0.06, bleed=3.0))
@@ -1339,25 +1340,33 @@ def venus_deck(seed):
     stack.append(tint(rng, H, sheen * bag, pal["offwhite"], 0.35, var=0.0, edge_dark=0.0, bleed=2.0))
     stack.append(tint(rng, H, wins, pal["mustard"], 0.95, var=0.0, edge_dark=0.0, bleed=0.6))
     out.append(finish(stack, rng, H))
-    # layer2: cloud tops near the deck with gaps showing the dark surface far below and its tiny vent glows
+    # layer2: cloud tops near the deck with gaps showing the dark surface far below and its tiny vent glows.
+    # B-220 (LEAD 16:0x; B-147 reopened only for tile_bottom's reserved rows): the same drawing moved UP 64 rows in the layer
+    # (UP2) and the layer set 1 m lower (y_m -0.5 -> -1.5), so the art sits on the same screen rows and the layer's bottom 128
+    # rows are plain floor: the cloud lobes' feet and the vent glows lay in those rows and repeated as a ladder of crescents and
+    # dots every 64 rows. The few lowest lobes lift <= 14 px and the glows close up into the floor's upper 84 rows; every rng
+    # draw is unchanged (H stays 384)
     H = 384
+    UP2 = 64
     stack = Stack()
     floor = np.zeros((H, W), np.float32)
-    rect(floor, 0, W, 210, H)
+    rect(floor, 0, W, 210 - UP2, H)
     stack.append(wash32(rng, H, floor, BG._mix(pal["brown"], pal["sky"], 0.25), var=0.05, edge_dark=0.0, bleed=4.0))
     glows = np.zeros((H, W), np.float32)
     for _k in range(30):
-        ell(glows, rng.uniform(0, W), rng.uniform(230, 360), rng.uniform(3, 7), rng.uniform(2, 4))
+        gx, gy, grx, gry = rng.uniform(0, W), rng.uniform(230, 360), rng.uniform(3, 7), rng.uniform(2, 4)
+        ell(glows, gx, 230 - UP2 + (gy - 230) * 84.0 / 130.0, grx, gry)                  # rows 166-250
     stack.append(tint(rng, H, glows, pal["red"], 0.9, var=0.03, edge_dark=0.0, bleed=1.5))
     tops = np.zeros((H, W), np.float32)
     for _k in range(26):
         cx = rng.uniform(0, W)
         for j in range(3):
-            ell(tops, cx + rng.uniform(-90, 90), rng.uniform(150, 260), rng.uniform(70, 150), rng.uniform(40, 70))
+            ox, cy, rx, ry = rng.uniform(-90, 90), rng.uniform(150, 260), rng.uniform(70, 150), rng.uniform(40, 70)
+            ell(tops, cx + ox, min(cy - UP2, 252 - ry), rx, ry)                           # every foot above row 252
     stack.append(wash32(rng, H, tops, BG._mix(pal["offwhite"], pal["sky"], 0.35), var=0.05, edge_dark=0.05, bleed=4.0))
     out.append(finish(stack, rng, H))
     return out, [{"n": 0, "parallax": 0.1, "y_m": -2.0}, {"n": 1, "parallax": 0.35, "y_m": -1.0},
-                 {"n": 2, "parallax": 0.6, "y_m": -0.5}]
+                 {"n": 2, "parallax": 0.6, "y_m": -1.5}]
 
 
 def venus_surface(seed):
