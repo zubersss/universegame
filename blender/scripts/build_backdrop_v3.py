@@ -2778,8 +2778,10 @@ def earth_sea_under(seed):
     # layer1: the far seabed in the haze - rock arches and mounds, kelp stands, the far floor (its strip tiles down)
     H = 640
     haze = BG._mix(water, pal["teal"], 0.25)
-    fl = BG.ridge(rng, [(2, 0.5), (5, 0.3), (11, 0.2)], base=H - 150, amp=14)
-    floor = BG._ridge_mask(H, fl)
+    fl = BG.ridge(rng, [(2, 0.5), (5, 0.3), (11, 0.2)], base=H - 190, amp=40)            # rev: hillier (amp 14 read as a ruled line),
+                                                                                              # up 40 px so the soft edge stays out of
+                                                                                              # the continue strip's 2 x 64 rows
+    floor = BG._ridge_mask(H, fl, soft=20.0)                                                  # and its top fades into the haze
     # rev (LEAD, B-202 export): at 40 m the far floor's nearly flat top read as one straight edge across the frame; low dunes
     # and mounds of sand along it break the line (drawn after the arches' seats so nothing above moves)
     dunes = np.zeros((H, W), np.float32)
