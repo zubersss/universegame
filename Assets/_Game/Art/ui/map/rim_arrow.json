@@ -1,0 +1,13 @@
+{
+  "key": "ui/map/rim_arrow",
+  "style": "v3",
+  "ppu": 64,
+  "pivot": [
+    0.5,
+    0.5
+  ],
+  "width": 24,
+  "height": 24,
+  "palette": "earth",
+  "note": "points up (outward) at rotation 0: rotate to the bearing; the distance on a name_tag beside it"
+}

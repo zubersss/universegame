@@ -1,0 +1,14 @@
+{
+  "key": "ui/map/minimap_frame",
+  "style": "v3",
+  "ppu": 64,
+  "pivot": [
+    0.5,
+    0.5
+  ],
+  "width": 256,
+  "height": 256,
+  "palette": "earth",
+  "clear_radius_px": 99,
+  "note": "the porthole: the centre (r < 99 px) is clear for UNITY's marks; N up"
+}

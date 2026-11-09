@@ -1,0 +1,15 @@
+{
+  "key": "ui/map/orbit_dot",
+  "style": "v3",
+  "ppu": 64,
+  "pivot": [
+    0.5,
+    0.5
+  ],
+  "width": 16,
+  "height": 8,
+  "palette": "earth",
+  "tile_x": true,
+  "repeat_px": 16,
+  "note": "tiled along an orbit, faint"
+}

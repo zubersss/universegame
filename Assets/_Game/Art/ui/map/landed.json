@@ -1,0 +1,13 @@
+{
+  "key": "ui/map/landed",
+  "style": "v3",
+  "ppu": 64,
+  "pivot": [
+    0.5,
+    0.5
+  ],
+  "width": 20,
+  "height": 20,
+  "palette": "earth",
+  "note": "on the tag's top-right corner of a planet you have landed on"
+}

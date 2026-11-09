@@ -1,0 +1,14 @@
+{
+  "key": "ui/map/title_cartouche",
+  "style": "v3",
+  "ppu": 64,
+  "pivot": [
+    0.5,
+    0.5
+  ],
+  "width": 384,
+  "height": 80,
+  "palette": "earth",
+  "lettering": "baked",
+  "note": "top-centre of the system map"
+}

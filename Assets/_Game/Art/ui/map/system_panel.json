@@ -1,0 +1,20 @@
+{
+  "key": "ui/map/system_panel",
+  "style": "v3",
+  "ppu": 64,
+  "pivot": [
+    0.5,
+    0.5
+  ],
+  "width": 256,
+  "height": 256,
+  "palette": "earth",
+  "slice": [
+    80,
+    80,
+    80,
+    80
+  ],
+  "grain": "ui/panels/grain",
+  "note": "the system map's paper (B-208 flat paper: tile the grain over it)"
+}

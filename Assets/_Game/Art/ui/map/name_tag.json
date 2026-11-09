@@ -1,0 +1,20 @@
+{
+  "key": "ui/map/name_tag",
+  "style": "v3",
+  "ppu": 64,
+  "pivot": [
+    0.5,
+    0.5
+  ],
+  "width": 64,
+  "height": 24,
+  "palette": "earth",
+  "slice": [
+    8,
+    8,
+    8,
+    8
+  ],
+  "lettering": "runtime",
+  "note": "the HUD's paper tag; Patrick Hand, ink"
+}

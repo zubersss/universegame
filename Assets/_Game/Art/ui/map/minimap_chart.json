@@ -1,0 +1,13 @@
+{
+  "key": "ui/map/minimap_chart",
+  "style": "v3",
+  "ppu": 64,
+  "pivot": [
+    0.5,
+    0.5
+  ],
+  "width": 208,
+  "height": 208,
+  "palette": "earth",
+  "note": "optional paper disc under the marks (208 px, centred under the frame)"
+}

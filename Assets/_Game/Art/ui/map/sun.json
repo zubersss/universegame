@@ -1,0 +1,12 @@
+{
+  "key": "ui/map/sun",
+  "style": "v3",
+  "ppu": 64,
+  "pivot": [
+    0.5,
+    0.5
+  ],
+  "width": 40,
+  "height": 40,
+  "palette": "earth"
+}
