@@ -95,6 +95,16 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 1d7cbad43169e2542b70c7bd3b9b17e8
+    m_Address: terrain/mars/fill_decor_t3_3
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 1e7996ea257e47c41847a69ef6e08ac4
+    m_Address: terrain/mars/fill_decor_t2_2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 20d5e17054a10b24baa9cae8b2f23da6
     m_Address: backgrounds/mars/storm/layer1
     m_ReadOnly: 0
@@ -117,6 +127,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 24463fc6758ef6c47bcc60e7ad447f52
     m_Address: creatures/mars/polar_crawler
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 2450f7761312d2a4bb3521961ebca99d
+    m_Address: terrain/mars/fill_decor_t3_2
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -180,6 +195,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 349dbbbead5027649bc6db155a6ffccb
+    m_Address: terrain/mars/ground_fill_t5
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 3534cf7328375e844bb1e379f7c77e63
     m_Address: terrain/mars/ground_lip
     m_ReadOnly: 0
@@ -217,6 +237,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 427110687af11e0458e8dec5057bf28a
     m_Address: backgrounds/mars/storm/layer2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 427cfab05874c7b40b312f817406345e
+    m_Address: terrain/mars/fill_decor_t5_2
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -340,6 +365,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 6c8b4964d6b23a743b8a8a8c924fe987
+    m_Address: terrain/mars/fill_decor_t2_1
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 6d05352c278b3d2438bc4bb1c25d5231
     m_Address: backgrounds/mars/plains/layer2
     m_ReadOnly: 0
@@ -362,6 +392,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 75bc95d50d197b540bf2324c35f59981
     m_Address: backgrounds/mars/canyon/layer1
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 76ca97d504be10642a8a5edac9262a88
+    m_Address: terrain/mars/fill_decor_t2_3
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -580,6 +615,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: ca18ab8facc2fd84d9c0dde3deb8fc26
+    m_Address: terrain/mars/ground_fill_t3
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: cbfd2a91e34d7024f8a6d7abf68b3184
     m_Address: terrain/mars/ground_decor_frost_2
     m_ReadOnly: 0
@@ -605,6 +645,16 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d37082d28ce328f43b2489e3a4894c1d
+    m_Address: terrain/mars/fill_decor_t4_2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d3e6c0ab1ac44534ca7fbbebd9fb86c1
+    m_Address: terrain/mars/fill_decor_t3_1
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: d48140547b4b0fe4dbae8e9e1054e19d
     m_Address: terrain/mars/dig_puff
     m_ReadOnly: 0
@@ -620,6 +670,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d7729f2609668eb4099129a9f9fd387e
+    m_Address: terrain/mars/surface_line
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: d7ab9ce2717534b41b9e47d5150bf147
     m_Address: terrain/mars/ground_band_frost
     m_ReadOnly: 0
@@ -630,8 +685,18 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e116b2e27d475334b88a16f31a5d763a
+    m_Address: terrain/mars/ground_fill_t4
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: e4d3fb50273ee1c40bab8e5b0b1fa99d
     m_Address: props/mars/node_water_ice/json
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e4de0bcad64b90544b2a79648fef2ad7
+    m_Address: terrain/mars/fill_decor_t5_1
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -655,6 +720,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e9b74c01facf4bc4d99295b2c692ef17
+    m_Address: terrain/mars/fill_decor_t4_1
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: ed2b5684d97a02f48aeb64f8722e4c4c
     m_Address: terrain/mars/ground_lip_frost
     m_ReadOnly: 0
@@ -662,6 +732,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: ed52e161ea8d55748a176d30bb0cf172
     m_Address: flora/mars/rigset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: efacf7360cccc2b48b0db9c022f431ff
+    m_Address: terrain/mars/ground_fill_t2
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

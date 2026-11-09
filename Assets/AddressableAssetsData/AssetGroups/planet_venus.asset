@@ -145,8 +145,23 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 418feae462a61564ca28be449964d006
+    m_Address: terrain/venus/fill_decor_t2_1
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 4244064109939df47b795287460f6322
+    m_Address: terrain/venus/fill_decor_t4_2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 42667f73a12c50a438ec643bf0217730
     m_Address: terrain/venus/dig_puff_tessera
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 433b4f87ab3d2c348b96d55c24aef717
+    m_Address: terrain/venus/ground_fill_t2
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -182,6 +197,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 4c31028873f44f34db03fb90ac3a924b
     m_Address: terrain/venus/ground_decor_2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 4c8ab519457c3c742a7070c3743e378f
+    m_Address: terrain/venus/ground_fill_t4
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -260,6 +280,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 6917282bd3efdfa4ea396dc84b841a85
+    m_Address: terrain/venus/fill_decor_t5_1
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 6c1738362e6dbab4b91faf41736d113f
     m_Address: props/venus/scan_x/json
     m_ReadOnly: 0
@@ -310,6 +335,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 7a7d36765e0364646a020bae10158fa2
+    m_Address: terrain/venus/fill_decor_t4_1
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 7b38057e87401c740ade31ba6981cb99
     m_Address: terrain/venus/ground_decor_3
     m_ReadOnly: 0
@@ -317,6 +347,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 7c96ee0cefffacf4980de4b16444e38c
     m_Address: creatures/venus/vent_eel
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 7d9791fe8c623c9439e7c6da6287a5d8
+    m_Address: terrain/venus/fill_decor_t2_2
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -380,6 +415,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 9ad88285a064d5741a6ea5bbabf986c0
+    m_Address: terrain/venus/ground_fill_t5
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: a1ccd65cb37b0ea4abeaa93840efeeff
     m_Address: props/venus/pressure_capsule
     m_ReadOnly: 0
@@ -422,6 +462,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: b4d48e4d67529134ca6ea55fc0d13b25
     m_Address: terrain/venus/dig_rim
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b6221dab01de08a4ea86fe900263ab32
+    m_Address: terrain/venus/ground_fill_t3
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -470,6 +515,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c372b7ae3e8792a41af0b89556da275e
+    m_Address: terrain/venus/fill_decor_t3_1
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: c3caa7439fe333b428cd8ba5f87bf5aa
     m_Address: terrain/venus/ground_decor_vent_1
     m_ReadOnly: 0
@@ -497,6 +547,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: cb5282d6ed4fc7646ae71d6ea3ea8068
     m_Address: props/venus/meridian_station_door
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: cd018454f56da2642a98ab2d306538ed
+    m_Address: terrain/venus/fill_decor_t5_2
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -540,6 +595,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: df181722e67be0343b5819ca048dcb64
+    m_Address: terrain/venus/surface_line
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: e3433963486ede94e9fa4b4c4eb1dd15
     m_Address: props/venus/meridian_station_door
     m_ReadOnly: 0
@@ -567,6 +627,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: eaf5c08310fa3c547854953226457407
     m_Address: terrain/venus/fill_decor_3
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: eb9f5cb4a7d26aa4191eed475dfa0c7c
+    m_Address: terrain/venus/fill_decor_t3_2
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

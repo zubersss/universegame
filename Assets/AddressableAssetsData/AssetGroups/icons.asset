@@ -20,6 +20,26 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 05bc3b788d69a7b478cbef3109034458
+    m_Address: icons/nodes/asc_grapple_2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 060628cb520aac44c8b2c0a9e1246db0
+    m_Address: icons/nodes/voy_dray
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 0bdeaf2544055f34382e262138fbf649
+    m_Address: icons/nodes/haul_pack_2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 0dfd5a725e9d97048b69403e9c29ce64
+    m_Address: icons/nodes/haul_pack_4
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 10b85a935de85c344ac2489eb9147fed
     m_Address: icons/copper/base
     m_ReadOnly: 0
@@ -27,6 +47,21 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 13404d6f6a342ef439271a563b4cb457
     m_Address: icons/vitriol_glass/base
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 139718025e313154b84145f0c91a0c71
+    m_Address: icons/nodes/end_air_1
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 155eb39a8516c464a9b37e9c2c285ea3
+    m_Address: icons/nodes/dig_heatsink
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 1a28b88b2c7443a489da5d72e817a073
+    m_Address: icons/nodes/dig_brush_2
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -40,8 +75,18 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 1c997afda45830340994f8a72cf74fc7
+    m_Address: icons/nodes/end_heat_2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 1f5cb7cfbee735646b4b8a757274145d
     m_Address: icons/cryo_pad/base
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 21ae178336e9eb4459e660df741fac0f
+    m_Address: icons/nodes/sur_scan_1
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -75,8 +120,18 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 2c3fb3f51f365eb44aa1fa2e91edac8c
+    m_Address: icons/nodes/asc_grapple_3
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 2e0a7cf91e20a0d4fa7aa8bd9a488c2a
     m_Address: icons/nickel/base
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 2e97ecad59152984bb712805567b5c9d
+    m_Address: icons/nodes/end_air_3
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -95,8 +150,53 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 342ebc4e56837404387dc362e11beb7c
+    m_Address: icons/nodes/voy_skip_2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 35baa5c337ee29b41a5794a3d697b25b
+    m_Address: icons/nodes/dig_power_5
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 3724462c45f77fe489669f3bf0c6e614
+    m_Address: icons/nodes/end_deep_1
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 3949f851d100cac4495c20b34b55b55a
+    m_Address: icons/nodes/sur_vault
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 3b47167720e8bfc47b4e2074a78706b9
+    m_Address: icons/nodes/sur_cartographer
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 3ebea58593b1e5a4c885d049aae32d13
+    m_Address: icons/nodes/sur_rare
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 40e759d6878bc4a409affd2dd62ad97c
+    m_Address: icons/nodes/asc_winch
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 43192fc2905107741b58164b9058706e
+    m_Address: icons/nodes/dig_power_1
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 452d8fe3be930b946934ab9fa3edf40c
     m_Address: icons/ring_ice/base
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 47a4710b7e39fae41843d4766cd786d1
+    m_Address: icons/nodes/asc_recall
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -110,6 +210,31 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 4dfab379bf10cdf4bac9f9e7d3cdc42c
+    m_Address: icons/nodes/dig_core_bit
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 4ed4f4f4f0f17e744ab524c56d571e1f
+    m_Address: icons/nodes/haul_pack_1
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 4ff58fa6754db2b4f812bb5e9a4234eb
+    m_Address: icons/nodes/sur_preview_2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 52d0a1ad22ac4014e91c74cef37bde31
+    m_Address: icons/nodes/end_heat_1
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 540f094009bf39640b7c05212b465710
+    m_Address: icons/nodes/end_deep_2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 576f69dda753e254ebb71cb92a1fb717
     m_Address: icons/basalt/base
     m_ReadOnly: 0
@@ -120,8 +245,18 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 59d55a224e40e9b42adf8d2ad466d8db
+    m_Address: icons/nodes/sur_preview_1
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 5b2949ccc54b5d04d81a92de70d5e708
     m_Address: icons/phosphorus_pigment/base
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 5cd6055711974824fa529c2f6bfe8b69
+    m_Address: icons/nodes/haul_dirt_1
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -130,8 +265,28 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 5f73d7571357cd44ba741d3028c2e1bd
+    m_Address: icons/nodes/dig_power_4
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 5f7ac5a3e49f1c447a4846e6975fa9de
+    m_Address: icons/nodes/dig_rhythm_2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 5f99a95a3fa6f0248a196ffc4f976ac8
     m_Address: icons/carbon/base
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 600e1afd25062ca40b8a77ee99ea416f
+    m_Address: icons/nodes/dig_rhythm_1
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 61a7380a5a93542478ace3a483ce36b3
+    m_Address: icons/nodes/haul_magnet_1
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -170,6 +325,26 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 74c2c77d690319c49b05df49961bcb50
+    m_Address: icons/nodes/asc_ladder_2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 76a5cb3be0694fd4f8975bc923c01a61
+    m_Address: icons/nodes/voy_skip_1
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 771da490d8f8bb946a08ed55faa84a3b
+    m_Address: icons/nodes/sur_scan_4
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 77a909acd21e0d14abf1ddadb6c02a26
+    m_Address: icons/nodes/end_air_4
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 77bc5991816f07e43ba6ecc77cd53827
     m_Address: icons/snow/base
     m_ReadOnly: 0
@@ -180,8 +355,33 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8105da1de0d39cc44a6a2b0c530882e5
+    m_Address: icons/nodes/sur_deep_eye
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 817be05767d835e46b4a07edd9639022
     m_Address: icons/polymer/base
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 86b5fe22fdad5d44895d2988a5894f2f
+    m_Address: icons/nodes/end_suit_mk3
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 87f78c076545f7b42908c9cb18ad3200
+    m_Address: icons/nodes/asc_ladder_1
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8b105be2e9bbed940b433f553ab764c7
+    m_Address: icons/nodes/asc_jet_3
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8b41541bf0af12046b9191bd4e0842bd
+    m_Address: icons/nodes/dig_power_3
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -200,6 +400,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 9a940e8f11971af4bb99f077f9c9a75f
+    m_Address: icons/nodes/sur_scan_2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 9cd7db039a01aad48b330d041b166754
     m_Address: icons/aluminium/base
     m_ReadOnly: 0
@@ -210,8 +415,38 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 9f9b355083eca8249b5681575d37b0a1
+    m_Address: icons/nodes/voy_trader
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a018f6fd1c6c9154d846b6238f8d4b16
+    m_Address: icons/nodes/asc_grapple_1
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a1e8d0d385938a449a4665e85613ccad
+    m_Address: icons/nodes/sur_scan_3
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: a2a2e10700666d94aa4cf4a0c68af7eb
     m_Address: icons/wood/base
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a5a92668f8a932d499321e409fb2c04c
+    m_Address: icons/nodes/dig_brush_1
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a77e03f477200cc498e43ddc72380b25
+    m_Address: icons/nodes/end_fall_2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: acddea8cadbb68f45a53c386352e8a67
+    m_Address: icons/nodes/end_fall_1
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -220,8 +455,43 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b0acfc67ce724314a8d8763cae7060d9
+    m_Address: icons/nodes/asc_jet_1
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: b0c242697b73cbd4ba1c0182cdc422a5
     m_Address: icons/smelter_bar_copper/base
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b27f9e48e5a17bc49ba7eb24774153ba
+    m_Address: icons/nodes/sur_depth_1
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b4455364b6c2c2e4ea25a3eeacfde4c7
+    m_Address: icons/nodes/voy_price_1
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b5e8746b2491f014a9365862c6e088fd
+    m_Address: icons/nodes/haul_light_1
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b93268e24ab41164babedae91327aeac
+    m_Address: icons/nodes/voy_price_2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: ba329ff489761e649a4610fe6176f5b6
+    m_Address: icons/nodes/haul_light_2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: bba141fb2ae8073479cc38c36391361a
+    m_Address: icons/nodes/voy_hold_1
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -230,13 +500,28 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: bfca2da90092fd749be5884a5821e0ff
+    m_Address: icons/nodes/voy_hold_2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: c07033cb786e0f44f92ae28525aaacf0
     m_Address: icons/deep_core_sample/base
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c0bd999cc27240948a314fe9793e3638
+    m_Address: icons/nodes/haul_sorter
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: c10600238fcbfde4cbd07512a8e1acdc
     m_Address: icons/water_ice/base
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c6e11c7b5fe7e7e45858528910c4ffd8
+    m_Address: icons/nodes/asc_climb_1
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -250,8 +535,23 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c9e1974445bb6dc4ab4b4d092225b607
+    m_Address: icons/nodes/haul_compact
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: cc0d2a0da5ec95b46b63deeeb7537e09
     m_Address: icons/superionic_ice/base
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d20f03aae45e3e64aa3def70f4764e2d
+    m_Address: icons/nodes/end_air_2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d600ad5d9b67acc49ab41ac5796ff2af
+    m_Address: icons/nodes/dig_power_2
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -270,8 +570,18 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e0750fa75a27fbf419ad83af31f094c1
+    m_Address: icons/nodes/haul_pack_5
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: e3d7d6af4d1b28e41bb5b210e82c2875
     m_Address: icons/sulfide/base
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e40bb0db0b5c1ef4a978faff0e8895cf
+    m_Address: icons/nodes/voy_price_3
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -282,6 +592,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: e5d39791d7c135941b9af51322d4dbb7
     m_Address: icons/ammonia_ice/base
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: ec7b1b46de5391b4b867b20e48fbbe56
+    m_Address: icons/nodes/voy_thrust_2
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -302,6 +617,21 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: f5ec467e6931cae40b800e8adbf491e7
     m_Address: icons/soil/base
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f5f2df56f839b3441a56bbd101c5faff
+    m_Address: icons/nodes/asc_jet_2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: fe64218c83265524386f155fe5b9a60b
+    m_Address: icons/nodes/voy_thrust_3
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: ffcf8d3206befd94091cee00e9f6a8c5
+    m_Address: icons/nodes/haul_pack_3
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

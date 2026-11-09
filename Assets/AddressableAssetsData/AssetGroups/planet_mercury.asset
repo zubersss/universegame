@@ -15,6 +15,11 @@ MonoBehaviour:
   m_GroupName: planet_mercury
   m_GUID: 8ef8665429d416c49b30c435d47c6f6a
   m_SerializeEntries:
+  - m_GUID: 011841404f6bc8f4399969dcf1e55b6c
+    m_Address: terrain/mercury/ground_fill_t2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 037ff26894fab3c4782826e76b11e477
     m_Address: backgrounds/mercury/night/layer0
     m_ReadOnly: 0
@@ -65,6 +70,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 160c8b6fdc9f1f94aaf27869923f83a0
+    m_Address: terrain/mercury/fill_decor_t4_1
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 1616e0c441cbc3c42b11bc7d563c13b3
     m_Address: backgrounds/mercury/skyline_far
     m_ReadOnly: 0
@@ -87,6 +97,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 204d2320f5b329443906e22e30d688e5
     m_Address: terrain/mercury/ground_decor_3
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 2245a30006c50974ca615d635595636a
+    m_Address: terrain/mercury/fill_decor_t2_1
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -235,6 +250,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 64e4a0b544b7af0469e62201db2a374d
+    m_Address: terrain/mercury/ground_fill_t4
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 65da60ff8cbbf4a439d2e423fb31661a
     m_Address: creatures/mercury/cinderling/animator
     m_ReadOnly: 0
@@ -247,6 +267,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 66007d8ec9f459546826951e753b1b9f
     m_Address: creatures/mercury/shadewyrm
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 6625afd411e33b64c9feb8f93e144265
+    m_Address: terrain/mercury/fill_decor_t3_1
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -265,8 +290,18 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 7086ccd82264883408fa3accb9a5efb4
+    m_Address: terrain/mercury/fill_decor_t5_1
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 772621f7ced88fa489f1e9e09276356a
     m_Address: terrain/mercury/fill_decor_2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 7a24efbde1d7bfb41b6ea97846d1eafb
+    m_Address: terrain/mercury/surface_line
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -277,6 +312,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 7fe151b55f54aca4b8c1b2657316fda3
     m_Address: flora/mercury/rigset/animator
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 80563ac0444c96b449b5cf859078d9e2
+    m_Address: terrain/mercury/ground_fill_t5
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -292,6 +332,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 86187be122de32b49b9b8867b981974d
     m_Address: props/mercury/solarite_cut
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 872297d3667538546a66007d5e5c80fc
+    m_Address: terrain/mercury/fill_decor_t3_2
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -370,6 +415,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 9bd219eec99aeda4caa781ff29ebc5cc
+    m_Address: terrain/mercury/fill_decor_t4_2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 9ce76618442290c4c86f588b86203a71
     m_Address: props/mercury/scan_x/animator
     m_ReadOnly: 0
@@ -445,6 +495,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b3eb898bb7eb60e4ba3a798a22243304
+    m_Address: terrain/mercury/fill_decor_t5_2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: b6266e708297d2c4e98db6b8c057c0d1
     m_Address: backgrounds/mercury/day
     m_ReadOnly: 0
@@ -477,6 +532,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: c397eefa66b4c58439f400431d514bce
     m_Address: terrain/mercury/ground_decor_ice_1
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c533ee19a74af194990a84d1c839c9d4
+    m_Address: terrain/mercury/fill_decor_t2_2
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -572,6 +632,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: f96df61d5f9f88448b4c97d33f257413
     m_Address: creatures/mercury/shadewyrm
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: fa1a7b1d887077e4496109c51b5925f3
+    m_Address: terrain/mercury/ground_fill_t3
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
