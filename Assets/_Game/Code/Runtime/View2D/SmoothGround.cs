@@ -129,7 +129,7 @@ namespace Meridian.View2D
         /// <summary>One piece at most per DecorCell-metre world cell (cells line up across the planet's seam: every width divides by 4),
         /// with DecorChance; never within DecorBorderGap of a tier border, wholly under the natural surface, and only where every tile
         /// under it is solid (a dug piece goes with its tile).</summary>
-        public const float DecorCell = 4f, DecorChance = 0.22f, DecorBorderGap = 1.2f, DecorUnderSurface = 0.4f;
+        public const float DecorCell = 4f, DecorChance = 0.22f, DecorBorderGap = 1.4f, DecorUnderSurface = 0.4f; // the gap clears the wobble (0.6) and half the fade
         /// <summary>The decor sets: 0 tier 1 (fill_decor_n), 1 the region fill's (fill_decor_sand_n / _basalt_n), 2..5 tiers 2..5 (fill_decor_tk_n).</summary>
         public const int DecorSets = 6, DecorPerSet = 4;
         readonly Sprite[][] decor = new Sprite[DecorSets][];
@@ -211,7 +211,7 @@ namespace Meridian.View2D
                     bool border = false;
                     for (int k = 1; k < t.tiers.Length; k++) if (Mathf.Abs(depth - t.tiers[k].fromM) < DecorBorderGap) border = true;
                     if (border) continue;
-                    int tier = TierShown(depth, t);
+                    int tier = TierShown(depth, t, wx);
                     int set = tier > 0 ? tier + 1 : (DecorArt(1) && SandWeight(wx) > 0.5f ? 1 : 0);
                     var pick = DecorPick(set, Meridian.Mining.DigRun.Hash01(hx, gy, 7174));
                     if (pick == null) continue;
@@ -280,24 +280,35 @@ namespace Meridian.View2D
         public bool TierFill => lineTex != null && Meridian.Rendering.ArtMaterials.Active != null && Meridian.Rendering.ArtMaterials.Active.groundTiers != null;
         public bool TierArt(int tier) => tier >= 2 && tier <= 5 && tierFills[tier - 2] != null;
 
-        /// <summary>The shader's tier weights (GroundTiers.hlsl) for a depth under the Surface Line: tiers 2..5 each fade in across
-        /// TierTransition centred on its depth, smoothstepped. Pure.</summary>
-        public static Vector4 TierWeights(float depth, Meridian.Mining.D1Tables t)
+        /// <summary>LEAD 21:5x: how far a tier border wobbles along x (m), so it reads as a rock boundary.</summary>
+        public const float TierWobbleMax = 0.6f;
+
+        /// <summary>The shader's border wobble (GroundTiers.hlsl) for tier k+2 at world x: three sines, 2-7 m wavelengths, phased per tier,
+        /// at most TierWobbleMax. Pure.</summary>
+        public static float TierWobble(int k, float x)
+        {
+            float p = 1.7f * k;
+            return TierWobbleMax * (0.5f * Mathf.Sin(x * 1.71f + p) + 0.32f * Mathf.Sin(x * 0.93f + p * 1.3f + 2.1f) + 0.18f * Mathf.Sin(x * 3.1f + p * 0.7f + 4.0f));
+        }
+
+        /// <summary>The shader's tier weights (GroundTiers.hlsl) for a depth under the Surface Line at world x: tiers 2..5 each fade in
+        /// across TierTransition centred on its depth (wobbled), smoothstepped. Pure.</summary>
+        public static Vector4 TierWeights(float depth, Meridian.Mining.D1Tables t, float x = 0f)
         {
             var w = Vector4.zero;
             for (int k = 0; k < 4; k++)
             {
                 float from = t.tiers.Length > k + 1 ? t.tiers[k + 1].fromM : 1e6f;
-                float x = Mathf.Clamp01((depth - (from - 0.5f * TierTransition)) / TierTransition);
-                w[k] = x * x * (3f - 2f * x);
+                float u = Mathf.Clamp01((depth + TierWobble(k, x) - (from - 0.5f * TierTransition)) / TierTransition);
+                w[k] = u * u * (3f - 2f * u);
             }
             return w;
         }
 
-        /// <summary>The tier the fill shows at a depth (0 = T1 ... 4 = T5): the deepest tier whose weight has reached a half. Pure.</summary>
-        public static int TierShown(float depth, Meridian.Mining.D1Tables t)
+        /// <summary>The tier the fill shows at a depth and x (0 = T1 ... 4 = T5): the deepest tier whose weight has reached a half. Pure.</summary>
+        public static int TierShown(float depth, Meridian.Mining.D1Tables t, float x = 0f)
         {
-            var w = TierWeights(depth, t);
+            var w = TierWeights(depth, t, x);
             for (int k = 3; k >= 0; k--) if (w[k] >= 0.5f) return k + 1;
             return 0;
         }
