@@ -64,6 +64,28 @@ def shovel(scale=1.0, ox=0.0, oz=0.0, rot=0.0, bold=1.0):
     return fn
 
 
+def shovel_icon(d, M):
+    """icons/tools/shovel with its own proportion (rev, LEAD 11:2x: the scaled prop stayed a thin stick at 48 / 40 px beside the
+    chunky icons): a short haft, the blade ~45 % of the icon's height, heavy ink; on the diagonal, the D-grip top-left."""
+    a = math.radians(-50)
+    k = 0.92                                                                                 # rev: inside the 2 px margin (the grip
+    ux, uz = k * math.cos(a), k * math.sin(a)                                                # touched the top-left edge at 1.0)
+    sx, sz = -0.225, 0.271                                                                   # the D-grip's centre: the bbox centred
+
+    def T(pts):
+        return [(sx + x * ux - z * uz, sz + x * uz + z * ux) for x, z in pts]
+    dg = [(-0.05, -0.10), (-0.05, 0.10)] + [(0.04 + 0.10 * math.cos(t), 0.10 * math.sin(t)) for t in np.linspace(math.pi / 2, -math.pi / 2, 9)]
+    G.stroke(d, T(hose(dg + [dg[0]], 0.05)), M["mustard_i"], O, cyclic=True)                # a heavy brass D-grip
+    G.stroke(d, T(hose([(0.15, 0.0), (0.42, 0.0)], 0.085)), M["teal_i"], O, cyclic=True)    # a short, thick teal haft
+    G.stroke(d, T([(0.40, -0.06), (0.47, -0.06), (0.47, 0.06), (0.40, 0.06)]), M["mustard_i"], O, cyclic=True)   # the ferrule
+    blade = [(0.47, -0.17), (0.56, -0.19), (0.70, -0.18), (0.84, -0.12), (0.93, 0.0), (0.84, 0.12), (0.70, 0.18), (0.56, 0.19), (0.47, 0.17)]
+    G.stroke(d, T(blade), M["sky_sh_i"], O, cyclic=True)                                     # the blade: ~0.46 m on its long side
+    G.stroke(d, T([(0.48, 0.16), (0.56, 0.18), (0.70, 0.17), (0.80, 0.12), (0.56, 0.11)]), M["sky"], 0.0, cyclic=True)
+    G.stroke(d, T(blade), M["ink"], O * 1.25, cyclic=True)
+    G.seam(d, T([(0.49, 0.0), (0.86, 0.0)]), M["ink"])
+    G.stroke(d, T(IT.lump(0.74, -0.07, 0.07, 0.045, 262, n=9, jit=0.15)), M["brown_sh_i"], I, cyclic=True)        # dirt on the blade
+
+
 # ---------------------------------------------------------------- the flick (cream + ink: UNITY tints it per ground)
 def flick_frame(k, seed=1500):
     import build_ui_v3 as U
@@ -97,8 +119,7 @@ def kit():
     tool = RT.render(shovel(), SW, SH_, SPPU, SPIV)[0]
     frames = [flick_frame(k) for k in range(6)]
     sheet, cols = FR.sheet_of(frames)
-    icon = RT.render(shovel(scale=0.64, ox=-0.40, oz=0.30, rot=-0.72, bold=1.9), IT.SIZE, IT.SIZE, IT.PPU, (0.5, 0.5))[0]   # rev: bold
-                                                                                              # (it vanished at 48 / 40 px)
+    icon = RT.render(shovel_icon, IT.SIZE, IT.SIZE, IT.PPU, (0.5, 0.5))[0]                  # rev 2: its own proportion (LEAD 11:2x)
     return [("props/rig/shovel", tool, {"ppu": SPPU, "pivot": [round(SPIV[0], 4), 0.5], "grip": list(GRIP), "blade_tip": list(TIP),
                                          "muzzle": list(DIG), "note": "B-226: the first digging tool, a field shovel (teal and brass, a D-grip); "
                                                                        "pivot = the grip in the hand; muzzle = the dig point on the blade"}, None),

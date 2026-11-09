@@ -1,0 +1,13 @@
+{
+  "key": "icons/tools/shovel",
+  "style": "v3",
+  "width": 128,
+  "height": 128,
+  "palette": "earth",
+  "ppu": 128,
+  "pivot": [
+    0.5,
+    0.5
+  ],
+  "note": "B-226: the shovel's icon (the HUD tool slot, the tree)"
+}

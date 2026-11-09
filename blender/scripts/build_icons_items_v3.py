@@ -815,6 +815,46 @@ def export(art, imgs=None, names=None):
     return out, {}, []
 
 
+def preview_one(out, names, neighbours=()):
+    """B-222: new icons beside exported neighbours (icons/<name>/base) at 128 / 48 / 40 px (main()'s batch sheet breaks on a
+    one-icon batch). python -I build_icons_items_v3.py <png> --one name[,name] [neighbour,...]"""
+    import time
+    from meridian import pngio
+    sys.path.insert(0, os.path.dirname(HERE))
+    import review
+    import numpy as np
+    art = os.path.normpath(os.path.join(HERE, "..", "..", "Assets", "_Game", "Art"))
+    ims = [(n + " (new)", render_item(n)[0]) for n in names]
+    for k in neighbours:
+        p = os.path.join(art, "icons", k, "base_color.png")
+        if os.path.isfile(p):
+            ims.append((k, pngio.read_png_np(p)))
+    W = 260 * len(ims) + 20
+    img = np.tile(np.array(review.PAPER, np.float32), (200, W, 1))
+
+    def ov(im, x, y):
+        f = im.astype(np.float32) / 255.0
+        h, w = f.shape[:2]
+        a = f[..., 3:4]
+        img[y:y + h, x:x + w] = f[..., :3] * a + img[y:y + h, x:x + w] * (1 - a)
+    review._label(img, "b-222: the new icon beside its neighbours at 128 / 48 / 40 px", 6, 4, scale=1)
+    lines = []
+    for i, (n, im) in enumerate(ims):
+        x = 10 + 260 * i
+        ov(im, x, 24)
+        for j, s in enumerate((48, 40)):
+            idx = (np.arange(s) * im.shape[0] / s).astype(int)
+            ov(im[idx][:, idx], x + 136 + j * 56, 24)
+        review._label(img, n, x, 160, scale=1)
+        if n.endswith("(new)"):
+            lines.append(f"{n}: palette {v3.palette_hits(im, ITEM_PLANET.get(n.split()[0], 'earth'))[0] * 100:.1f}%")
+    for i, ln in enumerate(lines):
+        review._label(img, ln, 6, 176 + 10 * i, scale=1)
+    review.draw(img, time.strftime("%m-%d %H:%M") + " B-222 design preview (lock-free)", 2, img.shape[0] - 12, (1.0, 1.0, 0.85))
+    review.write(out, img)
+    print("written", out, *lines)
+
+
 def main(out, imgs=None, widths=None, stamp_paths=(), batch=None):
     """Each new icon over its v2 render (read from Art before the export; after it, the exported one) at 1x, both again at
     the 32 px slot, and the v3 icons already in for the house look. batch: the design preview of that batch (default the
@@ -887,6 +927,9 @@ def main(out, imgs=None, widths=None, stamp_paths=(), batch=None):
         print(ln)
 
 
-if __name__ == "__main__":                       # python -I build_icons_items_v3.py <review png> [batch]
+if __name__ == "__main__" and len(sys.argv) > 3 and sys.argv[2] == "--one":     # B-222: <png> --one name[,name] [neighbour,...]
+    preview_one(sys.argv[1], sys.argv[3].split(","), sys.argv[4].split(",") if len(sys.argv) > 4 else ())
+    fakegp.restore()
+elif __name__ == "__main__":                     # python -I build_icons_items_v3.py <review png> [batch]
     main(sys.argv[1], batch=int(sys.argv[2]) if len(sys.argv) > 2 else None)
     fakegp.restore()

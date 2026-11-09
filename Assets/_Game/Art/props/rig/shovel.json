@@ -1,0 +1,25 @@
+{
+  "key": "props/rig/shovel",
+  "style": "v3",
+  "width": 192,
+  "height": 64,
+  "palette": "earth",
+  "ppu": 128,
+  "pivot": [
+    0.0667,
+    0.5
+  ],
+  "grip": [
+    0.0,
+    0.0
+  ],
+  "blade_tip": [
+    1.33,
+    0.0
+  ],
+  "muzzle": [
+    1.24,
+    0.0
+  ],
+  "note": "B-226: the first digging tool, a field shovel (teal and brass, a D-grip); pivot = the grip in the hand; muzzle = the dig point on the blade"
+}

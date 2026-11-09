@@ -1,0 +1,28 @@
+{
+  "key": "fx/shovel_flick/base",
+  "style": "v3",
+  "width": 788,
+  "height": 128,
+  "palette": "earth",
+  "ppu": 64,
+  "frame_width": 128,
+  "frame_height": 128,
+  "columns": 6,
+  "gutter": 4,
+  "frames": 6,
+  "fps": 12,
+  "pivot": [
+    0.5,
+    0.25
+  ],
+  "facing": "right",
+  "animations": [
+    {
+      "name": "flick",
+      "start": 0,
+      "length": 6,
+      "loop": false
+    }
+  ],
+  "note": "B-226: a dirt clod and crumbs flicked up and back over the shoulder; cream + ink: tint per ground (as the dust); mirror x when facing left"
+}
