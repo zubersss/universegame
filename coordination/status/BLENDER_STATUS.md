@@ -7,6 +7,7 @@ Dry (told LEAD 00:3x). Next: B-201, an art read of 0.6.0's smoke, frame by frame
 - Waiting on others: B-207 closes on PawsOnTheGround green; B-204 on UNITY's capture; B-172 on U-151. UNITY drops the three lance .meta files.
 
 ## Last completed
+- 11-09 00:4x: props/dig/winch_post json stands_on = the drawn surface at the shaft's mouth (379b0b89; UNITY's U-176 question; json only).
 - 11-09 00:35: B-219 (655fead8, LEAD-accepted after three fixes): the giants' floe nodes - props/jupiter/node_{ammonia_ice,metallic_hydrogen}, props/saturn/node_{ring_ice,ring_rock,helium3}, props/uranus/node_{methane_ice,superionic_ice}, props/neptune/node_{methane_ice,superionic_ice,deep_diamond}; B-176 format, json deck + item; for U-189.
 - 22:5x: U-183 request (UNITY): props/rig/hand_socket.json (9934340b) - the front glove's grip per frame of side (98) and side_b (72), [x, z, forearm angle], null in front views / hidden; held_b flags side_b frames already holding a pick / hammer / Beam / reel. Json only; regenerated with props/rig/tools_v3.
 - 22:47: Mars's old strips retired (9f035696, under my lock; U-186 9694c4c8): terrain/mars/ground_strip_basalt / _frost (2 png + 2 json, 0 .meta); the frost row dropped; build_c2_mars_ground RETIRED = basalt; the regolith strip kept.
