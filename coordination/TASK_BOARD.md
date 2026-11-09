@@ -2902,12 +2902,12 @@ Files: Code/Runtime/Progress/, UI/, Save/, Tests/
 Depends: U-175
 Lead notes: Cycle 284 (16:4x). The owner's second D1 direction; after U-175.
 
-### U-176 · UNITY · Ready · D1
+### U-176 · UNITY · Done · D1
 Goal: The ways back up as upgradeable tools (Bible 5.2 §8.1): the jetpack on suit power (no fuel, D-103) with thrust and power use from the tree and lift scaled by load; the Grapple's anchor and reel (length, reel speed, load); the Builder's ladder piece from dug dirt (cost from the tree); climbing speed and grip on carved ramps; later nodes: a winch line from the Surface Line, a one-use recall beacon.
 Accept: AscentTests: a full and an empty pack climb 30 m by each way within the tables' times; each Ascent node changes its time by its amount; captures of each way in a shaft.
 Files: Code/Runtime/Player/, Rig/, Building/, Tests/
 Depends: U-174
-Lead notes: Cycle 284 (16:2x).
+Lead notes: Cycle 284 (16:2x). 01:3x: DONE (e070b481; the B-219 import cb2aa4a3; the D-046 re-run passed with no second reap). AscentPlayTests over 30 m in a 38 m shaft: ladder 12.02 / 24.00 s (asc_climb_1 9.24), grapple 8.96 / 16.90 s (asc_grapple_2 6.12; the tables' ~8.5 / ~16 plus the drop while a re-thrown hook flies: accepted), winch 5.00 / 10.00 s, recall 5 s with the pack kept, the ramp grip holding on 37.5° with asc_climb_1; EditMode 477/477, ascent slice 8/8, movement / feel 13/13; the right click (Builder: the winch at a shaft's mouth with asc_winch, else a ladder; Grapple: the second hook), R the recall, W / S the Climb axis. RULED: the winch post stands on the drawn surface at the shaft's mouth (B-210's "base on the Surface Line" placed literally would sit 2 m down the shaft), the ride ending topside. Viewed u176/ladder and winch_top: the ladder and the line read; BUT a Warden sentinel hunts the surveyor down the shaft through solid rock → U-190 before the sweep.
 
 ### U-177 · UNITY · Ready · D1
 Goal: The planet ladder (Bible 5.2 §8.1): base hardness Earth 1, Mars 1.6, Mercury 2.5, Venus 4; each planet's tier tables from docs/D1_TABLES.md; Venus and Mercury's heat and pressure rising with depth (Endurance); the Wardens' extraction meter only within 48 m of a Warden site (D-174 (9), amends D-052); Mercury and Venus on smooth ground first (U-159's remaining slices fold in here).
@@ -2992,6 +2992,13 @@ Accept: GiantFindsTests: each giant's nodes by deck on 3 seeds; the yield / regr
 Files: Code/Runtime/Mining/ (ResourceFinds), Terrain/CloudColumn/, Tests/
 Depends: — (B-219 for the art)
 Lead notes: Cycle 288 (00:2x). After U-188 (0.6.0 can ship without the giants' finds: ring 5 is hours away for a new player), with U-160 (the giants' islands); before the owner can reach ring 5.
+
+### U-190 · UNITY · Ready · D1
+Goal: The Wardens leave ordinary digging alone (Bible 5.3 §8.1: the Wardens meter only within 48 m of a Warden site; pulled forward from U-177 for 0.6.0): WardenMeter fills only in areas within GuardRadius (48 m) of a guarded site (vaults, outposts, the Survey Archive); everywhere else digging never calls a sentinel (no 40-cell threshold); the camp is not a site; a sentinel never pathing through solid ground (it rises to open air, or stays at its post, never drawn inside rock).
+Accept: WardenTests on the 48 m rule (a 38 m shaft at camp: no sentinel; the same shaft 30 m from a vault: called); a 30 m shaft at camp with a full dig run and no sentinel in u190/; the existing Warden tests updated, the rest green.
+Files: Code/Runtime/Creatures/Wardens/, Tests/
+Depends: —
+Lead notes: Cycle 288 (01:3x). U-176's shaft shots show a sentinel trailing the surveyor down a camp shaft through rock: today every 40 cells dug anywhere call one, which would hound the owner's whole first dig run. Before the full sweep and U-188; U-177 keeps the rest of the planet ladder.
 
 ### U-154 · UNITY · Ready · C2
 Goal: P-51 (UNITY, ruled yes in cycle 279): the Builder's aerostat pieces draw the re-inked kit on the four giants: PieceSpec gains a per-planet art key, so the Deck / Strut / Lift cell pieces draw `props/common/aerostat_{deck,strut,cell}` (B-156) on Jupiter, Saturn, Uranus and Neptune and keep `props/venus/aerostat_deck` on Venus; nothing else about the pieces changes (sizes, costs, saves).
