@@ -270,11 +270,14 @@ def preview(out, footnote=None):
         tint = tone_of(tier)
         cl = K[tier - 1][3]
         r = np.tile(paper, (24 + CH_ + 26 + 256 + 26 + 128 + 12, W, 1)).astype(np.float32)
-        review._label(r, f"the dig stroke on {TIER_NAMES[tier]} (tone {TIER_CHIP[tier]} lifted 35 %): B-238's dust, 8 frames, with four t{tier} clods thrown over it as U-195 does (2.4-3.4 m/s, gravity, gone at 0.6 s)", 6, 4, scale=1)
-        cells = []
-        for k in range(8):
+        review._label(r, f"the dig stroke on {TIER_NAMES[tier]} (tone {TIER_CHIP[tier]}; the clods lifted 35 %, the dust 60 % at 0.85 alpha, its line 1.5 px: LEAD 17:2x): B-238's dust, 8 frames, with four t{tier} clods thrown over it as U-195 does (2.4-3.4 m/s, gravity, gone at 0.6 s)", 6, 4, scale=1)
+        dust_tint = np.array(v3.hex_rgb(TIER_CHIP[tier]), np.float32) / 255.0 * 0.40 + 0.60   # LEAD 17:2x: in the game the dust's
+        cells = []                                                                         # tone is lifted 60 % toward white (the
+        for k in range(8):                                                                 # clods' 35 %) and it plays at 0.85 alpha
             cell = scene(tier, CH_, CW_, LINE)
-            RT._ov(cell, puff[k], CX - 64, LINE - 96, tint=tint)                           # the puff's pivot (0.5, 0.25)
+            pf = puff[k].copy()
+            pf[..., 3] = np.rint(pf[..., 3].astype(np.float32) * 0.85).astype(np.uint8)
+            RT._ov(cell, pf, CX - 64, LINE - 96, tint=dust_tint)                           # the puff's pivot (0.5, 0.25)
             t = (k + 0.5) / 12.0
             if t <= 0.6:
                 for j, (a, v) in enumerate(THROW):

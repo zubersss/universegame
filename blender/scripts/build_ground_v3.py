@@ -317,6 +317,8 @@ def draw_lip(d, M):
 # band along the foot), no clods (B-232's clods are the debris; the variants' clod tone goes unused). Roles as before
 # (dust_i, dust_sh, ink), so every planet's variant follows from this one drawing; frame, pivot, clip and json unchanged.
 DUST_FOOT = 0.015                                                        # the cloud's foot, m above the dig point
+DUST_INK = O * 0.6                                                       # LEAD 17:2x: the dust's line 1.5 px (the full 2.5 px
+#                                                                          line made it a solid heap beside the clods)
 DUST_BUMPS = ((0.9, 0.42), (1.1, 0.72), (1.4, 1.0), (1.0, 0.55))         # the scallops, left to right: (rel width, rel height)
 DUST_WH = ((0.26, 0.10), (0.42, 0.19), (0.54, 0.27), (0.60, 0.25))       # frames 0-3: the cloud's width and height (m) before
 #                                                                          the end bumps' reach (x 1.08), the boil (x 1.06), the
@@ -348,10 +350,10 @@ def draw_puff(d, M, k):
         xb = W / 2 + 0.18 * W * DUST_BUMPS[-1][0] / total
         xs = [xa + (xb - xa) * i / 47 for i in range(48)]
         cloud = [(x, DUST_FOOT + _dust_top(x, W, H, k)) for x in xs] + [(xb, DUST_FOOT), (xa, DUST_FOOT)]
-        G.stroke(d, cloud, M["dust_i"], O, cyclic=True)
+        G.stroke(d, cloud, M["dust_i"], DUST_INK, cyclic=True)
         band = [(x, DUST_FOOT + 0.03 + 0.30 * max(_dust_top(x, W, H, k) - 0.04, 0.0)) for x in xs[4:-4]]   # the dense foot
         G.stroke(d, band + [(xs[-5], DUST_FOOT + 0.022), (xs[4], DUST_FOOT + 0.022)], M["dust_sh"], 0.0, cyclic=True)
-        G.stroke(d, cloud, M["ink"], O, cyclic=True)
+        G.stroke(d, cloud, M["ink"], DUST_INK, cyclic=True)
         if k >= 1:                                                       # ONE billow fold, on the peak's left flank
             c = -W / 2 + W * (DUST_BUMPS[0][0] + DUST_BUMPS[1][0] + DUST_BUMPS[2][0] / 2) / total
             G.seam(d, [(x, DUST_FOOT + 0.62 * _dust_top(x, W, H, k)) for x in (c - 0.20 * W, c - 0.13 * W, c - 0.06 * W, c - 0.01 * W)], M["ink"])
