@@ -6,7 +6,13 @@ Owner: LEAD (only the Lead edits this). Do the open items below, then tell the L
 
 ## Open
 
-(none open but the optional one below; the 0.6.0 playtest item comes with the build)
+### USER-36 — Play the first hour of 0.6.0, the digging game (about an hour)
+The page with pictures and the route: https://claude.ai/artifact/S3LfXBpfBbcjhJxDQYhBVx
+1. Double-click `C:\dev\universegame\Build\MERIDIAN_0.6.0\MERIDIAN.exe` and start a new game.
+2. Follow the hint cards: dig down (left mouse), cross the Surface Line, fill the pack, fly
+   out (Space), sell topside (G), buy an upgrade (K), and keep going your own way.
+3. Tell the Lead what felt good, what felt slow or confusing, and what you'd change
+   (digging speed, prices and climbing speeds are each a single number to retune).
 
 
 ### USER-08 — Optional: let the team run PowerShell commands without prompts (2 min)
