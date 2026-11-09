@@ -1,5 +1,6 @@
 # LEAD STATUS
-Updated: 2026-11-09 12:5x · Session: 11 (zuber-67; all three windows restarted ~11:45) · Review cycle: 296 · Cadence: every 2 hours (owner, 11-07 15:1x; session cron 1eb60286 at :43 on even hours, next ~14:50) + messages from the workers as they arrive
+Updated: 2026-11-09 13:5x · Session: 11 (zuber-67; all three windows restarted ~11:45) · Review cycle: 296 · Cadence: every 2 hours (owner, 11-07 15:1x; session cron 1eb60286 at :43 on even hours, next ~14:50) + messages from the workers as they arrive
+RESTART PLANNED (owner, 13:5x): all three windows restart on Fable 5.2 (UNITY and BLENDER extra high, LEAD high). UNITY's window only after U-194's chain releases its lock (asked 13:5x to say "safe to restart"); BLENDER any time (no lock, sources committed). The new LEAD: ListAgents for the new session names → message both workers → re-create the 2-hour review cron (1eb60286 dies with this session) → cycle 297.
 Cycle 296 (12:5x): no stall; USER-37 done (the ChatGPT app closed, 1.99 GB) → UNITY pinged for U-193 slice 2; B-227 beam / survey accepted, builder / grapple in rev; all BLENDER sources in; B-228 (the 0.6.1 smoke read) added.
 Cycle 295 (11:4x, the resume): no stall; B-221 / B-222 / B-226 Done (in LFS, imported); U-194 (Build 0.6.1) and B-227 (the tool-slot icons) written; While-waiting lists rewritten; UNITY's want live, gate open (2.41 GB).
 Cycle 294 (11:05): no stall; BUILD 0.6.0 OUT, its page + USER-36; the owner's shovel ask → D-182 / U-193 / B-226 for 0.6.1; UNITY's post-build sweep in its lock (RAM 0.48 GB).
@@ -16,11 +17,11 @@ Cycle 284 (15:05–17:0x): THE OWNER'S 0.5.0 PLAYTEST → D-174 (a progression d
 Cycles 281–283 (09:3x–15:0x): the resume; Build 0.5.0 (page https://claude.ai/artifact/CHnmoFrDg2jzUuM42BVi83); D-168..D-173; U-159 Mars smooth.
 (cycles 231–280: coordination/status/archive/LEAD_2026-11-06.md and REVIEW_LOG)
 ## Current task
-0.6.1 for the owner's shovel ask (D-182). UNITY: U-193 Done; U-194 Build 0.6.1 (code in, 4b0490ed) in its lock once BLENDER's B-227 export commit lands. BLENDER: B-227 export (in its lock now) → B-229 (the DIG DOWN hint picture) → B-220's remaining four sheets → B-224 → B-223 → B-225 → B-228 on U-194's smoke. After 0.6.1: U-189 + U-191, U-177, U-192, U-179.
+0.6.1 for the owner's shovel ask (D-182), then 0.6.2 for the playtest asks (D-183..D-186). UNITY: U-194 Build 0.6.1 in its lock (a multi-lock chain since 13:38; the icons imported 7a13536a; PlayMode at 13:56) → U-195 → U-196 → U-197 → U-198 → U-199; the giants after. BLENDER: files only beside UNITY's chain (B-229, B-231, B-230 sources in: daf89aad, eb51b232, 7b7f91b6); in its lock after: B-229 sheet → B-220 Neptune → Venus deck → the export of all bands → B-230 → B-232 → the B-231 design sheet (previews only until the owner's look-over). B-228 on U-194's smoke.
 ## Last completed
 13:3x: U-193 DONE (DoD checked: compile 0/0, 493/493, slices green, LeadQA 1/1, u193/1..4 viewed); B-229 carded; B-227 rev 2 and B-220 Jupiter accepted; the LeadQA HeldStroke fix (cceb9e6d). Cycle 296: USER-37 closed, UNITY pinged at the open gate, B-228 carded, queues rewritten. Cycle 295: B-221 / B-222 / B-226 Done; U-194 + B-227 cards; B-220's sparse-layer rule; B-227's first sheet judged.
 ## Next up
-1. U-194's release (UNITY's want filed 13:3x; B-227 in, 3a46eb91 verified) → BUILD OK / SMOKE OK / the probe. 2. B-220 Saturn + Uranus sheets → judge. 3. U-194 Build 0.6.1 → view its smoke with B-228 → the owner page + a short playtest item. 4. B-220's five sheets, B-224, B-223, B-225 previews → judge. 5. The owner's USER-36 notes → cards.
+1. U-194's release → BUILD OK / SMOKE OK / the probe → view its smoke with B-228 → the 0.6.1 owner page + a short playtest item. 2. B-229 sheet, B-220 Neptune + Venus deck → judge; then the band export. 3. B-230 / B-232 / B-231 previews → judge; the C5 look-over page for the owner once B-231's pose sheet is accepted. 4. U-195..U-199 as they reach Review. 5. A collapse design workflow (U-197) only if the owner asks for it and no lock is held.
 ## Pending decisions
 none open (D-183..D-186 logged 13:5x from the owner's playtest).
 ## Waiting on the user
