@@ -161,10 +161,10 @@ def m_grapple(d, M, lv=1):
     G.stroke(d, circ(-0.01, 0.24, 0.03, 14), M["off_sh"], 0.0, cyclic=True)
     G.stroke(d, circ(-0.01, 0.24, 0.03, 14), M["ink"], I, cyclic=True)
     if lv >= 3:                                                                                                         # step 3: two anchors
-        G.stroke(d, G.hose_outline([(0.27, 0.2), (0.36, 0.04), (0.34, -0.12)], 0.035), M["mustard_sh_i"], I, cyclic=True)
-        G.stroke(d, G.hose_outline([(0.34, -0.12), (0.34, -0.32)], 0.05), M["sky_sh_i"], O, cyclic=True)
+        G.stroke(d, G.hose_outline([(0.27, 0.2), (0.33, 0.04), (0.32, -0.12)], 0.035), M["mustard_sh_i"], I, cyclic=True)
+        G.stroke(d, G.hose_outline([(0.32, -0.12), (0.32, -0.32)], 0.05), M["sky_sh_i"], O, cyclic=True)
         for s in (-1, 1):
-            G.stroke(d, G.hose_outline([(0.34, -0.3), (0.34 + 0.08 * s, -0.36), (0.34 + 0.13 * s, -0.28)], 0.04), M["sky_sh_i"], I, cyclic=True)
+            G.stroke(d, G.hose_outline([(0.32, -0.3), (0.32 + 0.06 * s, -0.36), (0.32 + 0.1 * s, -0.28)], 0.04), M["sky_sh_i"], I, cyclic=True)
 
 
 def m_ladder(d, M, lv=1):
@@ -390,9 +390,9 @@ def m_heat(d, M, lv=1):
 def m_thrust(d, M, lv=2):
     """A thruster: a flared steel bell (rev 17:5x: a straight one read as a pen nib) under a short teal rocket tail with fins
     (rev 18:0x: without it the bell read as a spinning top); the flame grows with the Mk (2, 3)."""
-    fl = 0.14 + 0.06 * (lv - 2)
+    fl = 0.14 + 0.04 * (lv - 2)
     zb = -0.2                                                                                                           # the bell's mouth
-    G.stroke(d, [(-0.16, zb + 0.02), (0.16, zb + 0.02), (0.0, zb - fl - 0.08)], M["mustard_i"], I, cyclic=True)
+    G.stroke(d, [(-0.16, zb + 0.02), (0.16, zb + 0.02), (0.0, zb - fl - 0.06 - 0.02 * (lv == 2))], M["mustard_i"], I, cyclic=True)
     G.stroke(d, [(-0.08, zb + 0.02), (0.08, zb + 0.02), (0.0, zb - fl)], M["red"], 0.0, cyclic=True)
     G.stroke(d, [(-0.04, zb + 0.02), (0.04, zb + 0.02), (0.0, zb - fl * 0.5)], M["off"], 0.0, cyclic=True)
     hw = lambda z: 0.07 + 0.19 * ((0.08 - z) / 0.28) ** 1.8  # noqa: E731
@@ -523,14 +523,13 @@ def m_deep(d, M, lv=1):
 
 def m_trader(d, M, lv=1):
     """Selling from orbit: a teal world, a dashed orbit round it, a Scrip coin riding the orbit like a moon."""
-    G.stroke(d, circ(-0.12, -0.1, 0.2, 36), M["teal_i"], O, cyclic=True)
-    G.stroke(d, arc(-0.12, -0.1, 0.2, -0.9, 0.9, 10) + arc(-0.12, -0.1, 0.13, 0.9, -0.9, 10), M["teal_sh"], 0.0, cyclic=True)
-    G.stroke(d, circ(-0.12, -0.1, 0.2, 36), M["ink"], O, cyclic=True)
-    orbit = [(-0.12 + 0.36 * math.cos(t), -0.1 + 0.36 * math.sin(t)) for t in [math.radians(a) for a in range(0, 360, 6)]]
+    G.stroke(d, circ(-0.08, -0.08, 0.19, 36), M["teal_i"], O, cyclic=True)
+    G.stroke(d, arc(-0.08, -0.08, 0.19, -0.9, 0.9, 10) + arc(-0.08, -0.08, 0.12, 0.9, -0.9, 10), M["teal_sh"], 0.0, cyclic=True)
+    G.stroke(d, circ(-0.08, -0.08, 0.19, 36), M["ink"], O, cyclic=True)
+    orbit = [(-0.08 + 0.33 * math.cos(t), -0.08 + 0.33 * math.sin(t)) for t in [math.radians(a) for a in range(0, 360, 6)]]   # (inside the edge)
     for i in range(0, len(orbit) - 2, 3):
-        if not (0.3 < (i / len(orbit)) < 0.5):                                                                         # not behind the coin
-            G.stroke(d, G.hose_outline(orbit[i:i + 2], 0.025), M["off_sh_i"], I * 0.6, cyclic=True)
-    cx, cz = 0.18, 0.2                                                                                                  # the coin moon
+        G.stroke(d, G.hose_outline(orbit[i:i + 2], 0.025), M["off_sh_i"], I * 0.6, cyclic=True)
+    cx, cz = -0.08 + 0.33 * math.cos(math.radians(50)), -0.08 + 0.33 * math.sin(math.radians(50))                    # the coin moon, on it
     G.stroke(d, circ(cx, cz, 0.13, 30), M["mustard_i"], O, cyclic=True)
     G.stroke(d, [(cx + (0.075 if k % 2 == 0 else 0.032) * math.cos(TAU / 4 + TAU * k / 10), cz + (0.075 if k % 2 == 0 else 0.032) * math.sin(TAU / 4 + TAU * k / 10))
                  for k in range(10)], M["mustard_sh_i"], I, cyclic=True)
