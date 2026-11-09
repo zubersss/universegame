@@ -22,7 +22,7 @@ U-166 (b9d553de; smoke_42 with the next build). Earlier, still unjudged: U-129 s
 ## Handoffs
 (none unrouted; B-227's four tool icons are carded)
 ## Blockers
-Waiting for the RAM gate (0.53 GB at 12:06; the ChatGPT app holds ~0.63 GB, reported to LEAD).
+Waiting for the RAM gate: polled 12:03-12:23, free 0.53-0.70 GB throughout, no lock held anywhere. The ChatGPT app holds ~0.63 GB (USER-37). I go first when it opens (LEAD 12:0x), then BLENDER's B-220; LEAD pings me (no background waiters).
 ## Proposals
 (none open)
 ## For USER_ACTIONS
@@ -30,4 +30,4 @@ Waiting for the RAM gate (0.53 GB at 12:06; the ChatGPT app holds ~0.63 GB, repo
 ## Housekeeping
 Editor churn in the tree (Generated/Models *.mat _MainTex fills, link.xml deletions, InitTestScene files): never staged; my commits list files explicitly. MERIDIAN_SETUP.md at the repo root is untracked and not mine.
 ## HeavyJobLock
-none held; want_unity.lock filed 12:03:54 (refreshed on each poll). No background waiters.
+none held; want_unity.lock filed 12:03:54, refreshed through 12:23 while polling; still waiting at the gate (D-075: live while this line says so). No background waiters.
