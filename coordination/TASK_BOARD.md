@@ -201,12 +201,12 @@ Depends: D-174
 Lead notes: Cycle 284 (16:2x). LEAD's own; blocks U-174's data, U-175 and B-204's icons. Today.
 
 
-### L-014 · LEAD · Ready · D1
+### L-014 · LEAD · In Progress · D1
 Goal: The D1 exit scenario in LeadQA (charter: write LeadQA tests for the next milestone's exit criteria): Tests/LeadQA/D1DigRunTests.cs: on Earth, scripted input digs from the camp to tier 3 (a stroke time per tier within the tables' formula), fills the pack past its limit (the refusal and the stamp), climbs back above the Surface Line by a ladder and by the jetpack with a full pack (the load factor), sells topside (the Scrip and Rank change by the tables), buys a ring-1 node (its stat changes), and saves / loads with the pack, Scrip, nodes and Rank kept; LogAssert.NoUnexpectedReceived; ≤ 10 min game time.
 Accept: passes twice on U-188's build code; its numbers logged in the REVIEW_LOG.
 Files: Assets/_Game/Tests/LeadQA/D1DigRunTests.cs
 Depends: U-174, U-175, U-176
-Lead notes: Cycle 287 (22:2x). LEAD's own; written now against the D1 APIs, run in U-188's lock.
+Lead notes: Cycle 287 (22:2x). LEAD's own; written now against the D1 APIs, run in U-188's lock. 22:4x: WRITTEN (Tests/LeadQA/D1DigRunTests.AFirstDigRunEndToEnd: topside at the camp; held strokes at 5 m and 55 m against the tables' time; the pack filled to its limit and refusing the next piece; a full pack's jetpack climb out of a 6 m shaft to topside; the sale's Scrip, earnings and Rank; dig_power_1 refused below the line and bought topside (Beam power +0.5); save / disturb / load keeping the node, Scrip, earnings, Rank, the pack and the stat). Not yet compiled (no LEAD lock while UNITY works): UNITY's next compile includes it; the ladder step joins after U-176.
 ---
 
 ## UNITY
