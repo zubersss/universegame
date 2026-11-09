@@ -10,6 +10,10 @@ namespace Meridian.Terrain
     public sealed class TerrainChunk : MonoBehaviour
     {
         public const float WaterAlpha = 0.45f;
+        /// <summary>U-188: the water tiles' alpha now: WaterAlpha, eased lower while Earth's sea_under paints the water (CartoonStage); the
+        /// streamer applies it to its chunks when it changes.</summary>
+        public static float LiquidAlpha = WaterAlpha;
+        internal void ApplyLiquidAlpha(float a) { if (liquid != null) liquid.color = new Color(1f, 1f, 1f, a); }
 
         public Tilemap solid;
         public Tilemap liquid;
@@ -430,7 +434,7 @@ namespace Meridian.Terrain
             lr.sortingOrder = LiquidOrder;
             if (lit != null) lr.sharedMaterial = lit;
             // See-through water (U-037): the backdrop behind it darkens with depth and the seabed stays visible.
-            chunk.liquid.color = new Color(1f, 1f, 1f, WaterAlpha);
+            chunk.liquid.color = new Color(1f, 1f, 1f, LiquidAlpha);
             FixBounds(chunk.liquid);
 
             // U-073: the block mesh renderer (material and world come from the streamer via UseBlocks).

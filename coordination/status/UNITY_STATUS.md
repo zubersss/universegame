@@ -1,7 +1,7 @@
 # UNITY STATUS
-Updated: 2026-11-09 05:0x · Session: 10 (resumed 09:3x; earlier entries: coordination/status/archive/UNITY_2026-11-08.md)
+Updated: 2026-11-09 09:1x · Session: 10 (resumed 09:3x; earlier entries: coordination/status/archive/UNITY_2026-11-08.md)
 ## Current task
-05:0x: the full sweep is green → now U-188 (Build 0.6.0). U-189 after 0.6.0.
+09:1x: U-188 (Build 0.6.0) in progress. Done: version 0.6.0, the D1 smoke shots (smoke_47-63), the leak the first probe found (SideHud's inventory handler; fixed + guarded), D-180's interleaved Film pass reading, the dev build + dev smoke (75 shots, read by LEAD / BLENDER). Written, waiting at the RAM gate (want_unity.lock filed): LEAD's HUD fixes (PACK bar + kg, Scrip by the medallion, the PACK FULL cue clear, hint arrows off the card), land creatures out of the sea / birds over it, hints on foot only + stale cards dropped, the tree header's fit, the shallows' water tint eased under sea_under, the grapple re-aim, BLENDER's b47759a4 decor. Next: check + slices, commit, the D-180 reading, the release + its smoke, the sweep on the build's code. Shelter walls (smoke_18) → 0.6.1. U-189 after 0.6.0.
 
 ## Last completed
 - The pre-0.6.0 sweep (one lock per slice): compile 0 / 0, EditMode 486/486; PlayMode A 22/23 (1 skipped), B 29/29 after two stale stagings fixed (FxTests: the dig sparks are B-216's v3 ink, plain lit; CreatureTests.PawsOnTheGround: box and contact read on the same step, the box judged on the drawn surface, D-161), C 33/33, D 28/28 + 28/28, F 23/24 (1 skipped); LeadQA M1Loop 1/1, M3Inner + D1DigRun 8/8; BudgetGate GREEN (perf_2026-11-09: chunk p99 1.86 ms, Earth C0 151 draws, avg 3.62 / p99 5.08 ms, 36 Animators).

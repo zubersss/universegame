@@ -300,9 +300,17 @@ namespace Meridian.Terrain
             if (started && Config != null && Config.worldType == WorldType.Solid) SolidRescue.Tick(this, SmoothGround); // U-159: not over a giant's cloud column (its empty chunks are not unloaded ground: the Pilgrim froze over Jupiter's deck)
         }
 
+        float appliedLiquidAlpha = TerrainChunk.WaterAlpha;
+
         void Update()
         {
             if (!started || follow == null) return;
+            if (appliedLiquidAlpha != TerrainChunk.LiquidAlpha) // U-188
+            {
+                appliedLiquidAlpha = TerrainChunk.LiquidAlpha;
+                foreach (var c in resident.Values) c.ApplyLiquidAlpha(appliedLiquidAlpha);
+                foreach (var c in pool) c.ApplyLiquidAlpha(appliedLiquidAlpha);
+            }
             var p = follow.position;
             int ccx = WorldNoise.FloorDiv(Mathf.FloorToInt(p.x), C);
             int ccy = Mathf.Clamp(WorldNoise.FloorDiv(Mathf.FloorToInt(p.y), C), 0, chunksY - 1);

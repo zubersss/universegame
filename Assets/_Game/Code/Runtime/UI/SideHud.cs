@@ -148,10 +148,9 @@ namespace Meridian.UI
             DepthChip.rectTransform.anchoredPosition = new Vector2(-160f, -24f);
             UiKit.InkEdges(DepthChip.rectTransform, 1f, UiKit.Ink);
             DepthTag.enabled = false; DepthChip.enabled = false;
-            PackText = UiKit.Text(root, "PackFull", new Vector2(0.5f, 1f), new Vector2(-200f, -58f), new Vector2(400f, 26f), 17, true, TextAnchor.MiddleCenter, theme.warning);
-            PackText.text = "PACK FULL";
-            PackText.enabled = false;
+            BuildPack(root, top, theme);
             BuildRank(root, tl);
+            BuildScrip(root, tl);
             // U-147 (D-149): the hazard row and the suit row on paper tags in ink; the suit bar an ink-ruled strip with a gold fill.
             Tag(root, "HazardTag", tl, new Vector2(18f, -243f), new Vector2(128f, 23f), tl, HazardLabel, CryoText);
             Tag(root, "SuitTag", tl, new Vector2(18f, -267f), new Vector2(312f, 32f), tl, suitWord, SuitRateText);
@@ -274,6 +273,90 @@ namespace Meridian.UI
         }
 
         void OnPackRefused() => packCueUntil = Time.time + 2f;
+
+        // ---- U-188 (LEAD's 0.6.0 dev-smoke read): the pack's load and the Scrip on the HUD; how full the pack is, is the dig's main call ----
+
+        /// <summary>The pack tag right of the depth tag: "PACK", a ruled bar of the load (its fill tinting from gold toward the warning as the
+        /// climb's load factor drops) and "29 / 30 kg". Shown while the pack has a weight limit.</summary>
+        public const float PackTagX = 182f, PackTagW = 270f;
+        public RectTransform PackRoot { get; private set; }
+        public Image PackTag { get; private set; }
+        public Image PackFill { get; private set; }
+        public Text PackKg { get; private set; }
+        /// <summary>The Scrip tag left of the Rank medallion.</summary>
+        public RectTransform ScripRoot { get; private set; }
+        public Image ScripTag { get; private set; }
+        public Text ScripText { get; private set; }
+        int shownKg = int.MinValue, shownLimit = int.MinValue, shownScrip = int.MinValue;
+        float shownLoad = -1f;
+        string[] kgStrings;
+
+        void BuildPack(Transform root, Vector2 top, UiTheme theme)
+        {
+            PackRoot = UiKit.Rect(root, "Pack", top, Vector2.zero, Vector2.zero);
+            var packWord = UiKit.Text(PackRoot, "PackWord", top, Vector2.zero, new Vector2(52f, 26f), 15, true, TextAnchor.MiddleLeft, UiKit.Ink);
+            packWord.rectTransform.pivot = new Vector2(0f, 1f);
+            packWord.rectTransform.anchoredPosition = new Vector2(PackTagX + 10f, -20f);
+            packWord.text = "PACK";
+            PackFill = UiKit.Bar(PackRoot, "PackBar", top, Vector2.zero, new Vector2(100f, 8f), UiKit.Gold);
+            var back = PackFill.transform.parent.GetComponent<Image>();
+            back.rectTransform.pivot = new Vector2(0f, 0.5f);
+            back.rectTransform.anchoredPosition = new Vector2(PackTagX + 62f, -33f);
+            back.color = UiKit.Cream;
+            UiKit.InkEdges(back.rectTransform, UiKit.CardEdge, UiKit.Ink);
+            PackFill.fillAmount = 0f;
+            PackKg = UiKit.Text(PackRoot, "PackKg", top, Vector2.zero, new Vector2(94f, 26f), 15, true, TextAnchor.MiddleRight, UiKit.Ink);
+            PackKg.rectTransform.pivot = new Vector2(1f, 1f);
+            PackKg.rectTransform.anchoredPosition = new Vector2(PackTagX + PackTagW - 10f, -20f);
+            PackKg.text = "";
+            PackTag = Tag(PackRoot, "PackTag", top, new Vector2(PackTagX, -17f), new Vector2(PackTagW, 32f), new Vector2(0f, 1f), packWord, PackKg);
+            // the pack-full cue under the pack tag (it sat half under the Rank medallion in 0.6.0's dev smoke)
+            PackText = UiKit.Text(root, "PackFull", top, new Vector2(PackTagX + PackTagW * 0.5f, -54f), new Vector2(200f, 24f), 17, true, TextAnchor.MiddleCenter, theme.warning);
+            PackText.text = "PACK FULL";
+            PackText.enabled = false;
+        }
+
+        void BuildScrip(Transform root, Vector2 tl)
+        {
+            float rankX = 24f + 3f * (320f * DialScale + 16f) + 136f; // the medallion's left edge (BuildRank)
+            ScripRoot = UiKit.Rect(root, "Scrip", tl, Vector2.zero, Vector2.zero);
+            ScripText = UiKit.Text(ScripRoot, "ScripValue", tl, Vector2.zero, new Vector2(104f, 26f), 16, true, TextAnchor.MiddleRight, UiKit.Ink);
+            ScripText.rectTransform.pivot = new Vector2(1f, 1f);
+            ScripText.rectTransform.anchoredPosition = new Vector2(rankX - 16f, -20f);
+            ScripText.text = "";
+            ScripTag = Tag(ScripRoot, "ScripTag", tl, new Vector2(rankX - 6f, -17f), new Vector2(124f, 32f), new Vector2(1f, 1f), ScripText);
+        }
+
+        void UpdatePack()
+        {
+            if (PackRoot == null) return;
+            var s = Meridian.Core.GameState.Instance;
+            var inv = s != null ? s.inventory : null;
+            bool show = inv != null && !float.IsPositiveInfinity(inv.LimitKg) && inv.LimitKg > 0f;
+            if (PackRoot.gameObject.activeSelf != show) PackRoot.gameObject.SetActive(show);
+            if (show)
+            {
+                int limit = Mathf.RoundToInt(inv.LimitKg), kg = Mathf.Clamp(Mathf.FloorToInt(inv.Weight + 1e-3f), 0, limit + 64);
+                if (limit != shownLimit) { kgStrings = new string[limit + 65]; shownKg = int.MinValue; }
+                if (kg != shownKg || limit != shownLimit)
+                {
+                    shownKg = kg; shownLimit = limit;
+                    kgStrings[kg] ??= kg + " / " + limit + " kg";
+                    PackKg.text = kgStrings[kg];
+                }
+                float load = Mathf.Clamp01(inv.Weight / inv.LimitKg);
+                if (Mathf.Abs(load - shownLoad) > 0.002f)
+                {
+                    shownLoad = load;
+                    PackFill.fillAmount = load;
+                    float k = Meridian.Progress.SkillStats.LoadK, factor = Meridian.Mining.DigRun.LoadFactor(inv);
+                    PackFill.color = Color.Lerp(UiKit.Gold, UiTheme.Active.warning, k > 0f ? Mathf.Clamp01((1f - factor) / k) : load);
+                }
+            }
+            bool scrip = s != null;
+            if (ScripRoot.gameObject.activeSelf != scrip) ScripRoot.gameObject.SetActive(scrip);
+            if (scrip && s.scrip != shownScrip) { shownScrip = s.scrip; ScripText.text = s.scrip + " SCRIP"; }
+        }
 
         const int MaxMarkers = 4;
 
@@ -559,6 +642,7 @@ namespace Meridian.UI
         {
             bool hidden = MenuController.HudHidden || InventoryPanel.AnyOpen || CraftingPanel.AnyOpen || CataloguePanel.AnyOpen || SellPanel.AnyOpen || SkillTreePanel.AnyOpen; // U-058: nothing draws through a full-screen panel
             UpdateDepth(); // U-174
+            UpdatePack(); // U-188
             UpdateRank(); // U-178
             if (hudCanvas != null && hudCanvas.enabled == hidden) hudCanvas.enabled = !hidden;
             if (vitals == null && player != null) vitals = player.GetComponent<PlayerVitals>();

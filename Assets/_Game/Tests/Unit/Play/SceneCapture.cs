@@ -2897,6 +2897,7 @@ namespace Meridian.Tests
                     var cardRect = hints.CardScreenRect; var who = hints.SurveyorScreenRect;
                     Assert.Greater(who.width, 0f, "the surveyor is on screen");
                     Assert.IsFalse(cardRect.Overlaps(who), $"{label}: the card {cardRect} over the surveyor {who}");
+                    Assert.IsFalse(hints.ArrowOverCard, $"{label}: U-188: the arrow leaves from the card's edge, never over the card");
                     yield return SaveWithUi(side.sideCamera, hud.RankSlot.canvas, $"{name}_{label}");
                     File.Copy($"logs/capture_{name}_{label}.png", $"{dir}/{label}.png", true);
                     TestContext.Out.WriteLine($"[MERIDIAN] u185 {label}: card {(hints.AtTop ? "up top" : "lower centre")} {cardRect}, surveyor {who}, '{hints.TitleText.text}' / '{hints.BodyText.text}', key cap '{hints.KeyCap.text}', arrow {(hints.Arrow.enabled ? $"aimed, tip {hints.LastArrowGap:0} px from its element" : "none")}, card {(hints.Card.sprite != null ? hints.Card.sprite.name : "-")}");

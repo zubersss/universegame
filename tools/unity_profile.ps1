@@ -219,8 +219,9 @@ if ($runProbe) {
         $pass = [double]$f.filmPassMs
         $fok = ([double]$f.filmGpuOnMs -gt 0) -and ($pass -le 0.6)
         if (-not $fok) { $memRed = $true }
-        $fText = if ([double]$f.filmGpuOnMs -le 0) { 'no GPU timings from FrameTimingManager' } else { "on $($f.filmGpuOnMs) ms, off $($f.filmGpuOffMs) ms, pass $($f.filmPassMs) ms at $($f.width)${times}$($f.height)" }
-        $rows += "| Film pass GPU $dot $($f.leg) (dev build) | $le 0.6 ms at 1080p (U-095) | $fText | $(if ($fok) { 'green' } else { 'red' }) |"
+        $blocks = if ($null -ne $f.filmDiffs) { " (D-180: the median of $(@($f.filmDiffs).Count) interleaved pairs of $($f.filmBlockFrames) frames, spread $($f.filmSpreadMs) ms; on $(@($f.filmOn) -join ' / '), off $(@($f.filmOff) -join ' / '), on - off $(@($f.filmDiffs) -join ' / '))" } else { '' }
+        $fText = if ([double]$f.filmGpuOnMs -le 0) { 'no GPU timings from FrameTimingManager' } else { "on $($f.filmGpuOnMs) ms, off $($f.filmGpuOffMs) ms, pass $($f.filmPassMs) ms at $($f.width)${times}$($f.height)$blocks" }
+        $rows += "| Film pass GPU $dot $($f.leg) (dev build) | $le 0.6 ms at 1080p (U-095, D-180) | $fText | $(if ($fok) { 'green' } else { 'red' }) |"
     }
     # U-148 (D-158): the climb's frame times on Earth (a real pad-to-Escape-Line climb at full thrust in the player; the iris apart).
     $climb = @()

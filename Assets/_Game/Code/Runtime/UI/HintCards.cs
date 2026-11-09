@@ -22,7 +22,7 @@ namespace Meridian.UI
         public const float ShowSeconds = 6f, Scale = 1.25f;
         /// <summary>LEAD (u185 review): the card stays clear of the surveyor. Up top, under the depth readout and the PACK FULL cue (clear of
         /// the gauges left and the site list right); down at the lower centre only while the surveyor is up there. Canvas px from the edge.</summary>
-        public const float TopY = -96f, BottomY = 150f;
+        public const float TopY = -160f, BottomY = 150f; // U-188: room over the card for a 72 px arrow up to the HUD's top row (the medallion ends at -82)
         /// <summary>The surveyor's box for the overlap test: the capsule plus the pack and the held tool (m).</summary>
         public const float BodyHalfWidth = 0.7f, BodyHeight = 2.1f;
         /// <summary>The card is in the upper band (false: the lower centre).</summary>
@@ -205,6 +205,7 @@ namespace Meridian.UI
             Build();
             var s = State;
             if (s != null) s.hintsSeen.Add(id);
+            queue.Remove(id); // asked for meanwhile: up now, never again later
             Showing = id;
             ShownFor = 0f;
             dug = false;
@@ -265,6 +266,37 @@ namespace Meridian.UI
             }
         }
 
+        Meridian.Ship.ShipBoarding boarding;
+
+        /// <summary>U-188: the surveyor on foot on the planet: its body live, out of the ship.</summary>
+        bool OnFoot()
+        {
+            if (player == null || !player.isActiveAndEnabled || player.Body == null || !player.Body.simulated) return false;
+            if (side == null || !side.isActiveAndEnabled) side = FindAnyObjectByType<PlanetSideRoot>();
+            if (side != null && side.ship != null)
+            {
+                if (boarding == null || boarding.gameObject != side.ship.gameObject) boarding = side.ship.GetComponent<Meridian.Ship.ShipBoarding>();
+                if (boarding != null && boarding.Aboard) return false;
+            }
+            return true;
+        }
+
+        /// <summary>U-188: whether a queued card still applies when its turn comes.</summary>
+        bool StillHolds(string id, bool topside)
+        {
+            var s = State;
+            var inv = s != null ? s.inventory : null;
+            return id switch
+            {
+                DigDown => s != null && s.currentPlanet == Meridian.Planets.PlanetId.Earth && topside
+                    && Mathf.Abs(player.Body.position.x - Meridian.Planet.POI.PoiCatalog.SpawnCamp.CenterX) < 60f,
+                SurfaceLine or ClimbUp => !topside,
+                PackFull => inv != null && !float.IsPositiveInfinity(inv.LimitKg) && inv.Weight >= inv.LimitKg * 0.9f,
+                Sell => topside && inv != null && DigRun.PackValue(inv, false) > 0,
+                _ => true,
+            };
+        }
+
         void OnRefused() => packRefused = true;
         void OnDug(Vector2 _) => dug = true;
 
@@ -284,13 +316,18 @@ namespace Meridian.UI
             bool topside = Topside();
             bool d1 = side != null && side.terrain != null && side.terrain.SmoothGround;
 
-            // the triggers (each Request is a no-op once seen)
-            if (s.currentPlanet == Meridian.Planets.PlanetId.Earth && player.Grounded
-                && Mathf.Abs(player.Body.position.x - Meridian.Planet.POI.PoiCatalog.SpawnCamp.CenterX) < 60f) Request(DigDown);
-            if (d1 && wasTopside && !topside) Request(SurfaceLine);
-            if (packRefused) { packRefused = false; Request(PackFull); }
-            if (d1 && topside && !s.hintsSeen.Contains(Sell) && DigRun.PackValue(s.inventory, false) > 0) Request(Sell);
-            if (scripEarnedSeen >= 0 && s.scripEarned > scripEarnedSeen) Request(SkillTree);
+            // the triggers (each Request is a no-op once seen); U-188: only with the surveyor on foot (BLENDER's 0.6.0 smoke read: THE SURFACE
+            // LINE came up over the ship's climb)
+            bool onFoot = OnFoot();
+            if (onFoot)
+            {
+                if (s.currentPlanet == Meridian.Planets.PlanetId.Earth && player.Grounded
+                    && Mathf.Abs(player.Body.position.x - Meridian.Planet.POI.PoiCatalog.SpawnCamp.CenterX) < 60f) Request(DigDown);
+                if (d1 && wasTopside && !topside) Request(SurfaceLine);
+                if (packRefused) { packRefused = false; Request(PackFull); }
+                if (d1 && topside && !s.hintsSeen.Contains(Sell) && DigRun.PackValue(s.inventory, false) > 0) Request(Sell);
+                if (scripEarnedSeen >= 0 && s.scripEarned > scripEarnedSeen) Request(SkillTree);
+            }
             scripEarnedSeen = s.scripEarned;
             wasTopside = topside;
 
@@ -317,21 +354,24 @@ namespace Meridian.UI
             }
             if (queue.Count == 0 || IsBlocked()) return;
             if (!GameSettings.ShowHints) { queue.Clear(); return; }
+            if (!onFoot) return; // the queue waits for the surveyor on foot
             var next = queue[0];
             queue.RemoveAt(0);
-            if (next == ClimbUp && topside) return; // already out
+            if (!StillHolds(next, topside)) return; // U-188: asked for and then outlived (out already, the pack sold...): dropped, not shown late
             Show(next);
             Aim();
         }
 
-        /// <summary>The arrow's tip just short of the HUD element the card names, pointing at it (none for DIG DOWN and SELL).</summary>
+        /// <summary>The arrow from the card's edge toward the HUD element the card names, its tip just short of it (none for DIG DOWN and SELL).
+        /// U-188 (LEAD's smoke_54 read: the arrow lay over the card's own words): it leaves from the card's nearest point and is pushed out
+        /// along its line until none of it is over the card.</summary>
         void Aim()
         {
             RectTransform target = Showing switch
             {
                 SurfaceLine => hud.DepthTag != null ? hud.DepthTag.rectTransform : null,
                 ClimbUp => hud.DepthTag != null ? hud.DepthTag.rectTransform : null,
-                PackFull => hud.PackText != null ? hud.PackText.rectTransform : null,
+                PackFull => hud.PackTag != null && hud.PackTag.gameObject.activeInHierarchy ? hud.PackTag.rectTransform : hud.PackText != null ? hud.PackText.rectTransform : null,
                 SkillTree => hud.RankSlot != null ? hud.RankSlot.rectTransform : null,
                 _ => null,
             };
@@ -339,20 +379,65 @@ namespace Meridian.UI
             if (arrow.enabled != on) arrow.enabled = on;
             if (!on) return;
             arrow.sprite = arrowSprite;
-            // in the HUD canvas's own space (the canvas scale cancels): the element's centre and half extents, the card's top
+            // in the HUD canvas's own space (the canvas scale cancels): the element's centre and half extents, the card's rect
             var space = (RectTransform)arrow.rectTransform.parent;
             Vector2 to = space.InverseTransformPoint(target.TransformPoint(target.rect.center));
             Vector2 half = (Vector2)(space.InverseTransformVector(target.TransformVector(new Vector3(target.rect.width, target.rect.height, 0f)))) * 0.5f;
-            Vector2 from = space.InverseTransformPoint(card.rectTransform.TransformPoint(card.rectTransform.rect.center)); // the card's centre: only the direction counts
+            var cardRect = LocalRect(card.rectTransform, space);
+            Vector2 from = new Vector2(Mathf.Clamp(to.x, cardRect.xMin, cardRect.xMax), Mathf.Clamp(to.y, cardRect.yMin, cardRect.yMax)); // the card's nearest point
             var d = to - from;
             float len = d.magnitude;
-            if (len < 1f) return;
+            if (len < 1f) { arrow.enabled = false; return; }
             var u = d / len;
-            // the tip just outside the element's edge on the card's side, 14 px off
-            float reach = Mathf.Abs(u.x) * Mathf.Abs(half.x) + Mathf.Abs(u.y) * Mathf.Abs(half.y) + 14f;
-            arrow.rectTransform.localPosition = to - u * Mathf.Min(reach, len - 10f);
+            float arrowHalf = arrow.rectTransform.rect.width * 0.5f;
+            // the tip just outside the element's edge on the card's side, 6 px off; the arrow's centre half its length back
+            float reach = Mathf.Abs(u.x) * Mathf.Abs(half.x) + Mathf.Abs(u.y) * Mathf.Abs(half.y) + 6f;
             arrow.rectTransform.localRotation = Quaternion.Euler(0f, 0f, Mathf.Atan2(u.y, u.x) * Mathf.Rad2Deg);
+            arrow.rectTransform.localPosition = to - u * (reach + arrowHalf);
+            for (int k = 0; k < 80 && ArrowOver(space, cardRect); k++) arrow.rectTransform.localPosition += (Vector3)(u * 3f);
             LastArrowGap = Vector2.Distance(arrow.rectTransform.localPosition, to);
+        }
+
+        /// <summary>U-188: true while any of the arrow (its turned rect) lies over the card (tests: never).</summary>
+        public bool ArrowOverCard => arrow != null && arrow.enabled && card != null && card.gameObject.activeInHierarchy
+            && ArrowOver((RectTransform)arrow.rectTransform.parent, LocalRect(card.rectTransform, (RectTransform)arrow.rectTransform.parent));
+
+        // scratch for the arrow's checks (Aim runs every frame a card is up: no garbage)
+        static readonly Vector3[] corners = new Vector3[4];
+        static readonly Vector2[] quad = new Vector2[4], rectCorners = new Vector2[4], axes = new Vector2[4];
+
+        bool ArrowOver(RectTransform space, Rect cardRect)
+        {
+            arrow.rectTransform.GetWorldCorners(corners);
+            for (int i = 0; i < 4; i++) quad[i] = space.InverseTransformPoint(corners[i]);
+            return QuadOverRect(quad, cardRect);
+        }
+
+        static Rect LocalRect(RectTransform r, RectTransform space)
+        {
+            var c = corners;
+            r.GetWorldCorners(c);
+            Vector2 a = space.InverseTransformPoint(c[0]), b = space.InverseTransformPoint(c[2]);
+            return Rect.MinMaxRect(Mathf.Min(a.x, b.x), Mathf.Min(a.y, b.y), Mathf.Max(a.x, b.x), Mathf.Max(a.y, b.y));
+        }
+
+        /// <summary>A convex quad (corners in order) and an axis-aligned rect overlap: no separating axis among the rect's two and the quad's
+        /// two edge normals (touching counts as apart). Pure.</summary>
+        public static bool QuadOverRect(IList<Vector2> q, Rect r)
+        {
+            var rc = rectCorners;
+            rc[0] = new Vector2(r.xMin, r.yMin); rc[1] = new Vector2(r.xMax, r.yMin); rc[2] = new Vector2(r.xMax, r.yMax); rc[3] = new Vector2(r.xMin, r.yMax);
+            var e0 = q[1] - q[0]; var e1 = q[2] - q[1];
+            axes[0] = Vector2.right; axes[1] = Vector2.up; axes[2] = new Vector2(-e0.y, e0.x); axes[3] = new Vector2(-e1.y, e1.x);
+            foreach (var ax in axes)
+            {
+                if (ax.sqrMagnitude < 1e-8f) continue;
+                float a0 = float.MaxValue, a1 = float.MinValue, b0 = float.MaxValue, b1 = float.MinValue;
+                for (int i = 0; i < 4; i++) { float p = Vector2.Dot(q[i], ax); a0 = Mathf.Min(a0, p); a1 = Mathf.Max(a1, p); }
+                for (int i = 0; i < 4; i++) { float p = Vector2.Dot(rc[i], ax); b0 = Mathf.Min(b0, p); b1 = Mathf.Max(b1, p); }
+                if (a1 <= b0 || b1 <= a0) return false;
+            }
+            return true;
         }
     }
 }

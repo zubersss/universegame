@@ -302,19 +302,55 @@ namespace Meridian.Perf
         }
 
         /// <summary>
-        /// U-095: GPU frame time (FrameTimingManager, Frame Timing Stats on) over 120 frames with the film pass on and
-        /// off after 30 warm-up frames each; the difference is the pass's cost (Bible §9.4: ≤ 0.6 ms at 1080p). One JSON line.
+        /// U-095, D-180: the film pass's GPU cost at 1080p (Bible §9.4: ≤ 0.6 ms) from FrameTimingManager (Frame Timing Stats on), measured
+        /// interleaved: blocks of FilmBlockFrames frames with the pass on, then off (30 warm-up frames after each switch), FilmPairsMin pairs,
+        /// more (up to FilmPairsMax) while the paired differences spread over FilmSpreadMs; the pass is the median of the paired differences
+        /// (on − off), so drift between the halves (the GPU shares system RAM) cancels instead of landing in one difference. One JSON line
+        /// with every block.
         /// </summary>
         IEnumerator FilmGpu(string where)
         {
             bool before = Meridian.Core.GameSettings.FilmEffects;
-            float on = 0f, off = 0f;
-            yield return FilmGpuAverage(false, v => off = v);
-            yield return FilmGpuAverage(true, v => on = v);
+            var ons = new List<float>(FilmPairsMax);
+            var offs = new List<float>(FilmPairsMax);
+            var diffs = new List<float>(FilmPairsMax);
+            while (diffs.Count < FilmPairsMin || (Spread(diffs) > FilmSpreadMs && diffs.Count < FilmPairsMax))
+            {
+                float on = 0f, off = 0f;
+                yield return FilmGpuAverage(true, v => on = v);
+                yield return FilmGpuAverage(false, v => off = v);
+                ons.Add(on); offs.Add(off); diffs.Add(on - off);
+            }
             Meridian.Core.GameSettings.FilmEffects = before;
             var ci = System.Globalization.CultureInfo.InvariantCulture;
-            lines.AppendLine($"{{\"leg\":\"{where}\",\"filmGpuOnMs\":{on.ToString("F3", ci)},\"filmGpuOffMs\":{off.ToString("F3", ci)},\"filmPassMs\":{(on - off).ToString("F3", ci)},\"width\":{Screen.width},\"height\":{Screen.height}}}");
+            string Arr(List<float> l) { var sb = new StringBuilder("["); for (int i = 0; i < l.Count; i++) { if (i > 0) sb.Append(','); sb.Append(l[i].ToString("F3", ci)); } return sb.Append(']').ToString(); }
+            lines.AppendLine($"{{\"leg\":\"{where}\",\"filmGpuOnMs\":{Mean(ons).ToString("F3", ci)},\"filmGpuOffMs\":{Mean(offs).ToString("F3", ci)},\"filmPassMs\":{Median(diffs).ToString("F3", ci)},\"filmSpreadMs\":{Spread(diffs).ToString("F3", ci)},\"filmOn\":{Arr(ons)},\"filmOff\":{Arr(offs)},\"filmDiffs\":{Arr(diffs)},\"filmBlockFrames\":{FilmBlockFrames},\"width\":{Screen.width},\"height\":{Screen.height}}}");
         }
+
+        /// <summary>D-180: frames per block, the pairs taken (at least, at most), and the spread of the pairs' differences that asks for more.</summary>
+        public const int FilmBlockFrames = 300, FilmPairsMin = 4, FilmPairsMax = 8;
+        public const float FilmSpreadMs = 0.3f;
+
+        /// <summary>The median (the mean of the middle two for an even count). Pure.</summary>
+        public static float Median(IList<float> values)
+        {
+            int n = values.Count;
+            if (n == 0) return 0f;
+            var s = new List<float>(values);
+            s.Sort();
+            return n % 2 == 1 ? s[n / 2] : 0.5f * (s[n / 2 - 1] + s[n / 2]);
+        }
+
+        /// <summary>Largest minus smallest (0 for none). Pure.</summary>
+        public static float Spread(IList<float> values)
+        {
+            if (values.Count == 0) return 0f;
+            float lo = values[0], hi = values[0];
+            for (int i = 1; i < values.Count; i++) { lo = Mathf.Min(lo, values[i]); hi = Mathf.Max(hi, values[i]); }
+            return hi - lo;
+        }
+
+        static float Mean(List<float> values) { float t = 0f; foreach (var v in values) t += v; return values.Count > 0 ? t / values.Count : 0f; }
 
         IEnumerator FilmGpuAverage(bool film, Action<float> result)
         {
@@ -322,7 +358,7 @@ namespace Meridian.Perf
             for (int i = 0; i < 30; i++) yield return null;
             var timings = new FrameTiming[1];
             double sum = 0; int n = 0;
-            for (int i = 0; i < 120; i++)
+            for (int i = 0; i < FilmBlockFrames; i++)
             {
                 yield return null;
                 FrameTimingManager.CaptureFrameTimings();

@@ -249,6 +249,8 @@ namespace Meridian.View2D
         public const int SeaUnderOrder = 20;
         /// <summary>The shore's crossfade (m): the sea weight is the sea columns' share within half of it either side of the camera (U-128's 3 m).</summary>
         public const float ShoreBlend = 3f;
+        /// <summary>U-188: the water tiles' alpha out at sea while sea_under shows (TerrainChunk.WaterAlpha elsewhere).</summary>
+        public const float SeaWaterAlpha = 0.2f;
         /// <summary>sea_under's layers that continue down (B-202's json gives them continue_rows 64): the water column, the far and the near seabed.</summary>
         static readonly int[] SeaContinues = { 0, 1, 2 };
         /// <summary>The sea weight at the camera now (0 over land, 1 out at sea): sea_under's alpha; the land set's nearest layer fades by 1 − it.</summary>
@@ -268,6 +270,7 @@ namespace Meridian.View2D
         {
             seaWorld = config.id == Meridian.Planets.PlanetId.Earth && side.terrain != null && side.terrain.SmoothGround ? side.terrain.BaseGenerator as Meridian.Terrain.SolidWorldGenerator : null;
             SeaWeight = 0f;
+            Meridian.Terrain.TerrainChunk.LiquidAlpha = Meridian.Terrain.TerrainChunk.WaterAlpha; // U-188: each planet starts with the plain tint
             if (seaWorld == null) { if (SeaUnder != null) { SeaUnder.Release(); SeaUnder.gameObject.SetActive(false); } waterLine = float.NegativeInfinity; return; }
             waterLine = config.datumY + 1f; // PlanetBackdrop's sea level: the water fills the datum row
             if (SeaUnder == null) { var g = new GameObject("CartoonSeaUnder"); g.transform.SetParent(transform, false); SeaUnder = g.AddComponent<ParallaxLayers>(); }
@@ -285,7 +288,7 @@ namespace Meridian.View2D
         /// ShoreBlend; above the water, or on land, sea_under is off (no draw).</summary>
         void FollowSea()
         {
-            if (seaWorld == null || Layers == null || Layers.view == null) { SeaWeight = 0f; return; }
+            if (seaWorld == null || Layers == null || Layers.view == null) { SeaWeight = 0f; Meridian.Terrain.TerrainChunk.LiquidAlpha = Meridian.Terrain.TerrainChunk.WaterAlpha; return; }
             var cam = Layers.view;
             var c = cam.transform.position;
             float w = SeaShare(c.x, x => seaWorld.SeaAt(x));
@@ -295,6 +298,9 @@ namespace Meridian.View2D
             float half = Meridian.CameraRig.SideView.HalfHeight(cam);
             bool under = w > 0f && c.y - half < waterLine; // some of the frame is under the water line
             if (SeaUnder.gameObject.activeSelf != under) SeaUnder.gameObject.SetActive(under);
+            // U-188 (BLENDER's 0.6.0 smoke read: at -2 m a flat grey-blue): sea_under paints the water; the tiles' own tint over it eases off with
+            // the sea weight, so its surface band and light read from the first metre (in 0.01 steps: the chunks re-tint only on a change).
+            Meridian.Terrain.TerrainChunk.LiquidAlpha = Mathf.Round(Mathf.Lerp(Meridian.Terrain.TerrainChunk.WaterAlpha, SeaWaterAlpha, under ? w : 0f) * 100f) / 100f;
             if (!under) return;
             if (!seaConfigured) { SeaUnder.ConfigureFor("earth", "sea_under", waterLine); SeaUnder.anchorY = waterLine; seaConfigured = true; }
             SeaUnder.alpha = w;

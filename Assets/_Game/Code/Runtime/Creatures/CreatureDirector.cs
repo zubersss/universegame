@@ -83,6 +83,7 @@ namespace Meridian.Creatures
         public void ConfigureFor(PlanetConfig planet, int worldSeed)
         {
             Planet = planet;
+            if (terrain != null) SeaAhead(0, 0); // U-188: JIT the shore check now, not inside the AI budget's worst frame (D-047)
             seed = worldSeed;
             DespawnAll();
             ClearDens();
@@ -229,6 +230,7 @@ namespace Meridian.Creatures
             var spec = SpeciesSpec.Get(species);
             var site = SiteAt(tx, playerY);
             if (!spec.Allows(site)) return null;
+            if (spec.habitat == Habitat.Ground && site.waterDepth > 0) return null; // U-188: no land creature on a seabed
             Vector2 at;
             if (spec.habitat == Habitat.Deck)
             {
@@ -241,7 +243,7 @@ namespace Meridian.Creatures
             {
                 if (!terrain.IsCollisionReady(tx, site.surfaceY)) return null;
                 at = spec.habitat == Habitat.Air
-                    ? new Vector2(tx + 0.5f, site.surfaceY + 1f + Mathf.Lerp(spec.hoverMin, spec.hoverMax, Hash01(serial, 6)))
+                    ? new Vector2(tx + 0.5f, site.surfaceY + 1f + site.waterDepth + Mathf.Lerp(spec.hoverMin, spec.hoverMax, Hash01(serial, 6))) // U-188: over the sea, above its water line
                     : spec.habitat == Habitat.Water
                     ? new Vector2(tx + 0.5f, site.surfaceY + 1f + spec.floorClearance + spec.size.y * 0.5f) // U-114: its clearance over the pool floor
                     : new Vector2(tx + 0.5f, site.surfaceY + 1f + spec.size.y * 0.5f + 0.05f);
@@ -457,6 +459,18 @@ namespace Meridian.Creatures
                         else { c.dir = -c.dir; c.keepDirUntil = now + WallTurnSeconds; c.blockAnchorX = pos.x; c.blockAnchorT = now; } // Wander and Flee turn and move on along the wall
                     }
                 }
+                // U-188 (BLENDER's 0.6.0 smoke read: a bear swimming beside the shark): a land walker never walks into the sea. Water ahead (half
+                // its body, half a metre and its stopping distance at this speed) at its feet or down the shore's slope turns it like a wall, and a
+                // chase waits at the shore; judged grounded or not (a run down the shore's slope leaves the ground between steps).
+                if (speed > 0f)
+                {
+                    float look = spec.size.x * 0.5f + 0.5f + v.x * v.x / (2f * Accel);
+                    if (SeaAhead(Mathf.FloorToInt(pos.x + c.dir * look), ty + 1))
+                    {
+                        if (c.State == CreatureState.Chase) speed = 0f;
+                        else { c.dir = -c.dir; c.keepDirUntil = now + WallTurnSeconds; }
+                    }
+                }
                 v.x = Mathf.MoveTowards(v.x, c.dir * speed, Accel * dt);
             }
             if (c.knockFor > 0f) { c.knockFor -= dt; v.x = c.knockVx; } // U-089: the hit knock overrides the steering
@@ -571,7 +585,23 @@ namespace Meridian.Creatures
                 float hi = Mathf.Max(lo, ground + 1f + depth - spec.size.y * 0.5f);
                 return Mathf.Lerp(lo, hi, wobble);
             }
-            return ground + 1f + Mathf.Lerp(spec.hoverMin, spec.hoverMax, wobble);
+            // U-188: over the sea the band stands on the water line, not the seabed (a gull never flies under the water)
+            return ground + 1f + WaterDepthAbove(Mathf.FloorToInt(c.Body.position.x), ground) + Mathf.Lerp(spec.hoverMin, spec.hoverMax, wobble);
+        }
+
+        /// <summary>U-188: water at the feet's cell in column x or within four cells under it (a shore's slope).</summary>
+        bool SeaAhead(int x, int feet)
+        {
+            // within the AI budget (D-047): only Earth holds water and only in its sea columns (U-166), and the walk down stops at the ground
+            if (Planet == null || Planet.id != PlanetId.Earth) return false;
+            if (terrain.BaseGenerator is SolidWorldGenerator g && !g.SeaAt(x)) return false;
+            for (int k = 0; k <= 4; k++)
+            {
+                byte id = terrain.GetTile(x, feet - k);
+                if (id == TileId.Water) return true;
+                if (TileId.IsSolid(id)) return false; // the shore's ground: no water under it
+            }
+            return false;
         }
 
         /// <summary>U-114: water tiles standing on the floor at `floorY` in column tx (0 on dry ground); at most 64 looked at.</summary>

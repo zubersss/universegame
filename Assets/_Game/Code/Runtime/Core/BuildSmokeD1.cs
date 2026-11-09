@@ -210,7 +210,11 @@ namespace Meridian.Core
                     var module = input.module;
                     input.module = Meridian.Rig.RigModule.Grapple;
                     var hands = input.Grapple.Hands;
-                    input.AimAt(new Vector2(ax - 2.1f, hands.y + 14.7f));
+                    // the left wall 10 m up (the bored shaft's walls are round scoops, wider than a carved one), aimed just into it
+                    var aim = new Vector2(ax - 2.1f, hands.y + 14.7f);
+                    foreach (var h in Physics2D.RaycastAll(new Vector2(ax, hands.y + 10f), Vector2.left, 6f))
+                        if (h.collider is EdgeCollider2D && h.collider.GetComponent<Meridian.Terrain.TerrainChunk>() != null) { aim = h.point + new Vector2(-0.3f, 0f); break; }
+                    input.AimAt(aim);
                     input.holdUse = true;
                     for (int k = 0; k < 150 && !input.Grapple.Attached; k++) yield return new WaitForFixedUpdate();
                     for (int k = 0; k < 400 && input.Grapple.Attached && player.Body.position.y < shaftFloor + 4f; k++) yield return new WaitForFixedUpdate();

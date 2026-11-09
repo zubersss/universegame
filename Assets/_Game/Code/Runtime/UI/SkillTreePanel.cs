@@ -220,6 +220,9 @@ namespace Meridian.UI
             title.font = UiTheme.Active.TitleFace;
             title.text = "Skill Tree";
             Header = UiKit.Text(bt, "Header_Purse", c, new Vector2(ColX, 340f), new Vector2(ColW, 40f), 28, false, TextAnchor.MiddleLeft, UiKit.Ink);
+            // U-188 (BLENDER's 0.6.0 smoke read: "×1.00" ran into the panel's border): one line, shrinking to fit the column
+            Header.horizontalOverflow = HorizontalWrapMode.Wrap; Header.verticalOverflow = VerticalWrapMode.Truncate;
+            Header.resizeTextForBestFit = true; Header.resizeTextMinSize = 18; Header.resizeTextMaxSize = 28;
 
             // The node card on the kit's inventory paper (texts are its children: the paper keeps their colours).
             card = Img(bt, "Card", new Vector2(ColX, 95f), new Vector2(ColW, 400f), UiKit.Cream);
@@ -463,8 +466,8 @@ namespace Meridian.UI
             // U-178: the Rank (and the Scrip earned the next one needs), the expedition and its multiplier
             int rank = Expedition.Rank(s), nextAt = Expedition.NextRankScrip(s), expN = Mathf.Max(1, s.expedition);
             Header.text = nextAt > 0
-                ? $"Scrip {Num(s.scrip)}   ·   Rank {rank} (next at {Num(nextAt)} earned)   ·   ×{Expedition.Multiplier(expN):0.00}"
-                : $"Scrip {Num(s.scrip)}   ·   Rank {rank}   ·   ×{Expedition.Multiplier(expN):0.00}";
+                ? $"Scrip {Num(s.scrip)}  ·  Rank {rank} (next at {Num(nextAt)} earned)  ·  ×{Expedition.Multiplier(expN):0.00}"
+                : $"Scrip {Num(s.scrip)}  ·  Rank {rank}  ·  ×{Expedition.Multiplier(expN):0.00}";
             Header.color = UiKit.Ink;
             insignia.sprite = Art(Expedition.InsigniaKey(rank)); insignia.color = insignia.sprite != null ? Color.white : Color.clear;
             badge.sprite = Art(Expedition.BadgeKey(expN)); badge.color = badge.sprite != null ? Color.white : Color.clear;

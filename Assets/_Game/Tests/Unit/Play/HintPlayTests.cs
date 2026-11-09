@@ -126,6 +126,7 @@ namespace Meridian.Tests
             yield return Until(() => hints.Showing != null, 2f);
             Assert.AreEqual(HintCards.SurfaceLine, hints.Showing);
             Assert.IsTrue(hints.Arrow.enabled, "its arrow at the depth readout");
+            Assert.IsFalse(hints.ArrowOverCard, "U-188: the arrow leaves from the card's edge, never over the card");
             float t0 = Time.realtimeSinceStartup;
             yield return Until(() => hints.Showing == null, HintCards.ShowSeconds + 2f);
             Assert.AreEqual(HintCards.ShowSeconds, Time.realtimeSinceStartup - t0, 0.6f, "about 6 s");
@@ -136,6 +137,9 @@ namespace Meridian.Tests
             state.inventory.Add(clay, 1); // refused
             yield return Until(() => hints.Showing != null, 2f);
             Assert.AreEqual(HintCards.PackFull, hints.Showing);
+            Assert.IsTrue(hints.Arrow.enabled, "U-188: its arrow at the HUD's pack tag");
+            Assert.IsFalse(hints.ArrowOverCard, "U-188: PACK FULL's arrow off its card (it lay over the words in 0.6.0's dev smoke)");
+            StringAssert.Contains(" kg", hud.PackKg.text, "U-188: the pack's load on the HUD");
             hints.Dismiss();
             yield return Until(() => hints.Showing != null, 2f);
             Assert.AreEqual(HintCards.ClimbUp, hints.Showing, "CLIMB BACK UP right after");
@@ -159,6 +163,7 @@ namespace Meridian.Tests
             yield return Until(() => hints.Showing != null, 2f);
             Assert.AreEqual(HintCards.SkillTree, hints.Showing);
             Assert.IsTrue(hints.Arrow.enabled, "its arrow at the Rank slot");
+            Assert.IsFalse(hints.ArrowOverCard, "U-188: the arrow off the card");
             hud.Skills.SetOpen(true);
             yield return Frames(3);
             Assert.IsNull(hints.Showing, "the tree opened: done");
@@ -186,6 +191,42 @@ namespace Meridian.Tests
             yield return Frames(10);
             yield return Retrigger();
             Assert.AreEqual(6, fired.Count, "not after a save and a load either");
+            LogAssert.NoUnexpectedReceived();
+        }
+
+        /// <summary>U-188 (BLENDER's 0.6.0 smoke read: THE SURFACE LINE over the ship's climb): no card is asked for or shown aboard the ship,
+        /// and a card asked for whose condition has passed by its turn is dropped, never shown late.</summary>
+        [UnityTest, Timeout(300000)]
+        public IEnumerator NoCardAboardAndAStaleOneIsDropped()
+        {
+            yield return Boot();
+            int camp = Mathf.FloorToInt(Meridian.Planet.POI.PoiCatalog.SpawnCamp.CenterX);
+            // 75 m from the camp: DIG DOWN no longer applies there (a copy queued while booting is dropped too)
+            var away = new Vector2(camp + 75.5f, side.terrain.SurfaceAt(camp + 75.5f) + 0.3f);
+            Put(away);
+            yield return Frames(5);
+            hints.Dismiss();
+            yield return Frames(5);
+            Assert.IsNull(hints.Showing, "away from the camp: nothing up");
+            state.hintsSeen.Add(HintCards.DigDown);
+            // a card queued under the line, then the surveyor back topside before its turn: dropped
+            HintCards.Blocked = () => true;
+            hints.Request(HintCards.SurfaceLine);
+            yield return Frames(3);
+            HintCards.Blocked = null;
+            yield return Frames(10);
+            Assert.AreNotEqual(HintCards.SurfaceLine, hints.Showing, "topside again: THE SURFACE LINE dropped, not shown late");
+            Assert.IsFalse(state.hintsSeen.Contains(HintCards.SurfaceLine), "dropped, not spent: it can come when it applies");
+            // aboard the ship with a haul topside: SELL is neither asked for nor shown
+            int clay = ItemRegistry.Get(D1Tables.Current.materials[0].item).id;
+            state.inventory.Add(clay, 3);
+            var boarding = side.ship.GetComponent<Meridian.Ship.ShipBoarding>();
+            boarding.ForceAboard();
+            yield return Frames(30);
+            Assert.IsNull(hints.Showing, "no card aboard the ship");
+            boarding.TryExit();
+            yield return Until(() => hints.Showing != null, 3f);
+            Assert.AreEqual(HintCards.Sell, hints.Showing, "on foot again: SELL");
             LogAssert.NoUnexpectedReceived();
         }
 
