@@ -21,7 +21,12 @@ namespace Meridian.View2D
         public string key;
         /// <summary>Optional: drive the clip from this surveyor (PlanetSideRoot sets it in cartoon mode).</summary>
         public PlayerController player;
-        public int sortingOrder = 6;
+        /// <summary>U-200 (LEAD's read of 0.6.1's smoke_47 / 65 / 66: the surveyor stood half hidden behind the rocket's fin and foot pad at
+        /// the camp's first view): the drawn surveyor draws in front of the Pilgrim's side rig, whose parts take 10..17 from the ship's
+        /// renderer (at 6 it was behind all of them), and in front of every flora part (3..8); still under the underwater veil (20) and
+        /// the weather tints (30). The tool in the hand and the Grapple's line follow it.</summary>
+        public const int SurveyorOrder = 18;
+        public int sortingOrder = SurveyorOrder;
 
         public Transform SquashRoot { get; private set; }
         public SpriteRenderer Renderer { get; private set; }

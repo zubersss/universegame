@@ -8,7 +8,7 @@ namespace Meridian.Mining
 {
     /// <summary>
     /// U-195 (D-183, the owner's 0.6.0 playtest): the stroke feels like something. On every stroke that opens ground: 4-8 clods thrown out
-    /// of the cell at 2-4 m/s under the planet's gravity, resting where they land and gone 0.6 s after the stroke (B-232's
+    /// of the cell at 3-4.5 m/s in the dug tier's tone under the planet's gravity, resting where they land and gone 0.6 s after the stroke (B-232's
     /// fx/dig_clods/t&lt;tier&gt;: 24 frames, four 6-frame clips clod_1..4, one clod tumbling in place per clip, the travel in code; until that
     /// sheet is exported a drawn stand-in of the same shape, one clod per sprite, tumbled by rotation); a one-frame 2 px camera kick along
     /// the stroke; a shovel scoop's clod-fall sound. When the pack takes a dug material its icon flies to the PACK readout (HudPackFlight),
@@ -19,12 +19,27 @@ namespace Meridian.Mining
     {
         public const int MinClods = 4, MaxClods = 8, Pool = 48, Tiers = 5, ClipsPerSheet = 4;
         /// <summary>A clod's launch speed (m/s), its life (s), the fade at its end (s), the throw's half-angle about its axis (degrees).</summary>
-        public const float SpeedMin = 2f, SpeedMax = 4f, ClodLife = 0.6f, ClodFade = 0.15f, SpreadDeg = 35f;
+        public const float SpeedMin = 3f, SpeedMax = 4.5f, ClodLife = 0.6f, ClodFade = 0.15f, SpreadDeg = 35f; // LEAD 17:0x: 3-4.5 m/s (it replaces the card's 2-4): every clod peaks 0.25-0.8 m over the line and is down by 0.6 s
         /// <summary>The camera kick (screen px, one frame) and the stand-in clods' tumble (degrees a second).</summary>
         public const float KickPixels = 2f, StandInSpinDeg = 540f;
-        /// <summary>How far toward the open side a clod starts from the stroke's point (m: the bowl's mouth), and the stand-in clods' size
-        /// (their 0.3-0.5 m blobs at 0.55: 0.15-0.3 m, a fist to a head against the surveyor).</summary>
-        public const float MouthM = 0.45f, StandInScale = 0.3f; // LEAD 16:4x: no clod bigger than the surveyor's glove (the 0.3-0.5 m blobs at 0.3: 0.09-0.16 m)
+        /// <summary>How far toward the open side a clod starts from the stroke's point (m: the bowl's mouth).</summary>
+        public const float MouthM = 0.45f;
+        /// <summary>LEAD 17:0x: clods and the dig puff take the dug cell's TIER tone (the depth chip's colour, D1_TABLES), lifted this far
+        /// toward white so the cream-and-ink art keeps its light side; the puff until B-238 redraws it: smaller and thinner, behind the clods.</summary>
+        public const float ToneLift = 0.35f, PuffScale = 0.6f, PuffAlpha = 0.7f;
+
+        static Color[] tones;
+        /// <summary>The tone clods (and the puff) are multiplied by at a depth tier (0-based): the tier's chip colour lifted toward white.</summary>
+        public static Color Tone(int tier)
+        {
+            var t = D1Tables.Current.tiers;
+            if (tones == null || tones.Length != t.Length)
+            {
+                tones = new Color[t.Length];
+                for (int i = 0; i < t.Length; i++) { var c = Color.Lerp(t[i].ChipColor, Color.white, ToneLift); c.a = 1f; tones[i] = c; }
+            }
+            return tones.Length == 0 ? Color.white : tones[Mathf.Clamp(tier, 0, tones.Length - 1)];
+        }
         public const int SortingOrder = 41; // over the stroke's puff (FxPool, 40)
 
         public Meridian.Core.PlanetSideRoot side;
@@ -115,10 +130,9 @@ namespace Meridian.Mining
             int cells = rig.LastDugCells;
             if (cells <= 0) return; // a base piece came down or a node was cut: no ground opened
             var t = rig.terrain;
-            var planet = t != null && t.Config != null ? t.Config.id : default;
             int tier = t != null && rig.D1 ? DigRun.TierAt(t, at) : 0;
             Vector2 hand = rig.owner != null ? (Vector2)rig.owner.position + new Vector2(0f, 0.9f) : at + Vector2.up;
-            Burst(at, hand, ClodsFor(cells), tier, SideFx.FlickTint(planet));
+            Burst(at, hand, ClodsFor(cells), tier, Tone(tier));
             if (follow == null && side.sideCamera != null) follow = side.sideCamera.GetComponent<Meridian.Player.CameraFollow>();
             var stroke = at - hand;
             if (follow != null && stroke.sqrMagnitude > 1e-6f) { follow.Kick(stroke, KickPixels); LastKick = stroke.normalized; }
@@ -165,7 +179,7 @@ namespace Meridian.Mining
                 {
                     sheetOf[i] = null;
                     sr.sprite = StandIn(clip);
-                    sr.transform.localScale = new Vector3(StandInScale, StandInScale, 1f);
+                    sr.transform.localScale = Vector3.one; // drawn at B-232's size (13-20 px at 64 px a metre): the swap to the sheet changes nothing
                     if (standInMaterial == null) standInMaterial = ArtMaterials.MaterialFor(Meridian.Art.ArtKeys.Fx.ShovelFlick); // lit as the shovel's flick is
                     if (standInMaterial != null) sr.sharedMaterial = standInMaterial;
                     spin[i] = Random.Range(-StandInSpinDeg, StandInSpinDeg);
@@ -188,6 +202,9 @@ namespace Meridian.Mining
             position = pos[i]; velocity = vel[i]; resting = landed[i];
             return true;
         }
+
+        /// <summary>Tests: the tint clod `i` was thrown with (clear when the slot is free).</summary>
+        public Color TintOf(int i) => i >= 0 && i < Pool && alive[i] ? tintOf[i] : Color.clear;
 
         /// <summary>A free slot, else the oldest clod's.</summary>
         int Take()
@@ -286,7 +303,7 @@ namespace Meridian.Mining
                 var ink = new Color32(38, 30, 26, 255);
                 for (int c = 0; c < ClipsPerSheet; c++)
                 {
-                    float r0 = 9f + 2.5f * c, lobes = 3 + c, phase = 0.9f * c; // four sizes and outlines
+                    float r0 = 6.5f + 1.17f * c, lobes = 3 + c, phase = 0.9f * c; // four sizes and outlines: 13-20 px across, B-232's clods (0.2-0.3 m)
                     for (int y = 0; y < N; y++)
                         for (int x = 0; x < N; x++)
                         {
@@ -295,7 +312,7 @@ namespace Meridian.Mining
                             float r = r0 * (1f + 0.16f * Mathf.Sin(lobes * th + phase) + 0.07f * Mathf.Sin((lobes + 2f) * th - phase));
                             float edge = r - d; // > 0 inside
                             Color32 col = default;
-                            if (edge > 2.2f) col = cream;
+                            if (edge > 1.7f) col = cream;
                             else if (edge > 0f) col = ink;
                             else if (edge > -1f) col = new Color32(ink.r, ink.g, ink.b, (byte)(255f * (1f + edge)));
                             px[y * N * ClipsPerSheet + c * N + x] = col;

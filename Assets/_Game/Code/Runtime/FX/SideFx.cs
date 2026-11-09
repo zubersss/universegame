@@ -43,11 +43,19 @@ namespace Meridian.FX
             // U-157: the round brush throws B-175's dirt puff from the scoop; a block planet keeps the tile's sparks. U-186: in the stroke's
             // band set (the desert's sand, the canyon's talus ...) where B-190 / B-191 drew one.
             bool shovel = rig != null && rig.Tool == Meridian.Rig.DigTool.Shovel;
-            // U-193: the shovel flicks its clod up and back (B-226's fx/shovel_flick, once exported) over the scoop's puff
-            if (shovel && FxSheet.Get(ArtKeys.Fx.ShovelFlick).Ready)
-                pool.Play(ArtKeys.Fx.ShovelFlick, at, 1f, 0f, player != null && at.x < player.Body.position.x, FlickTint(puffPlanet)); // thrown back over the shoulder
+            // U-193: the shovel flicked B-226's fx/shovel_flick over the scoop. U-195 (LEAD 17:0x): DigFeel's clods are the stroke's debris
+            // now and the flick's clod is as large as the surveyor's torso (B-228's F1b): not played until B-238 redraws it without the clod.
             var puff = PuffAt(at);
-            if (puff != null && FxSheet.Get(puff).Ready) { pool.Play(puff, at, 1f); return; }
+            if (puff != null && FxSheet.Get(puff).Ready)
+            {
+                // U-195 (LEAD 17:0x, until B-238 redraws the puff as low wide dust): the puff smaller and thinner, in the dug cell's tier
+                // tone (as the clods: a tan ball in a grey Stone room read as a lump); the clods draw over it (DigFeel.SortingOrder).
+                int tier = rig != null && rig.D1 && rig.terrain != null ? Meridian.Mining.DigRun.TierAt(rig.terrain, at) : 0;
+                var tone = Meridian.Mining.DigFeel.Tone(tier);
+                tone.a = Meridian.Mining.DigFeel.PuffAlpha;
+                pool.Play(puff, at, Meridian.Mining.DigFeel.PuffScale, 0f, false, tone);
+                return;
+            }
             var t = RigTools.TileOf(at);
             pool.Play(shovel ? ArtKeys.Fx.Dust : ArtKeys.Fx.DigSparks, new Vector2(t.x + 0.5f, t.y + 0.5f), shovel ? 1f : 2f); // sparks are the Beam's
         }

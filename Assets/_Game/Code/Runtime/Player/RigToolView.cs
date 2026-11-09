@@ -84,11 +84,11 @@ namespace Meridian.Player
 
         void Awake()
         {
-            Tool = Child("RigTool", 6);
-            Beam = Child("BeamRay", 6);
+            Tool = Child("RigTool", Meridian.View2D.SpriteCharacterView.SurveyorOrder); // U-200: with the drawn surveyor, in front of the Pilgrim
+            Beam = Child("BeamRay", Meridian.View2D.SpriteCharacterView.SurveyorOrder);
             Beam.drawMode = SpriteDrawMode.Tiled;
             Beam.tileMode = SpriteTileMode.Continuous;
-            Ghost = Child("BuilderGhost", 6);
+            Ghost = Child("BuilderGhost", Meridian.View2D.SpriteCharacterView.SurveyorOrder);
             Beam.enabled = Ghost.enabled = false;
             var cg = new GameObject("BeamCable");
             cg.transform.SetParent(transform, false);
@@ -98,7 +98,7 @@ namespace Meridian.Player
             Cable.startWidth = Cable.endWidth = CableWidth;
             Cable.startColor = Cable.endColor = CableInk;
             Cable.numCapVertices = 2;
-            Cable.sortingOrder = 6;
+            Cable.sortingOrder = Meridian.View2D.SpriteCharacterView.SurveyorOrder;
             var unlit = ArtMaterials.Active != null ? ArtMaterials.Active.unlit : null;
             if (unlit != null) Cable.sharedMaterial = unlit;
             Cable.enabled = false;

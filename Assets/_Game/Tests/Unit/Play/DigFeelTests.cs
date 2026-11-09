@@ -55,6 +55,27 @@ namespace Meridian.Tests
             Assert.AreEqual("fx/dig_clods/t5", DigFeel.ClodsKey(9), "past the last tier: the last sheet");
         }
 
+        /// <summary>LEAD 17:0x: clods and the dig puff take the dug cell's tier tone (the depth chip's colour lifted toward white), not the
+        /// surface ground's: Topsoil brown, Stone grey.</summary>
+        [Test]
+        public void TheToneIsTheDugTiersNotTheSurfaces()
+        {
+            var tiers = D1Tables.Current.tiers;
+            Assert.GreaterOrEqual(tiers.Length, 3, "at least three tiers in the tables");
+            for (int k = 0; k < tiers.Length; k++)
+            {
+                var want = Color.Lerp(tiers[k].ChipColor, Color.white, DigFeel.ToneLift);
+                var tone = DigFeel.Tone(k);
+                Assert.AreEqual(want.r, tone.r, 1e-4f, $"T{k + 1} red"); Assert.AreEqual(want.g, tone.g, 1e-4f, $"T{k + 1} green"); Assert.AreEqual(want.b, tone.b, 1e-4f, $"T{k + 1} blue");
+                Assert.AreEqual(1f, tone.a, 1e-6f, "opaque");
+            }
+            Color t1 = DigFeel.Tone(0), t3 = DigFeel.Tone(2);
+            Assert.Greater(t1.r - t1.b, 0.15f, "Topsoil: a brown (red well over blue)");
+            Assert.Less(Mathf.Abs(t3.r - t3.b), 0.06f, "Stone: a grey");
+            Assert.Greater(Mathf.Abs(t1.r - t3.r) + Mathf.Abs(t1.g - t3.g) + Mathf.Abs(t1.b - t3.b), 0.15f, "T1 and T3 read apart");
+            Assert.AreEqual(DigFeel.Tone(tiers.Length - 1), DigFeel.Tone(99), "past the last tier: the last tone");
+        }
+
         [UnityTest, Timeout(240000)]
         public IEnumerator AStrokeThrowsItsClodsAndKicksTheCameraForOneFrame()
         {
@@ -85,8 +106,10 @@ namespace Meridian.Tests
                 seen++;
                 Assert.That(cv.magnitude, Is.InRange(DigFeel.SpeedMin - 1e-3f, DigFeel.SpeedMax + 1e-3f), "launch speed 2-4 m/s");
                 Assert.Less(Vector2.Distance(cp, at), DigFeel.MouthM + 0.3f, "thrown from the cell's mouth");
+                Assert.AreEqual(DigFeel.Tone(0), feel.TintOf(i), "at camp: Topsoil's tone");
             }
             Assert.AreEqual(feel.LastBurst, seen);
+            Assert.AreEqual(0, DigRun.TierAt(side.terrain, at), "the camp's stroke is in the first tier");
 
             // the kick: 2 px along the stroke in the frame the stroke lands in, gone the frame after
             yield return null;
@@ -113,6 +136,29 @@ namespace Meridian.Tests
             yield return null;
             Assert.AreEqual(0, feel.Alive, "gone 0.6 s after the stroke");
             Assert.AreEqual(0, DigFeel.TotalAlive);
+
+            // T3 (LEAD 17:0x): the same stroke 56 m under the Surface Line throws Stone-toned clods (the body held there, as a capture's room)
+            var body = side.player.Body;
+            var deep = new Vector2(p.x + 30f, DigRun.LineAt(side.terrain, p.x + 30f) - 56f);
+            body.simulated = false;
+            body.position = deep; side.player.transform.position = deep;
+            yield return null;
+            float settled = Time.realtimeSinceStartup + 20f;
+            while (!side.terrain.IsSettled && Time.realtimeSinceStartup < settled) yield return null;
+            var deepAt = deep + new Vector2(1.5f, 0.2f);
+            Assert.AreEqual(2, DigRun.TierAt(side.terrain, deepAt), "56 m down: the third tier");
+            Assert.IsTrue(side.rig.Dig(deepAt), "the stroke at depth");
+            int deepClods = 0;
+            for (int i = 0; i < DigFeel.Pool; i++)
+            {
+                if (!feel.Clod(i, out _, out _, out _)) continue;
+                deepClods++;
+                Assert.AreEqual(DigFeel.Tone(2), feel.TintOf(i), "at 56 m: Stone's tone, not the surface's");
+            }
+            Assert.AreEqual(feel.LastBurst, deepClods, "the deep burst's clods");
+            body.position = p; side.player.transform.position = p;
+            body.simulated = true;
+            yield return null;
             LogAssert.NoUnexpectedReceived();
         }
 

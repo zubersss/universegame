@@ -57,7 +57,7 @@ namespace Meridian.Player
             var go = new GameObject("GrappleHook");
             go.transform.SetParent(transform, false);
             hook = go.AddComponent<SpriteRenderer>();
-            hook.sortingOrder = 7;
+            hook.sortingOrder = Meridian.View2D.SpriteCharacterView.SurveyorOrder + 1; // U-200: over the drawn surveyor
             hook.enabled = false;
             var lgo = new GameObject("GrappleLine");
             lgo.transform.SetParent(transform, false);
@@ -67,7 +67,7 @@ namespace Meridian.Player
             line.startWidth = line.endWidth = LineWidth;
             line.startColor = line.endColor = Ink;
             line.numCapVertices = 0;
-            line.sortingOrder = 7;
+            line.sortingOrder = Meridian.View2D.SpriteCharacterView.SurveyorOrder + 1;
             line.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
             line.receiveShadows = false;
             var unlit = ArtMaterials.Active != null ? ArtMaterials.Active.unlit : null;

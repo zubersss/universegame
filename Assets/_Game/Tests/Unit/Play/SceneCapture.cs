@@ -3880,9 +3880,12 @@ namespace Meridian.Tests
                 until = Time.realtimeSinceStartup + 10f;
                 while (Meridian.UI.ItemIcons.Get(iron.id, side.terrain) == null && Time.realtimeSinceStartup < until) yield return null;
                 int flights = feel.Flights;
-                side.rig.drops.Spawn(iron.id, player.Body.position + new Vector2(0.9f, 0.4f), null);
+                // onto the surveyor (17:1x: a drop 0.9 m to the side rolled into the first shot's scoop, out of the pickup's 1.2 m: no flight)
+                var dropped = side.rig.drops.Spawn(iron.id, player.Body.position + new Vector2(0.2f, 0.9f), null);
+                dropped.body.linearVelocity = Vector2.zero;
                 until = Time.realtimeSinceStartup + 10f;
                 while (feel.Flights == flights && Time.realtimeSinceStartup < until) yield return null;
+                Assert.AreEqual(flights + 1, feel.Flights, "the pack took the staged drop: its icon flies");
                 yield return new WaitForSeconds(0.1f);
                 yield return Shot("2_icon_in_flight");
                 TestContext.Out.WriteLine($"[MERIDIAN] u195 2_icon_in_flight: flights {feel.Flights - flights}, in the air at the shot {side.sideHud.PackFlight.InFlight}, from {side.sideHud.PackFlight.LastFrom} to {Meridian.UI.SideHud.PackCentre}");
@@ -4012,9 +4015,9 @@ namespace Meridian.Tests
                     if (follow != null) follow.SnapToTarget();
                     for (int k = 0; k < 30; k++) yield return null;
                 }
-                IEnumerator Shot(string label)
+                IEnumerator Shot(string label, float wait = 1f)
                 {
-                    yield return new WaitForSeconds(1f); // art sheets in, a dig's clods gone
+                    yield return new WaitForSeconds(wait); // art sheets in, a dig's clods gone (0: a moment in motion)
                     yield return Save(side.sideCamera, $"{name}_{label}");
                     File.Copy($"logs/capture_{name}_{label}.png", $"{dir}/{label}.png", true);
                 }
@@ -4038,6 +4041,44 @@ namespace Meridian.Tests
                     var ground = UnityEngine.Object.FindAnyObjectByType<Meridian.View2D.SmoothGround>();
                     float slope = Mathf.Abs(t.SurfaceAt(bx + 0.5f) - t.SurfaceAt(bx - 0.5f));
                     TestContext.Out.WriteLine($"[MERIDIAN] u200 2_border_t1_t2_slope: x {bx:0.0}, the line's slope {slope:0.00} ({Mathf.Atan(slope) * Mathf.Rad2Deg:0} deg), wobble kept {(ground != null ? ground.WobbleKeepAt(bx) : float.NaN):0.000}");
+                }
+
+                // 3..5 (U-200's sorting part): the surveyor in front of the rocket's fin and foot pad, the hatch climb-in, a launch's exhaust
+                {
+                    var body = side.player.Body;
+                    var ship = side.ship;
+                    float fx = ship.Body.position.x - 2.6f;
+                    var stand = new Vector2(fx, side.terrain.SurfaceAt(fx) + 0.05f);
+                    body.simulated = true;
+                    body.position = stand; side.player.transform.position = stand; body.linearVelocity = Vector2.zero;
+                    for (int k = 0; k < 60; k++) yield return new WaitForFixedUpdate();
+                    if (follow != null) follow.SnapToTarget();
+                    yield return Shot("3_surveyor_at_the_fin");
+                    var drawn = side.cartoon != null ? side.cartoon.Surveyor : null;
+                    int top = int.MinValue;
+                    var legs = ship.GetComponentInChildren<Meridian.Ship.ShipLegsView>(true);
+                    if (legs != null && legs.Rig != null) foreach (var r in legs.Rig.Root.GetComponentsInChildren<SpriteRenderer>(true)) top = Mathf.Max(top, r.sortingOrder);
+                    TestContext.Out.WriteLine($"[MERIDIAN] u200 3_surveyor_at_the_fin: the surveyor's order {(drawn != null ? drawn.Renderer.sortingOrder : -1)}, the rocket's parts to {top}, standing {body.position.x - ship.Body.position.x:0.0} m from the ship's centre, grounded {side.player.Grounded}");
+                    var boarding = ship.GetComponent<Meridian.Ship.ShipBoarding>();
+                    bool climbed = boarding != null && boarding.TryBoard();
+                    yield return Shot("4_hatch_climb_in", 0.45f);
+                    TestContext.Out.WriteLine($"[MERIDIAN] u200 4_hatch_climb_in: TryBoard {climbed}, climbing in at the shot {(drawn != null && drawn.ClimbingIn)}");
+                    float aboardBy = Time.realtimeSinceStartup + 5f;
+                    while (boarding != null && side.player.gameObject.activeInHierarchy && Time.realtimeSinceStartup < aboardBy) yield return null;
+                    if (boarding != null && !boarding.Aboard) boarding.ForceAboard();
+                    ship.externalInput = true;
+                    ship.intent = default;
+                    ship.intent.thrust = 1f;
+                    yield return Shot("5_launch_exhaust", 0.9f);
+                    TestContext.Out.WriteLine($"[MERIDIAN] u200 5_launch_exhaust: aboard {(boarding != null && boarding.Aboard)}, {ship.Body.position.y - stand.y:0.0} m up, vy {ship.Body.linearVelocity.y:0.0} m/s");
+                    // back on the pad and out again: the next planet starts on foot (a staged section undoes what it changed)
+                    ship.intent = default;
+                    float downBy = Time.realtimeSinceStartup + 12f;
+                    while (!ship.Grounded && Time.realtimeSinceStartup < downBy) yield return null;
+                    for (int k = 0; k < 30; k++) yield return new WaitForFixedUpdate();
+                    ship.externalInput = false;
+                    if (boarding != null && boarding.Aboard) boarding.TryExit();
+                    for (int k = 0; k < 30; k++) yield return new WaitForFixedUpdate();
                 }
 
                 // 1: Mars, smoke_18's shelter on the slope

@@ -223,6 +223,41 @@ namespace Meridian.Tests
             }
         }
 
+        /// <summary>
+        /// U-200 (LEAD's read of 0.6.1's smoke_47 / 65 / 66: at the camp the surveyor stood half hidden behind the rocket's fin and foot
+        /// pad): the drawn surveyor and the tool in its hand draw in front of every part of the Pilgrim's side rig, and still under the
+        /// underwater veil.
+        /// </summary>
+        [UnityTest, Timeout(240000)]
+        public IEnumerator TheSurveyorAndItsToolDrawInFrontOfTheRocket()
+        {
+#if UNITY_EDITOR
+            yield return UnityEditor.SceneManagement.EditorSceneManager.LoadSceneAsyncInPlayMode(CorePath, new LoadSceneParameters(LoadSceneMode.Single));
+#endif
+            var director = Object.FindAnyObjectByType<SceneDirector>();
+            float timeout = Time.realtimeSinceStartup + 30f;
+            while ((!director.IsReady || !director.PlanetSide.terrain.IsSettled) && Time.realtimeSinceStartup < timeout) yield return null;
+            var side = director.PlanetSide;
+            var drawn = side.cartoon != null && side.cartoon.Active ? side.cartoon.Surveyor : null;
+            Assert.NotNull(drawn, "the drawn surveyor (the cartoon stage)");
+            var legs = side.ship.GetComponentInChildren<Meridian.Ship.ShipLegsView>(true);
+            Assert.NotNull(legs, "the Pilgrim's side view");
+            float until = Time.realtimeSinceStartup + 30f;
+            while (!legs.RigReady && Time.realtimeSinceStartup < until) yield return null;
+            Assert.IsTrue(legs.RigReady, "the Pilgrim's drawn rig is built");
+            int top = int.MinValue, parts = 0;
+            foreach (var r in legs.Rig.Root.GetComponentsInChildren<SpriteRenderer>(true)) { parts++; top = Mathf.Max(top, r.sortingOrder); }
+            Assert.Greater(parts, 3, "the rig's parts (hull, nose, fins)");
+            var view = side.player.GetComponentInChildren<RigToolView>();
+            Assert.NotNull(view, "the tool view");
+            TestContext.Out.WriteLine($"[MERIDIAN] u200 orders: the rocket's {parts} parts to {top}, the surveyor {drawn.Renderer.sortingOrder}, the tool {view.Tool.sortingOrder}, the underwater veil {Meridian.View2D.CartoonStage.SeaUnderOrder}");
+            Assert.Greater(drawn.Renderer.sortingOrder, top, "the surveyor draws in front of every part of the rocket");
+            Assert.GreaterOrEqual(view.Tool.sortingOrder, drawn.Renderer.sortingOrder, "the tool with the hand that holds it");
+            Assert.Greater(view.Tool.sortingOrder, top, "the tool in front of the rocket too");
+            Assert.Less(drawn.Renderer.sortingOrder + 1, Meridian.View2D.CartoonStage.SeaUnderOrder, "the surveyor and its badge under the underwater veil");
+            LogAssert.NoUnexpectedReceived();
+        }
+
         /// <summary>Two held strokes with `tool` in hand (the first `reach` m to the right and `down` m under the feet, the second mirrored
         /// to the left on fresh ground), sampled every frame until 0.45 s after the second: the tool shown, no baked-tool body frame.</summary>
         static IEnumerator HeldStrokes(PlanetSideRoot side, Meridian.View2D.SpriteCharacterView drawn, PlayerRigInput input, RigToolView view, string tool, float reach, float down)
