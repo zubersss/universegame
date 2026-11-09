@@ -1,0 +1,11 @@
+{
+  "key": "icons/thruster_mk2/base",
+  "style": "v3",
+  "ppu": 128,
+  "pivot": [
+    0.5,
+    0.5
+  ],
+  "icon": true,
+  "note": "B-222: new (smoke #12) - the thruster's Mk2 step, a steel bell with a brass collar before Mk3's red"
+}

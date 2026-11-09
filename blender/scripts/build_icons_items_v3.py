@@ -761,6 +761,7 @@ ITEM_PLANET = {"superionic_ice": "neptune", "skip_drive_mk2": "neptune",        
                                                                                               # the dusty rose nearest the v2 pink (Earth's coral
                                                                                               # read as a fire extinguisher)
 PROPS = {n: (ITEMS[n], SIZE, SIZE, None, 1, False) for b in EXPORT_BATCHES for n in BATCHES[b]}   # do_prop_sheet_set's API
+NEW_NOTES = {"thruster_mk2": "B-222: new (smoke #12) - the thruster's Mk2 step, a steel bell with a brass collar before Mk3's red"}
 
 
 def render_item(name):
@@ -806,10 +807,11 @@ def export(art, imgs=None, names=None):
     out = []
     for n in names:
         dd = os.path.join(art, "icons", n)
+        os.makedirs(dd, exist_ok=True)                           # B-222: thruster_mk2 is a new key (no v2 folder)
         b = pngio.write_png(os.path.join(dd, "base_color.png"), imgs[n][0])
         with open(os.path.join(dd, "base.json"), "w", encoding="utf-8", newline="\n") as f:
             json.dump({"key": KEY.format(n), "style": "v3", "ppu": PPU, "pivot": [0.5, 0.5], "icon": True,
-                       "note": "B-199: re-inked as v3 (replacing the v2 shaded render)"}, f, indent=2)
+                       "note": NEW_NOTES.get(n, "B-199: re-inked as v3 (replacing the v2 shaded render)")}, f, indent=2)
             f.write("\n")
         out.append((KEY.format(n), SIZE, SIZE, b))
     return out, {}, []
