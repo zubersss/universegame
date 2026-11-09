@@ -2815,7 +2815,7 @@ Files: Code/Runtime/View2D/ParallaxLayers.cs, CartoonStage.cs, Tests/
 Depends: U-161, B-183 (forest / coast / plains layer2 extended; the B-179 sets already qualify)
 Lead notes: Cycle 281 (10:3x, D-169). FOR BUILD 0.5.0: code now, lock-free; its test and re-shots ride U-157's short lock if B-183's export is in by then, otherwise U-163's lock runs it first.
 
-### U-167 · UNITY · Ready · G1
+### U-167 · UNITY · Done · G1
 Goal: Wire the cutaway's buried details (D-165, art exported and verified at 04:58, d8ace45a, never wired: UNITY's U-157 note "fill_decor is not wired in code"): scatter each planet's fill_decor_1..4 (Earth ammonites, a bone, a water lens; Mars ice lenses and blueberry clusters; Mercury sulfide and solarite glints; Venus vitriol shards) into the drawn ground below the surface band, sparse (≈ 1 per 6 m²), seeded per chunk and never on the 8 m fill period, only in natural ground (never in a piled mound, D-168 (3)), drawn behind the dig outline so a scoop cuts through them.
 Accept: a test +1 (the density within 20 % of 1 per 6 m² on 3 seeds; none in piled cells; the same seed gives the same scatter); a capture of a dug Earth cutaway at 1× showing one or two details with no visible row or grid; the frame budget row unchanged.
 Files: Code/Runtime/Terrain/, Code/Runtime/View2D/, Tests/
@@ -2920,12 +2920,12 @@ Files: Code/Runtime/UI/ (UiKit, UiPaper), Tests/
 Depends: B-208's export
 Lead notes: Cycle 285 (17:5x). Small; beside U-175 (the Skill Tree's node card uses the same panel).
 
-### U-182 · UNITY · Ready · D1
+### U-182 · UNITY · Review · D1
 Goal: Each depth tier draws its own fill (D1; B-203's ground_fill_t2..t5 per planet): the fill shader samples a 1-px-tall per-column texture of the Surface Line (built once per planet, like PlanetBackdrop's wall map) and blends the tier textures by depth below it with B-203's 1 m transitions (each json's transition_m), so the bands follow the curved line; tier 1 stays ground_fill; the tiers' fill_decor scatter by tier (U-167's scatter); a 2D-lit custom shader in the URP 2D renderer, no visible step anywhere.
 Accept: a capture per tier on Earth at 1× and one border at 1×, with the transition soft and following a sloped Surface Line; Mars / Mercury / Venus one capture each at T4; the frame budget rows unchanged (BudgetGate); a test +1 (the tier sampled at a point equals its depth's tier).
 Files: Code/Runtime/View2D/ (the ground mesh and its material), Shaders/, Tests/
 Depends: U-174
-Lead notes: Cycle 285 (18:4x). After U-175, and in before the D1 build: the owner must see depth change.
+Lead notes: Cycle 285 (18:4x). After U-175, and in before the D1 build: the owner must see depth change. 21:5x: IN, REVIEW (336bafe9; MERIDIAN/GroundTiers, a 2D-lit shader on the Sprite-Lit includes; the Surface Line as an R16 texel per column within 2 mm of DigRun.LineAt at all 4 096 Earth columns; ground_fill + t2..t5 smoothstepped over 1 m at D1_TABLES' depths, the desert overlay through it too; the fill_decor scatter folded in (U-167), probing the count present; GroundTierTests ×2, EditMode 465/465; the A/B probe CaptureU182Perf: a full-screen T3 room +1.5 ms (lit 7.5 → tier 9.0 ms), the samples cut to ≤ 2 per pixel). Viewed u182/5_earth_t5 (near-black core with amber cracks, a magma pool), 7_mars_t4 (the dark slate with phosphor seams), 6_earth_border_t1_t2: the border follows the slope parallel to the Surface Line, through the ground and the room's back wall, but as a perfectly straight soft diagonal it reads like a cast shadow across the horizontal strata. ONE POLISH: wobble the transition's depth with a low-frequency noise (± ~0.6 m along the band, a few metres' wavelength) so the border reads as a geological boundary, not a shadow. Mercury / Venus at T4 ride U-177. Done on the D1 build's player smoke. U-167 DONE here.
 
 ### U-183 · UNITY · Ready · D1
 Goal: The tools you upgrade, visible (B-205's art; Bible 5.3 §8.1): (1) the Beam in hand by its Mk (Mk1 start; dig_power_1 → Mk2, _2 → Mk3, _3 and _4 → Mk4, _5 → Mk5), its ray fx/beam_ray_mk<n>, and a cable line drawn from the sprite's json cable_socket to the surveyor's pack; (2) RigModule's Grapple slot draws props/rig/grapple (Mk1 at asc_grapple_1, _mk2 at _2, _mk3 at _3) and NEVER props/rig/lance (the archived v2 Lance, a weapon, D-087, today's stand-in); (3) the jetpack overlays Mk2 (asc_jet_2) / Mk3 (asc_jet_3) on the back, placed per surveyor frame from BLENDER's socket json (centre and angle by frame index); Mk1 is the pack as drawn; then tell BLENDER to remove props/rig/lance (the metas yours).
@@ -2954,6 +2954,13 @@ Accept: a capture per inner planet of a brink with its lip and a stretch of surf
 Files: Code/Runtime/Terrain/, View2D/, FX/, Tests/
 Depends: —
 Lead notes: Cycle 287 (21:2x). Before the D1 build: the owner's ground has had no lips or surface decor since 0.5.0.
+
+### U-187 · UNITY · Ready · D1
+Goal: Draw the ground's back wall only where it shows (UNITY's U-182 proposal): today the fill draws twice everywhere because the back wall sits under the whole body; draw the back wall only behind dug cells plus a one-cell margin, roughly halving the fill's pixels and recovering more than U-182's +1.5 ms on a full-screen room (Bible §11: 60 FPS on integrated graphics).
+Accept: CaptureU182Perf's A/B: a full-screen T3 room at or under the old lit path's 7.5 ms; the u157 / u182 room, tunnel and mound captures unchanged to the eye (no gap at a dug edge, no back wall missing behind a scoop); BudgetGate green; a test +1 (a dug cell always has back wall behind it, an undug interior cell none).
+Files: Code/Runtime/Terrain/ (the chunk mesh), Tests/
+Depends: U-182
+Lead notes: Cycle 287 (21:5x). After U-186, before the full sweep and the D1 build (the tier fill's cost lands in that build).
 
 ### U-154 · UNITY · Ready · C2
 Goal: P-51 (UNITY, ruled yes in cycle 279): the Builder's aerostat pieces draw the re-inked kit on the four giants: PieceSpec gains a per-planet art key, so the Deck / Strut / Lift cell pieces draw `props/common/aerostat_{deck,strut,cell}` (B-156) on Jupiter, Saturn, Uranus and Neptune and keep `props/venus/aerostat_deck` on Venus; nothing else about the pieces changes (sizes, costs, saves).
