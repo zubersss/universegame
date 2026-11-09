@@ -1,5 +1,6 @@
 # LEAD STATUS
-Updated: 2026-11-09 03:0x · Session: 10 (zuber-dc; all three windows restarted ~09:30 after a ~3-hour break) · Review cycle: 290 · Cadence: every 2 hours (owner, 11-07 15:1x; session cron 5ca489ce at :43 on odd hours, next ~05:05) + messages from the workers as they arrive
+Updated: 2026-11-09 05:0x · Session: 10 (zuber-dc; all three windows restarted ~09:30 after a ~3-hour break) · Review cycle: 291 · Cadence: every 2 hours (owner, 11-07 15:1x; session cron 5ca489ce at :43 on odd hours, next ~07:05) + messages from the workers as they arrive
+Cycle 291 (05:05): no stall; U-171 Done; the pre-0.6.0 sweep green (LeadQA, BudgetGate); U-188 Build 0.6.0 in UNITY's lock (RAM 0.43 GB, watched).
 Cycle 290 (03:05): no stall; U-190 / U-185 / U-181 / U-180 Done; LeadQA D1DigRunTests passes every step; U-171 in UNITY's lock; then the sweep and U-188 Build 0.6.0.
 Cycle 289 (01:05): no stall; U-183 / U-176 / U-178 Done; B-219 Done; U-190 added (the Wardens, the jetpack load rule); LeadQA D1DigRunTests' first run found the jetpack rule; 0.6.0 after U-190, U-185, the small fixes and the sweep.
 Cycle 288 (23:05): no stall; U-186 / U-187 Done, U-182 in Review; all D1 art in; LeadQA D1DigRunTests compiles; U-183 in UNITY's lock (RAM 0.14 GB, watched); 0.6.0 after U-176 / U-178 / U-185 and the sweep.
@@ -10,11 +11,11 @@ Cycle 284 (15:05–17:0x): THE OWNER'S 0.5.0 PLAYTEST → D-174 (a progression d
 Cycles 281–283 (09:3x–15:0x): the resume; Build 0.5.0 (page https://claude.ai/artifact/CHnmoFrDg2jzUuM42BVi83); D-168..D-173; U-159 Mars smooth.
 (cycles 231–280: coordination/status/archive/LEAD_2026-11-06.md and REVIEW_LOG)
 ## Current task
-Directing D1, the owner's progression digging game (D-174 / D-175 / D-178, Bible 5.3 §8.1, docs/D1_TABLES.md). UNITY: U-171 (the sea from below, in its lock) → the full sweep → U-188 Build 0.6.0. BLENDER: idle by design until B-201 (0.6.0's smoke read). After 0.6.0: U-189, U-177, U-179.
+Directing D1, the owner's progression digging game (D-174 / D-175 / D-178, Bible 5.3 §8.1, docs/D1_TABLES.md). UNITY: U-188 Build 0.6.0 (in its lock). BLENDER: idle by design until B-201 (0.6.0's smoke read). After 0.6.0: U-189, U-177, U-179.
 ## Last completed
 Cycle 287's tick.
 ## Next up
-1. U-171 → judge (the sea from below). 2. The full sweep → judge (LeadQA M1Loop / M3Inner / D1DigRun green). 3. U-188 Build 0.6.0 → view its player smoke (text crisp, the hint card, the slot counts, U-174 / U-175 / U-182 / U-184 / B-207 closed on it) → its owner page (memory: milestone-artifacts) + USER-35 (the first hour with the dig loop). 4. B-201 on 0.6.0's smoke.
+1. U-188's player smoke → view it (text crisp, the hint card, the slot counts, the shot list; U-174 / U-175 / U-182 / U-184 closed on it) → ping BLENDER for B-201. 2. The 0.6.0 owner page (memory: milestone-artifacts; the 0.5.1 page's style) + USER-35 (the first hour with the dig loop). 3. After the owner's playtest: U-189 / U-177 / U-179 and whatever the owner asks.
 ## Pending decisions
 none open.
 ## Waiting on the user
