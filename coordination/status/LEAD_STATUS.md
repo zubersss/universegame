@@ -1,5 +1,6 @@
 # LEAD STATUS
-Updated: 2026-11-09 05:0x · Session: 10 (zuber-dc; all three windows restarted ~09:30 after a ~3-hour break) · Review cycle: 291 · Cadence: every 2 hours (owner, 11-07 15:1x; session cron 5ca489ce at :43 on odd hours, next ~07:05) + messages from the workers as they arrive
+Updated: 2026-11-09 07:0x · Session: 10 (zuber-dc; all three windows restarted ~09:30 after a ~3-hour break) · Review cycle: 292 · Cadence: every 2 hours (owner, 11-07 15:1x; session cron 5ca489ce at :43 on odd hours, next ~09:05) + messages from the workers as they arrive
+Cycle 292 (07:05): no stall; U-188's dev build probed (a leak fixed; D-180) and its smoke judged with BLENDER's B-201 (release fixes routed; B-220..B-224 / U-191 / U-192 after); both workers mid-edit on the release fixes, B-222 / B-221.
 Cycle 291 (05:05): no stall; U-171 Done; the pre-0.6.0 sweep green (LeadQA, BudgetGate); U-188 Build 0.6.0 in UNITY's lock (RAM 0.43 GB, watched).
 Cycle 290 (03:05): no stall; U-190 / U-185 / U-181 / U-180 Done; LeadQA D1DigRunTests passes every step; U-171 in UNITY's lock; then the sweep and U-188 Build 0.6.0.
 Cycle 289 (01:05): no stall; U-183 / U-176 / U-178 Done; B-219 Done; U-190 added (the Wardens, the jetpack load rule); LeadQA D1DigRunTests' first run found the jetpack rule; 0.6.0 after U-190, U-185, the small fixes and the sweep.
@@ -11,11 +12,11 @@ Cycle 284 (15:05–17:0x): THE OWNER'S 0.5.0 PLAYTEST → D-174 (a progression d
 Cycles 281–283 (09:3x–15:0x): the resume; Build 0.5.0 (page https://claude.ai/artifact/CHnmoFrDg2jzUuM42BVi83); D-168..D-173; U-159 Mars smooth.
 (cycles 231–280: coordination/status/archive/LEAD_2026-11-06.md and REVIEW_LOG)
 ## Current task
-Directing D1, the owner's progression digging game (D-174 / D-175 / D-178, Bible 5.3 §8.1, docs/D1_TABLES.md). UNITY: U-188 Build 0.6.0 (in its lock). BLENDER: idle by design until B-201 (0.6.0's smoke read). After 0.6.0: U-189, U-177, U-179.
+Directing D1. UNITY: U-188's release fixes → the D-180 reading → the 0.6.0 release + its smoke. BLENDER: B-222 / B-221 (into the release only if in time) → B-220. After 0.6.0: U-189 + U-191, U-177, U-192, U-179; B-223, B-224.
 ## Last completed
 Cycle 287's tick.
 ## Next up
-1. U-188's player smoke → view it (text crisp, the hint card, the slot counts, the shot list; U-174 / U-175 / U-182 / U-184 closed on it) → ping BLENDER for B-201. 2. The 0.6.0 owner page (memory: milestone-artifacts; the 0.5.1 page's style) + USER-35 (the first hour with the dig loop). 3. After the owner's playtest: U-189 / U-177 / U-179 and whatever the owner asks.
+1. B-221's title preview → judge. 2. The D-180 reading → judge. 3. The release smoke → view (47 / 54 / 58 / 59 re-shot; the HUD readout; no animals in the sea). 4. The 0.6.0 owner page (memory: milestone-artifacts; the 0.5.1 page's style) + USER-35 (the first hour with the dig loop).
 ## Pending decisions
 none open.
 ## Waiting on the user
