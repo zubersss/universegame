@@ -19,8 +19,10 @@ namespace Meridian.Progress
         [Serializable]
         public sealed class Node
         {
-            public string id, branch, effect, sideways;
+            public string id, name, branch, effect, sideways;
             public int ring, slot, scrip, datacores;
+            /// <summary>Degrees from the branch's axis (screen degrees; BLENDER's crossing-free chart, B-204).</summary>
+            public float angle;
             public Cost[] items = new Cost[0];
             public string[] requires = new string[0];
             public Mod[] mods = new Mod[0];

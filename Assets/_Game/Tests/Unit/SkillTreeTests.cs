@@ -138,6 +138,51 @@ namespace Meridian.Tests
             Assert.AreEqual(0.25f, SkillStats.WaystationBonus, 1e-4f, "prices are not multiplied");
         }
 
+        /// <summary>LEAD 19:4x (3): BLENDER's crossing-free chart: no two links cross (sideways links are arcs along their ring), no link runs
+        /// over a node it doesn't join, and each sideways pair sits on the sides facing each other; every node has a name.</summary>
+        [Test]
+        public void TheChartHasNoCrossingLinks()
+        {
+            var links = Meridian.UI.SkillTreePanel.AllLinks();
+            Assert.AreEqual(84, links.Count, "66 nodes: 12 to the hub, the outward links, 6 sideways");
+            var paths = new System.Collections.Generic.List<(string a, string b, System.Collections.Generic.List<Vector2> p)>();
+            foreach (var (a, b) in links) paths.Add((a.id, b != null ? b.id : "hub", Meridian.UI.SkillTreePanel.LinkPath(a, b)));
+            static float Ccw(Vector2 a, Vector2 b, Vector2 c) => (c.y - a.y) * (b.x - a.x) - (b.y - a.y) * (c.x - a.x);
+            static bool Cross(Vector2 p, Vector2 q, Vector2 r, Vector2 s) => Ccw(p, q, r) * Ccw(p, q, s) < 0f && Ccw(r, s, p) * Ccw(r, s, q) < 0f;
+            int crossings = 0;
+            for (int i = 0; i < paths.Count; i++)
+                for (int j = i + 1; j < paths.Count; j++)
+                {
+                    var (a, b, P) = paths[i]; var (c, d, Q) = paths[j];
+                    if (a == c || a == d || b == c || b == d) continue;
+                    for (int m = 0; m + 1 < P.Count; m++)
+                        for (int k = 0; k + 1 < Q.Count; k++)
+                            if (Cross(P[m], P[m + 1], Q[k], Q[k + 1])) { crossings++; TestContext.Out.WriteLine($"[MERIDIAN] crossing {a}-{b} x {c}-{d}"); }
+                }
+            Assert.AreEqual(0, crossings, "no link crosses another");
+            foreach (var (a, b, P) in paths)
+                foreach (var n in SkillTree.Current.nodes)
+                {
+                    if (n.id == a || n.id == b) continue;
+                    var at = Meridian.UI.SkillTreePanel.NodePosition(n);
+                    for (int m = 0; m + 1 < P.Count; m++)
+                    {
+                        var dlt = P[m + 1] - P[m];
+                        float u = Mathf.Clamp01(Vector2.Dot(at - P[m], dlt) / dlt.sqrMagnitude);
+                        Assert.Greater(Vector2.Distance(P[m] + u * dlt, at), 30f * Meridian.UI.SkillTreePanel.K, $"{a}-{b} runs over {n.id}");
+                    }
+                }
+            foreach (var n in SkillTree.Current.nodes)
+            {
+                Assert.IsFalse(string.IsNullOrEmpty(n.name), $"{n.id} has a name");
+                if (string.IsNullOrEmpty(n.sideways)) continue;
+                // the neighbour lies clockwise (+) or counter-clockwise (-) round the circle; the node sits on that side of its axis
+                int me = System.Array.IndexOf(SkillTree.Branches, n.branch), other = System.Array.IndexOf(SkillTree.Branches, SkillTree.Current.Get(n.sideways).branch);
+                int dir = (other - me + 6) % 6 == 1 ? 1 : -1;
+                Assert.Greater(n.angle * dir, 0f, $"{n.id} faces {n.sideways}");
+            }
+        }
+
         [Test]
         public void TheSaveKeepsTheTreeAndAnOldSaveMapsItsUnlocks()
         {

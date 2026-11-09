@@ -2639,8 +2639,8 @@ namespace Meridian.Tests
             UnityEngine.Object.Destroy(uiGo);
         }
 
-        /// <summary>U-175 (D-174): the Skill Tree panel topside at Earth's camp with a few nodes bought (dig_power_1, haul_pack_1, haul_dirt_1,
-        /// sur_scan_1, asc_ladder_1) and dig_power_2 chosen → coordination/reports/unity/u175/1_skill_tree.png.</summary>
+        /// <summary>U-175 (D-174): the Skill Tree panel topside at Earth's camp, B-204's mock-up state (six bought, Beam Power III chosen):
+        /// 1_skill_tree.png with 2 of its 6 hematite (BUY greyed, the reason), 2_skill_tree_ready.png with 6 → coordination/reports/unity/u175/.</summary>
         [UnityTest, Timeout(240000)]
         public IEnumerator CaptureU175Tree()
         {
@@ -2664,18 +2664,30 @@ namespace Meridian.Tests
                 side.creatures.DespawnAll();
                 if (side.dayNight != null) side.dayNight.Override = 0.45f;
                 var state = GameState.Instance;
-                state.scrip = 2000;
-                foreach (var id in new[] { "dig_power_1", "haul_pack_1", "haul_dirt_1", "sur_scan_1", "asc_ladder_1" })
+                state.scrip = 3000;
+                state.scripEarned = 1200; // Surveyor Rank 3
+                // B-204's mock-up: these bought, Beam Power III chosen; the pack holds 2 of its 6 hematite (BUY greyed, the reason shown).
+                foreach (var id in new[] { "dig_power_1", "dig_brush_1", "dig_power_2", "haul_pack_1", "sur_depth_1", "voy_price_1" })
                     Assert.AreEqual(Meridian.Progress.SkillTree.BuyResult.Ok, Meridian.Progress.SkillTree.Current.Buy(state, id, true), id);
+                int hematite = Meridian.Items.ItemRegistry.Get("hematite").id;
+                state.inventory.Add(hematite, 2);
                 var panel = side.sideHud.Skills;
                 panel.SetOpen(true);
-                panel.Select("dig_power_2");
-                yield return new WaitForSeconds(2f); // the chart, frames and icons
+                panel.Select("dig_power_3");
+                yield return new WaitForSeconds(2f); // the chart, frames, icons and papers
                 var dir = "coordination/reports/unity/u175";
                 Directory.CreateDirectory(dir);
                 yield return SaveWithUi(side.sideCamera, panel.Title.canvas, $"{name}_1_skill_tree");
                 File.Copy($"logs/capture_{name}_1_skill_tree.png", $"{dir}/1_skill_tree.png", true);
-                TestContext.Out.WriteLine($"[MERIDIAN] u175 1_skill_tree: {state.skillNodes.Count} bought, chosen {panel.Selected}: '{panel.Status.text}', Beam power {Meridian.Progress.SkillStats.BeamPower:F2}, pack {state.inventory.LimitKg:F0} kg");
+                TestContext.Out.WriteLine($"[MERIDIAN] u175 1_skill_tree: {state.skillNodes.Count} bought, chosen {panel.Selected}: '{panel.Status.text}', BUY {(panel.Buy.interactable ? "on" : "greyed")}, cost '{panel.CostText.text}', header '{panel.Header.text}', needs '{panel.Needs.text}'");
+                Assert.IsFalse(panel.Buy.interactable, "2 of 6 hematite: BUY greyed");
+                state.inventory.Add(hematite, 4);
+                panel.Select("dig_power_3");
+                yield return null;
+                yield return SaveWithUi(side.sideCamera, panel.Title.canvas, $"{name}_2_skill_tree_ready");
+                File.Copy($"logs/capture_{name}_2_skill_tree_ready.png", $"{dir}/2_skill_tree_ready.png", true);
+                TestContext.Out.WriteLine($"[MERIDIAN] u175 2_skill_tree_ready: '{panel.Status.text}', BUY {(panel.Buy.interactable ? "on" : "greyed")}, cost '{panel.CostText.text}'");
+                Assert.IsTrue(panel.Buy.interactable, "6 of 6 hematite: BUY on");
                 panel.SetOpen(false);
                 LogAssert.NoUnexpectedReceived();
             }

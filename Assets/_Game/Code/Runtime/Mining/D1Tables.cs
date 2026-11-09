@@ -29,6 +29,16 @@ namespace Meridian.Mining
         public float surfaceLineDepth = 2f, strokeBaseSeconds = 0.25f, strokeCapSeconds = 8f, beamPowerStart = 1f;
         public float packLimitKg = 30f, loadK = 0.5f, waystationBonus = 0.25f;
         public int dirtStoreStart = 60, pocketCount = 3;
+        /// <summary>D1_TABLES §7 (D-175): the Scrip earned this expedition (sales only) for Surveyor Rank 1..10.</summary>
+        public int[] rankScrip = { 0, 300, 800, 1800, 3500, 7000, 14000, 28000, 50000, 80000 };
+
+        /// <summary>The Surveyor Rank (1..10) for the Scrip earned this expedition.</summary>
+        public int Rank(int scripEarned)
+        {
+            int r = 1;
+            for (int i = 1; i < rankScrip.Length; i++) if (scripEarned >= rankScrip[i]) r = i + 1;
+            return r;
+        }
         public Tier[] tiers = new Tier[0];
         public Planet[] planets = new Planet[0];
         public Material[] materials = new Material[0];
