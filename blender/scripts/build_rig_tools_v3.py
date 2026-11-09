@@ -291,14 +291,60 @@ def jetpack(mk):
     return fn
 
 
-def back_sockets():
-    """Per frame of characters/surveyor/side: [x, z, angle, sx, sz] of the float pack's centre (build_surveyor_v3's X and PK)."""
+def side_poses():
+    """characters/surveyor/side's 98 poses in sheet order (build_surveyor_v3's clips)."""
     sys.path.insert(0, HERE)
     import build_surveyor_v3 as SV
-    poses = [SV.idle_pose(i) for i in range(10)] + [SV.walk_pose(i) for i in range(12)] + SV.JUMP + SV.LAND + \
+    return [SV.idle_pose(i) for i in range(10)] + [SV.walk_pose(i) for i in range(12)] + SV.JUMP + SV.LAND + \
         [SV.look_pose(i) for i in range(12)] + SV.BUMP + SV.CONK + [SV.run_pose(i) for i in range(12)] + \
         [SV.fall_pose(i) for i in range(8)] + SV.DASH
-    return [_socket(pose) for pose in poses]
+
+
+def back_sockets():
+    """Per frame of characters/surveyor/side: [x, z, angle, sx, sz] of the float pack's centre (build_surveyor_v3's X and PK)."""
+    return [_socket(pose) for pose in side_poses()]
+
+
+def _hand(pose):
+    """UNITY's U-183 request: [x, z, angle_rad] of the FRONT glove's centre (draw_surveyor's arm(1): the hand point 0.04 m above
+    the glove's centre) in metres from the sheet pivot (the feet; x right, z up, facing right), and the forearm's direction (the
+    arm bezier's tangent at the hand, rad CCW from +x). None in the front view (no front hand) and where the surveyor is hidden."""
+    p = dict(view="side", bob=0.0, sz=1.0, lean=0.0, shift=0.0, arms=(0.0, 0.0))
+    p.update(pose)
+    if p["view"] not in ("side", "tq") or p.get("hidden"):
+        return None
+    sz = p["sz"]
+    sx = 1.0 / math.sqrt(sz)
+
+    def X1(x, z, pivot_z=0.55):
+        return ((x * sx) + p["lean"] * (z - pivot_z) + p["shift"], pivot_z + (z - pivot_z) * sz + p["bob"])
+    ang = p["arms"][1]
+    if p["view"] == "side":
+        sh = X1(0.04, 1.00)
+        h = (sh[0] + 0.42 * math.sin(ang), sh[1] - 0.42 * math.cos(ang))
+        mid = ((sh[0] + h[0]) / 2 - 0.06, (sh[1] + h[1]) / 2 + 0.02)
+    else:
+        sh = X1(0.30, 1.00)
+        h = (sh[0] + 0.16 + 0.10 * abs(math.sin(ang)), sh[1] - 0.42 * math.cos(ang * 0.6))
+        mid = ((sh[0] + h[0]) / 2 + 0.07, (sh[1] + h[1]) / 2 + 0.03)
+    return [round(h[0], 4), round(h[1] - 0.04, 4), round(math.atan2(h[1] - mid[1], h[0] - mid[0]), 4)]
+
+
+def hand_sockets():
+    return [_hand(pose) for pose in side_poses()]
+
+
+def hand_sockets_b():
+    """The same for characters/surveyor/side_b, plus per frame what the sheet already draws in or on that hand (None = nothing):
+    the Beam strapped on (climb_ladder / reel_up), the reel, a pick, a hammer - UNITY skips its held tool there."""
+    sys.path.insert(0, HERE)
+    import build_surveyor_side_b as SB
+    poses = SB.all_poses()
+    held = []
+    for pose in poses:
+        h = [k for k in ("beam_arm", "reel", "pick", "hammer") if pose.get(k) not in (None, False)]
+        held.append("+".join(h) if h else None)
+    return [_hand(pose) for pose in poses], held
 
 
 def back_sockets_b():
@@ -433,14 +479,30 @@ def export(art):
         p = os.path.join(art, *rel.split("/"))
         if os.path.isfile(p):
             os.remove(p)
+    hs, (hsb, held_b) = hand_sockets(), hand_sockets_b()                                      # U-183: the front hand, json only
+    hmeta = {"key": HAND_KEY, "style": "v3", "socket_sheet": "characters/surveyor/side", "hand_socket": hs,
+             "socket_sheet_b": "characters/surveyor/side_b", "hand_socket_b": hsb, "held_b": held_b,
+             "socket_units": "per sheet frame: [x, z] m from the sheet's pivot (the feet; x right, z up, facing right) to the front glove's "
+                             "centre, and the forearm's direction (rad, CCW from +x); null = no front hand drawn (front views, hidden)",
+             "note": "U-183 (B-205's tools at the drawn hand): put the tool's pivot (its json pivot = the hand) here, mirrored in x when facing "
+                     "left; held_b names what side_b already draws in that hand (beam_arm = the Beam strapped on, reel, pick, hammer): no held tool there"}
+    p = os.path.join(art, *HAND_KEY.split("/")) + ".json"
+    with open(p, "w", encoding="utf-8", newline="\n") as f:
+        json.dump(hmeta, f, indent=2)
+        f.write("\n")
+    out.append((HAND_KEY, 0, 0, os.path.getsize(p)))
     return out
+
+
+HAND_KEY = "props/rig/hand_socket"
 
 
 def keys():
     return [k for k, _i, _m in [(f"props/rig/beam_mk{m}", 0, 0) for m in range(1, 6)] + [("props/rig/beam", 0, 0)]
             + [(f"props/rig/grapple_mk{m}", 0, 0) for m in range(1, 4)] + [("props/rig/grapple", 0, 0)]
             + [(f"props/rig/jetpack_mk{m}", 0, 0) for m in (2, 3)] + [(f"fx/beam_ray/mk{m}", 0, 0) for m in range(1, 6)]
-            + [("props/rig/survey", 0, 0), ("props/rig/builder", 0, 0), ("fx/survey_scan/base", 0, 0), ("fx/builder_ghost/base", 0, 0)]]
+            + [("props/rig/survey", 0, 0), ("props/rig/builder", 0, 0), ("fx/survey_scan/base", 0, 0), ("fx/builder_ghost/base", 0, 0)]
+            + [(HAND_KEY, 0, 0)]]
 
 
 # ---------------------------------------------------------------- the review sheet (lock-free)
