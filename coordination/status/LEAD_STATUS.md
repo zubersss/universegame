@@ -7,11 +7,11 @@ Cycle 284 (15:05–17:0x): THE OWNER'S 0.5.0 PLAYTEST → D-174 (a progression d
 Cycles 281–283 (09:3x–15:0x): the resume; Build 0.5.0 (page https://claude.ai/artifact/CHnmoFrDg2jzUuM42BVi83); D-168..D-173; U-159 Mars smooth.
 (cycles 231–280: coordination/status/archive/LEAD_2026-11-06.md and REVIEW_LOG)
 ## Current task
-Directing D1, the owner's progression digging game (D-174 / D-175, Bible 5.3 §8.1, docs/D1_TABLES.md). UNITY: U-175 (the Skill Tree) → U-182 (the tier fill shader) → U-178 (Rank, New Expedition) → U-183 (the tool looks; the lance swap) → U-176 (ways up) → U-177 (the planet ladder, Mercury / Venus smooth) → U-179 / U-180 / U-181 → a full sweep → the D1 build. BLENDER: B-205 (the tool looks), B-202's export, B-201 (the D1 smoke read).
+Directing D1, the owner's progression digging game (D-174 / D-175 / D-178, Bible 5.3 §8.1, docs/D1_TABLES.md). UNITY: U-182 (the tier fill shader, in its lock) → U-178 (Rank, New Expedition) → U-183 (the tool looks) → U-176 (ways up) → U-177 (the planet ladder, Mercury / Venus smooth) → U-185 (the hints) → U-179 / U-180 / U-181 / U-171 → a full sweep → the D1 build. BLENDER: B-215 (the D1 key audit), then B-201 (the D1 smoke read). All D1 art is exported.
 ## Last completed
-Cycle 286's tick.
+Cycle 287's tick.
 ## Next up
-1. U-182's tier captures → judge. 2. U-175's slice → judge (the panel capture with the 66 icons; B-204 closes on it). 3. B-205's preview → judge; then the lance removal after U-183's repoint. 4. U-182's tier captures → judge (each tier visible, soft borders on a slope). 5. LeadQA: a dig-run scenario for D1's exit (dig to tier 3 on Earth, sell topside, buy a node, climb with a full pack).
+1. U-182's tier captures → judge (each tier visible, soft borders on a slope; Mars / Mercury / Venus at T4). 2. B-215's audit → route any missing key. 3. U-178 / U-183 / U-176 / U-177 / U-185 slices → judge. 4. The D1 build → its page + the owner's playtest item (the first hour with the new loop). 5. LeadQA: a dig-run scenario for D1's exit (dig to tier 3 on Earth, sell topside, buy a node, climb with a full pack).
 ## Pending decisions
 none open.
 ## Waiting on the user
