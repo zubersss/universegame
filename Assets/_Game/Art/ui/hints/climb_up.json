@@ -1,0 +1,44 @@
+{
+  "key": "ui/hints/climb_up",
+  "style": "v3",
+  "ppu": 64,
+  "pivot": [
+    0.5,
+    0.5
+  ],
+  "width": 320,
+  "height": 200,
+  "slice": [
+    152,
+    52,
+    44,
+    144
+  ],
+  "slice_order": "[left, top, right, bottom] px in from each edge (contract 11.6); Unity's Sprite.border is (left, bottom, right, top)",
+  "rect_origin": "bottom_left",
+  "title_rect": [
+    42,
+    152,
+    236,
+    26
+  ],
+  "body_rect": [
+    156,
+    24,
+    140,
+    114
+  ],
+  "lettering": "runtime",
+  "lettering_note": "the title in Limelight (ink), the body in Patrick Hand (ink); both rects grow with the card's width",
+  "binding": "climb",
+  "grain": "ui/panels/grain",
+  "grain_note": "flat paper for the 9-slice; tile ui/panels/grain over it at 1 texel = 1 px, masked by alpha",
+  "note": "B-213: the first-hour hint card 'CLIMB BACK UP' (pictogram baked)",
+  "keycap_rect": [
+    104,
+    31,
+    38,
+    35
+  ],
+  "keycap_note": "a blank key cap: UNITY letters the current binding on its top face (Patrick Hand, ink)"
+}

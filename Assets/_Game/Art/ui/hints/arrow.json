@@ -1,0 +1,13 @@
+{
+  "key": "ui/hints/arrow",
+  "style": "v3",
+  "ppu": 64,
+  "pivot": [
+    0.9166666666666666,
+    0.5
+  ],
+  "width": 72,
+  "height": 48,
+  "facing": "right",
+  "note": "B-213: the pointing paper arrow; the pivot is its tip: turn it about the tip so +x points at the HUD element"
+}
