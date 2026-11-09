@@ -183,5 +183,23 @@ namespace Meridian.Tests
             }
             finally { Object.DestroyImmediate(root); }
         }
+    
+        [Test]
+        public void TheFlatPapersAreTheOnesWhoseJsonAsksForTheGrain()
+        {
+            // U-181 (B-208): UiPaper.Grained mirrors the jsons (the panels' jsons are not addressable at runtime)
+            var fromJson = new System.Collections.Generic.HashSet<string>();
+            foreach (var f in System.IO.Directory.GetFiles("Assets/_Game/Art/ui", "*.json", System.IO.SearchOption.AllDirectories))
+            {
+                var text = System.IO.File.ReadAllText(f);
+                if (!System.Text.RegularExpressions.Regex.IsMatch(text, "\"grain\"\\s*:\\s*\"ui/panels/grain\"")) continue;
+                var key = System.Text.RegularExpressions.Regex.Match(text, "\"key\"\\s*:\\s*\"([^\"]+)\"").Groups[1].Value;
+                fromJson.Add(key);
+            }
+            CollectionAssert.AreEquivalent(fromJson, UiPaper.Grained, "the flat papers");
+            Assert.IsFalse(UiPaper.Grained.Contains(UiPaper.GrainKey));
+            var grain = System.IO.File.ReadAllText("Assets/_Game/Art/ui/panels/grain.json");
+            StringAssert.Contains("\"tile_x\": true", grain); StringAssert.Contains("\"texel_px\": 1", grain);
+        }
     }
 }

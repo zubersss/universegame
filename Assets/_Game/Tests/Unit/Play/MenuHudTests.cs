@@ -10,6 +10,7 @@ using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
+using UnityEngine.UI;
 
 namespace Meridian.Tests
 {
@@ -327,6 +328,47 @@ namespace Meridian.Tests
                 settings.editorInputBehaviorInPlayMode = savedEditor;
                 settings.backgroundBehavior = savedBackground;
             }
+        }
+
+        /// <summary>U-181 (B-208): every flat paper in the game (the pause card, the inventory, the Skill Tree's node card and cost tag, the
+        /// panels' frames) carries the tiled grain: a "Grain" child in the paper's own shape masking a Tiled grain at 1 texel = 1 canvas px
+        /// (1 screen px at 1080p).</summary>
+        [UnityTest]
+        public IEnumerator EveryFlatPaperCarriesTheTiledGrain()
+        {
+            SceneDirector director = null;
+            yield return Boot(d => director = d);
+            var hud = director.PlanetSide.sideHud;
+            hud.Inventory.SetOpen(true); hud.Inventory.SetOpen(false);
+            hud.Skills.SetOpen(true);
+            float until = Time.realtimeSinceStartup + 6f;
+            while (Time.realtimeSinceStartup < until) yield return null; // the papers and the grain load
+            var flat = new System.Collections.Generic.HashSet<string>();
+            foreach (var k in UiPaper.Grained) flat.Add(k.Substring(k.LastIndexOf('/') + 1) + "_color");
+            int papers = 0;
+            var seen = new System.Text.StringBuilder();
+            foreach (var img in Object.FindObjectsByType<Image>(FindObjectsInactive.Include))
+            {
+                if (img.sprite == null || img.name == "Grain" || !flat.Contains(img.sprite.texture.name)) continue;
+                papers++;
+                seen.Append(' ').Append(img.name).Append('(').Append(img.sprite.texture.name).Append(')');
+                var tile = UiPaper.GrainOf(img);
+                Assert.NotNull(tile, $"{img.name} ({img.sprite.texture.name}): its grain");
+                Assert.AreEqual(Image.Type.Tiled, tile.type, img.name);
+                Assert.NotNull(tile.sprite, img.name + ": the grain loaded");
+                StringAssert.StartsWith("grain", tile.sprite.texture.name);
+                Assert.IsNotNull(tile.transform.parent.GetComponent<Mask>(), img.name + ": masked by the paper's shape");
+                Assert.IsFalse(tile.transform.parent.GetComponent<Mask>().showMaskGraphic, "the mask draws nothing");
+                Assert.AreSame(img.sprite, tile.transform.parent.GetComponent<Image>().sprite, "the mask is the paper's own shape");
+                Assert.AreEqual(0, tile.transform.parent.GetSiblingIndex(), "over the paper, under what is on it");
+                float refPpu = tile.canvas != null ? tile.canvas.referencePixelsPerUnit : 100f;
+                float tilePx = tile.sprite.rect.width / tile.sprite.pixelsPerUnit * refPpu / tile.pixelsPerUnitMultiplier;
+                Assert.AreEqual(tile.sprite.rect.width, tilePx, 0.01f, img.name + ": 1 texel = 1 canvas px (a 128-texel tile spans 128 px at 1080p)");
+            }
+            TestContext.Out.WriteLine($"[MERIDIAN] u181 {papers} flat papers carry the grain:{seen}");
+            Assert.GreaterOrEqual(papers, 3, "the pause card, the inventory, the Skill Tree's card at least");
+            hud.Skills.SetOpen(false);
+            LogAssert.NoUnexpectedReceived();
         }
 
         [UnityTest]

@@ -2639,6 +2639,58 @@ namespace Meridian.Tests
             UnityEngine.Object.Destroy(uiGo);
         }
 
+        /// <summary>U-181 (B-208): the paper grain tiled at 1 texel = 1 px → coordination/reports/unity/u181/: 1_inventory (the inventory panel)
+        /// and 2_skill_tree_card (the tree's node card and cost tag) at 1080p, 1×.</summary>
+        [UnityTest, Timeout(300000)]
+        public IEnumerator CaptureU181Grain()
+        {
+            var name = Environment.GetEnvironmentVariable(Variable);
+            if (string.IsNullOrEmpty(name)) Assert.Ignore($"Set {Variable} (tools/unity_capture.ps1).");
+            if (SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.Null)
+                Assert.Fail("No graphics device: run without -nographics.");
+            bool wasCartoon = Meridian.View2D.CartoonStage.Enabled;
+            Meridian.View2D.CartoonStage.Enabled = true;
+            try
+            {
+#if UNITY_EDITOR
+                yield return UnityEditor.SceneManagement.EditorSceneManager.LoadSceneAsyncInPlayMode(
+                    CorePath, new LoadSceneParameters(LoadSceneMode.Single));
+#endif
+                var director = UnityEngine.Object.FindAnyObjectByType<SceneDirector>();
+                float timeout = Time.realtimeSinceStartup + 30f;
+                while ((!director.IsReady || !director.PlanetSide.terrain.IsSettled) && Time.realtimeSinceStartup < timeout) yield return null;
+                var side = director.PlanetSide;
+                side.creatures.autoSpawn = false;
+                side.creatures.DespawnAll();
+                if (side.dayNight != null) side.dayNight.Override = 0.45f;
+                var dir = "coordination/reports/unity/u181";
+                Directory.CreateDirectory(dir);
+                var state = GameState.Instance;
+                state.inventory.Add(Meridian.Items.ItemRegistry.Get("clay").id, 12);
+                state.inventory.Add(Meridian.Items.ItemRegistry.Get("iron").id, 5);
+                var hud = side.sideHud;
+                hud.Inventory.SetOpen(true);
+                yield return new WaitForSeconds(2.5f);
+                Canvas invCanvas = null;
+                foreach (var cv in hud.Inventory.GetComponentsInChildren<Canvas>(true)) if (cv.name == "InventoryCanvas") invCanvas = cv;
+                Assert.NotNull(invCanvas, "the inventory's canvas");
+                yield return SaveWithUi(side.sideCamera, invCanvas, $"{name}_1_inventory");
+                File.Copy($"logs/capture_{name}_1_inventory.png", $"{dir}/1_inventory.png", true);
+                hud.Inventory.SetOpen(false);
+                hud.Skills.SetOpen(true);
+                hud.Skills.Select("dig_power_2");
+                yield return new WaitForSeconds(2.5f);
+                yield return SaveWithUi(side.sideCamera, hud.Skills.Title.canvas, $"{name}_2_skill_tree_card");
+                File.Copy($"logs/capture_{name}_2_skill_tree_card.png", $"{dir}/2_skill_tree_card.png", true);
+                int grained = 0;
+                foreach (var img in UnityEngine.Object.FindObjectsByType<UnityEngine.UI.Image>()) if (Meridian.UI.UiPaper.GrainOf(img) != null) grained++;
+                TestContext.Out.WriteLine($"[MERIDIAN] u181: {grained} papers on screen carry the tiled grain");
+                hud.Skills.SetOpen(false);
+                LogAssert.NoUnexpectedReceived();
+            }
+            finally { Meridian.View2D.CartoonStage.Enabled = wasCartoon; }
+        }
+
         /// <summary>U-185 (B-213): the first hour's hint cards at 1080p, each in its moment → coordination/reports/unity/u185/: 1_dig_down (at
         /// the camp), 2_surface_line (just under the line, the arrow at the depth readout), 3_pack_full (a full pack, the arrow at the cue),
         /// 4_climb_up (the jetpack's key), 5_sell (topside with the haul), 6_skill_tree (after the first sale, the arrow at the Rank slot).</summary>

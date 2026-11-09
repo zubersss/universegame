@@ -11,7 +11,8 @@ namespace Meridian.UI
     /// U-124 (contract §11.6, B-151): the paper and sign panels as 9-slice sprites. The importer turns the json's
     /// `"slice": [l, t, r, b]` into the sprite border; here a panel Image switches to Sliced once its key is on disk. A missing key
     /// is probed, never loaded blind (no Addressables error), and the theme's flat fill stays. The art draws 1:1 (one sprite texel per
-    /// canvas pixel at 1080p) so the ink line keeps its weight; the sprite handle lives on the target and goes with it.
+    /// canvas pixel at 1080p) so the ink line keeps its weight; the sprite handle lives on the target and goes with it. U-181 (B-208): the
+    /// flat papers get the grain tiled over them, masked by their own shape.
     /// </summary>
     public static class UiPaper
     {
@@ -27,6 +28,7 @@ namespace Meridian.UI
             Load(target, key, sprite =>
             {
                 Dress(target, sprite);
+                Grain(target, key);
                 InkTexts(target.transform);
                 done?.Invoke(true);
             }, done);
@@ -42,6 +44,7 @@ namespace Meridian.UI
             Load(panel, key, sprite =>
             {
                 Dress(frame, sprite);
+                Grain(frame, key);
                 var size = panel.rectTransform.sizeDelta;
                 var b = BorderOnCanvas(sprite) * BorderReach; // (left, bottom, right, top)
                 frame.rectTransform.sizeDelta = FrameSize(size, b);
@@ -56,6 +59,85 @@ namespace Meridian.UI
         public static Vector2 FrameSize(Vector2 content, Vector4 b) => content + new Vector2(b.x + b.z, b.y + b.w);
         /// <summary>The frame's centre offset so each border reaches outward by its own width. Pure.</summary>
         public static Vector2 FrameOffset(Vector4 b) => new Vector2((b.z - b.x) * 0.5f, (b.w - b.y) * 0.5f);
+
+        // ---- U-181 (B-208): the paper grain, tiled over the flat papers ----
+
+        public const string GrainKey = "ui/panels/grain";
+        /// <summary>The papers B-208 exported flat for the tiled grain (their json's "grain": "ui/panels/grain"; MenuHudTests keeps the two equal).</summary>
+        public static readonly HashSet<string> Grained = new HashSet<string>
+        {
+            "ui/panels/inventory", "ui/panels/pause", "ui/panels/scroll", "ui/panels/settings", "ui/panels/sign", "ui/map/system_panel", "ui/rank/certificate",
+            "ui/hints/climb_up", "ui/hints/dig_down", "ui/hints/pack_full", "ui/hints/sell", "ui/hints/skill_tree", "ui/hints/surface_line",
+        };
+        static Sprite grain;
+        static bool grainAsked;
+        static readonly List<Image> waitingForGrain = new List<Image>();
+
+        /// <summary>A paper's grain layer: its "Grain" child (the paper's own shape, a Mask showing nothing) and the tiled grain under it.</summary>
+        public static Image GrainOf(Image paper)
+        {
+            var g = paper != null ? paper.transform.Find("Grain") : null;
+            var t = g != null ? g.Find("Tile") : null;
+            return t != null ? t.GetComponent<Image>() : null;
+        }
+
+        /// <summary>
+        /// B-208: the grain tiled over a flat paper at 1 texel = 1 canvas px (1 screen px at 1080p), never stretched, inside the paper's wavy
+        /// edge: the first child repeats the paper (same sprite and slicing) as a Mask that draws nothing, the tiled grain its only child, so
+        /// the mask clips the grain alone (the paper's other children, a seal or a cap hanging over its edge, stay whole). Papers not
+        /// exported flat keep none.
+        /// </summary>
+        public static void Grain(Image paper, string key)
+        {
+            var old = paper.transform.Find("Grain");
+            if (!Grained.Contains(key)) { if (old != null) Object.Destroy(old.gameObject); return; }
+            Image shape;
+            if (old == null)
+            {
+                var go = new GameObject("Grain", typeof(RectTransform));
+                go.transform.SetParent(paper.transform, false);
+                Fill((RectTransform)go.transform);
+                shape = go.AddComponent<Image>();
+                shape.raycastTarget = false;
+                go.AddComponent<Mask>().showMaskGraphic = false;
+                var tgo = new GameObject("Tile", typeof(RectTransform));
+                tgo.transform.SetParent(go.transform, false);
+                Fill((RectTransform)tgo.transform);
+                var tile = tgo.AddComponent<Image>();
+                tile.raycastTarget = false;
+                tile.type = Image.Type.Tiled;
+                tile.enabled = false;
+            }
+            else shape = old.GetComponent<Image>();
+            shape.transform.SetAsFirstSibling(); // over the paper, under everything on it
+            shape.sprite = paper.sprite; shape.type = paper.type; shape.fillCenter = true; shape.pixelsPerUnitMultiplier = paper.pixelsPerUnitMultiplier;
+            var tileImg = GrainOf(paper);
+            if (grain != null) { SetGrain(tileImg); return; }
+            if (!waitingForGrain.Contains(tileImg)) waitingForGrain.Add(tileImg);
+            if (grainAsked) return;
+            grainAsked = true;
+            var h = ArtLoad.Asset<IList<Sprite>>(GrainKey); // kept for the session: one 128 px tile every paper shares
+            h.Completed += op =>
+            {
+                if (op.Status != AsyncOperationStatus.Succeeded || op.Result == null || op.Result.Count == 0) { grainAsked = false; return; }
+                grain = op.Result[0];
+                foreach (var w in waitingForGrain) if (w != null) SetGrain(w);
+                waitingForGrain.Clear();
+            };
+        }
+
+        static void SetGrain(Image tile)
+        {
+            if (tile == null) return;
+            tile.sprite = grain;
+            var canvas = tile.canvas;
+            float refPpu = canvas != null ? canvas.referencePixelsPerUnit : 100f;
+            tile.pixelsPerUnitMultiplier = grain.pixelsPerUnit > 0f ? refPpu / grain.pixelsPerUnit : 1f; // a 128-texel tile spans 128 canvas px
+            tile.color = Color.white;
+            tile.enabled = true;
+        }
+
+        static void Fill(RectTransform rt) { rt.anchorMin = Vector2.zero; rt.anchorMax = Vector2.one; rt.offsetMin = rt.offsetMax = Vector2.zero; rt.pivot = new Vector2(0.5f, 0.5f); }
 
         /// <summary>The sprite's border in canvas pixels when drawn 1:1 (the Image's pixels-per-unit set by <see cref="Dress"/>).</summary>
         public static Vector4 BorderOnCanvas(Sprite s) => s != null ? s.border : Vector4.zero;

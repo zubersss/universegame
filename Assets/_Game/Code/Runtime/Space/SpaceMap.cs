@@ -509,6 +509,7 @@ namespace Meridian.Space
                     img.type = Image.Type.Sliced;
                     float refPpu = img.canvas != null ? img.canvas.referencePixelsPerUnit : 100f;
                     img.pixelsPerUnitMultiplier = s.pixelsPerUnit > 0f ? refPpu / s.pixelsPerUnit : 1f;
+                    Meridian.UI.UiPaper.Grain(img, key); // U-181: B-208's grain over the flat paper
                 }
             }
             if (key == "ui/map/title_cartouche" && cartoucheFallback != null) cartoucheFallback.gameObject.SetActive(false);
