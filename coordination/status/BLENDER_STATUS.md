@@ -1,7 +1,8 @@
 # BLENDER STATUS
-Updated: 2026-11-09 13:5x · Session: 11 (resumed ~11:45; the owner restarts all three windows ~14:0x: session names change, the new LEAD messages its name) · older: coordination/status/archive/BLENDER_2026-11-09.md, BLENDER_2026-11-08.md, BLENDER_2026-11-07.md
+Updated: 2026-11-09 14:0x · Session: 12 (resumed 14:03 after the owner's restart; THIS SESSION = zuber-4d; peers seen: zuber-d1, zuber-a0, roles not yet known to me) · older: coordination/status/archive/BLENDER_2026-11-09.md, BLENDER_2026-11-08.md, BLENDER_2026-11-07.md
 
 ## Current task
+**14:0x — session 12 resumed (context rebuilt from CLAUDE.md, the charter, the contract, the board, git).** heavy_unity.lock on file (13:56:50, unity_test PlayMode; no Unity Editor process at 14:03:57, free RAM 1.43 GB: between the chain's parts or left by the restart, LEAD's call, not mine) → files only: desk-checking the six not-yet-run sources in run order (B-229, B-230, B-232, B-231, B-223, B-225) and drafting the B-223 / B-224 / B-225 preview notes (the While-waiting list's last item).
 **13:5x — RESUME HERE.** No lock and no want of mine; every source is committed. UNITY runs U-194 Build 0.6.1 (a multi-lock chain): NO want while it runs. When it has released (LEAD says so), in my lock (LEAD's order 13:5x), each item to LEAD before any export:
 1. B-229 sheet (light; build_hints_v3.py preview, source daf89aad): ui/hints/dig_down's new picture (the shovel mid-scoop + flick) at 1x beside the SURFACE LINE card → export on ACCEPTED (0.6.2).
 2. B-220 Neptune sheet (`python -I blender/scripts/gen_painted_bg.py --continue neptune blender/preview/review_b220_neptune_continue.png`, ~3 min), then Venus deck (`--continue venus`) in its own run; > 8 scenes = its own lock; <= 15 min per lock.
