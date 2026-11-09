@@ -1469,12 +1469,13 @@ def fill_t5(d, M, k=0):
 def fd_t2(k):
     def fn(d, M, _k=0):
         rnd = random.Random(2100 + k)
-        if k == 0:                                                                            # a dead root knot
-            for j in range(4):
-                a = rnd.uniform(0, TAU)
-                G.stroke(d, G.hose_outline(G.bezier((0.0, 0.0), (0.12 * math.cos(a), 0.1 * math.sin(a) + 0.04), (0.24 * math.cos(a + 0.6), 0.14 * math.sin(a + 0.6)), n=8), 0.022),
-                         M["twig_i"], I, cyclic=True)
-            G.stroke(d, G.lumpy_ellipse(0.0, 0.0, 0.08, 0.06, n=12, lump=0.12, seed=2110), M["twig_i"], O, cyclic=True)
+        if k == 0:                                                                            # a loose tangle of pale roots (rev, B-201
+            for (p0, p1, p2, p3), w in ((((-0.30, 0.10), (-0.10, 0.12), (0.05, -0.12), (0.30, -0.06)), 0.020),   # 0.6.0, LEAD: a dark knot
+                                        (((-0.28, -0.08), (-0.05, -0.10), (0.08, 0.12), (0.28, 0.08)), 0.016),   # with roots read as a
+                                        (((-0.22, 0.02), (-0.02, 0.06), (0.12, -0.02), (0.26, 0.12)), 0.012)):   # spider / stick insect):
+                pts = [((1 - t) ** 3 * p0[0] + 3 * (1 - t) ** 2 * t * p1[0] + 3 * (1 - t) * t * t * p2[0] + t ** 3 * p3[0],
+                        (1 - t) ** 3 * p0[1] + 3 * (1 - t) ** 2 * t * p1[1] + 3 * (1 - t) * t * t * p2[1] + t ** 3 * p3[1]) for t in [i / 14 for i in range(15)]]
+                G.stroke(d, G.hose_outline(pts, w), M["clay_i"], I * 0.7, cyclic=True)        # three crossing S-curves, no body, no legs
         elif k == 1:                                                                          # a clay concretion with growth rings
             G.stroke(d, G.lumpy_ellipse(0.0, 0.0, 0.22, 0.16, n=18, lump=0.08, seed=2111), M["clay_i"], O, cyclic=True)
             for r in (0.13, 0.07):
@@ -1500,11 +1501,15 @@ def fd_t3(k):
             for x0, h, lean in ((-0.12, 0.26, -0.05), (0.02, 0.34, 0.0), (0.14, 0.22, 0.06)):
                 G.stroke(d, [(x0 - 0.045, -0.18), (x0 + 0.045, -0.18), (x0 + 0.045 + lean, -0.18 + h * 0.8), (x0 + lean, -0.18 + h), (x0 - 0.045 + lean, -0.18 + h * 0.8)],
                          M["bone_i"], I, cyclic=True)
-        else:                                                                                 # a book of mica
-            for j in range(4):
-                z = -0.08 + 0.05 * j
-                G.stroke(d, [(-0.2 + 0.02 * j, z), (0.18 + 0.02 * j, z + 0.01), (0.2 + 0.02 * j, z + 0.04), (-0.18 + 0.02 * j, z + 0.03)],
-                         M["rock_lit_i" if j % 2 else "cream_i"], I, cyclic=True)
+        else:                                                                                 # a book of mica (rev, B-201 0.6.0: four
+            book = [(-0.21, -0.09), (0.19, -0.08), (0.25, 0.10), (-0.15, 0.09)]               # inked sheets read as a dark grate):
+            G.stroke(d, book, M["cream"], 0.0, cyclic=True)                                   # one pale silhouette, the sheets as thin
+            for j in range(3):                                                                # unlined bands, a lit top edge
+                z = -0.045 + 0.05 * j
+                G.stroke(d, [(-0.19 + 0.02 * j, z), (0.20 + 0.02 * j, z + 0.008), (0.205 + 0.02 * j, z + 0.018), (-0.185 + 0.02 * j, z + 0.01)],
+                         M["rock_lit"], 0.0, cyclic=True)
+            G.stroke(d, [(-0.15, 0.09), (0.25, 0.10), (0.23, 0.065), (-0.16, 0.06)], M["bone"], 0.0, cyclic=True)
+            G.stroke(d, book, M["ink"], I, cyclic=True)
     return fn
 
 
