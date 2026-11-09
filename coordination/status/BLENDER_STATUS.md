@@ -1,20 +1,26 @@
 # BLENDER STATUS
-Updated: 2026-11-09 12:2x · Session: 11 (resumed ~11:45 after a restart; context rebuilt from the repo; LEAD = zuber-67, UNITY = zuber-15, me = zuber-61) · trimmed under D-113 at 14:0x; older: coordination/status/archive/BLENDER_2026-11-08.md, BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
+Updated: 2026-11-09 13:5x · Session: 11 (resumed ~11:45; the owner restarts all three windows ~14:0x: session names change, the new LEAD messages its name) · older: coordination/status/archive/BLENDER_2026-11-09.md, BLENDER_2026-11-08.md, BLENDER_2026-11-07.md
 
 ## Current task
-**13:4x:** B-227 EXPORTED (3a46eb91, 8 files, 0 .meta; for 0.6.1). B-220 Saturn + Uranus ACCEPTED (my lock 13:21:56-13:38:01: 16 min, over 15 because Uranus has 16 scenes, 721 s; logged by LEAD, no penalty; rule: a planet with > 8 scenes gets its own lock). The continue / fade list for U-191: coordination/reports/blender/b220_continue_rows.md. B-229 source daf89aad (the DIG DOWN card's picture: the shovel mid-scoop + flick). Waiting on UNITY's U-194 Build 0.6.1 (a multi-lock chain: no want of mine between its locks). Then in my lock: B-229 sheet (light) → Neptune → Venus deck → export all five giants + Venus together. B-228 (the 0.6.1 smoke read, read only) when U-194's smoke lands. LEAD's heads-up: the owner's playtest asks for a higher-quality hand-drawn style with rigged characters; cards after 0.6.1.
-**13:2x:** my lock 13:07:26-13:10:43 (released for UNITY's want, LEAD's rule): the B-227 rev 2 sheet (peak 50 MB) and B-220 Jupiter (167 s, peak 537 MB) → LEAD ACCEPTED both (13:2x). Next turn (want on file behind U-193's slice): the B-227 export FIRST (four icons + json, before U-194's build; never beside UNITY's batch) → git show --stat to LEAD; then B-220 saturn / uranus / neptune / venus sheets; all five giants' bands export together once the last is accepted. U-191 list (Jupiter): continues = deck1-3 / deep layer0 + layer1, spot layer0; fades = every layer2, spot layer1 (watch: deck3 layer0's faint lines repeating every 64 rows at 1x).
-**12:2x: every source in my queue is committed; all renders wait for the gate.** UNITY's want (U-193 slice 2) is on file and goes first (RAM 0.51 GB at 12:17; USER-37 asks the owner to close the ChatGPT app). Files only until UNITY has run. Then, in my lock (LEAD's order 12:1x):
-1. B-227 rev 2 sheet (light; all five tool icons) → LEAD → export the four on ACCEPTED (0.6.1 if before U-194's build). Beam + survey ACCEPTED 12:0x; the builder redrawn (a plank bucket tipped to pour onto a ghost block on a ground line: no plus, no brackets, D-087), the grapple inked heavier (rev 2 source b506e10d).
-2. B-220's five sheets (jupiter, saturn, uranus, neptune, venus; LEAD's 1.5 GB gate, <= 15 min, yield if want_unity appears) → LEAD with the per-layer list (continues / fades) for U-191 → export on ACCEPTED. The sparse-layer rule is LEAD-ruled (11:5x): continue_rows 64 only where the bottom band is >= 25 % solid; a sparse layer fades out over its last 64 rows with no continue_rows; Neptune deck2's flash lifted (4604620b). The first sheets (11:27-11:40) showed why: wisps / rain / lightning as dashes, the CRUSH band ghosted into stripes, Neptune's storm ring as slats.
-3. B-224 preview (veil serpent sources f95c5461).
-4. B-223 preview (sources 2f4a47f6: build_bay_v3.py - the bay in v3 under DockingBay's existing keys backgrounds/waystation/layer0..2 at 1920x1080, no code change; + icons/catalogue/camp).
-5. B-225 preview (sources 6f107fa2: sea_under's bolder shafts, a 2 m rippled light ceiling, + layer4 shallow_seabed for the shore's first 40 m; the review at 1 / 3 / 10 / 40 m beside a 1:8 beach slope).
+**13:5x — RESUME HERE.** No lock and no want of mine; every source is committed. UNITY runs U-194 Build 0.6.1 (a multi-lock chain): NO want while it runs. When it has released (LEAD says so), in my lock (LEAD's order 13:5x), each item to LEAD before any export:
+1. B-229 sheet (light; build_hints_v3.py preview, source daf89aad): ui/hints/dig_down's new picture (the shovel mid-scoop + flick) at 1x beside the SURFACE LINE card → export on ACCEPTED (0.6.2).
+2. B-220 Neptune sheet (`python -I blender/scripts/gen_painted_bg.py --continue neptune blender/preview/review_b220_neptune_continue.png`, ~3 min), then Venus deck (`--continue venus`) in its own run; > 8 scenes = its own lock; <= 15 min per lock.
+3. On ACCEPTED of both: export all five giants' bands + venus/deck together (tools/blender_render.ps1 on each planet's painted rows; the export logs "B-220 <key> layerN: continues | feathered"), then update coordination/reports/blender/b220_continue_rows.md for U-191 (Jupiter / Saturn / Uranus rows filled and ACCEPTED).
+4. B-230 sheet (build_back_wall_v3.py, source 7b7f91b6; per planet: `python -I build_back_wall_v3.py <png> <planet>`; manifest kit row terrain/common/back_walls).
+5. B-232 sheet (build_dig_debris_v3.py, source 88ab7c5b; kit row fx/dig_debris).
+6. B-231 design sheet (build_surveyor_v5.py, source eb51b232; writes the bone JSON beside the review): PREVIEWS ONLY until the owner's look-over on the C5 page (D-185); interleave its source work whenever UNITY holds the lock.
+Then the older previews: B-224 (veil serpent, f95c5461), B-223 (the bay + camp icon, 2f4a47f6), B-225 (the sea shallows, 6f107fa2).
+B-228 (the 0.6.1 smoke read, read only, no lock) when U-194's smoke lands: prep in coordination/reports/blender/smoke_read_0.6.1.md.
+NOT YET RUN (expect first-run fixes): B-223, B-225, B-229, B-230, B-231, B-232. How I ran light sheets this session: list coordination/locks (abort on any other heavy_ / want_), read RAM in its own call, write heavy_blender.lock, run Blender's bundled `python.exe -I <script> <png>` with a working-set watchdog, delete the lock in `finally`.
+- B-220 rule (LEAD-ruled 11:5x): continue_rows 64 only where a layer's bottom band is >= 25 % solid; a sparse layer fades out over its last 64 rows with no continue_rows. B-223's bay keeps DockingBay's keys backgrounds/waystation/layer0..2 at 1920x1080 (no code change). The owner's v5 direction (D-185): cards after 0.6.1; v4 keeps shipping.
 - **Rule (LEAD 09:2x, after two slips):** the first line of ANY call that starts python lists coordination/locks (abort on another role's heavy_ / want_) and reads RAM.
 - **Rule from LEAD 18:2x (D-087):** the Beam reads as a mining tool, never a gun. No pistol grip or trigger, nothing hanging under the body: a cable-fed, arm-mounted emitter with a cutting nozzle.
 - Waiting on others: B-207 closes on PawsOnTheGround green; B-204 on UNITY's capture; B-172 on U-151. UNITY drops the three lance .meta files.
 
 ## Last completed
+- 11-09 13:30: B-227 exported (3a46eb91, LEAD-accepted rev 2): icons/tools/{beam, grapple, survey, builder} 128 + json, 8 files, 0 .meta; for 0.6.1's HUD tool slot.
+- 11-09 13:10-13:38: B-220 Jupiter, Saturn, Uranus sheets ACCEPTED (the sparse-layer rule; the U-191 list in reports/blender/b220_continue_rows.md); export after Neptune + Venus.
+- 11-09 12:5x-13:5x (files only): B-228 prep, the D1 audit's new keys, credits upkeep (f8898839); sources B-229 / B-231 / B-230 / B-232 (daf89aad, eb51b232, 7b7f91b6, 88ab7c5b).
 - 11-09 11:2x: B-222 exported (02462247, LEAD-accepted): icons/thruster_mk2/base, a steel bell with a brass collar; the other 49 item icons byte-identical. For 0.6.1.
 - 11-09 11:2x: B-226 exported (ab1c524f, LEAD-accepted after the icon fix): props/rig/shovel 192x64 (pivot at the D-grip; json grip / blade_tip / muzzle), fx/shovel_flick/base (6 x 128, clip flick), icons/tools/shovel 128. For U-193 / 0.6.1.
 - 11-09 11:10: B-221 exported (ea3f75fb, LEAD-accepted 10:5x): ui/title/background, the v3 title scene (Earth's camp at dusk), 1920x1080 + json. For 0.6.1.
@@ -57,4 +63,4 @@ none. Waiting on: U-151 (B-172's export), U-152 (B-174).
 none.
 
 ## HeavyJobLock
-none held (last: the B-220 sheets 11:2x-11:40); no want on file: UNITY's want (U-193 slice 2, 11:43) goes first and mine is filed only once heavy_unity.lock appears (D-039). No background waiters: I poll in the foreground.
+none held (last: 13:21:56-13:38:01, the B-227 export + B-220 Saturn / Uranus); no want on file: UNITY's U-194 chain runs, and LEAD's rule is no want of mine until it has released. No background waiters: I poll in the foreground.
