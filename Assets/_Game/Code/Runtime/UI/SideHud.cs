@@ -135,9 +135,19 @@ namespace Meridian.UI
             SuitFill = UiKit.Bar(root, "Suit", tl, new Vector2(24f, -288f), new Vector2(220f, 6f), new Color(0.6f, 0.85f, 1f, 1f));
             SuitRateText = UiKit.Text(root, "SuitRate", tl, new Vector2(252f, -278f), new Vector2(120f, 24f), 16);
             SuitRateText.text = "";
-            // U-174: the depth under the Surface Line, top centre; the pack-full cue under it.
-            DepthText = UiKit.Text(root, "Depth", new Vector2(0.5f, 1f), new Vector2(-200f, -24f), new Vector2(400f, 30f), 20, true, TextAnchor.MiddleCenter, theme.text);
+            // U-174 (LEAD 18:5x): the depth under the Surface Line, top centre, in ink on a paper tag like the other readouts, the tier's colour
+            // as a small chip; the pack-full cue under it.
+            var top = new Vector2(0.5f, 1f);
+            DepthText = UiKit.Text(root, "Depth", top, new Vector2(-132f, -20f), new Vector2(296f, 26f), 17, true, TextAnchor.MiddleLeft, UiKit.Ink);
+            DepthText.rectTransform.pivot = new Vector2(0f, 1f); // its left edge at x, as the tag's and the chip's
+            DepthText.rectTransform.anchoredPosition = new Vector2(-132f, -20f);
             DepthText.text = "";
+            DepthTag = Tag(root, "DepthTag", top, new Vector2(-170f, -17f), new Vector2(340f, 32f), new Vector2(0f, 1f), DepthText);
+            DepthChip = UiKit.Panel(root, "DepthChip", top, new Vector2(-160f, -24f), new Vector2(18f, 18f), Color.gray);
+            DepthChip.rectTransform.pivot = new Vector2(0f, 1f);
+            DepthChip.rectTransform.anchoredPosition = new Vector2(-160f, -24f);
+            UiKit.InkEdges(DepthChip.rectTransform, 1f, UiKit.Ink);
+            DepthTag.enabled = false; DepthChip.enabled = false;
             PackText = UiKit.Text(root, "PackFull", new Vector2(0.5f, 1f), new Vector2(-200f, -58f), new Vector2(400f, 26f), 17, true, TextAnchor.MiddleCenter, theme.warning);
             PackText.text = "PACK FULL";
             PackText.enabled = false;
@@ -201,6 +211,8 @@ namespace Meridian.UI
 
         /// <summary>U-174: the depth readout under the Surface Line ("DEPTH 12 m · SUBSOIL"; blank topside) and the pack-full cue.</summary>
         public Text DepthText { get; private set; }
+        public Image DepthTag { get; private set; }
+        public Image DepthChip { get; private set; }
         public Text PackText { get; private set; }
         Meridian.Terrain.TerrainStreamer depthTerrain;
         int shownDepth = int.MinValue;
@@ -221,9 +233,14 @@ namespace Meridian.UI
             if (d != shownDepth)
             {
                 shownDepth = d;
+                bool on = d >= 0;
+                if (DepthTag.enabled != on) { DepthTag.enabled = on; DepthChip.enabled = on; foreach (var e in DepthChip.GetComponentsInChildren<Image>()) e.enabled = on; foreach (var e in DepthTag.GetComponentsInChildren<Image>()) e.enabled = on; }
                 if (d < 0) DepthText.text = "";
                 else
                 {
+                    var tiers = Meridian.Mining.D1Tables.Current;
+                    int tierNow = tiers.TierIndex(d);
+                    if (tierNow < tiers.tiers.Length) DepthChip.color = tiers.tiers[tierNow].ChipColor;
                     depthStrings ??= new string[1024];
                     int k = Mathf.Min(d, depthStrings.Length - 1);
                     if (depthStrings[k] == null)

@@ -44,6 +44,7 @@ namespace Meridian.UI
         void OnDestroy()
         {
             PanelInput.Close(this);
+            ItemIcons.Loaded -= OnIcons;
             if (toggle != null) toggle.performed -= OnToggle;
             if (IsOpen) AnyOpen = false;
         }
@@ -81,22 +82,47 @@ namespace Meridian.UI
             return LastPaid;
         }
 
+        // U-174 (LEAD 18:5x): ink at the HUD's size in aligned columns (icon, name, count, Scrip, kg), the total on its own rule.
+        const float ColIcon = 34f, ColName = 74f, ColCount = 330f, ColScrip = 420f, ColKg = 540f, RowH = 34f, Top = -96f;
+        readonly List<Image> icons = new List<Image>();
+        readonly List<Text> names = new List<Text>(), counts = new List<Text>(), scrips = new List<Text>(), kgs = new List<Text>();
+
         void Build()
         {
-            var theme = UiTheme.Active;
             var canvas = UiKit.Canvas(transform, "SellCanvas", 114);
             var back = UiKit.ModalPanel(canvas.transform, "Sell", new Vector2(720f, 640f), out root);
             UiPaper.ApplyModal(back, Meridian.Art.ArtKeys.Ui.PanelScroll, _ => { });
             var tl = new Vector2(0f, 1f);
-            UiKit.Text(back.transform, "Header", tl, new Vector2(28f, -32f), new Vector2(660f, 30f), 22, true, TextAnchor.MiddleLeft, theme.text).text = "SELL THE PACK";
+            var ink = UiKit.Ink;
+            UiKit.Text(back.transform, "Header", tl, new Vector2(34f, -30f), new Vector2(640f, 30f), 22, true, TextAnchor.MiddleLeft, ink).text = "SELL THE PACK";
+            Text Head(string n, float x, float w, TextAnchor a, string t) { var h = UiKit.Text(back.transform, n, tl, new Vector2(x, -62f), new Vector2(w, 22f), 14, true, a, UiKit.InkFaded); h.text = t; return h; }
+            Head("HName", ColName, 240f, TextAnchor.MiddleLeft, "MATERIAL");
+            Head("HCount", ColCount - 60f, 80f, TextAnchor.MiddleRight, "COUNT");
+            Head("HScrip", ColScrip - 20f, 100f, TextAnchor.MiddleRight, "SCRIP");
+            Head("HKg", ColKg - 20f, 100f, TextAnchor.MiddleRight, "KG");
+            UiKit.Panel(back.transform, "HeadRule", tl, new Vector2(34f, -84f), new Vector2(620f, 1.5f), ink);
             for (int i = 0; i < MaxLines; i++)
-                Lines.Add(UiKit.Text(back.transform, "Line" + i, tl, new Vector2(28f, -86f - i * 38f), new Vector2(660f, 30f), 17, false, TextAnchor.MiddleLeft, theme.text));
-            Total = UiKit.Text(back.transform, "Total", tl, new Vector2(28f, -480f), new Vector2(660f, 30f), 19, true, TextAnchor.MiddleLeft, theme.text);
-            Note = UiKit.Text(back.transform, "Note", tl, new Vector2(28f, -516f), new Vector2(660f, 30f), 15, false, TextAnchor.MiddleLeft, theme.label);
-            sell = UiKit.ActionButton(back.transform, "SELL ALL", tl, new Vector2(28f, -570f), new Vector2(260f, 48f), () => SellAll());
+            {
+                float y = Top - i * RowH;
+                var icon = UiKit.Panel(back.transform, "Icon" + i, tl, new Vector2(ColIcon, y + 2f), new Vector2(28f, 28f), Color.white);
+                icon.preserveAspect = true;
+                icons.Add(icon);
+                names.Add(UiKit.Text(back.transform, "Name" + i, tl, new Vector2(ColName, y), new Vector2(240f, 28f), 17, false, TextAnchor.MiddleLeft, ink));
+                counts.Add(UiKit.Text(back.transform, "Count" + i, tl, new Vector2(ColCount - 60f, y), new Vector2(80f, 28f), 17, false, TextAnchor.MiddleRight, ink));
+                scrips.Add(UiKit.Text(back.transform, "Scrip" + i, tl, new Vector2(ColScrip - 20f, y), new Vector2(100f, 28f), 17, false, TextAnchor.MiddleRight, ink));
+                kgs.Add(UiKit.Text(back.transform, "Kg" + i, tl, new Vector2(ColKg - 20f, y), new Vector2(100f, 28f), 17, false, TextAnchor.MiddleRight, ink));
+                Lines.Add(names[i]);
+            }
+            UiKit.Panel(back.transform, "TotalRule", tl, new Vector2(34f, Top - MaxLines * RowH + 4f), new Vector2(620f, 2f), ink);
+            Total = UiKit.Text(back.transform, "Total", tl, new Vector2(34f, Top - MaxLines * RowH - 8f), new Vector2(620f, 30f), 19, true, TextAnchor.MiddleLeft, ink);
+            Note = UiKit.Text(back.transform, "Note", tl, new Vector2(34f, Top - MaxLines * RowH - 42f), new Vector2(620f, 24f), 15, false, TextAnchor.MiddleLeft, UiKit.InkFaded);
+            sell = UiKit.ActionButton(back.transform, "SELL ALL", tl, new Vector2(34f, -572f), new Vector2(260f, 48f), () => SellAll());
+            ItemIcons.Loaded += OnIcons;
             root.SetActive(false);
             enabled = false;
         }
+
+        void OnIcons() { if (IsOpen) Redraw(); }
 
         void Redraw()
         {
@@ -111,13 +137,20 @@ namespace Meridian.UI
                     var st = inv[s];
                     if (st.IsEmpty || !tables.Sellable(st.itemId)) continue;
                     var def = ItemRegistry.Get(st.itemId);
-                    Lines[line++].text = $"{(def != null ? def.name : "?")} × {st.count}   {Mathf.RoundToInt(st.count * tables.Scrip(st.itemId))} Scrip   {st.count * tables.Kg(st.itemId):0.#} kg";
+                    var sp = ItemIcons.Get(st.itemId);
+                    icons[line].sprite = sp;
+                    icons[line].enabled = sp != null;
+                    names[line].text = def != null ? def.name : "?";
+                    counts[line].text = st.count.ToString();
+                    scrips[line].text = Mathf.RoundToInt(st.count * tables.Scrip(st.itemId)).ToString();
+                    kgs[line].text = (st.count * tables.Kg(st.itemId)).ToString("0.#");
+                    line++;
                 }
             }
-            for (int i = line; i < MaxLines; i++) Lines[i].text = "";
+            for (int i = line; i < MaxLines; i++) { icons[i].enabled = false; names[i].text = counts[i].text = scrips[i].text = kgs[i].text = ""; }
             bool topside = Topside;
             int value = state != null ? DigRun.PackValue(state.inventory, false) : 0;
-            Total.text = state != null ? $"TOTAL {value} Scrip    pack {state.inventory.Weight:0.#} / {state.inventory.LimitKg:0.#} kg    purse {state.scrip} Scrip" : "";
+            Total.text = state != null ? $"TOTAL {value} Scrip      pack {state.inventory.Weight:0.#} / {state.inventory.LimitKg:0.#} kg      purse {state.scrip}" : "";
             Note.text = !topside ? "Topside only: climb above the Surface Line to sell." : line == 0 ? "Nothing to sell: dig deeper for materials." : LastPaid > 0 ? $"Sold for {LastPaid} Scrip." : "";
             if (sell != null) sell.interactable = topside && line > 0;
         }

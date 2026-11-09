@@ -2627,13 +2627,61 @@ namespace Meridian.Tests
                 Directory.CreateDirectory(dir);
                 var cam = side.sideCamera;
 
+                // A frame; with `ui`, the overlay canvas drawn by a plain UI camera over the scene's render (LEAD 18:5x: through the scene camera the
+                // HUD's ink went through the film pass and the scene's light: pale and blurred; the game draws overlays crisp, as the smoke shows).
                 IEnumerator Shot(string label, Canvas ui = null)
                 {
-                    RenderMode mode = RenderMode.ScreenSpaceOverlay;
-                    if (ui != null) { mode = ui.renderMode; ui.renderMode = RenderMode.ScreenSpaceCamera; ui.worldCamera = cam; ui.planeDistance = 1f; }
-                    yield return Save(cam, $"{name}_{label}");
-                    if (ui != null) ui.renderMode = mode;
+                    if (ui == null)
+                    {
+                        yield return Save(cam, $"{name}_{label}");
+                        File.Copy($"logs/capture_{name}_{label}.png", $"{dir}/{label}.png", true);
+                        yield break;
+                    }
+                    // Both cameras get their 1920x1080 targets before the layout frame: the batch Editor's screen is small, and a canvas laid out
+                    // at it rasterised its letters small and scaled them up (pale, soft ink; the player's own frames are crisp, smoke_0.5.1).
+                    var sceneRt = new RenderTexture(1920, 1080, 24, RenderTextureFormat.ARGB32);
+                    var uiRt = new RenderTexture(1920, 1080, 24, RenderTextureFormat.ARGB32);
+                    var uiGo = new GameObject("CaptureUiCamera");
+                    var uiCam = uiGo.AddComponent<Camera>();
+                    uiCam.orthographic = true;
+                    uiCam.cullingMask = 1 << ui.gameObject.layer;
+                    uiCam.clearFlags = CameraClearFlags.SolidColor;
+                    uiCam.backgroundColor = new Color(0f, 0f, 0f, 0f);
+                    uiCam.targetTexture = uiRt;
+                    cam.targetTexture = sceneRt;
+                    var mode = ui.renderMode; var wc = ui.worldCamera;
+                    ui.renderMode = RenderMode.ScreenSpaceCamera; ui.worldCamera = uiCam; ui.planeDistance = 1f;
+                    cam.aspect = 1920f / 1080f; uiCam.aspect = cam.aspect;
+                    yield return null;
+                    yield return null;
+                    cam.Render(); uiCam.Render();
+                    Texture2D Read(RenderTexture r)
+                    {
+                        var prev = RenderTexture.active;
+                        RenderTexture.active = r;
+                        var tx = new Texture2D(1920, 1080, TextureFormat.RGBA32, false);
+                        tx.ReadPixels(new Rect(0, 0, 1920, 1080), 0, 0);
+                        tx.Apply();
+                        RenderTexture.active = prev;
+                        return tx;
+                    }
+                    var sceneTex = Read(sceneRt); var uiTex = Read(uiRt);
+                    cam.targetTexture = null; uiCam.targetTexture = null;
+                    // The UI over the scene: its colour came out premultiplied (drawn over a clear target) and its alpha squared (the UI blend
+                    // writes alpha with SrcAlpha too), so the coverage is the alpha's square root.
+                    var sp = sceneTex.GetPixels32(); var up = uiTex.GetPixels32();
+                    for (int k = 0; k < sp.Length; k++)
+                    {
+                        float a = Mathf.Sqrt(up[k].a / 255f);
+                        sp[k] = new Color32((byte)Mathf.Min(255, up[k].r + sp[k].r * (1f - a)), (byte)Mathf.Min(255, up[k].g + sp[k].g * (1f - a)), (byte)Mathf.Min(255, up[k].b + sp[k].b * (1f - a)), 255);
+                    }
+                    sceneTex.SetPixels32(sp); sceneTex.Apply();
+                    File.WriteAllBytes($"logs/capture_{name}_{label}.png", sceneTex.EncodeToPNG());
                     File.Copy($"logs/capture_{name}_{label}.png", $"{dir}/{label}.png", true);
+                    UnityEngine.Object.Destroy(sceneTex); UnityEngine.Object.Destroy(uiTex);
+                    sceneRt.Release(); uiRt.Release(); UnityEngine.Object.Destroy(sceneRt); UnityEngine.Object.Destroy(uiRt);
+                    ui.renderMode = mode; ui.worldCamera = wc;
+                    UnityEngine.Object.Destroy(uiGo);
                 }
 
                 // The surveyor in a 3 × 3 m hollow `depth` m under the Surface Line at x, the camera following.
@@ -2647,9 +2695,15 @@ namespace Meridian.Tests
                     yield return null;
                     float until = Time.realtimeSinceStartup + 15f;
                     while (!t.IsSettled && Time.realtimeSinceStartup < until) yield return null;
-                    for (int c = fx - 1; c <= fx + 1; c++) for (int y = fy; y <= fy + 2; y++) t.SetTile(c, y, Meridian.Terrain.TileId.Air);
+                    // LEAD 18:5x: the room dug with real Beam strokes (round scoops, D-168), not a carved rectangle.
+                    var rig = side.rig; var owner = rig.owner; rig.owner = null;
+                    try { foreach (float dy in new[] { 0.7f, 1.2f, 1.7f, 2.2f }) foreach (float dx in new[] { -1.1f, -0.55f, 0f, 0.55f, 1.1f }) rig.Dig(new Vector2(fx + 0.5f + dx, fy + dy)); }
+                    finally { rig.owner = owner; }
                     yield return new WaitForFixedUpdate();
-                    b.position = new Vector2(fx + 0.5f, fy + 0.05f); player.transform.position = b.position; b.linearVelocity = Vector2.zero;
+                    float floor = fy;
+                    foreach (var h in Physics2D.RaycastAll(new Vector2(fx + 0.5f, fy + 2.3f), Vector2.down, 4f))
+                        if (h.collider is EdgeCollider2D && h.collider.GetComponent<Meridian.Terrain.TerrainChunk>() != null) { floor = h.point.y; break; }
+                    b.position = new Vector2(fx + 0.5f, floor + 0.05f); player.transform.position = b.position; b.linearVelocity = Vector2.zero;
                     b.simulated = true;
                     var follow = cam.GetComponent<Meridian.Player.CameraFollow>();
                     if (follow != null) { follow.enabled = true; follow.SnapToTarget(); }

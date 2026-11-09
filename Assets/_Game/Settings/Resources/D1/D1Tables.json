@@ -10,11 +10,11 @@
   "waystationBonus": 0.25,
   "pocketCount": 3,
   "tiers": [
-    { "name": "Topsoil", "fromM": 0,   "hardness": 1,  "materialChance": 0.05 },
-    { "name": "Subsoil", "fromM": 10,  "hardness": 2,  "materialChance": 0.09 },
-    { "name": "Stone",   "fromM": 40,  "hardness": 4,  "materialChance": 0.11 },
-    { "name": "Deep",    "fromM": 100, "hardness": 8,  "materialChance": 0.12 },
-    { "name": "Core",    "fromM": 200, "hardness": 16, "materialChance": 0.12 }
+    { "name": "Topsoil", "chip": "#8C5A33", "fromM": 0,   "hardness": 1,  "materialChance": 0.05 },
+    { "name": "Subsoil", "chip": "#B8843F", "fromM": 10,  "hardness": 2,  "materialChance": 0.09 },
+    { "name": "Stone", "chip": "#7E7F86",   "fromM": 40,  "hardness": 4,  "materialChance": 0.11 },
+    { "name": "Deep", "chip": "#46516F",    "fromM": 100, "hardness": 8,  "materialChance": 0.12 },
+    { "name": "Core", "chip": "#9E3828",    "fromM": 200, "hardness": 16, "materialChance": 0.12 }
   ],
   "planets": [
     { "id": "Earth", "hardness": 1.0, "tiers": [
@@ -62,12 +62,12 @@
     { "item": "deep_core_sample", "scrip": 150, "kg": 3 },
     { "item": "solarite", "scrip": 160, "kg": 1 },
     { "item": "deep_diamond", "scrip": 300, "kg": 0.5 },
-    { "item": "ring_rock", "scrip": 25, "kg": 0 },
-    { "item": "ring_ice", "scrip": 30, "kg": 0 },
-    { "item": "methane_ice", "scrip": 20, "kg": 0 },
-    { "item": "ammonia_ice", "scrip": 25, "kg": 0 },
-    { "item": "superionic_ice", "scrip": 400, "kg": 0 },
-    { "item": "helium3_condensate", "scrip": 500, "kg": 0 },
-    { "item": "metallic_hydrogen", "scrip": 600, "kg": 0 }
+    { "item": "ring_rock", "scrip": 25, "kg": 2 },
+    { "item": "ring_ice", "scrip": 30, "kg": 1.5 },
+    { "item": "methane_ice", "scrip": 20, "kg": 1.5 },
+    { "item": "ammonia_ice", "scrip": 25, "kg": 1.5 },
+    { "item": "superionic_ice", "scrip": 400, "kg": 2 },
+    { "item": "helium3_condensate", "scrip": 500, "kg": 1 },
+    { "item": "metallic_hydrogen", "scrip": 600, "kg": 2 }
   ]
 }

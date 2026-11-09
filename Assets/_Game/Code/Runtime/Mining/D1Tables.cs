@@ -14,7 +14,13 @@ namespace Meridian.Mining
     [Serializable]
     public sealed class D1Tables
     {
-        [Serializable] public sealed class Tier { public string name; public float fromM; public float hardness = 1f; public float materialChance; }
+        [Serializable] public sealed class Tier
+        {
+            public string name; public float fromM; public float hardness = 1f; public float materialChance;
+            /// <summary>The tier's colour chip on the HUD's depth tag (#RRGGBB).</summary>
+            public string chip;
+            public Color ChipColor => ColorUtility.TryParseHtmlString(chip, out var c) ? c : Color.gray;
+        }
         [Serializable] public sealed class Row { public string item; public float weight; public bool coldTrapOnly; public string elseItem; }
         [Serializable] public sealed class TierTable { public Row[] rows; }
         [Serializable] public sealed class Planet { public string id; public float hardness = 1f; public TierTable[] tiers; }
