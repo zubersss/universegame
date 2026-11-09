@@ -1,0 +1,397 @@
+fileFormatVersion: 2
+guid: 6c2e8abb17451b54d8421b1a0af96868
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 6970086440498117299
+    second: scrip_shower_color_0
+  - first:
+      213: -170980359322706296
+    second: scrip_shower_color_1
+  - first:
+      213: -669318014521735146
+    second: scrip_shower_color_2
+  - first:
+      213: -1420213372776096596
+    second: scrip_shower_color_3
+  - first:
+      213: -7193654834796831356
+    second: scrip_shower_color_4
+  - first:
+      213: -1434666390584888395
+    second: scrip_shower_color_5
+  - first:
+      213: 6848966967100724933
+    second: scrip_shower_color_6
+  - first:
+      213: 4110021413862255059
+    second: scrip_shower_color_7
+  - first:
+      213: -5101254696780035258
+    second: scrip_shower_color_8
+  - first:
+      213: -4009038281844335741
+    second: scrip_shower_color_9
+  - first:
+      213: 8773891385193997112
+    second: scrip_shower_color_10
+  - first:
+      213: 8990147654426781877
+    second: scrip_shower_color_11
+  - first:
+      213: -3660546215399848370
+    second: scrip_shower_color_12
+  - first:
+      213: 771298271101523683
+    second: scrip_shower_color_13
+  - first:
+      213: -5793000807561160918
+    second: scrip_shower_color_14
+  - first:
+      213: 8353853478046671738
+    second: scrip_shower_color_15
+  - first:
+      213: 3634604964128621162
+    second: scrip_shower_color_16
+  - first:
+      213: 3735333003980027511
+    second: scrip_shower_color_17
+  - first:
+      213: -3496733735312093438
+    second: scrip_shower_color_18
+  - first:
+      213: -7428127773302328840
+    second: scrip_shower_color_19
+  - first:
+      213: 6145794552817730726
+    second: scrip_shower_color_20
+  - first:
+      213: -4693095479516714887
+    second: scrip_shower_color_21
+  - first:
+      213: 1559617824912871953
+    second: scrip_shower_color_22
+  - first:
+      213: -7480406988643607454
+    second: scrip_shower_color_23
+  - first:
+      213: 3274982236457577396
+    second: scrip_shower_color_24
+  - first:
+      213: -6716700675929517368
+    second: scrip_shower_color_25
+  - first:
+      213: 7972306454167000987
+    second: scrip_shower_color_26
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 9
+  spritePivot: {x: 0.5, y: 0.151}
+  spritePixelsToUnits: 64
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationMethod: 0
+  spriteTessellationDetail: -1
+  spriteGeometrySubdivision: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 2
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: 25
+    textureCompression: 1
+    compressionQuality: 100
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 1
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: scrip_shower_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 192
+        height: 192
+      alignment: 9
+      pivot: {x: 0.5, y: 0.151}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 40f3a271f2229f949b0ba2c590bce8da
+      internalID: -567165657
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: scrip_shower_1
+      rect:
+        serializedVersion: 2
+        x: 196
+        y: 0
+        width: 192
+        height: 192
+      alignment: 9
+      pivot: {x: 0.5, y: 0.151}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: cb4d5b14822e1ba479d9cffa12a81490
+      internalID: -1792712122
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: scrip_shower_2
+      rect:
+        serializedVersion: 2
+        x: 392
+        y: 0
+        width: 192
+        height: 192
+      alignment: 9
+      pivot: {x: 0.5, y: 0.151}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a2ab42e65e7abf4469160154b99777d8
+      internalID: -745119566
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: scrip_shower_3
+      rect:
+        serializedVersion: 2
+        x: 588
+        y: 0
+        width: 192
+        height: 192
+      alignment: 9
+      pivot: {x: 0.5, y: 0.151}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3af20f2521f336f4c9fb30fa93b83c78
+      internalID: -425114160
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: scrip_shower_4
+      rect:
+        serializedVersion: 2
+        x: 784
+        y: 0
+        width: 192
+        height: 192
+      alignment: 9
+      pivot: {x: 0.5, y: 0.151}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1ed41d213437c484f938f8f59846f1e6
+      internalID: -2079916612
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: scrip_shower_5
+      rect:
+        serializedVersion: 2
+        x: 980
+        y: 0
+        width: 192
+        height: 192
+      alignment: 9
+      pivot: {x: 0.5, y: 0.151}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 7fd9fbec7e8cbaf4e8306450dd1cfb79
+      internalID: 658126615
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: scrip_shower_6
+      rect:
+        serializedVersion: 2
+        x: 1176
+        y: 0
+        width: 192
+        height: 192
+      alignment: 9
+      pivot: {x: 0.5, y: 0.151}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8e6301a8f4f557f4aba98529f2866092
+      internalID: 982174146
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: scrip_shower_7
+      rect:
+        serializedVersion: 2
+        x: 1372
+        y: 0
+        width: 192
+        height: 192
+      alignment: 9
+      pivot: {x: 0.5, y: 0.151}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d599ac510b1e7da4aa464ee67e043fc7
+      internalID: 1738966324
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 29df35c2f963d26438a8a6d2dbe1b692
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      scrip_shower_0: -567165657
+      scrip_shower_1: -1792712122
+      scrip_shower_2: -745119566
+      scrip_shower_3: -425114160
+      scrip_shower_4: -2079916612
+      scrip_shower_5: 658126615
+      scrip_shower_6: 982174146
+      scrip_shower_7: 1738966324
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

@@ -15,6 +15,11 @@ MonoBehaviour:
   m_GroupName: common
   m_GUID: 2c4d4d7494187df4f87e340b88461f4b
   m_SerializeEntries:
+  - m_GUID: 01394234d4a2d9d46bdf09d54bf7f7fa
+    m_Address: fx/ui/rank_up/animator
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 0173f121a0b0b704b93fbe456df46bd5
     m_Address: characters/surveyor/mk2
     m_ReadOnly: 0
@@ -32,6 +37,16 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 0cd4cbd96af542244bb9e0580e03361c
     m_Address: ships/waystation_earth/top
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 0e3639ed4aed15247a46f1c36dee17b0
+    m_Address: fx/ui/scrip_shower/animator
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 0eac977c8ec4743479c31e48d3371a95
+    m_Address: fx/ui/expedition_seal
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -120,6 +135,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 3793a137fddd5c94ab6dcd4566b4a9fc
+    m_Address: fx/ui/node_bought/animator
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 3902495cdc5a8a84c8ff2edd74c35820
     m_Address: fx/skip_spool/base
     m_ReadOnly: 0
@@ -167,6 +187,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 4e5bcae4877173942bc69f18e6f2e86a
     m_Address: fx/film/grain
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 4ea33beae64a7444eade0cee2a72f962
+    m_Address: fx/ui/rank_up
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -250,6 +275,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 6c2e8abb17451b54d8421b1a0af96868
+    m_Address: fx/ui/scrip_shower
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 6de7ad167b8918e4b97dcfae630bda85
     m_Address: props/common/aerostat_cell/animator
     m_ReadOnly: 0
@@ -307,6 +337,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 82317d64251e44e4eabc403b98efd612
     m_Address: terrain/jupiter/floe_core
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8595fa9e91240594098dfe1f9cbe7538
+    m_Address: fx/ui/expedition_seal/animator
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -577,6 +612,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: f57130768d03b9b4393239172bcd67ae
     m_Address: fx/ship/vapor_cone
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f6029e92d99446249a79490bfa7d39d8
+    m_Address: fx/ui/node_bought
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

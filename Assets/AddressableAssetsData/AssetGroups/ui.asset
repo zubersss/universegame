@@ -95,6 +95,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 25c1d85ccf8440142a95c5ef4b7626c9
+    m_Address: ui/hints/pack_full
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 25e90f925a6735042a84798a570e1db1
     m_Address: ui/titlecards/mars
     m_ReadOnly: 0
@@ -102,6 +107,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 28af3974e6be25241976cb3359f025eb
     m_Address: ui/skilltree/link_locked
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 2931119e2ec85d2429865c0e2e444ddd
+    m_Address: ui/hints/sell
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -152,6 +162,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 3a9fa73aa8e226e4fa27a1dc33c803d7
     m_Address: ui/rank/certificate
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 4053600999c1e53498404b3bb5224de7
+    m_Address: ui/hints/skill_tree
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -450,6 +465,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e86f756e84447324cba3b1c6351103d7
+    m_Address: ui/hints/dig_down
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: e8d1070313381ef47985ea3b33b61410
     m_Address: ui/hud/escape_sign
     m_ReadOnly: 0
@@ -460,8 +480,18 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: efdfe06998290bb4ab7de322e58b0a55
+    m_Address: ui/hints/surface_line
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: f0a4003f83999d744be644790a738635
     m_Address: ui/titlecards/neptune
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f494ec191d33d2645937f88eab2d3af9
+    m_Address: ui/hints/climb_up
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -477,6 +507,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: f9416c42de6efb949b37fbfded9f269b
     m_Address: ui/title/background
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: fb203146080e0114dacd7283943aeff3
+    m_Address: ui/hints/arrow
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

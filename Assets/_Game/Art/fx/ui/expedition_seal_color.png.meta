@@ -1,0 +1,467 @@
+fileFormatVersion: 2
+guid: 0eac977c8ec4743479c31e48d3371a95
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 7306982796119341596
+    second: expedition_seal_color_0
+  - first:
+      213: -1516611622279639033
+    second: expedition_seal_color_1
+  - first:
+      213: 6911790075514281794
+    second: expedition_seal_color_2
+  - first:
+      213: -1679929944231089206
+    second: expedition_seal_color_3
+  - first:
+      213: -4788485263001961542
+    second: expedition_seal_color_4
+  - first:
+      213: -5052456182519090946
+    second: expedition_seal_color_5
+  - first:
+      213: 3539279747306068566
+    second: expedition_seal_color_6
+  - first:
+      213: -1846793375606703376
+    second: expedition_seal_color_7
+  - first:
+      213: 6372302682696740331
+    second: expedition_seal_color_8
+  - first:
+      213: 6475618299478231439
+    second: expedition_seal_color_9
+  - first:
+      213: 2962563630641338235
+    second: expedition_seal_color_10
+  - first:
+      213: -6666091950523769538
+    second: expedition_seal_color_11
+  - first:
+      213: -2970066859651253654
+    second: expedition_seal_color_12
+  - first:
+      213: 3005632459870173033
+    second: expedition_seal_color_13
+  - first:
+      213: 4899577523857472206
+    second: expedition_seal_color_14
+  - first:
+      213: 4315631678790173067
+    second: expedition_seal_color_15
+  - first:
+      213: 4734885623368535957
+    second: expedition_seal_color_16
+  - first:
+      213: -4572116047930030402
+    second: expedition_seal_color_17
+  - first:
+      213: -6415982864241321967
+    second: expedition_seal_color_18
+  - first:
+      213: -3903907705579561477
+    second: expedition_seal_color_19
+  - first:
+      213: -4178875849416829445
+    second: expedition_seal_color_20
+  - first:
+      213: -5470101630173653576
+    second: expedition_seal_color_21
+  - first:
+      213: 814676664023375071
+    second: expedition_seal_color_22
+  - first:
+      213: -1442379960649110738
+    second: expedition_seal_color_23
+  - first:
+      213: 1697450650143441259
+    second: expedition_seal_color_24
+  - first:
+      213: -4092155209001125042
+    second: expedition_seal_color_25
+  - first:
+      213: 4010565761289068722
+    second: expedition_seal_color_26
+  - first:
+      213: 4886185801044501300
+    second: expedition_seal_color_27
+  - first:
+      213: 566467007703186727
+    second: expedition_seal_color_28
+  - first:
+      213: -7675476591005785161
+    second: expedition_seal_color_29
+  - first:
+      213: 1465541455397667607
+    second: expedition_seal_color_30
+  - first:
+      213: -9150999259463294499
+    second: expedition_seal_color_31
+  - first:
+      213: -307382733714351323
+    second: expedition_seal_color_32
+  - first:
+      213: 1028541220540912167
+    second: expedition_seal_color_33
+  - first:
+      213: 4350919368259965961
+    second: expedition_seal_color_34
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 9
+  spritePivot: {x: 0.5, y: 0.3542}
+  spritePixelsToUnits: 64
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationMethod: 0
+  spriteTessellationDetail: -1
+  spriteGeometrySubdivision: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 2
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: 25
+    textureCompression: 1
+    compressionQuality: 100
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 1
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: expedition_seal_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 160
+        height: 192
+      alignment: 9
+      pivot: {x: 0.5, y: 0.3542}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 205038f023eaeea48b8c9a250b2abe5f
+      internalID: 1868626496
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: expedition_seal_1
+      rect:
+        serializedVersion: 2
+        x: 164
+        y: 0
+        width: 160
+        height: 192
+      alignment: 9
+      pivot: {x: 0.5, y: 0.3542}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 2268f7032480bcf478df72032ac108a2
+      internalID: 1674690481
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: expedition_seal_2
+      rect:
+        serializedVersion: 2
+        x: 328
+        y: 0
+        width: 160
+        height: 192
+      alignment: 9
+      pivot: {x: 0.5, y: 0.3542}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 77e3f929e90e47444a5359366f46bc6a
+      internalID: -255603257
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: expedition_seal_3
+      rect:
+        serializedVersion: 2
+        x: 492
+        y: 0
+        width: 160
+        height: 192
+      alignment: 9
+      pivot: {x: 0.5, y: 0.3542}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ad4f3fffc780ac34a832683ffc321ff7
+      internalID: -129588829
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: expedition_seal_4
+      rect:
+        serializedVersion: 2
+        x: 656
+        y: 0
+        width: 160
+        height: 192
+      alignment: 9
+      pivot: {x: 0.5, y: 0.3542}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 2abf1689ce671504e9f4e2d6688200c9
+      internalID: 842302406
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: expedition_seal_5
+      rect:
+        serializedVersion: 2
+        x: 820
+        y: 0
+        width: 160
+        height: 192
+      alignment: 9
+      pivot: {x: 0.5, y: 0.3542}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 060923886e49e0e4091d83bed150d199
+      internalID: -1431329445
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: expedition_seal_6
+      rect:
+        serializedVersion: 2
+        x: 984
+        y: 0
+        width: 160
+        height: 192
+      alignment: 9
+      pivot: {x: 0.5, y: 0.3542}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4a8a96e899a8c7848affeee452140f9e
+      internalID: 363729896
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: expedition_seal_7
+      rect:
+        serializedVersion: 2
+        x: 1148
+        y: 0
+        width: 160
+        height: 192
+      alignment: 9
+      pivot: {x: 0.5, y: 0.3542}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: aa33c3bbb289bee43879bbb8c8c6a7be
+      internalID: 831111922
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: expedition_seal_8
+      rect:
+        serializedVersion: 2
+        x: 1312
+        y: 0
+        width: 160
+        height: 192
+      alignment: 9
+      pivot: {x: 0.5, y: 0.3542}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 105baccefffe1ff47a3cc2a03d528495
+      internalID: 1634791130
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: expedition_seal_9
+      rect:
+        serializedVersion: 2
+        x: 1476
+        y: 0
+        width: 160
+        height: 192
+      alignment: 9
+      pivot: {x: 0.5, y: 0.3542}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0571530c5b7bd4845a7f05ce180325a4
+      internalID: -23596555
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: a0675677efa0f6c48868cdd15a4718c2
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      expedition_seal_0: 1868626496
+      expedition_seal_1: 1674690481
+      expedition_seal_2: -255603257
+      expedition_seal_3: -129588829
+      expedition_seal_4: 842302406
+      expedition_seal_5: -1431329445
+      expedition_seal_6: 363729896
+      expedition_seal_7: 831111922
+      expedition_seal_8: 1634791130
+      expedition_seal_9: -23596555
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
