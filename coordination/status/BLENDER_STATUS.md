@@ -1,64 +1,56 @@
 # BLENDER STATUS
-Updated: 2026-11-09 15:5x · Session: 12 (resumed 14:03 after the owner's restart; THIS SESSION = zuber-4d; LEAD = zuber-d1, UNITY = zuber-a0) · older: coordination/status/archive/BLENDER_2026-11-09.md, BLENDER_2026-11-08.md, BLENDER_2026-11-07.md
+Updated: 2026-11-09 17:1x · Session: 12 (resumed 14:03 after the owner's restart; THIS SESSION = zuber-4d; LEAD = zuber-d1, UNITY = zuber-a0) · older: coordination/status/archive/BLENDER_2026-11-09.md, BLENDER_2026-11-08.md, BLENDER_2026-11-07.md
 
 ## Current task
-**15:5x — RESUME HERE.** No lock and no want of mine; everything is committed and pushed. UNITY runs U-203 (Build 0.6.1b: the baked pick in the shovel stroke, B-228's F1), a multi-lock chain (an empty locks folder between its locks is NOT a release): files only, no want, no python, until LEAD messages that it has released. Then, in my lock, each sheet to LEAD before any export (commands and my 2x checks: coordination/reports/blender/preview_notes_0.6.2.md; the runner: `tools/blender_locked.ps1 -Job "<what>" -PyArgs <script>,<args> -CapMB <n> [-MinFreeGB 1.5]`, which lists the locks, takes heavy_blender.lock, runs Blender's bundled python -I with a working-set watchdog and deletes the lock in `finally`; crops for a 4x look: blender/scripts/crop_png.py; both are this session's scratch tools copied into the repo, the repo copies not yet run in that form). **State 16:1x: B-220's EXPORT IS UNDER WAY (LEAD's GO 16:1x, every sheet accepted). Jupiter is exported (1fb6b29b). I yielded to UNITY's want (16:15:23, its U-195 check): nothing of mine runs until UNITY has run that one job (D-037); then, with the locks listed and RAM read in their own calls first:**
-1. `tools/blender_render.ps1 backgrounds/saturn` (5 scenes; Jupiter's 5 took 240 s, peak 832 MB; the wrapper takes the lock itself).
-2. `tools/blender_render.ps1 backgrounds/neptune` (6 scenes, with the storm / spot layer0 fixed wrap LEAD accepted on the anchor preview).
-3. `tools/blender_render.ps1 backgrounds/venus/deck` (one key: the wrapper's LIGHT path, so I hold heavy_blender.lock by hand around it; NOT `backgrounds/venus`, which would re-export the surface).
-4. Uranus in two locks of 8 scenes (comma lists: deck1_* + deck2_*, then deck3_* + deep_*; all 16 took 721 s as a preview).
-5. After each: read the jsons back against reports/blender/b220_continue_rows.md, commit by explicit file list (git status → paths; 0 .meta), check git show --stat, push, one line to LEAD. Then complete that report (it already carries UNITY's line on venus/deck layer2's y_m -0.5 → -1.5).
-6. B-230: its first Earth run (16:05) was wrong in three ways (Stone's wall teal behind grey stone, Subsoil's wall = its fill's tone, a false seam alarm 3.81); the rev is in the source, NOT RUN: the wall = the fill's own main tone mixed 0.35 toward ink, pebbles / strata / veins redrawn, the tile rolled to its quietest row and column. Run `build_back_wall_v3.py <png> earth`, look, send to LEAD only when Stone and Subsoil read apart from their fills; then mars / mercury / venus.
-7. B-232 sheet → B-231 design sheet (PREVIEWS ONLY until the owner's C5 look-over, D-185) → B-224 → B-223 → B-225 previews → B-233's sheet (after B-223's camp icon is judged).
-NOT YET RUN (desk-checked by reading; expect first-run fixes): B-223, B-224, B-225, B-230's rev, B-231, B-232, B-233. How I run a light sheet: list coordination/locks (abort on any other heavy_ / want_), read RAM in its own call, write heavy_blender.lock, Blender's bundled `python.exe -I <script> <png>` with a working-set watchdog, delete the lock in `finally`.
-- Rulings this session: B-233's keys follow the PoiDef label (D-187: icons/catalogue/meridian_beacon, solarite). B-232 = 24 frames of 64 px in 4 rows of 6 (404x268), clips clod_1..4, one clod turning in place; U-195 throws them in code. B-231's crouch: the 1 m gap stays, the crouch stands <= 0.98 m (the forward tuck + root squash 0.92 in the crouch state); the sheet draws the 1 m line and prints the measured top; if it is over, say by how much and LEAD rules on the sheet. B-229: the surveyor's glove on the D-grip.
-- B-220 rule (LEAD 11:5x): continue_rows 64 only where a layer's bottom band is >= 25 % solid; a sparse layer fades out over its last 64 rows. B-223's bay keeps DockingBay's keys backgrounds/waystation/layer0..2 at 1920x1080.
-- **Rule (LEAD 09:2x):** the first line of ANY call that starts python lists coordination/locks (abort on another role's heavy_ / want_) and reads RAM.
-- **Rule (LEAD, D-087):** the Beam reads as a mining tool, never a gun: no pistol grip or trigger, a cable-fed, arm-mounted emitter with a cutting nozzle.
-- Waiting on others: B-207 closes on PawsOnTheGround green; B-204 on UNITY's capture; B-172 on U-151. UNITY drops the three lance .meta files.
+**17:1x — RESUME HERE.** No lock and no want of mine; everything is committed and pushed. Two sets of sheets are with LEAD, nothing of them exported:
+1. **B-230** (the hole's back walls): blender/preview/review_b230_{earth,mars,mercury,venus}_back_walls_preview.png (17:12). LEAD accepted the direction on Earth's sheet (the wall = the tier fill's main tone mixed 0.35 toward ink; T5 stays ink; T4's glints on the seams). On ACCEPTED of the four: export `tools/blender_render.ps1 terrain/common/back_walls` (a kit row: 21 keys; hold heavy_blender.lock by hand if the wrapper takes its light path), read the jsons back, commit by explicit file list, 0 .meta.
+2. **B-232 + B-238** (dig clods, rubble; the dig puff as low wide dust; the flick without its clod): blender/preview/review_b232_dig_debris_preview.png (17:14). On ACCEPTED: export fx/dig_debris/kit (clods t1..t5 + rubble), props/rig/shovel_kit (the flick; check the shovel prop and icon stay byte-identical), and the dig puff: terrain/{earth,mars,mercury,venus} ground rows' dig_puff + the variants' rows (dig_puffs) ONLY as LEAD rules on my two questions (the eight variant puffs under the tier tint; SideFx.OnMounded plays the puff untinted).
+3. Then **B-231**'s design sheet (`tools/blender_locked.ps1 -Job "B-231" -PyArgs blender/scripts/build_surveyor_v5.py,blender/preview/review_b231_surveyor_v5_design.png`; PREVIEWS ONLY until the owner's C5 look-over, D-185; not yet run: expect first-run fixes), then B-224 → B-223 → B-225 previews → B-233's sheet (after B-223's camp icon is judged). B-230 / B-232 / B-238 outrank B-231 (0.6.2's path).
+How I run: locks listed, then RAM read, each in its own call; `tools/blender_locked.ps1 -Job "<what>" -PyArgs <script>,<args> -CapMB <n> [-MinFreeGB 1.5]` (lists the locks, takes heavy_blender.lock, Blender's bundled python -I, a working-set watchdog, the lock deleted in `finally`); `blender/scripts/crop_png.py` for crops; a sheet's command and my 2x checks: reports/blender/preview_notes_0.6.2.md. UNITY and I take turns one job each while both have wants (D-037): if want_unity.lock appears, finish the job I am on, release, file mine only once UNITY HOLDS the lock, poll.
+- Rulings that stand: B-232 = 24 frames of 64 px, clips clod_1..4, UNITY throws them (U-195) and tints clods and puff by the dug cell's TIER tone (DigFeel.Tone = the tier's chip colour 35 % toward white). B-231: lit from above, crouch <= 0.98 m with a 0.92 root squash, one blink. B-233's keys by PoiDef label (D-187). B-237 Blocked (the giants up close = a painted limb band, with the giants' pass). The band rule: continue_rows only at cover >= 0.90.
+- **Rule (LEAD, D-087):** the Beam reads as a mining tool, never a gun. Waiting on others: B-207 on PawsOnTheGround; B-204 on UNITY's capture; B-172 on U-151.
 
 ## Last completed
-- 11-09 16:16: B-220 export part 1, Jupiter (1fb6b29b; 15 files, 0 .meta; lock 16:12:04-16:16:02, peak 832 MB).
-- 11-09 16:02-16:10: the Venus deck sheet (not accepted: towers repeating as slabs, a ladder of crescents) → its rev ACCEPTED (the >= 0.90 rule; layer2 moved, y_m -1.5); the Neptune storm anchor preview ACCEPTED (the core inside the rim, seam 1.03 / 1.02).
-- 11-09 15:35-15:5x: B-229 sheet → ACCEPTED → EXPORTED (d7353cd6; Done); B-220 Neptune sheet ACCEPTED; B-228 complete and Done (reports/blender/smoke_read_0.6.1.md: 79 shots, 21 findings; F1 the pickaxe swing in the shovel stroke → U-203 / Build 0.6.1b).
-- 11-09 14:03-14:5x (files only): sources B-233 (d593051c), B-232 to the ruled format (6970371f), desk-check fixes B-230 / B-231 / B-224, B-231 to LEAD's rulings (the crouch, lit from above, the blink); reports preview_notes_0.6.2.md, c5_style_notes.md, b237_giants_close_view.md.
-- Earlier (B-184 to B-227, all Done on the board): coordination/status/archive/BLENDER_2026-11-09.md, BLENDER_2026-11-08.md.
+- 11-09 17:12-17:15: B-230 four sheets (rev 3 + the T4 fix), B-232 + B-238 sheet (the dust measured 0.69 x 0.34 m) → to LEAD; sources committed.
+- 11-09 16:12-17:02: **B-220 EXPORTED and Done** (33 scenes, 109 files, 0 .meta: Jupiter 1fb6b29b, Saturn 5d1da622, Neptune dadf2d6c with B-161's storm / spot wrap, Uranus 20c1af38 + 82ee7e7a, venus/deck 6dd385d0 with layer2 y_m -1.5); reports/blender/b220_continue_rows.md complete for U-191.
+- 11-09 15:35-15:5x: B-229 sheet → ACCEPTED → EXPORTED (d7353cd6; Done). B-228 complete and Done (reports/blender/smoke_read_0.6.1.md: 79 shots, 21 findings; F1 the pickaxe swing in the shovel stroke → U-203 / Build 0.6.1b).
+- 11-09 14:03-15:0x (files only): sources B-233, B-232's format, desk-check fixes B-230 / B-231 / B-224, B-231 to LEAD's rulings; reports preview_notes_0.6.2.md, c5_style_notes.md, b237_giants_close_view.md; tools/blender_locked.ps1, blender/scripts/crop_png.py.
+- Earlier (B-184 to B-227): coordination/status/archive/BLENDER_2026-11-09.md, BLENDER_2026-11-08.md.
 
 ## Ready for review
-- B-189 / B-185: review_b141_mars_{canyon,storm,plains}(_dip).png (9e04de12), review_b152_venus_surface(_dip).png (baa7f1e0), review_b149_mercury_{day,twilight,night}_dip.png (d7fbeace).
+- B-230: the four sheets above. B-232 + B-238: the shared sheet above.
+- B-189 / B-185 (waiting on U-159's captures): review_b141_mars_{canyon,storm,plains}(_dip).png, review_b152_venus_surface(_dip).png, review_b149_mercury_{day,twilight,night}_dip.png.
 
 ## Handoffs (unrouted only)
-- -> UNITY (B-203 / B-204 / B-207, sent to LEAD 17:2x): ground_fill_t<n> json tier / depth_m / transition_m 1.0; surface_line row 40 = pivot, 2 m down the surface normal; ui/skilltree chart json ring_r_px / branch_axis_deg / slots_deg, emblem_r_px 408; node icons at 40 px, 0.4 alpha when locked; links tiled under the frames; vent_eel contact 0 px.
-- -> UNITY (B-191): terrain/mercury/dig_puff_ice, terrain/venus/dig_puff_{tessera,vent}: drop-ins for dig_puff where the dig is in that variant's band, as B-190's (8 frames 128x128, pivot (0.5, 0.25), clip 'puff'; json "variant").
-- -> UNITY (U-167, B-192): terrain/earth/fill_decor_sand_1..3 and terrain/mars/fill_decor_basalt_1..3: scatter in the ground_fill_sand / ground_fill_basalt cutaway by a position seed, as D-165's fill_decor (upright, never rotated, pivot centred; json "fill" names the fill).
-- -> UNITY (U-164 / U-159): a layer2 json entry's "continue_rows": 64 = its bottom 64 rows tile vertically. Two depths: the B-133 / B-114 / B-185 sets 480 tall at y_m -2.0; the B-179 / B-186 / B-187 sets 544 tall at y_m -3.0 with "ground_row": 352. The Mars storm's layer2 is a translucent veil (864, y_m -2.0), no ground.
-- -> UNITY (U-159): variant keys ground_band_{frost,basalt,talus} (Mars), ground_band_ice (Mercury), ground_band_{tessera,vent} (Venus); ground_fill_basalt (json "fill"); band json "biomes" names the code region; lips terrain/earth/ground_lip_{sand,stone,snow}, terrain/mars/ground_lip_frost.
-- -> UNITY (U-150), B-171 placement: vapor_cone and shock_ring pivots = the ship's centre of mass (ship-local 0, 6.2 m); the cone IN FRONT of the hull, the ring BEHIND. speed_lines: 128x360 tiles, 3 per 1080 px edge, drawn for the LEFT edge (flip x for the right), pivot (0, 0.5). puff_boost: a drop-in for ships/pilgrim/puff (tail_exhaust, pivot 0.5 / 0.96, clip 'puff'), 192x288 frames.
+- -> UNITY (B-220, in reports/blender/b220_continue_rows.md): venus/deck layer2's y_m is -1.5 (was -0.5; the same drawing 64 rows higher in the layer); Neptune storm / spot layer0's core now sits under the rim at the tile's x 1024.
+- -> UNITY (B-238, on its acceptance): the base dig_puff is cream + ink (multiply it by the tier's tone, also where a mound lands); it is 0.69 x 0.34 m at its peak with its foot on the pivot row, so it plays at scale 1; shovel_flick is crumbs only.
+- -> UNITY (B-203 / B-204 / B-207, sent to LEAD 11-08 17:2x): ground_fill_t<n> json tier / depth_m / transition_m 1.0; surface_line row 40 = pivot; ui/skilltree chart json ring_r_px / branch_axis_deg / slots_deg, emblem_r_px 408; node icons at 40 px, 0.4 alpha when locked; vent_eel contact 0 px.
+- -> UNITY (B-191 / B-192): dig_puff_{ice,tessera,vent} drop-ins; fill_decor_sand_1..3 / fill_decor_basalt_1..3 scattered by a position seed (upright, pivot centred).
+- -> UNITY (U-164 / U-159): continue_rows 64 = a layer's bottom 64 rows tile vertically; the ground-set depths (480 at y_m -2.0; 544 at y_m -3.0 with ground_row 352); variant keys ground_band_{frost,basalt,talus,ice,tessera,vent}, ground_fill_basalt, the lips.
+- -> UNITY (U-150): vapor_cone / shock_ring pivots = the ship's centre of mass; speed_lines 128x360 for the LEFT edge; puff_boost a drop-in for ships/pilgrim/puff.
 
 ## Blockers
-none. Waiting on: U-151 (B-172's export), U-152 (B-174). B-237 (the giants up close) is Blocked by LEAD's ruling 15:5x: option C of reports/blender/b237_giants_close_view.md (a painted limb band + a latitude fill on a ring mesh), carded with its UNITY half and a contract section when the giants' pass starts; nothing to draw before that (D-128's amendment rules out a disc_near for the giants).
+none. Waiting on: U-151 (B-172's export), U-152 (B-174). B-237 Blocked by LEAD's ruling (see above).
 
 ## Proposals (undecided only)
-none open. Decided 14:5x by LEAD (reports/blender/c5_style_notes.md sections 3 and 4): v5 characters are lit FROM ABOVE (the rig mirrors; at most a slight lean to the upper left, the v3 props' side), the palette check on flats and 128 px per metre accepted, ONE blink swap part per facing now; the stag / the nodbell / the camp's near band accepted as B-234 / B-235 / B-236 in the Backlog (promoted when the owner accepts the surveyor; no drawing source before).
-- Offered, not drawn (UNITY's work if wanted): a contact shade under each rig part (a darkened copy 2-3 px straight down), for moving shadows under the arms and the pack.
+- B-238 (to LEAD 17:1x): (a) the eight variant puffs under the tier tint: keep their material colours for mounds, re-export them in cream, or retire them; (b) SideFx.OnMounded plays the puff untinted: UNITY tints it, or the base puff keeps a tone. (c) the dust's ink at 1.5 px so it sits behind the clods.
+- B-230 (to LEAD 17:1x): a planet-specific T1 for Mars / Mercury / Venus (the roots and worm holes read there as dry veins and pits).
+- Offered, not drawn (UNITY's work if wanted): a contact shade under each v5 rig part.
 
 ## Rules I keep (from slips)
-- (LEAD 13:4x) One lock <= 15 min; a painted planet with more than 8 scenes (Uranus: 16, 721 s) gets its own lock.
-- While another role holds the lock or waits at the RAM gate, NOTHING of mine runs: no capped dry run, no python / sed text patch, no json check; edit files with the edit tools only (five slips on 11-08 / 11-09). The shell is never the editor while a lock is out, and no interpreter runs before the locks folder is read.
-- Before sending a sheet, look at every new shape at 2x for faces: dark marks on a ball (puff frame 2), pale points under a dark arch (teeth), a dark oval on a white ball (a hole).
-- preview_dip and any scene lookup: take the planet from the key (PLANET_OF is keyed by scene name). Hold heavy_blender.lock by hand around a light run (the wrapper also refuses beside another role's lock or want).
-- No 2>&1 on the render wrapper in PowerShell 5.1 (a numpy warning becomes a terminating error).
-- A lock check and a RAM read are each their own call; Blender starts only in a later call after a clear result (D-073). Light work lock-free <= ~300 MB (D-109); under 0.3 GB free, code only.
-- A want is filed only when I am next after the running job; withdraw it while the other role's multi-lock job is between locks. While a want is on file, poll the locks each turn; never end a turn waiting for a ping. No background waiters.
-- Measure every new export path's frames against the 2 px edge and the ground line before the export.
-- All three sessions share one working tree: a push can race another role's; fetch + merge (never rebase) and push again. Commit by explicit file paths (never an Art directory), check git show --stat against the list.
-- A stroke's line is drawn in its material's ink_hex: a coloured line needs its own line material; a fill-only material on an open stroke draws nothing.
-- (15:52 slip) I appended a report section with a shell heredoc in a call whose own listing showed heavy_unity.lock: a lock listing is read BEFORE the call that writes, and beside a lock every write goes through the edit tools, appends included.
-- A manifest row's key has three parts (fx/dig_debris stopped an export at the manifest check; now fx/dig_debris/kit): check new rows against `category/name/variant` when they are written.
-- A source that cannot run yet gets a desk-check by reading: canvas extents, both soles level by hand kinematics, sheet row sizes, tone-on-tone marks (session 12 found a crash or a wrong pose in five of eight).
+- One lock <= 15 min; a painted planet with more than 8 scenes gets its own lock (Uranus: two locks of 8, 398 s + 425 s).
+- While another role holds the lock or waits at the RAM gate, NOTHING of mine runs, and every file change goes through the edit tools, appends included (a shell heredoc at 15:52 was the sixth slip of this kind). A lock listing is read in an EARLIER call than any write or run.
+- Never pipe my lock helper into `Select-Object -First n`: it cut the script short after the release line and skipped the next step (17:04).
+- Before sending a sheet, look at every new shape at 2x-3x for faces: dark marks on a ball, pale points under a dark arch, two ringed dots side by side (B-230's worm holes), two equal top lobes (B-184's puff).
+- A first run is not a sheet: measure it against the card's numbers (B-238: 0.39 m against 0.35) and fix before sending.
+- A manifest row's key has three parts. No 2>&1 on the wrappers in PowerShell 5.1. preview_dip and scene lookups: the planet from the key.
+- A want is filed only once the other role HOLDS the lock (D-039); refresh it each poll; never end a turn on a want. No background waiters.
+- All three sessions share one working tree: a push can race another role's (fetch, never rebase, push again); commit by explicit file paths, check git show --stat, 0 .meta.
+- A stroke's line is drawn in its material's ink_hex; a fill-only material on an open stroke draws nothing; cream marks on a cream body draw nothing.
+- A source that cannot run yet gets a desk-check by reading (extents, both soles level, sheet row sizes): session 12 found a crash or a wrong pose in five of eight; the first RUN still found what reading could not (hues, sizes, face reads).
 
 ## For USER_ACTIONS
 none.
 
 ## HeavyJobLock
-none held (last: 15:44:20-15:44:36, the B-229 export; before it 15:37:22-15:42:53 Neptune, 15:36:23-26 crops, 15:35:07-18 the B-229 sheet); no want on file: UNITY's U-203 chain runs, and LEAD's rule is no want of mine until it has released. No background waiters.
+none held (last: 17:14:41-17:14:45, the B-232 + B-238 sheet; today's export locks are in the B-220 commits); no want on file. No background waiters.
