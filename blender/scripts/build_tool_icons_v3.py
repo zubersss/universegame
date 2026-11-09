@@ -65,6 +65,20 @@ def arc(cx, cz, r, a0, a1, n=12):
     return [(cx + r * math.cos(a0 + (a1 - a0) * i / n), cz + r * math.sin(a0 + (a1 - a0) * i / n)) for i in range(n + 1)]
 
 
+def smooth(pts, n=6):
+    """A Catmull-Rom curve through pts (n samples per span): a line that must not show its corners."""
+    P = [pts[0]] + list(pts) + [pts[-1]]
+    out = []
+    for i in range(1, len(P) - 2):
+        p0, p1, p2, p3 = P[i - 1], P[i], P[i + 1], P[i + 2]
+        for k in range(n):
+            t = k / n
+            out.append(tuple(0.5 * (2 * p1[j] + (p2[j] - p0[j]) * t + (2 * p0[j] - 5 * p1[j] + 4 * p2[j] - p3[j]) * t * t
+                                    + (3 * p1[j] - p0[j] - 3 * p2[j] + p3[j]) * t * t * t) for j in (0, 1)))
+    out.append(pts[-1])
+    return out
+
+
 def cuff(d, M, T, x0, x1, h):
     """The forearm cuff every module straps on (B-205 / B-217): brown, two brass straps."""
     G.stroke(d, T(rect(x0, -h, x1, h)), M["brown_i"], O, cyclic=True)
@@ -89,8 +103,8 @@ def beam_icon(d, M):
     G.stroke(d, T(body), M["teal_sh_i"], O, cyclic=True)                                                              # the emitter body
     G.stroke(d, T([(x0, r * 0.2), (x1, r * 0.15), (x1, r * 0.92), (x0, r)]), M["teal"], 0.0, cyclic=True)
     G.stroke(d, T(body), M["ink"], O * 1.25, cyclic=True)
-    for x in (0.0, 0.07):                                                                                              # cooling rings
-        G.stroke(d, T(rect(x - 0.018, -r - 0.015, x + 0.018, r + 0.015)), M["sky_i"], I, cyclic=True)
+    G.stroke(d, T(rect(0.025, -r - 0.015, 0.07, r + 0.015)), M["sky_i"], I, cyclic=True)                             # one cooling ring (rev:
+                                                                                                                        # two + the straps striped it at 40 px)
     G.stroke(d, T(rect(x1 - 0.025, -r * 0.85, x1 + 0.015, r * 0.85)), M["teal_i"], I, cyclic=True)                   # the glow ring
     G.stroke(d, T([(x1 + 0.015, -r * 0.8), (0.25, -0.04), (0.27, -0.035), (0.27, 0.035), (0.25, 0.04), (x1 + 0.015, r * 0.8)]),
              M["mustard_i"], O, cyclic=True)                                                                           # the cutting nozzle
@@ -105,8 +119,9 @@ def grapple_icon(d, M):
 
     def at(o, a, b):
         return (o[0] + a * u[0] + b * p[0], o[1] + a * u[1] + b * p[1])
-    G.stroke(d, hose([(-0.21, 0.03), (-0.30, 0.16), (-0.24, 0.30), (-0.08, 0.33), (0.04, 0.24), (0.09, 0.13)], 0.03),
-             M["mustard_sh_i"], I, cyclic=True)                                                                        # the slack line
+    G.stroke(d, hose(smooth([(-0.21, 0.03), (-0.30, 0.16), (-0.24, 0.30), (-0.08, 0.33), (0.04, 0.24), (0.09, 0.13)]), 0.036),
+             M["mustard_sh_i"], I * 0.7, cyclic=True)                                                                  # the slack line (rev:
+                                                                                                                        # a smooth curve, not corners)
     G.stroke(d, hose([C, S0], 0.06), M["sky_sh_i"], I, cyclic=True)                                                   # the arm to the seat
     G.stroke(d, circle(C[0], C[1], R, 28), M["sky_sh_i"], O * 1.25, cyclic=True)                                       # the reel drum
     for k in range(3):                                                                                                  # the line, lap on lap
