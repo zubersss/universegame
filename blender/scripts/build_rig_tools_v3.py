@@ -49,15 +49,26 @@ def hose(pts, w):
     return G.hose_outline(pts, w)
 
 
+def circ_pts(cx, cz, r, n=10):
+    return [(cx + r * math.cos(TAU * i / n), cz + r * math.sin(TAU * i / n)) for i in range(n)]
+
+
 # ---------------------------------------------------------------- the Beam, Mk1-5 (metres from the hand, +x the aim)
+def cable_path(mk):
+    """From the emitter's back end, backward and up in a soft curve toward the pack (its end: the json's cable_socket)."""
+    x0 = 0.36 - (0.24 + 0.035 * (mk - 1)) - 0.12
+    return [(x0 - 0.03, 0.0), (x0 - 0.09, 0.03), (x0 - 0.14, 0.08), (x0 - 0.17, 0.14)]
+
+
 def beam_tool(mk):
     def fn(d, M):
         L = 0.24 + 0.035 * (mk - 1)                                                          # the body grows back from the nozzle
         r = 0.055 + 0.008 * (mk - 1)                                                         # and in girth
         x1 = 0.36                                                                            # the body's front (the nozzle beyond)
         x0 = x1 - L - 0.12
-        G.stroke(d, hose([(x0 - 0.02, -0.01), (x0 - 0.12, -0.06), (x0 - 0.1, -0.15), (x0 + 0.02, -0.17)], 0.03), M["brown_sh_i"], I, cyclic=True)   # the cable
-        G.stroke(d, [(x0 + 0.0, -0.19), (x0 + 0.06, -0.19), (x0 + 0.06, -0.15), (x0 + 0.0, -0.15)], M["sky_sh_i"], I, cyclic=True)               # its plug
+        G.stroke(d, hose(cable_path(mk), 0.03), M["brown_sh_i"], I, cyclic=True)            # the cable, trailing back and up to the
+        G.stroke(d, [(x0 - 0.035, -0.035), (x0 + 0.005, -0.035), (x0 + 0.005, 0.035), (x0 - 0.035, 0.035)], M["sky_sh_i"], I, cyclic=True)  # pack
+        # rev 19:2x (LEAD): nothing under the body (an L-shaped cable with a plug beneath read as a pistol grip)
         body = [(x0, -r), (x1, -r * 0.9), (x1, r * 0.9), (x0, r)]
         G.stroke(d, body, M["teal_sh_i" if mk < 5 else "mustard_sh_i"], O, cyclic=True)
         G.stroke(d, [(x0, r * 0.15), (x1, r * 0.1), (x1, r * 0.9), (x0, r)], M["teal" if mk < 5 else "mustard"], 0.0, cyclic=True)
@@ -102,13 +113,18 @@ def grapple_tool(mk):
             rr = R * (0.78 - 0.16 * k)                                                       # a dark drum hid it)
             G.stroke(d, hose([(rr * math.cos(a), rr * math.sin(a)) for a in [TAU * i / 20 for i in range(19)]], 0.022), M["mustard_sh_i"], I * 0.7, cyclic=True)
         G.stroke(d, hose([(-R * 0.4, R * 0.1), (R * 0.4, -R * 0.1)], 0.02), M["sky_i"], I, cyclic=True)   # the crank bar
-        hooks = [(0.0, 0.0)] if mk < 3 else [(0.0, 0.035), (0.0, -0.035)]
-        for (dx, dz) in hooks:                                                               # the hook(s): shank + three prongs forward
-            s = 1.0 if mk < 3 else 0.8
-            G.stroke(d, hose([(0.24, dz), (0.36 * s + 0.08, dz)], 0.03 * s), M["sky_sh_i"], I, cyclic=True)
+        if mk < 3:                                                                           # the hook: shank + three prongs forward
+            G.stroke(d, hose([(0.24, 0.0), (0.44, 0.0)], 0.03), M["sky_sh_i"], I, cyclic=True)
             for side in (-1, 1):
-                G.stroke(d, hose([(0.42 * s + 0.04, dz), (0.47, dz + side * 0.05 * s), (0.42 * s + 0.02, dz + side * 0.07 * s)], 0.022 * s), M["sky_i"], I, cyclic=True)
-            G.stroke(d, hose([(0.42 * s + 0.04, dz), (0.5, dz)], 0.022 * s), M["sky_i"], I, cyclic=True)
+                G.stroke(d, hose([(0.46, 0.0), (0.47, side * 0.05), (0.44, side * 0.07)], 0.022), M["sky_i"], I, cyclic=True)
+            G.stroke(d, hose([(0.46, 0.0), (0.5, 0.0)], 0.022), M["sky_i"], I, cyclic=True)
+        else:                                                                                # Mk3: two separate anchors side by
+            G.stroke(d, hose([(0.24, -0.075), (0.24, 0.075)], 0.03), M["sky_sh_i"], I, cyclic=True)   # side, flukes curving back (rev
+            for dz in (0.075, -0.075):                                                       # 19:2x, LEAD: overlapped heads read
+                G.stroke(d, hose([(0.24, dz), (0.44, dz)], 0.024), M["sky_sh_i"], I, cyclic=True)   # as a trident)
+                for side in (-1, 1):
+                    G.stroke(d, hose([(0.45, dz), (0.42, dz + side * 0.04), (0.37, dz + side * 0.045)], 0.018), M["sky_i"], I, cyclic=True)
+                G.stroke(d, circ_pts(0.455, dz, 0.014), M["sky_i"], I, cyclic=True)
         if mk >= 2:                                                                          # Mk2+: brass fittings
             G.stroke(d, [(0.2, -0.03), (0.25, -0.03), (0.25, 0.03), (0.2, 0.03)], M["mustard_i"], I, cyclic=True)
     return fn
@@ -162,8 +178,7 @@ def back_sockets():
 
 # ---------------------------------------------------------------- the export (on LEAD's OK)
 def cable_socket(mk):
-    x0 = 0.36 - (0.24 + 0.035 * (mk - 1)) - 0.12
-    return [round(x0 + 0.03, 3), -0.17]
+    return [round(v, 3) for v in cable_path(mk)[-1]]
 
 
 def kit():
