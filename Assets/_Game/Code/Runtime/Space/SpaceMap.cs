@@ -80,7 +80,9 @@ namespace Meridian.Space
             public string name;
             public Vector2 world;
             public bool inset;
-            public RectTransform disc, tag, tick;
+            public RectTransform disc, tag, tick, leader;
+            /// <summary>The tag sits off its usual place (under the disc), joined to the disc by its leader line.</summary>
+            public bool moved;
         }
 
         public readonly List<Mark> Marks = new List<Mark>();
@@ -348,7 +350,7 @@ namespace Meridian.Space
 
             foreach (var b in ship.world.Bodies)
             {
-                if (!OnMaps(b)) continue;
+                if (!OnMaps(b) || b.parent != null) continue; // LEAD 20:4x: the Moon only on the minimap
                 bool inner = b.position.magnitude < InnerRange;
                 if (!b.isSun && b.parent == null) { insetOrbits.Add(Vector2.zero, b.position.magnitude * InsetScale); fullOrbits.Add(Vector2.zero, b.position.magnitude * FullScale); }
                 // The Sun goes on both charts; the rest on the one that holds them (the inner planets and the Moon in the inset).
@@ -356,6 +358,7 @@ namespace Meridian.Space
                 if (b.isSun || !inner) AddSystemMark(b, false);
             }
             insetOrbits.Commit(); insetWells.Commit(); fullOrbits.Commit(); fullWells.Commit();
+            PlaceSystemTags();
             SystemShip = Img(fullChart, "Ship", Vector2.zero, new Vector2(32f, 32f), new Color(0.85f, 0.25f, 0.2f, 1f), "ui/map/ship").rectTransform;
             insetShip = Img(insetChart, "Ship", Vector2.zero, new Vector2(32f, 32f), new Color(0.85f, 0.25f, 0.2f, 1f), "ui/map/ship").rectTransform;
             systemRoot.SetActive(false);
@@ -388,10 +391,12 @@ namespace Meridian.Space
             var size = DiscSize(b);
             var p = b.position * scale;
             var wells = inset ? insetWells : fullWells;
-            wells.Add(p, Mathf.Max(b.WellRadius * scale, Mathf.Max(size.x, size.y) * 0.5f + WellMargin));
+            if (!b.isSun) wells.Add(p, Mathf.Max(b.WellRadius * scale, Mathf.Max(size.x, size.y) * 0.5f + WellMargin)); // LEAD 20:4x: wells for planets only
             var sm = new SystemMark { name = b.name, world = b.position, inset = inset };
             sm.disc = Img(chart, "Disc_" + b.name, p, size, UiTheme.Accent(b.landable ? b.planet : (PlanetId?)null), DiscKey(b)).rectTransform;
             bool moon = b.parent != null;
+            sm.leader = Img(chart, "Leader_" + b.name, p, new Vector2(1f, 1.5f), UiKit.Ink).rectTransform; // under the tag: built first
+            sm.leader.gameObject.SetActive(false);
             sm.tag = Tag(chart, "Tag_" + b.name, Display(b.name), 18, out _);
             sm.tag.anchoredPosition = moon ? p + new Vector2(size.x * 0.5f + sm.tag.sizeDelta.x * 0.5f + 3f, 0f) : p + new Vector2(0f, -(size.y * 0.5f + 13f));
             if (b.landable)
@@ -401,6 +406,67 @@ namespace Meridian.Space
             }
             SystemMarks.Add(sm);
         }
+
+        /// <summary>The system map's tags, as the minimap's: each takes the first of its places round its disc (under it first) where it covers no
+        /// disc, station mark, tick or tag already placed on its chart; a tag pushed off its first place gets a short ink leader to its disc.</summary>
+        void PlaceSystemTags()
+        {
+            PlaceSystemTags(true);
+            PlaceSystemTags(false);
+        }
+
+        void PlaceSystemTags(bool inset)
+        {
+            placedTags.Clear();
+            foreach (var sm in SystemMarks)
+            {
+                if (sm.inset != inset) continue;
+                if (sm.disc != null) placedTags.Add(new Rect(sm.disc.anchoredPosition - sm.disc.sizeDelta * 0.5f, sm.disc.sizeDelta));
+                if (sm.tick != null && sm.tick.gameObject.activeSelf) placedTags.Add(new Rect(sm.tick.anchoredPosition - sm.tick.sizeDelta * 0.5f, sm.tick.sizeDelta));
+            }
+            foreach (var sm in SystemMarks)
+            {
+                if (sm.inset != inset || sm.tag == null) continue;
+                Vector2 p = sm.disc.anchoredPosition, ds = sm.disc.sizeDelta, ts = sm.tag.sizeDelta;
+                float below = ds.y * 0.5f + 13f, side = ds.x * 0.5f + ts.x * 0.5f + 5f;
+                Vector2 best = p + new Vector2(0f, -below);
+                bool moved = false;
+                for (int i = 0; i < TagSpots.Length; i++)
+                {
+                    var o = TagSpots[i];
+                    var c = p + new Vector2(o.x * side, o.y > 0f ? (below + (o.y - 1f) * 26f) : o.y < 0f ? -(below + (-o.y - 1f) * 26f) : 0f);
+                    if (o.x != 0f && o.y != 0f) c.y = p.y + Mathf.Sign(o.y) * (ds.y * 0.5f + 4f + (Mathf.Abs(o.y) - 1f) * 26f);
+                    var r = new Rect(c - ts * 0.5f, ts);
+                    if (!Free(r)) continue;
+                    best = c; moved = i > 0;
+                    break;
+                }
+                sm.tag.anchoredPosition = best;
+                placedTags.Add(new Rect(best - ts * 0.5f, ts));
+                sm.moved = moved;
+                Show(sm.leader, moved);
+                if (!moved) continue;
+                // the leader: from the disc's edge to the tag box's nearest point
+                var box = new Rect(best - ts * 0.5f, ts);
+                var near = new Vector2(Mathf.Clamp(p.x, box.xMin, box.xMax), Mathf.Clamp(p.y, box.yMin, box.yMax));
+                var d = near - p;
+                float len = d.magnitude - Mathf.Max(ds.x, ds.y) * 0.5f;
+                if (len < 3f) { Show(sm.leader, false); continue; }
+                var dir = d / d.magnitude;
+                var from = p + dir * (Mathf.Max(ds.x, ds.y) * 0.5f);
+                sm.leader.anchoredPosition = from + dir * (len * 0.5f);
+                sm.leader.sizeDelta = new Vector2(len, 1.5f);
+                sm.leader.localRotation = Quaternion.Euler(0f, 0f, Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg);
+            }
+        }
+
+        /// <summary>A tag's places round its disc, in order: (x: −1 left / 0 centred / 1 right; y: −n the nth row under, +n the nth row over).</summary>
+        static readonly Vector2[] TagSpots =
+        {
+            new Vector2(0f, -1f), new Vector2(0f, 1f), new Vector2(1f, 0f), new Vector2(-1f, 0f),
+            new Vector2(1f, -1f), new Vector2(-1f, -1f), new Vector2(1f, 1f), new Vector2(-1f, 1f),
+            new Vector2(0f, -2f), new Vector2(0f, 2f), new Vector2(0f, -3f), new Vector2(0f, 3f),
+        };
 
         // ---------- art ----------
 
@@ -610,6 +676,7 @@ namespace Meridian.Space
                 var chart = inset ? insetChart : fullChart;
                 var mark = Img(chart, "Station_" + w.planet, p * (inset ? InsetScale : FullScale), new Vector2(24f, 24f), UiKit.Ink, "ui/map/station").rectTransform;
                 SystemMarks.Add(new SystemMark { name = id, world = p, inset = inset, disc = mark });
+                mark.SetAsFirstSibling(); // under the planets' marks and tags
                 if (art.TryGetValue("ui/map/station", out var s)) Dress("ui/map/station", s);
             }
         }
@@ -620,6 +687,7 @@ namespace Meridian.Space
             var state = GameState.Instance;
             foreach (var sm in SystemMarks)
                 if (sm.tick != null) Show(sm.tick, Landed(state, PlanetOf(sm.name)));
+            PlaceSystemTags(); // after the ticks: a shown tick is a place a tag must not cover
             UpdateSystemShip();
         }
 

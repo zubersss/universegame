@@ -98,8 +98,22 @@ namespace Meridian.Tests
                 if (sm.name.StartsWith("station:")) stations++;
             }
             TestContext.Out.WriteLine($"[MERIDIAN] u184 marks: minimap range {map.Range:F0} u ({inside} inside), system map {marks} marks ({stations} Waystations)");
-            Assert.GreaterOrEqual(marks, 11, "the Sun twice, eight planets, the Moon");
+            Assert.GreaterOrEqual(marks, 10, "the Sun on both charts and the eight planets");
             Assert.AreEqual(Meridian.Trade.Waystation.All.Count, stations, "every Waystation on the system map");
+            Assert.IsFalse(map.SystemMarks.Exists(sm => sm.name == "luna"), "the Moon only on the minimap (LEAD 20:4x)");
+            // LEAD 20:4x: the tags placed clear (no tag over another tag or a disc on its chart); a moved tag has its leader.
+            foreach (var a in map.SystemMarks)
+            {
+                if (a.tag == null) continue;
+                var ra = new Rect(a.tag.anchoredPosition - a.tag.sizeDelta * 0.5f, a.tag.sizeDelta);
+                foreach (var b in map.SystemMarks)
+                {
+                    if (b == a || b.inset != a.inset) continue;
+                    Assert.IsFalse(ra.Overlaps(new Rect(b.disc.anchoredPosition - b.disc.sizeDelta * 0.5f, b.disc.sizeDelta)), $"{a.name}'s tag clear of {b.name}'s mark");
+                    if (b.tag != null) Assert.IsFalse(ra.Overlaps(new Rect(b.tag.anchoredPosition - b.tag.sizeDelta * 0.5f, b.tag.sizeDelta)), $"{a.name}'s tag clear of {b.name}'s tag");
+                }
+                if (a.moved) Assert.IsTrue(a.leader.gameObject.activeSelf || Vector2.Distance(a.tag.anchoredPosition, a.disc.anchoredPosition) < 40f, $"{a.name}: a moved tag has its leader");
+            }
             LogAssert.NoUnexpectedReceived();
         }
 
