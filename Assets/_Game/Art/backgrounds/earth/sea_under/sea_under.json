@@ -1,0 +1,41 @@
+{
+  "key": "backgrounds/earth/sea_under",
+  "style": "v3",
+  "ppu": 64,
+  "anchor": "bottom",
+  "tile_x": true,
+  "layers": [
+    {
+      "n": 0,
+      "parallax": 1.0,
+      "y_m": -16.0,
+      "continue_rows": 64,
+      "role": "water_column",
+      "height_px": 1024
+    },
+    {
+      "n": 1,
+      "parallax": 0.35,
+      "y_m": -13.3,
+      "continue_rows": 64,
+      "role": "far_seabed",
+      "height_px": 640
+    },
+    {
+      "n": 2,
+      "parallax": 0.7,
+      "y_m": -33.0,
+      "continue_rows": 64,
+      "role": "near_seabed",
+      "ground_row": 352,
+      "height_px": 544
+    },
+    {
+      "n": 3,
+      "parallax": 1.0,
+      "y_m": -1.0,
+      "role": "surface_from_below",
+      "height_px": 64
+    }
+  ]
+}
