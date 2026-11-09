@@ -1,29 +1,24 @@
 # BLENDER STATUS
-Updated: 2026-11-09 14:0x · Session: 12 (resumed 14:03 after the owner's restart; THIS SESSION = zuber-4d; LEAD = zuber-d1, UNITY = zuber-a0) · older: coordination/status/archive/BLENDER_2026-11-09.md, BLENDER_2026-11-08.md, BLENDER_2026-11-07.md
+Updated: 2026-11-09 14:4x · Session: 12 (resumed 14:03 after the owner's restart; THIS SESSION = zuber-4d; LEAD = zuber-d1, UNITY = zuber-a0) · older: coordination/status/archive/BLENDER_2026-11-09.md, BLENDER_2026-11-08.md, BLENDER_2026-11-07.md
 
 ## Current task
-**14:3x — session 12 (LEAD = zuber-d1, UNITY = zuber-a0).** UNITY's U-194 chain holds the lock (PlayMode slices since 14:06) → files only, no want, no python; LEAD messages when the chain has released. Done files-only since 14:03 (all pushed): B-229 rev (the surveyor's hand on the D-grip, LEAD 14:1x; d593051c), B-233's source (build_site_icons_v3.py + manifest row icons/catalogue/sites; keys by label, RULED: meridian_beacon, solarite), B-232 rewritten to LEAD's 14:2x ruling (24 x 64 px, clips clod_1..4, one clod turning in place; 6970371f), the desk-check of all seven unrun sources by reading (B-230 / B-231 fixes in the commit after 6970371f; B-223 and B-225 read clean), and reports/blender/preview_notes_0.6.2.md (the run order, each sheet's command, what it must show, my 2x checks). Run order when the lock is mine: that report's table, top to bottom.
-- B-231 crouch RULED (LEAD 14:4x): the 1 m gap stays; the crouch stands <= 0.98 m = the forward tuck + a root squash 0.92 in the crouch state; in the source: the pose (torso -76, the antenna laid back), the squash drawn on the sheet, a red 1 m ceiling line, the measured top in the cell's label, the JSON's states.<name>.root_scale for U-199. If the first run measures over 0.98 m, say by how much on the sheet; LEAD rules there.
-- B-224 read too (8e9058ce): one fix, the death wisps inside the frame.
-**13:5x — RESUME HERE.** No lock and no want of mine; every source is committed. UNITY runs U-194 Build 0.6.1 (a multi-lock chain): NO want while it runs. When it has released (LEAD says so), in my lock (LEAD's order 13:5x), each item to LEAD before any export:
-1. B-229 sheet (light; build_hints_v3.py preview, source daf89aad): ui/hints/dig_down's new picture (the shovel mid-scoop + flick) at 1x beside the SURFACE LINE card → export on ACCEPTED (0.6.2).
-2. B-220 Neptune sheet (`python -I blender/scripts/gen_painted_bg.py --continue neptune blender/preview/review_b220_neptune_continue.png`, ~3 min), then Venus deck (`--continue venus`) in its own run; > 8 scenes = its own lock; <= 15 min per lock.
-3. On ACCEPTED of both: export all five giants' bands + venus/deck together (tools/blender_render.ps1 on each planet's painted rows; the export logs "B-220 <key> layerN: continues | feathered"), then update coordination/reports/blender/b220_continue_rows.md for U-191 (Jupiter / Saturn / Uranus rows filled and ACCEPTED).
-4. B-230 sheet (build_back_wall_v3.py, source 7b7f91b6; per planet: `python -I build_back_wall_v3.py <png> <planet>`; manifest kit row terrain/common/back_walls).
-5. B-232 sheet (build_dig_debris_v3.py, source 88ab7c5b; kit row fx/dig_debris).
-6. B-231 design sheet (build_surveyor_v5.py, source eb51b232; writes the bone JSON beside the review): PREVIEWS ONLY until the owner's look-over on the C5 page (D-185); interleave its source work whenever UNITY holds the lock.
-Then the older previews: B-224 (veil serpent, f95c5461), B-223 (the bay + camp icon, 2f4a47f6), B-225 (the sea shallows, 6f107fa2).
-B-228 (the 0.6.1 smoke read, read only, no lock) when U-194's smoke lands: prep in coordination/reports/blender/smoke_read_0.6.1.md.
-7. After B-224 / B-223 / B-225's previews: B-233's sheet (`python -I blender/scripts/build_site_icons_v3.py blender/preview/review_b233_site_icons_preview.png`, light; only after B-223's camp icon is judged).
-NOT YET RUN (expect first-run fixes): B-223, B-225, B-229, B-230, B-231, B-232, B-233. How I ran light sheets this session: list coordination/locks (abort on any other heavy_ / want_), read RAM in its own call, write heavy_blender.lock, run Blender's bundled `python.exe -I <script> <png>` with a working-set watchdog, delete the lock in `finally`.
-- B-220 rule (LEAD-ruled 11:5x): continue_rows 64 only where a layer's bottom band is >= 25 % solid; a sparse layer fades out over its last 64 rows with no continue_rows. B-223's bay keeps DockingBay's keys backgrounds/waystation/layer0..2 at 1920x1080 (no code change). The owner's v5 direction (D-185): cards after 0.6.1; v4 keeps shipping.
-- **Rule (LEAD 09:2x, after two slips):** the first line of ANY call that starts python lists coordination/locks (abort on another role's heavy_ / want_) and reads RAM.
-- **Rule from LEAD 18:2x (D-087):** the Beam reads as a mining tool, never a gun. No pistol grip or trigger, nothing hanging under the body: a cable-fed, arm-mounted emitter with a cutting nozzle.
+**14:4x — RESUME HERE.** No lock and no want of mine; every source is committed and pushed. UNITY runs U-194 Build 0.6.1 (a multi-lock chain: the locks folder is empty between its locks, which is NOT a release): files only, no want, no python, until LEAD messages that the chain has released. Then, in my lock, each sheet to LEAD before any export, in this order (commands, what each must show and my 2x checks: coordination/reports/blender/preview_notes_0.6.2.md):
+1. B-229 sheet (light): ui/hints/dig_down, the shovel in the surveyor's hand → export on ACCEPTED (0.6.2).
+2. B-220 Neptune sheet (~3 min), then the Venus deck in its own run → on ACCEPTED of both, export all five giants' bands + venus/deck (> 8 scenes = its own lock; <= 15 min per lock), then fill reports/blender/b220_continue_rows.md for U-191.
+3. B-230 sheets (one per planet) → B-232 sheet → B-231 design sheet (PREVIEWS ONLY until the owner's C5 look-over, D-185; it writes the bone JSON beside the review).
+4. B-224 → B-223 → B-225 previews → B-233's sheet (only after B-223's camp icon is judged).
+B-228 (the 0.6.1 smoke read, read only, no lock) when coordination/reports/unity/smoke_0.6.1/ lands: prep in reports/blender/smoke_read_0.6.1.md.
+NOT YET RUN (all desk-checked by reading in session 12; expect first-run fixes): B-223, B-224, B-225, B-229, B-230, B-231, B-232, B-233. How I run a light sheet: list coordination/locks (abort on any other heavy_ / want_), read RAM in its own call, write heavy_blender.lock, Blender's bundled `python.exe -I <script> <png>` with a working-set watchdog, delete the lock in `finally`.
+- Rulings this session: B-233's keys follow the PoiDef label (D-187: icons/catalogue/meridian_beacon, solarite). B-232 = 24 frames of 64 px in 4 rows of 6 (404x268), clips clod_1..4, one clod turning in place; U-195 throws them in code. B-231's crouch: the 1 m gap stays, the crouch stands <= 0.98 m (the forward tuck + root squash 0.92 in the crouch state); the sheet draws the 1 m line and prints the measured top; if it is over, say by how much and LEAD rules on the sheet. B-229: the surveyor's glove on the D-grip.
+- B-220 rule (LEAD 11:5x): continue_rows 64 only where a layer's bottom band is >= 25 % solid; a sparse layer fades out over its last 64 rows. B-223's bay keeps DockingBay's keys backgrounds/waystation/layer0..2 at 1920x1080.
+- **Rule (LEAD 09:2x):** the first line of ANY call that starts python lists coordination/locks (abort on another role's heavy_ / want_) and reads RAM.
+- **Rule (LEAD, D-087):** the Beam reads as a mining tool, never a gun: no pistol grip or trigger, a cable-fed, arm-mounted emitter with a cutting nozzle.
 - Waiting on others: B-207 closes on PawsOnTheGround green; B-204 on UNITY's capture; B-172 on U-151. UNITY drops the three lance .meta files.
 
 ## Last completed
-- 11-09 14:03-14:3x (session 12, files only): B-233 source + B-229 glove rev (d593051c); B-232 to the ruled format (6970371f); B-230 / B-231 desk-check fixes; reports/blender/preview_notes_0.6.2.md.
-- 11-09 13:10-13:38: B-220 Jupiter, Saturn, Uranus sheets ACCEPTED (the sparse-layer rule; the U-191 list in reports/blender/b220_continue_rows.md); export after Neptune + Venus.
+- 11-09 14:4x (files only, for the wait; LEAD's ask): coordination/reports/blender/c5_style_notes.md (v5 in plain words as the source draws it, kept / changed, four points to rule, the C5 pieces' proposal).
+- 11-09 14:03-14:4x (session 12, files only): B-233 source + B-229 glove rev (d593051c); B-232 to the ruled format (6970371f); B-230 / B-231 / B-224 desk-check fixes (65e2b1db, 8e9058ce); B-231's crouch to LEAD's direction (734ae6a7); reports/blender/preview_notes_0.6.2.md.
+- 11-09 13:10-13:38: B-220 Jupiter, Saturn, Uranus sheets ACCEPTED (the U-191 list in reports/blender/b220_continue_rows.md); export after Neptune + Venus.
 - Earlier (B-184 to B-227, all Done on the board): coordination/status/archive/BLENDER_2026-11-09.md, BLENDER_2026-11-08.md.
 
 ## Ready for review
@@ -41,11 +36,15 @@ NOT YET RUN (expect first-run fixes): B-223, B-225, B-229, B-230, B-231, B-232, 
 none. Waiting on: U-151 (B-172's export), U-152 (B-174).
 
 ## Proposals (undecided only)
-- P (12:2x, from B-223's read of CataloguePanel.IconOf): every catalogue Site entry has no icon, not only Camp. IconOf returns null for EntryKind.Site, so U-192 needs a Site branch for any site icon. Proposal: key sites as icons/catalogue/<label lowercased, spaces as _> (camp, survey_archive, launch_complex, halcyon_hauler, warden_outpost, flare_shelter, warden_vault, mercury_beacon, solarite_field, meridian_station, vent_harvester), and a BLENDER card for the other ten in the camp icon's style once LEAD wants them.
+- P-C5 (14:4x, LEAD's ask; details and joints in reports/blender/c5_style_notes.md section 4; no drawing source before the surveyor is accepted):
+  - Creature: the STAG (creatures/earth/stag: on grass, so at the camp; peaceful; the most joints of Earth's land animals, long legs where a bending knee and hock read at 1x). 17 drawn parts + 9 far copies, 26 bones, four leg IK chains + a head look-at; ears, tail, jaw and breath move on their own; clips idle (grazing), walk, react. U-162's stag work would meet the rig: LEAD orders the two.
+  - Plant: the NODBELL (flora/earth/rigset, 4 bones today): 7 drawn parts + 1 far copy, 9 bones (three stem segments, two leaves, three bells each on its own stalk, a bud); sway travels up the stem, the bells swing behind it. Else the curlfrond.
+  - Background band: the camp scene's near band (backgrounds/earth/plains/layer2, if the camp shows plains): D-185 keeps the painted backgrounds, so a matching pass (brush streaks, two values per mass, the characters' light), no ink, tileable; optionally three sway cards (one pivot each).
+- P-v5 rules (same report, section 3): one light for v5 (the source lights from the upper right; v3 props shade their right side); the palette check on painted parts (flat colours = palette colours or named mixes of two); parts drawn at 128 px per metre; expressions as a face-swap set after the surveyor.
 
 ## Rules I keep (from slips)
 - (LEAD 13:4x) One lock <= 15 min; a painted planet with more than 8 scenes (Uranus: 16, 721 s) gets its own lock.
-- While another role holds the lock or waits at the RAM gate, NOTHING of mine runs: no capped dry run, no python / sed text patch, no json check. Edit files with the edit tools only (13:1x and 13:5x slips: two one-off python patches beside UNITY's lock; 16:4x: one `sed -i` swapping two characters in my own script; 18:2x: one `sed -i` on this status line; 11-09 00:3x: one python palette lookup (died at import, no numpy) run without first listing the locks while UNITY compiled. The shell is never the editor while a lock is out, and no interpreter runs before the locks folder is read.)
+- While another role holds the lock or waits at the RAM gate, NOTHING of mine runs: no capped dry run, no python / sed text patch, no json check; edit files with the edit tools only (five slips on 11-08 / 11-09). The shell is never the editor while a lock is out, and no interpreter runs before the locks folder is read.
 - Before sending a sheet, look at every new shape at 2x for faces: dark marks on a ball (puff frame 2), pale points under a dark arch (teeth), a dark oval on a white ball (a hole).
 - preview_dip and any scene lookup: take the planet from the key (PLANET_OF is keyed by scene name). Hold heavy_blender.lock by hand around a light run (the wrapper also refuses beside another role's lock or want).
 - No 2>&1 on the render wrapper in PowerShell 5.1 (a numpy warning becomes a terminating error).
@@ -54,9 +53,10 @@ none. Waiting on: U-151 (B-172's export), U-152 (B-174).
 - Measure every new export path's frames against the 2 px edge and the ground line before the export.
 - All three sessions share one working tree: a push can race another role's; fetch + merge (never rebase) and push again. Commit by explicit file paths (never an Art directory), check git show --stat against the list.
 - A stroke's line is drawn in its material's ink_hex: a coloured line needs its own line material; a fill-only material on an open stroke draws nothing.
+- A source that cannot run yet gets a desk-check by reading: canvas extents, both soles level by hand kinematics, sheet row sizes, tone-on-tone marks (session 12 found a crash or a wrong pose in five of eight).
 
 ## For USER_ACTIONS
 none.
 
 ## HeavyJobLock
-none held (last: 13:21:56-13:38:01, the B-227 export + B-220 Saturn / Uranus); no want on file: UNITY's U-194 chain runs, and LEAD's rule is no want of mine until it has released. No background waiters: I poll in the foreground.
+none held (last: 13:21:56-13:38:01, the B-227 export + B-220 Saturn / Uranus); no want on file: UNITY's U-194 chain runs, and LEAD's rule is no want of mine until it has released. No background waiters.
