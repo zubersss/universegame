@@ -62,6 +62,13 @@ namespace Meridian.UI
             if (PrevButton != null) UiKit.SetAction(PrevButton, Page > 0);
             if (NextButton != null) UiKit.SetAction(NextButton, Page < Pages - 1);
         }
+
+        /// <summary>U-194: the page a recipe's row is on (-1 if the panel lists no such recipe), for the smoke's shot of a given row.</summary>
+        public int PageOf(string recipeId)
+        {
+            for (int i = 0; i < rows.Count; i++) if (rows[i].recipe != null && rows[i].recipe.id == recipeId) return i / RecipesPerPage;
+            return -1;
+        }
         public string LastMessage { get; private set; } = "";
 
         const float RowH = 42f, Icon = 30f;

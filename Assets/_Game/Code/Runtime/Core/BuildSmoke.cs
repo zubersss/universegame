@@ -155,6 +155,13 @@ namespace Meridian.Core
                     hud.Crafting.SetOpen(true);
                     yield return Wait(1f);
                     yield return Shot(folder, "smoke_9_crafting.png");
+                    // U-194 (B-222): the page holding the Thruster Mk2's row, its v3 icon (a flat teal square in 0.6.0)
+                    int page = hud.Crafting.PageOf("fab_thruster_mk2");
+                    if (page >= 0) hud.Crafting.ShowPage(page);
+                    yield return Wait(0.6f);
+                    yield return Shot(folder, "smoke_64_crafting_thruster_mk2.png");
+                    Debug.Log($"[MERIDIAN] smoke crafting: fab_thruster_mk2 on page {page + 1} of {hud.Crafting.Pages}");
+                    hud.Crafting.ShowPage(0);
                     hud.Crafting.SetOpen(false);
                 }
             }

@@ -42,6 +42,8 @@ namespace Meridian.Building
             public Aerostat aerostat;
             /// <summary>U-076: the piece's 3D model (replaces the sprite once loaded).</summary>
             public Meridian.Art.ModelSwap model;
+            /// <summary>U-194: how far its drawing and collider reach below its cells to the drawn ground (negative: cut short above it); 0 off it.</summary>
+            public float foot;
         }
 
         public sealed class Aerostat
@@ -239,12 +241,13 @@ namespace Meridian.Building
                 go.transform.position = new Vector3(save.x, save.y, 0f);
                 for (int dx = 0; dx < spec.size.x; dx++)
                     for (int dy = 0; dy < spec.size.y; dy++) ground[new Vector2Int(save.x + dx, save.y + dy)] = piece;
+                piece.foot = FootOf(terrain, save.x, save.y, spec.size.x); // U-194: on the drawn ground, not the grid's tile top
             }
             if (spec.solid)
             {
                 var box = go.AddComponent<BoxCollider2D>();
-                box.size = spec.size;
-                box.offset = new Vector2(spec.size.x * 0.5f, spec.size.y * 0.5f);
+                box.size = new Vector2(spec.size.x, spec.size.y + piece.foot);
+                box.offset = new Vector2(spec.size.x * 0.5f, (spec.size.y - piece.foot) * 0.5f);
             }
             if (spec.kind == PieceKind.WindAnchor)
             {
@@ -259,7 +262,7 @@ namespace Meridian.Building
                 // U-064: a lamp lights its shelter: a small warm point light at its head.
                 var lightGo = new GameObject("Light");
                 lightGo.transform.SetParent(go.transform, false);
-                lightGo.transform.localPosition = new Vector3(spec.size.x * 0.5f, spec.size.y - 0.2f, 0f);
+                lightGo.transform.localPosition = new Vector3(spec.size.x * 0.5f, spec.size.y - 0.2f - piece.foot, 0f); // U-194: with the lamp on its foot
                 var light = lightGo.AddComponent<UnityEngine.Rendering.Universal.Light2D>();
                 light.lightType = UnityEngine.Rendering.Universal.Light2D.LightType.Point;
                 light.pointLightOuterRadius = LampRadius;
@@ -278,10 +281,10 @@ namespace Meridian.Building
             }
             var viewGo = new GameObject("View");
             viewGo.transform.SetParent(go.transform, false);
-            viewGo.transform.localPosition = new Vector3(spec.size.x * 0.5f, 0f, 0f);
+            viewGo.transform.localPosition = new Vector3(spec.size.x * 0.5f, -piece.foot, 0f);
             var view = viewGo.AddComponent<SpriteRenderer>();
             view.sortingOrder = 3;
-            Dress(view, spec);
+            Dress(view, spec, piece.foot);
             // U-076: the piece's model on the footprint's bottom centre, scaled like the sprite (stretch pieces fill
             // their cells; the others keep their proportions at the footprint's height).
             piece.model = Meridian.Art.ModelSwap.Attach(view, spec.artKey, go.transform, viewGo.transform.localPosition,
@@ -350,10 +353,10 @@ namespace Meridian.Building
 
         // ---------- art ----------
 
-        void Dress(SpriteRenderer view, PieceSpec spec)
+        void Dress(SpriteRenderer view, PieceSpec spec, float foot)
         {
-            if (art.TryGetValue(spec.artKey, out var sp)) { Fit(view, spec, sp); return; }
-            if (!requested.Add(spec.artKey)) { StartCoroutine(WaitFor(view, spec)); return; }
+            if (art.TryGetValue(spec.artKey, out var sp)) { Fit(view, spec, sp, foot); return; }
+            if (!requested.Add(spec.artKey)) { StartCoroutine(WaitFor(view, spec, foot)); return; }
             var h = ArtLoad.Asset<IList<Sprite>>(spec.artKey);
             handles.Add(h);
             h.Completed += op =>
@@ -361,18 +364,39 @@ namespace Meridian.Building
                 if (op.Status != AsyncOperationStatus.Succeeded || op.Result == null || op.Result.Count == 0) return;
                 art[spec.artKey] = op.Result[0];
             };
-            StartCoroutine(WaitFor(view, spec));
+            StartCoroutine(WaitFor(view, spec, foot));
         }
 
-        System.Collections.IEnumerator WaitFor(SpriteRenderer view, PieceSpec spec)
+        System.Collections.IEnumerator WaitFor(SpriteRenderer view, PieceSpec spec, float foot)
         {
             float until = Time.realtimeSinceStartup + 10f;
             Sprite sp = null;
             while (view != null && !art.TryGetValue(spec.artKey, out sp) && Time.realtimeSinceStartup < until) yield return null;
-            if (view != null && sp != null) Fit(view, spec, sp);
+            if (view != null && sp != null) Fit(view, spec, sp, foot);
         }
 
-        static void Fit(SpriteRenderer view, PieceSpec spec, Sprite sp)
+        /// <summary>U-194 (B-201 #16: smoke_18's wall stacks floated ~0.5 m over Mars's slope): how far a ground piece in cell row `y` reaches
+        /// down to the drawn ground. On a smooth planet the grid's natural top tile holds the curve somewhere inside it, so a piece standing on
+        /// that row (its cells start at the tile's top) can stand up to a metre over the drawn slope. Its foot: the cell's bottom minus the
+        /// highest drawn ground under its footprint (its middle and quarter points, as PoiPlayTests measures). 0 for a piece on another piece,
+        /// on dug or built ground, off a smooth planet. Pure over the terrain's generated curve (no chunk needed: a loaded base gets the same).</summary>
+        public static float FootOf(TerrainStreamer t, int x, int y, int width)
+        {
+            if (t == null || !t.SmoothGround || t.Config == null) return 0f;
+            float top = float.NegativeInfinity;
+            foreach (float q in FootSamples)
+            {
+                float sx = x + q * width;
+                if (t.NaturalTop(Mathf.FloorToInt(sx)) != y - 1) continue; // it stands on that column's natural top row
+                top = Mathf.Max(top, t.SurfaceAt(sx));
+            }
+            return float.IsNegativeInfinity(top) ? 0f : Mathf.Clamp(y - top, -MaxFootUp, MaxFootDown);
+        }
+        static readonly float[] FootSamples = { 0.1f, 0.5f, 0.9f };
+        /// <summary>The foot's limits (m): down to the tile's bottom and a little past it; cut short at most to a sliver of the cell.</summary>
+        public const float MaxFootDown = 1.2f, MaxFootUp = 0.8f;
+
+        static void Fit(SpriteRenderer view, PieceSpec spec, Sprite sp, float foot)
         {
             view.sprite = sp;
             var mat = Meridian.Rendering.ArtMaterials.MaterialFor(spec.artKey);
@@ -382,8 +406,9 @@ namespace Meridian.Building
             // The art's pivot is bottom-centre: it stands on the footprint's bottom edge.
             // Walls overlap: the art has soft side margins (wider than top and bottom); neighbours meet without a seam.
             float overX = spec.kind == PieceKind.Wall ? 1.25f : 1f, overY = spec.kind == PieceKind.Wall ? 1.1f : 1f;
+            // U-194: a stretched piece (a wall) draws its foot too: it stands from the drawn ground to its cells' top; the others keep their size.
             view.transform.localScale = spec.stretch
-                ? new Vector3(overX * spec.size.x / b.x, overY * spec.size.y / b.y, 1f)
+                ? new Vector3(overX * spec.size.x / b.x, overY * (spec.size.y + foot) / b.y, 1f)
                 : Vector3.one * (spec.size.y / b.y);
         }
 

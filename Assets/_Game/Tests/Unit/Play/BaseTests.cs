@@ -80,6 +80,72 @@ namespace Meridian.Tests
                 Assert.NotNull(bases.Place(new Vector2(x + 0.5f, roofY + 0.5f), PieceKind.Wall), $"roof at {x}");
         }
 
+        readonly RaycastHit2D[] hits = new RaycastHit2D[16];
+
+        /// <summary>The drawn outline's height under x (the terrain's colliders only: never a base piece), from `fromY` down; NaN if none in 6 m.</summary>
+        float OutlineUnder(float x, float fromY)
+        {
+            int n = Physics2D.Raycast(new Vector2(x, fromY), Vector2.down, new ContactFilter2D { useTriggers = false }, hits, 6f);
+            float best = float.NaN, dist = float.MaxValue;
+            for (int i = 0; i < n; i++)
+            {
+                var c = hits[i].collider;
+                if (c == null || hits[i].distance <= 0f || hits[i].distance >= dist || c.GetComponentInParent<TerrainChunk>() == null) continue;
+                dist = hits[i].distance; best = hits[i].point.y;
+            }
+            return best;
+        }
+
+        /// <summary>
+        /// U-194 (B-201 #16: smoke_18's wall stacks floated ~40 px over Mars's slope): smoke_18's shelter on the Mars plains (walls three columns
+        /// either side of the spot, a roof, a lamp): every piece standing on the ground draws its base within 0.1 m of the highest drawn ground
+        /// under its footprint (its middle and quarter points, as PoiPlayTests); the pieces stacked on them stay on the grid, the shelter seals.
+        /// </summary>
+        [UnityTest, Timeout(240000)]
+        public IEnumerator TheShelterWallsStandOnTheDrawnGround()
+        {
+            yield return Boot(PlanetId.Mars);
+            int sx = side.spawnX + 200; // smoke_18's spot
+            yield return StandAt(sx);
+            var t = side.terrain;
+            var bases = side.bases;
+            int top = t.TopSolidY(sx);
+            for (int dx = -3; dx <= 3; dx++) top = Mathf.Max(top, t.TopSolidY(sx + dx));
+            int roof = top + 5;
+            foreach (int wx in new[] { sx - 3, sx + 3 })
+                for (int wy = t.TopSolidY(wx) + 1; wy < roof; wy++)
+                    if (bases.PieceAt(new Vector2Int(wx, wy)) == null) Assert.NotNull(bases.Place(new Vector2(wx + 0.5f, wy + 0.5f), PieceKind.Wall), $"wall at {wx},{wy}");
+            for (int wx = sx - 3; wx <= sx + 3; wx++) Assert.NotNull(bases.Place(new Vector2(wx + 0.5f, roof + 0.5f), PieceKind.Wall), $"roof at {wx}");
+            Assert.NotNull(bases.Place(new Vector2(sx + 1.5f, t.TopSolidY(sx + 1) + 1.5f), PieceKind.Lamp), "the lamp");
+            for (int i = 0; i < 5; i++) yield return new WaitForFixedUpdate();
+            var log = new System.Text.StringBuilder();
+            var failures = new System.Collections.Generic.List<string>();
+            int onGround = 0;
+            float maxFoot = 0f;
+            foreach (var p in bases.pieces)
+            {
+                int x = p.save.x, y = p.save.y;
+                if (y > t.TopSolidY(x) + 1) { Assert.AreEqual(0f, p.foot, $"{p.go.name}: a stacked piece keeps the grid"); continue; }
+                onGround++;
+                maxFoot = Mathf.Max(maxFoot, p.foot);
+                float drawnBase = p.go.transform.Find("View").position.y;
+                float ground = float.NaN;
+                foreach (float q in new[] { 0.1f, 0.5f, 0.9f })
+                {
+                    float g = OutlineUnder(x + q * p.spec.size.x, y + 1.5f);
+                    if (!float.IsNaN(g) && (float.IsNaN(ground) || g > ground)) ground = g;
+                }
+                float gap = drawnBase - ground;
+                log.Append($" {p.go.name} foot {p.foot:0.00} gap {gap:+0.00;-0.00}");
+                if (float.IsNaN(gap) || Mathf.Abs(gap) > 0.1f) failures.Add($"{p.go.name}: base {drawnBase:0.00}, ground {ground:0.00}, foot {p.foot:0.00}");
+            }
+            TestContext.Out.WriteLine($"[MERIDIAN] u194 shelter at {sx}:{log}");
+            Assert.AreEqual(3, onGround, "two wall columns and the lamp on the ground");
+            Assert.IsEmpty(failures, "a piece over a gap or sunk into the slope (base more than 0.1 m off the drawn ground): " + string.Join("; ", failures));
+            Assert.Greater(maxFoot, 0.05f, "smoke_18's spot stands the grid's tiles over the drawn slope (the case under test)");
+            LogAssert.NoUnexpectedReceived();
+        }
+
         [UnityTest]
         public IEnumerator AnEnclosedShelterStopsTheCryoDrainAndSurvivesSaveLoad()
         {

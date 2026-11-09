@@ -108,6 +108,34 @@ namespace Meridian.Core
                 yield return Shot(folder, "smoke_47_d1_first_dig_dig_down.png");
                 if (hints != null) hints.Dismiss();
 
+                // smoke_65 / 66 (U-194, D-182): a new surveyor's held shovel stroke beside the first scoop: mid-swing, then the dirt flick;
+                // the HUD's tool slot reads SHOVEL.
+                if (input != null)
+                {
+                    var aim = new Vector2(tx + 1.3f, t.SurfaceAt(tx + 1.3f) - 0.5f);
+                    input.module = Meridian.Rig.RigModule.Beam;
+                    input.AimAt(aim);
+                    yield return Wait(0.5f);
+                    bool dug = false;
+                    System.Action<Vector2> onDug = _ => dug = true;
+                    rig.Dug += onDug;
+                    try
+                    {
+                        input.holdUse = true;
+                        float until = Time.realtimeSinceStartup + 10f;
+                        while (input.StrokeProgress < 0.5f && Time.realtimeSinceStartup < until) yield return null;
+                        yield return Shot(folder, "smoke_65_d1_shovel_midswing.png");
+                        until = Time.realtimeSinceStartup + 10f;
+                        while (!dug && Time.realtimeSinceStartup < until) yield return null;
+                        input.holdUse = false;
+                        yield return Wait(0.12f);
+                        yield return Shot(folder, "smoke_66_d1_shovel_flick.png");
+                    }
+                    finally { rig.Dug -= onDug; input.holdUse = false; }
+                    Debug.Log($"[MERIDIAN] smoke shovel: tool {rig.Tool}, dug {dug}, slot '{(hud.ToolSlot != null ? hud.ToolSlot.Name.text : "-")}'");
+                    input.externalAim = false;
+                }
+
                 // smoke_48: 2 m under the Surface Line in a pit beside the camp: the line in the cutaway, its card.
                 float px = sx + 27.5f, ps = t.SurfaceAt(px);
                 Bore(rig, px, ps - 3.6f, ps + 0.5f);
@@ -256,6 +284,16 @@ namespace Meridian.Core
                     yield return Shot(folder, "smoke_60_d1_skill_tree.png");
                     hud.Skills.SetOpen(false);
                     Debug.Log($"[MERIDIAN] smoke skill tree: {node} {bought}, purse {state.scrip}");
+                    // smoke_67 (U-194): The Beam bought: the Beam Mk1 in hand and the HUD's tool slot reads BEAM MK1.
+                    if (input != null)
+                    {
+                        input.module = Meridian.Rig.RigModule.Beam;
+                        input.AimAt(new Vector2(sx + 3.5f, t.SurfaceAt(sx + 3.5f) - 0.4f));
+                        yield return Wait(1f);
+                        yield return Shot(folder, "smoke_67_d1_tool_slot_beam.png");
+                        Debug.Log($"[MERIDIAN] smoke tool slot: '{(hud.ToolSlot != null ? hud.ToolSlot.Name.text : "-")}' {(hud.ToolSlot != null ? hud.ToolSlot.IconKey : "-")}, tool {rig.Tool}");
+                        input.externalAim = false;
+                    }
                 }
                 yield return Wait(0.3f);
             }
