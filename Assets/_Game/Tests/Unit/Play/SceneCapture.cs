@@ -2639,6 +2639,86 @@ namespace Meridian.Tests
             UnityEngine.Object.Destroy(uiGo);
         }
 
+        /// <summary>U-185 (B-213): the first hour's hint cards at 1080p, each in its moment → coordination/reports/unity/u185/: 1_dig_down (at
+        /// the camp), 2_surface_line (just under the line, the arrow at the depth readout), 3_pack_full (a full pack, the arrow at the cue),
+        /// 4_climb_up (the jetpack's key), 5_sell (topside with the haul), 6_skill_tree (after the first sale, the arrow at the Rank slot).</summary>
+        [UnityTest, Timeout(480000)]
+        public IEnumerator CaptureU185Hints()
+        {
+            var name = Environment.GetEnvironmentVariable(Variable);
+            if (string.IsNullOrEmpty(name)) Assert.Ignore($"Set {Variable} (tools/unity_capture.ps1).");
+            if (SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.Null)
+                Assert.Fail("No graphics device: run without -nographics.");
+            bool wasCartoon = Meridian.View2D.CartoonStage.Enabled, show0 = Meridian.Core.GameSettings.ShowHints;
+            Meridian.View2D.CartoonStage.Enabled = true;
+            Meridian.UI.HintCards.Suppressed = false;
+            Meridian.Core.GameSettings.ShowHints = true;
+            try
+            {
+#if UNITY_EDITOR
+                yield return UnityEditor.SceneManagement.EditorSceneManager.LoadSceneAsyncInPlayMode(
+                    CorePath, new LoadSceneParameters(LoadSceneMode.Single));
+#endif
+                var director = UnityEngine.Object.FindAnyObjectByType<SceneDirector>();
+                float timeout = Time.realtimeSinceStartup + 30f;
+                while ((!director.IsReady || !director.PlanetSide.terrain.IsSettled) && Time.realtimeSinceStartup < timeout) yield return null;
+                var side = director.PlanetSide;
+                var state = GameState.Instance;
+                if (side.hazards != null) side.hazards.enabled = false;
+                if (side.dayNight != null) side.dayNight.Override = 0.45f;
+                side.creatures.autoSpawn = false;
+                side.creatures.DespawnAll();
+                var dir = "coordination/reports/unity/u185";
+                Directory.CreateDirectory(dir);
+                var player = side.player;
+                player.externalInput = true;
+                var hud = side.sideHud;
+                var hints = hud.Hints;
+                Meridian.UI.HintCards.Blocked = () => true; // the capture puts each card up itself
+                state.hintsSeen.Clear();
+                state.inventory.Clear();
+                var follow = side.sideCamera.GetComponent<Meridian.Player.CameraFollow>();
+                int camp = Mathf.FloorToInt(Meridian.Planet.POI.PoiCatalog.SpawnCamp.CenterX);
+                var top = new Vector2(camp + 14.5f, side.terrain.SurfaceAt(camp + 14.5f) + 0.3f);
+                int x0 = camp + 20;
+                float surface = side.terrain.SurfaceAt(x0 + 1.5f);
+                int floor = Mathf.FloorToInt(surface) - 4; // just under the Surface Line (2 m under the surface)
+                for (int y = floor; y <= Mathf.CeilToInt(surface) + 2; y++) for (int x = x0; x < x0 + 3; x++) side.terrain.SetTile(x, y, Meridian.Terrain.TileId.Air);
+                void Put(Vector2 p) { player.Body.position = p; player.transform.position = p; player.Body.linearVelocity = Vector2.zero; }
+                IEnumerator Card(string label, string id, Vector2 at)
+                {
+                    Put(at);
+                    for (int i = 0; i < 30; i++) yield return new WaitForFixedUpdate();
+                    if (follow != null) follow.SnapToTarget();
+                    hints.Show(id);
+                    yield return new WaitForSeconds(1.2f); // the card's paper, the arrow
+                    yield return SaveWithUi(side.sideCamera, hud.RankSlot.canvas, $"{name}_{label}");
+                    File.Copy($"logs/capture_{name}_{label}.png", $"{dir}/{label}.png", true);
+                    TestContext.Out.WriteLine($"[MERIDIAN] u185 {label}: '{hints.TitleText.text}' / '{hints.BodyText.text}', key cap '{hints.KeyCap.text}', arrow {(hints.Arrow.enabled ? $"aimed, tip {hints.LastArrowGap:0} px from its element" : "none")}, card {(hints.Card.sprite != null ? hints.Card.sprite.name : "-")}");
+                    hints.Dismiss();
+                    yield return null;
+                }
+                yield return Card("1_dig_down", Meridian.UI.HintCards.DigDown, top);
+                yield return Card("2_surface_line", Meridian.UI.HintCards.SurfaceLine, new Vector2(x0 + 1.5f, floor + 0.05f));
+                int clay = Meridian.Items.ItemRegistry.Get(Meridian.Mining.D1Tables.Current.materials[0].item).id;
+                state.inventory.Add(clay, state.inventory.FitsByWeight(clay));
+                state.inventory.Add(clay, 1); // refused: the HUD's PACK FULL cue
+                yield return Card("3_pack_full", Meridian.UI.HintCards.PackFull, new Vector2(x0 + 1.5f, floor + 0.05f));
+                yield return Card("4_climb_up", Meridian.UI.HintCards.ClimbUp, new Vector2(x0 + 1.5f, floor + 0.05f));
+                yield return Card("5_sell", Meridian.UI.HintCards.Sell, top);
+                hud.Sell.SetOpen(true); hud.Sell.SellAll(); hud.Sell.SetOpen(false);
+                yield return Card("6_skill_tree", Meridian.UI.HintCards.SkillTree, top);
+                LogAssert.NoUnexpectedReceived();
+            }
+            finally
+            {
+                Meridian.View2D.CartoonStage.Enabled = wasCartoon;
+                Meridian.UI.HintCards.Suppressed = true;
+                Meridian.UI.HintCards.Blocked = null;
+                Meridian.Core.GameSettings.ShowHints = show0;
+            }
+        }
+
         /// <summary>U-190 (Bible 5.3 §8.1): a full dig run at Earth's camp with no sentinel → coordination/reports/unity/u190/: the Beam digs a
         /// shaft 30 m down beside the camp (the pack fills), 1_dug_30m at its floor, 2_ladder_up on the way out, 3_topside beside the shaft;
         /// the Warden meter never trips and no sentinel comes (the camp is no Warden site).</summary>

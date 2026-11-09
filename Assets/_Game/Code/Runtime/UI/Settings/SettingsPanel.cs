@@ -42,6 +42,10 @@ namespace Meridian.UI
         public static readonly Vector2 Size = new Vector2(1180f, 860f);
 
         public static string FilmLabel() => GameSettings.FilmEffects ? "FILM EFFECTS: ON" : "FILM EFFECTS: OFF";
+        /// <summary>U-185: the hints row's label, and its reset (every hint shows again, from the next trigger).</summary>
+        public static string HintsLabel() => GameSettings.ShowHints ? "SHOW HINTS: ON" : "SHOW HINTS: OFF";
+        public static void ResetHints() { if (GameState.Instance != null) GameState.Instance.hintsSeen.Clear(); }
+        public Button HintsButton, ResetHintsButton;
 
         public static SettingsPanel Build(Transform canvas, InputActionAsset actions, UnityAction back)
         {
@@ -61,8 +65,16 @@ namespace Meridian.UI
             p.MusicDown = nd; p.MusicUp = nu;
             p.SfxLabel = VolumeRow(t, "Sfx", 50f, out var sd, out var su, () => GameSettings.SfxVolume = GameSettings.Stepped(GameSettings.SfxVolume, -1), () => GameSettings.SfxVolume = GameSettings.Stepped(GameSettings.SfxVolume, 1), p);
             p.SfxDown = sd; p.SfxUp = su;
-            p.LanguageButton = UiKit.Button(t, "LANGUAGE: " + GameSettings.Language.ToUpperInvariant(), new Vector2(0f, -25f), () => { });
+            p.LanguageButton = UiKit.Button(t, "LANGUAGE: " + GameSettings.Language.ToUpperInvariant(), new Vector2(-380f, -25f), () => { });
             p.LanguageButton.interactable = false; // one language until localisation exists (P-39's placeholder)
+            // U-185: the first hour's hints: shown or not, and shown again from the start
+            p.HintsButton = UiKit.Button(t, HintsLabel(), new Vector2(0f, -25f), () => { GameSettings.ShowHints = !GameSettings.ShowHints; p.Refresh(); });
+            p.ResetHintsButton = UiKit.Button(t, "RESET HINTS", new Vector2(380f, -25f), () => { ResetHints(); p.Refresh(); });
+            foreach (var b in new[] { p.LanguageButton, p.HintsButton, p.ResetHintsButton })
+            {
+                ((RectTransform)b.transform).sizeDelta = new Vector2(340f, 64f);
+                ((RectTransform)b.GetComponentInChildren<Text>().transform).sizeDelta = new Vector2(340f, 64f);
+            }
 
             var head = UiKit.Text(t, "KeysHeader", new Vector2(0.5f, 0.5f), new Vector2(0f, -95f), new Vector2(1000f, 36f), 20, true, TextAnchor.MiddleCenter, theme.label);
             head.text = "KEYS (rebinding comes later)";
@@ -86,6 +98,12 @@ namespace Meridian.UI
 
             p.BackButton = UiKit.Button(t, "BACK", new Vector2(0f, -360f), back);
             Chain(p.FilmButton, p.MasterDown, p.MasterUp, p.MusicDown, p.MusicUp, p.SfxDown, p.SfxUp, p.BackButton);
+            // U-185: the hints row sits between the volumes and BACK
+            p.HintsButton.navigation = new Navigation { mode = Navigation.Mode.Explicit, selectOnUp = p.SfxDown, selectOnDown = p.BackButton, selectOnRight = p.ResetHintsButton };
+            p.ResetHintsButton.navigation = new Navigation { mode = Navigation.Mode.Explicit, selectOnUp = p.SfxUp, selectOnDown = p.BackButton, selectOnLeft = p.HintsButton };
+            var sdn = p.SfxDown.navigation; sdn.selectOnDown = p.HintsButton; p.SfxDown.navigation = sdn;
+            var sun = p.SfxUp.navigation; sun.selectOnDown = p.ResetHintsButton; p.SfxUp.navigation = sun;
+            var bn = p.BackButton.navigation; bn.selectOnUp = p.HintsButton; p.BackButton.navigation = bn;
             root.SetActive(false);
             return p;
         }
@@ -135,6 +153,9 @@ namespace Meridian.UI
         {
             var ft = FilmButton.GetComponentInChildren<Text>();
             if (ft != null) ft.text = FilmLabel();
+            var ht = HintsButton != null ? HintsButton.GetComponentInChildren<Text>() : null;
+            if (ht != null) ht.text = HintsLabel();
+            if (ResetHintsButton != null) ResetHintsButton.interactable = GameState.Instance != null && GameState.Instance.hintsSeen.Count > 0;
             var lever = GameSettings.FilmEffects ? switchOn : switchOff; // U-124: the lever follows the setting
             if (FilmSwitch != null) { FilmSwitch.sprite = lever; FilmSwitch.enabled = lever != null; }
             MasterLabel.text = "MASTER VOLUME   " + GameSettings.Percent(GameSettings.MasterVolume);

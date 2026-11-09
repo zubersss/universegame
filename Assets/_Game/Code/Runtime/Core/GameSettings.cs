@@ -10,6 +10,8 @@ namespace Meridian.Core
     public static class GameSettings
     {
         public const string FilmKey = "meridian.settings.film";
+        /// <summary>U-185: the first hour's hint cards (default on).</summary>
+        public const string HintsKey = "meridian.settings.hints";
         public const string MasterKey = "meridian.settings.master", MusicKey = "meridian.settings.music", SfxKey = "meridian.settings.sfx";
         /// <summary>The defaults a fresh install starts from: the mix as tuned (AudioDirector's own levels at full).</summary>
         public const float DefaultMaster = 1f, DefaultMusic = 1f, DefaultSfx = 1f;
@@ -18,7 +20,7 @@ namespace Meridian.Core
         /// <summary>The one language until localisation exists (U-102's placeholder row).</summary>
         public const string Language = "English";
 
-        static bool? film;
+        static bool? film, hints;
         static float? master, music, sfx;
 
         /// <summary>Raised after any setting changes.</summary>
@@ -33,6 +35,20 @@ namespace Meridian.Core
                 if (film.HasValue && film.Value == value) return;
                 film = value;
                 PlayerPrefs.SetInt(FilmKey, value ? 1 : 0);
+                PlayerPrefs.Save();
+                Changed?.Invoke();
+            }
+        }
+
+        /// <summary>U-185: "Show hints": the first hour's hint cards. Default on.</summary>
+        public static bool ShowHints
+        {
+            get { if (!hints.HasValue) hints = PlayerPrefs.GetInt(HintsKey, 1) != 0; return hints.Value; }
+            set
+            {
+                if (hints.HasValue && hints.Value == value) return;
+                hints = value;
+                PlayerPrefs.SetInt(HintsKey, value ? 1 : 0);
                 PlayerPrefs.Save();
                 Changed?.Invoke();
             }
@@ -68,6 +84,6 @@ namespace Meridian.Core
         }
 
         /// <summary>Drops the cached values so the next read comes from PlayerPrefs (tests; a restart reads the same way).</summary>
-        public static void Reload() { film = null; master = null; music = null; sfx = null; }
+        public static void Reload() { film = null; hints = null; master = null; music = null; sfx = null; }
     }
 }

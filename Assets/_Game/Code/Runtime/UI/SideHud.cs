@@ -206,6 +206,10 @@ namespace Meridian.UI
             // U-175 (D-174): the Skill Tree (K).
             Skills = gameObject.AddComponent<SkillTreePanel>();
             Skills.player = player;
+            // U-185 (B-213): the first hour's hint cards
+            Hints = gameObject.AddComponent<HintCards>();
+            Hints.hud = this;
+            Hints.player = player;
         }
 
         public InventoryPanel Inventory { get; private set; }
@@ -213,6 +217,7 @@ namespace Meridian.UI
         public CataloguePanel Catalogue { get; private set; }
         public SellPanel Sell { get; private set; }
         public SkillTreePanel Skills { get; private set; }
+        public HintCards Hints { get; private set; }
 
         /// <summary>U-174: the depth readout under the Surface Line ("DEPTH 12 m · SUBSOIL"; blank topside) and the pack-full cue.</summary>
         public Text DepthText { get; private set; }
