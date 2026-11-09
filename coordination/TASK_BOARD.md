@@ -1580,6 +1580,13 @@ Files: blender/scripts/ (the UI builder), Assets/_Game/Art/ui/rank/
 Depends: —
 Lead notes: Cycle 284 (16:4x). After B-204's mock-up. 19:0x: SHEET ACCEPTED AS DRAWN (review_b206_rank_preview.png 18:59: ten insignia rising from a steel survey pin to the starred laurel medallion, distinct at 48 px; the expedition rosette with a blank plate for UNITY's numeral (I, II, V, X lettered in Limelight) and a laurel variant from XI; the certificate on B-208's flat paper with a double border, corner flourishes and a red wax seal on gold ribbons, lettered as UNITY would; nothing from combat): export the 13 keys to ui/rank/. 19:1x: EXPORTED (d9f66b10: 26 files, 0 .meta): ui/rank/insignia_1..10 (HUD 48 px, panel 96), expedition_badge (I–X, the numeral in Limelight inside json numeral_rect, top-left origin) and expedition_badge_laurel (XI+), certificate (9-slice 72 72 104 104, the grain under a Mask as U-181); handoff to U-178.
 
+### B-209 · BLENDER · Ready · D1
+Goal: The space minimap's and the system map's art (D-178): a round minimap frame (a brass-rimmed porthole chart on aged paper, a compass N at the top, 256 px, a transparent centre for UNITY's marks), the marks (the Sun, a small station mark for Waystations, the ship's heading arrow, a rim arrow, a landed tick, a dashed-ring tile for Gravity Wells), and the system map's panel (a wide paper chart in UiKit's style with an inked title cartouche "THE SOLAR SYSTEM", 9-slice), the planets drawn from their existing discs at map size (32 px), name tags in the HUD's paper style.
+Accept: one stamped mock-up (the minimap at 1× over a space frame with Earth, the Moon, Mars and a Waystation; the system map at 1080p with all eight planets) accepted by LEAD before the export; palette 100 %; no faces.
+Files: blender/scripts/ (the UI builder), Assets/_Game/Art/ui/map/
+Depends: —
+Lead notes: Cycle 286 (19:3x). The owner's ask: right after B-205's export.
+
 ### B-202 · BLENDER · Ready · G1
 Goal: Earth's underwater set (B-200's finding, b200_underwater.md: below the surface the swimmer sees the coast / plains land set tinted, meadow and flowers filling the water, and at 15 m a flat green-grey with vertical strip streaks, no depth cue): `backgrounds/earth/sea_under` in D-169's format, drawn for below the sea surface: layer0 the water column (light under the surface with soft wavering light shafts, darkening with depth toward the Hadal trench's dark); layer1 far seabed silhouettes in the haze (rock arches, kelp stands); layer2 the near seabed on the sea floor's depth (sand ripples, rocks, kelp, shells), solid to its bottom with a tileable strip (continue_rows 64); a bright wavy band of the surface seen from below on layer0's top, its own json row naming it. Earth's palette with U-040's tint in mind (it multiplies on top), the straight finish, no faces, nothing that reads as a land plant.
 Accept: one stamped preview (the swimmer at 3, 8, 15 and 40 m, with the tint as UnderwaterTint.shader applies it) accepted by LEAD before the export; log OK; seams ≤ 1 /255; ≤ 4 MB per layer.
@@ -2865,6 +2872,13 @@ Accept: RigModuleTests (or the nearest) +1: each slot's key by its chain level, 
 Files: Code/Runtime/Rig/ (RigModule, RigTools), Player/ (the overlay), Tests/
 Depends: B-205, U-175
 Lead notes: Cycle 285 (19:1x). After U-175 (the chain levels come from the tree); the lance swap first if B-205's grapple lands earlier (a weapon shows in slot 2 today). 19:2x (BLENDER's note): RigToolView holds every tool at a fixed Hand (0.12, 0.95), chest height, while the drawn arms hang at the sides, so the arm-mounted cuff floats in front of the chest: make the tool's Hand follow the drawn front hand per frame (from the surveyor build's pose math, as the back socket) or, if that reads wrong, ask LEAD for a BLENDER card for a raised "tool out" front arm.
+
+### U-184 · UNITY · Ready · D1
+Goal: OWNER (USER-34, D-178): a minimap in space, and the system map on M. (1) A round minimap in a corner of the top-down space view, north-up, centred on the ship: the Sun, each planet as its small painted disc with a name tag, faint orbit rings, dashed Gravity Well circles, Waystation marks, the ship as a heading arrow; the zoom fits the nearest planets and widens with speed; an off-edge planet shows as a rim arrow with its distance; hidden during climb / entry transitions. (2) M opens the full system map (the whole system on one paper chart, the same marks, planets landed on ticked); M or Esc closes it; nothing pauses. Art from B-209 (placeholders until then: UiKit paper, the planets' existing disc sprites).
+Accept: SpaceMapTests: every planet and Waystation marked at its true position within 1 px of the scale; the ship arrow's heading matches; the rim arrows point at off-edge planets; M toggles the system map; the minimap absent during transitions; a capture of each at 1080p; the space frame-time row unchanged (BudgetGate).
+Files: Code/Runtime/Space/ (SpaceHud, a new SpaceMap), UI/, Tests/
+Depends: —
+Lead notes: Cycle 286 (19:3x). The owner's ask: next after U-175, ahead of U-182.
 
 ### U-154 · UNITY · Ready · C2
 Goal: P-51 (UNITY, ruled yes in cycle 279): the Builder's aerostat pieces draw the re-inked kit on the four giants: PieceSpec gains a per-planet art key, so the Deck / Strut / Lift cell pieces draw `props/common/aerostat_{deck,strut,cell}` (B-156) on Jupiter, Saturn, Uranus and Neptune and keep `props/venus/aerostat_deck` on Venus; nothing else about the pieces changes (sizes, costs, saves).
