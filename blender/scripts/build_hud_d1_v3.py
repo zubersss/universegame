@@ -121,7 +121,12 @@ def pack_full(seed=71):
     for half_w, half_h, t in ((110, 33, 4.5), (102, 25, 2.0)):                                   # the double border
         ring = (np.abs(cu) <= half_w) & (np.abs(cv) <= half_h) & ~((np.abs(cu) <= half_w - t) & (np.abs(cv) <= half_h - t))
         m0 = np.maximum(m0, ring.astype(np.float32))
-    tm = U.text_mask(U.LIMELIGHT, "PACK  FULL", 38, wobble=0.3, seed=seed)                    # rev: larger, a wider word space
+    tm = U.text_mask(U.LIMELIGHT, "PACK  FULL", 30, wobble=0.3, seed=seed)                    # rev: a wider word space, sized to sit
+    if tm.shape[1] > 190:                                                                         # inside the inner border (38 px ran
+        k = tm.shape[1] / 190.0                                                                   # over it)
+        idx_y = np.clip((np.arange(int(tm.shape[0] / k)) * k).astype(int), 0, tm.shape[0] - 1)
+        idx_x = np.clip((np.arange(190) * k).astype(int), 0, tm.shape[1] - 1)
+        tm = tm[idx_y][:, idx_x]
     th, tw = tm.shape
     y0, x0 = (H_ - th) // 2, (W_ - tw) // 2
     m0[y0:y0 + th, x0:x0 + tw] = np.maximum(m0[y0:y0 + th, x0:x0 + tw], tm)
