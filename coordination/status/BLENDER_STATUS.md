@@ -1,15 +1,16 @@
 # BLENDER STATUS
-Updated: 2026-11-08 19:3x · Session: 10 (all three windows restarted ~09:30 after a ~3-hour break; context rebuilt from the repo) · trimmed under D-113 at 14:0x; older: coordination/status/archive/BLENDER_2026-11-08.md, BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
+Updated: 2026-11-08 19:5x · Session: 10 (all three windows restarted ~09:30 after a ~3-hour break; context rebuilt from the repo) · trimmed under D-113 at 14:0x; older: coordination/status/archive/BLENDER_2026-11-08.md, BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
 
 ## Current task
-LEAD's order (19:3x): B-209 (the space minimap + the system map, D-178; one mock-up first), then B-202's export and B-201.
+Dry (told LEAD 19:5x). B-201 waits on the D1 build's smoke (an art read, frame by frame).
 - **Rule from LEAD 18:2x (D-087):** the Beam reads as a mining tool, never a gun. No pistol grip or trigger, nothing hanging under the body: a cable-fed, arm-mounted emitter with a cutting nozzle.
-- Waiting on others:
-  - props/rig/lance: remove on UNITY's word after U-183 (never a .meta).
-  - B-207 closes on PawsOnTheGround green. B-204 closes on UNITY's capture.
-  - B-172 waits on U-151.
+- Waiting on others: B-207 closes on PawsOnTheGround green; B-204 on UNITY's capture; B-172 on U-151. UNITY drops the three lance .meta files.
 
 ## Last completed
+- 19:4x-19:5x:
+  - B-209: ui/map/* (21 keys, b24977b9; for U-184).
+  - props/rig/lance removed (4697c870: 3 PNGs + the manifest row, 0 .meta).
+  - B-202: backgrounds/earth/sea_under (dc65eb88, for U-171). The 40 m edge was the far floor's flat top: now hillier, with a soft top.
 - 18:2x-19:25, all LEAD-accepted, reviews stamped:
   - B-204 complete: node icons batches 3-5 (e09be9a4, 8d8fed62, acbc7ffd; all 66 in icons/nodes/) + emblem_dig cable-fed.
   - B-206: ui/rank/* (13 keys, d9f66b10).
