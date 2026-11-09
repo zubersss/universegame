@@ -12,7 +12,7 @@ namespace Meridian.UI
     /// U-185 (D1; B-213's cards): the first hour's hints, each shown once, in context, then never again (GameState.hintsSeen, saved):
     /// DIG DOWN on landing at Earth's camp; THE SURFACE LINE the first time the feet cross below it; PACK FULL on the first refused
     /// pickup and CLIMB BACK UP right after it; SELL the first time topside with something sellable in the pack; THE SKILL TREE after the
-    /// first sale. A card sits at the screen's lower centre for ShowSeconds or until its action is done (the first dig, topside, the Sell
+    /// first sale. A card sits clear of the surveyor (up under the depth readout, else the lower centre) for ShowSeconds or until its action is done (the first dig, topside, the Sell
     /// panel, the tree), B-213's paper arrow aimed at the HUD element it names, the current key lettered on its key cap. Nothing shows
     /// during a transition, a menu or a panel (a trigger waits for them); Settings' "Show hints" off shows none. Lives beside SideHud on
     /// its canvas (hidden with the HUD); a few comparisons a frame.
@@ -20,6 +20,13 @@ namespace Meridian.UI
     public sealed class HintCards : MonoBehaviour
     {
         public const float ShowSeconds = 6f, Scale = 1.25f;
+        /// <summary>LEAD (u185 review): the card stays clear of the surveyor. Up top, under the depth readout and the PACK FULL cue (clear of
+        /// the gauges left and the site list right); down at the lower centre only while the surveyor is up there. Canvas px from the edge.</summary>
+        public const float TopY = -96f, BottomY = 150f;
+        /// <summary>The surveyor's box for the overlap test: the capsule plus the pack and the held tool (m).</summary>
+        public const float BodyHalfWidth = 0.7f, BodyHeight = 2.1f;
+        /// <summary>The card is in the upper band (false: the lower centre).</summary>
+        public bool AtTop { get; private set; } = true;
         /// <summary>B-213's card: 320 × 200 at 1:1, the title and body rects (bottom-left px), the key cap; drawn here 440 px wide.</summary>
         public const float CardW = 440f, CardH = 200f, BaseW = 320f;
         public const string DigDown = "dig_down", SurfaceLine = "surface_line", PackFull = "pack_full", ClimbUp = "climb_up", Sell = "sell", SkillTree = "skill_tree";
@@ -87,23 +94,22 @@ namespace Meridian.UI
             if (built || hud == null) return;
             built = true;
             var root = hud.RankSlot != null ? hud.RankSlot.transform.parent : transform;
-            card = UiKit.Panel(root, "HintCard", new Vector2(0.5f, 0f), new Vector2(0f, 150f), new Vector2(CardW, CardH), UiKit.Cream);
-            card.rectTransform.pivot = new Vector2(0.5f, 0f);
-            card.rectTransform.anchoredPosition = new Vector2(0f, 150f);
+            card = UiKit.Panel(root, "HintCard", new Vector2(0.5f, 1f), new Vector2(0f, TopY), new Vector2(CardW, CardH), UiKit.Cream);
             card.rectTransform.localScale = new Vector3(Scale, Scale, 1f);
+            PlaceAt(true);
             card.raycastTarget = false;
             var c = card.transform;
             // B-213's rects (bottom-left px of the 320-px card), the middle stretched to CardW
             float grow = CardW - BaseW;
-            title = Rect(c, "Title", 42f, 152f, 236f + grow, 26f, 22, TextAnchor.MiddleLeft);
+            title = Lettering(c, "Title", 42f, 152f, 236f + grow, 26f, 22, TextAnchor.MiddleLeft);
             title.fontStyle = FontStyle.Normal;
             title.font = UiTheme.Active.TitleFace;
-            body = Rect(c, "Body", 156f, 24f, 140f + grow, 114f, 22, TextAnchor.UpperLeft);
+            body = Lettering(c, "Body", 156f, 24f, 140f + grow, 114f, 22, TextAnchor.UpperLeft);
             body.horizontalOverflow = HorizontalWrapMode.Wrap;
             body.verticalOverflow = VerticalWrapMode.Truncate;
             body.fontStyle = FontStyle.Bold; // Patrick Hand's regular reads grey at this size (the HUD's tags letter bold)
             body.resizeTextForBestFit = true; body.resizeTextMinSize = Mathf.RoundToInt(15 * Scale); body.resizeTextMaxSize = Mathf.RoundToInt(22 * Scale);
-            keycap = Rect(c, "KeyCap", 104f, 31f, 38f, 35f, 18, TextAnchor.MiddleCenter);
+            keycap = Lettering(c, "KeyCap", 104f, 31f, 38f, 35f, 18, TextAnchor.MiddleCenter);
             keycap.horizontalOverflow = HorizontalWrapMode.Wrap;
             keycap.fontStyle = FontStyle.Bold;
             keycap.resizeTextForBestFit = true; keycap.resizeTextMinSize = Mathf.RoundToInt(9 * Scale); keycap.resizeTextMaxSize = Mathf.RoundToInt(18 * Scale);
@@ -115,7 +121,7 @@ namespace Meridian.UI
             Hide();
         }
 
-        Text Rect(Transform parent, string name, float x, float y, float w, float hgt, int size, TextAnchor anchor)
+        Text Lettering(Transform parent, string name, float x, float y, float w, float hgt, int size, TextAnchor anchor)
         {
             // bottom-left px of the card → its centre-pivot space; lettered at the card's drawn scale and shrunk back, so it stays crisp
             var t = UiKit.Text(parent, name, new Vector2(0f, 0f), new Vector2(x + w * 0.5f, y + hgt * 0.5f), new Vector2(w, hgt) * Scale, Mathf.RoundToInt(size * Scale), false, anchor, UiKit.Ink);
@@ -125,6 +131,49 @@ namespace Meridian.UI
             t.raycastTarget = false;
             var o = t.GetComponent<Outline>(); if (o != null) o.enabled = false;
             return t;
+        }
+
+        void PlaceAt(bool top)
+        {
+            AtTop = top;
+            var rt = card.rectTransform;
+            rt.anchorMin = rt.anchorMax = new Vector2(0.5f, top ? 1f : 0f);
+            rt.pivot = new Vector2(0.5f, top ? 1f : 0f);
+            rt.anchoredPosition = new Vector2(0f, top ? TopY : BottomY);
+        }
+
+        /// <summary>A UI rect on the screen (px, origin bottom-left).</summary>
+        public static Rect ScreenRect(RectTransform r)
+        {
+            var c = new Vector3[4];
+            r.GetWorldCorners(c);
+            var canvas = r.GetComponentInParent<Canvas>();
+            var cam = canvas != null && canvas.renderMode != RenderMode.ScreenSpaceOverlay ? canvas.worldCamera : null;
+            Vector2 a = RectTransformUtility.WorldToScreenPoint(cam, c[0]), b = RectTransformUtility.WorldToScreenPoint(cam, c[2]);
+            return Rect.MinMaxRect(Mathf.Min(a.x, b.x), Mathf.Min(a.y, b.y), Mathf.Max(a.x, b.x), Mathf.Max(a.y, b.y));
+        }
+
+        /// <summary>The card's rect on the screen, and the surveyor's (their box through the side camera; empty without one).</summary>
+        public Rect CardScreenRect => card != null ? ScreenRect(card.rectTransform) : default;
+        public Rect SurveyorScreenRect
+        {
+            get
+            {
+                if (side == null || !side.isActiveAndEnabled) side = FindAnyObjectByType<PlanetSideRoot>();
+                var cam = side != null ? side.sideCamera : null;
+                if (cam == null || player == null) return default;
+                var f = player.Body.position;
+                Vector3 a = cam.WorldToScreenPoint(new Vector3(f.x - BodyHalfWidth, f.y, 0f)), b = cam.WorldToScreenPoint(new Vector3(f.x + BodyHalfWidth, f.y + BodyHeight, 0f));
+                return Rect.MinMaxRect(Mathf.Min(a.x, b.x), Mathf.Min(a.y, b.y), Mathf.Max(a.x, b.x), Mathf.Max(a.y, b.y));
+            }
+        }
+
+        /// <summary>Up top unless the surveyor is there; then the lower centre (re-checked while the card is up).</summary>
+        void Place()
+        {
+            PlaceAt(true);
+            var who = SurveyorScreenRect;
+            if (who.width > 0f && CardScreenRect.Overlaps(who)) PlaceAt(false);
         }
 
         void Hide()
@@ -165,6 +214,7 @@ namespace Meridian.UI
             body.text = Body(id, key);
             keycap.text = ActionOf(id) != null ? CapText(key) : "";
             card.gameObject.SetActive(true);
+            Place();
             UiPaper.Apply(card, "ui/hints/" + id, _ => { title.color = body.color = keycap.color = UiKit.Ink; });
             Fired?.Invoke(id);
         }
@@ -257,7 +307,12 @@ namespace Meridian.UI
                     _ => false,
                 };
                 if (done || ShownFor >= ShowSeconds || !GameSettings.ShowHints) Dismiss();
-                else Aim();
+                else
+                {
+                    var who = SurveyorScreenRect;
+                    if (who.width > 0f && CardScreenRect.Overlaps(who)) PlaceAt(!AtTop); // the surveyor moved under it: the other band
+                    Aim();
+                }
                 return;
             }
             if (queue.Count == 0 || IsBlocked()) return;
@@ -288,7 +343,7 @@ namespace Meridian.UI
             var space = (RectTransform)arrow.rectTransform.parent;
             Vector2 to = space.InverseTransformPoint(target.TransformPoint(target.rect.center));
             Vector2 half = (Vector2)(space.InverseTransformVector(target.TransformVector(new Vector3(target.rect.width, target.rect.height, 0f)))) * 0.5f;
-            Vector2 from = space.InverseTransformPoint(card.rectTransform.TransformPoint(new Vector3(0f, CardH + 20f, 0f)));
+            Vector2 from = space.InverseTransformPoint(card.rectTransform.TransformPoint(card.rectTransform.rect.center)); // the card's centre: only the direction counts
             var d = to - from;
             float len = d.magnitude;
             if (len < 1f) return;
