@@ -67,6 +67,10 @@ namespace Meridian.Tests
             // Fly right at 30 m/s-equivalent steps (0.5 m per frame) for 400 frames, crossing ~6 chunks.
             var cam = side.sideCamera.transform;
             side.sideCamera.GetComponent<Meridian.Player.CameraFollow>().enabled = false; // this test flies the camera itself
+            // U-194 (as BudgetGate's flight, U-165): streaming follows the camera, so the camp's chunks unload under the surveyor once the
+            // camera is 3 chunks off; left simulated it falls through the missing outline and the solid rescue logs a lift whenever the
+            // flight's last frames run past ~0.4 s (0.6.1's sweep: avg 2.16 ms a frame, a 0.76 m lift). Held still: the game never parts them.
+            if (side.player != null && side.player.Body != null) side.player.Body.simulated = false;
             t.ResetStats();
             float total = 0f, worstFrame = 0f;
             int worstIndex = -1;
