@@ -700,6 +700,8 @@ def preview(out, footnote=None):
     poses = [("idle", pimg["idle"], GROUND), (f"crouch x{csz:g}: top {ctop:.2f} m{over}", pimg["crouch"], GROUND, 1.0),
              ("jump", pimg["jump"], GROUND), ("dig", pimg["dig"], GROUND)]
     rows.append(strip(poses, f"pose sheet (side): idle, crouch (a deep tuck under a 1 m gap, root squash {csz:g}, measured top {ctop:.2f} m), jump apex (knees tucked, arms up), dig with B-226's shovel"))
+    rows.append(strip([(k, half(pimg[k]), GROUND // 2) for k in ("idle", "crouch", "jump", "dig")],
+                      "the same poses at the game's zoom (1x): the shading is baked on each part at rest, so judge it here on the jump's raised thigh and arms and the dig's bent arm (LEAD 14:5x; the fix, if needed, is U-199's contact shade)", h=260))
     for k in ("idle", "crouch", "jump", "dig"):                                  # the measured heights, for the sheet's reader
         w_ = solve("side", POSES[k])
         hx, hz, ha = w_["helmet"]
