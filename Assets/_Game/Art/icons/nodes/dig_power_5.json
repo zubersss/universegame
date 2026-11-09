@@ -1,0 +1,14 @@
+{
+  "key": "icons/nodes/dig_power_5",
+  "style": "v3",
+  "ppu": 128,
+  "pivot": [
+    0.5,
+    0.5
+  ],
+  "icon": true,
+  "node": "dig_power_5",
+  "level": 5,
+  "of": 5,
+  "note": "B-204: the Skill Tree node's icon; drawn at the node frame's icon_display_px (40), 0.4 alpha when locked"
+}

@@ -1,0 +1,12 @@
+{
+  "key": "icons/nodes/dig_core_bit",
+  "style": "v3",
+  "ppu": 128,
+  "pivot": [
+    0.5,
+    0.5
+  ],
+  "icon": true,
+  "node": "dig_core_bit",
+  "note": "B-204: the Skill Tree node's icon; drawn at the node frame's icon_display_px (40), 0.4 alpha when locked"
+}
