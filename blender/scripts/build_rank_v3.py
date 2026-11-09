@@ -108,14 +108,14 @@ def insignia(rank, seed=200):
     c = U.Canvas(INS, INS)
     d, M = c.dm, extra(c)
     cx, cy = INS / 2, INS / 2
-    if rank == 1:
-        pin(d, M, cx, cy - 4, 1.25)
+    if rank == 1:                                                                             # rev 18:5x: the pins larger (tiny
+        pin(d, M, cx, cy - 10, 1.7)                                                           # at 48 px)
     elif rank == 2:
-        pin(d, M, cx - 6, cy - 2, 1.25, pennant=True)
+        pin(d, M, cx - 8, cy - 2, 1.5, pennant=True)
     elif rank <= 5:
-        badge(d, M, cx, cy - (6 if rank > 3 else 0), 30)
-        for k in range(rank - 3):
-            chevron(d, M, cx, cy + 34 + 9 * k, 20, 8, 5)
+        badge(d, M, cx, cy - (8 if rank > 3 else 0), 30)
+        for k in range(rank - 3):                                                             # (clear of the bottom edge)
+            chevron(d, M, cx, cy + 30 + 8 * k, 20, 8, 5)
     elif rank <= 9:
         if rank >= 7:
             ribbon(d, M, cx, cy + 14, 18, 30)
@@ -125,7 +125,7 @@ def insignia(rank, seed=200):
     else:                                                                                     # rank 10: the starred medallion
         for k in range(12):                                                                   # rays behind it
             a = TAU * k / 12 + TAU / 24
-            G.stroke(d, [(cx + 30 * math.cos(a - 0.08), cy - 4 + 30 * math.sin(a - 0.08)), (cx + 44 * math.cos(a), cy - 4 + 44 * math.sin(a)),
+            G.stroke(d, [(cx + 30 * math.cos(a - 0.08), cy - 4 + 30 * math.sin(a - 0.08)), (cx + 40 * math.cos(a), cy - 4 + 40 * math.sin(a)),
                          (cx + 30 * math.cos(a + 0.08), cy - 4 + 30 * math.sin(a + 0.08))], M["mustard_sh"], 0.0, cyclic=True)
         ribbon(d, M, cx, cy + 14, 18, 30)
         laurel(d, M, cx, cy - 4, 37)
