@@ -11,6 +11,11 @@ mining by resource nodes and buried finds, drawn with gp_draw (fakegp + numpy), 
                    inset panels, a hum ring); closed 1, open 6 (it rolls aside, the dark doorway behind)
   scan_x           64x64, pivot at the base: the Survey scan's X painted on the ground above a find; pulse 8 (loop)
 
+  B-219 (LEAD 00:2x): the giants' floes get nodes only (no pockets / relics / scan X), json "deck" (where U-189 places it; deeper
+  rarer) and "item" (what it drops): Jupiter ammonia_ice (deck1), metallic_hydrogen (deep); Saturn ring_ice (deck1), ring_rock
+  (deck2), helium3 (deep, drops helium3_condensate); Uranus methane_ice (deck1), superionic_ice (deep); Neptune methane_ice (deck1),
+  superionic_ice (deck3), deep_diamond (deep). Preview: review_b219_<giant>_nodes_preview.png (the nodes on floe_strip_ice).
+
   python -I build_nodes_v3.py <preview dir> [planet]   lock-free design preview: review_b176_<planet>_nodes_preview.png
                                                        (the nodes on Earth's B-175 ground at 1x beside the surveyor, the
                                                        pockets / cache / vault door in the cutaway, the X over a pocket; every
@@ -76,6 +81,26 @@ def colours(planet):
                 "capsule": P["mustard"], "capsule_sh": sh("mustard"), "stripe": P["red"], "petal": sh("mustard"),
                 "lamp": P["red"], "lamp_on": P["offwhite"], "glint": P["offwhite"], "dark": P["brown"], "ice": P["offwhite"],
                 "ice_sh": P["sky"], "xred": P["red"], "xred_sh": sh("red"), "xpale": P["offwhite"], "xpale_sh": sh("offwhite")}
+    # B-219 (LEAD 00:2x): the giants' harvestable nodes on their floes, each giant's own palette and tones only
+    if planet == "jupiter":                     # ammonia ice (deck 1), metallic hydrogen (the deep)
+        return {"rock": sh("sky"), "rock_sh": dp("sky"), "rock_hi": P["offwhite"], "crystal": P["offwhite"], "crystal_sh": sh("offwhite"),
+                "crystal_tint": P["teal"], "metal": P["teal"], "metal_sh": dp("teal"), "metal_hi": P["offwhite"],
+                "shell": P["brown"], "shell_sh": dp("brown"), "band": P["mustard"], "band2": P["red"],
+                "glint": P["offwhite"], "dark": P["brown"]}
+    if planet == "saturn":                      # ring ice (deck 1), ring rock (deck 2), helium-3 (the deep)
+        return {"rock": sh("offwhite"), "rock_sh": dp("offwhite"), "rock_hi": P["offwhite"], "ice": P["offwhite"], "ice_sh": P["teal"],
+                "ice_dp": sh("teal"), "rrock": dp("sky"), "rrock_sh": P["brown"], "rrock_hi": P["sky"], "vent": sh("sky"), "vent_sh": dp("sky"),
+                "mouth": P["brown"], "frost": P["offwhite"], "frost_sh": sh("offwhite"), "rose": P["red"], "rose_sh": sh("red"),
+                "rose_hi": P["offwhite"], "glint": P["offwhite"], "dark": P["brown"]}
+    if planet == "uranus":                      # methane ice (deck 1), superionic ice (the deep: ice-cyan; Uranus has no violet)
+        return {"rock": sh("sky"), "rock_sh": dp("sky"), "rock_hi": P["offwhite"], "meth": P["sky"], "meth_sh": P["teal"],
+                "meth_hi": P["offwhite"], "super": P["teal"], "super_sh": sh("teal"), "super_hi": P["offwhite"], "glint": P["offwhite"],
+                "dark": P["brown"]}
+    if planet == "neptune":                     # methane ice (deck 1), superionic ice (deck 3, violet), deep diamond (the deep)
+        return {"rock": sh("offwhite"), "rock_sh": dp("offwhite"), "rock_hi": P["offwhite"], "meth": P["teal"], "meth_sh": sh("teal"),
+                "meth_hi": P["offwhite"], "super": P["mustard"], "super_sh": sh("mustard"), "super_hi": P["offwhite"],
+                "diamond": P["offwhite"], "diamond_sh": P["teal"], "diamond_dp": P["sky"], "pit": sh("offwhite"), "glint": P["offwhite"],
+                "dark": P["brown"]}
     raise ValueError(f"B-176: no node tones for {planet}")
 
 
@@ -568,10 +593,254 @@ def _arc_pts(c, zc, rx, rz, a0, a1, n=16):
     return [(c + rx * math.cos(a0 + (a1 - a0) * i / n), zc + rz * math.sin(a0 + (a1 - a0) * i / n)) for i in range(n + 1)]
 
 
+# ---------------------------------------------------------------- B-219: the giants' nodes on their floes (LEAD 00:2x)
+# Each sits on the floe's top (pivot 0.5, 6/96); a low floe-ice mound under it ("rock" = the giant's pale floe tone); no faces:
+# bubbles and pits are many and irregular, never a pair of dark dots.
+
+def _prisms(d, M, prisms, base_z, fill, shade, ink=O):
+    """Crystal prisms from a base line: [(x, length, angle_deg, half_width)] -> their tip spots."""
+    spots = []
+    for x, ln, a_deg, w in prisms:
+        a = math.radians(a_deg)
+        bx, bz = x, base_z
+        tx, tz = bx + ln * math.sin(a), bz + ln * math.cos(a)
+        nx, nz = math.cos(a) * w, -math.sin(a) * w
+        tip = (tx + 0.45 * w * math.sin(a), tz + 0.45 * w * math.cos(a))
+        body = [(bx - nx, bz - nz), (tx - nx, tz - nz), tip, (tx + nx, tz + nz), (bx + nx, bz + nz)]
+        G.stroke(d, body, M[fill], 0.0, cyclic=True)
+        G.stroke(d, [(bx - nx, bz - nz), (tx - nx, tz - nz), tip, (tx, tz), (bx, bz)], M[shade], 0.0, cyclic=True)
+        G.stroke(d, body, M["ink"], ink, cyclic=True)
+        G.seam(d, [(bx, bz), (tx, tz), tip], M["ink"])
+        spots.append((tx + nx * 0.5, tz + nz * 0.5))
+    return spots
+
+
+def node_ammonia_ice(d, M, state, k=0):
+    """Jupiter, deck 1: a cluster of pale, chunky ammonia-ice crystals with slate-blue inner faces and frosted tips."""
+    mound(d, M, 0.66, 0.20, 31)
+    full = state != "harvested"
+    prisms = [(-0.34, 0.50, -18, 0.10), (-0.10, 0.80, -6, 0.13), (0.14, 0.64, 9, 0.12), (0.36, 0.44, 24, 0.10), (-0.50, 0.30, -30, 0.08),
+              (0.50, 0.26, 34, 0.07)]
+    if not full:
+        prisms = [(x, 0.16, a, w) for x, _l, a, w in prisms[1:4]]
+    spots = _prisms(d, M, prisms, 0.12, "crystal", "crystal_tint")
+    if full:
+        for x, z in ((-0.12, 0.98), (0.17, 0.82), (-0.38, 0.66)):                          # frost on the tips
+            G.stroke(d, G.lumpy_ellipse(x, z, 0.05, 0.025, n=10, lump=0.15, seed=int(x * 100) + 5), M["crystal"], 0.0, cyclic=True)
+    return spots if full else []
+
+
+def node_metallic_hydrogen(d, M, state, k=0):
+    """Jupiter, the deep: a dark pressure shell banded red and gold, split open, silver liquid-metal beads bulging from the
+    split and a few run down onto the floe; harvested: the cracked shell, empty but for one bead."""
+    full = state != "harvested"
+    w, h = (0.80, 1.00) if full else (0.72, 0.62)
+    top_z = crag(d, M, w, h, 33, mat="shell")
+    for j, (zf, mat) in enumerate(((0.62, "band"), (0.40, "band2"))):                       # the pressure bands across the shell
+        xs = [-w * 0.92 + 1.84 * w * i / 24 for i in range(25)]
+        up = [(x, min(top_z(x) - 0.03, h * zf + 0.05 + 0.04 * math.sin(3 * x + j))) for x in xs]
+        lo = [(x, min(top_z(x) - 0.06, h * zf - 0.03 + 0.04 * math.sin(3 * x + j))) for x in xs]
+        G.stroke(d, up + lo[::-1], M[mat], 0.0, cyclic=True)
+        G.stroke(d, up, M["ink"], I)
+        G.stroke(d, lo, M["ink"], I)
+    split = [(-0.10, 0.10), (-0.18, h * 0.45), (-0.04, h * 0.78), (0.14, h * 0.50), (0.08, 0.10)]       # the split
+    G.stroke(d, split, M["shell_sh"], 0.0, cyclic=True)
+    G.stroke(d, split, M["ink"], O, cyclic=True)
+    beads = [(-0.04, h * 0.55, 0.12), (0.06, h * 0.34, 0.10), (-0.10, h * 0.30, 0.08), (0.02, h * 0.18, 0.07), (0.30, 0.06, 0.06),
+             (0.42, 0.045, 0.045), (-0.36, 0.05, 0.05)] if full else [(-0.02, h * 0.3, 0.07)]
+    spots = []
+    for x, z, r in beads:                                                                    # silver beads: round, a bright cap
+        G.stroke(d, G.lumpy_ellipse(x, z, r, r * 0.94, n=18, lump=0.02, seed=int(x * 100) + 9), M["metal"], 0.0, cyclic=True)
+        G.stroke(d, G.lumpy_ellipse(x - r * 0.2, z - r * 0.25, r * 0.65, r * 0.5, n=12, lump=0.0), M["metal_sh"], 0.0, cyclic=True)
+        G.stroke(d, G.lumpy_ellipse(x + r * 0.3, z + r * 0.38, r * 0.32, r * 0.2, n=8, lump=0.0), M["metal_hi"], 0.0, cyclic=True)
+        G.stroke(d, G.lumpy_ellipse(x, z, r, r * 0.94, n=18, lump=0.02, seed=int(x * 100) + 9), M["ink"], I, cyclic=True)
+        spots.append((x + r * 0.3, z + r * 0.38))
+    if not full:
+        for x in (-0.45, 0.35):
+            G.seam(d, [(x - 0.07, top_z(x) - 0.04), (x, top_z(x) - 0.12), (x + 0.07, top_z(x) - 0.04)], M["ink"])
+    return spots
+
+
+def _slab(d, M, cx, cz, w, h, tilt, fill, shade, hi, seed, ink=O):
+    """An angular chunk (a ring fragment): a skewed box with a lit top and a shaded side."""
+    rnd = random.Random(seed)
+    ca, sa = math.cos(tilt), math.sin(tilt)
+    R = lambda u, v: (cx + u * ca - v * sa, cz + u * sa + v * ca)  # noqa: E731
+    j = lambda: rnd.uniform(-0.15, 0.15)  # noqa: E731
+    body = [R(-w * (1 + j() * 0.3), -h), R(w * (1 + j() * 0.3), -h), R(w * (0.9 + j() * 0.3), h), R(-w * (0.85 + j() * 0.3), h * (1 + j() * 0.2))]
+    G.stroke(d, body, M[fill], 0.0, cyclic=True)
+    G.stroke(d, [body[0], body[1], R(w * 0.9, -h * 0.2), R(-w * 0.9, -h * 0.35)], M[shade], 0.0, cyclic=True)
+    G.stroke(d, [body[3], body[2], R(w * 0.7, h * 0.65), R(-w * 0.6, h * 0.7)], M[hi], 0.0, cyclic=True)
+    G.stroke(d, body, M["ink"], ink, cyclic=True)
+    return R(w * 0.4, h * 0.6)
+
+
+def node_ring_ice(d, M, state, k=0):
+    """Saturn, deck 1: a heap of angular ring-ice fragments, offwhite with blue shading and cracks."""
+    mound(d, M, 0.66, 0.16, 41)
+    full = state != "harvested"
+    chunks = [(-0.36, 0.30, 0.20, 0.15, 0.25), (0.20, 0.28, 0.24, 0.16, -0.18), (-0.06, 0.62, 0.22, 0.17, 0.10), (0.42, 0.62, 0.14, 0.12, -0.4),
+              (-0.42, 0.66, 0.12, 0.10, 0.5)] if full else [(-0.10, 0.22, 0.16, 0.10, 0.2), (0.24, 0.18, 0.12, 0.08, -0.3)]
+    spots = []
+    for j, (x, z, w, h, t) in enumerate(chunks):
+        spots.append(_slab(d, M, x, z, w, h, t, "ice", "ice_sh", "ice", 50 + j))
+        G.seam(d, [(x - w * 0.3, z + h * 0.4), (x, z), (x + w * 0.2, z - h * 0.3)], M["ink"])
+    return spots
+
+
+def node_ring_rock(d, M, state, k=0):
+    """Saturn, deck 2: ring-rubble boulders, dusty tan-grey, their tops crusted with ice."""
+    mound(d, M, 0.68, 0.16, 43)
+    full = state != "harvested"
+    rocks = [(-0.34, 0.30, 0.24), (0.22, 0.30, 0.26), (-0.04, 0.70, 0.22), (0.46, 0.18, 0.13), (-0.56, 0.16, 0.11)] if full else [(0.0, 0.24, 0.18)]
+    spots = []
+    for j, (x, z, r) in enumerate(rocks):
+        rnd = random.Random(60 + j)
+        pts = _poly(x, z, r, rnd, sides=7, flat=0.82, lift=0.10)
+        G.stroke(d, pts, M["rrock"], 0.0, cyclic=True)
+        G.stroke(d, [p for p in pts if p[0] < x] + [(x, z - r * 0.5)], M["rrock_sh"], 0.0, cyclic=True)
+        crust = [(x - r * 0.75, z + r * 0.35), (x - r * 0.3, z + r * 0.72), (x + r * 0.35, z + r * 0.7), (x + r * 0.8, z + r * 0.3),
+                 (x + r * 0.4, z + r * 0.42), (x - r * 0.2, z + r * 0.5)]
+        G.stroke(d, crust, M["rrock_hi"], 0.0, cyclic=True)                                  # the ice crust on top
+        G.stroke(d, pts, M["ink"], O, cyclic=True)
+        G.seam(d, [(x - r * 0.2, z - r * 0.1), (x + r * 0.15, z + r * 0.2)], M["ink"])
+        spots.append((x + r * 0.3, z + r * 0.55))
+    return spots
+
+
+def node_helium3(d, M, state, k=0):
+    """Saturn, the deep: a low vent cone, its rim crusted with frost, pale rose helium-3 condensate pooled round the mouth and
+    a soft rose puff over it; harvested: the frost rim, the mouth dry, no puff."""
+    full = state != "harvested"
+    w, h = 0.78, 0.46
+    xs = [-w + 2 * w * i / 30 for i in range(31)]
+    cone = [(x, h * (1 - (abs(x) / w) ** 1.6)) for x in xs]
+    cone = [(x, min(z, h * 0.86)) for x, z in cone]
+    G.stroke(d, cone + [(w, -0.02), (-w, -0.02)], M["vent"], 0.0, cyclic=True)
+    G.stroke(d, [(x, z * 0.7) for x, z in cone if x < -0.1] + [(-0.1, -0.02), (-w, -0.02)], M["vent_sh"], 0.0, cyclic=True)
+    G.stroke(d, cone, M["ink"], O)
+    mz = h * 0.86
+    G.stroke(d, G.lumpy_ellipse(0.0, mz, 0.24, 0.06, n=20, lump=0.03, seed=3), M["mouth"], 0.0, cyclic=True)         # the mouth
+    rim = [(0.30 * math.cos(a) * (1 + 0.12 * math.sin(7 * a)), mz + 0.085 * math.sin(a)) for a in [TAU * i / 28 for i in range(28)]]
+    inner = [(0.22 * math.cos(a), mz + 0.05 * math.sin(a)) for a in [TAU * i / 28 for i in range(28)]]
+    G.stroke(d, rim + [rim[0]] + [inner[0]] + inner[::-1], M["frost"], 0.0, cyclic=True)                              # frost rim
+    G.stroke(d, rim, M["ink"], I, cyclic=True)
+    G.stroke(d, G.lumpy_ellipse(0.0, mz, 0.24, 0.06, n=20, lump=0.03, seed=3), M["ink"], I, cyclic=True)
+    spots = [(0.18, mz + 0.06)]
+    if full:
+        for x, z, r in ((-0.42, 0.10, 0.08), (0.38, 0.14, 0.07), (-0.2, 0.32, 0.06)):           # condensate pooled on the cone
+            G.stroke(d, G.lumpy_ellipse(x, z, r, r * 0.55, n=12, lump=0.1, seed=int(x * 50) + 7), M["rose"], I, cyclic=True)
+            spots.append((x + r * 0.3, z + r * 0.2))
+        puff = [(-0.12, mz + 0.22, 0.13), (0.06, mz + 0.30, 0.15), (0.20, mz + 0.20, 0.11), (-0.02, mz + 0.48, 0.10)]   # the rose puff
+        for x, z, r in puff:
+            G.stroke(d, G.lumpy_ellipse(x, z, r, r * 0.85, n=16, lump=0.05, seed=int(z * 40)), M["rose"], O * 0.8, cyclic=True)
+        for x, z, r in puff:
+            G.stroke(d, G.lumpy_ellipse(x, z, r - 0.02, (r - 0.02) * 0.85, n=16, lump=0.05, seed=int(z * 40)), M["rose"], 0.0, cyclic=True)
+        G.stroke(d, G.lumpy_ellipse(0.10, mz + 0.36, 0.05, 0.025, n=8, lump=0.0), M["rose_hi"], 0.0, cyclic=True)
+        spots.append((0.08, mz + 0.40))
+    return spots
+
+
+def node_methane_ice(d, M, state, k=0):
+    """Uranus / Neptune, deck 1: a rounded mound of methane clathrate, frosted on top, pocked with many small pale bubbles."""
+    mound(d, M, 0.66, 0.16, 47)
+    full = state != "harvested"
+    h = 0.66 if full else 0.34
+    xs = [-0.56 + 1.12 * i / 30 for i in range(31)]
+    top = [(x, 0.10 + h * (1 - (x / 0.56) ** 2) ** 0.55 + 0.025 * math.sin(8 * x)) for x in xs]
+    G.stroke(d, top + [(0.56, 0.08), (-0.56, 0.08)], M["meth"], 0.0, cyclic=True)
+    G.stroke(d, [(x, 0.10 + (z - 0.10) * 0.5) for x, z in top if x < 0.0] + [(0.0, 0.08), (-0.56, 0.08)], M["meth_sh"], 0.0, cyclic=True)
+    cap = [(x, z) for x, z in top if abs(x) < 0.42]                                          # the frosted cap, scalloped
+    G.stroke(d, cap + [(cap[-1][0], cap[-1][1] - 0.08)] + [(x, z - 0.07 - 0.03 * math.sin(14 * x)) for x, z in cap[::-1]], M["meth_hi"], 0.0, cyclic=True)
+    G.stroke(d, top, M["ink"], O)
+    rnd = random.Random(77)
+    spots = []
+    for j in range(9 if full else 4):                                                        # many pale bubbles (never a pair)
+        x = rnd.uniform(-0.40, 0.40)
+        zt = 0.10 + h * (1 - (x / 0.56) ** 2) ** 0.55
+        z = rnd.uniform(0.16, max(0.18, zt - 0.14))
+        r = rnd.uniform(0.022, 0.045)
+        G.stroke(d, G.lumpy_ellipse(x, z, r, r, n=10, lump=0.0), M["meth_hi"], I * 0.7, cyclic=True)
+        if j < 3:
+            spots.append((x, z))
+    return spots if full else []
+
+
+def _cube(d, M, cx, cz, s, tilt, fill, shade, hi):
+    """A cubic crystal in a three-quarter view: the top face lit, the left face the body tone, the right face shaded; nested ink
+    squares on the faces stand for the inner glow (ink only, no glow)."""
+    ca, sa = math.cos(tilt), math.sin(tilt)
+    R = lambda u, v: (cx + u * ca - v * sa, cz + u * sa + v * ca)  # noqa: E731
+    a, b, c = s, s * 0.55, s * 0.95                                                          # half width, depth skew, height
+    top = [R(-a, c), R(-a + b, c + b * 0.6), R(a + b, c + b * 0.6), R(a, c)]
+    left = [R(-a, 0), R(a, 0), R(a, c), R(-a, c)]
+    right = [R(a, 0), R(a + b, b * 0.6), R(a + b, c + b * 0.6), R(a, c)]
+    G.stroke(d, left, M[fill], 0.0, cyclic=True)
+    G.stroke(d, right, M[shade], 0.0, cyclic=True)
+    G.stroke(d, top, M[hi], 0.0, cyclic=True)
+    for face in (left, right, top):
+        G.stroke(d, face, M["ink"], O * 0.8, cyclic=True)
+    fx, fz = (left[0][0] + left[2][0]) / 2, (left[0][1] + left[2][1]) / 2                      # the inner squares on the front face
+    for q in (0.55, 0.28):
+        G.stroke(d, [(fx + (p[0] - fx) * q, fz + (p[1] - fz) * q) for p in left], M["ink"], I * 0.6, cyclic=True)
+    return R(a * 0.3, c + b * 0.3)
+
+
+def node_superionic_ice(d, M, state, k=0):
+    """Uranus (the deep) / Neptune (deck 3): a cluster of cubic superionic crystals, inked heavily, inner squares for the glow."""
+    mound(d, M, 0.62, 0.16, 49)
+    full = state != "harvested"
+    cubes = [(-0.30, 0.12, 0.17, 0.12), (0.12, 0.12, 0.22, -0.06), (-0.06, 0.48, 0.15, 0.22), (0.40, 0.12, 0.12, -0.25), (0.26, 0.48, 0.10, -0.3)] \
+        if full else [(-0.06, 0.10, 0.12, 0.1)]
+    return [_cube(d, M, x, z, s, t, "super", "super_sh", "super_hi") for x, z, s, t in cubes]
+
+
+def _octa(d, M, cx, cz, s, buried, fill, shade, deep):
+    """A diamond (an octahedron's silhouette) half-buried in the floe: only the part above `buried` (0..1 of its height) shows."""
+    top, mid_l, mid_r, bot = (cx, cz + s), (cx - s * 0.7, cz), (cx + s * 0.7, cz), (cx, cz - s)
+    cut = cz - s + 2 * s * buried
+    def clip(poly):
+        return [(x, max(z, cut)) for x, z in poly]
+    G.stroke(d, clip([top, mid_l, bot, mid_r]), M[fill], 0.0, cyclic=True)
+    G.stroke(d, clip([top, (cx, cz), bot, mid_r]), M[shade], 0.0, cyclic=True)
+    G.stroke(d, clip([(cx, cz), mid_r, bot]), M[deep], 0.0, cyclic=True)
+    G.stroke(d, clip([top, mid_l, bot, mid_r]), M["ink"], O * 0.8, cyclic=True)
+    G.seam(d, clip([mid_l, (cx, cz), mid_r]), M["ink"])
+    G.seam(d, clip([top, (cx, cz)]), M["ink"])
+    return (cx - s * 0.2, cz + s * 0.55)
+
+
+def node_deep_diamond(d, M, state, k=0):
+    """Neptune, the deep: diamond hail half-buried in a patch of floe crust: a big stone and a scatter of small ones."""
+    full = state != "harvested"
+    mound(d, M, 0.74, 0.14, 51)
+    stones = [(0.0, 0.28, 0.26, 0.42), (-0.40, 0.17, 0.13, 0.4), (0.38, 0.16, 0.12, 0.35), (-0.18, 0.12, 0.08, 0.3), (0.56, 0.08, 0.07, 0.3),
+              (-0.58, 0.08, 0.06, 0.3), (0.20, 0.10, 0.07, 0.35)] if full else [(0.30, 0.10, 0.08, 0.35)]
+    spots = []
+    for x, z, s, b in stones:
+        spots.append(_octa(d, M, x, z, s, b, "diamond", "diamond_sh", "diamond_dp"))
+    if not full:                                                                             # the pits the hail left
+        for x in (-0.32, 0.02, -0.55):
+            G.stroke(d, G.lumpy_ellipse(x, 0.12, 0.09, 0.03, n=12, lump=0.08, seed=int(x * 100) + 3), M["pit"], I, cyclic=True)
+    return spots
+
+
+GIANTS = ("jupiter", "saturn", "uranus", "neptune")
+GIANT_DECK = {"jupiter": {"ammonia_ice": "deck1", "metallic_hydrogen": "deep"},           # where U-189 places each (deeper = rarer)
+              "saturn": {"ring_ice": "deck1", "ring_rock": "deck2", "helium3": "deep"},
+              "uranus": {"methane_ice": "deck1", "superionic_ice": "deep"},
+              "neptune": {"methane_ice": "deck1", "superionic_ice": "deck3", "deep_diamond": "deep"}}
+ITEM_OF = {"helium3": "helium3_condensate"}                                                # the node's name -> the item it drops
+
+
 PLANET_NODES = {"earth": {"iron": node_iron, "copper": node_copper, "carbon": node_carbon, "silica": node_silica, "water_ice": node_water_ice},
                 "mars": {"hematite": node_hematite, "perchlorate": node_perchlorate, "water_ice": node_mars_ice},
                 "mercury": {"solarite": node_solarite, "nickel": node_nickel},
-                "venus": {"vitriol_glass": node_vitriol, "sulfur": node_sulfur}}
+                "venus": {"vitriol_glass": node_vitriol, "sulfur": node_sulfur},
+                "jupiter": {"ammonia_ice": node_ammonia_ice, "metallic_hydrogen": node_metallic_hydrogen},
+                "saturn": {"ring_ice": node_ring_ice, "ring_rock": node_ring_rock, "helium3": node_helium3},
+                "uranus": {"methane_ice": node_methane_ice, "superionic_ice": node_superionic_ice},
+                "neptune": {"methane_ice": node_methane_ice, "superionic_ice": node_superionic_ice, "deep_diamond": node_deep_diamond}}
 NODES = PLANET_NODES["earth"]
 
 
@@ -749,8 +1018,9 @@ def pieces_for(planet):
         P = {}
         for it in PLANET_NODES[planet]:
             P[f"node_{it}"] = (draw_node(it, planet), 128, 96, (0.5, 6 / 96), [("full", 1, False), ("harvested", 1, False), ("glint", 8, True)])
-            P[f"pocket_{it}"] = (draw_pocket(it), 96, 96, (0.5, 0.5), [("full", 1, False), ("glint", 8, True)])
-        P.update(RELICS[planet])
+            if planet not in GIANTS:                                                         # B-219: the giants' floes have nodes only
+                P[f"pocket_{it}"] = (draw_pocket(it), 96, 96, (0.5, 0.5), [("full", 1, False), ("glint", 8, True)])
+        P.update(RELICS.get(planet, {}))
         _PC[planet] = P
     return _PC[planet]
 
@@ -805,6 +1075,8 @@ def sheet_meta(name, frames, planet="earth", piece=None):
 def preview(out_dir, planet="earth", S=None, out=None, footnote=None):
     """Earth's B-175 ground (band + fill from Art) flat at 1x: the five nodes on the surface beside the surveyor (full,
     harvested), the pockets, the cache and the vault door in the cutaway, the X above a pocket; every clip; the checks."""
+    if planet in GIANTS:
+        return preview_giant(out_dir, planet, S=S, out=out, footnote=footnote)
     import json
     import numpy as np
     from meridian import pngio
@@ -900,6 +1172,90 @@ def preview(out_dir, planet="earth", S=None, out=None, footnote=None):
 
 
 
+def preview_giant(out_dir, planet, S=None, out=None, footnote=None):
+    """B-219: the giant's nodes on its floe (terrain/<giant>/floe_strip_ice, caps at both ends, the fill continued below) at 1x
+    beside the surveyor, full | harvested, labelled with their deck; every clip as a strip; the per-key checks."""
+    import json
+    import time
+    import numpy as np
+    from meridian import pngio
+    sys.path.insert(0, os.path.dirname(HERE))
+    import review
+    PC = pieces_export(planet) if S is not None else pieces_for(planet)
+    res = S if S is not None else {n: render(n, planet) for n in PC}
+    W, SH, surf = 1900, 520, 300
+    sky = np.array(v3.hex_rgb(v3.PALETTES[planet]["sky"]), np.float32) / 255.0
+    img = np.empty((SH, W, 3), np.float32)
+    img[:] = sky
+    fj = json.load(open(os.path.join(ART, "terrain", planet, "floe_strip_ice.json"), encoding="utf-8"))
+    fs = pngio.read_png_np(os.path.join(ART, "terrain", planet, "floe_strip_ice_color.png"))
+    fw, fh, cols, g = fj["frame_width"], fj["frame_height"], fj["columns"], fj.get("gutter", 4)
+    fr = []
+    for i in range(fj["frames"]):
+        r, c = divmod(i, cols)
+        fr.append(fs[r * (fh + g):r * (fh + g) + fh, c * (fw + g):c * (fw + g) + fw])
+    gl = fj.get("ground_line_px", int(round(fh * (1 - fj["pivot"][1]))))
+    caps = fj.get("caps", {})
+    ncol = (W - 40) // fw
+    for c in range(ncol):
+        f = fr[caps.get("cap_left", 8)] if c == 0 else fr[caps.get("cap_right", 9)] if c == ncol - 1 else fr[(c - 1) % 8]
+        review._over(img, f, 20 + c * fw, surf - gl)
+        for q in range(4):                                                                   # the floe's fill below (the bottom 8 px)
+            review._over(img, f[-8:], 20 + c * fw, surf - gl + fh + 8 * q)
+
+    def place(im, piv, x, y):
+        h, w = im.shape[:2]
+        review._over(img, im, int(x - piv[0] * w), int(y - (1 - piv[1]) * h))
+    nodes = list(PLANET_NODES[planet])
+    for i, name in enumerate(nodes):
+        x = 140 + 430 * i
+        place(res[f"node_{name}"][0][0], (0.5, 6 / 96), x, surf + 2)
+        place(res[f"node_{name}"][0][1], (0.5, 6 / 96), x + 150, surf + 2)
+        review._label(img, f"{name} ({GIANT_DECK[planet][name]}): full | harvested", x - 60, surf - 130, scale=1)
+    try:
+        sm = json.load(open(os.path.join(ART, "characters", "surveyor", "side.json"), encoding="utf-8"))
+        shs = pngio.read_png_np(os.path.join(ART, "characters", "surveyor", "side_color.png"))
+        review._over(img, shs[:sm["frame_height"], :sm["frame_width"]], W - 260,
+                     surf - sm["frame_height"] + int(round(sm["pivot"][1] * sm["frame_height"])) + 2)
+    except (OSError, KeyError, ValueError):
+        pass
+    review._label(img, f"b-219 {planet}'s nodes at 1x on its floe (floe_strip_ice), full | harvested, beside the surveyor; deeper decks rarer (u-189 places them)", 6, 6)
+    rows = [img]
+    for name, (fn, fw_, fh_, piv, clips) in PC.items():
+        frames = res[name][0]
+        row = np.empty((fh_ + 34, W, 3), np.float32)
+        row[:] = review.PAPER
+        for i, im in enumerate(frames):
+            xx = 8 + i * (fw_ + 6)
+            if xx + fw_ > W:
+                break
+            row[24:24 + fh_, xx:xx + fw_] = sky
+            review._over(row, im, xx, 24)
+        review._label(row, f"{name} {fw_}x{fh_}: " + ", ".join(f"{c} {n_}" for c, n_, _l in clips), 6, 4)
+        rows.append(row)
+    lines = []
+    for name in PC:
+        frames, widths = res[name]
+        sheet, meta, probs = sheet_meta(name, frames, planet, PC[name])
+        o = [w for w in widths if w[0] >= v3.OUTER_SPLIT]
+        n_ = [w for w in widths if w[0] < v3.OUTER_SPLIT]
+        rng = lambda q: f"{min(w[1] for w in q):.1f}-{max(w[2] for w in q):.1f}" if q else "-"  # noqa: E731
+        pal = v3.palette_hits(sheet, planet)[0] * 100
+        lines.append(f"{name}: sheet {sheet.shape[1]}x{sheet.shape[0]}, ink {rng(o)} / {rng(n_)} px, palette {pal:.1f}%, "
+                     f"json {'valid' if not probs else 'INVALID: ' + '; '.join(probs)[:70]}")
+    foot = np.empty((30 + 16 * len(lines), W, 3), np.float32)
+    foot[:] = review.PAPER
+    for i, ln in enumerate(lines):
+        review._label(foot, ln, 6, 6 + 16 * i, scale=1)
+    out_img = np.vstack(rows + [foot])
+    review.draw(out_img, time.strftime("%m-%d %H:%M") + " " + (footnote or "design preview (lock-free, fakegp)"), 2, out_img.shape[0] - 16, (1.0, 1.0, 0.85))
+    out = out or os.path.join(out_dir, f"review_b219_{planet}_nodes_preview.png")
+    review.write(out, out_img)
+    print("written", out, out_img.shape[1], "x", out_img.shape[0])
+    for ln in lines:
+        print(ln)
+
+
 # ---------------------------------------------------------------- the export (render.py's ground_strip_set API; U-158's key list,
 # UNITY_STATUS 24eab036: props/<planet>/node_<item>, pocket_<item>, the relics, ONE scan_x per planet)
 
@@ -909,7 +1265,8 @@ SCAN_PALE = {"mars", "venus"}           # LEAD 05:5x: the pale X where the red o
 def pieces_export(planet):
     """U-158's keys for the planet: its nodes, pockets and relics, and ONE scan_x (the pale X for Mars and Venus)."""
     P = {n: v for n, v in pieces_for(planet).items() if n not in ("scan_x", "scan_x_pale")}
-    P["scan_x"] = (draw_x_pale if planet in SCAN_PALE else draw_x, 64, 64, (0.5, 6 / 64), [("pulse", 8, True)])
+    if planet not in GIANTS:                                                                 # B-219: no scan X on the floes
+        P["scan_x"] = (draw_x_pale if planet in SCAN_PALE else draw_x, 64, 64, (0.5, 6 / 64), [("pulse", 8, True)])
     return P
 
 
@@ -950,6 +1307,11 @@ def export(art, S=None):
         meta["note"] = ("B-176 / U-158: " + ("a resource node, upright on the curve" if n.startswith("node_") else
                         "a buried find set into the cutaway" if n.startswith("pocket_") else
                         "the Survey scan's X above a find (pale where red vanishes)" if n == "scan_x" else "a relic in the cutaway") + "; no faces")
+        if PLANET in GIANTS and n.startswith("node_"):                                       # B-219: where it grows, what it drops
+            it = n[len("node_"):]
+            meta["note"] = "B-219: a harvestable node on the floe's top (pivot on the floe's surface); deeper decks rarer; no faces"
+            meta["deck"] = GIANT_DECK[PLANET][it]
+            meta["item"] = ITEM_OF.get(it, it)
         hit, off = v3.palette_hits(sheet, PLANET)
         if hit < 0.98:
             p.append(f"palette {hit * 100:.1f}% (off {' '.join(off[:3])})")

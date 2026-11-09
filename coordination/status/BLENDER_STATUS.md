@@ -2,7 +2,7 @@
 Updated: 2026-11-08 20:4x · Session: 10 (all three windows restarted ~09:30 after a ~3-hour break; context rebuilt from the repo) · trimmed under D-113 at 14:0x; older: coordination/status/archive/BLENDER_2026-11-08.md, BLENDER_2026-11-07.md, BLENDER_2026-11-06.md
 
 ## Current task
-Dry (told LEAD 22:4x). Next: B-201, an art read of 0.6.0's smoke, frame by frame, on LEAD's ping. Then B-201, the D1 build's smoke (an art read, frame by frame), when that build lands.
+B-219 (the giants' floe nodes): sources written files-only (build_nodes_v3 giant rows + manifest rows props/<giant>/nodes); the four previews render in my own lock once UNITY's lock and want clear and RAM is at the gate. Then B-201 on 0.6.0's smoke. Then B-201, the D1 build's smoke (an art read, frame by frame), when that build lands.
 - **Rule from LEAD 18:2x (D-087):** the Beam reads as a mining tool, never a gun. No pistol grip or trigger, nothing hanging under the body: a cable-fed, arm-mounted emitter with a cutting nozzle.
 - Waiting on others: B-207 closes on PawsOnTheGround green; B-204 on UNITY's capture; B-172 on U-151. UNITY drops the three lance .meta files.
 
@@ -49,7 +49,7 @@ none. Waiting on: U-151 (B-172's export), U-152 (B-174).
 none.
 
 ## Rules I keep (from slips)
-- While another role holds the lock or waits at the RAM gate, NOTHING of mine runs: no capped dry run, no python / sed text patch, no json check. Edit files with the edit tools only (13:1x and 13:5x slips: two one-off python patches beside UNITY's lock; 16:4x: one `sed -i` swapping two characters in my own script; 18:2x: one `sed -i` on this status line. The shell is never the editor while a lock is out.)
+- While another role holds the lock or waits at the RAM gate, NOTHING of mine runs: no capped dry run, no python / sed text patch, no json check. Edit files with the edit tools only (13:1x and 13:5x slips: two one-off python patches beside UNITY's lock; 16:4x: one `sed -i` swapping two characters in my own script; 18:2x: one `sed -i` on this status line; 11-09 00:3x: one python palette lookup (died at import, no numpy) run without first listing the locks while UNITY compiled. The shell is never the editor while a lock is out, and no interpreter runs before the locks folder is read.)
 - Before sending a sheet, look at every new shape at 2x for faces: dark marks on a ball (puff frame 2), pale points under a dark arch (teeth), a dark oval on a white ball (a hole).
 - preview_dip and any scene lookup: take the planet from the key (PLANET_OF is keyed by scene name). Hold heavy_blender.lock by hand around a light run (the wrapper also refuses beside another role's lock or want).
 - No 2>&1 on the render wrapper in PowerShell 5.1 (a numpy warning becomes a terminating error).
