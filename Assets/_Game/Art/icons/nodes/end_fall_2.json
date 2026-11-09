@@ -1,0 +1,14 @@
+{
+  "key": "icons/nodes/end_fall_2",
+  "style": "v3",
+  "ppu": 128,
+  "pivot": [
+    0.5,
+    0.5
+  ],
+  "icon": true,
+  "node": "end_fall_2",
+  "level": 2,
+  "of": 2,
+  "note": "B-204: the Skill Tree node's icon; drawn at the node frame's icon_display_px (40), 0.4 alpha when locked"
+}

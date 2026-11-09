@@ -1,0 +1,12 @@
+{
+  "key": "icons/nodes/haul_sorter",
+  "style": "v3",
+  "ppu": 128,
+  "pivot": [
+    0.5,
+    0.5
+  ],
+  "icon": true,
+  "node": "haul_sorter",
+  "note": "B-204: the Skill Tree node's icon; drawn at the node frame's icon_display_px (40), 0.4 alpha when locked"
+}
