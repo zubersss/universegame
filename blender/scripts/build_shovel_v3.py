@@ -30,36 +30,37 @@ TAU = 2 * math.pi
 ART = os.path.normpath(os.path.join(HERE, "..", "..", "Assets", "_Game", "Art"))
 SW, SH_, SPPU = 192, 64, 128
 SPIV = (0.10 / 1.5, 0.5)                                    # the grip 0.10 m in from the frame's left
-GRIP, TIP, DIG = (0.0, 0.0), (1.32, 0.0), (1.24, 0.0)       # metres from the grip, the shovel along +x
+GRIP, TIP, DIG = (0.0, 0.0), (1.33, 0.0), (1.24, 0.0)       # metres from the grip, the shovel along +x
 
 
 def hose(pts, w):
     return G.hose_outline(pts, w)
 
 
-def shovel(scale=1.0, ox=0.0, oz=0.0, rot=0.0):
-    """The shovel along +x from its grip (scale / offset / rotation for the icon)."""
+def shovel(scale=1.0, ox=0.0, oz=0.0, rot=0.0, bold=1.0):
+    """The shovel along +x from its grip (scale / offset / rotation / bold for the icon). rev (11:15 sheet): a thicker haft, a
+    heavier D-grip and a broader blade - the first one read as a thin stick with a small dark head."""
     ca, sa = math.cos(rot), math.sin(rot)
 
     def T(pts):
         return [(ox + scale * (x * ca - z * sa), oz + scale * (x * sa + z * ca)) for x, z in pts]
 
     def fn(d, M):
-        dg = [(-0.03, -0.075), (-0.03, 0.075)] + [(0.04 + 0.075 * math.cos(a), 0.075 * math.sin(a)) for a in np.linspace(math.pi / 2, -math.pi / 2, 9)]
-        G.stroke(d, T(hose(dg + [dg[0]], 0.022)), M["mustard_i"], I, cyclic=True)           # the brass D-grip (the hand on its bar)
-        G.stroke(d, T(hose([(0.11, 0.0), (0.95, 0.0)], 0.034)), M["teal_i"], I, cyclic=True)   # the teal haft
-        G.stroke(d, T([(0.2, 0.012), (0.85, 0.012)]), M["ink"], I * 0.5)                      # its grain line
-        G.stroke(d, T([(0.90, -0.026), (0.97, -0.026), (0.97, 0.026), (0.90, 0.026)]), M["mustard_i"], I, cyclic=True)   # brass ferrule
-        G.stroke(d, T([(0.97, -0.03), (1.04, -0.045), (1.04, 0.045), (0.97, 0.03)]), M["teal_sh_i"], I, cyclic=True)    # the socket
-        blade = [(1.04, -0.10), (1.10, -0.115), (1.18, -0.112), (1.27, -0.08), (1.32, 0.0), (1.27, 0.08), (1.18, 0.112), (1.10, 0.115),
-                 (1.04, 0.10)]
+        dg = [(-0.035, -0.085), (-0.035, 0.085)] + [(0.045 + 0.085 * math.cos(a), 0.085 * math.sin(a)) for a in np.linspace(math.pi / 2, -math.pi / 2, 9)]
+        G.stroke(d, T(hose(dg + [dg[0]], 0.03 * bold)), M["mustard_i"], I, cyclic=True)     # the brass D-grip (the hand on its bar)
+        G.stroke(d, T(hose([(0.13, 0.0), (0.88, 0.0)], 0.052 * bold)), M["teal_i"], I, cyclic=True)   # the teal haft
+        G.stroke(d, T([(0.2, 0.012 * bold), (0.8, 0.012 * bold)]), M["teal_sh"], I * 0.8)     # its shade line
+        G.stroke(d, T([(0.83, -0.035 * bold), (0.90, -0.035 * bold), (0.90, 0.035 * bold), (0.83, 0.035 * bold)]), M["mustard_i"], I, cyclic=True)   # ferrule
+        G.stroke(d, T([(0.90, -0.04), (0.97, -0.055), (0.97, 0.055), (0.90, 0.04)]), M["teal_sh_i"], I, cyclic=True)    # the socket
+        blade = [(0.97, -0.13), (1.04, -0.145), (1.14, -0.14), (1.25, -0.10), (1.33, 0.0), (1.25, 0.10), (1.14, 0.14), (1.04, 0.145),
+                 (0.97, 0.13)]
         G.stroke(d, T(blade), M["sky_sh_i"], O, cyclic=True)                                 # the steel round-point blade
-        G.stroke(d, T([(1.04, 0.10), (1.10, 0.115), (1.18, 0.112), (1.24, 0.09), (1.10, 0.08)]), M["sky"], 0.0, cyclic=True)   # a lit edge
+        G.stroke(d, T([(0.97, 0.13), (1.04, 0.145), (1.14, 0.14), (1.22, 0.11), (1.04, 0.10)]), M["sky"], 0.0, cyclic=True)   # a lit edge
         G.stroke(d, T(blade), M["ink"], O, cyclic=True)
-        G.seam(d, T([(1.05, 0.0), (1.27, 0.0)]), M["ink"])                                  # the centre rib
-        G.stroke(d, T([(1.04, -0.10), (1.09, -0.10)]), M["ink"], I)                          # the step shoulders
-        G.stroke(d, T([(1.04, 0.10), (1.09, 0.10)]), M["ink"], I)
-        G.stroke(d, T(IT.lump(1.22, -0.035, 0.05, 0.03, 261, n=9, jit=0.15)), M["brown_sh_i"], I * 0.6, cyclic=True)   # a dirt smear
+        G.seam(d, T([(0.98, 0.0), (1.27, 0.0)]), M["ink"])                                  # the centre rib
+        G.stroke(d, T([(0.97, -0.13), (1.03, -0.13)]), M["ink"], I)                          # the step shoulders
+        G.stroke(d, T([(0.97, 0.13), (1.03, 0.13)]), M["ink"], I)
+        G.stroke(d, T(IT.lump(1.19, -0.05, 0.065, 0.04, 261, n=9, jit=0.15)), M["brown_sh_i"], I * 0.6, cyclic=True)   # a dirt smear
     return fn
 
 
@@ -96,7 +97,8 @@ def kit():
     tool = RT.render(shovel(), SW, SH_, SPPU, SPIV)[0]
     frames = [flick_frame(k) for k in range(6)]
     sheet, cols = FR.sheet_of(frames)
-    icon = RT.render(shovel(scale=0.62, ox=-0.41, oz=0.30, rot=-0.72), IT.SIZE, IT.SIZE, IT.PPU, (0.5, 0.5))[0]
+    icon = RT.render(shovel(scale=0.64, ox=-0.40, oz=0.30, rot=-0.72, bold=1.9), IT.SIZE, IT.SIZE, IT.PPU, (0.5, 0.5))[0]   # rev: bold
+                                                                                              # (it vanished at 48 / 40 px)
     return [("props/rig/shovel", tool, {"ppu": SPPU, "pivot": [round(SPIV[0], 4), 0.5], "grip": list(GRIP), "blade_tip": list(TIP),
                                          "muzzle": list(DIG), "note": "B-226: the first digging tool, a field shovel (teal and brass, a D-grip); "
                                                                        "pivot = the grip in the hand; muzzle = the dig point on the blade"}, None),
