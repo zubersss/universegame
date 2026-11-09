@@ -360,11 +360,6 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 6c65559fd20e0954ea06e1ad1c8e17fb
-    m_Address: terrain/mars/ground_strip_frost
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 6c8b4964d6b23a743b8a8a8c924fe987
     m_Address: terrain/mars/fill_decor_t2_1
     m_ReadOnly: 0
@@ -597,11 +592,6 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: c135af657f93f6449960939add7ba1ca
     m_Address: terrain/mars/ground_decor_talus_2
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: c1c3bcc012518dd45bba67ccd3ab30c5
-    m_Address: terrain/mars/ground_strip_basalt
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
