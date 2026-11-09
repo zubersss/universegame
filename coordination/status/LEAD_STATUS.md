@@ -1,5 +1,6 @@
 # LEAD STATUS
-Updated: 2026-11-09 11:0x · Session: 10 (zuber-dc; all three windows restarted ~09:30 after a ~3-hour break) · Review cycle: 294 · Cadence: every 2 hours (owner, 11-07 15:1x; session cron 5ca489ce at :43 on odd hours, next ~13:05) + messages from the workers as they arrive
+Updated: 2026-11-09 11:5x · Session: 11 (zuber-67; all three windows restarted ~11:45) · Review cycle: 295 · Cadence: every 2 hours (owner, 11-07 15:1x; session cron 1eb60286 at :43 on even hours, next ~12:50) + messages from the workers as they arrive
+Cycle 295 (11:4x, the resume): no stall; B-221 / B-222 / B-226 Done (in LFS, imported); U-194 (Build 0.6.1) and B-227 (the tool-slot icons) written; While-waiting lists rewritten; UNITY's want live, gate open (2.41 GB).
 Cycle 294 (11:05): no stall; BUILD 0.6.0 OUT, its page + USER-36; the owner's shovel ask → D-182 / U-193 / B-226 for 0.6.1; UNITY's post-build sweep in its lock (RAM 0.48 GB).
 Cycle 293 (09:05): both workers paused 2 h (no commit, no edit, RAM 1.30 GB under the gate) → nudged; USER-35 (close Edge).
 Cycle 292 (07:05): no stall; U-188's dev build probed (a leak fixed; D-180) and its smoke judged with BLENDER's B-201 (release fixes routed; B-220..B-224 / U-191 / U-192 after); both workers mid-edit on the release fixes, B-222 / B-221.
@@ -14,18 +15,18 @@ Cycle 284 (15:05–17:0x): THE OWNER'S 0.5.0 PLAYTEST → D-174 (a progression d
 Cycles 281–283 (09:3x–15:0x): the resume; Build 0.5.0 (page https://claude.ai/artifact/CHnmoFrDg2jzUuM42BVi83); D-168..D-173; U-159 Mars smooth.
 (cycles 231–280: coordination/status/archive/LEAD_2026-11-06.md and REVIEW_LOG)
 ## Current task
-D1 shipped as 0.6.0; now 0.6.1 for the owner's shovel ask (D-182). UNITY: the post-build sweep → U-193 → U-194 Build 0.6.1. BLENDER: B-221 export → B-226 (the shovel) → B-222 → B-220 → B-224. After 0.6.1: U-189 + U-191, U-177, U-192, U-179; B-223, B-225.
+D1 shipped as 0.6.0; now 0.6.1 for the owner's shovel ask (D-182). UNITY: U-193 part 2 (the HUD tool slot) + its PlayMode slice with LeadQA D1DigRunTests → U-194 Build 0.6.1. BLENDER: B-220 previews → B-224 preview → B-227 (tool icons) → B-223 → B-225. After 0.6.1: U-189 + U-191, U-177, U-192, U-179.
 ## Last completed
-BUILD 0.6.0 OUT (the progression digging game, D1) and its owner page published (https://claude.ai/artifact/S3LfXBpfBbcjhJxDQYhBVx); USER-36 posted.
+Cycle 295 resume: B-221 / B-222 / B-226 → Done; U-194 + B-227 cards; queues refreshed. Before: LeadQA D1DigRunTests on the shovel start (a80f6a07); BUILD 0.6.0 OUT with its owner page (https://claude.ai/artifact/S3LfXBpfBbcjhJxDQYhBVx).
 ## Next up
-1. B-226's shovel preview → judge. 2. U-193 compiles → apply scratchpad/leadqa_shovel_patch.py to D1DigRunTests, commit, UNITY runs it. 3. U-193's captures → judge. 4. U-194 Build 0.6.1 → update the 0.6.0 page or a new 0.6.1 page + a short playtest item. 5. The owner's USER-36 notes → cards.
+1. U-193's slice result (D1DigRunTests on the shovel) + captures (the shovel mid-swing, the flick, the tool slot, The Beam bought) → judge. 2. B-220's 3× previews per giant → judge. 3. B-224's veil serpent preview → judge. 4. B-227's icon sheet → judge. 5. U-194 Build 0.6.1 → view its smoke → the owner page + a short playtest item. 6. The owner's USER-36 notes → cards.
 ## Pending decisions
 none open.
 ## Waiting on the user
 USER-36 (10:4x): the owner's first hour with 0.6.0, the digging game (page https://claude.ai/artifact/S3LfXBpfBbcjhJxDQYhBVx). USER-08 optional.
 ## Loop / stall watch
-none. The stag is U-162 (D-167 (6)).
-## Session addresses (ListAgents, 11-08 09:4x)
-This session: zuber-dc. zuber-c6 = UNITY. zuber-f6 = BLENDER.
+BLENDER_STATUS.md unchanged since 09:19 while it committed through 11:24 (asked to rewrite it at the restart); UNITY_STATUS.md 14.3 KB, over D-113 (trim listed). The stag is U-162 (D-167 (6)).
+## Session addresses (ListAgents, 11-09 11:4x)
+This session: zuber-67. Workers: zuber-61 and zuber-15 (both started ~11:45; which is UNITY / BLENDER not yet known: the resume message went to both).
 ## HeavyJobLock
 none (LEAD runs no heavy jobs while a worker holds the lock or a want)

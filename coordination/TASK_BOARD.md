@@ -25,6 +25,9 @@ the next live rank runs now and the skipped role goes next after it files. A rol
 keeps its want filed and refreshed (D-075) and works its `## While waiting` list. Cycle 278 (11-08 01:4x: all three windows restarted ~01:27; lock B's tests green (MarsStage 3/3, the Jupiter PlayMode slice 20/20) but its captures died with the restart; B-170 in; THE OWNER'S 0.4.7 PLAYTEST → D-158: the flight overhaul goes first and rides 0.4.8). A role files its want only when the queue says it is next after the running job:
 Cycle 281 (11-08 09:4x, the resume: all three windows restarted ~09:30 after a ~3-hour break; no lock, no want; free RAM 0.69 GB at 09:33 while the sessions started, 1.83 GB at 09:4x: the gate is open). Done since 05:1x: U-156 accepted; B-176 exported for the four inner planets; B-177's islands for all four giants; B-178 Earth's bands; B-179's desert and taiga exported, the tundra accepted with one fix; D-167.
 Cycle 282 (11:0x, 2-hour tick): every 0.5.0 art item is in and verified (B-178 frost, B-179 tundra, B-180 lips, B-181 all, B-183 forest / coast / plains with D-169's layer2, Earth's dig_puff). UNITY's short lock (U-157's D-168 fix + U-164) is in its capture part (11:04); the re-shot u157/1_scoop (a round bowl) and u158/4_pocket_dug (a U-bottomed shaft) viewed at 11:0x.
+Cycle 295 (11:4x, the resume: all three windows restarted ~11:45; no lock; UNITY's want on file (11:43, U-193 slice 2); free RAM 0.69 GB at 11:46 while the sessions started, 2.41 GB at 11:47: the gate is open). Done since 11:05: B-221 / B-222 / B-226 exported, in LFS and imported (→ Done); U-193 part 1 compiles (a0f489e1); LeadQA D1DigRunTests on the shovel start (a80f6a07). Added: U-194 (Build 0.6.1), B-227 (the HUD tool-slot icons).
+1. UNITY · NOW (want live, gate open): U-193 part 2 (the HUD tool slot) + its PlayMode slice with LeadQA D1DigRunTests + the captures → U-194 Build 0.6.1 → U-189 + U-191 (the giants, after B-220), U-177, U-192, U-179.
+2. BLENDER · after UNITY's slice, in its lock: B-220 previews (3× per giant, to LEAD) → B-224 preview → B-227 icons (sources lock-free now) → B-223 → B-225. B-227 rides 0.6.1 only if exported before U-194's build starts.
 11:1x: 0.6.0's post-build sweep GREEN on the build's code (A 22/23, B 25/29 with 3 skips and the AI worst-frame note 1.68 ms → U-191, C 34/34, D 28 + 29, F 23/24; LeadQA M1Loop / M3Inner / D1DigRun all green: L-014 Done); UNITY on U-193.
 Cycle 294 (11:05, 2-hour tick): UNITY holds the lock (the post-build sweep, PlayMode P-Sp, 11:01); RAM 0.48 GB under it. Since 09:05: the release fixes in (314a482b), BUILD 0.6.0 OUT (40a0b641) with its owner page and USER-36; the owner's shovel ask → D-182, U-193, B-226; B-221 accepted (0.6.1); B-222 / B-224 / B-226 / B-220 sources in. Not paused: UNITY in its lock, BLENDER committed 10:56.
 1. UNITY · the post-build sweep + LeadQA (in its lock) → U-193 (the shovel first, the Beam early; LEAD applies its D1DigRunTests patch when the API compiles) → U-194 Build 0.6.1 (U-193 + B-221 + B-222 + B-226 + the shelter walls) → U-189 + U-191 (the giants), U-177, U-192, U-179.
@@ -104,12 +107,12 @@ Rules: nothing here needs the lock; it stays under ~300 MB of extra RAM; no Unit
 did in your status before the next poll. LEAD tops each list up to ≥ 3 items every cycle.
 
 **UNITY**
-- U-169's fix (the camp shoulder's curve vs grid), then U-167 (the fill_decor scatter incl. B-192's sand / basalt pieces).
-- U-159's Mercury and Venus slices as code (the region → band / set / puff / lip map on its card; the Mars funnel's straight edge at y ≈ 940; the next build's smoke: smoke_42, the swim frame, the Survey Archive, the Launch Complex, a Warden).
-- U-162 (the stag's hysteresis) as code.
-- U-152 (the v2 census, files only, using B-173's audit lists).
-- Status trim (D-113): U-142 / U-143 / U-147 / U-153 / U-156 / U-161 are Done; Ready for review lists only unjudged items.
-- The Creep watch row (0.4.8's reading); `docs/credits/unity.md` upkeep.
+(Cycle 295, 11:4x)
+- U-193 part 2 as code: the HUD tool slot (requests icons/tools/{shovel, beam, grapple, survey, builder}; placeholders for the four B-227 keys until they land).
+- U-194's shelter-wall seating (B-201 #16) as code + its PlayMode test, so the release lock only builds.
+- U-189 (the giants' finds) as code against B-219's nodes (already imported); U-191's island_belly / gap fixes as code (the continue_rows repeat waits for B-220).
+- U-192's veil serpent temper (a gentle drifter) as code, ahead of B-224's import.
+- Status trim (D-113): UNITY_STATUS.md is 14.3 KB (cap 12 KB): archive Last completed entries for Done cards (U-171..U-190) and the old Ready-for-review list (U-129 / U-130 / U-133 / U-144 / U-146 / U-166 have LEAD notes on the board).
 Then one batched check per hand-off when your turn in the queue comes (compile + EditMode as one lock, PlayMode A / B as two, D-122).
 
 
@@ -120,10 +123,12 @@ Then one batched check per hand-off when your turn in the queue comes (compile +
 
 
 **BLENDER** (numpy / scripts only while UNITY holds the lock or a want; bpy only under your own lock; under 0.3 GB free, code only; otherwise only pre-measured ≤ 150 MB jobs beside another role's lock; the lock / RAM check is its own call)
-- GO (16:0x): the U-168 removal (14 files) + icons/cryo_round/base_color.png in one commit under your lock, never a .meta, the staged list diffed against the 15, git show --stat to LEAD and UNITY.
-- B-200 (Earth's sets underwater, dip sheets at 3 / 8 / 15 m), then B-201 when the next build's smoke lands.
-- The next cards come from the owner's USER-33 answer, the next build's smoke (the seabed under smoke_43's swim frame) or U-160; tell LEAD when the list runs dry.
-- Status trim (D-113): B-173, B-175, B-176, B-177 are judged; Ready for review lists only unjudged items. `docs/credits/blender.md` upkeep.
+(Cycle 295, 11:4x)
+- Your status file first: it still reads 09:2x (before B-221 / B-222 / B-226's exports); rewrite Current task / Last completed for the restart.
+- B-227 sources (the four HUD tool icons in the shovel icon's proportion), files only.
+- B-223 sources (the docking bay set + icons/catalogue/camp), files only.
+- B-225 sources (the shallows' surface band, light shafts, the shallow seabed layer), files only.
+- `docs/credits/blender.md` upkeep for B-221 / B-222 / B-226.
 
 **LEAD**
 - The charter idle list, plus: the C1 LeadQA scenario draft (pad → Escape Line → space → entry → touchdown under scripted input), the C1_REPORT skeleton, the owner's v4.1 look-over page, Bible gap closure, credits audit, a status-size check each cycle (D-113).
@@ -3035,19 +3040,19 @@ Files: Code/Runtime/Terrain/CloudColumn/, Code/Runtime/Rendering/
 Depends: B-220
 Lead notes: Cycle 291 (06:0x). After 0.6.0, with U-189 (the giants' finds) so the giants get one pass.
 
-### B-221 · BLENDER · Ready · D1
+### B-221 · BLENDER · Done · D1
 Goal: A v3 title scene (B-201 #10: smoke_1 is still B-046's v2 render: 3D conifers, a grey placeholder hull, pixel-noise dirt): ui/title/background redrawn in the v3 ink style at the title's size: the surveyor's rocket on its pad at Earth's camp at dusk, the meadow and forest bands, the dashed Surface Line with a dug shaft below it hinting at the digging game, room for the logo and menu on the left third; palette 100 %; no faces but the surveyor's.
 Accept: a stamped preview at 1920×1080 with the menu's rectangles outlined, accepted by LEAD before the export.
 Files: blender/scripts/ (a title builder), Assets/_Game/Art/ui/title/
 Depends: —
-Lead notes: Cycle 291 (06:4x). The first thing a player sees. Into 0.6.0 only if exported before UNITY's release build starts; else 0.6.1. 09:3x: source in 1c80affe (build_title_v3: the camp at dusk from v3 art); the preview (logo / menu rectangles outlined) in BLENDER's lock after UNITY's release run, to LEAD before the export. BLENDER self-reported a second slip (two python reads at 09:2x without listing the locks first; harmless, nothing ran beside a lock): reminded. 10:5x: PREVIEW ACCEPTED (review_b221_title_preview.png): the Pilgrim on its pad at Earth's camp at dusk, the smelter, crates and surveyor, a dug shaft with a ladder through the dashed Surface Line, the left third calm behind the logo and four buttons; export (same key) → 0.6.1 (UNITY's release build started 10:20, before the render).
+Lead notes: Cycle 291 (06:4x). The first thing a player sees. Into 0.6.0 only if exported before UNITY's release build starts; else 0.6.1. 09:3x: source in 1c80affe (build_title_v3: the camp at dusk from v3 art); the preview (logo / menu rectangles outlined) in BLENDER's lock after UNITY's release run, to LEAD before the export. BLENDER self-reported a second slip (two python reads at 09:2x without listing the locks first; harmless, nothing ran beside a lock): reminded. 10:5x: PREVIEW ACCEPTED (review_b221_title_preview.png): the Pilgrim on its pad at Earth's camp at dusk, the smelter, crates and surveyor, a dug shaft with a ladder through the dashed Surface Line, the left third calm behind the logo and four buttons; export (same key) → 0.6.1 (UNITY's release build started 10:20, before the render). 11:4x: DONE (ea3f75fb: exported, in LFS, 0 .meta; imported by UNITY in a0f489e1); the title frame is checked again in U-194's smoke.
 
-### B-222 · BLENDER · Ready · D1
+### B-222 · BLENDER · Done · D1
 Goal: icons/thruster_mk2/base (B-201 #12: crafting shows a flat teal square; Mk3 exists): the v3 ink icon matching B-204's set and thruster_mk3's design one step down.
 Accept: a preview beside thruster_mk1 / mk3 at 1×; palette 100 %.
 Files: Assets/_Game/Art/icons/thruster_mk2/
 Depends: —
-Lead notes: Cycle 291 (06:4x). Small; same release rule as B-221. 09:3x: source in 00f2b605 (icons/thruster_mk2, batch 5); preview in BLENDER's lock after UNITY's release run. 11:2x: PREVIEW ACCEPTED (review_b222_thruster_mk2_preview.png): a steel bell with a brass collar, the plainer step before mk3's red-collared bell, reads at 128 / 48 / 40 px; export → 0.6.1.
+Lead notes: Cycle 291 (06:4x). Small; same release rule as B-221. 09:3x: source in 00f2b605 (icons/thruster_mk2, batch 5); preview in BLENDER's lock after UNITY's release run. 11:2x: PREVIEW ACCEPTED (review_b222_thruster_mk2_preview.png): a steel bell with a brass collar, the plainer step before mk3's red-collared bell, reads at 128 / 48 / 40 px; export → 0.6.1. 11:4x: DONE (02462247: exported, in LFS, 0 .meta; the other 49 item icons byte-identical; imported in a0f489e1).
 
 ### B-223 · BLENDER · Ready · G1
 Goal: A painted docking bay interior and the catalogue's Camp icon (B-201 #11 / #17): the Earth waystation's docking bay as a v3 ink backdrop set (panels, a porthole on the painted starfield, cargo racks; layered for parallax) and icons/catalogue/camp.
@@ -3084,12 +3089,26 @@ Files: Code/Runtime/Rig/, Code/Runtime/Mining/, Code/Runtime/Progress/ (SkillTre
 Depends: B-226 for the art (placeholders until then)
 Lead notes: Cycle 293 (10:5x, the owner's ask). FIRST, ahead of U-189 / U-191 / U-177: it changes the owner's first minute. Ships in 0.6.1 with B-221 (the title), B-222, B-226 and the shelter walls. 11:0x: UNITY's API (to build): Meridian.Rig.DigTool {Shovel, Beam}; SkillStats.DigTool / DigPower / DigReach; D1Tables.StrokeSeconds(planet, depth, power, tool) (shovel 0.5 / 12 s, Beam 0.25 / 8 s); the dig slot stays RigModule.Beam (RULED: no rename). LEAD's D1DigRunTests patch is ready in LEAD's scratchpad (the shovel start, the wall inside 2 m, DigTool.Beam after the buy and the load): applied only after U-193 compiles on main, since the shared tree would break UNITY's compile before. 11:3x: PART 1 COMPILES (a0f489e1; EditMode 491 with SkillTreeTests' stale 80-Scrip asserts → 250; B-221 / B-222 / B-226 imported); LEAD applied the D1DigRunTests shovel patch (the shovel at the start, reach 2 m, the wall ~1.2 m off, the 4-arg strokes, DigTool.Beam after the buy and the load); the PlayMode slice waits for BLENDER's B-220 lock. RULED: a HUD tool slot IN THIS CARD (there is none today, so the held tool and Q / E switching are invisible): the current rig module's icon and name in a small paper slot by the dials (the shovel / the Beam Mk n, the Grapple, Survey, Builder), Q / E arrow hints, updating on a switch or the Beam's purchase; modules without an icon get a placeholder and a BLENDER card.
 
-### B-226 · BLENDER · Ready · D1
+### B-226 · BLENDER · Done · D1
 Goal: The shovel's art (D-182): props/rig/shovel (a sturdy field shovel in the surveyor's teal and brass, a D-grip, ink v3, sized to the hand: blade ~0.35 m, haft ~0.9 m; pivot at the grip; a json grip point and blade tip), fx/shovel_flick (a dirt clod and crumbs flicked up and back, 6 frames, tinted per ground like dig_puff), icons/tools/shovel for the HUD tool slot and the tree; confirm the dig_power_1 icon reads as "The Beam" (a Beam emitter, not a power arrow), else redraw it; nothing weapon-like.
 Accept: a preview of the shovel on the surveyor's hand at three scoop angles beside the Beam Mk1 at 1×, the flick's frames on Earth / Mars ground, the icons at 1× beside their neighbours; palette 100 %; LEAD accepts before the export.
 Files: blender/scripts/, Assets/_Game/Art/props/rig/, Assets/_Game/Art/fx/, Assets/_Game/Art/icons/
 Depends: —
-Lead notes: Cycle 293 (10:5x, the owner's ask). FIRST in BLENDER's queue (before B-220's previews and B-224); sources now, the preview in its lock when UNITY's is clear. 11:0x: SOURCES IN (1aebe347, build_shovel_v3.py, files only): props/rig/shovel (brass D-grip, teal haft ~0.85 m with a brass ferrule, a steel round-point blade ~0.37 m with step shoulders and a dirt smear; pivot at the grip; json grip / blade_tip / the dig point), fx/shovel_flick/base (6 frames, cream + ink for UNITY's per-ground tint), icons/tools/shovel; dig_power_1's icon already reads as the Beam (an emitter firing into rock, cable-fed since e09be9a4): no redraw. The preview to LEAD in BLENDER's lock after UNITY's sweep (queue: B-221 export → B-226 preview → B-222 → B-220 → B-224). 11:1x: PREVIEW JUDGED (review_b226_shovel_preview.png): props/rig/shovel ACCEPTED (teal haft, brass D-grip, a round-point steel blade; reads as a tool at −55 / −20 / +30°); fx/shovel_flick ACCEPTED (the clod arcs up and back, crumbs after it; tints on Earth and Mars); ONE FIX: icons/tools/shovel at 48 / 40 px is a thin diagonal stick beside chunky neighbours: an icon-specific proportion (shorter haft, the blade ~45 % of the icon's height, heavier ink) so it reads at 40 px; then export the kit. B-221 exported (ea3f75fb, 0 .meta) for 0.6.1. 11:2x: the icon fix viewed (its own proportion: a short thick haft, a heavy D-grip, the blade ~46 % of the height): reads at 48 / 40 px beside dig_power_1 and the ores: ACCEPTED; the kit exporting (props/rig/shovel, fx/shovel_flick/base, icons/tools/shovel).
+Lead notes: Cycle 293 (10:5x, the owner's ask). FIRST in BLENDER's queue (before B-220's previews and B-224); sources now, the preview in its lock when UNITY's is clear. 11:0x: SOURCES IN (1aebe347, build_shovel_v3.py, files only): props/rig/shovel (brass D-grip, teal haft ~0.85 m with a brass ferrule, a steel round-point blade ~0.37 m with step shoulders and a dirt smear; pivot at the grip; json grip / blade_tip / the dig point), fx/shovel_flick/base (6 frames, cream + ink for UNITY's per-ground tint), icons/tools/shovel; dig_power_1's icon already reads as the Beam (an emitter firing into rock, cable-fed since e09be9a4): no redraw. The preview to LEAD in BLENDER's lock after UNITY's sweep (queue: B-221 export → B-226 preview → B-222 → B-220 → B-224). 11:1x: PREVIEW JUDGED (review_b226_shovel_preview.png): props/rig/shovel ACCEPTED (teal haft, brass D-grip, a round-point steel blade; reads as a tool at −55 / −20 / +30°); fx/shovel_flick ACCEPTED (the clod arcs up and back, crumbs after it; tints on Earth and Mars); ONE FIX: icons/tools/shovel at 48 / 40 px is a thin diagonal stick beside chunky neighbours: an icon-specific proportion (shorter haft, the blade ~45 % of the icon's height, heavier ink) so it reads at 40 px; then export the kit. B-221 exported (ea3f75fb, 0 .meta) for 0.6.1. 11:2x: the icon fix viewed (its own proportion: a short thick haft, a heavy D-grip, the blade ~46 % of the height): reads at 48 / 40 px beside dig_power_1 and the ores: ACCEPTED; the kit exporting (props/rig/shovel, fx/shovel_flick/base, icons/tools/shovel). 11:4x: DONE (ab1c524f: the three keys exported, in LFS, 0 .meta; imported in a0f489e1); the shovel in the surveyor's hand is checked in U-193's captures.
+
+### U-194 · UNITY · Ready · D1
+Goal: Build 0.6.1 (the owner's shovel ask, D-182): U-193 (the shovel start, The Beam at 250 Scrip, the HUD tool slot), B-221's v3 title scene, B-222's thruster Mk2 icon, B-226's shovel kit, B-227's tool icons if exported before the build starts, and the shelter walls seated on the drawn ground (B-201 #16: smoke_18's built wall stacks float ~40 px above Mars's slope); the same release path as U-188 (compile, EditMode, the PlayMode slices, LeadQA M1Loop / M3Inner / D1DigRun, BudgetGate, the player build, the player smoke, the dev-build memory probe).
+Accept: BUILD OK, SMOKE OK, the probe green, BudgetGate green (no row above Bible §11.1); Build/MERIDIAN_0.6.1/MERIDIAN.exe; the smoke list adds: the title scene (smoke_1), a new game digging with the shovel at camp (mid-swing, the flick), the HUD tool slot with the shovel then The Beam Mk1 after buying it, crafting showing thruster_mk2, smoke_18 re-shot with the walls on the slope; a PlayMode test for the walls (each built wall's base within 0.1 m of the drawn surface under it).
+Files: Build/, Code/Runtime/Building/ (the walls), Tests/, coordination/reports/unity/
+Depends: U-193
+Lead notes: Cycle 295 (11:4x). Card written at the resume (cycle 293's plan named it; no card existed). One lock per slice as for 0.6.0; LEAD views the smoke before the owner page. B-227 waits for nobody: if its export misses the build start, the slot keeps the placeholders and the icons ride 0.6.2.
+
+### B-227 · BLENDER · Ready · D1
+Goal: The HUD tool slot's icons (U-193 ruling, 11:3x: "modules without an icon get a placeholder and a BLENDER card"): icons/tools/beam, icons/tools/grapple, icons/tools/survey, icons/tools/builder in the proportion and ink weight of B-226's icons/tools/shovel (128 px, inside the 2 px margin, readable at 48 / 40 px): the Beam a cable-fed, arm-mounted emitter with its cutting nozzle (D-087: never a gun, no grip or trigger), the Grapple its hook and coiled line, the Survey its scanner dish, the Builder its placing tool; teal / brass / steel as the props/rig sheets; palette 100 %.
+Accept: one preview sheet of the five tool icons (the shovel included) at 128 / 48 / 40 px side by side, accepted by LEAD before the export; json per key as the shovel's.
+Files: blender/scripts/ (build_shovel_v3.py's icon path or a sibling), Assets/_Game/Art/icons/tools/
+Depends: —
+Lead notes: Cycle 295 (11:4x). Sources now, lock-free (files only while UNITY holds the lock or a want); the preview in BLENDER's own lock after B-220's previews. UNITY's slot requests these four keys with placeholders until they land (sent with this card).
 
 ### U-154 · UNITY · Ready · C2
 Goal: P-51 (UNITY, ruled yes in cycle 279): the Builder's aerostat pieces draw the re-inked kit on the four giants: PieceSpec gains a per-planet art key, so the Deck / Strut / Lift cell pieces draw `props/common/aerostat_{deck,strut,cell}` (B-156) on Jupiter, Saturn, Uranus and Neptune and keep `props/venus/aerostat_deck` on Venus; nothing else about the pieces changes (sizes, costs, saves).
