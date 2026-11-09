@@ -3031,7 +3031,7 @@ Goal: (+ backgrounds/venus/deck, B-201 #14) The giants' deck backdrops continue 
 Accept: a preview per giant of each deck layer repeated 3× below its sheet (no seam, no streak); json continue_rows; palette 100 %.
 Files: blender/scripts/ (the giants' backdrop builders), Assets/_Game/Art/backgrounds/<giant>/
 Depends: —
-Lead notes: Cycle 291 (06:0x). After 0.6.0's release; U-191 repeats the bands. 09:5x: sources part 1 (d0c32d8b) and part 2 (1a40cddd: preview_continue, a 3× repeat per giant) in; previews in BLENDER's lock after UNITY's release run and B-221 / B-222.
+Lead notes: Cycle 291 (06:0x). After 0.6.0's release; U-191 repeats the bands. 09:5x: sources part 1 (d0c32d8b) and part 2 (1a40cddd: preview_continue, a 3× repeat per giant) in; previews in BLENDER's lock after UNITY's release run and B-221 / B-222. 11:5x RULED (BLENDER's first sheets showed sparse bottoms repeating as dashes / stripes / slats): continue_rows 64 only on a layer whose bottom band is ≥ 25 % solid; a sparse layer fades to transparent over its last 64 rows with no continue_rows; Neptune deck2's flash lifted out of the band. Five sheets (the four giants + venus/deck) to LEAD; the report names which layers continue and which fade, so U-191 repeats exactly those.
 
 ### U-191 · UNITY · Ready · G1
 Goal: The giants' decks assembled right (B-201 #1 / #4; + #13: Mars canyon and Mercury twilight declare continue_rows 64 but the band isn't repeated, smoke_5 / 6 / 14; + Venus's deck): repeat B-220's continue_rows below every deck backdrop (no clamped streaks); B-177's rounded island_belly under each floe instead of the flat block; no cap-to-cap gaps between floe segments.

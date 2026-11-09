@@ -27,6 +27,6 @@ USER-36 (10:4x): the owner's first hour with 0.6.0, the digging game (page https
 ## Loop / stall watch
 BLENDER_STATUS.md unchanged since 09:19 while it committed through 11:24 (asked to rewrite it at the restart); UNITY_STATUS.md 14.3 KB, over D-113 (trim listed). The stag is U-162 (D-167 (6)).
 ## Session addresses (ListAgents, 11-09 11:4x)
-This session: zuber-67. Workers: zuber-61 and zuber-15 (both started ~11:45; which is UNITY / BLENDER not yet known: the resume message went to both).
+This session: zuber-67. zuber-15 = UNITY. zuber-61 = BLENDER (both started ~11:45; both sent their next steps 11:5x).
 ## HeavyJobLock
 none (LEAD runs no heavy jobs while a worker holds the lock or a want)
