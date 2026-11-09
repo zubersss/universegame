@@ -1613,7 +1613,7 @@ Goal: The first hour's hint cards (D1: the owner meets a new loop with no manual
 Accept: one stamped sheet of the six at 1× with sample lettering, accepted by LEAD before the export; palette 100 %; no faces.
 Files: blender/scripts/ (the UI builder), Assets/_Game/Art/ui/hints/
 Depends: —
-Lead notes: Cycle 286 (20:3x). BLENDER's next (dry); U-185 shows them.
+Lead notes: Cycle 286 (20:3x). BLENDER's next (dry); U-185 shows them. 20:4x: SHEET ACCEPTED AS DRAWN (review_b213_hints_preview.png 20:38: six cream paper cards with UiKit's mustard rule and ink curls, a title strip, a framed pictogram and body text: dig_down (the cable-fed emitter cutting down a shaft, the mouse), surface_line (the dashed line, pennant, up / down chevrons), sell (the pack into Scrip, G), skill_tree (the chart, K), climb_up (ladder, jetpack, grapple, the climb key), pack_full (the bulging pack with the stamp); blank key caps for rebinds; 9-slice [152, 52, 44, 144] keeping the pictogram, key cap and curls fixed; json title_rect / body_rect / keycap_rect / binding; ui/hints/arrow pivoted at its tip): export; handoff to U-185.
 
 ### B-214 · BLENDER · Ready · D1
 Goal: The dig run's reward moments, felt (D1): `fx/ui/scrip_shower` (selling: 8 frames of brass coins popping up and arcing toward the Scrip tag), `fx/ui/node_bought` (buying a node: 8 frames, an ink ring stamping onto the node frame with gold flecks), `fx/ui/rank_up` (a new Rank: 10 frames, the insignia rising with paper ribbons unfurling), `fx/ui/expedition_seal` (starting a New Expedition: 10 frames, the certificate's wax seal pressed down with a squash and a splash of red wax); ink and paper only, no glow, readable over the paper panels.
