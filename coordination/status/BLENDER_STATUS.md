@@ -21,16 +21,9 @@ NOT YET RUN (expect first-run fixes): B-223, B-225, B-229, B-230, B-231, B-232, 
 - Waiting on others: B-207 closes on PawsOnTheGround green; B-204 on UNITY's capture; B-172 on U-151. UNITY drops the three lance .meta files.
 
 ## Last completed
-- 11-09 13:30: B-227 exported (3a46eb91, LEAD-accepted rev 2): icons/tools/{beam, grapple, survey, builder} 128 + json, 8 files, 0 .meta; for 0.6.1's HUD tool slot.
+- 11-09 14:03-14:3x (session 12, files only): B-233 source + B-229 glove rev (d593051c); B-232 to the ruled format (6970371f); B-230 / B-231 desk-check fixes; reports/blender/preview_notes_0.6.2.md.
 - 11-09 13:10-13:38: B-220 Jupiter, Saturn, Uranus sheets ACCEPTED (the sparse-layer rule; the U-191 list in reports/blender/b220_continue_rows.md); export after Neptune + Venus.
-- 11-09 12:5x-13:5x (files only): B-228 prep, the D1 audit's new keys, credits upkeep (f8898839); sources B-229 / B-231 / B-230 / B-232 (daf89aad, eb51b232, 7b7f91b6, 88ab7c5b).
-- 11-09 11:2x: B-222 exported (02462247, LEAD-accepted): icons/thruster_mk2/base, a steel bell with a brass collar; the other 49 item icons byte-identical. For 0.6.1.
-- 11-09 11:2x: B-226 exported (ab1c524f, LEAD-accepted after the icon fix): props/rig/shovel 192x64 (pivot at the D-grip; json grip / blade_tip / muzzle), fx/shovel_flick/base (6 x 128, clip flick), icons/tools/shovel 128. For U-193 / 0.6.1.
-- 11-09 11:10: B-221 exported (ea3f75fb, LEAD-accepted 10:5x): ui/title/background, the v3 title scene (Earth's camp at dusk), 1920x1080 + json. For 0.6.1.
-- 11-09 06:0x-09:1x: B-201 (0.6.0 smoke read, all 75 shots; coordination/reports/blender/smoke_read_0.6.0.md, 517ae849 + 1008f40c): 17 defects routed by LEAD; mine fixed: terrain/earth/fill_decor_t2_1 (root_knot -> a pale root tangle) + fill_decor_t3_3 (mica_book -> a pale layered slab), b47759a4.
-- 11-09 00:4x: props/dig/winch_post json stands_on = the drawn surface at the shaft's mouth (379b0b89; UNITY's U-176 question; json only).
-- 11-09 00:35: B-219 (655fead8, LEAD-accepted after three fixes): the giants' floe nodes - props/jupiter/node_{ammonia_ice,metallic_hydrogen}, props/saturn/node_{ring_ice,ring_rock,helium3}, props/uranus/node_{methane_ice,superionic_ice}, props/neptune/node_{methane_ice,superionic_ice,deep_diamond}; B-176 format, json deck + item; for U-189.
-- 11-08 12:10-22:5x: B-184 to B-217, the strip retirements, U-183's hand_socket (archived: coordination/status/archive/BLENDER_2026-11-09.md, BLENDER_2026-11-08.md).
+- Earlier (B-184 to B-227, all Done on the board): coordination/status/archive/BLENDER_2026-11-09.md, BLENDER_2026-11-08.md.
 
 ## Ready for review
 - B-189 / B-185: review_b141_mars_{canyon,storm,plains}(_dip).png (9e04de12), review_b152_venus_surface(_dip).png (baa7f1e0), review_b149_mercury_{day,twilight,night}_dip.png (d7fbeace).
