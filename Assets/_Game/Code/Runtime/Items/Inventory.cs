@@ -39,6 +39,8 @@ namespace Meridian.Items
         public float LimitKg = float.PositiveInfinity;
         /// <summary>U-174: raised when an Add is cut short by the weight limit (the HUD's "pack full" cue).</summary>
         public event Action Refused;
+        /// <summary>U-188: Refused's listeners (tests: none may be a destroyed planet-scene object; the inventory outlives every planet).</summary>
+        public Delegate[] RefusedListeners() => Refused != null ? Refused.GetInvocationList() : Array.Empty<Delegate>();
 
         /// <summary>U-174: what the pack weighs now (kg).</summary>
         public float Weight

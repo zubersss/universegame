@@ -539,6 +539,10 @@ namespace Meridian.UI
         {
             foreach (var h in gaugeHandles) if (h.IsValid()) ArtLoad.Release(h);
             foreach (var h in rankHandles) if (h.IsValid()) ArtLoad.Release(h);
+            // U-188 (0.6.0's probe: Mono +14 MB per planet visit): the inventory outlives the planet scene; its handler kept this HUD, and
+            // through `player` the whole planet side (terrain, chunks), reachable after the scene unloaded.
+            if (cuedInventory != null) cuedInventory.Refused -= OnPackRefused;
+            cuedInventory = null;
         }
 
         public void ConfigureFor(PlanetConfig p)

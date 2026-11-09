@@ -82,6 +82,9 @@ namespace Meridian.Terrain
             if (lr != null) lr.sortingOrder = smooth ? LiquidOrderSmooth : LiquidOrder;
         }
 
+        /// <summary>U-188: the block mesh is this chunk's own (`new Mesh`), freed with it: never left for a stray reference to keep.</summary>
+        void OnDestroy() { if (blockMesh != null) Destroy(blockMesh); }
+
         // ---------- U-156: the smooth ground (D-161 / D-162, Bible 5.0) ----------
 
         /// <summary>True on a smooth planet: FinishCollision traces the outline (GroundField / GroundContour) into edge colliders.</summary>

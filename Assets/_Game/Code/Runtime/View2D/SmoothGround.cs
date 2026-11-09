@@ -701,7 +701,17 @@ namespace Meridian.View2D
             rebuildQueue.Clear();
             foreach (var m in tierMaterials.Values) if (m != null) Destroy(m);
             tierMaterials.Clear();
+            // U-188 (0.6.0's probe: Mono +14 MB, 56 ChunkBlocks meshes and ~10 materials per planet visit, never returned): a planet's chunks die
+            // with it, but held as keys here they stayed reachable with their meshes; the materials were made per texture each visit.
+            topCounts.Clear();
+            deadChunks.Clear();
+            foreach (var kv in meshes) if (kv.Key == null) deadChunks.Add(kv.Key);
+            foreach (var c in deadChunks) meshes.Remove(c);
+            deadChunks.Clear();
+            foreach (var m in materials.Values) if (m != null) Destroy(m);
+            materials.Clear();
         }
+        readonly List<TerrainChunk> deadChunks = new List<TerrainChunk>(64);
 
         /// <summary>A key not exported yet is probed quietly (D-143) and its placeholder stays.</summary>
         void Probe(string key, System.Action<Sprite> got)

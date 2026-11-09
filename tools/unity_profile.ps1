@@ -124,7 +124,7 @@ if ($runProbe) {
             $rows += "| Transition $dot $($l.leg) (dev build) | $le 1.5 s (D-089) | $($l.transitionSec) s, worst iris-in frame $($l.irisInWorstMs) ms | $(if ($tok) { 'green' } else { 'red' }) |"
         }
         if ($null -ne $l.bundles) {
-            $planetBundles = @([string]$l.bundles -split ', ' | Where-Object { $_ -like 'planet_*' -and $_ -notlike 'planet_space*' -and $_ -notlike 'planet_warden*' -and $_ -notlike 'planet_waystation*' -and $_ -notlike 'planet_rig*' })
+            $planetBundles = @([string]$l.bundles -split ', ' | Where-Object { $_ -like 'planet_*' -and $_ -notlike 'planet_space*' -and $_ -notlike 'planet_warden*' -and $_ -notlike 'planet_waystation*' -and $_ -notlike 'planet_rig*' -and $_ -notlike 'planet_dig*' })
             $foreign = @($planetBundles | Where-Object { (-not $l.ownGroup) -or (($_ -ne $l.ownGroup) -and ($_ -notlike "$($l.ownGroup)_*")) })
             $bok = ($foreign.Count -eq 0)
             if (-not $bok) { $memRed = $true }

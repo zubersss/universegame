@@ -193,6 +193,10 @@ namespace Meridian.Tests
             Reading spaceFirst = default;
             yield return Settled(monitor, director.Space.GetComponentInChildren<Camera>(), r => spaceFirst = r);
             Log($"Space first: {spaceFirst}");
+            // U-188 (0.6.0's probe: Mono +14 MB per planet visit): the inventory outlives the planet scene; a listener left on it by a
+            // planet-scene object (the HUD's PACK FULL cue) kept the whole planet side reachable after the scene unloaded.
+            foreach (var d in GameState.Instance.inventory.RefusedListeners())
+                if (d.Target is Object o) Assert.IsTrue(o != null, $"{d.Method.DeclaringType.Name}.{d.Method.Name} still listens to the inventory from a destroyed {o.GetType().Name}");
 
             // 3. Enter Mars: Earth stays released, only Mars is resident, Mars's own sheets are tracked.
             yield return Enter(director, transitions, "mars");

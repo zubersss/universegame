@@ -12,7 +12,7 @@ namespace Meridian.Core
     /// main menu, Earth by day and night, a biome border, the Mars canyon in a storm and Saturn (U-044), writes smoke_done.txt and quits.
     /// Without the argument it does nothing. Used by tools/unity_smoke.ps1.
     /// </summary>
-    public sealed class BuildSmoke : MonoBehaviour
+    public sealed partial class BuildSmoke : MonoBehaviour
     {
         public SceneDirector scenes;
 
@@ -189,6 +189,7 @@ namespace Meridian.Core
             yield return LookAt(side, coast - 10f, 8f);
             yield return Shot(folder, "smoke_4_desert_ocean.png");
             if (side != null) yield return EarthGround(folder, side); // U-163: Earth on the smooth ground (smoke_29-41)
+            if (side != null) yield return EarthDigRun(folder, side); // U-188: the digging game (smoke_47-60, BuildSmokeD1)
 
             // U-142 (D-158, U-148 / U-150): the climb in the ship frame: full thrust off the pad until the hull boosts at speed (the long flame,
             // the speed lines, the frame widening), then the sound barrier breaking at Earth's 30 m/s (the vapor cone, the shock ring).
@@ -268,6 +269,7 @@ namespace Meridian.Core
             var hauler = Meridian.Planet.POI.PoiCatalog.HalcyonHauler;
             yield return LookAt(side, hauler.CenterX, 4f, 10f);
             yield return Shot(folder, "smoke_22_mars_hauler.png");
+            yield return MarsRoom(folder, side); // U-188: a T4 room (smoke_61)
             // On the canyon wall's terraces (as the U-039 capture): wall, ledges and the far rim in one view.
             int canyon = Meridian.Terrain.MarsLandforms.CanyonStart + 60;
             yield return LookAt(side, canyon, 6f, 24f);
@@ -400,6 +402,7 @@ namespace Meridian.Core
             }
             else yield return Wait(3f);
             yield return Shot(folder, "smoke_7_space_saturn.png");
+            yield return SpaceMaps(folder, scenes, craft); // U-188 (U-184): the minimap and the system map (smoke_62 / 63)
 
             // U-052: docked at the Earth Waystation, the Halcyon market open (some goods aboard, a dented hull).
             var bay = scenes.Space != null ? scenes.Space.GetComponent<Meridian.Trade.DockingBay>() : null;
