@@ -1,0 +1,12 @@
+{
+  "key": "props/dig/ladder_bottom",
+  "style": "v3",
+  "ppu": 64,
+  "pivot": [
+    0.5,
+    0.25
+  ],
+  "width": 64,
+  "height": 48,
+  "palette": "earth"
+}

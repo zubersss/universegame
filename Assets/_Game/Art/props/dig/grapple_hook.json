@@ -1,0 +1,16 @@
+{
+  "key": "props/dig/grapple_hook",
+  "style": "v3",
+  "ppu": 64,
+  "pivot": [
+    0.5,
+    0.5
+  ],
+  "width": 96,
+  "height": 96,
+  "palette": "earth",
+  "line_socket": [
+    0.0,
+    -0.42
+  ]
+}

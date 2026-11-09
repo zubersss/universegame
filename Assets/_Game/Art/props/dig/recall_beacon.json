@@ -1,0 +1,33 @@
+{
+  "key": "props/dig/recall_beacon",
+  "style": "v3",
+  "ppu": 64,
+  "squash_root": false,
+  "frame_width": 64,
+  "frame_height": 192,
+  "columns": 10,
+  "gutter": 4,
+  "frames": 10,
+  "fps": 12,
+  "pivot": [
+    0.5,
+    0.0
+  ],
+  "facing": "right",
+  "animations": [
+    {
+      "name": "pulse",
+      "start": 0,
+      "length": 4,
+      "loop": true,
+      "loop_from": 0
+    },
+    {
+      "name": "liftoff",
+      "start": 4,
+      "length": 6,
+      "loop": false
+    }
+  ],
+  "note": "B-210: the recall beacon - pulse (the lamp + two ink rings, no glow) while it waits; liftoff when it fires"
+}
