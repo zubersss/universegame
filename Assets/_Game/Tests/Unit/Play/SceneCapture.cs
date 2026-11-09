@@ -2639,6 +2639,158 @@ namespace Meridian.Tests
             UnityEngine.Object.Destroy(uiGo);
         }
 
+        /// <summary>U-186 (B-215's audit): the ground art never requested before, at 1x → coordination/reports/unity/u186/: 1 an Earth brink
+        /// with its lip and the surface decor, 2 a stroke in Earth's desert throwing the sand puff, 3 a Mars brink. Mercury and Venus are block
+        /// planets until U-177 (their lips and decor come with their smooth ground).</summary>
+        [UnityTest, Timeout(480000)]
+        public IEnumerator CaptureU186Ground()
+        {
+            var name = Environment.GetEnvironmentVariable(Variable);
+            if (string.IsNullOrEmpty(name)) Assert.Ignore($"Set {Variable} (tools/unity_capture.ps1).");
+            if (SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.Null)
+                Assert.Fail("No graphics device: run without -nographics.");
+            bool wasCartoon = Meridian.View2D.CartoonStage.Enabled;
+            Meridian.View2D.CartoonStage.Enabled = true;
+            try
+            {
+#if UNITY_EDITOR
+                yield return UnityEditor.SceneManagement.EditorSceneManager.LoadSceneAsyncInPlayMode(
+                    CorePath, new LoadSceneParameters(LoadSceneMode.Single));
+#endif
+                var director = UnityEngine.Object.FindAnyObjectByType<SceneDirector>();
+                float timeout = Time.realtimeSinceStartup + 30f;
+                while ((!director.IsReady || !director.PlanetSide.terrain.IsSettled) && Time.realtimeSinceStartup < timeout) yield return null;
+                var dir = "coordination/reports/unity/u186";
+                Directory.CreateDirectory(dir);
+                var side = director.PlanetSide;
+                void Calm()
+                {
+                    if (side.hazards != null) side.hazards.enabled = false;
+                    if (side.dayNight != null) side.dayNight.Override = 0.45f;
+                    side.creatures.autoSpawn = false;
+                    side.creatures.DespawnAll();
+                }
+                Calm();
+
+                IEnumerator Stand(float x)
+                {
+                    var t = side.terrain;
+                    var body = side.player.Body;
+                    var follow = side.sideCamera.GetComponent<Meridian.Player.CameraFollow>();
+                    if (follow != null) follow.enabled = true;
+                    body.simulated = false;
+                    body.position = new Vector2(x, t.SurfaceAt(x) + 1.5f); side.player.transform.position = body.position;
+                    yield return null;
+                    float until = Time.realtimeSinceStartup + 15f;
+                    while (!t.IsSettled && Time.realtimeSinceStartup < until) yield return null;
+                    body.simulated = true;
+                    for (int k = 0; k < 60; k++) yield return new WaitForFixedUpdate();
+                    if (follow != null) follow.SnapToTarget();
+                    for (int k = 0; k < 30; k++) yield return null;
+                    yield return new WaitForSeconds(1.5f); // the lip / decor probes and the spread rebuild
+                }
+
+                // The steepest natural drop near x (the surface curve's largest step between neighbouring columns), standing on its high side.
+                float Brink(Meridian.Terrain.TerrainStreamer t, int from, int to, out float drop)
+                {
+                    int best = from; drop = 0f;
+                    for (int x = from; x < to; x++)
+                    {
+                        float d = t.CurveAt(x) - t.CurveAt(x + 1);
+                        if (Mathf.Abs(d) > Mathf.Abs(drop) && t.PadTop(x) == int.MinValue && t.PadTop(x + 1) == int.MinValue) { drop = d; best = x; }
+                    }
+                    return drop > 0f ? best - 1.5f : best + 2.5f; // the high side, a step back from the edge
+                }
+
+                // The nearest spot, stepping by dir, with no POI stamp (pad) within 4 m: a lip is never drawn on a pad (U-186).
+                float PadFree(Meridian.Terrain.TerrainStreamer t, float x, int dir)
+                {
+                    for (int step = 0; step < 200; step++)
+                    {
+                        bool free = true;
+                        for (int k = -4; k <= 4 && free; k++) free = t.PadTop(Mathf.RoundToInt(x) + k) == int.MinValue;
+                        if (free) return x;
+                        x += dir;
+                    }
+                    return x;
+                }
+
+                // A pit dug beside the surveyor: its two edges are brinks (a dug drop carries the lip like a natural one).
+                IEnumerator Pit(float x)
+                {
+                    var t = side.terrain;
+                    var rig = side.rig; var owner = rig.owner; rig.owner = null;
+                    try
+                    {
+                        float top = t.SurfaceAt(x);
+                        for (float dy = -0.4f; dy >= -4.2f; dy -= 0.6f)
+                            for (float dx = -1.5f; dx <= 1.5f + 1e-3f; dx += 0.6f) rig.Dig(new Vector2(x + dx, top + dy));
+                    }
+                    finally { rig.owner = owner; }
+                    var drops = UnityEngine.Object.FindAnyObjectByType<Meridian.Rig.ItemDrops>();
+                    if (drops != null) for (int k = drops.Live.Count - 1; k >= 0; k--) drops.Collect(drops.Live[k]);
+                    for (int k = 0; k < 30; k++) yield return null;
+                    yield return new WaitForSeconds(0.6f);
+                }
+
+                Meridian.View2D.SmoothGround Ground() => UnityEngine.Object.FindAnyObjectByType<Meridian.View2D.SmoothGround>();
+
+                IEnumerator Shot(string label)
+                {
+                    yield return Save(side.sideCamera, $"{name}_{label}");
+                    File.Copy($"logs/capture_{name}_{label}.png", $"{dir}/{label}.png", true);
+                    var g = Ground();
+                    TestContext.Out.WriteLine($"[MERIDIAN] u186 {label}: {side.terrain.Config.id} x {side.player.Body.position.x:F0}, lips {g.TopShown.x}, surface decor {g.TopShown.y} over the chunks built; lip art {g.LipArt(0)}, decor art {g.SurfaceDecorArt(0)}, top textures {g.TopTextures}, slot rejects {g.TopSlotRejects}");
+                }
+
+                var earth = side.terrain;
+                float camp = side.player.Body.position.x;
+                float bx = Brink(earth, Mathf.RoundToInt(camp) - 2500, Mathf.RoundToInt(camp) + 2500, out float bd);
+                TestContext.Out.WriteLine($"[MERIDIAN] u186 earth brink: x {bx:F0}, drop {bd:F2} m between columns{(Mathf.Abs(bd) < 1f ? " (no natural cliff: the pit's edges)" : "")}");
+                // No natural cliff near the camp: a pit on flat, pad-free ground beside the camp shows the lips at its two edges.
+                float pitX = PadFree(earth, camp + 40f, 1);
+                yield return Stand(pitX - 4f);
+                yield return Pit(pitX);
+                yield return Shot("1_earth_brink");
+
+                // A stroke in the desert: the sand puff.
+                int desert = int.MinValue;
+                for (int d = 0; d < 3000 && desert == int.MinValue; d += 4)
+                    foreach (int x in new[] { Mathf.RoundToInt(camp) + d, Mathf.RoundToInt(camp) - d })
+                        if (Meridian.Terrain.EarthBiomes.At(x) == Meridian.Terrain.Biome.Desert && earth.PadTop(x) == int.MinValue) { desert = x + 6; break; }
+                Assert.AreNotEqual(int.MinValue, desert, "a desert column");
+                yield return Stand(desert);
+                var fx = UnityEngine.Object.FindAnyObjectByType<Meridian.FX.SideFx>();
+                var at = side.player.Body.position + new Vector2(1.4f, -0.4f);
+                if (fx != null) fx.PuffAt(at);
+                yield return new WaitForSeconds(1f); // the band set's puff sheet in
+                string puff = fx != null ? fx.PuffAt(at) : "-";
+                var rig = side.rig; var owner = rig.owner; rig.owner = null;
+                try { rig.Dig(at); } finally { rig.owner = owner; }
+                yield return new WaitForSeconds(0.18f);
+                yield return Shot("2_earth_desert_puff");
+                TestContext.Out.WriteLine($"[MERIDIAN] u186 desert puff: x {desert}, variant {Ground().VariantAt(Mathf.RoundToInt(at.x))}, key {puff}");
+                StringAssert.EndsWith("dig_puff_sand", puff, "the desert throws the sand puff");
+
+                // Mars.
+                var mars = Meridian.Planets.PlanetId.Mars;
+                GameState.Instance.EditsFor(mars).Clear();
+                yield return director.LoadPlanetSide(GameState.Instance.catalog.Get(mars));
+                side = director.PlanetSide;
+                float wait = Time.realtimeSinceStartup + 20f;
+                while (!side.terrain.IsSettled && Time.realtimeSinceStartup < wait) yield return null;
+                Calm();
+                float mx = Brink(side.terrain, 200, 2400, out float md);
+                TestContext.Out.WriteLine($"[MERIDIAN] u186 mars brink: x {mx:F0}, drop {md:F2} m between columns");
+                float marsPit = PadFree(side.terrain, 620f, 1); // the plains
+                yield return Stand(marsPit - 4f);
+                yield return Pit(marsPit);
+                yield return Shot("3_mars_brink");
+                LogAssert.NoUnexpectedReceived();
+            }
+            finally { Meridian.View2D.CartoonStage.Enabled = wasCartoon; }
+        }
+
         /// <summary>U-182: the tier shader's cost, A/B in one session (BudgetGate's rows swing run to run on this machine): Earth at the camp
         /// (the surface view) and in a T3 room, 300 frames each with the tier shader, the plain lit fill, the tier shader again.</summary>
         [UnityTest, Timeout(300000)]

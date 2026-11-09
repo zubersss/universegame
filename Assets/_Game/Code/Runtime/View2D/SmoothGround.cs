@@ -90,7 +90,7 @@ namespace Meridian.View2D
 
         // Submeshes, back to front (a later one draws over an earlier one).
         const int SubBack = 0, SubBackSand = 1, SubBody = 2, SubBodySand = 3, SubDecor = 4, DecorSubs = 3, SubBand = SubDecor + DecorSubs,
-            SubRim = SubBand + Variants, SubCount = SubRim + 1;
+            SubRim = SubBand + Variants, SubTop = SubRim + 1, TopSubs = 5, SubCount = SubTop + TopSubs;
 
         public TerrainStreamer terrain;
         public GroundStrip strips;
@@ -253,6 +253,239 @@ namespace Meridian.View2D
             int want = Mathf.Min(n - 1, Mathf.FloorToInt(roll * n));
             foreach (var d in arr) { if (d == null) continue; if (want-- == 0) return d; }
             return null;
+        }
+
+        // ---------- U-186: the brink lips and the surface decor ----------
+
+        /// <summary>A brink: where the natural surface's band turns into a drop of at least LipMinDrop within LipMaxRun sideways (searched
+        /// over LipSearch of outline); lips at least LipSpacing apart.</summary>
+        public const float LipMinDrop = 1f, LipMaxRun = 1f, LipSearch = 2.5f, LipSpacing = 2f;
+        /// <summary>The surface decor: one piece at most per SurfaceDecorCell metres of surface (SurfaceDecorChance), on stretches no steeper
+        /// than SurfaceDecorMaxSlope, never on a POI's pad or a dug cell (only the natural surface carries the band).</summary>
+        public const float SurfaceDecorCell = 3f, SurfaceDecorChance = 0.3f, SurfaceDecorMaxSlope = 0.45f;
+        public const int SurfaceDecorPerSet = 6;
+        readonly Sprite[] lips = new Sprite[Variants];
+        readonly Sprite[][] surfaceDecor = new Sprite[Variants][];
+        readonly Texture[] topTex = new Texture[TopSubs];
+        readonly List<Vector2> lipsPlaced = new List<Vector2>(8);
+        int topPending;
+        /// <summary>Lips / decor pieces left out because their chunk already had TopSubs atlas pages (diagnostics).</summary>
+        public int TopSlotRejects { get; private set; }
+        /// <summary>The distinct textures (atlas pages) of the loaded lips and surface decor (diagnostics).</summary>
+        public int TopTextures { get { var set = new HashSet<Texture>(); for (int v = 0; v < Variants; v++) { if (lips[v] != null) set.Add(lips[v].texture); if (surfaceDecor[v] != null) foreach (var d in surfaceDecor[v]) if (d != null) set.Add(d.texture); } return set.Count; } }
+        public int LastLips { get; private set; }
+        public int LastSurfaceDecor { get; private set; }
+        readonly Dictionary<TerrainChunk, Vector2Int> topCounts = new Dictionary<TerrainChunk, Vector2Int>(64);
+        /// <summary>Lips and surface decor pieces over every chunk built now (captures, tests).</summary>
+        public Vector2Int TopShown { get { var t = Vector2Int.zero; foreach (var kv in topCounts) if (kv.Key != null && kv.Key.gameObject.activeInHierarchy) t += kv.Value; return t; } }
+        public bool LipArt(int variant) => lips[variant] != null;
+        public bool SurfaceDecorArt(int variant) { var a = surfaceDecor[variant]; if (a == null) return false; foreach (var d in a) if (d != null) return true; return false; }
+
+        /// <summary>A band set's suffix (ground_band_sand: "sand"; the planet's base set: null). Pure.</summary>
+        public static string VariantSuffix(Meridian.Planets.PlanetId id, int variant)
+        {
+            var k = VariantKeys(id);
+            if (variant <= 0 || variant >= k.Length || k[variant] == null) return null;
+            return k[variant].StartsWith("ground_band_") ? k[variant].Substring("ground_band_".Length) : null;
+        }
+
+        /// <summary>The variant's lip key (ground_lip_suffix; the base ground_lip for the base set). Pure.</summary>
+        public static string LipKey(Meridian.Planets.PlanetId id, int variant)
+        {
+            string sfx = VariantSuffix(id, variant);
+            string planetName = id.ToString().ToLowerInvariant();
+            return sfx == null ? $"terrain/{planetName}/ground_lip" : $"terrain/{planetName}/ground_lip_{sfx}";
+        }
+
+        /// <summary>The variant's n-th surface decor key (ground_decor_n for the base set, ground_decor_suffix_n). Pure.</summary>
+        public static string SurfaceDecorKey(Meridian.Planets.PlanetId id, int variant, int n)
+        {
+            string sfx = VariantSuffix(id, variant);
+            string planetName = id.ToString().ToLowerInvariant();
+            return sfx == null ? $"terrain/{planetName}/ground_decor_{n}" : $"terrain/{planetName}/ground_decor_{sfx}_{n}";
+        }
+
+        /// <summary>The variant's dig puff key (dig_puff_suffix; the base dig_puff for the base set). Pure.</summary>
+        public static string PuffKey(Meridian.Planets.PlanetId id, int variant)
+        {
+            string sfx = VariantSuffix(id, variant);
+            string planetName = id.ToString().ToLowerInvariant();
+            return sfx == null ? $"terrain/{planetName}/dig_puff" : $"terrain/{planetName}/dig_puff_{sfx}";
+        }
+
+        void ProbeTop()
+        {
+            topPending = 0;
+            for (int v = 0; v < Variants; v++)
+            {
+                lips[v] = null;
+                if (surfaceDecor[v] == null) surfaceDecor[v] = new Sprite[SurfaceDecorPerSet];
+                System.Array.Clear(surfaceDecor[v], 0, SurfaceDecorPerSet);
+                if (variantKey[v] == null) continue;
+                int vi = v;
+                ProbeTopKey(LipKey(planetId, v), s => lips[vi] = s);
+                for (int n = 1; n <= SurfaceDecorPerSet; n++) { int ni = n - 1; ProbeTopKey(SurfaceDecorKey(planetId, v, n), s => surfaceDecor[vi][ni] = s); }
+            }
+        }
+
+        /// <summary>A lip or decor key, probed quietly (a set has as many pieces as BLENDER drew); the chunks rebuild once all are in.</summary>
+        void ProbeTopKey(string key, System.Action<Sprite> got)
+        {
+            topPending++;
+            var loc = Addressables.LoadResourceLocationsAsync(key);
+            loc.Completed += l =>
+            {
+                bool exists = l.Status == AsyncOperationStatus.Succeeded && l.Result != null && l.Result.Count > 0;
+                ArtLoad.Release(l);
+                if (this == null || !Active) return;
+                if (!exists) { TopArrived(); return; }
+                var h = ArtLoad.Asset<IList<Sprite>>(key);
+                handles.Add(h);
+                h.Completed += op =>
+                {
+                    if (this == null || !Active) return;
+                    if (op.Status == AsyncOperationStatus.Succeeded && op.Result != null && op.Result.Count > 0) got(op.Result[0]);
+                    TopArrived();
+                };
+            };
+        }
+
+        void TopArrived() { if (--topPending <= 0) decorDirty = true; }
+
+        bool OnPad(float worldX) => terrain != null && terrain.PadTop(Mathf.RoundToInt(worldX)) != int.MinValue;
+
+        bool IsBand(TerrainChunk c, Vector2 p, Vector2 q, float wy0) => Normal(q - p).y > SurfaceFacing && OnSurface(c, (p + q) * 0.5f, wy0);
+
+        /// <summary>The lips and the surface decor over the chunk's band (after the band and the rim: drawn over both).</summary>
+        void TopSprites(TerrainChunk c, GroundContour k, float wx0, float wy0)
+        {
+            for (int i = 0; i < TopSubs; i++) topTex[i] = null;
+            lipsPlaced.Clear();
+            int lipsN = 0, decorN = 0;
+            const int C = TerrainConstants.ChunkSize;
+            for (int line = 0; line < k.Lines; line++)
+            {
+                int s0 = k.lineStart[line], n = k.lineCount[line];
+                bool closed = k.lineClosed[line];
+                if (n < 2) continue;
+                int segs = closed ? n : n - 1;
+                for (int a = 0; a < segs; a++)
+                {
+                    Vector2 p = k.points[s0 + a], q = k.points[s0 + (a + 1) % n];
+                    bool bandA = IsBand(c, p, q, wy0);
+                    if (bandA) decorN += SurfaceDecorOn(p, q, wx0, wy0, C);
+                    if (a + 1 >= segs && !closed) continue;
+                    Vector2 r = k.points[s0 + (a + 2) % n];
+                    bool bandB = IsBand(c, q, r, wy0);
+                    // The walk keeps the air on its left, so the top runs left to right: band then a fall is a drop to the right, a climb
+                    // then band a drop to the left.
+                    if (bandA != bandB)
+                    {
+                        int side = bandA ? +1 : -1;
+                        if (Falls(k.points, s0, n, closed, a + 1, side, q)) lipsN += Lip(q, side, wx0, wy0);
+                    }
+                }
+            }
+            LastLips = lipsN; LastSurfaceDecor = decorN;
+            topCounts[c] = new Vector2Int(lipsN, decorN);
+        }
+
+        /// <summary>From outline point `at` (index i), walking `dir` along the line: does it fall LipMinDrop within LipMaxRun sideways
+        /// before LipSearch of outline?</summary>
+        static bool Falls(List<Vector2> pts, int s0, int n, bool closed, int i, int dir, Vector2 at)
+        {
+            float arc = 0f;
+            var prev = at;
+            for (int step = 1; step < n; step++)
+            {
+                int j = i + dir * step;
+                if (!closed && (j < 0 || j >= n)) break;
+                var z = pts[s0 + ((j % n) + n) % n];
+                arc += (z - prev).magnitude;
+                prev = z;
+                if (Mathf.Abs(z.x - at.x) > LipMaxRun) break;
+                if (at.y - z.y >= LipMinDrop) return true;
+                if (arc > LipSearch) break;
+            }
+            return false;
+        }
+
+        int Lip(Vector2 at, int side, float wx0, float wy0)
+        {
+            float wx = wx0 + at.x;
+            if (OnPad(wx)) return 0;
+            foreach (var o in lipsPlaced) if ((o - at).sqrMagnitude < LipSpacing * LipSpacing) return 0;
+            int variant = VariantAt(Mathf.RoundToInt(wx));
+            var sprite = lips[variant] != null ? lips[variant] : lips[Grass];
+            if (sprite == null) return 0;
+            if (!TopQuad(sprite, at, side < 0)) return 0;
+            lipsPlaced.Add(at);
+            return 1;
+        }
+
+        int SurfaceDecorOn(Vector2 p, Vector2 q, float wx0, float wy0, int C)
+        {
+            float x0 = Mathf.Min(p.x, q.x), x1 = Mathf.Max(p.x, q.x);
+            if (x1 - x0 < 1e-4f || Mathf.Abs(q.y - p.y) / (x1 - x0) > SurfaceDecorMaxSlope) return 0;
+            int placed = 0;
+            int g0 = Mathf.FloorToInt((wx0 + x0) / SurfaceDecorCell), g1 = Mathf.FloorToInt((wx0 + x1) / SurfaceDecorCell);
+            for (int g = g0; g <= g1; g++)
+            {
+                int hx = SurfaceCellX(g);
+                if (Meridian.Mining.DigRun.Hash01(hx, 31, 8181) > SurfaceDecorChance) continue;
+                float wx = g * SurfaceDecorCell + Meridian.Mining.DigRun.Hash01(hx, 31, 8182) * SurfaceDecorCell;
+                float lx = wx - wx0;
+                if (lx < x0 || lx >= x1 || lx < -0.5f || lx >= C - 0.5f) continue; // the segment (and the chunk) holding the spot draws it
+                if (OnPad(wx)) continue;
+                int variant = VariantAt(Mathf.RoundToInt(wx));
+                var pick = SurfacePick(variant, Meridian.Mining.DigRun.Hash01(hx, 31, 8183));
+                if (pick == null) continue;
+                float ly = Mathf.Lerp(p.y, q.y, (lx - p.x) / (q.x - p.x));
+                if (TopQuad(pick, new Vector2(lx, ly), false)) placed++;
+            }
+            return placed;
+        }
+
+        int SurfaceCellX(int g)
+        {
+            int cells = terrain != null && terrain.Config != null ? Mathf.Max(1, Mathf.RoundToInt(terrain.Config.worldWidth / SurfaceDecorCell)) : 1;
+            return ((g % cells) + cells) % cells;
+        }
+
+        Sprite SurfacePick(int variant, float roll)
+        {
+            var arr = surfaceDecor[variant];
+            int n = 0;
+            if (arr != null) foreach (var d in arr) if (d != null) n++;
+            if (n == 0 && variant != Grass) { arr = surfaceDecor[Grass]; n = 0; if (arr != null) foreach (var d in arr) if (d != null) n++; }
+            if (n == 0) return null;
+            int want = Mathf.Min(n - 1, Mathf.FloorToInt(roll * n));
+            foreach (var d in arr) { if (d == null) continue; if (want-- == 0) return d; }
+            return null;
+        }
+
+        /// <summary>A sprite as a quad at its pivot (chunk-local), mirrored in x when asked; into the top submesh of its texture.</summary>
+        bool TopQuad(Sprite sprite, Vector2 at, bool mirror)
+        {
+            int slot = -1;
+            for (int i = 0; i < TopSubs; i++) if (topTex[i] == sprite.texture || topTex[i] == null) { slot = i; break; }
+            if (slot < 0) { TopSlotRejects++; return false; }
+            topTex[slot] = sprite.texture;
+            var size = sprite.rect.size / sprite.pixelsPerUnit;
+            var piv = new Vector2(sprite.pivot.x / sprite.rect.width, sprite.pivot.y / sprite.rect.height);
+            float left = mirror ? at.x - (1f - piv.x) * size.x : at.x - piv.x * size.x;
+            float bottom = at.y - piv.y * size.y;
+            var o = UnityEngine.Sprites.DataUtility.GetOuterUV(sprite);
+            float u0 = mirror ? o.z : o.x, u1 = mirror ? o.x : o.z;
+            var white = Color.white;
+            int b = v.Count;
+            Add(new Vector3(left, bottom, -0.01f), new Vector2(u0, o.y), white);
+            Add(new Vector3(left + size.x, bottom, -0.01f), new Vector2(u1, o.y), white);
+            Add(new Vector3(left + size.x, bottom + size.y, -0.01f), new Vector2(u1, o.w), white);
+            Add(new Vector3(left, bottom + size.y, -0.01f), new Vector2(u0, o.w), white);
+            var into = tris[SubTop + slot];
+            into.Add(b); into.Add(b + 2); into.Add(b + 1); into.Add(b); into.Add(b + 3); into.Add(b + 2);
+            return true;
         }
 
         /// <summary>U-182: the fill through the tier shader (false: the plain lit fill, as before U-182; the perf probe's A/B).</summary>
@@ -435,6 +668,7 @@ namespace Meridian.View2D
             }
             BuildLine();
             ProbeDecor();
+            ProbeTop(); // U-186
             RebuildAll();
         }
 
@@ -659,6 +893,7 @@ namespace Meridian.View2D
                 }
             }
             LastBandQuads = quads;
+            TopSprites(c, k, wx0, wy0); // U-186: the brink lips and the surface decor, over the band and the rim
 
             mesh.Clear();
             mesh.SetVertices(v);
@@ -675,6 +910,7 @@ namespace Meridian.View2D
             for (int i = 0; i < DecorSubs; i++) mats[SubDecor + i] = MaterialFor(decorTex[i]);
             for (int i = 0; i < Variants; i++) mats[SubBand + i] = MaterialFor(variantCount[i] > 0 ? variantSprites[i][0].texture : null);
             mats[SubRim] = MaterialFor(rim != null ? rim.texture : null);
+            for (int i = 0; i < TopSubs; i++) mats[SubTop + i] = MaterialFor(topTex[i]);
             f.GetComponent<MeshRenderer>().sharedMaterials = mats;
             ChunksBuilt++;
         }

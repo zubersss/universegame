@@ -198,6 +198,9 @@ namespace Meridian.View2D
             for (int m = 0; m < handles.Length; m++) if (handles[m].IsValid()) ArtLoad.Release(handles[m]);
             this.planet = planet;
             keys = KeysFor(planet);
+            // U-186 (B-215's audit): smooth Earth draws SmoothGround's bands; its strip is only their placeholder, so the grass strip alone loads.
+            // The soil / stone / sand strips load only on the block path (GroundField.ForceBlocks), which falls back to the grass strip (D-143).
+            if (planet == Meridian.Planets.PlanetId.Earth && Meridian.Terrain.GroundField.Smooth(planet) && keys.Length > 1) keys = new[] { keys[0] };
             framesBy = new Sprite[keys.Length][]; fillBy = new Sprite[keys.Length]; handles = new AsyncOperationHandle<IList<Sprite>>[keys.Length];
             frames = null; dirt = null; dirty = true;
             var loadKeys = keys;

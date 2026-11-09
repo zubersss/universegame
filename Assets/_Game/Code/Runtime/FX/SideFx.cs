@@ -34,13 +34,15 @@ namespace Meridian.FX
             if (rig != null) { rig.Dug -= OnDug; rig.Mounded -= OnMounded; }
             if (player != null) player.Landed -= OnPlayerLanded;
             FxSheet.Release(puffKey); puffKey = null; // U-159 (Residency): the puff is the planet's art; leaving releases its bundle
+            ReleaseVariantPuffs();
             if (ship != null) ship.TouchedDown -= OnTouchdown;
         }
 
         void OnDug(Vector2 at)
         {
-            // U-157: the round brush throws B-175's dirt puff from the scoop; a block planet keeps the tile's sparks.
-            var puff = Puff();
+            // U-157: the round brush throws B-175's dirt puff from the scoop; a block planet keeps the tile's sparks. U-186: in the stroke's
+            // band set (the desert's sand, the canyon's talus ...) where B-190 / B-191 drew one.
+            var puff = PuffAt(at);
             if (puff != null && FxSheet.Get(puff).Ready) { pool.Play(puff, at, 1f); return; }
             var t = RigTools.TileOf(at);
             pool.Play(ArtKeys.Fx.DigSparks, new Vector2(t.x + 0.5f, t.y + 0.5f), 2f);
@@ -49,7 +51,7 @@ namespace Meridian.FX
         /// <summary>U-157: a mound's puff where the earth lands.</summary>
         void OnMounded(Vector2 at)
         {
-            var puff = Puff();
+            var puff = PuffAt(at);
             if (puff != null && FxSheet.Get(puff).Ready) pool.Play(puff, at, 1f);
         }
 
@@ -62,9 +64,47 @@ namespace Meridian.FX
             var id = rig != null && rig.terrain != null && rig.terrain.Config != null ? rig.terrain.Config.id : default;
             if (puffKey != null && id == puffPlanet) return puffKey;
             var key = PuffKey();
-            if (key != puffKey) { FxSheet.Release(puffKey); puffKey = key; if (key != null) FxSheet.Get(key); }
+            if (key != puffKey)
+            {
+                FxSheet.Release(puffKey); puffKey = key; if (key != null) FxSheet.Get(key);
+                ReleaseVariantPuffs();
+                if (key != null) // U-186: the planet's band sets' puffs load with its base puff (a set without one plays the base)
+                    for (int v = 1; v < Meridian.View2D.SmoothGround.Variants; v++)
+                        if (Meridian.View2D.SmoothGround.VariantSuffix(id, v) != null) { variantPuffs[v] = Meridian.View2D.SmoothGround.PuffKey(id, v); FxSheet.Get(variantPuffs[v]); }
+            }
             puffPlanet = id;
             return puffKey;
+        }
+
+        // ---------- U-186: the puff by the stroke's band set ----------
+
+        /// <summary>The brush planet's puffs load as soon as it is up (OnEnable can run before the rig is configured), so the first stroke
+        /// already has its band set's puff. Nothing per frame once loaded (no string is built while the key holds).</summary>
+        void LateUpdate()
+        {
+            if (rig == null || !rig.Brush || rig.terrain == null || rig.terrain.Config == null) return;
+            if (puffKey == null || rig.terrain.Config.id != puffPlanet) Puff();
+        }
+
+        readonly string[] variantPuffs = new string[Meridian.View2D.SmoothGround.Variants];
+        Meridian.View2D.SmoothGround ground;
+
+        void ReleaseVariantPuffs()
+        {
+            for (int v = 0; v < variantPuffs.Length; v++) { if (variantPuffs[v] != null) FxSheet.Release(variantPuffs[v]); variantPuffs[v] = null; }
+            ground = null;
+        }
+
+        /// <summary>The puff for a stroke at `at`: its column's band set's (dig_puff_sand ...) once loaded, else the planet's dig_puff.</summary>
+        public string PuffAt(Vector2 at)
+        {
+            var basePuff = Puff();
+            if (basePuff == null) return null;
+            if (ground == null || !ground.Active) ground = FindAnyObjectByType<Meridian.View2D.SmoothGround>();
+            if (ground == null) return basePuff;
+            int v = ground.VariantAt(Mathf.RoundToInt(at.x));
+            var key = v > 0 && v < variantPuffs.Length ? variantPuffs[v] : null;
+            return key != null && FxSheet.Get(key).Ready ? key : basePuff;
         }
 
         /// <summary>U-157: terrain/&lt;planet&gt;/dig_puff on a smooth planet; null elsewhere.</summary>
