@@ -6,6 +6,14 @@ Owner: LEAD (only the Lead edits this). Do the open items below, then tell the L
 
 ## Open
 
+### USER-42 — Restart the three windows and the laptop (5 min) — heavy jobs are blocked until then
+Since 23:58 the laptop has had 0.9 to 1.2 GB of memory free with nothing of the team's running; builds, tests and renders need 1.5 GB. The memory is held by the three Claude windows themselves: after ten hours each holds about 1 GB (0.33 GB when fresh). File-only work continues; nothing heavy can start.
+1. In each of the two worker windows, wait until it is not in the middle of a command (both write their resume point at the top of their status file).
+2. Close the three windows, the Lead's last.
+3. Restart the laptop. Leave Ollama and the Xbox app closed if you are not using them.
+4. Open the three windows again and paste the usual resume message into each (Lead, Unity, Blender).
+Nothing is lost: everything is in the project files, and the new Lead re-creates the review timer and finds the two workers.
+
 ### USER-41 — Play Build 0.6.2: ten minutes of digging (10 min)
 Two of your 0.6.0 asks are in: digging that throws clods and dust, and holes that look like holes. The page with pictures: https://claude.ai/artifact/Xfb4R17qVr5K8DkFp4aLpT
 1. Double-click `C:\dev\universegame\Build\MERIDIAN_0.6.2\MERIDIAN.exe` and choose **NEW**.
