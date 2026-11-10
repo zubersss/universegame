@@ -6,6 +6,11 @@ Owner: LEAD (only the Lead edits this). Do the open items below, then tell the L
 
 ## Open
 
+### USER-47 — Your Canva image credits ran out (optional, 2 min, nothing is blocked)
+The painter's-hand test worked: brush strokes and plants painted by the AI in your Canva look better than what our code paints by itself, so the Lead is building a small library of them. Four new sheets were made today (three sheets of brush marks, one sheet of nine jungle plants). Then Canva refused the next two with "You have exceeded your credit quota".
+- If you do nothing: the team carries on with the four sheets it has; ferns, grasses, vines, logs and rocks stay painted by our own code until credits come back, and the Lead tries again later.
+- If you want the library finished sooner: in Canva, look at your plan's AI image credits (Account settings, then Billing and plans) and tell the Lead when there are credits again, or say "use something else" if you would rather the Lead not spend Canva credits at all.
+Seven or eight more sheets are wanted in all.
 
 ### USER-45 — Play Build 0.6.3: ten minutes of the rebuilt digging (10 min)
 You said digging felt disconnected from your clicks and from the surveyor. It has been rebuilt. The page with frame-by-frame pictures: https://claude.ai/artifact/TdyF9gzKsFWzXebcu5KUSm
