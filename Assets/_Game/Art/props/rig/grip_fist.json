@@ -1,0 +1,13 @@
+{
+  "key": "props/rig/grip_fist",
+  "style": "v3",
+  "width": 32,
+  "height": 32,
+  "palette": "earth",
+  "ppu": 64,
+  "pivot": [
+    0.5,
+    0.5
+  ],
+  "note": "B-246 (D-196): the surveyor's front glove as a fist round a shaft. Its pivot (the sprite's centre) sits ON the shaft's centre line at the hand socket (the glove's centre), the shaft running along the sprite's +x: lay it OVER the tool at characters/surveyor/side_dig's socket, turned to the tool's angle, on every dig clip, the aim holds and the ready pose; not when the tool is stowed. Not tinted (the suit's own glove)"
+}
