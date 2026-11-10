@@ -181,7 +181,8 @@ def hand(d, M):
     S(d, [(10, 4), (22, 4), (25.4, 12), (25.6, 20.5), (17, 22.5), (8.4, 20.5), (8, 12)], M["glove"], OUT, cyclic=True, rnd=4)   # the back of the hand
     S(d, hose([(23.6, 13), (29.6, 18), (29, 24.2)], 6.2), M["glove"], OUT * 0.8, cyclic=True, gap=0)   # the thumb
     F(d, M, [(8.4, 8.4), (16, 9.4), (23.8, 8.4)])                                                    # the glove's cuff: one line
-    F(d, M, [(12.4, 17.4), (14.6, 18.6)], 0.7, ends=(1, 1.5))                                        # a knuckle tick
+    F(d, M, [(10.4, 18.4), (14, 20), (18.6, 19.6)], 0.6, ends=(2.5, 3.5))                            # the knuckles: one light crease
+    #                                                     (run 6's short tick read as a dot in the palm)
 
 
 @part("thigh", 56, 72, (28, 15))
