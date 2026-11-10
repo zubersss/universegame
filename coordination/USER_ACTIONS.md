@@ -6,6 +6,16 @@ Owner: LEAD (only the Lead edits this). Do the open items below, then tell the L
 
 ## Open
 
+### USER-41 — Play Build 0.6.2: ten minutes of digging (10 min)
+Two of your 0.6.0 asks are in: digging that throws clods and dust, and holes that look like holes. The page with pictures: https://claude.ai/artifact/Xfb4R17qVr5K8DkFp4aLpT
+1. Double-click `C:\dev\universegame\Build\MERIDIAN_0.6.2\MERIDIAN.exe` and choose **NEW**.
+2. Dig at the camp with the left mouse button held: watch the clods and the find flying to the PACK gauge.
+3. Dig a shaft straight down about ten metres and look at it: does it read as a hole?
+4. Keep going past 10 m into Subsoil: the clods, dust and back wall change with the layer.
+5. Fly out (Space), sell (G), buy The Beam (K, 250 Scrip) and dig again.
+Then tell the Lead session: does digging feel better, is it enough or do you want more (bigger clods, more shake, more sound), and do the holes look right? This build includes everything in 0.6.1b, so USER-38's shovel questions can be answered here too (is the shovel a good start, does the Beam feel like a reward, is 250 Scrip right).
+Known already: ground does not collapse yet and the sounds are still synthesized (both next); the docking bay's cradle is empty; a small pale box hangs near you on arrival at any planet but Earth (fixed for the next build).
+
 ### USER-40 — Free the laptop's memory: quit Ollama (1 min) — the team is blocked on this
 At 18:52 the laptop has 0.12 GB of memory free and no build or render can start (they need 1.5 GB). The biggest holder is the **Ollama** app: 4.2 GB, running since 11:47 this morning. It is not part of the game team.
 1. Look in the system tray (the small icons by the clock, bottom right; click the ^ arrow if it is hidden) for the Ollama llama icon.
@@ -24,7 +34,7 @@ It is drawings only; nothing in the game changes until you answer. Open the page
 4. Do the crouch, the jump and the dig read the way you pictured them?
 A "yes" starts the surveyor being built as a moving rig in the game (about a day to a test scene you can play). A "change this" is about half a day a round.
 
-### USER-38 — Play Build 0.6.1b: ten minutes with the shovel (10 min)
+### USER-38 — (folded into USER-41 at 21:5x: play 0.6.2 instead; it includes 0.6.1b) Play Build 0.6.1b: ten minutes with the shovel (10 min)
 Your shovel ask is in. The page with pictures: https://claude.ai/artifact/JQ1uqincAcQRRt1yFqrT5w
 Use the fixed build 0.6.1b (16:0x), not 0.6.1.
 1. Double-click `C:\dev\universegame\Build\MERIDIAN_0.6.1b\MERIDIAN.exe` and choose **NEW** (a game continued from 0.6.0 keeps the Beam if you had bought Beam Power I, so only a new game shows the shovel).
