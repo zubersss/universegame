@@ -3559,9 +3559,10 @@ namespace Meridian.Tests
                 Meridian.View2D.SmoothGround.TierShader = true; ground.RedressWalls(); ground.RebuildNow();
                 yield return null;
                 var wallT3 = ground.WallMaterialNow != null ? ground.WallMaterialNow.GetTexture("_Tier3Tex") as Texture2D : null;
-                var grainTile = LoadTestTile("test_u205_earth_t3_no_grain_with_grain.png", wallT3, out var mean);
-                var plainTile = LoadTestTile("test_u205_earth_t3_no_grain.png", wallT3, out _);
-                var flatTile = grainTile != null ? FlatTile(mean, wallT3) : null;
+                // The three control tiles are BC7 whatever the exported walls are (RGBA32 since D-192 was amended), so the series keeps its BC7 rows.
+                var grainTile = LoadTestTile("test_u205_earth_t3_no_grain_with_grain.png", wallT3, out var mean, TextureFormat.BC7);
+                var plainTile = LoadTestTile("test_u205_earth_t3_no_grain.png", wallT3, out _, TextureFormat.BC7);
+                var flatTile = grainTile != null ? FlatTile(mean, wallT3, TextureFormat.BC7) : null;
                 // 22:06 read the grain as the cost (with grain 1.71, without 1.43, the fill alone 1.41). A noisy tile can only cost more than a
                 // quiet one of its size and format through the format's decode or the cache: the grained tile again in three other formats.
                 var grainRgba = LoadTestTile("test_u205_earth_t3_no_grain_with_grain.png", wallT3, out _, TextureFormat.RGBA32);
@@ -3574,9 +3575,9 @@ namespace Meridian.Tests
                     (true, false, 0, null, "the walls off (one material, the fill shaded)"),
                     (true, true, 0, null, "the walls on (the exported wall tiles)"),
                     (true, true, 2, null, "a second material, the fill's textures at world / 4"),
-                    (true, true, 0, grainTile, "tier 3's wall = the test tile with its grain"),
-                    (true, true, 0, plainTile, "tier 3's wall = the test tile without grain"),
-                    (true, true, 0, flatTile, "tier 3's wall = a flat tile"),
+                    (true, true, 0, grainTile, "tier 3's wall = the test tile with its grain, BC7"),
+                    (true, true, 0, plainTile, "tier 3's wall = the test tile without grain, BC7"),
+                    (true, true, 0, flatTile, "tier 3's wall = a flat tile, BC7"),
                     (true, true, 0, grainRgba, "tier 3's wall = the grained test tile, uncompressed RGBA32"),
                     (true, true, 0, grainDxt5, "tier 3's wall = the grained test tile, DXT5"),
                     (true, true, 0, grainDxt1, "tier 3's wall = the grained test tile, DXT1"),
@@ -3600,7 +3601,19 @@ namespace Meridian.Tests
                 for (int i = 0; i < probes.Length; i++)
                     if (sums[i] > 0f) TestContext.Out.WriteLine($"[MERIDIAN] u205 ratio: {probes[i].label}: {sums[i] / 2f:F2} ms, / lit {sums[i] / 2f / lit:F2}");
                 if (sums[5] > 0f && sums[6] > 0f)
-                    TestContext.Out.WriteLine($"[MERIDIAN] u205 verdict rows: the fill alone {sums[1] / 2f / lit:F2}, the exported walls {sums[2] / 2f / lit:F2}, with grain {sums[4] / 2f / lit:F2}, without grain {sums[5] / 2f / lit:F2}, flat {sums[6] / 2f / lit:F2}; without grain minus the fill alone {(sums[5] - sums[1]) / 2f / lit:+0.00;-0.00} (D-192: within 0.05 means the grain is the cost)");
+                    TestContext.Out.WriteLine($"[MERIDIAN] u205 verdict rows: the fill alone {sums[1] / 2f / lit:F2}, the exported walls {sums[2] / 2f / lit:F2} (the walled room's bar: 1.52, D-192 amended), BC7 with grain {sums[4] / 2f / lit:F2}, BC7 without grain {sums[5] / 2f / lit:F2}, BC7 flat {sums[6] / 2f / lit:F2}; the exported walls minus the fill alone {(sums[2] - sums[1]) / 2f / lit:+0.00;-0.00}");
+                // the walls' resident size as loaded (D-192 amended: RGBA32, 256 KB a tile against BC7's 64)
+                if (ground.WallMaterialNow != null)
+                {
+                    long wallBytes = 0; int wallCount = 0;
+                    foreach (var prop in new[] { "_MainTex", "_Tier2Tex", "_Tier3Tex", "_Tier4Tex", "_Tier5Tex" })
+                    {
+                        var wt = ground.WallMaterialNow.GetTexture(prop);
+                        if (wt == null) continue;
+                        wallBytes += UnityEngine.Profiling.Profiler.GetRuntimeMemorySizeLong(wt); wallCount++;
+                    }
+                    TestContext.Out.WriteLine($"[MERIDIAN] u205 walls resident: {wallCount} wall textures, {wallBytes / 1024f:F0} KB as loaded ({Describe(wallT3)}); as BC7 they were {wallCount * 65536 / 1024f:F0} KB");
+                }
                 foreach (var tile in new[] { grainTile, plainTile, flatTile, grainRgba, grainDxt5, grainDxt1 }) if (tile != null) UnityEngine.Object.Destroy(tile);
                 Meridian.View2D.SmoothGround.WallsOn = true; Meridian.View2D.SmoothGround.WallProbe = 0;
                 Meridian.View2D.SmoothGround.TierShader = false; ground.RedressWalls(); ground.RebuildNow();
@@ -3640,14 +3653,14 @@ namespace Meridian.Tests
         }
 
         /// <summary>U-205: a 256 px tile of one colour, dressed as the exported wall.</summary>
-        static Texture2D FlatTile(Color32 colour, Texture2D like)
+        static Texture2D FlatTile(Color32 colour, Texture2D like, TextureFormat? format = null)
         {
             var tex = new Texture2D(256, 256, TextureFormat.RGBA32, false, false) { name = "u205_flat" };
             var px = new Color32[256 * 256];
             for (int i = 0; i < px.Length; i++) px[i] = colour;
             tex.SetPixels32(px);
             tex.Apply(false, false);
-            return DressLike(tex, like);
+            return DressLike(tex, like, format);
         }
 
         /// <summary>The exported wall's wrap, filter and (in the Editor) compressed format on a test tile, then uploaded. `format`: that

@@ -273,6 +273,33 @@ namespace Meridian.Tests
             Assert.AreEqual(SpriteMeshType.FullRect, settings.spriteMeshType, "a tiled sprite keeps its full rect");
         }
 
+        /// <summary>U-205 (D-192 amended): a dug cell's back wall is the one colour map that imports uncompressed (RGBA32): its paper grain
+        /// cost a fifth more a frame in BC7 on the integrated GPU. A fill beside it stays BC7.</summary>
+        [Test]
+        public void ABackWallImportsUncompressedAndAFillStaysBc7()
+        {
+            Assert.IsTrue(Meridian.Art.ArtKeys.IsBackWall("terrain/earth/back_wall_t3"), "by key");
+            Assert.IsTrue(Meridian.Art.ArtKeys.IsBackWall("Assets/_Game/Art/terrain/mars/back_wall_t5_color.png"), "by path");
+            Assert.IsFalse(Meridian.Art.ArtKeys.IsBackWall("terrain/earth/ground_fill_t3"));
+            Assert.IsFalse(Meridian.Art.ArtKeys.IsBackWall("props/earth/back_wall_t3"), "only under terrain/");
+            Assert.IsFalse(Meridian.Art.ArtKeys.IsBackWall(null));
+            var wallJson = Art("terrain/earth/back_wall_t3.json");
+            Directory.CreateDirectory(Path.GetDirectoryName(wallJson));
+            File.WriteAllText(wallJson, "{\"key\":\"terrain/earth/back_wall_t3\",\"style\":\"v3\",\"ppu\":64}");
+            File.WriteAllText(Art("terrain/earth/ground_fill_t3.json"), "{\"key\":\"terrain/earth/ground_fill_t3\",\"style\":\"v3\",\"ppu\":64}");
+            var wall = Png(Art("terrain/earth/back_wall_t3_color.png"), 64, 64);
+            var fill = Png(Art("terrain/earth/ground_fill_t3_color.png"), 64, 64);
+            AssetDatabase.Refresh(ImportAssetOptions.ForceSynchronousImport);
+            Import(wall, fill);
+            var w = Standalone(wall);
+            Assert.IsTrue(w.overridden);
+            Assert.AreEqual(TextureImporterFormat.RGBA32, w.format, "the wall: uncompressed");
+            Assert.AreEqual(TextureImporterCompression.Uncompressed, w.textureCompression);
+            Assert.IsFalse(Importer(wall).mipmapEnabled, "a v3 sprite: no mips");
+            Assert.AreEqual(TextureImporterFormat.BC7, Standalone(fill).format, "the fill: BC7 as every other colour map");
+            Assert.AreEqual(0, ArtImporter.ReimportBackWalls(), "nothing left to re-import");
+        }
+
         // ---------- §5 frame sheets ----------
 
         [Test]

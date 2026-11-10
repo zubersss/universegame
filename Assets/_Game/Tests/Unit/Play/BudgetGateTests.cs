@@ -349,7 +349,8 @@ namespace Meridian.Tests
                 total++;
                 var fmt = ti.GetPlatformTextureSettings("Standalone").format;
                 if (path.EndsWith("_normal.png")) { if (fmt != UnityEditor.TextureImporterFormat.BC5) { wrongNormal++; wrong.Add(path); } }
-                else if (path.EndsWith("_color.png") && fmt != UnityEditor.TextureImporterFormat.BC7) { wrongColor++; wrong.Add(path); }
+                // D-192 amended (LEAD 11-09 22:2x): the dug cells' back walls are the one colour map that is uncompressed RGBA32, not BC7
+                else if (path.EndsWith("_color.png") && fmt != (Meridian.Art.ArtKeys.IsBackWall(path) ? UnityEditor.TextureImporterFormat.RGBA32 : UnityEditor.TextureImporterFormat.BC7)) { wrongColor++; wrong.Add(path); }
                 bool world = !path.Contains("/fx/") && !path.Contains("/icons/") && !path.Contains("/ui/");
                 // D-061: non-power-of-two sheets import without mips (NPOT + mips would be stored uncompressed).
                 ti.GetSourceTextureWidthAndHeight(out int tw, out int th);
@@ -358,8 +359,8 @@ namespace Meridian.Tests
                 bool v3 = path.EndsWith("_color.png") && IsV3Asset(root, path);
                 if (path.EndsWith("_color.png") && world && !ti.mipmapEnabled) { if (v3) v3NoMips++; else if (pot) missingMips++; else npotNoMips++; }
             }
-            Row("Textures", "BC7 color, BC5 normals, mips on POT world sprites (NPOT: none, D-061)",
-                $"{total} textures: {wrongColor} color not BC7, {wrongNormal} normals not BC5, {missingMips} POT world sprites without mips ({npotNoMips} NPOT without, D-061; {v3NoMips} v3 without by rule, contract §11.8){(wrong.Count > 0 ? "; off-rule: " + string.Join(", ", wrong.Take(5)) : "")}",
+            Row("Textures", "BC7 color (the back walls RGBA32, D-192), BC5 normals, mips on POT world sprites (NPOT: none, D-061)",
+                $"{total} textures: {wrongColor} color not BC7 (a back wall: not RGBA32), {wrongNormal} normals not BC5, {missingMips} POT world sprites without mips ({npotNoMips} NPOT without, D-061; {v3NoMips} v3 without by rule, contract §11.8){(wrong.Count > 0 ? "; off-rule: " + string.Join(", ", wrong.Take(5)) : "")}",
                 wrongColor == 0 && wrongNormal == 0 && missingMips == 0);
 
             int bigAtlas = 0, atlases = 0;

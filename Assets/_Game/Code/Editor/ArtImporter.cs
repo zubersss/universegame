@@ -297,7 +297,8 @@ namespace Meridian.EditorTools
             ti.maxTextureSize = ArtRules.MaxDimension;
             ti.textureCompression = TextureImporterCompression.CompressedHQ;
             ti.spritePixelsPerUnit = sheet != null && sheet.ppu > 0f ? sheet.ppu : ArtRules.V3PixelsPerUnit;
-            SetStandaloneFormat(ti, TextureImporterFormat.BC7);
+            if (ArtKeys.IsBackWall(key)) SetStandaloneUncompressed(ti); // U-205 (D-192 amended): the walls' grain costs a fifth more a frame in BC7
+            else SetStandaloneFormat(ti, TextureImporterFormat.BC7);
 
             bool frames = sheet != null && sheet.IsSheet;
             bool multiple = frames || RigSetBuilder.IsRigSet(key) || (sheet != null && sheet.HasParts); // rig-set and parts sheets are sliced by RigSetBuilder and must stay Multiple
@@ -570,6 +571,38 @@ namespace Meridian.EditorTools
             }
             catch (Exception) { }
             return false;
+        }
+
+        /// <summary>U-205 (D-192 amended): the Standalone override of a dug cell's back wall: uncompressed RGBA32.</summary>
+        static void SetStandaloneUncompressed(TextureImporter ti)
+        {
+            var p = ti.GetPlatformTextureSettings("Standalone");
+            p.overridden = true;
+            p.format = TextureImporterFormat.RGBA32;
+            p.textureCompression = TextureImporterCompression.Uncompressed;
+            p.maxTextureSize = ArtRules.MaxDimension;
+            ti.SetPlatformTextureSettings(p);
+        }
+
+        /// <summary>U-205 (D-192 amended): re-imports the back walls whose Standalone format is not RGBA32 yet (the rule reached the metas
+        /// after their import). Returns the count.</summary>
+        public static int ReimportBackWalls()
+        {
+            int count = 0;
+            foreach (var root in new[] { Active.art, Active.placeholders })
+            {
+                var dir = root + "terrain";
+                if (!Directory.Exists(dir)) continue;
+                foreach (var file in Directory.GetFiles(dir, "back_wall_t*_color.png", SearchOption.AllDirectories))
+                {
+                    var path = ArtRules.Normalize(file);
+                    var ti = AssetImporter.GetAtPath(path) as TextureImporter;
+                    if (ti == null || ti.GetPlatformTextureSettings("Standalone").format == TextureImporterFormat.RGBA32) continue;
+                    AssetDatabase.ImportAsset(path, ImportAssetOptions.ForceUpdate);
+                    count++;
+                }
+            }
+            return count;
         }
 
         /// <summary>U-109: re-imports the scene layers whose wrap-in-y disagrees with LayerTilesY (the rule reached the metas after their import). Returns the count.</summary>

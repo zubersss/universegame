@@ -25,6 +25,8 @@ namespace Meridian.EditorTools
             ArtTones.Register(); // D-190 (1): the ground fills' main tones from their jsons
             int sceneLayers = ArtImporter.ReimportSceneLayers(); // U-109: the side-scene layers clamp in y (the climb frames' thin line)
             if (sceneLayers > 0) Debug.Log($"[CheckSetup] re-imported {sceneLayers} scene layer(s): wrap-in-y per U-109.");
+            int backWalls = ArtImporter.ReimportBackWalls(); // U-205 (D-192 amended): the dug cells' back walls as uncompressed RGBA32
+            if (backWalls > 0) Debug.Log($"[MERIDIAN] CheckSetup: re-imported {backWalls} back wall tile(s) as RGBA32 (D-192 amended).");
             var theme = AssetDatabase.LoadAssetAtPath<Meridian.UI.UiTheme>(SceneAuthoring.UiThemePath);
             if (theme != null) { FontAuthoring.EnsureHudFonts(theme); EditorUtility.SetDirty(theme); } // U-104 (D-090) fonts
             int bottoms = RecordOpaqueBottoms(); // U-164 (D-169)

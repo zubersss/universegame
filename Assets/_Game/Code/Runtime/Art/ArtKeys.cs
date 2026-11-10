@@ -88,6 +88,13 @@ namespace Meridian.Art
         /// <summary>U-091: true for a terrain sheet in Terrain.Shared (no allocation).</summary>
         public static bool IsSharedTerrain(string key) => key != null && System.Array.IndexOf(Terrain.Shared, key) >= 0;
 
+        /// <summary>U-205 (D-192 amended, LEAD 11-09 22:2x): a dug cell's back wall (terrain/&lt;planet&gt;/back_wall_t1..t5), by its key or by
+        /// its asset path. The walls import as uncompressed RGBA32, the one colour map that is not BC7: their paper grain cost a fifth more
+        /// a full-screen frame in BC7 on the integrated GPU and nothing more than a plain tile in RGBA32, DXT5 or DXT1 (perf_2026-11-09.md),
+        /// so they keep the grain as drawn at 256 KB a tile against 64.</summary>
+        public static bool IsBackWall(string keyOrPath) =>
+            keyOrPath != null && keyOrPath.Contains("terrain/") && keyOrPath.Contains("/back_wall_t");
+
         /// <summary>
         /// Addressables group of a key (Bible §10.3): the one table, used by ArtRules.GroupFor at import and by Residency at
         /// run time (U-091: the two used to drift; flora had no runtime case). No Split: IndexOf and Substring only.
