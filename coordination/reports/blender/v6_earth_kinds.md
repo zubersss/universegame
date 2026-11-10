@@ -13,8 +13,12 @@ Written 2026-11-10 08:4x at LEAD's ask; one line each.
   thorn bush (`savanna_tree_into`, `thorn_bush_into`, the crown's `shelf`), in `blender/scripts/build_plains_kinds_v6.py`
   with its own specimen sheet; 4's tree fern and a placeable ground fern (`tree_fern_into`, `fern_into`, `frond` in
   `build_forest_kinds_v6.py`, shown on the plains' sheet). A first run is a look at every shape, not a sheet.
+  11 and 12, the coast (`coconut_palm_into`, `dune_grass_into`, `sea_rock_into`, `wrack_into`, `driftwood_into`, and a
+  generic `sheet()`), in `blender/scripts/build_coast_kinds_v6.py`, UNRUN too.
 - NOT WRITTEN: 1's two more fork patterns and the low spreading form; 8's shelf fungus and the boulder
-  in three sizes; 11 and 12 (the coast); the plains' and the coast's ground palettes.
+  in three sizes; the liana and the log as placeable kinds; the plains' and the coast's ground palettes.
+- TO RUN, when LEAD says and no lock or want of UNITY's is up: the plains' sheet, then the coast's (each a light
+  numpy sheet, well under a minute); expect faults on a first run of unrun code.
 Every kind is a rule in the manner of `blender/scripts/build_specimens_v6.py` (a form field steers the brush: TUBE =
 a centre line with a radius, FACET = a plane with one value and one stroke direction, BALL = a lit cluster), under the
 frame's one light, seeded so no two individuals are alike. "Cost" is my time to write and tune the rule; painting one
