@@ -24,6 +24,7 @@ import numpy as np
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import gp_raster as GR  # noqa: E402
+import giants_v3 as GT  # noqa: E402  (B-239: the four giants' belts, storms and rings as one table)
 from meridian import pngio, v3  # noqa: E402
 
 SPACE_PPU = 3.0
@@ -334,7 +335,7 @@ def soft_limb(img, width=LIMB_PX, solid=250):
     return out
 
 
-def saturn_rings(R, tilt=0.30, limb=True):
+def saturn_rings(R, tilt=0.30, limb=False):       # limb: B-143's soft limb, SHELVED by D-128's amendment (see build_disc)
     """Rings as two static parts (back = the half behind the body, front = in front): bands
     1.24-2.27 R with the Cassini gap, ink on the outer and inner edges. -> (back, front) uint8."""
     Rr = 2.27 * R
@@ -375,7 +376,11 @@ def saturn_rings(R, tilt=0.30, limb=True):
     return back, front
 
 
-def build_disc(name, limb=True):
+def build_disc(name, limb=False):
+    """The far disc's frames. limb=True adds B-143's soft alpha limb, which D-128's amendment SHELVED ("code kept, never
+    run", c43c8da3): the exported far discs have none. B-239 (11-09): the default was still True, so export() and the
+    review would have re-drawn every far disc's limb (about 4,000 pixels a Jupiter frame: the first proof run's finding);
+    it is False now, and only b143() asks for the limb."""
     R = RADIUS_U[name] * SPACE_PPU
     nf = FRAMES.get(name, 12)
     pad = 10 if name != "uranus" else 10
@@ -709,7 +714,7 @@ def b143(art, preview_dir, report, write=True):
     for name in ORDER + ["luna"]:
         planet, variant = ("earth", "luna") if name == "luna" else (name, "disc")
         old = _old_frames(art, planet, variant)
-        frames, R = build_disc(name)
+        frames, R = build_disc(name, limb=True)                 # (the shelved soft limb is this function's whole subject)
         built[name] = (frames, R)
         if len(old) != len(frames) or old[0].shape != frames[0].shape:
             problems.append(f"{name}: shape {old[0].shape} x{len(old)} -> {frames[0].shape} x{len(frames)}")
@@ -730,7 +735,7 @@ def b143(art, preview_dir, report, write=True):
         seg = slice(max(0, x0 - 4), x0 + 2)
         rows.append(f"| {planet}/{variant} | {len(frames)} | {frames[0].shape[1]} | {same_in}/{len(frames)} | {changed // len(frames)} | "
                     f"{' '.join(str(v) for v in o[cy, seg, 3])} | {' '.join(str(v) for v in n[cy, seg, 3])} |")
-    back, front = saturn_rings(RADIUS_U["saturn"] * SPACE_PPU)
+    back, front = saturn_rings(RADIUS_U["saturn"] * SPACE_PPU, limb=True)
     built["_rings"] = (back, front)
     for nm, im in (("rings_back", back), ("rings_front", front)):
         o = pngio.read_png_np(os.path.join(art, "planets", "saturn", f"{nm}_color.png"))
@@ -762,7 +767,69 @@ def b143(art, preview_dir, report, write=True):
     return rows, out
 
 
+PAINT_FROM_TABLE = False         # B-239: False while paint() still holds the giants' numbers inline (the BEFORE run)
+
+
+def b239(art, out_dir):
+    """B-239's proof and drafts: rebuild the four giants' far discs and Saturn's two ring parts, write each to out_dir and
+    compare the written file BYTE FOR BYTE with the exported one under art (and the sheet json's text); then write the
+    close.json drafts (GT.close_json) into out_dir. Nothing under art is written. -> (lines, how many differ)."""
+    import hashlib
+    import json as _json
+    os.makedirs(out_dir, exist_ok=True)
+    lines, bad = [f"B-239 proof: paint() reads the giants from {'giants_v3.GIANTS' if PAINT_FROM_TABLE else 'its own inline numbers (BEFORE)'}"], 0
+
+    def sha(p):
+        with open(p, "rb") as fh:
+            return hashlib.sha1(fh.read()).hexdigest()
+
+    def compare(label, new, ref, shape, extra=""):
+        nonlocal bad
+        a, b = sha(new), sha(ref)
+        same = a == b
+        note = ""
+        if not same:
+            bad += 1
+            pa, pb = pngio.read_png_np(new), pngio.read_png_np(ref)
+            px = pa.shape == pb.shape and bool((pa == pb).all())
+            note = " (the pixels are equal: only the file's encoding differs)" if px else (
+                f" ({int((pa != pb).any(axis=-1).sum())} pixels differ)" if pa.shape == pb.shape else f" (shape {pa.shape} against {pb.shape})")
+        lines.append(f"{label}: {shape[1]}x{shape[0]}{extra}, {os.path.getsize(new)} bytes | rebuilt sha1 {a} | exported sha1 {b} | "
+                     + ("BYTE-IDENTICAL" if same else "DIFFERS" + note))
+
+    for name in GT.GIANTS:
+        frames, R = build_disc(name)
+        key = f"planets/{name}/disc"
+        meta = sheet_meta(key, frames, R, name)
+        sheet = pack(frames, meta["columns"])
+        new = os.path.join(out_dir, f"{name}_disc_color.png")
+        pngio.write_png(new, sheet)
+        compare(key, new, os.path.join(art, "planets", name, "disc_color.png"), sheet.shape, f", {len(frames)} frames")
+        with open(os.path.join(art, "planets", name, "disc.json"), encoding="utf-8") as fh:
+            same_json = fh.read() == _json.dumps(meta, indent=2) + "\n"
+        lines.append(f"{key}.json: " + ("text identical" if same_json else "TEXT DIFFERS"))
+        bad += 0 if same_json else 1
+        del frames, sheet
+    back, front = saturn_rings(RADIUS_U["saturn"] * SPACE_PPU)
+    for nm, im in (("rings_back", back), ("rings_front", front)):
+        new = os.path.join(out_dir, f"saturn_{nm}_color.png")
+        pngio.write_png(new, im)
+        compare(f"planets/saturn/{nm}", new, os.path.join(art, "planets", "saturn", f"{nm}_color.png"), im.shape)
+    for name in GT.GIANTS:                                       # the close.json drafts (preview only)
+        p = os.path.join(out_dir, f"{name}_close.json")
+        with open(p, "w", encoding="utf-8", newline="\n") as fh:
+            _json.dump(GT.close_json(name, PAL, lambda c: v3.rgb_hex([float(x) * 255 for x in c]), RADIUS_U[name], FRAMES.get(name, 12), v3.FPS), fh, indent=2)
+            fh.write("\n")
+        lines.append(f"draft written: {p.replace(os.sep, '/')}")
+    lines.append(f"RESULT: {'all byte-identical' if not bad else str(bad) + ' DIFFER'}")
+    return lines, bad
+
+
 if __name__ == "__main__":
+    if len(sys.argv) > 3 and sys.argv[1] == "--b239":             # build_discs_v3.py --b239 <art> <out dir>
+        _lines, _bad = b239(sys.argv[2], sys.argv[3])
+        print("\n".join(_lines))
+        sys.exit(1 if _bad else 0)
     if len(sys.argv) > 2 and sys.argv[1] == "--near":            # build_discs_v3.py --near <art> <preview dir> <review png> [--dry]
         for row in near_export(sys.argv[2], sys.argv[3], review=sys.argv[4], write="--dry" not in sys.argv):
             print(row[0], row[1] if row[1] else "none", f"k {row[2]:.2f}")
