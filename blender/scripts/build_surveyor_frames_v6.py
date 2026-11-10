@@ -17,6 +17,7 @@ A clip is a short list of KEY POSES (hand-set numbers) and a rule for the frames
 
   python -I build_surveyor_frames_v6.py <review png>     slice 1 as ONE strip sheet (lock-free, numpy); nothing exported
 """
+import json
 import math
 import os
 import sys
@@ -331,6 +332,258 @@ def clips():
     return side + dig
 
 
+SHOVEL_LEN = 1.33                                 # props/rig/shovel: the blade tip from the tool's grip end (its json "blade_tip")
+HAFT_MAX = 0.78                                   # the largest slide that keeps the whole front glove on that sprite's haft (B-246)
+DIG_ORIGIN = (0.0, 0.95)                          # UNITY's RigTools.DigOrigin today (the v3 body's shoulder); the reach is 2 m from it
+
+
+def fist_of(p, s):
+    """A hand's middle on a side drawing (m from the pivot): 0.045 m past the wrist on the forearm's line, as it is drawn."""
+    J, sq = SV.skeleton(p), (p.get("squash", 1.0) if SV.RHYTHM else 1.0)
+    pr = lambda q: (q[0] / math.sqrt(sq), q[1] * sq)                            # noqa: E731
+    e, w = pr(J["elb_" + s]), pr(J["wr_" + s])
+    ln = math.hypot(w[0] - e[0], w[1] - e[1]) or 1e-6
+    return (w[0] + (w[0] - e[0]) / ln * 0.045, w[1] + (w[1] - e[1]) / ln * 0.045)
+
+
+def reach_lines():
+    """THE POSE MATHS of the dig clips (LEAD 12:2x: slide_max, carry and ready for this figure come from numbers, not
+    from the eye). UNITY's tool: the socket is the FRONT glove; the tip is (1.33 - slide) m beyond it along the tool.
+    These drawings hold the tool with BOTH hands, the rear one on the grip `gap` m behind the front one, so AS DRAWN
+    the slide is `gap`; a smaller slide would pull the grip out of the rear hand."""
+    out = [f"THE TOOL: the shovel's tip is {SHOVEL_LEN} m from its grip end; UNITY puts the tip at (1.33 - slide) m beyond the FRONT glove (the socket), slide 0 .. slide_max.",
+           "As drawn here both hands are on the tool, the rear one on the grip: the slide AS DRAWN = the hands' spacing. Per dig clip, on its contact drawing (1):"]
+    idle_sh = SV.skeleton(IDLE)["sh_n"]
+    for name, ks in DIG.items():
+        k = ks[1]
+        gap = k[3] if len(k) > 3 else 0.40
+        p = hold(k[0], k[1], k[2], two=True, gap=gap, world=len(k) > 4 and k[4])
+        g, r = fist_of(p, "n"), fist_of(p, "f")
+        a = math.radians(k[2])
+        d = (math.cos(a), math.sin(a))
+        spacing = (g[0] - r[0]) * d[0] + (g[1] - r[1]) * d[1]                    # the rear fist's place along the tool, behind the front one
+        off = abs(-(g[0] - r[0]) * d[1] + (g[1] - r[1]) * d[0])                  # and how far off the tool's line it sits
+        tip = (g[0] + (SHOVEL_LEN - gap) * d[0], g[1] + (SHOVEL_LEN - gap) * d[1])
+        far = (g[0] + SHOVEL_LEN * d[0], g[1] + SHOVEL_LEN * d[1])
+        near = (g[0] + (SHOVEL_LEN - HAFT_MAX) * d[0], g[1] + (SHOVEL_LEN - HAFT_MAX) * d[1])
+        sh = SV.skeleton(p)["sh_n"]
+        out.append(f"  {name}: front glove ({g[0]:+.3f}, {g[1]:.3f}) m, the tool at {k[2]:+.0f} deg; rear fist {spacing:.2f} m behind it along the tool ({off * 100:.0f} cm off its line): slide as drawn {gap:.2f}")
+        out.append(f"      the tip AS DRAWN ({tip[0]:+.2f}, {tip[1]:+.2f}) m = {math.hypot(tip[0] - DIG_ORIGIN[0], tip[1] - DIG_ORIGIN[1]):.2f} m from DigOrigin (0, 0.95), {math.hypot(tip[0] - sh[0], tip[1] - sh[1]):.2f} m from this drawing's shoulder ({sh[0]:+.2f}, {sh[1]:.2f})")
+        out.append(f"      at slide 0 (the grip in the FRONT hand, the rear hand holding nothing) ({far[0]:+.2f}, {far[1]:+.2f}); at slide {HAFT_MAX} (the glove at the haft's end) ({near[0]:+.2f}, {near[1]:+.2f})")
+        if d[1] < -0.05:
+            for sl, what in ((gap, "as drawn"), (0.0, "slide 0")):
+                t = g[1] / -d[1]                                                 # along the tool to the ground line
+                out.append(f"      the ground along the drawn line is {t:.2f} m from the glove, at x {g[0] + t * d[0]:+.2f} m: the tip ({what}, {SHOVEL_LEN - sl:.2f} m long) "
+                           + ("reaches it" if SHOVEL_LEN - sl >= t - 0.005 else f"stops {t - (SHOVEL_LEN - sl):.2f} m short"))
+    out.append(f"THE FIGURE: the near shoulder stands at ({idle_sh[0]:+.2f}, {idle_sh[1]:.2f}) m in the idle (DigOrigin is at 0.95: the v3 body's); the idle's near fist at "
+               + "({:+.3f}, {:.3f})".format(*fist_of(IDLE, "n")) + ".")
+    rd = hold(READY[0], READY[1], READY[2], two=False)
+    g = fist_of(rd, "n")
+    a = math.radians(READY[2])
+    out.append(f"READY as drawn (every dig clip's last drawing): the glove ({g[0]:+.3f}, {g[1]:.3f}), the tool {READY[2]:+.0f} deg ({a:+.3f} rad), one hand; at slide 0 its tip is at "
+               f"({g[0] + SHOVEL_LEN * math.cos(a):+.2f}, {g[1] + SHOVEL_LEN * math.sin(a):+.2f}), at slide 0.40 ({g[0] + 0.93 * math.cos(a):+.2f}, {g[1] + 0.93 * math.sin(a):+.2f})")
+    for name, clip in (("idle", loop([IDLE, I_B], 10)),):
+        hs = [fist_of(p, "n") for p in clip]
+        out.append(f"{name}: the near fist over its frames x {min(h[0] for h in hs):+.3f}..{max(h[0] for h in hs):+.3f}, z {min(h[1] for h in hs):.3f}..{max(h[1] for h in hs):.3f}")
+    return out
+
+
+# ---------------------------------------------------------------- the export (B-250; LEAD's word 12:4x)
+KEYBASE = "characters/surveyor_v6"
+LOOPS = {"idle", "walk", "run", "stroll", "fall", "aim_up", "aim_up45", "aim_fwd", "aim_down45", "aim_down"}
+HAND_UNITS = {
+    "side_dig": "per frame in sheet order: [x, z] metres from the pivot to the front glove's centre (x right, z up, facing right) and the "
+                "tool's direction on that drawing (radians, counter-clockwise from +x)",
+    "side": "per frame in sheet order: [x, z] metres from the pivot to the front fist's centre (x right, z up, facing right) and the "
+            "front forearm's direction on that drawing (radians, counter-clockwise from +x; an arm hanging straight down is -1.5708)"}
+
+
+def arm_of(p, s="n"):
+    """The forearm's direction on a side drawing (rad, counter-clockwise from +x)."""
+    J, sq = SV.skeleton(p), (p.get("squash", 1.0) if SV.RHYTHM else 1.0)
+    e, w = J["elb_" + s], J["wr_" + s]
+    return math.atan2((w[1] - e[1]) * sq, (w[0] - e[0]) / math.sqrt(sq))
+
+
+def stow_of(p):
+    """Where a STOWED shovel rides this figure: on the pack, not in the hand (the v3 body carried it on the swinging
+    glove; here the fist travels 0.5 m in the lope, and a strapped tool must not). -> [x, z] of the tool's grip end, 0.72 m
+    down the pack's own axis from its middle (below the pack, behind the thigh), and the tool's direction: up the pack,
+    5 degrees back. At slide 0 the blade's tip then stands level with the top of the head, behind it."""
+    J, sq = SV.skeleton(p), (p.get("squash", 1.0) if SV.RHYTHM else 1.0)
+    ch = math.radians(p.get("chest", 0.0) + (0.12 * p.get("arc", 0.0) if SV.RHYTHM else 0.0))
+    u, n = SV.up(ch), (math.cos(ch), -math.sin(ch))
+    g = SV.add(SV.add(J["C"], SV.mul(n, -0.195 - 0.02)), SV.mul(u, -0.72))
+    return [round(g[0] / math.sqrt(sq), 4), round(g[1] * sq, 4), round(math.atan2(u[1], u[0]) + math.radians(5.0), 4)]
+
+
+def dig_fields(name):
+    """A dig clip's json fields from its CONTACT drawing: contact; slide_min = how far behind the front glove the rear
+    fist holds the tool AS DRAWN (a smaller slide pulls the grip out of the rear hand); slide_max = the front glove at
+    the haft's end; tip = the blade's tip as drawn (at slide_min), metres from the pivot."""
+    k = DIG[name][1]
+    gap = k[3] if len(k) > 3 else 0.40
+    p = hold(k[0], k[1], k[2], two=True, gap=gap, world=len(k) > 4 and k[4])
+    g, r = fist_of(p, "n"), fist_of(p, "f")
+    a = math.radians(k[2])
+    smin = round((g[0] - r[0]) * math.cos(a) + (g[1] - r[1]) * math.sin(a), 2)
+    return {"contact": 1, "slide_min": smin, "slide_max": HAFT_MAX,
+            "tip": [round(g[0] + (SHOVEL_LEN - smin) * math.cos(a), 3), round(g[1] + (SHOVEL_LEN - smin) * math.sin(a), 3)]}
+
+
+def straight(fr):
+    """A premultiplied float frame -> straight RGBA uint8 (the contract's PNG)."""
+    a = fr[..., 3:4]
+    return np.clip(np.rint(np.dstack([np.where(a > 1e-4, fr[..., :3] / np.maximum(a, 1e-4), 0.0), a]) * 255.0), 0, 255).astype(np.uint8)
+
+
+def build_pages():
+    """{page: (sheet RGBA uint8, its json)} for slice 1: side (idle, walk, run), side_air (jump, fall, land, stroll),
+    side_dig (the four dig clips, the five aim holds). Raises before anything is returned if a frame touches its box."""
+    from meridian import v3
+    SV.RHYTHM = True
+    by = {}
+    for sheet, name, poses, _w in clips():
+        by.setdefault(sheet, []).append((name, poses))
+    out, clipped = {}, []
+    for sheet, cl in by.items():
+        frames, anims, hands, stows, grips = [], [], [], [], []
+        for name, poses in cl:
+            an = {"name": name, "start": len(frames), "length": len(poses), "loop": name in LOOPS}
+            if an["loop"]:
+                an["loop_from"] = 0
+            if name in SPEED:
+                an["ground_speed"] = round(SPEED[name], 3)
+            if name in DIG:
+                an.update(dig_fields(name))
+            anims.append(an)
+            for i, p in enumerate(poses):
+                fr, sock = draw(p, f"{name}{i}")[:2]
+                al = fr[..., 3] > 0.02
+                m = v3.EDGE_MARGIN
+                if al[:m].any() or al[:, :m].any() or al[:, -m:].any():
+                    clipped.append(f"{sheet}/{name} {i}")
+                frames.append(straight(fr))
+                if sheet == "side_dig":
+                    hands.append([float(v) for v in sock])
+                    grips.append([round(v, 4) for v in fist_of(p, "f")] if p.get("_two") else None)
+                else:
+                    f = fist_of(p, "n")
+                    hands.append([round(f[0], 4), round(f[1], 4), round(arm_of(p), 4)])
+                    stows.append(stow_of(p))
+        n = len(frames)
+        cols = v3.columns_for(BOX_W, n)
+        rws = -(-n // cols)
+        g = v3.GUTTER
+        img = np.zeros((rws * BOX_H + (rws - 1) * g, cols * BOX_W + (cols - 1) * g, 4), np.uint8)
+        for i, fr in enumerate(frames):
+            r, c = divmod(i, cols)
+            img[r * (BOX_H + g):r * (BOX_H + g) + BOX_H, c * (BOX_W + g):c * (BOX_W + g) + BOX_W] = fr
+        meta = {"key": f"{KEYBASE}/{sheet}", "style": "v3", "art": "v6", "frame_width": BOX_W, "frame_height": BOX_H, "columns": cols, "gutter": g,
+                "frames": n, "fps": 12, "pivot": [0.5, GROUND / BOX_H], "facing": "right", "ppu": 128, "animations": anims, "squash_root": True,
+                "sockets": {"hand": hands}, "sockets_units": HAND_UNITS["side_dig" if sheet == "side_dig" else "side"]}
+        if sheet == "side_dig":
+            meta["grip"] = grips
+            meta["grip_units"] = ("per frame: [x, z] metres from the pivot to the REAR fist's centre where both fists are on the tool (null where one is): "
+                                  "the tool's grip end as drawn. A dig clip's slide_min is that fist's distance behind the front glove on its contact drawing")
+            meta["carry"] = {"angle": round(math.radians(125.0), 4), "swing": 0.08, "behind": True, "rides": "stow",
+                             "note": "STOWED. This figure carries the tool ON THE PACK: side and side_air give `stow` per frame (the tool's grip end and its "
+                                     "direction); drawn BEHIND the body, no fist over it. angle and swing are today's rule (the direction on the front "
+                                     "fist, plus swing x the forearm's own angle) for a reader that has no stow table yet: on this figure the fist "
+                                     "travels half a metre in the lope, so a tool riding it slides with every step"}
+            meta["ready"] = {"angle": round(math.radians(READY[2]), 4), "swing": 0.25,
+                             "note": "the low pose in front of the body, the tool's direction on every dig clip's last drawing; held for 1.5 s after the "
+                                     "last swing, then stowed; the fist (props/rig/grip_fist) over the tool"}
+            meta["note"] = ("B-250 (D-200): the v6 surveyor's dig sheet, every frame its own drawing. Both fists hold the tool on a dig clip's drawings 0-2 "
+                            "(dig_fwd and dig_fwd_near: 0-3), the front one alone on the last (the ready pose) and on the aim holds. The front fist is drawn "
+                            "CLOSED and EMPTY: the tool is UNITY's sprite on the socket")
+        else:
+            meta["stow"] = stows
+            meta["stow_units"] = ("per frame in sheet order: [x, z] metres from the pivot to a stowed tool's grip end on the pack, and the tool's direction "
+                                  "there (radians, counter-clockwise from +x); see side_dig's carry")
+            meta["note"] = ("B-250 (D-200): the v6 surveyor, every frame its own drawing from a pose. ground_speed (m/s) is the speed at which a clip's "
+                            "planted foot does not slide at 12 fps: walk is a lope, run a sprint, stroll a true walk"
+                            if sheet == "side" else
+                            "B-250 (D-200): the v6 surveyor in the air, and the stroll (a true walk; its page has the room). jump ends on its apex; fall loops; "
+                            "land ends on the idle's first drawing")
+        if json.dumps(meta).count('"hand"') != 1:
+            raise ValueError(f"B-250 {sheet}: the json must carry the name hand once (UNITY's reader)")
+        out[sheet] = (img, meta)
+    if clipped:
+        raise ValueError("B-250: frames touch their box: " + ", ".join(clipped))
+    return out
+
+
+def export(art):
+    """Writes characters/surveyor_v6/<page>_color.png + <page>.json for slice 1's three pages. Everything is drawn and
+    checked before the first file is written. -> [(key, w, h, bytes)]."""
+    from meridian import v3
+    pages = build_pages()
+    for sheet, (img, meta) in pages.items():
+        if img.shape[0] > v3.MAX_SHEET or img.shape[1] > v3.MAX_SHEET or img.shape[0] % 4 or img.shape[1] % 4:
+            raise ValueError(f"B-250 {sheet}: a sheet of {img.shape[1]}x{img.shape[0]}")
+        for an in meta["animations"]:
+            fs = [img[r * (BOX_H + 4):r * (BOX_H + 4) + BOX_H, c * (BOX_W + 4):c * (BOX_W + 4) + BOX_W]
+                  for r, c in (divmod(i, meta["columns"]) for i in range(an["start"], an["start"] + an["length"]))]
+            if any(not f[..., 3].any() for f in fs):
+                raise ValueError(f"B-250 {sheet}/{an['name']}: an empty frame")
+    out = []
+    for sheet, (img, meta) in pages.items():
+        base = os.path.join(art, *meta["key"].split("/"))
+        os.makedirs(os.path.dirname(base), exist_ok=True)
+        nb = pngio.write_png(base + "_color.png", img)
+        if nb > v3.MAX_FILE_BYTES:
+            raise ValueError(f"B-250 {sheet}: {nb} bytes, over the file cap")
+        with open(base + ".json", "w", encoding="utf-8", newline="\n") as fh:
+            json.dump(meta, fh, indent=2)
+            fh.write("\n")
+        out.append((meta["key"], img.shape[1], img.shape[0], nb))
+    return out
+
+
+def keys():
+    return [f"{KEYBASE}/{s}" for s in ("side", "side_air", "side_dig")]
+
+
+def readback(out, footnote=None, art=None):
+    """The exported pages read back from Assets/_Game/Art and laid out at half size, with each page's clip table: what is
+    on disk, not what the builder would draw."""
+    sys.path.insert(0, os.path.dirname(HERE))
+    import review
+    art = art or os.path.normpath(os.path.join(HERE, "..", "..", "Assets", "_Game", "Art"))
+    paper = np.array(review.PAPER, np.float32)
+    Wd = 1920
+    rows = []
+
+    def head(text, h=20):
+        hd = np.tile(paper, (h, Wd, 1)).astype(np.float32)
+        review._label(hd, text[:310], 6, 4, scale=1)
+        return hd
+    rows.append(head("B-250: characters/surveyor_v6 as EXPORTED (read back from Assets/_Game/Art; each page at half size, on the stage tone)", 26))
+    for key in keys():
+        base = os.path.join(art, *key.split("/"))
+        if not os.path.isfile(base + "_color.png") or not os.path.isfile(base + ".json"):
+            rows.append(head(f"{key}: NOT ON DISK"))
+            continue
+        meta = json.load(open(base + ".json", encoding="utf-8"))
+        img = pngio.read_png_np(base + "_color.png").astype(np.float32) / 255.0
+        pm = np.dstack([img[..., :3] * img[..., 3:4], img[..., 3:4]])
+        half = CEL.down(pm, 2)
+        cell = np.tile(SV.STAGE, (half.shape[0], Wd, 1)).astype(np.float32)
+        w = min(half.shape[1], Wd)
+        cell[:, :w] = half[:, :w, :3] + cell[:, :w] * (1 - half[:, :w, 3:4])
+        rows.append(head(f"{key}: {img.shape[1]}x{img.shape[0]}, {meta['frames']} frames of {meta['frame_width']}x{meta['frame_height']} in {meta['columns']} columns, ppu {meta['ppu']}, "
+                         f"pivot {meta['pivot']}, {os.path.getsize(base + '_color.png') // 1024} KB"))
+        rows.append(head("   " + "; ".join(f"{a['name']} {a['start']}+{a['length']}{' loop' if a['loop'] else ''}"
+                                             + (f" {a['ground_speed']} m/s" if 'ground_speed' in a else "")
+                                             + (f" contact {a['contact']} slide {a['slide_min']}-{a['slide_max']}" if 'contact' in a else "") for a in meta["animations"])))
+        rows.append(cell)
+    img = np.vstack(rows)
+    review.draw(img, time.strftime("%m-%d %H:%M") + " " + (footnote or "B-250 surveyor_v6 pages, read back"), 2, img.shape[0] - 14, (1.0, 1.0, 0.85))
+    review.write(out, img)
+    print("written", out, img.shape[1], "x", img.shape[0])
+
+
 def planted(p):
     """Which foot carries the pose (the one whose sole is lowest; "air" when both are off the ground) and its ground
     point's x from the pivot (m): a planted foot must travel back at the game's ground speed, or it slides."""
@@ -507,7 +760,17 @@ def preview(out):
         print(ln)
 
 
-if __name__ == "__main__":                       # <review png> [--only <clip> ...]
-    if len(sys.argv) > 3 and sys.argv[2] == "--only":
-        ONLY_CLIPS = set(sys.argv[3:])
-    preview(sys.argv[1])
+if __name__ == "__main__":                       # <review png> [--only <clip> ...]  |  --reach (the pose maths, no drawing)  |  --pages <dir> <review png>
+    if sys.argv[1] == "--reach":
+        for ln in reach_lines():
+            print(ln)
+    elif sys.argv[1] == "--pages":               # a DRY RUN of the export: the three pages written under <dir>, not into Assets, and read back
+        t0 = time.time()
+        for k, w, h, nb in export(sys.argv[2]):
+            print(f"{k}: {w}x{h}, {nb // 1024} KB")
+        print(f"drawn and written in {time.time() - t0:.0f} s")
+        readback(sys.argv[3], footnote="B-250 surveyor_v6 pages, a DRY RUN read back (not in Assets)", art=sys.argv[2])
+    else:
+        if len(sys.argv) > 3 and sys.argv[2] == "--only":
+            ONLY_CLIPS = set(sys.argv[3:])
+        preview(sys.argv[1])
