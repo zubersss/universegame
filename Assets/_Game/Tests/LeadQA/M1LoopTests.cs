@@ -21,17 +21,27 @@ namespace Meridian.Tests.LeadQA
     {
         const string CorePath = "Assets/_Game/Scenes/Core.unity";
         string saveRoot;
+        float savedTimeScale, savedCaptureDelta;
 
         [SetUp]
         public void SetUp()
         {
             saveRoot = System.IO.Path.Combine(Application.temporaryCachePath, "meridian_leadqa_" + System.Guid.NewGuid().ToString("N").Substring(0, 6));
             SaveSystem.RootOverride = saveRoot;
+            // 0.6.3's sweep: this loop went red the first time it ran in one process after another class (the space leg used its whole
+            // window) and green alone. A Core load does not reset the clock's statics, so the loop sets its own and logs what it found.
+            savedTimeScale = Time.timeScale;
+            savedCaptureDelta = Time.captureDeltaTime;
+            TestContext.Out.WriteLine($"[LEADQA] M1Loop found timeScale {savedTimeScale:F2}, captureDeltaTime {savedCaptureDelta:F4}");
+            Time.timeScale = 1f;
+            Time.captureDeltaTime = 0f;
         }
 
         [TearDown]
         public void TearDown()
         {
+            Time.timeScale = savedTimeScale;
+            Time.captureDeltaTime = savedCaptureDelta;
             SaveSystem.RootOverride = null;
             if (System.IO.Directory.Exists(saveRoot)) System.IO.Directory.Delete(saveRoot, true);
         }
@@ -80,9 +90,12 @@ namespace Meridian.Tests.LeadQA
             // D-158 (LEAD, cycle 278): 60 → 90 s. U-149's spool and drag lengthen the Earth climb (19.1 → 20.0 s), so the craft
             // leaves at another longitude and this scripted steering can take the long way round; the assertions are unchanged.
             float spaceLegStart = Time.realtimeSinceStartup;
+            float spaceLegGameStart = Time.time;
+            int spaceLegFrames = 0;
             timeout = Time.realtimeSinceStartup + 90f;
             while (state.view == ViewMode.Space && !transitions.Busy && Time.realtimeSinceStartup < timeout)
             {
+                spaceLegFrames++;
                 Vector2 target = mars.position;
                 float fromEarth = (craft.Position - earth.position).magnitude;
                 if (fromEarth < earth.WellRadius) target = escapePoint;
@@ -100,6 +113,10 @@ namespace Meridian.Tests.LeadQA
                 yield return null;
             }
             TestContext.Out.WriteLine($"[LEADQA] space leg {Time.realtimeSinceStartup - spaceLegStart:F1} s real time (window 90 s)");
+            // What the leg looked like when it ended (an entry, or the window running out): enough to tell a slow clock from a craft circling.
+            TestContext.Out.WriteLine($"[LEADQA] space leg end: {spaceLegFrames} frames, {Time.time - spaceLegGameStart:F1} s game time, view {state.view}, busy {transitions.Busy}, " +
+                $"craft at ({craft.Position.x:F0}, {craft.Position.y:F0}) speed {craft.Velocity.magnitude:F1} heading {craft.Heading:F0}, in the well of '{craft.InWellOf}', " +
+                $"{(craft.Position - mars.position).magnitude:F0} from Mars (ring {mars.RingRadius:F0}, well {mars.WellRadius:F0}), {(craft.Position - earth.position).magnitude:F0} from Earth");
             Assert.IsTrue(feltMars, "Mars gravity well pulled the ship");
             yield return WaitIdle(transitions, 15f);
             Assert.AreEqual(ViewMode.PlanetSide, state.view, "entered a planet");
