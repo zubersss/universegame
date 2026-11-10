@@ -345,6 +345,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 6ab4df57fd8c3af4589bf38e52088519
+    m_Address: icons/catalogue/hadal_maw
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 6d0e6b4a225e0be49a35ff17f8d257b5
     m_Address: icons/catalogue/camp
     m_ReadOnly: 0
@@ -390,6 +395,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 7af1adf64a7742a48b3442e93928f365
+    m_Address: icons/catalogue/umbral_leviathan
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 7f2404929c94bae4b96ec6655136eb21
     m_Address: icons/mercury_regolith/base
     m_ReadOnly: 0
@@ -427,6 +437,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 8e850f5fcf6055d4ebbf66e7a59d3829
     m_Address: icons/catalogue/survey_archive
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 92e72037a88f9ac40a8760e360cd5171
+    m_Address: icons/catalogue/vortex_whale
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -615,6 +630,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d138188f9606b4a46b4a5b6d85c601da
+    m_Address: icons/catalogue/polar_hydra
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: d20f03aae45e3e64aa3def70f4764e2d
     m_Address: icons/nodes/end_air_2
     m_ReadOnly: 0
@@ -697,6 +717,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: f5f2df56f839b3441a56bbd101c5faff
     m_Address: icons/nodes/asc_jet_2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: fa2fce5afc6fb3c4f949e2351b9da8a7
+    m_Address: icons/catalogue/diamondback_colossus
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

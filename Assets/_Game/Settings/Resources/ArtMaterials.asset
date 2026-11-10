@@ -2063,6 +2063,15 @@ MonoBehaviour:
       loop: 0
       contact: 0
       slideMax: 0
+  - key: fx/beam_contact/base
+    fps: 12
+    clips:
+    - name: glow
+      start: 0
+      length: 6
+      loop: 1
+      contact: 0
+      slideMax: 0
   - key: fx/beam_ray/base
     fps: 12
     clips:
@@ -2279,6 +2288,27 @@ MonoBehaviour:
       loop: 1
       contact: 0
       slideMax: 0
+  - key: fx/dig_reticle/base
+    fps: 12
+    clips:
+    - name: arc
+      start: 0
+      length: 2
+      loop: 1
+      contact: 0
+      slideMax: 0
+    - name: corner
+      start: 2
+      length: 2
+      loop: 1
+      contact: 0
+      slideMax: 0
+    - name: pip
+      start: 4
+      length: 2
+      loop: 1
+      contact: 0
+      slideMax: 0
   - key: fx/dig_sparks/base
     fps: 15
     clips:
@@ -2465,6 +2495,15 @@ MonoBehaviour:
     - name: flick
       start: 0
       length: 6
+      loop: 0
+      contact: 0
+      slideMax: 0
+  - key: fx/shovel_swish/base
+    fps: 12
+    clips:
+    - name: swish
+      start: 0
+      length: 3
       loop: 0
       contact: 0
       slideMax: 0
