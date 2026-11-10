@@ -263,8 +263,9 @@ def t1_marks(planet, rng, R):
 
 
 # ---------------------------------------------------------------- the tiers
-def draw_tier(planet, t):
-    """-> (RGBA uint8 256x256, the roles used)."""
+def draw_tier(planet, t, grain=0.035):
+    """-> (RGBA uint8 256x256, the roles used). grain: the paper grain's strength (0 = none: U-205's test tile, D-192;
+    the exports use the default)."""
     pal, R, names = tier_colours(planet, t)
     rng = np.random.default_rng(23000 + 100 * PLANETS.index(planet) + t)
     layers = []                                                          # (mask, colour) painted in order over the back tone
@@ -362,8 +363,8 @@ def draw_tier(planet, t):
     for m, col in layers:
         out = out * (1 - m[..., None]) + col[None, None, :] * m[..., None]
     small = out.reshape(S, SS, S, SS, 3).mean(axis=(1, 3))
-    grain = periodic_noise(rng, 64)[::SS, ::SS] * 0.6 + periodic_noise(rng, 16)[::SS, ::SS] * 0.4
-    small = quiet_roll(small * (1 + 0.035 * grain[..., None]))
+    g = periodic_noise(rng, 64)[::SS, ::SS] * 0.6 + periodic_noise(rng, 16)[::SS, ::SS] * 0.4
+    small = quiet_roll(small * (1 + grain * g[..., None]))
     img = np.dstack([np.clip(np.rint(small * 255), 0, 255).astype(np.uint8), np.full((S, S), 255, np.uint8)])
     return img, names
 
@@ -495,5 +496,22 @@ def preview(out, planet="earth", footnote=None):
         print(ln)
 
 
+def test_tile(out, planet="earth", t=3):
+    """U-205's test tile (LEAD 19:2x, D-192: is the walls' cost their grain?): one tier's wall with its paper grain removed,
+    the marks kept, written to the PREVIEW folder only (never exported), and the same tile with its grain beside it for the
+    comparison. Prints both files' sizes and their counts of distinct colours."""
+    def colours(im):
+        return len(np.unique(im[..., :3].reshape(-1, 3), axis=0))
+    plain, _n = draw_tier(planet, t, grain=0.0)
+    with_g, _n = draw_tier(planet, t)
+    other = os.path.splitext(out)[0] + "_with_grain.png"
+    n0, n1 = pngio.write_png(out, plain), pngio.write_png(other, with_g)
+    print(f"{planet} t{t} {TIER_NAMES[t]} without grain -> {out}: {plain.shape[1]}x{plain.shape[0]}, {n0 // 1024} KB, {colours(plain)} colours")
+    print(f"the same with its grain (as exported) -> {other}: {n1 // 1024} KB, {colours(with_g)} colours")
+
+
 if __name__ == "__main__":                       # python -I build_back_wall_v3.py <review png> [planet]
-    preview(sys.argv[1], sys.argv[2] if len(sys.argv) > 2 else "earth")
+    if sys.argv[1] == "--no-grain":              # python -I build_back_wall_v3.py --no-grain <out png> [planet] [tier]
+        test_tile(sys.argv[2], sys.argv[3] if len(sys.argv) > 3 else "earth", int(sys.argv[4]) if len(sys.argv) > 4 else 3)
+    else:
+        preview(sys.argv[1], sys.argv[2] if len(sys.argv) > 2 else "earth")
