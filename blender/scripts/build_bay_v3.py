@@ -386,11 +386,14 @@ def camp_icon(d, M):
         for cxx in (x0 + 0.025, x0 + w - 0.025):
             for czz in (z0 + 0.025, z0 + h - 0.025):
                 G.stroke(d, IT.lump(cxx, czz, 0.014, 0.014, int((cxx + czz) * 1000) % 97, n=6, jit=0.0), M["mustard_i"], I * 0.6, cyclic=True)
-    G.stroke(d, hose([(0.27, -0.31), (0.27, 0.27)], 0.05), M["teal_sh_i"], O, cyclic=True)           # the lamp post
-    G.stroke(d, hose([(0.27, 0.27), (0.28, 0.33), (0.33, 0.36), (0.37, 0.33)], 0.04), M["teal_sh_i"], I, cyclic=True)
-    G.stroke(d, [(0.27, 0.21), (0.11, 0.16), (0.27, 0.11)], M["red_i"], I, cyclic=True)              # the pennant
-    G.stroke(d, [(0.34, 0.33), (0.41, 0.33), (0.43, 0.27), (0.32, 0.27)], M["mustard_i"], O, cyclic=True)   # the lamp's shade
-    G.stroke(d, [(0.335 + 0.03 * math.cos(a), 0.26 + 0.03 * math.sin(a)) for a in np.linspace(0, TAU, 12, endpoint=False)], M["off_i"], I, cyclic=True)
+    # the lamp post: a straight post with a box lantern on top. The 18:17 preview at 3x: the hooked arm, the mustard shade and
+    # the round white bulb beside it read as a bird's neck, beak and eye (D-101) - no hook, no round bulb
+    G.stroke(d, hose([(0.27, -0.31), (0.27, 0.25)], 0.05), M["teal_sh_i"], O, cyclic=True)
+    G.stroke(d, [(0.27, 0.17), (0.11, 0.12), (0.27, 0.07)], M["red_i"], I, cyclic=True)              # the pennant
+    G.stroke(d, [(0.215, 0.24), (0.325, 0.24), (0.335, 0.355), (0.205, 0.355)], M["mustard_i"], O, cyclic=True)   # the lantern's pane
+    G.stroke(d, [(0.19, 0.355), (0.35, 0.355), (0.315, 0.40), (0.225, 0.40)], M["brown_i"], O, cyclic=True)   # its cap (one pane,
+    #                                                                                                 no glazing bar: two lit panes
+    #                                                                                                 under a dark cap were a pair of eyes)
     G.stroke(d, hose([(0.24, -0.31), (0.30, -0.31)], 0.05), M["brown_i"], I, cyclic=True)             # its foot
 
 
