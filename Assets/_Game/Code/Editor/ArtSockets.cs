@@ -15,7 +15,8 @@ namespace Meridian.EditorTools
     public static class ArtSockets
     {
         public static readonly string[] Fields = { "muzzle", "cable_socket", "back_socket", "back_socket_b", "hand_socket", "hand_socket_b", "held_b", "reel", // U-176: side_b's reel (reel_up's hands)
-            "blade_tip", "hand" }; // U-209: the shovel's blade tip; B-246's side_dig "hand" rows ([x, z, angle] a frame)
+            "blade_tip", "hand", // U-209: the shovel's blade tip; B-246's side_dig "hand" rows ([x, z, angle] a frame)
+            "stow_socket" }; // U-212 (H8): props/rig/stow_socket: the stowed tool's grip end on the body and its direction, a frame of the side sheet
         const string ArtRoot = "Assets/_Game/Art/";
 
         [MenuItem("MERIDIAN/Art/Register sockets (U-183)")]

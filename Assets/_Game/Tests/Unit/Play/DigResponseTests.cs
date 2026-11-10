@@ -214,11 +214,23 @@ namespace Meridian.Tests
                 {
                     input.AimAt(feet + d);
                     yield return null; yield return null;
-                    Assert.Less(Mathf.Abs(Mathf.DeltaAngle(rest, view.AimDegrees)), 3f, $"the cursor at {d}: the tool's angle does not change with the button up (but for its share of the idle arm's sway)");
                     Assert.IsTrue(view.Carrying);
                     Assert.IsTrue(view.Stowed, "stowed until the first swing");
-                    Assert.Less(Mathf.Abs(Mathf.DeltaAngle(view.StowAngle(false), view.AimDegrees)), 1e-2f, "the stowed pose (facing right): its angle and its share of the arm's own, nothing of the cursor's");
-                    Assert.That(view.AimDegrees, Is.InRange(110f, 140f), "the blade up behind the helmet (125 degrees)");
+                    if (view.StowOnTable)
+                    {
+                        // U-212 (H8, props/rig/stow_socket): the stowed tool rides the body: its grip end and its direction are the drawn
+                        // frame's own row, nothing of the cursor's and nothing of the swinging arm's
+                        Assert.Less(Vector2.Distance(view.Tool.transform.position, view.StowWorld), 1e-3f, $"the cursor at {d}: the stowed tool's grip end is on the body's stow socket");
+                        Assert.Less(Mathf.Abs(Mathf.DeltaAngle(view.StowTableDegrees, view.AimDegrees)), 1e-2f, "its direction is the table's for the drawn frame");
+                        Assert.Greater(Vector2.Distance(view.StowWorld, feet), 0.3f, "on the body, not at the feet");
+                        Assert.Less(Vector2.Distance(view.StowWorld, feet + new Vector2(0f, 0.9f)), 1.0f, "within the figure");
+                    }
+                    else
+                    {
+                        Assert.Less(Mathf.Abs(Mathf.DeltaAngle(rest, view.AimDegrees)), 3f, $"the cursor at {d}: the tool's angle does not change with the button up (but for its share of the idle arm's sway)");
+                        Assert.Less(Mathf.Abs(Mathf.DeltaAngle(view.StowAngle(false), view.AimDegrees)), 1e-2f, "the stowed pose (facing right): its angle and its share of the arm's own, nothing of the cursor's");
+                    }
+                    Assert.That(view.AimDegrees, Is.InRange(100f, 140f), "the blade up behind the helmet (about 120 degrees)");
                     Assert.AreEqual(Meridian.View2D.SpriteCharacterView.SurveyorOrder - 1, view.Tool.sortingOrder, "drawn behind the body");
                     Assert.IsFalse(view.Fist.enabled, "no fist on a stowed tool");
                 }
@@ -253,6 +265,7 @@ namespace Meridian.Tests
                 Assert.Less(Mathf.Abs(Mathf.DeltaAngle(view.CarryAngle(false), view.AimDegrees)), 1e-2f, "whatever the cursor does");
                 for (int i = 0; i < 75; i++) yield return null;
                 Assert.IsTrue(view.Stowed, "stowed 1.5 s after the last swing");
+                TestContext.Out.WriteLine($"[MERIDIAN] u212 stow: on the table {view.StowOnTable}; the grip end {view.StowWorld - feet} from the feet, the tool at {view.AimDegrees:0.0} degrees, order {view.Tool.sortingOrder}");
                 input.AimAt(target);
                 yield return null;
 
@@ -302,10 +315,15 @@ namespace Meridian.Tests
                         Assert.IsTrue(view.Bracket(i).enabled, $"bracket {i} of four round the brush's circle");
                         Assert.AreEqual(RigTools.BrushRadius + RigToolView.ClampedGapM, Vector2.Distance(view.Bracket(i).transform.position, view.ReticleCentre), 0.01f, "pushed out 0.09 m: clamped");
                     }
-                    Assert.IsTrue(view.Pip.enabled, "the pip on the contact");
-                    Assert.Less(Vector2.Distance(view.Pip.transform.position, view.ReticleAt), 1e-3f);
+                    // U-212 (LEAD 11:2x): no pip while the tool rests (brackets with a mark at their middle read as a sight); its place is kept
+                    Assert.IsFalse(view.Pip.enabled, "no pip at rest");
+                    Assert.Less(Vector2.Distance(view.Pip.transform.position, view.ReticleAt), 1e-3f, "the pip's place is the contact");
                     Assert.IsFalse(view.Reticle.enabled, "the stand-in ring is off");
+                    // U-212 (3): the marks sort under the drawn surveyor (a red bracket sat on the hand in 0.6.3's smoke_65)
+                    for (int i = 0; i < 4; i++) Assert.Less(view.Bracket(i).sortingOrder, Meridian.View2D.SpriteCharacterView.SurveyorOrder, $"bracket {i} sorts under the surveyor");
+                    Assert.Less(view.Pip.sortingOrder, Meridian.View2D.SpriteCharacterView.SurveyorOrder, "the pip sorts under the surveyor");
                 }
+                Assert.IsFalse(view.ReticleOverAnimal, "no animal in the brackets here");
                 Assert.AreEqual(RigTools.BrushPush, Vector2.Distance(view.ReticleCentre, view.ReticleAt), 0.02f, "the ring is the brush's circle: its middle pushed into the ground from the contact");
                 Vector2 dugAt = default;
                 bool dug = false;
@@ -313,10 +331,16 @@ namespace Meridian.Tests
                 rig.Dug += onDug;
                 input.holdUse = true;
                 float until = Time.time + 3f;
-                while (!dug && Time.time < until) yield return null;
+                bool pipInStroke = false;
+                while (!dug && Time.time < until)
+                {
+                    if (stroke.Active && view.Pip.enabled) pipInStroke = true;
+                    yield return null;
+                }
                 input.holdUse = false;
                 rig.Dug -= onDug;
                 Assert.IsTrue(dug, "a click past reach digs, never nothing");
+                Assert.IsTrue(pipInStroke, "U-212: the pip shows on the contact while the stroke runs");
                 Assert.IsTrue(stroke.Clamped);
                 Assert.LessOrEqual(Vector2.Distance(stroke.LastContactAt, shoulder), reach + 1e-3f, "the contact inside the reach");
                 Assert.AreEqual(RigTools.BrushPush, Vector2.Distance(dugAt, stroke.LastContactAt), 0.02f, "the dig opened from the contact, its centre pushed into the ground");

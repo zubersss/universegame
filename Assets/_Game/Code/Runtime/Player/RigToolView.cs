@@ -77,7 +77,7 @@ namespace Meridian.Player
         }
 
         // the hand's socket tables and the dig sheet's rest poses, read once per registry (a lookup builds its key string)
-        ArtMaterials.ArtSocket handTable, handTableB, heldTableB, handTableDig, readyPose, stowPose;
+        ArtMaterials.ArtSocket handTable, handTableB, heldTableB, handTableDig, readyPose, stowPose, stowTable;
         ArtMaterials tablesOf;
         int tablesCount = -2;
 
@@ -93,6 +93,7 @@ namespace Meridian.Player
             handTableDig = ArtMaterials.SocketFor(DigSheetKey, "hand");
             readyPose = ArtMaterials.SocketFor(DigSheetKey, "ready");
             stowPose = ArtMaterials.SocketFor(DigSheetKey, "carry");
+            stowTable = ArtMaterials.SocketFor("props/rig/stow_socket", "stow_socket");
             ReadLookSockets();
         }
 
@@ -139,12 +140,14 @@ namespace Meridian.Player
             Beam.tileMode = SpriteTileMode.Continuous;
             Ghost = Child("BuilderGhost", Meridian.View2D.SpriteCharacterView.SurveyorOrder);
             // U-209: the dig's reticle, the crack mark under it, the Beam's glow at its hit
-            Crack = Child("DigCrack", Meridian.View2D.SpriteCharacterView.SurveyorOrder - 1);
-            Reticle = Child("DigReticle", Meridian.View2D.SpriteCharacterView.SurveyorOrder);
+            // U-212 (LEAD 11-10, 0.6.3's smoke_65: a red bracket sat on the hand): the reticle's marks sort UNDER the drawn surveyor, the
+            // crack under them
+            Crack = Child("DigCrack", CrackOrder);
+            Reticle = Child("DigReticle", ReticleOrder);
             Glow = Child("BeamGlow", Meridian.View2D.SpriteCharacterView.SurveyorOrder + 1);
             Fist = Child("GripFist", Meridian.View2D.SpriteCharacterView.SurveyorOrder + 2); // over the tool, which is over the body
-            Pip = Child("DigPip", Meridian.View2D.SpriteCharacterView.SurveyorOrder + 1);     // the reticle's mark on the contact point
-            for (int i = 0; i < brackets.Length; i++) { brackets[i] = Child("ReticleBracket" + i, Meridian.View2D.SpriteCharacterView.SurveyorOrder + 1); brackets[i].enabled = false; }
+            Pip = Child("DigPip", ReticleOrder);     // the reticle's mark on the contact point
+            for (int i = 0; i < brackets.Length; i++) { brackets[i] = Child("ReticleBracket" + i, ReticleOrder); brackets[i].enabled = false; }
             Swish = Child("ShovelSwish", Meridian.View2D.SpriteCharacterView.SurveyorOrder + 2);
             Beam.enabled = Ghost.enabled = Crack.enabled = Reticle.enabled = Glow.enabled = Fist.enabled = Pip.enabled = Swish.enabled = false;
             var mg = new GameObject("DigCrackMask");
@@ -464,12 +467,12 @@ namespace Meridian.Player
             bool flying = body != null && body.Clip == SurveyorAnim.Jetpack && !input.Using;
             bool away = held || flying;
             ToolAway = away;
-            if (Tool.enabled == away) Tool.enabled = !away;
 
             Vector2 toolAt = HandWorld;
             Carrying = false;
             ScoopArcDegrees = 0f;
-            bool stowed = false;
+            bool stowed = false, stowHidden = false;
+            StowOnTable = false;
             if (swing || ray) readyUntil = Time.time + ReadySeconds;
             if (swing)
             {
@@ -526,6 +529,13 @@ namespace Meridian.Player
                     stowed = Mathf.Floor(Time.time * DigStroke.DrawingsPerSecond) / DigStroke.DrawingsPerSecond >= readyUntil; // on the 12 Hz tick
                     AimDegrees = stowed ? StowAngle(left) : CarryAngle(left);
                     aimVelocity = 0f;
+                    // U-212 (H8): stowed, the tool rides the BODY (props/rig/stow_socket: its grip end and direction a drawn frame),
+                    // not the swinging glove: in the bump and hard-landing frames the blade stood on the helmet like a horn
+                    if (stowed && StowOnBody(out var stowAt, out float stowDeg, out stowHidden) && !stowHidden)
+                    {
+                        toolAt = stowAt; AimDegrees = stowDeg;
+                        StowOnTable = true; StowWorld = stowAt; StowTableDegrees = stowDeg;
+                    }
                 }
                 else AimDegrees = Mathf.SmoothDampAngle(AimDegrees, CarryAngle(left), ref aimVelocity, BeamDampSeconds);
             }
@@ -537,6 +547,8 @@ namespace Meridian.Player
                 aimVelocity = 0f;
             }
             Stowed = stowed;
+            bool toolShown = !away && !stowHidden; // hidden too on a frame the stow table has no row for (look_camera's front view)
+            if (Tool.enabled != toolShown) Tool.enabled = toolShown;
             // The dig tool is drawn IN FRONT of the body (LEAD 06:5x: the whole shaft across the torso to its grip, the fist over it;
             // level with the body it was hidden behind the fist and the spade read short); stowed it goes behind. The other modules
             // keep the body's own order.
@@ -575,6 +587,30 @@ namespace Meridian.Player
             if (pose != null && pose.stride >= 2 && pose.Has(0)) { radians = pose[0, 0]; swing = pose[0, 1]; }
             float deg = radians * Mathf.Rad2Deg + swing * ArmDegrees;
             return left ? 180f - deg : deg;
+        }
+
+        /// <summary>U-212: the stowed tool sits on the body's stow socket this frame (props/rig/stow_socket), where it is, and its direction
+        /// (degrees, counter-clockwise from +x, mirrored with the drawing).</summary>
+        public bool StowOnTable { get; private set; }
+        public Vector2 StowWorld { get; private set; }
+        public float StowTableDegrees { get; private set; }
+
+        /// <summary>The stow socket for the drawn frame of the SIDE sheet (not side_b's clips nor the dig sheet's: no table for them):
+        /// the grip end through the squash root, mirrored with the drawing. `hidden`: the frame is the table's but has no row.</summary>
+        bool StowOnBody(out Vector2 at, out float degrees, out bool hidden)
+        {
+            at = default; degrees = 0f; hidden = false;
+            if (stowTable == null || stowTable.stride < 3 || body == null || body.Renderer == null || !body.Renderer.enabled) return false;
+            var sprite = body.Renderer.sprite;
+            if (sprite == null || SheetDig(sprite) || JetpackOverlay.SheetB(sprite)) return false;
+            int i = JetpackOverlay.FrameOf(sprite);
+            if (i < 0 || i >= stowTable.Count) return false;
+            if (!stowTable.Has(i)) { hidden = true; return true; }
+            bool flip = body.Renderer.flipX;
+            at = body.SquashRoot.TransformPoint(new Vector2(flip ? -stowTable[i, 0] : stowTable[i, 0], stowTable[i, 1]));
+            float deg = stowTable[i, 2] * Mathf.Rad2Deg;
+            degrees = flip ? 180f - deg : deg;
+            return true;
         }
 
         /// <summary>The stowed tool is drawn behind the body (side_dig.json's carry.behind; true where the registry has no carry pose).</summary>
@@ -667,9 +703,14 @@ namespace Meridian.Player
             on &= rig != null && rig.terrain != null && input.UiFree && !TransitionBusy;
             bool art = reticleSheet != null && reticleSheet.Ready && reticleSheet.frames.Length >= 6;
             ReticleOnArt = on && art;
-            if (Reticle.enabled != (on && !art)) Reticle.enabled = on && !art;
-            for (int i = 0; i < brackets.Length; i++) if (brackets[i].enabled != (on && art)) brackets[i].enabled = on && art;
-            if (!on) { if (Crack.enabled) Crack.enabled = false; if (CrackMask.enabled) CrackMask.enabled = false; if (Pip.enabled) Pip.enabled = false; CrackStage = 0; return; }
+            if (!on)
+            {
+                if (Reticle.enabled) Reticle.enabled = false;
+                for (int i = 0; i < brackets.Length; i++) if (brackets[i].enabled) brackets[i].enabled = false;
+                if (Crack.enabled) Crack.enabled = false; if (CrackMask.enabled) CrackMask.enabled = false; if (Pip.enabled) Pip.enabled = false;
+                CrackStage = 0; ReticleOverAnimal = false;
+                return;
+            }
             var stroke = input.Stroke;
             Vector2 at; bool diggable, clamped;
             if (stroke.Active) { at = stroke.Target; diggable = stroke.Diggable; clamped = stroke.Clamped; }
@@ -684,6 +725,17 @@ namespace Meridian.Player
             bool lively = input.Pressed || stroke.Active || Time.time - input.LastAimMoveTime < ReticleFullSeconds;
             ReticleStrength = Mathf.MoveTowards(ReticleStrength, lively ? 1f : ReticleIdleStrength, Time.deltaTime * ReticleFadePerSecond);
             bool hit = shovel && stroke.Phase == DigPhase.Swing && stroke.Drawing == DigStroke.ContactDrawing; // the hit reads on the mark
+            // U-212 (H7): on block ground the marks stand in front of the block mesh's front faces
+            float markZ = brush ? 0f : BlockMarkZ;
+            // U-212 (5): the empty state hides while an animal stands inside it (red brackets came to rest framing the wolf in 0.6.3's smoke_2c)
+            bool overAnimal = !diggable && AnimalInside(centre, (brush ? RigTools.BrushRadius : 0.71f) + NothingGapM);
+            ReticleOverAnimal = overAnimal;
+            bool ring = !art && !overAnimal, corners = art && !overAnimal;
+            if (Reticle.enabled != ring) Reticle.enabled = ring;
+            for (int i = 0; i < brackets.Length; i++) if (brackets[i].enabled != corners) brackets[i].enabled = corners;
+            // U-212 (9, LEAD 11:2x): the pip only while a stroke runs; at rest four brackets with a mark at their middle read as a sight.
+            // Its place is kept at rest (the contact), so it is there the frame a stroke starts.
+            bool pipOn = diggable && stroke.Active;
             if (art)
             {
                 // B-246's fx/dig_reticle: four brackets and a pip, a two-drawing boil; the state by tint and gap
@@ -702,7 +754,7 @@ namespace Meridian.Player
                     {
                         // an arc sits ON the circle: its pivot on the line, the circle's middle straight below the frame as drawn
                         float a = 45f + 90f * i, rad = a * Mathf.Deg2Rad, r = RigTools.BrushRadius + gap;
-                        b.transform.SetPositionAndRotation(new Vector3(centre.x + r * Mathf.Cos(rad), centre.y + r * Mathf.Sin(rad), 0f), Quaternion.Euler(0f, 0f, a - 90f));
+                        b.transform.SetPositionAndRotation(new Vector3(centre.x + r * Mathf.Cos(rad), centre.y + r * Mathf.Sin(rad), markZ), Quaternion.Euler(0f, 0f, a - 90f));
                     }
                     else
                     {
@@ -710,16 +762,16 @@ namespace Meridian.Player
                         // the bottom-left, the bottom-right, the top-right
                         float h = 0.5f + gap * 0.7071f;
                         float cx = i == 0 || i == 1 ? -h : h, cy = i == 0 || i == 3 ? h : -h;
-                        b.transform.SetPositionAndRotation(new Vector3(centre.x + cx, centre.y + cy, 0f), Quaternion.Euler(0f, 0f, 90f * i));
+                        b.transform.SetPositionAndRotation(new Vector3(centre.x + cx, centre.y + cy, markZ), Quaternion.Euler(0f, 0f, 90f * i));
                     }
                 }
-                if (Pip.enabled != diggable) Pip.enabled = diggable; // no pip where there is nothing to dig
+                if (Pip.enabled != pipOn) Pip.enabled = pipOn; // no pip where there is nothing to dig, none while the tool rests
                 if (diggable)
                 {
                     var cross = reticleSheet.frames[4 + boil];
                     if (Pip.sprite != cross) Pip.sprite = cross;
                     if (Pip.color != tint) Pip.color = tint;
-                    Pip.transform.position = new Vector3(at.x, at.y, 0f);
+                    Pip.transform.position = new Vector3(at.x, at.y, markZ);
                     Pip.transform.localScale = Vector3.one;
                 }
             }
@@ -729,12 +781,12 @@ namespace Meridian.Player
                 var tint = !diggable ? ReticleNothing : clamped ? ReticleAtReach : ReticleInReach;
                 ReticleTint = tint;
                 tint.a *= ReticleStrength;
-                if (Pip.enabled != diggable) Pip.enabled = diggable;
+                if (Pip.enabled != pipOn) Pip.enabled = pipOn;
                 if (diggable)
                 {
                     if (Pip.sprite != GlowSprite) Pip.sprite = GlowSprite;
                     if (Pip.color != tint) Pip.color = tint;
-                    Pip.transform.position = new Vector3(at.x, at.y, 0f);
+                    Pip.transform.position = new Vector3(at.x, at.y, markZ);
                     Pip.transform.localScale = Vector3.one * PipSize;
                 }
                 var sprite = brush ? Ring : CellBox;
@@ -743,7 +795,7 @@ namespace Meridian.Player
                 float size = brush ? 2f * RigTools.BrushRadius : 1f;
                 if (!diggable) size *= NothingScale;
                 else if (hit) size *= ContactPop;
-                Reticle.transform.position = new Vector3(centre.x, centre.y, 0f);
+                Reticle.transform.position = new Vector3(centre.x, centre.y, markZ);
                 Reticle.transform.localScale = Vector3.one * size;
             }
             // the crack: the work the target holds, in three stages, on the lump of ground that will open
@@ -781,8 +833,48 @@ namespace Meridian.Player
                 CrackMask.transform.localScale = new Vector3(CrackMaskWideM, CrackMaskDeepM, 1f);
             }
             Vector2 origin = clip ? at : centre;
-            Crack.transform.position = new Vector3(origin.x, origin.y, 0f);
+            Crack.transform.position = new Vector3(origin.x, origin.y, markZ);
             Crack.transform.localScale = Vector3.one * (chipArt ? (brush ? RigTools.BrushRadius / 0.9f : 1f) : (brush ? 2f * RigTools.BrushRadius : 1f) * CrackShare);
+        }
+
+        /// <summary>U-212: the reticle's marks (brackets, pip, the stand-in ring) under the drawn surveyor and its stowed tool, the crack under them.</summary>
+        public const int ReticleOrder = Meridian.View2D.SpriteCharacterView.SurveyorOrder - 2, CrackOrder = Meridian.View2D.SpriteCharacterView.SurveyorOrder - 3; // -1 is the stowed tool, behind the body
+        /// <summary>U-212 (H7, 0.6.3's smoke_13 / 15 / 17 / 23-26 at 4x): the block mesh writes depth and its front faces stand at
+        /// BlockMesher.FrontZ (-0.5); a mark at z 0 was drawn BEHIND its own cell, two or three dashes showing in the open air beside
+        /// it. On block ground the marks stand a hair in front of those faces (as GroundStrip does).</summary>
+        public const float BlockMarkZ = Meridian.Terrain.BlockMesher.FrontZ - 0.1f;
+        /// <summary>U-212 (5): an animal stands inside the reticle's empty state (it is hidden then).</summary>
+        public bool ReticleOverAnimal { get; private set; }
+        /// <summary>How far round a creature's body (m) counts as the animal when its drawn bounds are not to be had.</summary>
+        public const float AnimalHalfM = 0.9f;
+        Meridian.Creatures.CreatureDirector creatures;
+        int creaturesSought = -1000;
+
+        bool AnimalInside(Vector2 centre, float radius)
+        {
+            if (creatures == null)
+            {
+                if (Time.frameCount - creaturesSought < 120) return false; // sought twice a second at most: a scene may have none
+                creaturesSought = Time.frameCount;
+                creatures = FindAnyObjectByType<Meridian.Creatures.CreatureDirector>();
+                if (creatures == null) return false;
+            }
+            var all = creatures.All;
+            for (int i = 0; i < all.Count; i++)
+            {
+                var c = all[i];
+                if (c == null || !c.Alive) continue;
+                if (c.View != null && c.View.enabled && c.View.sprite != null)
+                {
+                    var b = c.View.bounds;
+                    if (b.SqrDistance(new Vector3(centre.x, centre.y, b.center.z)) <= radius * radius) return true;
+                    continue;
+                }
+                if (c.Body == null) continue;
+                float reach = radius + AnimalHalfM;
+                if ((c.Body.position - centre).sqrMagnitude <= reach * reach) return true;
+            }
+            return false;
         }
 
         /// <summary>The crack's mask: a square over the ground's side of the face at the contact (its lower edge on the face's tangent).</summary>
