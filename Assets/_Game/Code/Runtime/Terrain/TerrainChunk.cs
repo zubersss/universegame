@@ -218,7 +218,10 @@ namespace Meridian.Terrain
             int x0 = cx * C, y0 = cy * C, t0 = x0 - 1 - r;
             ShoreWater(x0, y0);
             for (int k = 0; k < tops.Length; k++) tops[k] = world.WallTop(t0 + k);
-            for (int i = 0; i <= C; i++) curve[i] = GroundField.Curve(x0 - 1 + i, x => tops[x - t0], world.PadTop);
+            WorldDelegates();
+            topsFrom = t0;
+            topOfTops ??= x => tops[x - topsFrom];
+            for (int i = 0; i <= C; i++) curve[i] = GroundField.Curve(x0 - 1 + i, topOfTops, padTopOf);
             for (int i = 0; i <= C; i++) SurfaceCurve[i] = tops[i + r] == int.MinValue ? float.NaN : curve[i];
             // U-169: each node column's natural top (its fill to the curve), once per column, not per node (the build gate's chunk p99).
             naturalTop ??= new int[C + 1];
@@ -351,9 +354,24 @@ namespace Meridian.Terrain
             bool solid = TileId.IsSolid(world.TileAt(tx, ty));
             int top = world.WallTop(tx);
             if (world.TryLevel(tx, ty, out byte level)) return level / 255f;
-            float curveAt = GroundField.Curve(tx, world.WallTop, world.PadTop);
+            WorldDelegates();
+            float curveAt = GroundField.Curve(tx, wallTopOf, padTopOf);
             if (top != int.MinValue) top = world.FillTop(tx, top, curveAt); // U-169
             return GroundField.Density(solid, top != int.MinValue && solid == (ty <= top), curveAt, ty);
+        }
+
+        // The curve's delegates, made once a chunk and a world: a method group or a lambda written in the call makes a new object every
+        // time (07:5x: Unity's own allocation counter, the first live one, showed the curve's callers).
+        System.Func<int, int> topOfTops, wallTopOf, padTopOf;
+        IBlockWorld delegatesOf;
+        int topsFrom;
+
+        void WorldDelegates()
+        {
+            if (ReferenceEquals(delegatesOf, world)) return;
+            delegatesOf = world;
+            wallTopOf = world.WallTop;
+            padTopOf = world.PadTop;
         }
 
         bool filled;

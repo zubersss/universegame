@@ -3,6 +3,8 @@ using Meridian.Player;
 using Meridian.Rig;
 using NUnit.Framework;
 using UnityEngine;
+using UnityEngine.TestTools.Constraints; // AllocatingGCMemory on a constraint expression (Is.Not...)
+using Is = UnityEngine.TestTools.Constraints.Is;
 
 namespace Meridian.Tests
 {
@@ -249,11 +251,27 @@ namespace Meridian.Tests
             s.Contacted += (kind, at, stage) => contacts++;
             s.SwingStarted += (at, ok) => { };
             for (int f = 0; f < 60; f++) s.Step(w, Dt, f == 0, true, Aim); // warm
-            long before = System.GC.GetAllocatedBytesForCurrentThread();
-            for (int f = 0; f < 25 * 20; f++) s.Step(w, Dt, false, true, Aim + new Vector2(0.001f * f, 0f));
-            long allocated = System.GC.GetAllocatedBytesForCurrentThread() - before;
-            Assert.AreEqual(0L, allocated, "20 swings of chips: 0 B");
+            // The measure is Unity's own count of GC.Alloc samples on this thread (the test framework's constraint), with a control: a
+            // measure that never moves passes anything. System.GC.GetAllocatedBytesForCurrentThread was the measure here until 07:4x:
+            // what it reads for a known 4 KB array is printed below (0: this runtime does not count it, and the row it gave proved
+            // nothing).
+            long sys0 = System.GC.GetAllocatedBytesForCurrentThread();
+            var known = new byte[4096];
+            long sys = System.GC.GetAllocatedBytesForCurrentThread() - sys0;
+            System.GC.KeepAlive(known);
+            TestContext.Out.WriteLine($"[MERIDIAN] u209 allocation counters (EditMode): System.GC.GetAllocatedBytesForCurrentThread read {sys} B for a 4096 B array ({(sys >= 4096 ? "live" : "NOT live in this runtime")})");
+            byte[] kept = null;
+            Assert.That(() => { kept = new byte[64]; }, UnityEngine.TestTools.Constraints.Is.AllocatingGCMemory(), "the control: the constraint sees a 64 B array");
+            System.GC.KeepAlive(kept);
+            Assert.That(() => { for (int f = 0; f < 25 * 20; f++) s.Step(w, Dt, false, true, Aim + new Vector2(0.001f * f, 0f)); },
+                UnityEngine.TestTools.Constraints.Is.Not.AllocatingGCMemory(), "20 swings of chips: no GC allocation");
             Assert.GreaterOrEqual(contacts, 20);
+            // the Beam's ray, and both with the Rhythm node's numbers read every stroke
+            var beam = new FakeWorld { tool = DigTool.Beam, strokeSeconds = 1000f, reach = 5f, rhythmStep = 0.1f, rhythmMax = 0.3f };
+            var ray = new DigStroke();
+            for (int f = 0; f < 60; f++) ray.Step(beam, Dt, f == 0, true, Aim);
+            Assert.That(() => { for (int f = 0; f < 600; f++) ray.Step(beam, Dt, false, true, Aim + new Vector2(0.001f * f, 0f)); },
+                UnityEngine.TestTools.Constraints.Is.Not.AllocatingGCMemory(), "10 s of the ray: no GC allocation");
         }
 
         // ---------- the rhythm (P-U209-3; D1 §5: "each consecutive stroke on the same face -10 % time (max -30 %)") ----------

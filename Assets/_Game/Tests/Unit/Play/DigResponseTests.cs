@@ -641,60 +641,80 @@ namespace Meridian.Tests
                 const int Frames = 75; // three swings
                 long idle = long.MaxValue, swinging = long.MaxValue;
                 int opens = input.Stroke.Opens, contacts = input.Stroke.Contacts;
-                for (int round = 0; round < 3; round++)
+                // The measure: Unity's own counter of the managed bytes allocated in a frame (every thread), read a frame late (the
+                // last whole frame's). First a CONTROL: a counter that never moves passes every row below. Until 07:4x the measure
+                // here was System.GC.GetAllocatedBytesForCurrentThread: what it reads for the same known array is printed, and if
+                // that is 0 the "0 B" rows it gave before proved nothing.
+                using (var gc = Unity.Profiling.ProfilerRecorder.StartNew(Unity.Profiling.ProfilerCategory.Memory, "GC Allocated In Frame"))
                 {
-                    long before = System.GC.GetAllocatedBytesForCurrentThread();
-                    for (int i = 0; i < Frames; i++) yield return null;
-                    idle = System.Math.Min(idle, System.GC.GetAllocatedBytesForCurrentThread() - before);
-                    input.holdUse = true;
-                    yield return null;
-                    before = System.GC.GetAllocatedBytesForCurrentThread();
-                    for (int i = 0; i < Frames; i++) yield return null;
-                    swinging = System.Math.Min(swinging, System.GC.GetAllocatedBytesForCurrentThread() - before);
-                    input.holdUse = false;
-                    yield return Rest();
-                }
-                TestContext.Out.WriteLine($"[MERIDIAN] u209 allocation over {Frames} frames, the least of 3 rounds: idle {idle} B, swinging {swinging} B ({input.Stroke.Contacts - contacts} contacts, {input.Stroke.Opens - opens} opens)");
-                Assert.AreEqual(0, input.Stroke.Opens - opens, "no cell opened in the measured spans");
-                Assert.GreaterOrEqual(input.Stroke.Contacts - contacts, 9, "the swings made their contacts");
-                Assert.LessOrEqual(swinging - idle, 0L, "0 B per swing: swinging allocates nothing an idle frame does not");
+                    Assert.IsTrue(gc.Valid, "Unity's 'GC Allocated In Frame' counter is there");
+                    for (int i = 0; i < 3; i++) yield return null;
+                    long sys0 = System.GC.GetAllocatedBytesForCurrentThread();
+                    var known = new byte[65536];
+                    long sys = System.GC.GetAllocatedBytesForCurrentThread() - sys0;
+                    long seenKnown = 0;
+                    for (int i = 0; i < 3; i++) { yield return null; seenKnown = System.Math.Max(seenKnown, gc.LastValue); }
+                    System.GC.KeepAlive(known);
+                    TestContext.Out.WriteLine($"[MERIDIAN] u209 allocation counters (PlayMode), a known 65536 B array: Unity's 'GC Allocated In Frame' read {seenKnown} B in its frame; System.GC.GetAllocatedBytesForCurrentThread read {sys} B ({(sys >= 65536 ? "live" : "NOT live in this runtime")})");
+                    Assert.GreaterOrEqual(seenKnown, 65536L, "the control: the counter sees a 64 KB array in the frame it is made");
 
-                // P-U209-4 (LEAD 07:1x): the frame a cell OPENS, a number for the perf report (not a bar): the main thread's bytes in the
-                // span that holds the opening Update (the terrain edit) and in the ten frames after it (the chunk's mesh, the clods,
-                // the drops), three openings in topsoil with the shovel: the hollow's right wall, its left wall, its floor (one cell a
-                // line: the next face on a line is past the shovel's 2 m).
-                yield return StandAtDepth(x + 76f, 5f);
-                feet = player.Body.position;
-                int dug = 0, measured = 0;
-                System.Action<Vector2> onDug = p => dug++;
-                rig.Dug += onDug;
-                var rows = new System.Text.StringBuilder();
-                foreach (var aim in new[] { new Vector2(1.4f, 0.6f), new Vector2(-1.4f, 0.6f), new Vector2(0.2f, -0.6f) })
-                {
-                    input.AimAt(feet + aim);
-                    yield return Rest();
-                    input.Stroke.Reset();
-                    input.holdUse = true;
-                    long mark = System.GC.GetAllocatedBytesForCurrentThread();
-                    for (int f = 0; f < 60 * 4; f++)
+                    var rounds = new System.Text.StringBuilder();
+                    for (int round = 0; round < 3; round++)
                     {
-                        int seen = dug;
+                        long sum = 0;
+                        for (int i = 0; i < Frames; i++) { yield return null; sum += gc.LastValue; }
+                        idle = System.Math.Min(idle, sum);
+                        rounds.Append($" round {round + 1}: idle {sum} B,");
+                        input.holdUse = true;
                         yield return null;
-                        long now = System.GC.GetAllocatedBytesForCurrentThread();
-                        long span = now - mark;
-                        mark = now;
-                        if (dug == seen) continue;
-                        input.holdUse = false; // the swing plays out; no second cell
-                        for (int i = 0; i < 10; i++) yield return null;
-                        rows.Append($" opening {++measured}: {span} B in its frame, {System.GC.GetAllocatedBytesForCurrentThread() - mark} B in the ten after;");
-                        break;
+                        yield return null; // the counter reads a frame late: from the press' own frame
+                        sum = 0;
+                        for (int i = 0; i < Frames; i++) { yield return null; sum += gc.LastValue; }
+                        swinging = System.Math.Min(swinging, sum);
+                        rounds.Append($" swinging {sum} B;");
+                        input.holdUse = false;
+                        yield return Rest();
                     }
-                    input.holdUse = false;
+                    TestContext.Out.WriteLine($"[MERIDIAN] u209 allocation over {Frames} frames (Unity's 'GC Allocated In Frame', every thread), the least of 3 rounds: idle {idle} B, swinging {swinging} B ({input.Stroke.Contacts - contacts} contacts, {input.Stroke.Opens - opens} opens);{rounds}");
+                    Assert.AreEqual(0, input.Stroke.Opens - opens, "no cell opened in the measured spans");
+                    Assert.GreaterOrEqual(input.Stroke.Contacts - contacts, 9, "the swings made their contacts");
+                    Assert.LessOrEqual(swinging - idle, 0L, "0 B per swing: swinging allocates nothing an idle frame does not");
+
+                    // P-U209-4 (LEAD 07:1x): the frame a cell OPENS, a number for the perf report (not a bar): the bytes of the frame
+                    // whose Update opened it (the terrain edit) and of the ten frames after it (the chunk's mesh, the clods, the
+                    // drops), three openings in topsoil with the shovel: the hollow's right wall, its left wall, its floor (one cell a
+                    // line: the next face on a line is past the shovel's 2 m).
+                    yield return StandAtDepth(x + 76f, 5f);
+                    feet = player.Body.position;
+                    int dug = 0, measured = 0;
+                    System.Action<Vector2> onDug = p => dug++;
+                    rig.Dug += onDug;
+                    var rows = new System.Text.StringBuilder();
+                    foreach (var aim in new[] { new Vector2(1.4f, 0.6f), new Vector2(-1.4f, 0.6f), new Vector2(0.2f, -0.6f) })
+                    {
+                        input.AimAt(feet + aim);
+                        yield return Rest();
+                        input.Stroke.Reset();
+                        input.holdUse = true;
+                        for (int f = 0; f < 60 * 4; f++)
+                        {
+                            int seen = dug;
+                            yield return null;
+                            if (dug == seen) continue;
+                            input.holdUse = false; // the swing plays out; no second cell
+                            yield return null;     // the opening frame is whole: its bytes
+                            long open = gc.LastValue, after = 0;
+                            for (int i = 0; i < 10; i++) { yield return null; after += gc.LastValue; }
+                            rows.Append($" opening {++measured}: {open} B in its frame, {after} B in the ten after;");
+                            break;
+                        }
+                        input.holdUse = false;
+                    }
+                    rig.Dug -= onDug;
+                    Assert.AreEqual(3, measured, "three cells opened");
+                    TestContext.Out.WriteLine($"[MERIDIAN] u209 the frame a cell opens (shovel, topsoil; Unity's 'GC Allocated In Frame'; an idle frame: {idle / Frames} B):{rows}");
+                    yield return Rest();
                 }
-                rig.Dug -= onDug;
-                Assert.AreEqual(3, measured, "three cells opened");
-                TestContext.Out.WriteLine($"[MERIDIAN] u209 the frame a cell opens (shovel, topsoil, the main thread; idle and swinging frames: {idle / Frames} B):{rows}");
-                yield return Rest();
                 LogAssert.NoUnexpectedReceived();
             }
             finally { Restore(); }

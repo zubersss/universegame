@@ -159,7 +159,10 @@ namespace Meridian.Terrain
         public int PadTop(int x) => SmoothGround && Config != null ? Meridian.Planet.POI.PoiStamp.PadAt(BaseGenerator, Config.datumY, Config.id, x) : int.MinValue;
 
         /// <summary>U-156: the drawn surface's height over column x's centre on a smooth planet (the outline's line where nothing is dug or built).</summary>
-        public float CurveAt(int x) => GroundField.Curve(x, OriginalTop, PadTop);
+        public float CurveAt(int x) => GroundField.Curve(x, originalTopOf ??= OriginalTop, padTopOf ??= PadTop);
+        // The two delegates, made once: passed as method groups each call made two objects (128 B), and a field read (FieldAt: up to
+        // 32 curves a point) is asked hundreds of times a frame (U-209's reticle, 07:5x: 48-108 KB a frame at rest in the dig slot).
+        System.Func<int, int> originalTopOf, padTopOf;
 
         /// <summary>U-157 (P-54): a brushed tile's node density (0-255: its block's [0]), if it has a block.</summary>
         public bool TryLevel(int x, int y, out byte level) { level = 0; return Edits != null && Edits.TryGetLevel(WrapX(x), y, out level); }
@@ -219,8 +222,10 @@ namespace Meridian.Terrain
         {
             if (TryLevel(x, y, out byte l)) return l / 255f;
             bool solid = TileId.IsSolid(GetTile(x, y));
-            int top = NaturalTop(x); // U-169
-            return GroundField.Density(solid, top != int.MinValue && solid == (y <= top), CurveAt(x), y);
+            float curve = CurveAt(x); // once: NaturalTop asks for it too
+            int top = OriginalTop(x);
+            if (top != int.MinValue) top = ((TerrainChunk.IBlockWorld)this).FillTop(x, top, curve); // U-169 (NaturalTop)
+            return GroundField.Density(solid, top != int.MinValue && solid == (y <= top), curve, y);
         }
 
         /// <summary>U-156: the drawn outline's height at world x where nothing is dug or built (the curve between column centres, linear, as

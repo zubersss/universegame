@@ -175,14 +175,20 @@ namespace Meridian.Tests
             Assert.AreEqual(kicks0 + 1, follow.KickFrames, "no second kick frame");
 
             // the clods fall under gravity and are gone 0.6 s after the stroke
+            // (08:0x: "a clod moves down within 0.3 s" held only by luck: at 3-4.5 m/s a clod thrown steeply peaks 0.31-0.46 s after the
+            // stroke, and the row failed once in about ten runs. What gravity does in 0.3 s whatever the throw: a clod's upward speed
+            // has dropped by over 1 m/s, or it rests.)
             float t0 = Time.time;
             bool fell = false;
+            var launched = new float[DigFeel.Pool];
+            for (int i = 0; i < DigFeel.Pool; i++) launched[i] = feel.Clod(i, out _, out var v0, out _) ? v0.y : float.NaN;
             while (Time.time - t0 < DigFeel.ClodLife * 0.5f)
             {
                 yield return null;
-                for (int i = 0; i < DigFeel.Pool; i++) if (feel.Clod(i, out _, out var cv, out bool resting) && (cv.y < 0f || resting)) fell = true;
+                for (int i = 0; i < DigFeel.Pool; i++)
+                    if (feel.Clod(i, out _, out var cv, out bool resting) && (resting || cv.y < 0f || cv.y < launched[i] - 1f)) fell = true;
             }
-            Assert.IsTrue(fell, "gravity turns the clods down within 0.3 s");
+            Assert.IsTrue(fell, "gravity turns the clods down: within 0.3 s one has lost over 1 m/s of its rise, or falls, or rests");
             Assert.Greater(feel.Alive, 0, "still drawn at half their life");
             while (Time.time - t0 < DigFeel.ClodLife + 0.1f) yield return null;
             yield return null;
@@ -500,26 +506,41 @@ namespace Meridian.Tests
             while (Time.time < until) yield return null;
             // The whole frame over 60 frames, quiet and then with 8-16 clods in the air (a burst each 0.3 s), three rounds: the least of each
             // (another system's one-off allocation in a span is not the clods'; a per-frame one of ours would be in every flying span).
+            // The measure (08:0x): Unity's own "GC Allocated In Frame" (every thread; read a frame late), after a control. It was
+            // System.GC.GetAllocatedBytesForCurrentThread, which reads 0 for a known array in this runtime: its "0 B" proved nothing.
             long quiet = long.MaxValue, flying = long.MaxValue;
             int aliveSeen = 0;
-            for (int round = 0; round < 3; round++)
+            using (var gc = Unity.Profiling.ProfilerRecorder.StartNew(Unity.Profiling.ProfilerCategory.Memory, "GC Allocated In Frame"))
             {
-                long before = System.GC.GetAllocatedBytesForCurrentThread();
-                for (int i = 0; i < 60; i++) yield return null;
-                quiet = System.Math.Min(quiet, System.GC.GetAllocatedBytesForCurrentThread() - before);
-                before = System.GC.GetAllocatedBytesForCurrentThread();
-                float next = 0f;
-                for (int i = 0; i < 60; i++)
+                Assert.IsTrue(gc.Valid, "Unity's 'GC Allocated In Frame' counter is there");
+                for (int i = 0; i < 3; i++) yield return null;
+                var known = new byte[65536];
+                long seenKnown = 0;
+                for (int i = 0; i < 3; i++) { yield return null; seenKnown = System.Math.Max(seenKnown, gc.LastValue); }
+                System.GC.KeepAlive(known);
+                Assert.GreaterOrEqual(seenKnown, 65536L, "the control: the counter sees a 64 KB array in the frame it is made");
+                for (int round = 0; round < 3; round++)
                 {
-                    if (Time.time >= next) { feel.Burst(p + new Vector2(1.5f, 1.5f), p + new Vector2(0f, 0.9f), DigFeel.MaxClods, 0, tint); next = Time.time + 0.3f; }
+                    long sum = 0;
+                    for (int i = 0; i < 60; i++) { yield return null; sum += gc.LastValue; }
+                    quiet = System.Math.Min(quiet, sum);
+                    sum = 0;
+                    float next = 0f;
+                    for (int i = 0; i < 60; i++)
+                    {
+                        if (Time.time >= next) { feel.Burst(p + new Vector2(1.5f, 1.5f), p + new Vector2(0f, 0.9f), DigFeel.MaxClods, 0, tint); next = Time.time + 0.3f; }
+                        yield return null;
+                        sum += gc.LastValue;
+                        aliveSeen = Mathf.Max(aliveSeen, feel.Alive);
+                    }
                     yield return null;
-                    aliveSeen = Mathf.Max(aliveSeen, feel.Alive);
+                    sum += gc.LastValue; // the counter reads a frame late: the span's last frame
+                    flying = System.Math.Min(flying, sum);
+                    float clear = Time.time + DigFeel.ClodLife + 0.1f;
+                    while (Time.time < clear) yield return null;
                 }
-                flying = System.Math.Min(flying, System.GC.GetAllocatedBytesForCurrentThread() - before);
-                float clear = Time.time + DigFeel.ClodLife + 0.1f;
-                while (Time.time < clear) yield return null;
             }
-            TestContext.Out.WriteLine($"[MERIDIAN] u195 GC over 60 frames (least of 3 rounds): quiet {quiet} B, with clods flying {flying} B (up to {aliveSeen} alive)");
+            TestContext.Out.WriteLine($"[MERIDIAN] u195 GC over 60 frames (Unity's 'GC Allocated In Frame', least of 3 rounds): quiet {quiet} B, with clods flying {flying} B (up to {aliveSeen} alive)");
             Assert.Greater(aliveSeen, 0, "clods in the air while measured");
             Assert.LessOrEqual(flying - quiet, 1024, "the clods add no per-frame allocation (≤ 1 KB over 60 frames)");
             LogAssert.NoUnexpectedReceived();
