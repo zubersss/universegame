@@ -25,10 +25,11 @@ A NOTE ON YOUR SAVED GAME (found 12:00, our fault): the team's automatic test ru
 
 
 
-### USER-42 — Close two apps that started with Windows (1 min) — not blocking, but the art renders are at their limit
-Thank you for restarting the laptop (14:18) and the three windows. At 14:27 there are 1.96 GB of memory free: builds and tests can run (they need 1.5 GB), and the new painted-art renders have just enough (they need 1.9 GB). Two apps started by themselves with Windows and hold about 0.6 GB that the renders would use:
-- the **Copilot** app (0.5 GB) and the **Xbox** app (0.1 GB). For each: look in the system tray by the clock (click the ^ arrow), right-click the icon and choose Quit or Close.
-Then tell the Lead session "done: USER-42". If you are using either, leave it: the team waits its turn instead.
+### USER-42 — Memory is short: no build, test or render has been able to start since 14:34 (2 min; helps, may not be enough alone)
+At 15:11 the laptop has 0.72 GB of memory free. Builds and tests need 1.5 GB and the painted-art renders 1.9 GB, so both workers are writing code and waiting. The main cause is Windows itself: it is installing an update after the 14:18 restart, and that should finish on its own. You can help it along:
+1. Close the apps that started with Windows and that you are not using: **Copilot**, **Xbox**, **Chrome**, and the **Settings** window (together about 0.5 GB). For Copilot and Xbox: the system tray by the clock (click the ^ arrow), right-click the icon, Quit or Close.
+2. If Windows shows "Restart required" under Settings > Windows Update, tell the Lead session first: the team will save its work, then you restart and reopen the three windows.
+Then tell the Lead session "done: USER-42". If memory is still short at about 17:00 the Lead will ask for that restart.
 
 ### USER-40 — Free the laptop's memory: quit Ollama (1 min) — the team is blocked on this
 At 18:52 the laptop has 0.12 GB of memory free and no build or render can start (they need 1.5 GB). The biggest holder is the **Ollama** app: 4.2 GB, running since 11:47 this morning. It is not part of the game team.

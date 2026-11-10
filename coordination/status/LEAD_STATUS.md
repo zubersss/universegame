@@ -1,5 +1,5 @@
 # LEAD STATUS
-Updated: 2026-11-10 14:3x · Session: 14 (zuber-4a; THE LAPTOP WAS RESTARTED 14:18, all three windows new; Fable 5.2: LEAD high, UNITY and BLENDER extra high) · Review cycle: 309 · Cadence: every 2 hours (session job 6f46ff05, `43 */2 * * *`; it dies with this session: a NEW LEAD re-creates it)
+Updated: 2026-11-10 15:1x · Session: 14 (zuber-4a; THE LAPTOP WAS RESTARTED 14:18, all three windows new; Fable 5.2: LEAD high, UNITY and BLENDER extra high) · Review cycle: 310 · Cadence: every 2 hours (session job 6f46ff05, `43 */2 * * *`; it dies with this session: a NEW LEAD re-creates it)
 Session addresses (each answered its role 14:2x; they change at a restart): this session zuber-4a · UNITY zuber-30 · BLENDER zuber-59.
 
 ## Where things stand (resume here)
@@ -20,8 +20,14 @@ B-258 part 3 (the frame) → my judgement → part 2 (the figure's probe frame, 
 ## The owner
 Open: USER-45 (play 0.6.3; choose NEW), USER-42 (close Copilot and Xbox: about 0.6 GB; BLENDER's render gate is 1.9 GB), USER-47 (optional). The restart reminder is met: the laptop and the windows were restarted 14:18.
 
+## Since the resume (15:1x, cycle 310)
+- THE RAM GATE HAS BEEN SHUT SINCE 14:34 (free 0.72 GB at 15:11; Windows Update installing after the restart; the three windows hold 2.0 GB private). No heavy job since BLENDER's look pass (14:31). UNITY's want on file since 14:50 (one 14 min lock: U-212 part 2 + U-213's camera, written, uncompiled). If still shut at the 17:1x tick: ask the owner for the thorough way (USER-42 step 2).
+- RULED since 14:3x: D-206 (the v7 piece format: contract v3.5 §12, a draft for the pilot), D-206a (12 drawings a second, one ppu 192 set, normals for figures and near pieces), D-207 (THE OWNER: "pass it if you can": the texture line for art v7 is 1,024 MB, the 2.0 GB working set unchanged; Bible 5.4), D-208 (the surveyor as TRIMMED frame sheets; the game loads no sprite atlas so megabytes bind; a live impostor priced once before any v7 creature). P-U212-1 (the Maw kept 67 m off the shore) and P-U213-1 (the close camera keeps the ground's share) accepted.
+- CARDED: U-217 (the pilot in the game + the compression A/B on the built player), U-218 (the importer's cuts), U-219 (the impostor, Blocked on part 2's rig), B-264 (the trimmed packer proven on B-250's archive), B-265 (the CC0 animal survey). B-260 (a) accepted, B-263 Done.
+- WAITING FOR ME when the gate opens: UNITY's CaptureU212 and CaptureU213Camera at 4x; BLENDER's frame sheet.
+
 ## Loop / stall watch
-None at 14:3x. Rules kept: read `date` FIRST, then write a time label (broken once at the resume: a label ten minutes ahead); read the code or the stills a complaint points at before carding; judge only what its author has handed over; a figure from another hour is no baseline; an allocation row needs a control; nothing of the team's touches the owner's AppData; never enlarge pixels on an owner page; an edits-only Artifact publish sends no files; check an assumption about the game in the code before telling a worker. The board is 950 KB: read a card by line range, edit by a unique tail of its line.
+None at 15:1x. Rules kept: read `date` FIRST, then write a time label (broken once at the resume: a label ten minutes ahead); read the code or the stills a complaint points at before carding; judge only what its author has handed over; a figure from another hour is no baseline; an allocation row needs a control; nothing of the team's touches the owner's AppData; never enlarge pixels on an owner page; an edits-only Artifact publish sends no files; check an assumption about the game in the code before telling a worker. The board is 950 KB: read a card by line range, edit by a unique tail of its line.
 
 ## HeavyJobLock
 none of mine
