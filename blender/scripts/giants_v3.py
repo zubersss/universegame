@@ -86,6 +86,37 @@ MARKS = {"hatch": {"groups": ((-0.62, -0.42), (-0.30, -0.80)), "count": 3, "step
                   "limit": 0.9, "points": 6}}
 
 
+# The close view's strips (B-243, contract 11.5.1 / D-195). ONE scale, fixed to the planet: STRIP_SCALE strip texels per
+# far-disc texel, so a strip texel is 6 / STRIP_SCALE screen px at the wheel's closest zoom (6 px per far texel) and
+# 9 / STRIP_SCALE at the end of the entry's push-in (9); no zoom stepping. The strips' drawn widths are 2.5 texels (the
+# limb's ink) and 1.25 (the thin line), each +-20 %. RULED 7.5 (LEAD 11-10 01:0x, on B-243's desk-check; the contract's
+# first 7.3 gave 2.05-3.08 and 1.03-1.54 px): a strip texel is 0.80 px at 6 and 1.20 at 9, so the limb's mean runs
+# 2.00-3.00 px and the thin line 1.00-1.50, contract 11.1's two ranges exactly. A change here changes close.json only,
+# never a strip.
+STRIP_SCALE = 7.5
+EDGE_VARIANT = {"jupiter": 0, "saturn": 0, "uranus": 1, "neptune": 1}      # belt_edge: 0 firm, 1 faint and streaky
+
+
+def strips_json(name):
+    """close.json's "strips": which textures the close view lays, on which row each one's line sits, and the one scale."""
+    out = {
+        "texels_per_far_texel": STRIP_SCALE,
+        "limb_band": {"key": "planets/common/limb_band", "centre_row": 8},
+        "belt_edge": {"key": f"planets/common/belt_edge_{EDGE_VARIANT[name]}", "cut_row": 12},
+        "spot_rim": {"key": "planets/common/spot_rim", "cut_row": 12},
+        "pigment": {"key": f"planets/{name}/close_pigment"},
+        "grain": {"key": "planets/common/close_grain"},
+        "note": "one scale, fixed to the planet: a strip texel covers 1 / texels_per_far_texel of a far-disc texel at every "
+                "zoom (no stepping); u runs along each curve from the body's own left, the limb with a whole number of "
+                "repeats; rows count from the strip's top (v = row - signed distance in strip texels); the pigment tile "
+                "lies over the far sheet's frame (disc.json's frame_width x frame_height), value / 127.5; the grain is "
+                "laid in screen space, value / 127.5",
+    }
+    if "rings" in GIANTS[name]:
+        out["ring_edge"] = {"key": "planets/saturn/ring_edge", "cut_row": 8}
+    return out
+
+
 def close_json(name, pal, to_hex, radius_u, loop_frames, fps, rim_phases=None):
     """The DRAFT of planets/<giant>/close.json (B-239: into blender/preview only; the close view is not carded as art).
     pal: slot -> colour (0..1); to_hex(colour) -> '#RRGGBB'; rim_phases: the body's (ph3, ph5) from build_discs_v3
@@ -124,6 +155,7 @@ def close_json(name, pal, to_hex, radius_u, loop_frames, fps, rim_phases=None):
                           "(night_hex per belt)"},
         "storms": [],
         "swap": {"above_px_per_far_texel": 6, "below_px_per_far_texel": 5, "note": "DiscSprite.NearAbove / NearBelow"},
+        "strips": strips_json(name),
     }
     if rim_phases is not None:
         out["rim"] = {"a3": RIM[0], "ph3": round(float(rim_phases[0]), 6), "a5": RIM[2], "ph5": round(float(rim_phases[1]), 6),
