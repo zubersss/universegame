@@ -1,0 +1,14 @@
+{
+  "key": "icons/catalogue/hadal_maw",
+  "style": "v3",
+  "width": 128,
+  "height": 128,
+  "palette": "earth",
+  "ppu": 128,
+  "pivot": [
+    0.5,
+    0.5
+  ],
+  "creature": "creatures/earth/hadal_maw",
+  "note": "B-247 (G14): the catalogue's the Hadal maw (the trench's long fish with its lure): a rig set's first sprite is a body part, so the catalogue shows this instead (U-210)"
+}
