@@ -49,6 +49,12 @@ namespace Meridian.Tests
             Assert.AreEqual(0f, CartoonStage.ShallowsWeight(40f, 40f));
             Assert.AreEqual(0f, CartoonStage.ShallowsWeight(41f, 40f));
             Assert.AreEqual(1f, CartoonStage.ShallowsWeight(500f, 0f), "a layer with no shore_m is not a shore layer");
+            // LEAD 11-09 23:0x: a backdrop for the shallows only: gone 2 m under its painted ground line
+            Assert.AreEqual(1f, CartoonStage.ShallowsDepthWeight(5f, 0f), "the camera above the layer's ground line");
+            Assert.AreEqual(1f, CartoonStage.ShallowsDepthWeight(0f, 0f), "at the line");
+            Assert.AreEqual(0.5f, CartoonStage.ShallowsDepthWeight(-1f, 0f), 1e-5f, "1 m under: half");
+            Assert.AreEqual(0f, CartoonStage.ShallowsDepthWeight(-2f, 0f), "2 m under: gone");
+            Assert.AreEqual(0f, CartoonStage.ShallowsDepthWeight(-9f, 0f));
         }
 
         /// <summary>U-205 (B-225): sea_under's shallow seabed (layer4, draw_before 3) draws over the two seabeds and under the surface seen from
@@ -155,27 +161,47 @@ namespace Meridian.Tests
                 int first = os - 12;
                 while (first < os + len && !gen.SeaAt(first)) first++;
                 Assert.IsTrue(gen.SeaAt(first) && !gen.SeaAt(first - 1), "the shore's first sea column");
+                // A body held with its physics off keeps its last grounded flag, and the stage camera frames the floor under a grounded
+                // surveyor: over deep water that is the seabed far below, not the swimmer. These holds put the camera on the swimmer
+                // (1.5 m over it, as it follows one in play), since the shallow seabed now fades with the camera's depth.
+                IEnumerator HoldSwim(Vector2 at)
+                {
+                    yield return Hold(at);
+                    if (follow != null) follow.enabled = false;
+                    cam.transform.position = new Vector3(at.x, at.y + 1.5f, cam.transform.position.z);
+                    for (int i = 0; i < 30; i++) yield return null;
+                }
                 // 10 m out, 3 m under: whole
-                yield return Hold(new Vector2(first + 10.5f, water - 3f));
+                yield return HoldSwim(new Vector2(first + 10.5f, water - 3f));
                 TestContext.Out.WriteLine($"[MERIDIAN] u205 shallows at {first} + 10.5: shore distance {stage.ShoreDistanceNow:0.00} m, layer4 alpha {seaSet.LayerAlphaOf(4):0.00} x the set's {seaSet.alpha:0.00}, drawn {shallows.enabled}, colour a {shallows.color.a:0.00}");
                 Assert.AreEqual(10.5f, stage.ShoreDistanceNow, 0.01f);
                 Assert.AreEqual(1f, seaSet.LayerAlphaOf(4), 1e-4f, "the shallow seabed whole 10 m out");
                 Assert.IsTrue(shallows.enabled, "drawn");
                 Assert.AreEqual(seaSet.alpha, shallows.color.a, 0.01f);
                 Assert.IsFalse(seaSet.placeholders.Contains(true), "all five layers' art in (layer4 imported)");
+                // LEAD 11-09 23:0x (u205/3_sea_10m: a flat sand wall behind the surveyor): by the shore but deep, the camera well under the
+                // layer's painted ground line: the shallow seabed is not drawn
+                Assert.IsFalse(float.IsNaN(stage.ShallowsGroundY), "the shallow seabed's ground line is placed");
+                Assert.Greater(cam.transform.position.y, stage.ShallowsGroundY, "3 m under, the camera is over the layer's ground line");
+                yield return HoldSwim(new Vector2(first + 19.5f, water - 12f));
+                TestContext.Out.WriteLine($"[MERIDIAN] u205 shallows 19.5 m out, 12 m under: the camera at {cam.transform.position.y - water:0.0} m, the layer's ground line at {stage.ShallowsGroundY - water:0.0} m, layer4 alpha {seaSet.LayerAlphaOf(4):0.00}, drawn {shallows.enabled}");
+                Assert.Less(cam.transform.position.y, stage.ShallowsGroundY - CartoonStage.ShallowsDepthFade, "the camera more than 2 m under the layer's ground line");
+                Assert.AreEqual(0f, seaSet.LayerAlphaOf(4), 1e-4f, "deep by the shore: the shallow seabed is gone");
+                Assert.IsFalse(shallows.enabled, "and not drawn");
                 // 36 m out: fading
-                yield return Hold(new Vector2(first + 36f, water - 3f));
+                yield return HoldSwim(new Vector2(first + 36f, water - 3f));
                 Assert.AreEqual(36f, stage.ShoreDistanceNow, 0.01f);
                 Assert.AreEqual(0.5f, seaSet.LayerAlphaOf(4), 0.01f, "half gone 36 m out");
                 Assert.AreEqual(seaSet.alpha * 0.5f, shallows.color.a, 0.02f);
                 // 45 m out: not drawn at all, nor its continued strip
-                yield return Hold(new Vector2(first + 45.5f, water - 3f));
+                yield return HoldSwim(new Vector2(first + 45.5f, water - 3f));
                 TestContext.Out.WriteLine($"[MERIDIAN] u205 shallows at {first} + 45.5: shore distance {stage.ShoreDistanceNow:0.00} m, layer4 alpha {seaSet.LayerAlphaOf(4):0.00}, drawn {shallows.enabled}");
                 Assert.Greater(stage.ShoreDistanceNow, 40f);
                 Assert.AreEqual(0f, seaSet.LayerAlphaOf(4), 1e-4f, "gone past 40 m");
                 Assert.IsFalse(shallows.enabled, "not drawn out at sea");
                 int shallowOrder = ParallaxLayers.BackOrder + CartoonStage.SeaUnderOrder + 3;
                 foreach (var r in seaSet.GetComponentsInChildren<SpriteRenderer>()) if (r.enabled) Assert.AreNotEqual(shallowOrder, r.sortingOrder, $"{r.name}: nothing of the shallow seabed draws out at sea");
+                if (follow != null) follow.enabled = true;
 
                 // the shore above the water: untouched
                 int shore = os - 12;

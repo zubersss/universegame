@@ -42,15 +42,30 @@ namespace Meridian.Tests
             {
                 // where the wobble is zero the border sits on the tier's own depth: half and half
                 float x0 = 0f;
-                for (float x = 0f; x < 20f; x += 0.01f) if (Mathf.Abs(SmoothGround.TierWobble(k - 1, x)) < Mathf.Abs(SmoothGround.TierWobble(k - 1, x0))) x0 = x;
+                for (float x = 0f; x < 120f; x += 0.01f) if (Mathf.Abs(SmoothGround.TierWobble(k - 1, x)) < Mathf.Abs(SmoothGround.TierWobble(k - 1, x0))) x0 = x; // the roll's waves are 12-30 m long
                 var w = SmoothGround.TierWeights(t.tiers[k].fromM, t, x0);
                 Assert.AreEqual(0.5f, w[k - 1], 0.02f, $"half T{k + 1} at its own depth ({t.tiers[k].fromM} m) where the wobble crosses zero");
             }
-            // LEAD 21:5x: the border wobbles (a rock boundary, not a straight shadow): it moves along x by up to the wobble, no more.
+            // The border rolls (a rock boundary, not a straight shadow): it moves along x by up to the roll, no more. LEAD 11-09 23:0x
+            // (U-205, G2 / G12): 0.4 m over waves at least 12 m long (it was 0.6 m over 2-7 m waves).
+            Assert.AreEqual(0.4f, SmoothGround.TierWobbleMax, 1e-6f, "the roll's size");
+            foreach (float w in new[] { SmoothGround.WobbleW0, SmoothGround.WobbleW1, SmoothGround.WobbleW2 })
+                Assert.GreaterOrEqual(2f * Mathf.PI / w, 12f, "every wave at least 12 m long");
             float lo = float.MaxValue, hi = float.MinValue;
-            for (float x = 0f; x < 30f; x += 0.05f) { float wob = SmoothGround.TierWobble(0, x); lo = Mathf.Min(lo, wob); hi = Mathf.Max(hi, wob); }
-            Assert.Greater(hi - lo, 0.6f, "the border visibly wobbles");
+            for (float x = 0f; x < 240f; x += 0.05f) { float wob = SmoothGround.TierWobble(0, x); lo = Mathf.Min(lo, wob); hi = Mathf.Max(hi, wob); }
+            Assert.Greater(hi - lo, 0.4f, "the border visibly rolls");
             Assert.LessOrEqual(Mathf.Max(-lo, hi), SmoothGround.TierWobbleMax + 1e-4f, "within its bound");
+            // no trough fits inside a 4 m shaft: across any 4 m the border sags 0.2 m at most from the straight line between its ends
+            float sag = 0f;
+            for (int k = 0; k < 4; k++)
+                for (float x = 0f; x < 240f; x += 0.25f)
+                {
+                    float a = SmoothGround.TierWobble(k, x), b = SmoothGround.TierWobble(k, x + 4f);
+                    for (float u = 0.25f; u < 4f; u += 0.25f)
+                        sag = Mathf.Max(sag, Mathf.Abs(SmoothGround.TierWobble(k, x + u) - Mathf.Lerp(a, b, u / 4f)));
+                }
+            TestContext.Out.WriteLine($"[MERIDIAN] u205 the border's roll: range {lo:0.00}..{hi:0.00} m over 240 m, the deepest sag across any 4 m {sag:0.000} m, steepest run {SmoothGround.TierWobbleSlopeMax:0.000}");
+            Assert.LessOrEqual(sag, 0.2f, "the sag across a 4 m shaft");
         }
 
         [Test]
@@ -83,7 +98,7 @@ namespace Meridian.Tests
             Assert.AreEqual(1f, SmoothGround.WobbleKeep(0f), 1e-6f, "level ground: the whole wobble");
             Assert.Greater(SmoothGround.WobbleKeep(0.03f), 0.9f, "a 2-degree lie keeps it");
             Assert.AreEqual(0.5f, SmoothGround.WobbleKeep(SmoothGround.WobbleSlope0), 1e-6f, "half at the reference slope");
-            Assert.AreEqual(1.0264f, SmoothGround.TierWobbleSlopeMax, 1e-3f, "the wobble's steepest run (the three sines' amplitude x frequency)");
+            Assert.AreEqual(0.1614f, SmoothGround.TierWobbleSlopeMax, 1e-3f, "the roll's steepest run (the three sines' amplitude x frequency; U-182's short waves ran at 1.03)");
             var t = D1Tables.Load();
             float border = t.tiers[1].fromM;
             foreach (float slope in new[] { Mathf.Tan(20f * Mathf.Deg2Rad), 0.65f, 1f, 2f })
@@ -106,8 +121,9 @@ namespace Meridian.Tests
                     prev = y;
                 }
             }
-            // unattenuated, the same border under a 20-degree hill does climb back: the fault
-            Assert.Greater(SmoothGround.TierWobbleSlopeMax, Mathf.Tan(20f * Mathf.Deg2Rad), "at full strength the wobble out-runs a 20-degree hill");
+            // U-182's short waves out-ran a 20-degree hill at full strength (the fault the scaling was made for). The long roll does not,
+            // even unscaled; the scaling stays (LEAD 23:0x), so a border under a hill follows the line.
+            Assert.Less(SmoothGround.TierWobbleSlopeMax, Mathf.Tan(20f * Mathf.Deg2Rad), "even at full strength the roll runs gentler than a 20-degree hill");
         }
 
         /// <summary>U-196 (D-183): the back wall's depth term: its full shade at the natural surface, 55 % of it from 6 m down, never

@@ -604,15 +604,19 @@ namespace Meridian.View2D
         public bool TierFill => lineTex != null && Meridian.Rendering.ArtMaterials.Active != null && Meridian.Rendering.ArtMaterials.Active.groundTiers != null;
         public bool TierArt(int tier) => tier >= 2 && tier <= 5 && tierFills[tier - 2] != null;
 
-        /// <summary>LEAD 21:5x: how far a tier border wobbles along x (m), so it reads as a rock boundary.</summary>
-        public const float TierWobbleMax = 0.6f;
+        /// <summary>How far a tier border rolls along x (m), so it reads as a rock boundary. LEAD 11-09 23:0x (U-205, BLENDER's G2 and
+        /// G12 in 0.6.2's smoke): 0.4 m over waves at least 12 m long. It was 0.6 m over 2-7 m waves (LEAD 11-08 21:5x): a 0.9 m trough
+        /// 2.5 m wide sat inside a 4 m shaft as a V, and the same waves left isolated soft bumps along the fill's border.</summary>
+        public const float TierWobbleMax = 0.4f;
+        /// <summary>The roll's three waves (radians a metre): 12.1, 19.0 and 29.9 m long. GroundTiers.hlsl carries the same numbers.</summary>
+        public const float WobbleW0 = 0.52f, WobbleW1 = 0.33f, WobbleW2 = 0.21f;
 
-        /// <summary>The shader's border wobble (GroundTiers.hlsl) for tier k+2 at world x: three sines, 2-7 m wavelengths, phased per tier,
-        /// at most TierWobbleMax. Pure.</summary>
+        /// <summary>The shader's border roll (GroundTiers.hlsl) for tier k+2 at world x: three sines 12-30 m long, phased per tier, at most
+        /// TierWobbleMax; across any 4 m it sags 0.2 m at most. Pure.</summary>
         public static float TierWobble(int k, float x)
         {
             float p = 1.7f * k;
-            return TierWobbleMax * (0.5f * Mathf.Sin(x * 1.71f + p) + 0.32f * Mathf.Sin(x * 0.93f + p * 1.3f + 2.1f) + 0.18f * Mathf.Sin(x * 3.1f + p * 0.7f + 4.0f));
+            return TierWobbleMax * (0.5f * Mathf.Sin(x * WobbleW0 + p) + 0.32f * Mathf.Sin(x * WobbleW1 + p * 1.3f + 2.1f) + 0.18f * Mathf.Sin(x * WobbleW2 + p * 0.7f + 4.0f));
         }
 
         /// <summary>The shader's tier weights (GroundTiers.hlsl) for a depth under the Surface Line at world x: tiers 2..5 each fade in
@@ -641,16 +645,17 @@ namespace Meridian.View2D
         /// <summary>The Surface Line's slope (m per m) at which a border keeps half its wobble.</summary>
         public const float WobbleSlope0 = 0.12f;
         /// <summary>How much of its wobble a border keeps where the Surface Line has this slope: all of it on level ground, 15 % under a
-        /// 20-degree hill. The wobble's own slope reaches 1.0 (TierWobbleSlopeMax), steeper than a 30-degree hill's 0.58: at full strength a
-        /// border under a slope alternated flat treads and steep risers and, blurred by its transition, read as stair-steps (0.6.1's
-        /// smoke_54..57). Pure; the line texture's second channel holds it per column for the shader.</summary>
+        /// 20-degree hill. With U-182's short waves the wobble's own slope reached 1.0, steeper than a 30-degree hill's 0.58: at full
+        /// strength a border under a slope alternated flat treads and steep risers and, blurred by its transition, read as stair-steps
+        /// (0.6.1's smoke_54..57). The long roll runs at 0.16 at most (TierWobbleSlopeMax); the scaling is kept (LEAD 23:0x), so under a
+        /// hill the border still follows the line. Pure; the line texture's second channel holds it per column for the shader.</summary>
         public static float WobbleKeep(float slope)
         {
             float k = slope / WobbleSlope0;
             return 1f / (1f + k * k);
         }
         /// <summary>The steepest the wobble itself runs (m per m): the sum of its three sines' amplitude x frequency.</summary>
-        public const float TierWobbleSlopeMax = TierWobbleMax * (0.5f * 1.71f + 0.32f * 0.93f + 0.18f * 3.1f);
+        public const float TierWobbleSlopeMax = TierWobbleMax * (0.5f * WobbleW0 + 0.32f * WobbleW1 + 0.18f * WobbleW2);
 
         float[] wobbleKeep;
         /// <summary>The wobble kept at world x (between column centres, linear: as the shader's bilinear sample); 1 before the line is built.</summary>

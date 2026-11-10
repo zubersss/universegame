@@ -1,12 +1,13 @@
 #ifndef MERIDIAN_GROUND_TIERS
 #define MERIDIAN_GROUND_TIERS
 
-// U-182 (LEAD 21:5x): each tier border wobbles by up to 0.6 m along x (three sines, 2-7 m wavelengths, phased per tier) so it reads as a
-// rock boundary, not a straight soft shadow across the strata. SmoothGround.TierWobble is this function in C#.
+// U-182, re-ruled in U-205 (LEAD 11-09 23:0x): each tier border rolls by up to 0.4 m along x (three sines 12.1, 19.0 and 29.9 m long,
+// phased per tier) so it reads as a rock boundary, not a straight soft shadow across the strata. It was 0.6 m over 2-7 m waves: a
+// trough sat inside a 4 m shaft as a V and isolated bumps stood along the fill's border. SmoothGround.TierWobble is this function in C#.
 float4 GroundTierWobble(float x)
 {
     const float4 p = float4(0.0, 1.7, 3.4, 5.1);
-    return 0.6 * (0.5 * sin(x * 1.71 + p) + 0.32 * sin(x * 0.93 + p * 1.3 + 2.1) + 0.18 * sin(x * 3.1 + p * 0.7 + 4.0));
+    return 0.4 * (0.5 * sin(x * 0.52 + p) + 0.32 * sin(x * 0.33 + p * 1.3 + 2.1) + 0.18 * sin(x * 0.21 + p * 0.7 + 4.0));
 }
 
 // U-182: the tier weights for a depth under the Surface Line (m) at world x: each of tiers 2..5 fades in across its transition centred on

@@ -4324,9 +4324,24 @@ namespace Meridian.Tests
                     TestContext.Out.WriteLine($"[MERIDIAN] u205 {label}: x {x} ({x - first} columns out from the shore's first sea column {first}), {depth:0} m under the water line {water:0.0}, the seabed there {gen.SurfaceHeight(x)}; shore distance {stage.ShoreDistanceNow:0.0} m, the shallow seabed's alpha {(stage.SeaUnder != null ? stage.SeaUnder.LayerAlphaOf(4) : -1f):0.00}, the sea weight {stage.SeaWeight:0.00}");
                 }
                 {
+                    // LEAD 23:1x: the worst case for the shallow seabed's fade: 25 m out, the camera on the layer's painted ground line (the
+                    // layer whole, its continued strip under it down to the frame's bottom over water deeper than the strip)
+                    int x = first + 25;
+                    yield return Park(new Vector2(x + 0.5f, water - 5.5f));
+                    if (follow != null) follow.enabled = false;
+                    cam.transform.position = new Vector3(x + 0.5f, water - 4f, cam.transform.position.z);
+                    for (int k = 0; k < 60; k++) yield return null;
+                    yield return Shot("3b_sea_25m_out_camera_at_the_ground_line");
+                    TestContext.Out.WriteLine($"[MERIDIAN] u205 3b: x {x} (25 columns out), the camera {cam.transform.position.y - water:0.0} m, the layer's ground line {stage.ShallowsGroundY - water:0.0} m, shore distance {stage.ShoreDistanceNow:0.0} m, the shallow seabed's alpha {(stage.SeaUnder != null ? stage.SeaUnder.LayerAlphaOf(4) : -1f):0.00}, the seabed there {gen.SurfaceHeight(x) - water:0}");
+                }
+                {
                     int x = first + 60;
                     while (x < first + 400 && !(gen.SeaAt(x) && gen.SurfaceHeight(x) <= water - 4.5f)) x++;
                     yield return Park(new Vector2(x + 0.5f, water - 3f));
+                    // 22:5x's shot had no surveyor in it: a body held with its physics off keeps its last grounded flag, and the stage camera
+                    // frames the floor under a grounded surveyor (here the seabed, far below). The camera is put on the surveyor by hand.
+                    if (follow != null) follow.enabled = false;
+                    cam.transform.position = new Vector3(x + 0.5f, water - 3f + 1.5f, cam.transform.position.z);
                     for (int k = 0; k < 60; k++) yield return null;
                     yield return Shot("4_sea_out");
                     TestContext.Out.WriteLine($"[MERIDIAN] u205 4_sea_out: x {x} ({x - first} columns out), 3 m under; shore distance {stage.ShoreDistanceNow:0.0} m, the shallow seabed's alpha {(stage.SeaUnder != null ? stage.SeaUnder.LayerAlphaOf(4) : -1f):0.00}");
@@ -4368,6 +4383,23 @@ namespace Meridian.Tests
                 cam.transform.position = new Vector3(ax, top - 12f, cam.transform.position.z);
                 yield return Shot("7_shaft_whole");
                 Meridian.CameraRig.SideView.SetHalfHeight(cam, half0);
+
+                // ---- G12 (the soft dark shapes low in smoke_41 / 43): the same two frames as the smoke stages them, with the border's long roll ----
+                int cliff = os; float steep = 0f;
+                for (int x = os - 40; x < os + 80; x++) { float s = Mathf.Abs(t.CurveAt(x + 1) - t.CurveAt(x)); if (s > steep) { steep = s; cliff = x; } }
+                int swim = os + 16;
+                for (int x = os + 16; x < os + 400; x++) if (gen.SurfaceHeight(x) <= side.Config.datumY - 4) { swim = x; break; }
+                foreach (var (column, label) in new[] { (cliff - 4, "8_coast_cliff"), (swim, "9_sea_shore") })
+                {
+                    float gy = t.SurfaceAt(column + 0.5f);
+                    yield return Park(new Vector2(column + 0.5f, gy + 0.05f));
+                    if (follow != null) follow.enabled = false;
+                    // 6 m under the ground: the Topsoil / Subsoil border (about 12 m under it) lies low in the frame, as in the smoke's shots
+                    cam.transform.position = new Vector3(column + 0.5f, gy - 6f, cam.transform.position.z);
+                    for (int k = 0; k < 40; k++) yield return null;
+                    yield return Shot(label);
+                    TestContext.Out.WriteLine($"[MERIDIAN] u205 {label}: column {column}, the ground there {gy:0.0}, the camera 6 m under it (the frame reaches {gy - 6f - Meridian.CameraRig.SideView.HalfHeight(cam):0.0}); the Topsoil / Subsoil border there at {Meridian.Mining.DigRun.LineAt(t, column + 0.5f) - from2:0.0}; the line's slope there {Mathf.Abs(Meridian.Mining.DigRun.LineAt(t, column + 1.5f) - Meridian.Mining.DigRun.LineAt(t, column - 0.5f)) * 0.5f:0.00}, the wobble kept {smooth.WobbleKeepAt(column + 0.5f):0.00}");
+                }
                 if (follow != null) follow.enabled = true;
                 body.simulated = true;
                 if (side.dayNight != null) side.dayNight.Override = null;

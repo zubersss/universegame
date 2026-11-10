@@ -280,6 +280,15 @@ namespace Meridian.View2D
         /// <summary>U-205: a shore layer's weight `d` metres out from the shore: whole up to shoreM − ShallowsFade, gone from shoreM on; 1 for a
         /// layer with no shore_m. Pure.</summary>
         public static float ShallowsWeight(float d, float shoreM) => shoreM <= 0f ? 1f : Mathf.Clamp01((shoreM - d) / ShallowsFade);
+        /// <summary>U-205 (LEAD 11-09 23:0x, on u205/3_sea_10m: 10 m under, the shallow seabed's sand stood as a flat wall behind the
+        /// surveyor): a shore layer is a backdrop for the shallows only. It fades out over ShallowsDepthFade metres as the camera sinks
+        /// under the layer's painted ground line (its json ground_row).</summary>
+        public const float ShallowsDepthFade = 2f;
+        /// <summary>A shore layer's weight for a camera at cameraY over a painted ground line at groundY: whole at and above the line, gone
+        /// ShallowsDepthFade under it. Pure.</summary>
+        public static float ShallowsDepthWeight(float cameraY, float groundY) => Mathf.Clamp01(1f - (groundY - cameraY) / ShallowsDepthFade);
+        /// <summary>The shore layer's painted ground line (world y) on the last frame it was placed; NaN before (tests read it).</summary>
+        public float ShallowsGroundY { get; private set; } = float.NaN;
         /// <summary>The sea weight at the camera now (0 over land, 1 out at sea): sea_under's alpha; the land set's nearest layer fades by 1 − it.</summary>
         public float SeaWeight { get; private set; }
         float waterLine = float.NegativeInfinity;
@@ -339,8 +348,20 @@ namespace Meridian.View2D
             for (int i = 0; i < layers.Length; i++) reach = Mathf.Max(reach, layers[i].shore_m);
             if (reach <= 0f) { ShoreDistanceNow = 0f; return; }
             ShoreDistanceNow = ShoreDistance(c.x, Mathf.CeilToInt(reach), seaAt);
+            float ppu = SeaUnder.Layout.ppu > 0f ? SeaUnder.Layout.ppu : 64f;
             for (int i = 0; i < layers.Length; i++)
-                if (layers[i].shore_m > 0f) SeaUnder.SetLayerAlpha(layers[i].n, ShallowsWeight(ShoreDistanceNow, layers[i].shore_m));
+            {
+                var l = layers[i];
+                if (l.shore_m <= 0f) continue;
+                float a = ShallowsWeight(ShoreDistanceNow, l.shore_m);
+                if (l.ground_row > 0 && l.height_px > l.ground_row)
+                {
+                    // the layer's bottom as ParallaxLayers places it (the sea set follows the camera down), then up to its painted ground line
+                    ShallowsGroundY = ParallaxMath.LayerY(c.y, SeaUnder.anchorY, SeaUnder.datumY, l.y_m, l.parallax) + (l.height_px - l.ground_row) / ppu;
+                    a *= ShallowsDepthWeight(c.y, ShallowsGroundY);
+                }
+                SeaUnder.SetLayerAlpha(l.n, a);
+            }
         }
         /// <summary>The incoming set's alpha `t` seconds into a border crossfade (a smooth step over CrossfadeSeconds). Pure.</summary>
         public static float CrossfadeAlpha(float t, float seconds) { float k = seconds > 0f ? Mathf.Clamp01(t / seconds) : 1f; return k * k * (3f - 2f * k); }
