@@ -138,9 +138,21 @@ namespace Meridian.View2D
         /// <summary>The back wall's material: MERIDIAN/GroundTiers over the walls (t1 its base, t2..t5 by depth under the Surface Line, as
         /// the fills crossfade), read at world / 4. The same shader on the submesh the back wall already had: no draw call more. Null
         /// until the first wall is in or where the registry has no tier material: the fill's own material then draws the wall, shaded.</summary>
+        /// <summary>The perf probe's A/B: false draws the back wall as before the art (the fill shaded).</summary>
+        public static bool WallsOn = true;
+        /// <summary>The perf probe's second A/B (U-196, 19:0x), never set in play. What the walls' material carries: 0 the walls (as built);
+        /// 1 the FILL's own textures at the fill's scale and shade (a second material that draws exactly what one material drew: the
+        /// cost of a second material apart from the wall tiles'); 2 the fill's textures at the walls' scale (world / 4); 3 the walls'
+        /// textures at the fill's scale (world / 8: half the texel density, what a half-resolution wall tile would sample).</summary>
+        public static int WallProbe;
+        static bool ProbeFillTextures => WallProbe == 1 || WallProbe == 2;
+        static float ProbeTileM => WallProbe == 1 || WallProbe == 3 ? 8f : WallTileM;
+        /// <summary>The perf probe: the walls' material dressed again after WallProbe changes.</summary>
+        public void RedressWalls() => DressWalls();
+
         Material WallMaterial()
         {
-            if (!TierShader || walls[0] == null || walls[0].texture == null || lineTex == null) return null;
+            if (!WallsOn || !TierShader || walls[0] == null || walls[0].texture == null || lineTex == null) return null;
             var proto = Meridian.Rendering.ArtMaterials.Active != null ? Meridian.Rendering.ArtMaterials.Active.groundTiers : null;
             if (proto == null) return null;
             if (wallMaterial == null) { wallMaterial = new Material(proto) { name = "GroundWalls_" + planet }; DressWalls(); }
@@ -151,19 +163,21 @@ namespace Meridian.View2D
         {
             var m = wallMaterial;
             if (m == null || walls[0] == null || walls[0].texture == null) return;
-            m.mainTexture = walls[0].texture;
+            bool copy = ProbeFillTextures && fill != null && fill.texture != null; // the perf probe: the fill's own textures on this material
+            var baseTex = copy ? fill.texture : walls[0].texture;
+            m.mainTexture = baseTex;
             var t = Meridian.Mining.D1Tables.Current;
             var from = Vector4.zero;
             for (int k = 0; k < 4; k++)
             {
-                var s = walls[k + 1];
-                m.SetTexture(TierIds[k], s != null ? s.texture : walls[0].texture);
+                var s = copy ? tierFills[k] : walls[k + 1];
+                m.SetTexture(TierIds[k], s != null ? s.texture : baseTex);
                 from[k] = s != null && t.tiers.Length > k + 1 ? t.tiers[k + 1].fromM : 1e6f; // a tier without its wall keeps the one over it
             }
             m.SetVector(TierFromId, from);
             m.SetVector(TierBlendId, new Vector4(TierTransition, TierTransition, TierTransition, TierTransition));
-            m.SetFloat(TileTexelsId, walls[0].texture.width);
-            if (lineTex != null) { m.SetTexture(LineTexId, lineTex); m.SetVector(LineParamsId, new Vector4(1f / lineTex.width, WallTileM, lineBase, lineSpan)); }
+            m.SetFloat(TileTexelsId, baseTex.width);
+            if (lineTex != null) { m.SetTexture(LineTexId, lineTex); m.SetVector(LineParamsId, new Vector4(1f / lineTex.width, ProbeTileM, lineBase, lineSpan)); }
         }
 
         /// <summary>Tests: the materials a chunk's ground mesh draws its back wall and its body with (false where the chunk has no mesh).</summary>
@@ -962,9 +976,11 @@ namespace Meridian.View2D
             // shading multiplies it), else the fill shaded as before the art.
             var wallMat = worldFill ? WallMaterial() : null;
             bool wallOn = wallMat != null;
-            Vector2 WallUv(float lx, float ly) => new Vector2((wx0 + lx) / WallTileM, (wy0 + ly) / WallTileM);
+            float wallTile = ProbeTileM; // WallTileM in play; the perf probe may read the material at the fill's scale
+            Vector2 WallUv(float lx, float ly) => new Vector2((wx0 + lx) / wallTile, (wy0 + ly) / wallTile);
+            bool wallArt = wallOn && !ProbeFillTextures; // the perf probe's fill copies draw the fill, shaded, through the second material
             System.Func<float, float, Vector2> backUv = wallOn ? WallUv : FillUv;
-            var back = wallOn ? Color.white : new Color(fillTint.r * BackShade, fillTint.g * BackShade, fillTint.b * BackShade, 1f);
+            var back = wallArt ? Color.white : new Color(fillTint.r * BackShade, fillTint.g * BackShade, fillTint.b * BackShade, 1f);
 
             // Does any of this chunk take the desert's sand fill? (Most chunks: no, and they skip the overlay.)
             bool sandFill = false;

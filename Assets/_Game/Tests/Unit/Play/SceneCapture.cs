@@ -3496,6 +3496,7 @@ namespace Meridian.Tests
                 IEnumerator Measure(string label)
                 {
                     for (int k = 0; k < 60; k++) yield return null; // settle
+                    int built0 = ground.ChunksBuilt; // U-196's diagnostic: a chunk mesh rebuilt during the measure is not the fill's cost
                     for (int k = 0; k < times.Length; k++)
                     {
                         yield return null;
@@ -3507,7 +3508,11 @@ namespace Meridian.Tests
                     var sorted = (float[])times.Clone();
                     System.Array.Sort(sorted);
                     float avg = 0f; foreach (var x in times) avg += x; avg /= times.Length;
-                    TestContext.Out.WriteLine($"[MERIDIAN] u182 perf {label}: avg {avg:F2} ms, p50 {sorted[times.Length / 2]:F2}, p99 {sorted[(int)(times.Length * 0.99f)]:F2}, max {sorted[times.Length - 1]:F2} (tier shader {Meridian.View2D.SmoothGround.TierShader})");
+                    string stats = "";
+#if UNITY_EDITOR
+                    stats = $"; the frame's draw calls {UnityEditor.UnityStats.drawCalls}, set passes {UnityEditor.UnityStats.setPassCalls}, triangles {UnityEditor.UnityStats.triangles}";
+#endif
+                    TestContext.Out.WriteLine($"[MERIDIAN] u182 perf {label}: avg {avg:F2} ms, p50 {sorted[times.Length / 2]:F2}, p99 {sorted[(int)(times.Length * 0.99f)]:F2}, max {sorted[times.Length - 1]:F2} (tier shader {Meridian.View2D.SmoothGround.TierShader}, walls {Meridian.View2D.SmoothGround.WallsOn && ground.WallArt}); chunk meshes rebuilt meanwhile {ground.ChunksBuilt - built0}{stats}");
                 }
 
                 IEnumerator AB(string where)
@@ -3538,12 +3543,43 @@ namespace Meridian.Tests
                 if (drops != null) for (int k = drops.Live.Count - 1; k >= 0; k--) drops.Collect(drops.Live[k]);
                 if (follow != null) follow.SnapToTarget();
                 yield return AB("T3 room");
+                // U-196's diagnostic (18:37 and 18:43 read this capture twice as slow as 17:49 on both paths, on a quiet machine): the same
+                // room with the walls off (the fill shaded, as at 17:49), on again, and with every canvas off (a read-back waits for all the
+                // frame's GPU work, the Game view's UI included).
+                // 19:00 and 19:11 answered: no chunk mesh rebuilds meanwhile, the canvases and the Editor's Game view (640 x 480) cost
+                // nothing in the measure, a second material alone costs nothing; the walls' own textures at their own scale cost ~2 ms.
+                // What is left to tell apart: the wall ART from the SCALE it is read at. Each state twice, interleaved.
+                Meridian.View2D.SmoothGround.TierShader = true;
+                var probes = new (bool walls, int probe, string label)[]
+                {
+                    (false, 0, "the walls off (one material, the fill shaded)"),
+                    (true, 0, "the walls on (the wall tiles at world / 4)"),
+                    (true, 1, "a second material, the fill's textures at world / 8"),
+                    (true, 2, "a second material, the fill's textures at world / 4"),
+                    (true, 3, "a second material, the wall tiles at world / 8 (a half-resolution wall's density)"),
+                };
+                for (int round = 0; round < 2; round++)
+                    foreach (var (wallsOn, probe, label) in probes)
+                    {
+                        Meridian.View2D.SmoothGround.WallsOn = wallsOn;
+                        Meridian.View2D.SmoothGround.WallProbe = probe;
+                        ground.RedressWalls(); ground.RebuildNow();
+                        yield return Measure($"T3 room tier, {label}");
+                    }
+                Meridian.View2D.SmoothGround.WallsOn = true; Meridian.View2D.SmoothGround.WallProbe = 0;
+                Meridian.View2D.SmoothGround.TierShader = false; ground.RedressWalls(); ground.RebuildNow();
+                yield return Measure("T3 room lit, at the end");
+                Meridian.View2D.SmoothGround.TierShader = true; ground.RebuildNow();
+                TestContext.Out.WriteLine($"[MERIDIAN] u182 perf screen: Game view {Screen.width} x {Screen.height}, display {Screen.currentResolution.width} x {Screen.currentResolution.height}, {SystemInfo.graphicsDeviceName}, quality '{QualitySettings.names[QualitySettings.GetQualityLevel()]}'");
+                TestContext.Out.WriteLine($"[MERIDIAN] u182 perf room: back wall quads on the last build {ground.LastBackQuads}, the walls' material {(ground.WallMaterialNow != null ? ground.WallMaterialNow.name + " over " + ground.WallMaterialNow.mainTexture.name + " " + ground.WallMaterialNow.mainTexture.width + " px, " + ((Texture2D)ground.WallMaterialNow.mainTexture).format + ", mips " + ((Texture2D)ground.WallMaterialNow.mainTexture).mipmapCount : "none")}");
                 rt.Release(); UnityEngine.Object.Destroy(rt); UnityEngine.Object.Destroy(px);
                 LogAssert.NoUnexpectedReceived();
             }
             finally
             {
                 Meridian.View2D.SmoothGround.TierShader = true;
+                Meridian.View2D.SmoothGround.WallsOn = true;
+                Meridian.View2D.SmoothGround.WallProbe = 0;
                 QualitySettings.vSyncCount = vsync; Application.targetFrameRate = target;
                 Meridian.View2D.CartoonStage.Enabled = wasCartoon;
             }

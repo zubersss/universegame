@@ -36,6 +36,9 @@ function Complete-Release {
     return 0
 }
 try { Enter-HeavyJobLock $jobName } catch { Write-Host "BLOCKED: $_"; exit 2 }
+$memStart = Get-MemoryNote   # LEAD 18:5x (2026-11-09): the machine's memory beside every perf row
+$memEnd = ''
+Write-Host "Machine memory at the start: $memStart"
 try {
     if (-not $SkipGate) {
         $env:MERIDIAN_PROFILE_REPORT = $report
@@ -69,7 +72,19 @@ try {
     }
 } finally {
     Remove-Item Env:\MERIDIAN_PROFILE_REPORT -ErrorAction SilentlyContinue
+    $memEnd = Get-MemoryNote
+    Write-Host "Machine memory at the end: $memEnd"
     Exit-HeavyJobLock
+}
+# The memory note goes under the gate's "Load during measurement" line (the gate rewrites the report on each run).
+if ((-not $SkipGate) -and (Test-Path $report)) {
+    $text = Get-Content $report -Raw -Encoding UTF8
+    $rx = [regex]'(?m)^- Load during measurement[^\r\n]*\r?\n'
+    $note = "- Machine memory (LEAD 2026-11-09): at the start $memStart; at the end $memEnd"
+    if ($rx.IsMatch($text) -and $text.IndexOf('- Machine memory (LEAD 2026-11-09)') -lt 0) {
+        $text = $rx.Replace($text, { param($m) $m.Value + $note + "`n" }, 1)
+        Set-Content -Path $report -Value $text -Encoding UTF8 -NoNewline
+    }
 }
 
 # ---- dev-build rows (U-041; v4 limits U-091, D-089) ----
@@ -156,10 +171,32 @@ if ($runProbe) {
         if (-not $dok) { $memRed = $true }
         $rows += "| Boot $ar warm $dot Earth (dev build) | $le 150 MB: the Space scene resident after the first launch + re-entry (D-114) | working set +$dWs MB, private +$dPriv MB | $(if ($dok) { 'green' } else { 'red' }) |"
     }
-    # Return rows (D-089 / D-114): a second visit stays within 10 % of its baseline (Earth: the warm leg; Space: the first Space leg).
-    foreach ($pair in @(@('Space after Mars', 'Space'), @('Earth again', 'Earth (warm)'))) {
+    # Return rows (D-089 / D-114; U-202, D-189 for Space): a later visit stays within 10 % of its WARM baseline. Earth again against
+    # Earth (warm); Space after Mars and every later Space leg against "Space after Earth", the Space leg after the first planet visit
+    # (the first Space leg is cold: its one-time warm-up, Mono heap 40 -> 54 MB and the warm sets, read as a 10 % "return" on three
+    # builds). A probe file without that leg keeps the cold baseline.
+    $spaceBase = if ($null -ne $byLeg['Space after Earth']) { 'Space after Earth' } else { 'Space' }
+    $pairs = New-Object System.Collections.ArrayList
+    foreach ($name in @('Space after Mars', 'Space after Mercury', 'Space after Venus', 'Space after Earth again', 'Space after Mars again')) { $null = $pairs.Add(@($name, $spaceBase)) }
+    $null = $pairs.Add(@('Earth again', 'Earth (warm)'))
+    # D-189: the first Space leg -> warm Space delta has its own row, capped at 150 MB private, so a leak cannot hide inside the
+    # warm-up; and the old cold-baseline figure stays beside it as an info line through 0.6.4 (three builds).
+    $coldSpace = $byLeg['Space']; $warmSpace = $byLeg['Space after Earth']
+    if ($null -ne $coldSpace -and $null -ne $warmSpace -and $null -ne $coldSpace.privateMB -and $null -ne $warmSpace.privateMB -and [long]$coldSpace.privateMB -gt 0) {
+        $dWarm = [long]$warmSpace.privateMB - [long]$coldSpace.privateMB
+        $wok = ($dWarm -le 150)
+        if (-not $wok) { $memRed = $true }
+        $rows += "| Space first $ar warm (dev build) | $le 150 MB private: the one-time warm-up after the first Space leg (D-189) | private $($coldSpace.privateMB) $ar $($warmSpace.privateMB) MB ($(if ($dWarm -ge 0) { '+' })$dWarm MB) | $(if ($wok) { 'green' } else { 'red (over the cap: D-189 reopens)' }) |"
+        $afterMars = $byLeg['Space after Mars']
+        if ($null -ne $afterMars -and $null -ne $afterMars.privateMB) {
+            $pctCold = [math]::Round(([double]$afterMars.privateMB / [double]$coldSpace.privateMB - 1.0) * 100.0, 1)
+            $rows += "| Return $dot Space after Mars against the cold first Space leg (dev build) | info through 0.6.4 (D-189): the figure D-089's row judged until 0.6.1 | private $($afterMars.privateMB) vs $($coldSpace.privateMB) MB ($(if ($pctCold -ge 0) { '+' })$pctCold %) | info |"
+        }
+    }
+    foreach ($pair in $pairs) {
         $again = $byLeg[$pair[0]]; $first = $byLeg[$pair[1]]
         if ($null -eq $again -or $null -eq $first) { continue }
+        if ($pair[0] -eq $pair[1]) { continue }
         $wsA = if ($again.workingSetMB -gt 0) { [long]$again.workingSetMB } else { [long]$again.systemMB }
         $wsF = if ($first.workingSetMB -gt 0) { [long]$first.workingSetMB } else { [long]$first.systemMB }
         # D-116: the row judges private commit; working set is info. Without a private figure (an old probe) it falls back to working set.
@@ -173,7 +210,8 @@ if ($runProbe) {
             $measured = "working set $wsA vs $wsF MB (no private figure)"
         }
         if (-not $rok) { $memRed = $true }
-        $rows += "| Return $dot $($pair[0]) (dev build) | private commit within 10 % of $($pair[1]) (D-089 / D-116) | $measured | $(if ($rok) { 'green' } else { 'red' }) |"
+        $rule = if ($pair[0] -like 'Space*') { 'D-089 / D-116; the warm Space baseline, D-189' } else { 'D-089 / D-116' }
+        $rows += "| Return $dot $($pair[0]) (dev build) | private commit within 10 % of $($pair[1]) ($rule) | $measured | $(if ($rok) { 'green' } else { 'red' }) |"
     }
     # D-116: the per-visit creep, (private at the last leg - private at Earth (warm)) / planet visits after the warm leg; info through C1, a budget row (<= 10 MB) from C2.
     $warmLeg = $byLeg['Earth (warm)']; $lastLeg = if ($null -ne $byLeg['Earth again']) { $byLeg['Earth again'] } else { $legs | Select-Object -Last 1 } # D-116: the four visits to Earth again; the second loop has its own row
@@ -240,7 +278,7 @@ if ($runProbe) {
     } else {
         Set-Content -Path $report -Value (($rows -join "`n") + "`n") -Encoding UTF8 -NoNewline
     }
-    $rows | Where-Object { $_ -like '| Memory*' -or $_ -like '| Residency*' -or $_ -like '| Film*' -or $_ -like '| Planet load*' -or $_ -like '| Transition*' -or $_ -like '| Bundles*' -or $_ -like '| Sprite atlases*' -or $_ -like '| Return*' -or $_ -like '| Mip*' -or $_ -like '| Boot*' -or $_ -like '| Creep*' -or $_ -like '| Heap*' -or $_ -like '| Climb*' } | ForEach-Object { Write-Host $_ }
+    $rows | Where-Object { $_ -like '| Memory*' -or $_ -like '| Residency*' -or $_ -like '| Film*' -or $_ -like '| Planet load*' -or $_ -like '| Transition*' -or $_ -like '| Bundles*' -or $_ -like '| Sprite atlases*' -or $_ -like '| Return*' -or $_ -like '| Mip*' -or $_ -like '| Boot*' -or $_ -like '| Creep*' -or $_ -like '| Heap*' -or $_ -like '| Climb*' -or $_ -like '| Space first*' } | ForEach-Object { Write-Host $_ }
 }
 
 if ($SkipGate) { if ($memRed -or -not $buildOk) { Write-Host 'BUILD MEMORY RED'; exit 1 } else { Write-Host 'BUILD MEMORY GREEN'; exit (Complete-Release) } }

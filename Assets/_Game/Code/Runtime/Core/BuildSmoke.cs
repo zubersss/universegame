@@ -75,10 +75,11 @@ namespace Meridian.Core
                     if (w1 != null) side.creatures.Despawn(w1);
                     yield return Wait(0.3f);
                 }
-                side.dayNight.Override = 0f;
-                yield return Wait(1f);
-                yield return Shot(folder, "smoke_3_earth_night.png");
-                side.dayNight.Override = 0.45f;
+                // U-204 F6 (LEAD 18:4x): the shot is named for what it shows, the camp by day. The cartoon stage's painted set and unlit
+                // sheets take no light from DayNight (only Mercury has a night set), so "smoke_3_earth_night" showed the day at local
+                // midnight; a stage tint driven by DayNight is a Backlog line, not this script's to stage.
+                yield return Wait(0.5f);
+                yield return Shot(folder, "smoke_3_earth_camp_day.png");
                 // U-077 smoke: a dig ahead of the surveyor (the Beam), then the Pilgrim airborne with its gear up.
                 if (side.player != null && side.rig != null)
                 {
@@ -128,7 +129,7 @@ namespace Meridian.Core
                 inv.Clear();
                 inv.Add(Meridian.Terrain.TileId.Soil, 64);
                 inv.Add(Meridian.Terrain.TileId.Stone, 999);
-                inv.Add(Meridian.Terrain.TileId.Stone, 210);
+                inv.Add(Meridian.Terrain.TileId.Sand, 210); // U-204 F9: it was a second stack of Stone: two like lumps side by side read as an art fault
                 foreach (var key in new[] { "iron", "copper", "carbon", "silica", "water_ice", "oxygen", "wood", "clay" })
                 {
                     var def = Meridian.Items.ItemRegistry.Get(key);
@@ -548,6 +549,9 @@ namespace Meridian.Core
                     for (int dx = -12; dx <= 12; dx += 2) low = Mathf.Min(low, t.CurveAt(x + dx));
                     if (here - low > dip) { dip = here - low; valley = x; }
                 }
+                // LEAD (the release's order for 0.6.2's smoke): the pack is emptied before the valley shot. The inventory, crafting and
+                // catalogue stagings above leave it loaded, and the HUD then reads a heavy pack over a landscape frame.
+                if (GameState.Instance != null && GameState.Instance.inventory != null) GameState.Instance.inventory.Clear();
                 yield return LookAt(side, valley, 3f);
                 yield return Staged(side);
                 yield return Shot(folder, "smoke_42_earth_forest_valley.png");
@@ -711,7 +715,35 @@ namespace Meridian.Core
             if (cards.Showing != key) yield break;
             cards.Seek(TitleCard.SlideSeconds);
             yield return Shot(folder, "smoke_21_titlecard_" + planet.ToString().ToLowerInvariant() + ".png");
+            if (planet == Meridian.Planets.PlanetId.Mars) LogSmallThingsNearTheShip(); // U-204 F14
             cards.Hide();
+        }
+
+        /// <summary>U-204 F14 (B-228's read of smoke_21 Mars, in 0.6.0's shot too: a flat pale square, about 0.7 x 0.5 m, floats behind the
+        /// Pilgrim at hatch height). A loaded, creature-free Mars shows no such thing (CaptureU196Holes' probe), so it belongs to this
+        /// moment: every small drawn thing round the landed ship is named in the log, so the object and its art key can be told.</summary>
+        static void LogSmallThingsNearTheShip()
+        {
+            var director = FindAnyObjectByType<SceneDirector>();
+            var side = director != null ? director.PlanetSide : null;
+            if (side == null || side.ship == null || side.ship.Body == null) return;
+            var shipAt = side.ship.Body.position;
+            int found = 0;
+            foreach (var r in FindObjectsByType<Renderer>(FindObjectsInactive.Exclude))
+            {
+                if (!r.enabled) continue;
+                var b = r.bounds;
+                if (Mathf.Abs(b.center.x - shipAt.x) > 9f || b.center.y < shipAt.y + 0.5f || b.center.y > shipAt.y + 9f) continue;
+                if (b.size.x > 1.8f || b.size.y > 1.8f || b.size.x < 0.15f) continue;
+                var sr = r as SpriteRenderer;
+                string path = r.name;
+                for (var up = r.transform.parent; up != null && path.Length < 160; up = up.parent) path = up.name + "/" + path;
+                string drawn = sr != null ? (sr.sprite != null ? sr.sprite.name + " (" + (sr.sprite.texture != null ? sr.sprite.texture.name : "no texture") + ")" : "NO SPRITE")
+                    : (r.sharedMaterial != null && r.sharedMaterial.mainTexture != null ? r.sharedMaterial.mainTexture.name : "no main texture");
+                Debug.Log($"[MERIDIAN] smoke F14 near the Pilgrim: {path}: {r.GetType().Name} {b.size.x:0.00} x {b.size.y:0.00} m at ({b.center.x - shipAt.x:+0.0;-0.0}, {b.center.y - shipAt.y:+0.0;-0.0}) from the ship, drawing {drawn}, order {r.sortingOrder}{(sr != null ? ", colour " + ColorUtility.ToHtmlStringRGBA(sr.color) : "")}");
+                found++;
+            }
+            Debug.Log($"[MERIDIAN] smoke F14: {found} small drawn thing(s) within 9 m of the landed Pilgrim");
         }
 
         static IEnumerator Wait(float seconds)

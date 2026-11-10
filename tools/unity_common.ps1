@@ -42,6 +42,20 @@ function Get-FreeMemoryGB {
     return [math]::Round((Get-CimInstance Win32_OperatingSystem).FreePhysicalMemory / 1MB, 2)
 }
 
+# LEAD 18:5x (2026-11-09): on this 7.6 GB machine a perf row cannot be judged without the memory beside it. Free RAM, the size of
+# Windows' compression store and the largest private holders (an idle "ollama app" held 4.2 GB all day; how much of it was compressed
+# differed from run to run). Every perf wrapper prints it at its start and its end.
+function Get-MemoryNote {
+    $store = Get-Process -Name 'Memory Compression' -ErrorAction SilentlyContinue | Select-Object -First 1
+    $storeMb = if ($store) { [math]::Round($store.WorkingSet64 / 1MB) } else { 0 }
+    $big = Get-Process | Sort-Object PrivateMemorySize64 -Descending | Select-Object -First 4 | ForEach-Object { "$($_.ProcessName) $([math]::Round($_.PrivateMemorySize64 / 1MB)) MB" }
+    # LEAD 19:2x: the machine's uptime and the minutes since the last heavy job's log was written (if a slow reading tracks heat, here)
+    $up = [math]::Round(((Get-Date) - (Get-CimInstance Win32_OperatingSystem).LastBootUpTime).TotalHours, 1)
+    $last = Get-ChildItem $LogDir -Filter 'unity_*.log' -ErrorAction SilentlyContinue | Sort-Object LastWriteTime -Descending | Select-Object -First 1
+    $since = if ($last) { [math]::Round(((Get-Date) - $last.LastWriteTime).TotalMinutes, 1) } else { -1 }
+    return "free $(Get-FreeMemoryGB) GB, compression store $storeMb MB, largest private: $($big -join ', '); up $up h, $since min since the last Unity job's log"
+}
+
 function Write-Want([string]$job) {
     # D-039 guard (LEAD cycle 159): never file a want while UNITY still holds the lock, and after UNITY's own
     # job never file one while another role's want is waiting: that role goes first, and UNITY files only once
