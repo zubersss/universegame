@@ -218,7 +218,8 @@ def thorn_bush(seed=71):
     return P
 
 
-KINDS = (("three grasses", grasses), ("a savanna tree", savanna_tree), ("a thorn bush", thorn_bush))
+KINDS = (("three grasses", grasses), ("a savanna tree", savanna_tree), ("a thorn bush", thorn_bush),
+         ("a tree fern", FK.tree_fern))                    # the forest's kind 4b, unrun too: shown here, FK's own sheet is accepted as it is
 
 
 def preview(out):
@@ -251,9 +252,9 @@ def preview(out):
             r[pad + hmax - im.shape[0]:pad + hmax, x:x + im.shape[1]] = im
             x += im.shape[1] + 24
         return r
-    rows = [head("B-248 (D-200): THE PLAINS' KINDS in ART v6 (the plan's 9 and 10) - the form-following brush, the same ONE light, no drawn line. PREVIEW, nothing exported", 26),
+    rows = [head("B-248 (D-200): THE PLAINS' KINDS in ART v6 (the plan's 9 and 10) and the TREE FERN (4) - the form-following brush, the same ONE light, no drawn line. PREVIEW, nothing exported", 26),
             head("AT THE GAME'S SIZE (64 px per metre): " + " | ".join(m[0] for m in made)), row(made, 1),
-            head("AT 2x (as painted): " + made[0][0] + " (turf, the clump, the plumed grass) | " + made[2][0]), row([made[0], made[2]], 2),
+            head("AT 2x (as painted): " + made[0][0] + " (turf, the clump, the plumed grass) | " + made[2][0] + " | " + made[3][0]), row([made[0], made[2], made[3]], 2),
             head("AT 2x: " + made[1][0] + " (a short forked trunk, level boughs, a thin crown of shelves with sky between them)"), row(made[1:2], 2)]
     lines = ["WHAT EACH COST: " + "; ".join(f"{m[0]} {m[3]} dabs, {m[4]:.1f} s" for m in made),
              f"this run: {time.time() - t0:.0f} s. Files in b248_plains/: " + ", ".join(m[0].split()[-1] + "_2x.png" for m in made)]

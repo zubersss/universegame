@@ -11,8 +11,9 @@ Written 2026-11-10 08:4x at LEAD's ask; one line each.
   are written inside the frame, not yet as placeable kinds).
 - WRITTEN, UNRUN: 9 the three grasses (`turf_into`, `clump_into`, `plume_grass_into`) and 10 the savanna tree and the
   thorn bush (`savanna_tree_into`, `thorn_bush_into`, the crown's `shelf`), in `blender/scripts/build_plains_kinds_v6.py`
-  with its own specimen sheet. A first run is a look at every shape, not a sheet.
-- NOT WRITTEN: 4's tree fern; 1's two more fork patterns and the low spreading form; 8's shelf fungus and the boulder
+  with its own specimen sheet; 4's tree fern and a placeable ground fern (`tree_fern_into`, `fern_into`, `frond` in
+  `build_forest_kinds_v6.py`, shown on the plains' sheet). A first run is a look at every shape, not a sheet.
+- NOT WRITTEN: 1's two more fork patterns and the low spreading form; 8's shelf fungus and the boulder
   in three sizes; 11 and 12 (the coast); the plains' and the coast's ground palettes.
 Every kind is a rule in the manner of `blender/scripts/build_specimens_v6.py` (a form field steers the brush: TUBE =
 a centre line with a radius, FACET = a plane with one value and one stroke direction, BALL = a lit cluster), under the

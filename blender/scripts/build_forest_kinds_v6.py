@@ -266,6 +266,68 @@ def heart_into(P, tf, s=1.0, pale=0.0, dark=0.0, n=8):
              lambda t, w=w: 0.8 * s + w * s * (math.sin(math.pi * min(1.0, 0.1 + t * 0.9) ** 0.45) ** 0.9), g, near, veins=4, vein_a=0.75, s=s)
 
 
+# ---------------------------------------------------------------- ferns (written 11-10 10:0x, UNRUN: the plan's kind 4)
+FERN = ("#476244", "#66894F", "#9DB96A")
+
+
+def frond(P, tf, s, base, a, ln, droop, cols, n=13):
+    """One frond (its own px about the plant's foot): a rachis that arcs out and droops, a leaflet down each side at
+    every step, each its own dab. The frame's Scene.frond made placeable; the light is read from the PLACED rachis."""
+    rng = P.rng
+    pts = [base, (base[0] + math.cos(a) * ln * 0.5, base[1] + math.sin(a) * ln * 0.55), (base[0] + math.cos(a) * ln, base[1] + math.sin(a) * ln + droop)]
+    rib = CEL.catmull(pts, False, n)
+    p0, p1 = tf(*rib[0]), tf(*rib[-1])
+    lit = ((p1[0] - p0[0]) * LIGHT[0] + (p1[1] - p0[1]) * LIGHT[1]) > 0
+    fl = flipped(tf)
+    for i in range(2, len(rib) - 1):
+        (x0, y0), (x1, y1) = rib[i - 1], rib[i]
+        t = i / len(rib)
+        ang = math.atan2(y1 - y0, x1 - x0)
+        ll = ln * 0.22 * math.sin(math.pi * min(1.0, t * 1.05)) ** 0.6 + 2
+        for side in (-1, 1):
+            b = ang + side * 1.0
+            c = cols[2] if (lit and side < 0) else cols[1] if lit else cols[0] if side > 0 else cols[1]
+            px, py = tf(x1 + math.cos(b) * ll * 0.5, y1 + math.sin(b) * ll * 0.5)
+            P.dab(px, py, ll * 0.5 * s, max(0.9, ll * 0.12 * s), math.pi - b if fl else b, np.clip(c * (1 + rng.normal(0, 0.05)), 0, 1), 1.0, 4.6, 0.0)
+    P.stroke([tf(*p) for p in rib], 1.6 * s, 0.6 * s, cols[0] * 0.85, 4.0)
+
+
+def fern_into(P, tf, s=1.0, pale=0.0, dark=0.0, n=9):
+    """A ground fern about 0.8 m: fronds from one base, the outer ones first (the frame's Scene.fern, placeable)."""
+    rng, cols = P.rng, hz(FERN, pale, dark)
+    for i in sorted(range(n), key=lambda i: abs(i - (n - 1) / 2), reverse=True):
+        a = math.radians(-160 + 140 * i / (n - 1) + rng.uniform(-6, 6))
+        ln = rng.uniform(34, 52)
+        frond(P, tf, s, (0, 0), a, ln, ln * (0.25 + 0.5 * abs(math.cos(a))), cols)
+
+
+def tree_fern_into(P, tf, s=1.0, pale=0.0, dark=0.0, n=13):
+    """A tree fern about 3 m tall: a short shaggy trunk ringed with old frond bases, dead fronds hanging against it, a
+    wide crown of long arching fronds (the far ones behind the trunk, darker), two young croziers at its heart."""
+    rng = P.rng
+    bark = hz(("#3A302C", "#54463A", "#746350", "#978466"), pale, dark)
+    cols, back = hz(FERN, pale, dark), hz(FERN, pale, min(1.0, dark + 0.5))
+    dead = hz(("#6E5B40", "#8E7A54", "#AD9A6C"), pale, dark)
+    top = (5, -150)
+    fr = []
+    for i in range(n):
+        a = math.radians(-176 + 172 * i / (n - 1) + rng.uniform(-6, 6))
+        fr.append((rng.random() + 0.4 * abs(math.cos(a)), a, rng.uniform(84, 110)))
+    fr.sort()
+    for depth, a, ln in fr[:n // 2]:                                           # the crown's far half, behind the trunk
+        frond(P, tf, s, top, a, ln, ln * (0.35 + 0.75 * abs(math.cos(a))), back, 18)
+    limb(P, [tf(*p) for p in ((0, 2), (-5, -52), (3, -104), top)], 9 * s, 7 * s, bark, flare=3 * s, n_per=0.08, rings=9 * s, s=s)
+    for _ in range(5):                                                          # dead fronds hang down against the trunk
+        side = 1 if rng.random() < 0.5 else -1
+        x0, y0, ln = top[0] + side * rng.uniform(2, 6), top[1] + rng.uniform(4, 14), rng.uniform(34, 52)
+        P.stroke([tf(x0, y0), tf(x0 + side * 10, y0 + ln * 0.45), tf(x0 + side * rng.uniform(8, 14), y0 + ln)], 2.4 * s, 0.8 * s, dead[int(rng.integers(0, 3))], 4.2)
+    for depth, a, ln in fr[n // 2:]:                                            # the near half
+        frond(P, tf, s, top, a, ln, ln * (0.35 + 0.75 * abs(math.cos(a))), cols, 18)
+    for d, h in ((1, rng.uniform(16, 22)), (-1, rng.uniform(12, 17))):          # young fronds, still curled
+        tx, ty = top
+        P.stroke([tf(tx, ty), tf(tx + d * 2, ty - h * 0.6), tf(tx + d * 5, ty - h), tf(tx + d * 9, ty - h * 0.82), tf(tx + d * 7, ty - h * 0.62)], 2.2 * s, 1.2 * s, cols[1], 4.4)
+
+
 # ---------------------------------------------------------------- the specimen sheet
 def canvas(w, h, seed, gy, shade):
     P = PT.Painting(w, h, seed, Q)
@@ -301,6 +363,12 @@ def understorey(seed=47):
     P = canvas(360, 210, seed, 184, (120, 150, 9))
     paddle_into(P, at(100, 184))
     heart_into(P, at(262, 182))
+    return P
+
+
+def tree_fern(seed=59):                                    # UNRUN; shown on build_plains_kinds_v6's sheet, not in KINDS (this sheet is accepted as it is)
+    P = canvas(250, 270, seed, 244, (108, 92, 8))
+    tree_fern_into(P, at(120, 244))
     return P
 
 
