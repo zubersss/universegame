@@ -33,9 +33,20 @@
     {
       "n": 3,
       "parallax": 1.0,
-      "y_m": -1.0,
+      "y_m": -2.0,
       "role": "surface_from_below",
-      "height_px": 64
+      "height_px": 128
+    },
+    {
+      "n": 4,
+      "parallax": 0.9,
+      "y_m": -6.0,
+      "continue_rows": 64,
+      "role": "shallow_seabed",
+      "ground_row": 232,
+      "shore_m": 40.0,
+      "draw_before": 3,
+      "height_px": 384
     }
   ]
 }
