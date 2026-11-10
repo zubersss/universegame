@@ -377,10 +377,14 @@ def draw_veil_serpent(d, M, pose=None, seed=0):
     p.update(pose or {})
     spine, s = serpent_spine(p)
     n = len(spine)
+    # Round 2 (LEAD 18:2x; the 18:16 preview read as an earthworm at 1x - thin, ringed along its whole length, its fins a row
+    # of dots): the body about 60 % thicker at the head and tapering to the tail; no ring lines; the fin lobes joined into ONE
+    # soft flowing frill along the back (the veil) and a smaller one under the belly, each rippling a frame behind the body's
+    # wave; a larger head to carry the thicker body. The calm eye and the closed smile stay
     left, right = [], []
     for i, (x, z) in enumerate(spine):
         t = i / (n - 1)
-        w = (0.17 * (1 - t) + 0.05 * t) * s * (1 - 0.3 * p["curl"] * math.sin(math.pi * t))
+        w = (0.27 * (1 - t) + 0.045 * t) * s * (1 - 0.3 * p["curl"] * math.sin(math.pi * t))
         a, b = spine[max(i - 1, 0)], spine[min(i + 1, n - 1)]
         dx, dz = b[0] - a[0], b[1] - a[1]
         L = math.hypot(dx, dz) or 1.0
@@ -388,30 +392,44 @@ def draw_veil_serpent(d, M, pose=None, seed=0):
         left.append((x + nx * w, z + nz * w))
         right.append((x - nx * w, z - nz * w))
     up, down = (left, right) if sum(q[1] for q in left) > sum(q[1] for q in right) else (right, left)
-    for i in range(3, n - 3, 4):                                                          # soft fins: rounded lobes along both edges
-        for edge, k in ((up, 1), (down, -1)):
-            q = edge[i]
-            G.stroke(d, G.lumpy_ellipse(q[0], q[1] + k * 0.04 * s, 0.10 * s, 0.05 * s, n=14, lump=0.05, seed=seed + i + (k > 0)),
-                     M["cream_sh"], I, cyclic=True)
+
+    def frill(edge, t0, t1, H, lag):
+        """A frill on one edge between t0 and t1 of the body's length: -> (the line it grows from, a little inside the body;
+        its free edge, H m high at most, swelling from nothing at both ends and rippling with twice the body's wave number,
+        `lag` rad behind the body's wave)."""
+        i0, i1 = int(round(t0 * (n - 1))), int(round(t1 * (n - 1)))
+        root, free, fold = [], [], []
+        for i in range(i0, i1 + 1):
+            t = i / (n - 1)
+            u = (i - i0) / (i1 - i0)
+            (cx, cz), (ex, ez) = spine[i], edge[i]
+            L = math.hypot(ex - cx, ez - cz) or 1.0
+            h = H * s * math.sin(math.pi * u) ** 0.55 * (1 + 0.42 * math.sin(p["wave"] - lag - 5.2 * math.pi * t))
+            root.append((cx + (ex - cx) * 0.6, cz + (ez - cz) * 0.6))
+            free.append((ex + (ex - cx) / L * h, ez + (ez - cz) / L * h))
+            fold.append((ex + (ex - cx) / L * h * 0.45, ez + (ez - cz) / L * h * 0.45))   # its shade: the half by the body
+        return root, free, fold
+    for edge, t0, t1, H, lag in ((up, 0.07, 0.94, 0.22, 1.3), (down, 0.24, 0.80, 0.09, 1.9)):   # the veil, then the belly frill
+        root, free, fold = frill(edge, t0, t1, H, lag)
+        G.stroke(d, root + free[::-1], M["cream"], O, cyclic=True)
+        G.stroke(d, root + fold[::-1], M["cream_sh"], 0.0, cyclic=True)
     tip = spine[-1]                                                                       # a soft forked tail fin (rounded lobes)
     for k in (1, -1):
-        G.stroke(d, G.lumpy_ellipse(tip[0] - 0.08 * s, tip[1] + k * 0.07 * s, 0.13 * s, 0.05 * s, n=14, lump=0.05, seed=seed + 40 + k),
+        G.stroke(d, G.lumpy_ellipse(tip[0] - 0.09 * s, tip[1] + k * 0.08 * s, 0.16 * s, 0.06 * s, n=14, lump=0.05, seed=seed + 40 + k),
                  M["cream"], I, cyclic=True)
     shape = left + [tip] + right[::-1]
     G.stroke(d, shape, M["haze_f"], 0.0, cyclic=True)                                     # the ribbon: haze, a cream belly band
     mid = [((u[0] + 2 * v[0]) / 3, (u[1] + 2 * v[1]) / 3) for u, v in zip(up, down)]
     G.stroke(d, down + mid[::-1], M["cream_f"], 0.0, cyclic=True)
-    for i in range(2, n - 2, 3):                                                          # soft bands across it
-        G.seam(d, [up[i], mid[i]], M["ink"])
     G.stroke(d, shape, M["ink"], O, cyclic=True)
-    hx, hz = spine[0][0] + 0.08 * s, spine[0][1]                                          # the head: rounded, a calm eye, a closed mouth
+    hx, hz = spine[0][0] + 0.10 * s, spine[0][1]                                          # the head: rounded, a calm eye, a closed mouth
     dh = G.Xf(d, K.turn((hx, hz), p["head_rot"], (0.0, 0.0), K.scale_about((hx, hz), s)))
-    head = G.lumpy_ellipse(hx, hz, 0.21, 0.15, n=28, lump=0.03, seed=seed + 2)
+    head = G.lumpy_ellipse(hx, hz, 0.31, 0.27, n=28, lump=0.03, seed=seed + 2)
     G.stroke(dh, head, M["haze_f"], 0.0, cyclic=True)
-    G.stroke(dh, [q for q in head if q[1] < hz - 0.04] + [(hx, hz - 0.04)], M["cream_f"], 0.0, cyclic=True)
+    G.stroke(dh, [q for q in head if q[1] < hz - 0.08] + [(hx, hz - 0.08)], M["cream_f"], 0.0, cyclic=True)
     G.stroke(dh, head, M["ink"], O, cyclic=True)
-    G.seam(dh, G.bezier((hx + 0.20, hz - 0.035), (hx + 0.12, hz - 0.07), (hx + 0.03, hz - 0.06), n=5), M["ink"])   # closed, gently smiling
-    K.eyes(dh, M, hx + 0.06, hz + 0.03, 0.035, 0.045, 0.06, p, seed)
+    G.seam(dh, G.bezier((hx + 0.29, hz - 0.07), (hx + 0.18, hz - 0.14), (hx + 0.04, hz - 0.115), n=6), M["ink"])   # closed, gently smiling
+    K.eyes(dh, M, hx + 0.09, hz + 0.06, 0.052, 0.068, 0.092, p, seed)
     if p["shrink"] > 0.05:                                                                # thinning into the haze: a few wisps behind
         for j in range(3):
             x = tip[0] - 0.15 - 0.14 * j                                                  # desk-check: at - 0.2 - 0.18 j the last wisp of
