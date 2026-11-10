@@ -103,6 +103,10 @@ LAT = {"leg": 0.085, "arm": 0.205}                 # how far to the side the hip
 #            back, the forearm forward - the long S of a leg and of an arm instead of two straight tubes.
 #   folds    Fig.folds(): cloth gathers on the INSIDE of a bend, one more flick for every 45 degrees of it (behind a
 #            knee; across the waist's front when the chest leans over the pelvis, across its back when it leans away).
+#   arc      pose["arc"] (deg; LEAD 08:5x: "the stiffest thing left is the trunk: one straight lean, the head square
+#            on it"): the chest's lean runs through an arc from the waist to the neck's base (a C through the back in
+#            the dig and the crawl, a slight S against the pelvis in the idle and the walk, arched back in the jump);
+#            the neck takes 0.6 of it on and the head 0.4, so the head leads the curve instead of sitting square.
 #   stretch  pose["len_arm_n"], ["len_arm_f"], ["len_leg_n"], ["len_leg_f"] (1.0 = as built): a reaching limb
 #            lengthens and thins (its volume kept). pose["squash"] (1.0 = none): the whole figure pressed toward the
 #            ground and widened by the same volume rule (a landing), or drawn out (a jump's take-off, above 1.0).
@@ -117,13 +121,24 @@ def skeleton(p):
     sole stands on the ground (plus lift). With RHYTHM: twist and len_* (above)."""
     g = lambda k, d=0.0: math.radians(p.get(k, d))  # noqa: E731
     tw = g("twist") if RHYTHM else 0.0
+    arc = g("arc") if RHYTHM else 0.0
     J = {"P": (0.0, 0.0)}
     pel, che = g("pelvis"), g("chest")
     J["W"] = mul(up(pel), 0.14)
+
+    def along(t):
+        """A point t metres up the chest from the waist. With an arc the chest is not one straight lean: its lean runs
+        from chest - arc / 2 at the waist to chest + arc / 2 at the neck's base (a C through the back when arc > 0)."""
+        if arc == 0.0:
+            return add(J["W"], mul(up(che), t))
+        pos = J["W"]
+        for i in range(8):
+            pos = add(pos, mul(up(che + arc * ((i + 0.5) * t / 8 / 0.385 - 0.5)), t / 8))
+        return pos
     for k, t in (("R", 0.12), ("C", 0.24), ("SH", 0.34), ("N", 0.385)):
-        J[k] = add(J["W"], mul(up(che), t))
+        J[k] = along(t)
     J["CR"] = mul(up(pel), -0.075)
-    J["A"] = add(J["N"], mul(up(g("neck")), 0.05))
+    J["A"] = add(J["N"], mul(up(g("neck") + 0.6 * arc), 0.05))                  # the neck carries the end of the curve
     lows = []
     for s in ("n", "f"):
         sg = 1 if s == "n" else -1
@@ -133,7 +148,7 @@ def skeleton(p):
         th, kn, ft = g("th_" + s), g("kn_" + s), g("ft_" + s)
         knee = add(hip, mul(dn(th), L_TH * ll))
         ank = add(knee, mul(dn(th - kn), L_SH * ll))
-        sh = add(add(J["SH"], mul(up(che), -0.035)), (sg * LAT["arm"] * math.sin(tw), 0.0))   # the near shoulder forward
+        sh = add(along(0.305) if arc else add(J["SH"], mul(up(che), -0.035)), (sg * LAT["arm"] * math.sin(tw), 0.0))   # the near shoulder forward
         ua, el = g("ua_" + s), g("el_" + s)
         elb = add(sh, mul(dn(ua), L_UA * la))
         J.update({"hip_" + s: hip, "knee_" + s: knee, "ank_" + s: ank, "sh_" + s: sh, "elb_" + s: elb,
@@ -404,7 +419,7 @@ class Fig:
         if self.view == "front":
             return
         d, M, J = self.d, self.M, self.J
-        ch = math.radians(self.p.get("chest", 0.0))
+        ch = math.radians(self.p.get("chest", 0.0) + (0.12 * self.p.get("arc", 0.0) if RHYTHM else 0.0))
         u, n = up(ch), (math.cos(ch), -math.sin(ch))
         c = add(J["C"], mul(n, -(0.125 + 0.07)))
         hw = self.aw(0.30, 0.17) / 2
@@ -429,7 +444,7 @@ class Fig:
     def head(self):
         d, M = self.d, self.M
         a = self.pr(self.J["A"])
-        tilt = -math.radians(self.p.get("head", 0.0)) * self.cs
+        tilt = -math.radians(self.p.get("head", 0.0) + (0.4 * self.p.get("arc", 0.0) if RHYTHM else 0.0)) * self.cs   # the head carries the spine's arc on
         pv = {"side": (36, 84), "three-quarter": (-2, 88), "front": (0, 90)}[self.view]
         h = G.Xf(d, lambda pts: [add(a, rot(((x - pv[0]) * HU, (pv[1] - y) * HU), tilt)) for x, y in pts])
         W = LINE * 0.42                                                         # the face in a finer line than the body (run 2: at 8x the features were blobs)
@@ -520,20 +535,20 @@ class Fig:
 # ---------------------------------------------------------------- the poses (degrees; twist and len_* are RHYTHM keys, ignored while it is off)
 POSES = {
     # the weight on the near leg, the far knee eased and its heel off the ground; the spine a little curved
-    "idle": {"twist": 6, "pelvis": -3, "chest": 4, "neck": 6, "head": 2, "th_n": 1, "kn_n": 2, "th_f": 12, "kn_f": 26, "ft_f": -16,
+    "idle": {"twist": 6, "arc": 6, "pelvis": -3, "chest": 4, "neck": 6, "head": 2, "th_n": 1, "kn_n": 2, "th_f": 12, "kn_f": 26, "ft_f": -16,
              "ua_n": -7, "el_n": 14, "ua_f": 9, "el_f": 22},
     # a walk's contact: the near heel down ahead, the far foot pushing off its toes, the arms counter-swung
-    "walk": {"twist": -22, "pelvis": 2, "chest": 6, "neck": 4, "th_n": 27, "kn_n": 6, "ft_n": 17, "th_f": -20, "kn_f": 26, "ft_f": -32,
+    "walk": {"twist": -22, "arc": 8, "pelvis": 2, "chest": 6, "neck": 4, "th_n": 27, "kn_n": 6, "ft_n": 17, "th_f": -20, "kn_f": 26, "ft_f": -32,
              "ua_n": -28, "el_n": 16, "ua_f": 26, "el_f": 34},
     # a deep crouch under the 1 m line: folded at hips and knees, the back level, the head ducked, a hand to the ground
     # (the antenna laid back along the pack: "ant")
-    "crouch": {"pelvis": 64, "chest": 82, "neck": 64, "head": 50, "th_n": 118, "kn_n": 152, "ft_n": 0, "th_f": 100, "kn_f": 154, "ft_f": -26,
+    "crouch": {"arc": 22, "pelvis": 64, "chest": 82, "neck": 64, "head": 50, "th_n": 118, "kn_n": 152, "ft_n": 0, "th_f": 100, "kn_f": 154, "ft_f": -26,
                "ua_n": 40, "el_n": 62, "ua_f": 30, "el_f": 70, "ant": -150},
     # a jump's apex: the knees tucked unevenly, one arm thrown up and forward, the other back
-    "jump": {"twist": 14, "len_arm_n": 1.08, "len_leg_f": 1.05, "pelvis": 4, "chest": 8, "neck": -4, "th_n": 66, "kn_n": 98, "ft_n": -22, "th_f": 14, "kn_f": 72, "ft_f": -36,
+    "jump": {"twist": 14, "arc": -14, "len_arm_n": 1.08, "len_leg_f": 1.05, "pelvis": 4, "chest": 8, "neck": -4, "th_n": 66, "kn_n": 98, "ft_n": -22, "th_f": 14, "kn_f": 72, "ft_f": -36,
              "ua_n": 128, "el_n": 26, "ua_f": -34, "el_f": 22, "lift": 0.32},
     # the dig's contact: a lunge, the weight over the front knee, both hands on the shovel (set by reach, below)
-    "dig": {"twist": 18, "pelvis": 16, "chest": 30, "neck": 16, "head": 14, "th_n": 50, "kn_n": 62, "th_f": -30, "kn_f": 22, "ft_f": -34},
+    "dig": {"twist": 18, "arc": 24, "pelvis": 16, "chest": 30, "neck": 16, "head": 14, "th_n": 50, "kn_n": 62, "th_f": -30, "kn_f": 22, "ft_f": -34},
 }
 DIG_AIM = -47.0                                   # the shovel's angle at the dig's contact (deg from level)
 
@@ -717,7 +732,7 @@ def compare(out):
     finally:
         RHYTHM = keep
     rows = [np.tile(paper, (30, Wd, 1)).astype(np.float32)]
-    review._label(rows[0], "B-231 (D-200): THE RHYTHM RULES, for LEAD's judgement - the same five poses drawn with the rules OFF and ON (a twist of shoulders against hips, a bow along each limb, folds by each bend, stretch). PREVIEW", 6, 8)
+    review._label(rows[0], "B-231 (D-200): THE RHYTHM RULES, for LEAD's judgement - the same five poses drawn with the rules OFF and ON (an arc through the spine carried on by neck and head, a twist of shoulders against hips, a bow along each limb, folds by each bend, stretch). PREVIEW", 6, 8)
     RH = 370
     for on in (False, True):
         rows.append(head(("RULES ON" if on else "RULES OFF (the accepted model sheet's drawings)") + ", at 2x the game's size: idle | a walk's contact | the crouch | a jump's apex | the dig's contact"))
@@ -744,7 +759,7 @@ def compare(out):
             over(r, im, x, 720 - im.shape[0] - 10)
             x += im.shape[1] + 10
     rows.append(r)
-    lines = ["the rules ON: twist (idle 6, walk -22, jump 14, dig 18 degrees), bow (thigh +5 %, shin -4.5 %, upper arm -3 %, forearm +3.5 % of each length), folds by bend, the jump's reaching arm 8 % and trailing leg 5 % longer",
+    lines = ["the rules ON: the spine's arc (idle 6, walk 8, crouch 22, jump -14, dig 24 degrees; the neck takes 0.6 of it on, the head 0.4), twist (idle 6, walk -22, jump 14, dig 18), bow (thigh +5 %, shin -4.5 %, upper arm -3 %, forearm +3.5 % of each length), folds by bend, the jump's reaching arm 8 % and trailing leg 5 % longer",
              "heights standing / crouched: off " + f"{tops[('idle', False)]:.2f} / {tops[('crouch', False)]:.2f} m, on {tops[('idle', True)]:.2f} / {tops[('crouch', True)]:.2f} m; this run {time.time() - t0:.0f} s"]
     foot = np.tile(paper, (24 + 16 * len(lines), Wd, 1)).astype(np.float32)
     for i, ln in enumerate(lines):
