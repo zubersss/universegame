@@ -135,3 +135,45 @@ atlases 16.8 (64), the creatures 13.2 (50), each region's painted layers 6.3-12.
 retires its painted layers (24-48 MB), the flora atlases (64), the v3 surveyor sheets in use (side, side_b, side_dig:
 7.4 Mpx, 30 MB) and its creatures' sheets (about 20 of the 50): **about 140-160 MB RGBA32 leaves**; case A brings in
 713, case D 126.
+
+## 6. The quality ladder (B-266, D-209: what to SPEND memory on, in the order the eye gains most)
+
+D-209 (the owner, 15:1x): use this laptop to its measured limit. So from case D (126 MB: everything compressed, trimmed,
+ppu 192, 12 a second, normals only on figures and near pieces) upward, each rung is something the eye would see, its
+cost, and the running total of one region resident. All **E** (sums from sections 1-4; one near "page" = about 20 kinds
+of piece = 16 MB RGBA32 or 4 MB BC at ppu 192, x1.78 at ppu 256; the figure trimmed = 6.5 pages at ppu 192).
+The marks are texture megabytes; on this Intel chip texture memory IS the machine's RAM, so the real bound is the
+working set U-220's probe measures on the built player.
+
+| Rung | What the eye gains | Cost | Running total |
+|---|---|---|---|
+| D | the base (section 4) | | 126 MB |
+| 1 | THE FIGURE's colour uncompressed (the thing looked at all the time: no block in a face or a fold); its normals stay BC5 | +78 | 204 |
+| 2 | the NEAR pieces' colour uncompressed (3 pages) | +36 | 240 |
+| 3 | ppu 256 UNDER THE 128 CAMERA (only if that camera is chosen: x2 over it instead of x1.5): the figure +101, the near pieces +46 | +147 | 387 |
+| 4 | 24 drawings a second for WALK AND RUN (+24 drawings) | +28 | 415 |
+| 5 | 24 a second for EVERY moving clip (370 drawings in all) | +168 | 583 |
+| 6 | normal maps on the MIDDLE layer (the game's lights reach the thicket) | +4 | 587 |
+| 7 | MORE KINDS a screen: 40 more near pieces (two more pages at this quality) | +71 | 658 |
+| 8 | A SECOND LIT VARIANT of the near plants (rendered with the light from the other side, so a plant may be mirrored without the painted light going wrong: D-206's rule 1 lifted for them) | +107 | 765 |
+| 9 | LARGER FAR VEILS (ppu 64 instead of 32, uncompressed: the far forest stops being soft) | +36 | 801 |
+| 10 | the three resident CREATURES' colour uncompressed (at ppu 128) | +53 | 854 |
+| 11 | the creatures at ppu 192 (x2 over the 96 camera, as the figure) | +110 | 964 |
+| | **---- 1 024 MB (D-207's line) ----** | | |
+| 12 | the creatures at 24 a second for their moving clips | +159 | 1 123 |
+| 13 | the figure's NORMAL maps uncompressed too (only if BC5 shows in a lit face) | +256 | 1 379 |
+| 14 | the ground maps at 512 px per metre, uncompressed (the earth cut holds a 2x look) | +60 | 1 439 |
+| 15 | the middle layer at ppu 192, colour uncompressed | +37 | 1 476 |
+| | **---- 1 500 MB ----** | | |
+| 16 | A SECOND REGION RESIDENT at this quality (no load when the surveyor crosses from forest to plains) | +440 | 1 916 |
+| | **---- 2 000 MB ----** | | |
+
+- Rungs 1, 2 and 4 are the cheap ones the eye gains most from: **240 MB with 1 and 2, 268 with 4 as well** (at ppu 192).
+- Rung 3 is a camera decision, not a quality one: without the 128 camera it is not spent and every total below it is 147
+  less (and rungs 4-8 cost about 0.56 of what is written, being priced at ppu 256).
+- Rung 5 is the first costly one (168 MB for motion the paint-in-materials look may not show at 12 against 24): look at
+  rung 4 in the game before buying it.
+- Rungs 8 and 16 cost RENDER TIME as well as memory (a second render of every near plant; a second region's pieces).
+- What none of this buys: more DETAIL in a piece than the 384 px per metre source holds. Past ppu 256 the next gain is
+  rendering at 512, which is a change to B-258's method (one piece of about 0.7 megapixel a render: its peak is not
+  measured yet), not a rung.

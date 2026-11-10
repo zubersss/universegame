@@ -558,7 +558,11 @@ def piece(ids, plain=False):
         if pid not in PIECES:
             raise SystemExit(f"v7_frame_pieces: no piece '{pid}' (have: {', '.join(PIECES)})")
         by_asset.setdefault(PIECES[pid]["asset"], []).append(pid)
+    left = []
     for asset, pids in by_asset.items():
+        if BUDGET_S and time.time() - T0 > BUDGET_S:                                        # a turn is <= 10 min: no new set is begun past the budget
+            left += pids
+            continue
         scene = V.fresh()
         obs = V.load(asset)
         mats = materials(obs)
@@ -569,6 +573,9 @@ def piece(ids, plain=False):
         gs = groups(obs)
         painted = {}
         for pid in pids:
+            if BUDGET_S and time.time() - T0 > BUDGET_S:
+                left.append(pid)
+                continue
             cfg = PIECES[pid]
             g = next((x for x in gs if any(o.name == cfg["ob"] for o in x)), None)
             if g is None:
@@ -600,8 +607,7 @@ def piece(ids, plain=False):
             if plain:
                 say(f"{pid} PLAIN: {w}x{h} px at {ppm} px per metre in {t_r:.1f} s")
             else:
-                meta.update(finish(pid, cfg["kind"], ppm, rp))
-                os.remove(rp)
+                meta.update(finish(pid, cfg["kind"], ppm, rp))                              # (the render is KEPT: `refinish` paints it again without a 3D render)
                 if cfg["kind"] in ("leaf", "grass") and len(g) == 1 and tris(g) < 20000:      # the parts that can sway: a root and a tip each
                     V.PPM = ppm
                     cam = scene.camera
@@ -615,6 +621,21 @@ def piece(ids, plain=False):
             for o in g:
                 o.matrix_world = keep[o.name]
             bpy.context.view_layer.update()
+    say(f"this run: {time.time() - T0:.0f} s" + (f"; NOT STARTED (the budget of {BUDGET_S:.0f} s was reached): {' '.join(left)}" if left else "; every named piece done"))
+
+
+def refinish(ids):
+    """The kept renders painted again (after a change to POST or v7_paint): no 3D render, the json's paint rows renewed."""
+    for pid in ids or sorted(f[:-11] for f in os.listdir(PDIR) if f.endswith("_render.png")):
+        rp, jp = os.path.join(PDIR, pid + "_render.png"), os.path.join(PDIR, pid + ".json")
+        if not (os.path.isfile(rp) and os.path.isfile(jp)):
+            say(f"{pid}: no kept render")
+            continue
+        meta = json.load(open(jp, encoding="utf-8"))
+        meta.update(finish(pid, meta["kind"], meta["px_per_m"], rp))
+        with open(jp, "w", encoding="utf-8", newline="\n") as fh:
+            json.dump(meta, fh, indent=1)
+        say(f"{pid}: painted again: {meta['strokes']} strokes + {meta['edge_strokes']} on the edge in {meta['paint_s']} s")
 
 
 def stand_piece(ids):
@@ -654,16 +675,23 @@ def stand_piece(ids):
         meta = {"id": sid, "style": "v7", "asset": cfg["asset"], "kind": cfg["kind"], "px_per_m": ppm, "size_px": [w, h], "pivot": pivot,
                 "width_m": round(hi.x - lo.x, 3), "height_m": round(hi.z, 3), "under_m": 0.0, "trees": len(cfg["items"]), "tris": tris(copies), "render_s": round(t_r, 1)}
         meta.update(finish(sid, cfg["kind"], ppm, rp))
-        os.remove(rp)
         with open(os.path.join(PDIR, sid + ".json"), "w", encoding="utf-8", newline="\n") as fh:
             json.dump(meta, fh, indent=1)
         say(f"{sid}: {len(cfg['items'])} trees over {meta['width_m']} m, {w}x{h} px at {ppm} px per metre; render {t_r:.1f} s; the brush {meta['strokes']} strokes in {meta['paint_s']} s")
 
 
+T0, BUDGET_S = time.time(), 0.0
+
 if __name__ == "__main__":
     argv = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
+    if "budget" in argv:                                                                    # ... budget <seconds>: no new piece is begun after that long
+        i = argv.index("budget")
+        BUDGET_S = float(argv[i + 1])
+        argv = argv[:i] + argv[i + 2:]
     mode = argv[0] if argv else "look"
-    if mode == "look":
+    if mode == "refinish":
+        refinish(argv[1:])
+    elif mode == "look":
         look(argv[1:])
     elif mode in ("piece", "plain"):
         unknown = [a for a in argv[1:] if a not in PIECES and a not in STANDS]

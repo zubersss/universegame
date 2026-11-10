@@ -23,7 +23,8 @@ param(
     [string[]]$ScriptArgs = @(),
     [int]$CapMB = 2400,
     [int]$TimeoutSec = 600,
-    [double]$MinFreeGB = 2.4
+    [double]$MinFreeGB = 2.4,
+    [switch]$SmallestFit
 )
 $repo = Split-Path -Parent $PSScriptRoot
 $locks = Join-Path $repo 'coordination\locks'
@@ -43,7 +44,18 @@ if (-not (Test-Path $Script)) { $Script = Join-Path $repo $Script }
 if (-not (Test-Path $Script)) { "blender_scene: no such script: $Script"; exit 2 }
 
 $others = Get-ChildItem $locks -File | Where-Object { $_.Name -like 'heavy_*' -or $_.Name -like 'want_*' }
-if ($others) {
+if ($SmallestFit) {
+    # CLAUDE.md rule 6 (D-209): while another role's want is held back ONLY by the RAM gate, a job that fits its own
+    # MEASURED gate (-MinFreeGB = its peak + 0.35, -CapMB = its peak + 0.2) may run ONE turn of <= 10 min under its lock.
+    # So: another role's want_* may be on file; a heavy_* lock or a file of my own may not; and with 1.5 GB or more free
+    # the waiting role can start, so the turn is its, not mine.
+    $block = $others | Where-Object { $_.Name -like 'heavy_*' -or $_.Name -like '*_blender.lock' }
+    if ($block) { "ABORT: locks on file: " + (($block | ForEach-Object { $_.Name }) -join ', '); exit 3 }
+    $freeNow = [math]::Round((Get-CimInstance Win32_OperatingSystem).FreePhysicalMemory / 1MB, 2)
+    if ($others -and $freeNow -ge 1.5) { "ABORT: free RAM $freeNow GB is 1.5 GB or more: the waiting role's turn, not a smallest fit"; exit 3 }
+    if ($TimeoutSec -gt 600) { $TimeoutSec = 600 }
+    if ($others) { "smallest fit beside: " + (($others | ForEach-Object { $_.Name }) -join ', ') }
+} elseif ($others) {
     "ABORT: locks on file: " + (($others | ForEach-Object { $_.Name }) -join ', ')
     exit 3
 }
