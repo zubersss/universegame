@@ -578,7 +578,7 @@ def cels(P, yb, ppm, x0, gy, K):
     dx_, dy_ = PIT_X + 1.75, gy + FLOOR * ppm
     shadow(dx_ + 0.2, dy_ + 1, 46, 5, 0.34)
     put(CEL.down(dig, f), dx_, dy_, 130 * u, 330 * u)
-    SV.K, SV.RHYTHM = 4, False
+    SV.K = 4                                                                     # (RHYTHM is the figure's default now)
     clods = [prop(SF.clod(11 + i, r), 48, 48, f"clod{i}") for i, r in enumerate((16, 13, 10, 8))]
     tx, ty = dx_ + 1.36, dy_ - 0.05 * ppm                                        # about where the blade bites
     for i, (ox, oy) in enumerate(((-14, -40), (12, -66), (36, -46), (54, -22), (-34, -16), (66, -60), (22, -94))):

@@ -111,7 +111,9 @@ LAT = {"leg": 0.085, "arm": 0.205}                 # how far to the side the hip
 #            lengthens and thins (its volume kept). pose["squash"] (1.0 = none): the whole figure pressed toward the
 #            ground and widened by the same volume rule (a landing), or drawn out (a jump's take-off, above 1.0).
 # Poses may already carry these keys; with RHYTHM False they are ignored.
-RHYTHM = False
+# 11-10 11:4x: THE DEFAULT IS ON (LEAD accepted the rules on the comparison sheet "from the owner's yes"; the owner said
+# yes on USER-44). compare() still draws both ways.
+RHYTHM = True
 BOW = {"thigh": 0.05, "shin": -0.045, "upper_arm": -0.03, "forearm": 0.035}    # the bow, as a share of the segment's length
 
 
