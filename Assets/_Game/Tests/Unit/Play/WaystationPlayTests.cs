@@ -89,5 +89,80 @@ namespace Meridian.Tests
             Assert.IsTrue(state.contracts[0].accepted);
             LogAssert.NoUnexpectedReceived();
         }
+
+        /// <summary>U-204 F10 (B-228's read of smoke_10: the goods list ran past the market panel's bottom border, "Ring ice" across it and
+        /// "Methane ice" outside): the goods page. On every page every piece of every shown row lies inside the panel, above the page
+        /// cards; every good is on exactly one page; PREV / NEXT are live only where there is a page to go to; docking opens page one.</summary>
+        [UnityTest]
+        public IEnumerator TheGoodsPageInsideTheMarketPanel()
+        {
+#if UNITY_EDITOR
+            yield return UnityEditor.SceneManagement.EditorSceneManager.LoadSceneAsyncInPlayMode(
+                CorePath, new LoadSceneParameters(LoadSceneMode.Single));
+#endif
+            var director = Object.FindAnyObjectByType<SceneDirector>();
+            float timeout = Time.realtimeSinceStartup + 30f;
+            while (!director.IsReady && Time.realtimeSinceStartup < timeout) yield return null;
+            director.SetView(ViewMode.Space);
+            for (int i = 0; i < 10; i++) yield return null;
+            var bay = director.Space.GetComponent<DockingBay>();
+            Assert.NotNull(bay, "DockingBay on the Space root");
+            var ship = director.Space.GetComponentInChildren<SpaceShip>();
+            ship.externalInput = true;
+            Assert.IsTrue(bay.Dock("earth"));
+            yield return null;
+            Canvas.ForceUpdateCanvases();
+
+            Assert.AreEqual(System.Linq.Enumerable.Count(Market.Goods), bay.GoodsCount, "a row a good");
+            Assert.Greater(bay.GoodsCount, DockingBay.GoodsPerPage, "more goods than one page holds (the reason for the pages)");
+            Assert.AreEqual((bay.GoodsCount + DockingBay.GoodsPerPage - 1) / DockingBay.GoodsPerPage, bay.GoodsPages);
+            Assert.AreEqual(0, bay.GoodsPage, "docking opens the first page");
+            var panel = WorldRect(bay.MarketPanel);
+            float cardsTop = WorldRect((RectTransform)bay.PrevGoods.transform).yMax;
+            var seen = new System.Collections.Generic.HashSet<int>();
+            for (int page = 0; page < bay.GoodsPages; page++)
+            {
+                bay.ShowGoodsPage(page);
+                Canvas.ForceUpdateCanvases();
+                Assert.AreEqual(page, bay.GoodsPage);
+                int shownRows = 0, lastRow = -1;
+                foreach (var (part, row, _) in bay.GoodsParts)
+                {
+                    bool on = row / DockingBay.GoodsPerPage == page;
+                    Assert.AreEqual(on, part.gameObject.activeSelf, $"page {page + 1}: row {row}'s {part.name} shown only on its page");
+                    if (!on) continue;
+                    var r = WorldRect(part);
+                    Assert.IsTrue(r.xMin >= panel.xMin && r.xMax <= panel.xMax && r.yMax <= panel.yMax, $"page {page + 1}: {part.name} {r} inside the panel {panel}");
+                    Assert.GreaterOrEqual(r.yMin, cardsTop, $"page {page + 1}: {part.name} {r} above the page cards (top {cardsTop:F1})");
+                    if (row != lastRow) { lastRow = row; shownRows++; Assert.IsTrue(seen.Add(row), $"row {row} on one page only"); }
+                }
+                Assert.That(shownRows, Is.InRange(1, DockingBay.GoodsPerPage), $"page {page + 1}'s rows");
+                Assert.AreEqual(page > 0, bay.PrevGoods.interactable, $"page {page + 1}: PREV");
+                Assert.AreEqual(page < bay.GoodsPages - 1, bay.NextGoods.interactable, $"page {page + 1}: NEXT");
+                StringAssert.Contains($"of {bay.GoodsCount}", bay.GoodsCountText.text);
+            }
+            Assert.AreEqual(bay.GoodsCount, seen.Count, "every good on a page");
+            // the page cards and the count sit inside the panel too, clear of the UNDOCK card
+            foreach (var rt in new[] { (RectTransform)bay.PrevGoods.transform, (RectTransform)bay.NextGoods.transform, bay.GoodsCountText.rectTransform })
+            {
+                var r = WorldRect(rt);
+                Assert.IsTrue(r.xMin >= panel.xMin && r.xMax <= panel.xMax && r.yMin >= panel.yMin && r.yMax <= panel.yMax, $"{rt.name} {r} inside the panel {panel}");
+            }
+            bay.ShowGoodsPage(99);
+            Assert.AreEqual(bay.GoodsPages - 1, bay.GoodsPage, "clamped to the last page");
+            bay.Undock();
+            Assert.IsTrue(bay.Dock("earth"));
+            Assert.AreEqual(0, bay.GoodsPage, "a new docking opens the first page again");
+            bay.Undock();
+            yield return null;
+            LogAssert.NoUnexpectedReceived();
+        }
+
+        static Rect WorldRect(RectTransform rt)
+        {
+            var c = new Vector3[4];
+            rt.GetWorldCorners(c);
+            return Rect.MinMaxRect(c[0].x, c[0].y, c[2].x, c[2].y);
+        }
     }
 }

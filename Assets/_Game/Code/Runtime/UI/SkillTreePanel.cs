@@ -236,6 +236,12 @@ namespace Meridian.UI
             sub = UiKit.Text(ct, "Branch", c, new Vector2(60f, 88f), new Vector2(460f, 30f), 21, false, TextAnchor.MiddleLeft, Brown);
             Effect = UiKit.Text(ct, "Effect", c, new Vector2(0f, 22f), new Vector2(534f, 64f), 25, false, TextAnchor.UpperLeft, UiKit.Ink);
             Needs = UiKit.Text(ct, "Needs", c, new Vector2(0f, -42f), new Vector2(534f, 56f), 21, false, TextAnchor.UpperLeft, Brown);
+            // U-204 F19: both wrap inside the card's width and step their size down before they would leave their boxes (LayoutCardText
+            // sets the boxes for the selected node); the sizes are the handwritten face's, as UiKit.Text scaled them.
+            Effect.horizontalOverflow = HorizontalWrapMode.Wrap; Effect.verticalOverflow = VerticalWrapMode.Truncate;
+            Effect.resizeTextForBestFit = true; Effect.resizeTextMaxSize = Effect.fontSize; Effect.resizeTextMinSize = Mathf.RoundToInt(Effect.fontSize * 0.6f);
+            Needs.horizontalOverflow = HorizontalWrapMode.Wrap; Needs.verticalOverflow = VerticalWrapMode.Truncate;
+            Needs.resizeTextForBestFit = true; Needs.resizeTextMaxSize = Needs.fontSize; Needs.resizeTextMinSize = Mathf.RoundToInt(Needs.fontSize * 0.6f);
             costTag = Img(ct, "CostTag", new Vector2(0f, -122f), new Vector2(534f, 60f), UiKit.Cream);
             costTag.raycastTarget = false;
             UiPaper.Apply(costTag, "ui/skilltree/cost_tag", _ => { if (IsOpen) Redraw(); });
@@ -501,6 +507,7 @@ namespace Meridian.UI
                 if (s.skillNodes.Contains(sel.requires[i])) needs.Append(" (bought)");
             }
             Needs.text = needs.ToString();
+            LayoutCardText();
 
             // The cost, owned / needed: Scrip, then each material from the pack, then Datacores.
             var cost = new System.Text.StringBuilder();
@@ -517,6 +524,24 @@ namespace Meridian.UI
             Status.text = r == SkillTree.BuyResult.Ok ? "Ready to buy." : Reason(r);
             Status.color = Brown;
             if (buy != null) buy.interactable = r == SkillTree.BuyResult.Ok;
+        }
+
+        /// <summary>The card's text column, from the card's centre: the description's top, the cost tag's top, the room a description
+        /// may take (two lines of its type), the gap under a one-line description (as built) and the least room the needs line keeps.</summary>
+        public const float EffectTop = 54f, CostTagTop = -92f, EffectMaxH = 92f, NeedsGap = 22f, NeedsMinH = 44f, CardTextW = 534f;
+
+        /// <summary>U-204 F19 (B-228's read of smoke_60: The Beam's description ran past the card's right border and off the screen): the
+        /// description wraps inside the card, up to two lines at its full size (a longer one steps its size down, never cut off); the
+        /// needs line sits under its last line (where it was for a one-line description) and above the cost tag.</summary>
+        void LayoutCardText()
+        {
+            float effectH = Mathf.Clamp(Effect.preferredHeight, 1f, EffectMaxH); // its box's width wraps it
+            Effect.rectTransform.sizeDelta = new Vector2(CardTextW, EffectMaxH);
+            Effect.rectTransform.anchoredPosition = new Vector2(0f, EffectTop - EffectMaxH * 0.5f);
+            float needsTop = Mathf.Max(EffectTop - effectH - NeedsGap, CostTagTop + 2f + NeedsMinH);
+            float needsH = needsTop - (CostTagTop + 2f);
+            Needs.rectTransform.sizeDelta = new Vector2(CardTextW, needsH);
+            Needs.rectTransform.anchoredPosition = new Vector2(0f, needsTop - needsH * 0.5f);
         }
     }
 }

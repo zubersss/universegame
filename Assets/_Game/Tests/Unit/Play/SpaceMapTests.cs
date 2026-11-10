@@ -114,6 +114,25 @@ namespace Meridian.Tests
                 }
                 if (a.moved) Assert.IsTrue(a.leader.gameObject.activeSelf || Vector2.Distance(a.tag.anchoredPosition, a.disc.anchoredPosition) < 40f, $"{a.name}: a moved tag has its leader");
             }
+            // U-204 F20 (B-228's read of smoke_63: every label read as struck through): a name stands inside its plate, the plate's
+            // height set by the type's size (18 px names were taller than their 22 px plates).
+            int lettered = 0;
+            foreach (var sm in map.SystemMarks)
+            {
+                if (sm.tag == null) continue;
+                var label = sm.tag.GetComponentInChildren<UnityEngine.UI.Text>(true);
+                Assert.NotNull(label, $"{sm.name}'s lettering");
+                Assert.AreEqual(SpaceMap.TagHeight(label), sm.tag.sizeDelta.y, 0.01f, $"{sm.name}: the plate for {label.fontSize} px type");
+                Assert.GreaterOrEqual(sm.tag.sizeDelta.y, label.preferredHeight + 1.5f, $"{sm.name}: '{label.text}' is {label.preferredHeight:F1} px tall in a {sm.tag.sizeDelta.y} px plate");
+                Assert.Greater(sm.tag.sizeDelta.y, SpaceMap.MinimapTagHeight, $"{sm.name}: taller than the minimap's 22 px plate");
+                Assert.AreEqual(sm.tag.sizeDelta.y, label.rectTransform.sizeDelta.y, 0.01f, $"{sm.name}: the lettering's box is the plate's");
+                Assert.LessOrEqual(label.preferredWidth, sm.tag.sizeDelta.x - 8f, $"{sm.name}: '{label.text}' across its plate");
+                lettered++;
+            }
+            Assert.GreaterOrEqual(lettered, 10, "the system map's name plates checked");
+            foreach (var m in map.GetComponentsInChildren<UnityEngine.UI.Text>(true))
+                if (m.name == "Label" && m.transform.parent.name.StartsWith("RimTag_"))
+                    Assert.AreEqual(SpaceMap.MinimapTagHeight, ((RectTransform)m.transform.parent).sizeDelta.y, 0.01f, "the minimap's tags keep their height");
             LogAssert.NoUnexpectedReceived();
         }
 

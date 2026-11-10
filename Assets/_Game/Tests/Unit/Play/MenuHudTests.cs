@@ -611,6 +611,131 @@ namespace Meridian.Tests
             }
         }
 
+        /// <summary>
+        /// U-204 (B-228's read of the 0.6.1 smoke), the panels' lettering. F2: no recipe row's ingredient count reaches its station's name
+        /// (a fourth ingredient printed "× 1BRICATOR"), and the name stops before the CRAFT card. F3: a blueprint tile names what it
+        /// follows (no raw key), its "needs" line clear of the tile's icon and of its name. F19: every Skill Tree node's description and
+        /// "needs" line are drawn whole inside the node card (The Beam's ran off the screen).
+        /// </summary>
+        [UnityTest]
+        public IEnumerator ThePanelsKeepTheirLetteringClearAndInside()
+        {
+            SceneDirector director = null;
+            yield return Boot(d => director = d);
+            var crafting = Object.FindAnyObjectByType<CraftingPanel>();
+            Assert.NotNull(crafting, "the crafting panel in the game");
+            crafting.SetOpen(true);
+            yield return null;
+            Canvas.ForceUpdateCanvases();
+            try
+            {
+                // F2: the recipe rows, page by page
+                int rowsSeen = 0, fours = 0;
+                for (int page = 0; page < crafting.Pages; page++)
+                {
+                    crafting.ShowPage(page);
+                    Canvas.ForceUpdateCanvases();
+                    int last = Mathf.Min(crafting.RowCountNow, (page + 1) * CraftingPanel.RecipesPerPage);
+                    for (int i = page * CraftingPanel.RecipesPerPage; i < last; i++)
+                    {
+                        string id = crafting.RecipeAt(i);
+                        var counts = crafting.CountsOf(id, out var station);
+                        Assert.NotNull(counts, $"{id}: its row");
+                        Assert.IsTrue(station.gameObject.activeInHierarchy, $"{id}: shown on page {page + 1}");
+                        var name = Drawn(station);
+                        if (counts.Count >= 4) fours++;
+                        foreach (var count in counts)
+                        {
+                            var d = Drawn(count);
+                            Assert.LessOrEqual(d.xMax, name.xMin, $"{id}: '{count.text}' (to {d.xMax:F1}) runs into '{station.text}' (from {name.xMin:F1})");
+                            Assert.LessOrEqual(d.xMax, WorldRect(count.rectTransform).xMax + 0.01f, $"{id}: '{count.text}' inside its own box");
+                        }
+                        Assert.LessOrEqual(name.xMax, WorldRect((RectTransform)crafting.CraftButtons[id].transform).xMin, $"{id}: '{station.text}' stops before the CRAFT card");
+                        rowsSeen++;
+                    }
+                }
+                Assert.AreEqual(crafting.RowCountNow, rowsSeen, "every recipe row checked");
+                Assert.GreaterOrEqual(fours, 3, "the rows with four ingredients among them (Float cell Mk2, Jetpack Mk3, Thruster Mk3)");
+                Assert.AreEqual(CraftingPanel.InputStepMax, CraftingPanel.InputStep(3, 1200f), 1e-4f, "three ingredients keep the usual step");
+                Assert.Less(CraftingPanel.InputStep(5, 1200f), CraftingPanel.InputStepMax, "five share the span to the station column");
+                crafting.ShowPage(0);
+
+                // F3: the blueprint tiles
+                int after = 0;
+                foreach (var kv in crafting.Nodes)
+                {
+                    Text needs = null, title = null;
+                    foreach (var t in kv.Value.GetComponentsInChildren<Text>(true)) { if (t.name == "Needs") needs = t; else if (t.name == "Name") title = t; }
+                    RectTransform icon = null;
+                    foreach (var img in kv.Value.GetComponentsInChildren<Image>(true)) if (img.name == "Icon") icon = img.rectTransform;
+                    Assert.IsTrue(needs != null && title != null && icon != null, $"{kv.Key}: the tile's name, needs line and icon");
+                    StringAssert.DoesNotContain("_", needs.text, $"{kv.Key}: a raw key on the tile");
+                    if (needs.text.StartsWith("after ")) after++;
+                    var box = WorldRect(needs.rectTransform);
+                    Assert.IsFalse(box.Overlaps(WorldRect(icon)), $"{kv.Key}: the needs line's box {box} over the icon {WorldRect(icon)}");
+                    Assert.IsTrue(Whole(needs), $"{kv.Key}: '{needs.text}' drawn whole in its box");
+                    // the needs line (bottom-aligned in its box) stays under the name (centred on its line, wrapped)
+                    float sy = needs.rectTransform.lossyScale.y;
+                    float needsTop = box.yMin + DrawnHeight(needs) * sy;
+                    float nameBottom = WorldRect(title.rectTransform).center.y - DrawnHeight(title) * title.rectTransform.lossyScale.y * 0.5f;
+                    Assert.GreaterOrEqual(nameBottom, needsTop - 0.5f * sy, $"{kv.Key}: '{title.text}' (down to {nameBottom:F1}) over '{needs.text}' (up to {needsTop:F1})");
+                }
+                Assert.GreaterOrEqual(after, 3, "tiles that follow another blueprint, by its name");
+            }
+            finally { crafting.SetOpen(false); }
+            yield return null;
+
+            // F19: the Skill Tree's node card
+            var treePanel = Object.FindAnyObjectByType<SkillTreePanel>();
+            Assert.NotNull(treePanel, "the Skill Tree panel in the game");
+            treePanel.SetOpen(true);
+            yield return null;
+            try
+            {
+                var card = WorldRect((RectTransform)treePanel.Effect.transform.parent);
+                int nodes = 0;
+                foreach (var n in Meridian.Progress.SkillTree.Current.nodes)
+                {
+                    treePanel.Select(n.id);
+                    Canvas.ForceUpdateCanvases();
+                    foreach (var t in new[] { treePanel.Effect, treePanel.Needs })
+                    {
+                        if (string.IsNullOrEmpty(t.text)) continue;
+                        var box = WorldRect(t.rectTransform);
+                        Assert.IsTrue(Inside(box, card, 0.01f), $"{n.id}: {t.name}'s box {box} inside the card {card}");
+                        Assert.AreEqual(HorizontalWrapMode.Wrap, t.horizontalOverflow, $"{n.id}: {t.name} wraps");
+                        Assert.IsTrue(Whole(t), $"{n.id}: {t.name} '{t.text}' drawn whole in its box");
+                    }
+                    nodes++;
+                }
+                Assert.Greater(nodes, 20, "every node's card checked");
+            }
+            finally { treePanel.SetOpen(false); }
+            yield return null;
+            LogAssert.NoUnexpectedReceived();
+        }
+
+        /// <summary>Lays a Text's string out in its own box with its own settings (wrap, best fit, truncation): true when every character
+        /// is drawn, none cut off.</summary>
+        static bool Whole(Text t)
+        {
+            var gen = new TextGenerator();
+            gen.Populate(t.text, t.GetGenerationSettings(t.rectTransform.rect.size));
+            return gen.characterCountVisible >= t.text.Length;
+        }
+
+        /// <summary>The height a Text's string takes laid out in its own box with its own settings (wrap, best fit), in its local units:
+        /// from its first line's top to its last line's foot.</summary>
+        static float DrawnHeight(Text t)
+        {
+            var gen = new TextGenerator();
+            gen.Populate(t.text, t.GetGenerationSettings(t.rectTransform.rect.size));
+            if (gen.lineCount == 0) return 0f;
+            var lines = gen.lines;
+            var last = lines[gen.lineCount - 1];
+            return (lines[0].topY - (last.topY - last.height)) / t.pixelsPerUnit;
+        }
+
         static Rect WorldRect(RectTransform rt)
         {
             var c = new Vector3[4];

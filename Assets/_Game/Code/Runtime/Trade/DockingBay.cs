@@ -33,6 +33,44 @@ namespace Meridian.Trade
         readonly List<AsyncOperationHandle<Texture2D>> handles = new List<AsyncOperationHandle<Texture2D>>();
         readonly List<(string item, Text price, Text held, Image icon, Button buy, Button sell)> goods = new List<(string, Text, Text, Image, Button, Button)>();
         readonly List<(Text label, Button button)> contractRows = new List<(Text, Button)>();
+
+        /// <summary>U-204 F10 (B-228's read of smoke_10: 26 goods ran past the panel's bottom border, "Ring ice" across it and "Methane
+        /// ice" outside): the goods page inside the panel: this many rows a page, PREV / NEXT cards under the BUY / SELL columns,
+        /// PageUp / PageDown and the wheel, a faded row count.</summary>
+        public const int GoodsPerPage = 22;
+        const float GoodsRowH = 36f;
+        public int GoodsPage { get; private set; }
+        public int GoodsCount => goods.Count;
+        public int GoodsPages => Mathf.Max(1, (goods.Count + GoodsPerPage - 1) / GoodsPerPage);
+        public Button PrevGoods { get; private set; }
+        public Button NextGoods { get; private set; }
+        public Text GoodsCountText { get; private set; }
+        /// <summary>Tests: the market panel's rect and every piece a goods row drew (with its row).</summary>
+        public RectTransform MarketPanel { get; private set; }
+        public IReadOnlyList<(RectTransform part, int row, float baseY)> GoodsParts => goodsParts;
+        readonly List<(RectTransform part, int row, float baseY)> goodsParts = new List<(RectTransform, int, float)>();
+
+        /// <summary>Shows page p of the goods (clamped): its rows moved up into the first page's slots, the rest hidden.</summary>
+        public void ShowGoodsPage(int p)
+        {
+            GoodsPage = Mathf.Clamp(p, 0, GoodsPages - 1);
+            float lift = GoodsPage * GoodsPerPage * GoodsRowH;
+            for (int i = 0; i < goodsParts.Count; i++)
+            {
+                var (part, row, baseY) = goodsParts[i];
+                bool on = row / GoodsPerPage == GoodsPage;
+                if (part.gameObject.activeSelf != on) part.gameObject.SetActive(on);
+                if (on) part.anchoredPosition = new Vector2(part.anchoredPosition.x, baseY + lift);
+            }
+            if (GoodsCountText != null)
+            {
+                int first = GoodsPage * GoodsPerPage, last = Mathf.Min(goods.Count, first + GoodsPerPage);
+                GoodsCountText.text = goods.Count == 0 ? "" : $"goods {first + 1}–{last} of {goods.Count}"; // on a page change only
+            }
+            if (PrevGoods != null) UiKit.SetAction(PrevGoods, GoodsPage > 0);
+            if (NextGoods != null) UiKit.SetAction(NextGoods, GoodsPage < GoodsPages - 1);
+        }
+
         Button repair;
         Text repairText;
         bool savedExternal;
@@ -75,7 +113,16 @@ namespace Meridian.Trade
         void Update()
         {
             if (ship == null) return;
-            if (Docked) { ship.Velocity = Vector2.zero; return; }
+            if (Docked)
+            {
+                ship.Velocity = Vector2.zero;
+                // U-204 F10: PageUp / PageDown and the wheel page the goods
+                var kb = Keyboard.current;
+                if (kb != null) { if (kb.pageDownKey.wasPressedThisFrame) ShowGoodsPage(GoodsPage + 1); else if (kb.pageUpKey.wasPressedThisFrame) ShowGoodsPage(GoodsPage - 1); }
+                var mouse = Mouse.current;
+                if (mouse != null) { float wheel = mouse.scroll.ReadValue().y; if (wheel < -0.01f) ShowGoodsPage(GoodsPage + 1); else if (wheel > 0.01f) ShowGoodsPage(GoodsPage - 1); }
+                return;
+            }
             var near = Waystation.DockableFrom(ship.Position, ship.Velocity);
             bool show = near != null;
             if (prompt.activeSelf != show) prompt.SetActive(show);
@@ -99,6 +146,7 @@ namespace Meridian.Trade
             prompt.SetActive(false);
             AnyOpen = true;
             title.text = $"{planet.ToUpperInvariant()} WAYSTATION  ·  HALCYON FREIGHT";
+            ShowGoodsPage(0);
             BuildContracts();
             FillIcons();
             Refresh();
@@ -205,6 +253,7 @@ namespace Meridian.Trade
             frame.rectTransform.pivot = new Vector2(1f, 0.5f);
             var panel = UiKit.Panel(frame.transform, "Market", center, Vector2.zero, new Vector2(960f, 980f), UiKit.PanelFill);
             panel.raycastTarget = true;
+            MarketPanel = panel.rectTransform;
             var tl = new Vector2(0f, 1f);
             title = UiKit.Text(panel.transform, "Title", tl, new Vector2(24f, -30f), new Vector2(700f, 28f), 20, true, TextAnchor.MiddleLeft, theme.text);
             scripText = UiKit.Text(panel.transform, "Scrip", new Vector2(1f, 1f), new Vector2(-24f, -30f), new Vector2(240f, 28f), 20, true, TextAnchor.MiddleRight, UiTheme.Accent(null));
@@ -217,7 +266,8 @@ namespace Meridian.Trade
             int row = 0;
             foreach (var item in Market.Goods)
             {
-                float y = -100f - row * 36f;
+                float y = -100f - row * GoodsRowH;
+                int partsFrom = panel.transform.childCount; // F10: what this row draws is paged as one
                 var icon = UiKit.Panel(panel.transform, "Icon_" + item, tl, new Vector2(24f, y), new Vector2(28f, 28f), Color.white);
                 icon.rectTransform.pivot = tl; icon.preserveAspect = true; icon.enabled = false;
                 UiKit.Text(panel.transform, "Name_" + item, tl, new Vector2(60f, y - 4f), new Vector2(200f, 26f), 15, true, TextAnchor.MiddleLeft, theme.text).text = Name(item);
@@ -227,8 +277,19 @@ namespace Meridian.Trade
                 var buy = UiKit.ActionButton(panel.transform, "BUY", tl, new Vector2(500f, y), new Vector2(84f, 28f), () => BuyItem(it, 1));
                 var sell = UiKit.ActionButton(panel.transform, "SELL", tl, new Vector2(592f, y), new Vector2(84f, 28f), () => SellItem(it, 1));
                 goods.Add((item, price, held, icon, buy, sell));
+                for (int c = partsFrom; c < panel.transform.childCount; c++)
+                {
+                    var part = (RectTransform)panel.transform.GetChild(c);
+                    goodsParts.Add((part, row, part.anchoredPosition.y));
+                }
                 row++;
             }
+            // F10: the page cards under the BUY / SELL columns and the row count, between the last row and the message line
+            float pageY = -100f - GoodsPerPage * GoodsRowH - 6f;
+            PrevGoods = UiKit.ActionButton(panel.transform, "PREV", tl, new Vector2(500f, pageY), new Vector2(84f, 28f), () => ShowGoodsPage(GoodsPage - 1));
+            NextGoods = UiKit.ActionButton(panel.transform, "NEXT", tl, new Vector2(592f, pageY), new Vector2(84f, 28f), () => ShowGoodsPage(GoodsPage + 1));
+            GoodsCountText = UiKit.Text(panel.transform, "GoodsCount", tl, new Vector2(24f, pageY - 2f), new Vector2(400f, 24f), 13, false, TextAnchor.MiddleLeft, theme.label);
+            ShowGoodsPage(0);
 
             UiKit.Text(panel.transform, "ServicesTitle", tl, new Vector2(700f, -70f), new Vector2(240f, 22f), 15, true, TextAnchor.MiddleLeft, theme.label).text = "SERVICES";
             repair = UiKit.ActionButton(panel.transform, "REPAIR", tl, new Vector2(700f, -100f), new Vector2(236f, 34f), () => Repair());

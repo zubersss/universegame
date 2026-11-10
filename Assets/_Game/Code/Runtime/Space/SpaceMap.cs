@@ -272,22 +272,33 @@ namespace Meridian.Space
         /// <summary>A name tag (B-209's name_tag, lettered in Patrick Hand); returns it sized to its text.</summary>
         RectTransform Tag(Transform parent, string name, string text, int fontSize, out Text label)
         {
-            var tag = Img(parent, name, Vector2.zero, new Vector2(64f, 22f), UiKit.Cream, "ui/map/name_tag", true);
-            label = UiKit.Text(tag.transform, "Label", new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(240f, 22f), fontSize, false, TextAnchor.MiddleCenter, UiKit.Ink);
+            var tag = Img(parent, name, Vector2.zero, new Vector2(64f, MinimapTagHeight), UiKit.Cream, "ui/map/name_tag", true);
+            label = UiKit.Text(tag.transform, "Label", new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(240f, MinimapTagHeight), fontSize, false, TextAnchor.MiddleCenter, UiKit.Ink);
             label.font = UiTheme.Active.HudFace;
             var rim = label.GetComponent<Outline>();
             if (rim != null) rim.enabled = false;
             label.raycastTarget = false;
+            label.text = text;
+            if (fontSize > MinimapTagType) tag.rectTransform.sizeDelta = new Vector2(64f, TagHeight(label)); // F20: the system map's larger names
             SetTag(tag.rectTransform, label, text);
             return tag.rectTransform;
         }
 
+        /// <summary>The minimap's tags: 22 px plates for type up to 15 (as built, U-184).</summary>
+        public const float MinimapTagHeight = 22f;
+        public const int MinimapTagType = 15;
+        /// <summary>A larger name's plate: its lettering's line height and 2 px. U-204 F20 (B-228's read of smoke_63): the system map's 18
+        /// px names (24 px in the handwritten face) stood taller than their 22 px plates, so every label read as struck through by its
+        /// plate's lines.</summary>
+        public static float TagHeight(Text label) => Mathf.Max(MinimapTagHeight, Mathf.Ceil(label.preferredHeight) + 2f);
+
+        /// <summary>Letters a tag and sets its width to the text; its height stays the one it was built with.</summary>
         static void SetTag(RectTransform tag, Text label, string text)
         {
             label.text = text;
-            float w = Mathf.Ceil(label.preferredWidth) + 14f;
-            tag.sizeDelta = new Vector2(w, 22f);
-            label.rectTransform.sizeDelta = new Vector2(w, 22f);
+            float w = Mathf.Ceil(label.preferredWidth) + 14f, h = tag.sizeDelta.y;
+            tag.sizeDelta = new Vector2(w, h);
+            label.rectTransform.sizeDelta = new Vector2(w, h);
         }
 
         void BuildMinimap()
@@ -398,7 +409,7 @@ namespace Meridian.Space
             sm.leader = Img(chart, "Leader_" + b.name, p, new Vector2(1f, 1.5f), UiKit.Ink).rectTransform; // under the tag: built first
             sm.leader.gameObject.SetActive(false);
             sm.tag = Tag(chart, "Tag_" + b.name, Display(b.name), 18, out _);
-            sm.tag.anchoredPosition = moon ? p + new Vector2(size.x * 0.5f + sm.tag.sizeDelta.x * 0.5f + 3f, 0f) : p + new Vector2(0f, -(size.y * 0.5f + 13f));
+            sm.tag.anchoredPosition = moon ? p + new Vector2(size.x * 0.5f + sm.tag.sizeDelta.x * 0.5f + 3f, 0f) : p + new Vector2(0f, -(size.y * 0.5f + sm.tag.sizeDelta.y * 0.5f + 2f));
             if (b.landable)
             {
                 sm.tick = Img(chart, "Landed_" + b.name, p + new Vector2(size.x * 0.5f + 4f, -size.y * 0.5f + 4f), new Vector2(20f, 20f), Color.clear, "ui/map/landed").rectTransform;
@@ -428,14 +439,14 @@ namespace Meridian.Space
             {
                 if (sm.inset != inset || sm.tag == null) continue;
                 Vector2 p = sm.disc.anchoredPosition, ds = sm.disc.sizeDelta, ts = sm.tag.sizeDelta;
-                float below = ds.y * 0.5f + 13f, side = ds.x * 0.5f + ts.x * 0.5f + 5f;
+                float below = ds.y * 0.5f + ts.y * 0.5f + 2f, side = ds.x * 0.5f + ts.x * 0.5f + 5f, rowStep = ts.y + 4f; // F20: by the tag's own height
                 Vector2 best = p + new Vector2(0f, -below);
                 bool moved = false;
                 for (int i = 0; i < TagSpots.Length; i++)
                 {
                     var o = TagSpots[i];
-                    var c = p + new Vector2(o.x * side, o.y > 0f ? (below + (o.y - 1f) * 26f) : o.y < 0f ? -(below + (-o.y - 1f) * 26f) : 0f);
-                    if (o.x != 0f && o.y != 0f) c.y = p.y + Mathf.Sign(o.y) * (ds.y * 0.5f + 4f + (Mathf.Abs(o.y) - 1f) * 26f);
+                    var c = p + new Vector2(o.x * side, o.y > 0f ? (below + (o.y - 1f) * rowStep) : o.y < 0f ? -(below + (-o.y - 1f) * rowStep) : 0f);
+                    if (o.x != 0f && o.y != 0f) c.y = p.y + Mathf.Sign(o.y) * (ds.y * 0.5f + 4f + (Mathf.Abs(o.y) - 1f) * rowStep);
                     var r = new Rect(c - ts * 0.5f, ts);
                     if (!Free(r)) continue;
                     best = c; moved = i > 0;

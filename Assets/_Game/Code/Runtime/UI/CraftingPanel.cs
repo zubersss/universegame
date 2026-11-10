@@ -72,11 +72,37 @@ namespace Meridian.UI
         public string LastMessage { get; private set; } = "";
 
         const float RowH = 42f, Icon = 30f;
+        /// <summary>U-204 F2: the station column (left of the CRAFT card at 1680) and the usual step between a row's ingredients;
+        /// F3: a blueprint tile's "needs" line stops short of the tile's icon (30 px at its bottom right corner).</summary>
+        public const float StationX = 1548f, StationW = 124f, InputStepMax = 86f, NeedsWidth = 98f;
+        /// <summary>The step between a recipe row's ingredients starting at `fromX`: the usual one while `inputs` of them end before the
+        /// station column, else that span shared out (a fourth ingredient's count ran into the station's name). Pure.</summary>
+        public static float InputStep(int inputs, float fromX) => inputs <= 0 ? InputStepMax : Mathf.Min(InputStepMax, (StationX - 8f - fromX) / inputs);
+
+        /// <summary>Tests: a recipe row's ingredient counts and its station label (null when the panel lists no such recipe).</summary>
+        public IReadOnlyList<Text> CountsOf(string recipeId, out Text station)
+        {
+            station = null;
+            for (int i = 0; i < rows.Count; i++)
+                if (rows[i].recipe != null && rows[i].recipe.id == recipeId) { station = rows[i].station; return rows[i].counts; }
+            return null;
+        }
+        /// <summary>Tests: the recipes the panel lists, in row order.</summary>
+        public int RowCountNow => rows.Count;
+        public string RecipeAt(int row) => row >= 0 && row < rows.Count && rows[row].recipe != null ? rows[row].recipe.id : null;
+
+        /// <summary>A blueprint's name for a tile's "after ..." line (its id with spaces if the book has no such blueprint).</summary>
+        string BlueprintName(string id)
+        {
+            foreach (var b in book.blueprints) if (b.id == id) return b.name;
+            return id.Replace('_', ' ');
+        }
 
         sealed class Row
         {
             public Recipe recipe;
             public Text name, station;
+            public readonly List<Text> counts = new List<Text>(5);
             public readonly List<(Image icon, int itemId)> icons = new List<(Image, int)>();
             /// <summary>U-140: every piece the row drew on the panel and its y on the first page.</summary>
             public readonly List<RectTransform> parts = new List<RectTransform>(12);
@@ -179,8 +205,13 @@ namespace Meridian.UI
                 var t = UiKit.Text(node.transform, "Name", tl, new Vector2(10f, -16f), new Vector2(132f, 22f), 14, true, TextAnchor.MiddleLeft, theme.text);
                 t.horizontalOverflow = HorizontalWrapMode.Wrap;
                 t.text = b.name;
-                string needs = string.IsNullOrEmpty(b.unlockFlag) ? (b.requires != null && b.requires.Length > 0 ? "after " + b.requires[0] : "known") : b.unlockFlag.Replace("beacon:", "beacon · ");
-                UiKit.Text(node.transform, "Needs", tl, new Vector2(10f, -62f), new Vector2(132f, 18f), 12, false, TextAnchor.MiddleLeft, theme.label).text = needs;
+                // U-204 F3 (B-228's read of smoke_64): the blueprint it follows by its NAME (the tile printed the raw id, "after
+                // float_cell_mk1"), in a box clear of the tile's icon: a long line steps its size down (or wraps) inside it, not under the icon.
+                string needs = string.IsNullOrEmpty(b.unlockFlag) ? (b.requires != null && b.requires.Length > 0 ? "after " + BlueprintName(b.requires[0]) : "known") : b.unlockFlag.Replace("beacon:", "beacon · ");
+                var needsText = UiKit.Text(node.transform, "Needs", tl, new Vector2(10f, -46f), new Vector2(NeedsWidth, 36f), 12, false, TextAnchor.LowerLeft, theme.label); // a short line sits where it did
+                needsText.horizontalOverflow = HorizontalWrapMode.Wrap; needsText.verticalOverflow = VerticalWrapMode.Truncate;
+                needsText.resizeTextForBestFit = true; needsText.resizeTextMaxSize = needsText.fontSize; needsText.resizeTextMinSize = Mathf.RoundToInt(needsText.fontSize * 0.7f);
+                needsText.text = needs;
                 UiKit.PaperCard(node); // D-149 (U-136): a blueprint tile is a paper card; known = the gold band, locked = greyed
             }
 
@@ -198,13 +229,18 @@ namespace Meridian.UI
                 x += 300f;
                 UiKit.Text(back.transform, "Arrow_" + r.id, tl, new Vector2(x, y - 4f), new Vector2(30f, Icon), 18, true, TextAnchor.MiddleCenter, theme.label).text = "←";
                 x += 40f;
+                // U-204 F2 (smoke_64): a fourth ingredient's count ran into the station's name ("× 1BRICATOR"). The ingredients share
+                // the span up to the station column: the usual step while they fit, a narrower one for a row with more.
+                float step = InputStep(r.inputs != null ? r.inputs.Length : 0, x);
                 foreach (var a in r.inputs)
                 {
                     row.icons.Add((IconAt(back.transform, x, y), ItemRegistry.Get(a.item)?.id ?? 0));
-                    UiKit.Text(back.transform, "In_" + r.id + a.item, tl, new Vector2(x + Icon + 4f, y - 4f), new Vector2(40f, Icon), 16, true, TextAnchor.MiddleLeft, theme.text).text = "× " + a.count;
-                    x += Icon + 56f;
+                    var count = UiKit.Text(back.transform, "In_" + r.id + a.item, tl, new Vector2(x + Icon + 4f, y - 4f), new Vector2(step - Icon - 8f, Icon), 16, true, TextAnchor.MiddleLeft, theme.text);
+                    count.text = "× " + a.count;
+                    row.counts.Add(count);
+                    x += step;
                 }
-                row.station = UiKit.Text(back.transform, "Station_" + r.id, tl, new Vector2(1500f, y - 4f), new Vector2(150f, Icon), 13, false, TextAnchor.MiddleLeft, theme.label);
+                row.station = UiKit.Text(back.transform, "Station_" + r.id, tl, new Vector2(StationX, y - 4f), new Vector2(StationW, Icon), 13, false, TextAnchor.MiddleLeft, theme.label);
                 row.station.text = r.station.ToString().ToUpperInvariant();
                 var recipe = r;
                 CraftButtons[r.id] = UiKit.ActionButton(back.transform, "CRAFT", tl, new Vector2(1680f, y), new Vector2(130f, 34f), () => Craft(recipe));

@@ -5664,6 +5664,99 @@ namespace Meridian.Tests
         }
 
         /// <summary>
+        /// U-204 (B-228's read of the 0.6.1 smoke) → coordination/reports/unity/u204/: 1_crafting_four_ingredients (F2: the page with Float cell
+        /// Mk2 / Jetpack Mk3 / Thruster Mk3, their fourth count clear of FABRICATOR; F3: the Float cell Mk2 tile names "Float cell Mk1"),
+        /// 2_tree_the_beam (F19: The Beam's description wrapped inside the node card), 3_market_page_1 and 4_market_page_2 (F10: the goods
+        /// paged inside the panel), 5_system_map (F20: every name inside its plate).
+        /// </summary>
+        [UnityTest, Timeout(240000)]
+        public IEnumerator CaptureU204Panels()
+        {
+            var name = Environment.GetEnvironmentVariable(Variable);
+            if (string.IsNullOrEmpty(name)) Assert.Ignore($"Set {Variable} (tools/unity_capture.ps1).");
+            if (SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.Null)
+                Assert.Fail("No graphics device: run without -nographics.");
+            bool wasCartoon = Meridian.View2D.CartoonStage.Enabled;
+            Meridian.View2D.CartoonStage.Enabled = true;
+            try
+            {
+#if UNITY_EDITOR
+                yield return UnityEditor.SceneManagement.EditorSceneManager.LoadSceneAsyncInPlayMode(
+                    CorePath, new LoadSceneParameters(LoadSceneMode.Single));
+#endif
+                var director = UnityEngine.Object.FindAnyObjectByType<SceneDirector>();
+                float timeout = Time.realtimeSinceStartup + 30f;
+                while ((!director.IsReady || !director.PlanetSide.terrain.IsSettled) && Time.realtimeSinceStartup < timeout) yield return null;
+                var dir = "coordination/reports/unity/u204";
+                Directory.CreateDirectory(dir);
+                var side = director.PlanetSide;
+                if (side.hazards != null) side.hazards.enabled = false;
+                side.creatures.autoSpawn = false; side.creatures.DespawnAll();
+                IEnumerator Shot(Camera cam, Canvas canvas, string label)
+                {
+                    yield return SaveWithUi(cam, canvas, $"{name}_{label}");
+                    File.Copy($"logs/capture_{name}_{label}.png", $"{dir}/{label}.png", true);
+                }
+
+                // 1: the crafting panel on the page that holds the four-ingredient rows
+                var crafting = UnityEngine.Object.FindAnyObjectByType<Meridian.UI.CraftingPanel>();
+                Assert.NotNull(crafting, "the crafting panel");
+                timeout = Time.realtimeSinceStartup + 10f;
+                while (!crafting.Paper.HasValue && Time.realtimeSinceStartup < timeout) yield return null;
+                crafting.SetOpen(true);
+                int page = crafting.PageOf("fab_float_cell_mk2");
+                Assert.GreaterOrEqual(page, 0, "the Float cell Mk2 recipe is listed");
+                crafting.ShowPage(page);
+                yield return new WaitForSeconds(1.5f);
+                yield return Shot(side.sideCamera, crafting.PrevButton.GetComponentInParent<Canvas>(), "1_crafting_four_ingredients");
+                var counts = crafting.CountsOf("fab_float_cell_mk2", out var station);
+                TestContext.Out.WriteLine($"[MERIDIAN] u204 1_crafting_four_ingredients: page {page + 1} of {crafting.Pages}, Float cell Mk2 with {counts.Count} ingredients, station '{station.text}' at x {station.rectTransform.anchoredPosition.x:F0}");
+                crafting.SetOpen(false);
+
+                // 2: the Skill Tree, The Beam selected
+                var panel = side.sideHud.Skills;
+                panel.SetOpen(true);
+                panel.Select("dig_power_1");
+                yield return new WaitForSeconds(2f);
+                yield return Shot(side.sideCamera, panel.Title.canvas, "2_tree_the_beam");
+                TestContext.Out.WriteLine($"[MERIDIAN] u204 2_tree_the_beam: '{panel.Effect.text}' in a box {panel.Effect.rectTransform.sizeDelta}, needs at y {panel.Needs.rectTransform.anchoredPosition.y:F0}");
+                panel.SetOpen(false);
+
+                // 3, 4: the Waystation's market, both pages
+                director.SetView(ViewMode.Space);
+                for (int i = 0; i < 10; i++) yield return null;
+                var ship = director.Space.GetComponentInChildren<Meridian.Space.SpaceShip>();
+                var map = director.Space.GetComponentInChildren<Meridian.Space.SpaceHud>().Map;
+                ship.externalInput = true; ship.intent = default;
+                timeout = Time.realtimeSinceStartup + 10f;
+                while ((!map.Built || ship.Invulnerable) && Time.realtimeSinceStartup < timeout) yield return null;
+                var cam = director.Space.GetComponentInChildren<Camera>();
+                var bay = director.Space.GetComponent<Meridian.Trade.DockingBay>();
+                Assert.IsTrue(bay.Dock("earth"), "docked at Earth's Waystation");
+                yield return new WaitForSeconds(2f); // the bay's layers and the goods' icons
+                var bayCanvas = bay.MarketPanel.GetComponentInParent<Canvas>();
+                yield return Shot(cam, bayCanvas, "3_market_page_1");
+                bay.ShowGoodsPage(1);
+                yield return null;
+                yield return Shot(cam, bayCanvas, "4_market_page_2");
+                TestContext.Out.WriteLine($"[MERIDIAN] u204 market: {bay.GoodsCount} goods on {bay.GoodsPages} pages of {Meridian.Trade.DockingBay.GoodsPerPage}; '{bay.GoodsCountText.text}'");
+                bay.Undock();
+                yield return null;
+
+                // 5: the system map
+                map.SetSystemOpen(true);
+                yield return new WaitForSeconds(1.5f);
+                yield return Shot(cam, map.SystemShip.GetComponentInParent<Canvas>(), "5_system_map");
+                float plate = 0f;
+                foreach (var sm in map.SystemMarks) if (sm.tag != null) plate = Mathf.Max(plate, sm.tag.sizeDelta.y);
+                TestContext.Out.WriteLine($"[MERIDIAN] u204 5_system_map: {map.SystemMarks.Count} marks, name plates {plate:F0} px tall");
+                map.SetSystemOpen(false);
+                LogAssert.NoUnexpectedReceived();
+            }
+            finally { Meridian.View2D.CartoonStage.Enabled = wasCartoon; }
+        }
+
+        /// <summary>
         /// U-125 (B-152 / B-153 / B-154): Venus on the cartoon stage at 1x in reports/unity/u125/: 1_deck_1x (the surveyor on the Meridian station's
         /// deck: the deck set off the cloud deck, the deck-plank strip, a Sulfur drifter), 2_surface_vent_1x (the first vent field: the surface set,
         /// the basalt crust, a Pressure crab and the Vent eel at its vent mouth).
