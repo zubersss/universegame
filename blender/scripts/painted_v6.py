@@ -33,6 +33,8 @@ import paint_v6 as PT  # noqa: E402
 import build_specimens_v6 as SP  # noqa: E402
 
 LIGHT = SP.LIGHT
+DRY_AT = 1.5                                      # a stroke whose paint lies in more than this many separate bands across its width is a dry drag
+TONE = 0.5                                        # how much of a stroke's own light and dark is kept when it is laid (1.0 speckled a lit form)
 
 
 def read_rgb(path):
@@ -155,10 +157,19 @@ def strokes(path, lo=0.06, hi=0.30, min_px=600, join=3):
         rows = np.arange(mask.shape[0], dtype=np.float32)[:, None]
         mid = (mask * rows).sum(axis=0) / np.maximum(mask.sum(axis=0), 1e-3)     # the body's middle line, column by column
         bend = float(np.ptp(mid[mask.sum(axis=0) > 1.0])) / max(2 * hb, 1.0) if (mask.sum(axis=0) > 1.0).any() else 0.0
-        kind = "dry" if fill < 0.42 else "long" if ha / hb >= 3.5 else "curl" if bend > 0.45 else "leaf"
+        solid = mask > 0.5
+        cols_on = solid.any(axis=0)
+        runs = (solid[1:] & ~solid[:-1]).sum(axis=0) + solid[0]                  # across the stroke, column by column: how many separate bands of paint
+        ragged = float(runs[cols_on].mean()) if cols_on.any() else 1.0           # a clean stroke is one band; a dry drag is several bristle tracks
+        # (Run 1 told "dry" by the box's fill and found none; run 2 by the share of half-covered pixels and found none: a
+        # bristle track is fully paint and the gap beside it fully paper. The six dry drags went in with the clean dabs and
+        # tapers, and a smooth leaf painted with them came out scratched.)
+        kind = "dry" if ragged > DRY_AT else "long" if ha / hb >= 3.5 else "curl" if bend > 0.45 else "leaf"
         if mask[:, :mask.shape[1] // 2].sum() < mask[:, mask.shape[1] // 2:].sum():   # the heavy end first: a stroke starts full and runs dry
             mask, tone = mask[:, ::-1], tone[:, ::-1]
-        out.append(Stroke(np.ascontiguousarray(mask, np.float32), np.ascontiguousarray(tone, np.float32), ha, hb, kind))
+        st = Stroke(np.ascontiguousarray(mask, np.float32), np.ascontiguousarray(tone, np.float32), ha, hb, kind)
+        st.ragged = ragged
+        out.append(st)
     out.sort(key=lambda st: -st.mask.size)
     return out
 
@@ -197,7 +208,7 @@ def stamp(P, st, cx, cy, a, th, col, alpha=1.0, clip=None, wide=1.0):
     if clip is not None:
         m = m * clip[y0:y1, x0:x1]
     m = (m * alpha)[..., None]
-    paint = np.clip(np.asarray(col, np.float32)[None, None, :] * sample(tone, 1.0)[..., None], 0, 1)
+    paint = np.clip(np.asarray(col, np.float32)[None, None, :] * (1.0 + TONE * (sample(tone, 1.0) - 1.0))[..., None], 0, 1)
     sub = P.img[y0:y1, x0:x1]
     P.img[y0:y1, x0:x1] = sub * (1 - m) + paint * m
     P.count += 1
@@ -263,6 +274,15 @@ def plate(path, height_m, lo=0.045, hi=0.12, feather=2):
     like = shrink((d < hi).astype(np.float32), f) > 0.5
     lab, ids = labels(like)
     rim = set(int(v) for v in np.concatenate([lab[0], lab[-1], lab[:, 0], lab[:, -1]]) if v)
+    # (Run 1 flooded from the border only: the pockets of ground shut in between the stems stayed in the plate as grey
+    # patches. A pocket is ground too when it is the ground's own colour (its middle distance under lo) and more than a
+    # speck; a pale light on a leaf is near the ground's colour but not at it.)
+    ds = shrink(d, f)
+    for i in ids:
+        if i not in rim:
+            sel = lab == i
+            if sel.sum() >= 12 and float(np.median(ds[sel])) < lo:
+                rim.add(i)
     bg = np.repeat(np.repeat(np.isin(lab, list(rim)), f, 0), f, 1)
     full = np.zeros(d.shape, bool)
     full[:bg.shape[0], :bg.shape[1]] = bg
@@ -278,6 +298,15 @@ def plate(path, height_m, lo=0.045, hi=0.12, feather=2):
     low = alpha[-max(2, alpha.shape[0] // 40):].sum(axis=0)
     fx = float((np.arange(low.size) * low).sum() / max(float(low.sum()), 1e-3))
     return Plate(np.ascontiguousarray(rgb, np.float32), np.ascontiguousarray(alpha, np.float32), (fx, float(alpha.shape[0])), height_m)
+
+
+def smaller(pl, f=2):
+    """The plate at 1 / f of its painted size (block means of premultiplied colour): a plate that will stand 200 px tall
+    need not be carried at 1800."""
+    pm = shrink(np.dstack([pl.rgb * pl.alpha[..., None], pl.alpha]).astype(np.float32), f)
+    a = pm[..., 3]
+    return Plate(np.ascontiguousarray(np.clip(pm[..., :3] / np.maximum(a[..., None], 1e-3), 0, 1) * (a[..., None] > 1e-3), np.float32),
+                 np.ascontiguousarray(a, np.float32), (pl.foot[0] / f, float(a.shape[0])), pl.height_m)
 
 
 def rekey(pl, cols, mix=0.7, light=0.10, pale=0.0, haze=None):
