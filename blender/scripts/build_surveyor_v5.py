@@ -141,7 +141,8 @@ L_UA, L_FA, L_TH, L_SH = 0.28, 0.26, 0.34, 0.33
 # far limbs a step darker). THE JOINTS: a lower limb's paint runs up under the joint and its LINE is left open across it,
 # so no line crosses the limb where it bends (how a drawn figure bends); JOINT = "band" lays a slim ribbed band over the
 # elbow and the knee, "none" leaves the two shapes overlapping with one fold flick (the sheet shows both).
-JOINT = "band"
+# RULED (LEAD 11-10 07:4x): NO HARDWARE on the figure - it reads as a drawn figure, which is the style asked for.
+JOINT = "none"
 
 
 def limb(d, M, p0, p1, w0, w1, bulge, tone="suit"):
@@ -745,12 +746,12 @@ def preview(out, footnote=None):
 
     sh_u8, sh_piv = shovel_cel()                                                 # the shovel as a cel (LEAD 07:1x), on the grip
     prop = (sh_u8, sh_piv, DIG_AIM)
-    global JOINT                                                                 # the other joint, for plate 3: no hardware
-    JOINT = "none"
+    global JOINT                                                                 # the other joint, for plate 3: slim ribbed bands
+    JOINT = "band"
     try:
         PN, _lay = all_parts()
     finally:
-        JOINT = "band"
+        JOINT = "none"
     order = ("idle", "walk", "crouch", "jump", "dig")
     pimg = {k: pose_image(P, "side", POSES[k], prop=prop if k == "dig" else None) for k in order}
     front = pose_image(P, "front34", POSES["idle"])
@@ -814,15 +815,15 @@ def preview(out, footnote=None):
     bx, bz, _a = w_idle["boot_f"]
     face = (-0.36, 1.36, 0.44, 2.02)
     boxes = [("the face", face), ("a glove", (hx - 0.16, hz - 0.26, hx + 0.20, hz + 0.08)),
-             ("a knee cuff", (kx - 0.20, kz - 0.20, kx + 0.20, kz + 0.16)), ("a boot", (bx - 0.20, bz - 0.22, bx + 0.42, bz + 0.12))]
-    rows.append(head("PLATE 3 - CLOSE-UPS of the idle pose, each a window of the large drawing: at 2x the game's zoom (shrunk 4x), then at 4x (shrunk 2x) ||| THE JOINTS at 4x, the jump's bent knee and elbow: slim ribbed bands (the figure's) | no hardware (the shapes overlap, one fold flick)"))
+             ("a knee", (kx - 0.20, kz - 0.20, kx + 0.20, kz + 0.16)), ("a boot", (bx - 0.20, bz - 0.22, bx + 0.42, bz + 0.12))]
+    rows.append(head("PLATE 3 - CLOSE-UPS of the idle pose, each a window of the large drawing: at 2x the game's zoom (shrunk 4x), then at 4x (shrunk 2x) ||| THE JOINTS at 4x, the jump's bent knee and elbow: no hardware (the figure's, ruled: the shapes overlap, one fold flick) | slim ribbed bands (the other way)"))
     crops = [(name, crop(pimg["idle"], *b)) for name, b in boxes]
     w_jump = solve("side", POSES["jump"])
     jn = pose_image(PN, "side", POSES["jump"])
     joints = []
     for label, bone in (("the knee", "shin_f"), ("the elbow", "forearm_f")):
         jx, jz, _a = w_jump[bone]
-        for kind, im in (("bands", pimg["jump"]), ("no hardware", jn)):
+        for kind, im in (("no hardware (the figure's)", pimg["jump"]), ("bands", jn)):
             joints.append((f"{label}: {kind}", crop(im, jx - 0.3, jz - 0.3, jx + 0.3, jz + 0.3)))
     for f, label in ((4, "2x"), (2, "4x")):
         hmax = max(c.shape[0] for _n, c in crops) // f + 24
@@ -866,7 +867,7 @@ def preview(out, footnote=None):
              f"{n_lines} pencil strokes on the figure, charcoal {CEL.CHARCOAL}; all parts of both facings: mean {all_w[0]:.2f} px",
              f"the crouch stands {crouch_top:.3f} m (the limit 0.98 m under a 1 m gap); the idle {top_m(pimg['idle'], PG * K):.3f} m to the plumb bob",
              f"the part sheet: {sh.shape[1]}x{sh.shape[0]} px at {PX * K} px per metre, {len(rects)} parts on pivots (far limbs: the paint a step darker, the line the same), {na // 1024} KB; "
-             "the bones, pivots and poses are round 2b's, unchanged",
+             "the bones and pivots are round 2b's, unchanged; of the poses only the idle changed (a lean and a curve through the spine)",
              f"THE BOIL: a second pencil pass over the same paint took {t_boil:.0f} s more (the first pass with its paint {t_parts:.0f} s); as a second sheet of the same rects it is {nb // 1024} KB on disk "
              f"and {sh.shape[1] * sh.shape[0] * 4 // (1024 * 1024)} MB more texture uncompressed; the two passes differ on {shift * 100:.1f} % of the figure's coverage (under a pixel at the game's zoom)",
              f"this run: {time.time() - t0:.0f} s to draw, paint, pose and shrink everything"]
