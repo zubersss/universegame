@@ -272,7 +272,11 @@ def head(d, M):
     G.stroke(d, hose([(43, 19), (48, 17), (54, 19)], 2.2), M["brow"], 0.0, cyclic=True)             # the eyebrow
     G.stroke(d, C(46, 40, 4.5, 12, ry=3), M["cheek_f"], 0.0, cyclic=True)                           # the cheek
     G.stroke(d, [(50, 45), (54, 47), (58, 45)], M["ink"], INN)                                       # a small smile
-    G.stroke(d, C(26, 32, 4.5, 12, ry=6), M["skin"], INN, cyclic=True)                              # the ear
+    G.stroke(d, C(29, 36, 3.6, 12, ry=5.2), M["skin"], INN, cyclic=True)                            # the ear: just behind the head's
+    G.stroke(d, [(30.2, 33.6), (28.2, 36), (30, 38.6)], M["ink"], INN)                               # centre, under the eye line, with
+    #                                                                                                 its fold (the 17:17 sheet at 4x: a
+    #                                                                                                 plain ring of the eye's size at the
+    #                                                                                                 eye's height read as a second, blank eye)
     G.stroke(d, [(30, 56), (46, 56), (44, 64), (32, 64)], M["skin"], INN, cyclic=True)             # the neck
 
 
@@ -432,7 +436,9 @@ POSES = {   # degrees counter-clockwise, added to rest; "lift" raises the root a
     # draws the 1 m line
     "crouch": {"torso": -76, "head": 58, "antenna": 123, "upper_arm_f": 45, "forearm_f": 90, "upper_arm_b": 38, "forearm_b": 94,
                "thigh_f": 115, "shin_f": -142, "boot_f": 27, "thigh_b": 95, "shin_b": -152, "boot_b": 57, "root_scale_z": 0.92},
-    "jump": {"torso": -8, "head": 10, "upper_arm_f": 150, "forearm_f": 30, "upper_arm_b": 125, "forearm_b": 40,
+    # the 17:17 sheet: the near arm at 150 crossed the bubble and hid the face (the arms cannot reach over a 0.6 m bubble): the
+    # near arm now reaches forward and up, clear of the glass; the far arm stays raised behind it
+    "jump": {"torso": -8, "head": 10, "upper_arm_f": 108, "forearm_f": 25, "upper_arm_b": 125, "forearm_b": 40,
              "thigh_f": 78, "shin_f": -96, "boot_f": 18, "thigh_b": 40, "shin_b": -104, "boot_b": 30, "lift": 0.42},
     # a lunge on the shovel: the near hand on the D-grip at (0.33, 0.93) m from the hips' ground point, the shovel 48 deg
     # down (DIG_AIM), its tip ~0.1 m in the ground 1.25 m ahead; the far hand on the haft 0.3 m down it; the back foot on its toe
