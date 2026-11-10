@@ -354,6 +354,46 @@ namespace Meridian.Tests
                 for (int i = 0; i < 20; i++) yield return null;
                 Assert.AreEqual(1f, view.ReticleStrength, 0.02f, "whole again when the cursor moves");
                 TestContext.Out.WriteLine($"[MERIDIAN] u209 reticle: on B-246's art {view.ReticleOnArt}; strength {RigToolView.ReticleIdleStrength:0.0} with a still cursor, 1.0 within 0.3 s of a move");
+
+                // LEAD 11:1x (0.6.3's smoke read): AT REST in a room, the cursor 5 m off INSIDE solid ground beyond the wall: the mark
+                // stands on what the next contact will hit (D-196 (3), D-196b), not on the cursor, button up.
+                yield return StandAtDepth(x + 40f, 5f);
+                feet = player.Body.position;
+                var deep = feet + new Vector2(5f, -0.4f);
+                input.AimAt(deep);
+                yield return Rest();
+                for (int i = 0; i < RigTools.WalkKeepFrames + 4; i++) yield return null; // past any kept walk
+                Assert.IsFalse(input.Pressed, "the button is up");
+                Assert.IsFalse(stroke.Active, "no stroke under way");
+                Assert.IsTrue(rig.SolidAt(deep), "the cursor is inside solid ground");
+                shoulder = rig.DigOrigin;
+                Assert.Greater(Vector2.Distance(deep, shoulder), reach + 2.5f, "the cursor is well past the reach");
+                Assert.IsTrue(rig.DigTarget(deep, out var roomContact, out bool roomClamped), "the line from the shoulder meets the room's wall");
+                Assert.IsTrue(roomClamped, "the cursor past the reach");
+                Assert.LessOrEqual(Vector2.Distance(roomContact, shoulder), reach + 1e-3f, "the contact inside the reach");
+                Assert.IsFalse(rig.SolidAt(roomContact - (deep - shoulder).normalized * 0.05f), "the contact is the wall's face: open just before it");
+                Assert.Less(Vector2.Distance(view.ReticleAt, roomContact), 0.01f, "the reticle's mark is the next contact");
+                Assert.Less(Vector2.Distance(view.ReticleCentre, rig.DigPoint(roomContact)), 0.01f, "the brackets' centre is the brush's centre for that contact");
+                Assert.Greater(Vector2.Distance(view.ReticleCentre, deep), 2.5f, "and not the cursor");
+                Assert.AreEqual(view.ReticleOnArt ? RigToolView.ReticleClampedTint : RigToolView.ReticleAtReach, view.ReticleTint, "mustard: the cursor is past the reach");
+                if (view.ReticleOnArt)
+                {
+                    for (int i = 0; i < 4; i++)
+                        Assert.AreEqual(RigTools.BrushRadius + RigToolView.ClampedGapM, Vector2.Distance(view.Bracket(i).transform.position, rig.DigPoint(roomContact)), 0.02f, $"bracket {i} stands round the brush's circle at the contact");
+                    Assert.Less(Vector2.Distance(view.Pip.transform.position, roomContact), 0.01f, "the pip on the wall's face");
+                }
+                TestContext.Out.WriteLine($"[MERIDIAN] u209 reticle at rest in a room: the cursor {Vector2.Distance(deep, shoulder):0.0} m from the shoulder, inside solid ground; the mark {Vector2.Distance(view.ReticleAt, shoulder):0.00} m from the shoulder on the wall's face ({Vector2.Distance(view.ReticleAt, roomContact):0.000} m from DigTarget's contact), the brackets' centre {Vector2.Distance(view.ReticleCentre, deep):0.0} m from the cursor, tint {(view.ReticleTint == RigToolView.ReticleClampedTint ? "mustard" : view.ReticleTint.ToString())}");
+                // The smoke's staging: BuildSmoke / BuildSmokeD1 take the rig's owner away round their scripted digs (a rig with no owner
+                // works the point itself, at any distance). With no owner the mark IS the cursor: what smoke_31, 32 and 49-53 show.
+                var ownerWas = rig.owner;
+                rig.owner = null;
+                try
+                {
+                    for (int i = 0; i < RigTools.WalkKeepFrames + 4; i++) yield return null;
+                    Assert.Less(Vector2.Distance(view.ReticleAt, deep), 0.01f, "with no owner (the smoke's staged digs) the mark is the cursor itself");
+                    Assert.Less(Vector2.Distance(view.ReticleCentre, deep), 0.01f, "and the brackets stand round it");
+                }
+                finally { rig.owner = ownerWas; }
                 LogAssert.NoUnexpectedReceived();
             }
             finally { Restore(); }
