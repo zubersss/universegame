@@ -6,6 +6,15 @@ Owner: LEAD (only the Lead edits this). Do the open items below, then tell the L
 
 ## Open
 
+### USER-44 — Second look at the new art style (5 min, no game needed)
+You liked the colours of the first test and not the drawing ("still looks like a 1930s cartoon, big circle head and eyes"). The second test is on the same page: https://claude.ai/artifact/DfszsRAPjF6hwbjr5i36GX
+It shows the surveyor redrawn with natural proportions, and Earth's forest edge painted plant by plant, at two camera distances with a button to flip to today's game. It also says plainly where this still falls short of the film. Nothing in the game changes until you answer. Tell the Lead session:
+1. The figure: is this the right direction now? If something is still off, say what (the face, the build, the clothes).
+2. The camera: closer all the time, today's distance, or close on the surface and pulling back as you dig deep?
+3. The scenery: good enough to start repainting Earth, more plant kinds and denser planting first, or a painter's hand brought in (real brush strokes or painted plants, scanned)?
+4. Anything else you want changed before the work starts.
+A yes on the scenery is about a working week for Earth and three to four days for each planet after it. Build 0.6.3 (the reworked digging) does not wait for this.
+
 
 ### USER-42 — Free about half a gigabyte of memory (2 min) — not blocking right now, but the margin is thin
 Thank you for restarting the three windows (00:50). Update 01:01: once the new windows settled, free memory rose to 1.9 GB and the team's builds and tests can start again. The laptop itself was not restarted (it has been on since yesterday 11:44) and builds need 1.5 GB free, so one busy app can stop them again. Either of these gives a safe margin:
