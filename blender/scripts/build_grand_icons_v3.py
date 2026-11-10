@@ -31,7 +31,17 @@ from meridian import v3  # noqa: E402
 G, O, I = IT.G, IT.O, IT.I
 TAU = 2 * math.pi
 ART = os.path.normpath(os.path.join(HERE, "..", "..", "Assets", "_Game", "Art"))
-C, arc, hose, fill, inked, outline, line = SI.C, SI.arc, SI.hose, SI.fill, SI.inked, SI.outline, SI.line
+C, arc, hose, fill, line = SI.C, SI.arc, SI.hose, SI.fill, SI.line
+OW = O * 0.67                           # the outline at two thirds of the icon set's weight (LEAD 06:2x: at the row size the first
+#                                         sheet's five sat heavier than their creature neighbours, whose ink thins as they shrink)
+
+
+def inked(d, M, pts, tone, r=None):
+    SI.inked(d, M, pts, tone, OW if r is None else r)
+
+
+def outline(d, M, pts, r=None):
+    SI.outline(d, M, pts, OW if r is None else r)
 
 
 def eye(d, M, x, z, r, look=(0.35, 0.05)):
@@ -106,13 +116,17 @@ def polar_hydra(d, M):
     outline(d, M, body)
     for i, (hx, hz) in enumerate(heads):
         s = -1.0 if hx < 0 else 1.0                                                                         # the outer heads look outward
-        hd = C(hx, hz, 0.068, n=18, rz=0.05)
-        inked(d, M, [(hx - 0.035 * s, hz + 0.035), (hx - 0.075 * s, hz + 0.085), (hx - 0.03 * s, hz + 0.07), (hx - 0.005 * s, hz + 0.095),
-                     (hx + 0.012 * s, hz + 0.045)], "red", I)                                               # the frill crest
+        # run 2's heads were white balls with one dark dot: six eyeballs on stalks (LEAD 06:2x). Each is a HEAD now: a rounded
+        # skull with a snout that points outward, the blue jaw under a mouth line, a small eye set back and high
+        hd = [(hx + x * s, hz + z) for x, z in arc(-0.012, 0.0, 0.05, 55, 305, n=12, rz=0.044)] + [(hx + 0.105 * s, hz - 0.016)]
+        inked(d, M, [(hx - 0.045 * s, hz + 0.028), (hx - 0.085 * s, hz + 0.08), (hx - 0.04 * s, hz + 0.066), (hx - 0.018 * s, hz + 0.094),
+                     (hx + 0.0 * s, hz + 0.042)], "red", I)                                                 # the frill crest
         fill(d, M, hd, "off")
-        fill(d, M, below(hd, hz - 0.012), "teal")                                                           # the blue jaw
-        outline(d, M, hd, I)
-        G.stroke(d, [(hx + 0.028 * s - 0.002, hz + 0.014), (hx + 0.028 * s + 0.002, hz + 0.014)], M["ink"], 0.011)            # the eye
+        fill(d, M, [(hx + 0.105 * s, hz - 0.016), (hx + 0.0 * s, hz - 0.02)] + [(hx + x * s, hz + z) for x, z in arc(-0.012, 0.0, 0.05, 245, 305, n=5, rz=0.044)],
+             "teal")                                                                                        # the blue jaw
+        outline(d, M, hd, I * 1.2)
+        line(d, M, [(hx + 0.105 * s, hz - 0.016), (hx + 0.045 * s, hz - 0.022), (hx + 0.0 * s, hz - 0.018)], I * 0.8)   # the closed mouth
+        G.stroke(d, [(hx + 0.004 * s - 0.002, hz + 0.014), (hx + 0.004 * s + 0.002, hz + 0.014)], M["ink"], 0.007)       # the eye
 
 
 def diamondback_colossus(d, M):
