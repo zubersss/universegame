@@ -434,6 +434,17 @@ namespace Meridian.Player
             // the body's drawing by the stroke's own clock, shown now: the glove read below is this frame's (the Animator on its own
             // clock runs a frame behind the tool)
             if (swing && SwingOnClip) body.ShowStroke(strokeClip, drawing, DigStroke.Drawings, DigStroke.SwingSeconds - stroke.SwingTime + 0.05f);
+            else if (ray && body != null)
+            {
+                // the sheet's aim pose for the direction, held while the ray runs (B-246); shown before the glove is read: the tool is
+                // in the raised hand from the press' own frame (played after the read, it stayed at the hip for that frame)
+                string pose = SurveyorAnim.AimClipFor(toTarget);
+                if (body.HasClip(pose))
+                {
+                    if (pose != strokeClip) body.PlayStroke(pose, 0.2f); else body.Override(pose, 0.2f);
+                    strokeClip = pose;
+                }
+            }
             float lean = swing && !SwingOnClip ? SwingLean[drawing] * (left ? 1f : -1f) : 0f; // toward the target: clockwise facing right
             Vector2 shift = swing && !SwingOnClip ? line * SwingShift[drawing] : Vector2.zero;
             if (body != null) body.SetStrokePose(shift, lean);
@@ -500,13 +511,6 @@ namespace Meridian.Player
                 Vector2 d = target - HandWorld;
                 if (d.sqrMagnitude < 1e-4f) d = left ? Vector2.left : Vector2.right;
                 AimDegrees = Mathf.SmoothDampAngle(AimDegrees, Mathf.Atan2(d.y, d.x) * Mathf.Rad2Deg, ref aimVelocity, BeamDampSeconds);
-                // the sheet's aim pose for the direction, held while the ray runs (B-246)
-                string pose = SurveyorAnim.AimClipFor(toTarget);
-                if (body != null && body.HasClip(pose))
-                {
-                    if (pose != strokeClip) body.PlayStroke(pose, 0.2f); else body.Override(pose, 0.2f);
-                    strokeClip = pose;
-                }
             }
             else if (digSlot)
             {

@@ -513,7 +513,12 @@ namespace Meridian.Tests
                 // (the aim is the ray's contact on the wall's face, D-196b, not the cursor's point behind it)
                 float toAim = Mathf.Atan2(stroke.Target.y - view.HandWorld.y, stroke.Target.x - view.HandWorld.x) * Mathf.Rad2Deg;
                 float first = Mathf.Abs(Mathf.DeltaAngle(view.AimDegrees, toAim));
-                for (int i = 0; i < 18; i++) yield return null;
+                // the tool is in the aim pose's raised hand from the press' own frame (it stayed at the hip for that frame once)
+                Vector2 handAtPress = view.HandWorld, toolAtPress = view.Tool.transform.position;
+                yield return null;
+                Assert.Less(Vector2.Distance(handAtPress, view.HandWorld), 0.02f, "the glove the tool is held in on the press' frame is the aim pose's");
+                Assert.Less(Vector2.Distance(toolAtPress, handAtPress), 1e-3f, "the tool in it");
+                for (int i = 0; i < 17; i++) yield return null;
                 float later = Mathf.Abs(Mathf.DeltaAngle(view.AimDegrees, Mathf.Atan2(stroke.Target.y - view.HandWorld.y, stroke.Target.x - view.HandWorld.x) * Mathf.Rad2Deg));
                 TestContext.Out.WriteLine($"[MERIDIAN] u209 Beam: press at frame {press}, the ray drawn in frame {view.RayShownFrame}, hum {(audio != null ? audio.BeamHumOn.ToString() : "no audio")}; the tool {first:0.0} deg off the aim one frame in, {later:0.0} deg 0.3 s later");
                 Assert.Greater(first, 1f, "damped: not on the aim in one frame");
