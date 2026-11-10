@@ -755,7 +755,23 @@ def do_v3_sheet(entry, preview):
     if sockets and all(len(v) == len(frames) for v in sockets.values()):
         meta["sockets"] = sockets
         meta["sockets_units"] = "metres in sprite space from the pivot, one [x, y] per frame in sheet order"
+    if entry.get("hitbox") == "measure":            # B-224: a v2 sheet's "hitbox" carried over, measured on the new frames
+        import numpy as _np
+        sel = [i for c in clips if c["name"] in ("idle", "walk") for i in range(c["start"], c["start"] + c["length"])] or list(range(len(frames)))
+        drawn = _np.zeros((fh, fw), bool)
+        for i in sel:
+            drawn |= frames[i][..., 3] > 127
+        ys_, xs_ = _np.where(drawn)
+        if len(xs_):
+            meta["hitbox"] = {"x": round(float(xs_.min()) / fw, 3), "y": round(float(fh - 1 - ys_.max()) / fh, 3),
+                              "w": round(float(xs_.max() - xs_.min() + 1) / fw, 3), "h": round(float(ys_.max() - ys_.min() + 1) / fh, 3)}
+            meta["hitbox_note"] = ("fractions of the frame, x from the left and y from the bottom: the drawn pixels of the idle and "
+                                   "walk frames (alpha > 127)")
+    elif isinstance(entry.get("hitbox"), dict):
+        meta["hitbox"] = entry["hitbox"]
     problems = v3.validate_sheet(meta, sheet.shape, ppu=base)
+    if entry.get("clip_caps_exception"):            # a LEAD-ruled exception (B-224: a v2 sheet's clip lengths kept for UNITY's
+        problems = [p_ for p_ in problems if "frames (cap " not in p_]   # animator); the manifest row names the ruling
     if base != v3.PPU and not entry.get("ppu_exception"):
         problems.append(f"ppu {base} needs a LEAD-approved ppu_exception (contract §11.1: 64)")
     if clipped:

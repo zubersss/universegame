@@ -1,28 +1,32 @@
 {
   "key": "creatures/venus/veil_serpent",
-  "frame_width": 400,
-  "frame_height": 400,
-  "columns": 5,
+  "style": "v3",
+  "frame_width": 256,
+  "frame_height": 256,
+  "columns": 7,
   "gutter": 4,
   "frames": 25,
-  "fps": 10,
+  "fps": 12,
   "pivot": [
     0.5,
     0.5
   ],
   "facing": "right",
+  "ppu": 64,
   "animations": [
     {
       "name": "idle",
       "start": 0,
       "length": 5,
-      "loop": true
+      "loop": true,
+      "loop_from": 0
     },
     {
       "name": "walk",
       "start": 5,
       "length": 8,
-      "loop": true
+      "loop": true,
+      "loop_from": 0
     },
     {
       "name": "attack",
@@ -43,11 +47,12 @@
       "loop": false
     }
   ],
+  "squash_root": true,
   "hitbox": {
-    "x": 0.08,
-    "y": 0.4,
-    "w": 0.84,
-    "h": 0.2
+    "x": 0.031,
+    "y": 0.398,
+    "w": 0.941,
+    "h": 0.258
   },
-  "ppu": 103.0
+  "hitbox_note": "fractions of the frame, x from the left and y from the bottom: the drawn pixels of the idle and walk frames (alpha > 127)"
 }
