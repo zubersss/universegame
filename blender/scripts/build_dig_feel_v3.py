@@ -179,6 +179,8 @@ def chip_frame(size, stage, seed, n, Lmax):
             keep = max(2, int(math.ceil(len(pts) * frac)))
             crack(pts[:keep], {1: 1.5, 2: 1.7, 3: 2.0}[stage], 0.7)      # heavier at the contact: the stage must read at 1x
             for bi, (k, bp) in enumerate(branches):
+                if size < 128 and bi > 0:                                # the 1 m cell: one branch a crack (run 2's stage 3
+                    continue                                             # was a scribble at 1x)
                 if k < keep and (stage == 3 or (stage == 2 and bi == 0)):
                     crack(bp if stage == 3 else bp[:max(2, len(bp) // 2 + 1)], 1.0, 0.5)
             if stage == 3:                                               # flakes only on the last stage, one a crack
@@ -193,22 +195,26 @@ def chip_frame(size, stage, seed, n, Lmax):
 def contact_frame(k):
     def fn(d, M):
         ph = TAU * k / 6
-        cx, cy = 32.0, 32.0
-        G.stroke(d, G.lumpy_ellipse(cx, cy - 1, 12.5 + 1.8 * math.sin(ph), 10.5 + 1.5 * math.sin(ph), n=22, lump=0.10, seed=700 + k),
-                 M["offwhite_sh"], 0.0, cyclic=True)                                          # the glow's halo (no ink: a glow)
-        G.stroke(d, G.lumpy_ellipse(cx, cy - 1, 7.0 + 1.3 * math.sin(ph + 1.0), 6.0 + 1.1 * math.sin(ph + 1.0), n=18, lump=0.08, seed=720 + k),
-                 M["offwhite_f"], 0.0, cyclic=True)                                           # its core
-        for j in range(3):                                                                    # three heat licks, flickering
-            a = -math.pi / 2 + (j - 1) * 0.9 + 0.25 * math.sin(ph + j)
-            r0, r1 = 14.5, 18.0 + 1.5 * math.sin(ph + 2 * j)
-            G.stroke(d, [(cx + r0 * math.cos(a), cy + r0 * math.sin(a)), (cx + r1 * math.cos(a), cy + r1 * math.sin(a))], M["ln_offwhite"], I * 0.9)
-        for j in range(5):                                                                    # grit thrown up and out, then falling
-            t = (k / 6 + j / 5) % 1.0
-            a = math.radians(-150 + 30 * j + 8 * math.sin(j * 2.3))
-            dist = 9 + 19 * t
-            x, y = cx + dist * math.cos(a), cy + dist * math.sin(a) + 7 * t * t
-            r = 2.8 * (1 - 0.55 * t)
-            G.stroke(d, [(x + r * math.cos(b + j), y + r * 0.8 * math.sin(b + j)) for b in (0.3, 1.9, 3.4, 4.9)], M["offwhite"], I * 0.7, cyclic=True)
+        cx, cy = 32.0, 33.0
+        # the glow as a SPIKED FLARE with a five-cornered core (runs 1-4 drew a round halo with a round core and the grit
+        # fanned along its rim: at 6x a lashed eye). No ink on it: a glowing part is drawn in its colour.
+        halo = []
+        for i in range(14):
+            a = TAU * i / 14 + 0.22 * math.sin(ph + i)
+            r = (14.5 + 2.2 * math.sin(ph + 1.7 * i)) if i % 2 == 0 else (8.0 + 1.0 * math.sin(ph + i))
+            halo.append((cx + r * math.cos(a), cy + r * 0.9 * math.sin(a)))
+        G.stroke(d, halo, M["offwhite_sh"], 0.0, cyclic=True)
+        G.stroke(d, [(cx + (5.2 + 1.2 * math.sin(ph + 2 * i)) * math.cos(TAU * i / 5 + 0.3 + ph / 6),
+                      cy + (4.4 + 1.0 * math.sin(ph + 2 * i)) * math.sin(TAU * i / 5 + 0.3 + ph / 6)) for i in range(5)], M["offwhite_f"], 0.0, cyclic=True)
+        for j, deg in enumerate((-168.0, -128.0, -97.0, -66.0, -38.0, -10.0)):                # grit thrown clear, each on its own
+            t = (k / 6 + j * 0.37) % 1.0                                                      # beat, well off the flare's edge
+            a = math.radians(deg + 6 * math.sin(j * 2.3))
+            dist = 16 + 11 * t
+            x, y = cx + dist * math.cos(a), cy + dist * math.sin(a) + 5 * t * t
+            L = 3.6 * (1 - 0.5 * t)                                                           # each a short ink dash along its own
+            ux, uy = math.cos(a), math.sin(a) + 0.5 * t                                      # flight (runs 1-3 drew outlined chips:
+            n = math.hypot(ux, uy)                                                           # two side by side over the round glow
+            G.stroke(d, [(x - ux / n * L / 2, y - uy / n * L / 2), (x + ux / n * L / 2, y + uy / n * L / 2)], M["ink"], I * 0.9)   # read as eyes)
     return frame(64, 64, fn, 740 + k)
 
 
