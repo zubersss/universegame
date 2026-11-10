@@ -518,6 +518,9 @@ namespace Meridian.View2D
 
         bool IsBand(TerrainChunk c, Vector2 p, Vector2 q, float wy0) => Normal(q - p).y > SurfaceFacing && OnSurface(c, (p + q) * 0.5f, wy0);
 
+        System.Func<int, float> curveOf;
+        TerrainStreamer curveOfTerrain;
+
         /// <summary>The lips (on the natural brinks) and the surface decor over the chunk's band (after the band and the rim: drawn over both).</summary>
         void TopSprites(TerrainChunk c, GroundContour k, float wx0, float wy0)
         {
@@ -538,7 +541,8 @@ namespace Meridian.View2D
             }
             // The natural brinks whose node lies in this chunk (x = n + 0.5 in [wx0 - 0.5, wx0 + C - 0.5)).
             int x0 = Mathf.RoundToInt(wx0);
-            System.Func<int, float> curve = terrain.CurveAt;
+            if (curveOf == null || !ReferenceEquals(curveOfTerrain, terrain)) { curveOf = terrain.CurveAt; curveOfTerrain = terrain; } // U-211: was a delegate a build
+            var curve = curveOf;
             for (int nn = x0 - 1; nn < x0 + C - 1; nn++)
             {
                 if (!NaturalBrink(curve, nn, out int side, out float angle)) continue;
@@ -1049,6 +1053,18 @@ namespace Meridian.View2D
             return f;
         }
 
+        /// <summary>U-211: where a vertex of the chunk being built samples its texture: one fixed point of a sheet (the strip's fill
+        /// colour), or its world position over a tile's size in metres (the fills at 8 m, the walls at theirs).</summary>
+        readonly struct UvMap
+        {
+            readonly float wx0, wy0, tile;
+            readonly Vector2 point;
+            readonly bool world;
+            public UvMap(float wx0, float wy0, float tile) { this.wx0 = wx0; this.wy0 = wy0; this.tile = tile; point = default; world = true; }
+            public UvMap(Vector2 point) { wx0 = 0f; wy0 = 0f; tile = 1f; this.point = point; world = false; }
+            public Vector2 At(float lx, float ly) => world ? new Vector2((wx0 + lx) / tile, (wy0 + ly) / tile) : point;
+        }
+
         void Build(TerrainChunk c)
         {
             EnsureScratch();
@@ -1065,16 +1081,17 @@ namespace Meridian.View2D
             Vector2 fillUv = fillSprite != null ? Centre(fillSprite) : new Vector2(0.5f, 0.5f);
             Color fillTint = fillSprite != null ? Color.white : new Color(0.45f, 0.36f, 0.27f, 1f);
             bool worldFill = fill != null && fill.texture != null && fill.rect.width >= fill.texture.width - 0.5f;
-            Vector2 FillUv(float lx, float ly) => worldFill ? new Vector2((wx0 + lx) / 8f, (wy0 + ly) / 8f) : fillUv;
-            Vector2 WorldUv(float lx, float ly) => new Vector2((wx0 + lx) / 8f, (wy0 + ly) / 8f);
+            // U-211: where a vertex samples is a VALUE (UvMap), not a delegate over this build's locals: the three local functions here
+            // cost a closure and up to four delegates a rebuild (a rebuild a dug cell, and one a chunk streamed in).
+            var worldUv = new UvMap(wx0, wy0, 8f);
+            var fillMap = worldFill ? worldUv : new UvMap(fillUv);
             // U-196 (B-230): the back wall is the tier's wall tile where it is in (already one step darker than the fill: only the hole's
             // shading multiplies it), else the fill shaded as before the art.
             var wallMat = worldFill ? WallMaterial() : null;
             bool wallOn = wallMat != null;
             float wallTile = ProbeTileM; // WallTileM in play; the perf probe may read the material at the fill's scale
-            Vector2 WallUv(float lx, float ly) => new Vector2((wx0 + lx) / wallTile, (wy0 + ly) / wallTile);
             bool wallArt = wallOn && !ProbeFillTextures; // the perf probe's fill copies draw the fill, shaded, through the second material
-            System.Func<float, float, Vector2> backUv = wallOn ? WallUv : FillUv;
+            var backUv = wallOn ? new UvMap(wx0, wy0, wallTile) : fillMap;
             var back = wallArt ? Color.white : new Color(fillTint.r * BackShade, fillTint.g * BackShade, fillTint.b * BackShade, 1f);
 
             // Does any of this chunk take the desert's sand fill? (Most chunks: no, and they skip the overlay.)
@@ -1086,7 +1103,7 @@ namespace Meridian.View2D
             var altWallMat = sandFill && wallArt ? WallAltMaterial() : null;
             bool altWall = altWallMat != null;
             var sandBack = altWall ? Color.white : new Color(BackShade, BackShade, BackShade, 1f);
-            System.Func<float, float, Vector2> sandUv = altWall ? backUv : WorldUv;
+            var sandUv = altWall ? backUv : worldUv;
             // The hole's soft inner shadow goes in the last back submesh this chunk draws: laid in the planet's wall under the band fill's
             // overlay it was covered wherever that overlay is whole (a pit in the desert had no inner shadow).
             rimShadowSub = sandFill ? SubBackSand : SubBack;
@@ -1094,6 +1111,8 @@ namespace Meridian.View2D
             // 1. The back wall: under the natural surface curve, shaded (and the desert's sand over it, faded in). U-187: only where it can show,
             // behind the cells dug (or a cave's air) under the natural surface and one cell round them; the body covers the rest, so the
             // solid ground's pixels draw once, not twice (U-182's A/B room).
+            // U-211: the build's steps named for the Profiler (compiled out of the release player): what a rebuild allocates, by step
+            UnityEngine.Profiling.Profiler.BeginSample("Ground.Build.Back");
             if (k.Lines > 0 || k.fillVerts.Count > 0)
             {
                 float yt = C - 0.5f;
@@ -1125,13 +1144,19 @@ namespace Meridian.View2D
                 }
             }
 
+            UnityEngine.Profiling.Profiler.EndSample();
             LastBackQuads = tris[SubBack].Count / 6; // U-187
+            UnityEngine.Profiling.Profiler.BeginSample("Ground.Build.Body");
             // 2. The body (and the desert's sand over it, faded in across the border).
             int fb = v.Count;
-            for (int i = 0; i < k.fillVerts.Count; i++) { var p = k.fillVerts[i]; Add(p, FillUv(p.x, p.y), fillTint); }
+            for (int i = 0; i < k.fillVerts.Count; i++) { var p = k.fillVerts[i]; Add(p, fillMap.At(p.x, p.y), fillTint); }
             for (int i = 0; i < k.fillTris.Count; i++) tris[SubBody].Add(fb + k.fillTris[i]);
-            if (sandFill) SandBody(k, wx0, WorldUv);
+            if (sandFill) SandBody(k, wx0, worldUv);
+            UnityEngine.Profiling.Profiler.EndSample();
+            UnityEngine.Profiling.Profiler.BeginSample("Ground.Build.Decor");
             Decor(wx0, wy0); // U-182: the tier's buried pieces, over the fill
+            UnityEngine.Profiling.Profiler.EndSample();
+            UnityEngine.Profiling.Profiler.BeginSample("Ground.Build.Bands");
 
             // 3 / 4. The band along upward-facing stretches (by biome, crossfaded), the rim along the rest.
             for (int i = 0; i < Variants; i++) { variantCount[i] = BandSprites(i, out variantWidth[i]); LastVariantQuads[i] = 0; }
@@ -1158,8 +1183,12 @@ namespace Meridian.View2D
                 }
             }
             LastBandQuads = quads;
+            UnityEngine.Profiling.Profiler.EndSample();
+            UnityEngine.Profiling.Profiler.BeginSample("Ground.Build.Top");
             TopSprites(c, k, wx0, wy0); // U-186: the brink lips and the surface decor, over the band and the rim
+            UnityEngine.Profiling.Profiler.EndSample();
 
+            UnityEngine.Profiling.Profiler.BeginSample("Ground.Build.Mesh");
             mesh.Clear();
             mesh.SetVertices(v);
             mesh.SetUVs(0, uv);
@@ -1177,6 +1206,7 @@ namespace Meridian.View2D
             mats[SubRim] = MaterialFor(rim != null ? rim.texture : null);
             for (int i = 0; i < TopSubs; i++) mats[SubTop + i] = MaterialFor(topTex[i]);
             f.GetComponent<MeshRenderer>().sharedMaterials = mats;
+            UnityEngine.Profiling.Profiler.EndSample();
             ChunksBuilt++;
         }
 
@@ -1237,14 +1267,14 @@ namespace Meridian.View2D
         /// <summary>One column's back wall from yb up to the curve h0 → h1. U-171 (LEAD's smoke_43 read): where the curve crosses yb inside the
         /// column the wall stops at the crossing (a triangle); clamping the low corner up to yb instead ran its top over the curve, a 1 m wedge
         /// of wall in the air beside a steep shore at a chunk's bottom edge.</summary>
-        void BackQuad(List<int> into, float x0, float x1, float yb, float h0, float h1, Color c0, Color c1, System.Func<float, float, Vector2> uvOf)
+        void BackQuad(List<int> into, float x0, float x1, float yb, float h0, float h1, Color c0, Color c1, in UvMap uvOf)
         {
             if (h0 > yb && h1 < yb) { float u = (h0 - yb) / (h0 - h1); x1 = Mathf.Lerp(x0, x1, u); c1 = Color.Lerp(c0, c1, u); h1 = yb; }
             else if (h1 > yb && h0 < yb) { float u = (yb - h0) / (h1 - h0); x0 = Mathf.Lerp(x0, x1, u); c0 = Color.Lerp(c0, c1, u); h0 = yb; }
             h0 = Mathf.Max(h0, yb); h1 = Mathf.Max(h1, yb);
             int b = v.Count;
-            Add(new Vector3(x0, yb, 0.01f), uvOf(x0, yb), c0); Add(new Vector3(x1, yb, 0.01f), uvOf(x1, yb), c1);
-            Add(new Vector3(x1, h1, 0.01f), uvOf(x1, h1), c1); Add(new Vector3(x0, h0, 0.01f), uvOf(x0, h0), c0);
+            Add(new Vector3(x0, yb, 0.01f), uvOf.At(x0, yb), c0); Add(new Vector3(x1, yb, 0.01f), uvOf.At(x1, yb), c1);
+            Add(new Vector3(x1, h1, 0.01f), uvOf.At(x1, h1), c1); Add(new Vector3(x0, h0, 0.01f), uvOf.At(x0, h0), c0);
             into.Add(b); into.Add(b + 2); into.Add(b + 1); into.Add(b); into.Add(b + 3); into.Add(b + 2);
         }
 
@@ -1356,7 +1386,7 @@ namespace Meridian.View2D
         }
 
         /// <summary>BackQuad for one cell with the hole's shading at each corner: `tint` times HoleShade there, alpha a0 → a1 across the cell.</summary>
-        void BackQuadShaded(List<int> into, TerrainChunk c, float wy0, float x0, float x1, float yb, float h0, float h1, Color tint, float a0, float a1, System.Func<float, float, Vector2> uvOf)
+        void BackQuadShaded(List<int> into, TerrainChunk c, float wy0, float x0, float x1, float yb, float h0, float h1, Color tint, float a0, float a1, in UvMap uvOf)
         {
             float xa = x0, span = Mathf.Max(1e-5f, x1 - x0);
             if (h0 > yb && h1 < yb) { float u = (h0 - yb) / (h0 - h1); x1 = Mathf.Lerp(x0, x1, u); h1 = yb; }
@@ -1370,16 +1400,16 @@ namespace Meridian.View2D
             into.Add(b); into.Add(b + 2); into.Add(b + 1); into.Add(b); into.Add(b + 3); into.Add(b + 2);
         }
 
-        void ShadedVertex(TerrainChunk c, float wy0, float x, float y, Color tint, float alpha, System.Func<float, float, Vector2> uvOf)
+        void ShadedVertex(TerrainChunk c, float wy0, float x, float y, Color tint, float alpha, in UvMap uvOf)
         {
             float s = HoleShade(c, x, y, wy0);
-            Add(new Vector3(x, y, 0.01f), uvOf(x, y), new Color(tint.r * s, tint.g * s, tint.b * s, tint.a * alpha));
+            Add(new Vector3(x, y, 0.01f), uvOf.At(x, y), new Color(tint.r * s, tint.g * s, tint.b * s, tint.a * alpha));
         }
 
         /// <summary>The soft shadow inside a dug edge: from the outline (ink at RimShadowInk) RimShadowM into the hole (clear), in the back
         /// wall's triangles after its quads (over them, under the body and the ink rim). Only where the strip lies under the natural surface:
         /// a mound's side and a cliff's face stand in the open air and get none.</summary>
-        void RimShadow(TerrainChunk c, Vector2 p, Vector2 q, Vector2 np, Vector2 nq, float wy0, System.Func<float, float, Vector2> uvOf)
+        void RimShadow(TerrainChunk c, Vector2 p, Vector2 q, Vector2 np, Vector2 nq, float wy0, in UvMap uvOf)
         {
             Vector2 inside = (p + q) * 0.5f + (np + nq) * (0.25f * RimShadowM);
             const int C = TerrainConstants.ChunkSize;
@@ -1391,8 +1421,8 @@ namespace Meridian.View2D
             var ink = new Color(0f, 0f, 0f, RimShadowInk);
             var clear = new Color(0f, 0f, 0f, 0f);
             int i0 = v.Count;
-            Add(new Vector3(p.x, p.y, 0.005f), uvOf(p.x, p.y), ink); Add(new Vector3(q.x, q.y, 0.005f), uvOf(q.x, q.y), ink);
-            Add(new Vector3(qf.x, qf.y, 0.005f), uvOf(qf.x, qf.y), clear); Add(new Vector3(pf.x, pf.y, 0.005f), uvOf(pf.x, pf.y), clear);
+            Add(new Vector3(p.x, p.y, 0.005f), uvOf.At(p.x, p.y), ink); Add(new Vector3(q.x, q.y, 0.005f), uvOf.At(q.x, q.y), ink);
+            Add(new Vector3(qf.x, qf.y, 0.005f), uvOf.At(qf.x, qf.y), clear); Add(new Vector3(pf.x, pf.y, 0.005f), uvOf.At(pf.x, pf.y), clear);
             var into = tris[rimShadowSub];
             into.Add(i0); into.Add(i0 + 1); into.Add(i0 + 2); into.Add(i0); into.Add(i0 + 2); into.Add(i0 + 3);
         }
@@ -1402,7 +1432,7 @@ namespace Meridian.View2D
 
         /// <summary>The body's triangles again in the sand fill, alpha = the sand's weight: whole where the weight holds at 0 or 1 across a
         /// triangle, else clipped into 1 m slabs (column centre to column centre) so the vertex alpha follows the fade.</summary>
-        void SandBody(GroundContour k, float wx0, System.Func<float, float, Vector2> uvOf)
+        void SandBody(GroundContour k, float wx0, in UvMap uvOf)
         {
             var into = tris[SubBodySand];
             for (int t = 0; t + 2 < k.fillTris.Count; t += 3)
@@ -1422,7 +1452,7 @@ namespace Meridian.View2D
                 {
                     int i0 = v.Count;
                     var white = Color.white;
-                    Add(a, uvOf(a.x, a.y), white); Add(b, uvOf(b.x, b.y), white); Add(d, uvOf(d.x, d.y), white);
+                    Add(a, uvOf.At(a.x, a.y), white); Add(b, uvOf.At(b.x, b.y), white); Add(d, uvOf.At(d.x, d.y), white);
                     into.Add(i0); into.Add(i0 + 1); into.Add(i0 + 2);
                     continue;
                 }
@@ -1435,7 +1465,7 @@ namespace Meridian.View2D
                     for (int j = 0; j < clipA.Count; j++)
                     {
                         var p = clipA[j];
-                        Add(p, uvOf(p.x, p.y), new Color(1f, 1f, 1f, SandWeight(wx0 + p.x)));
+                        Add(p, uvOf.At(p.x, p.y), new Color(1f, 1f, 1f, SandWeight(wx0 + p.x)));
                     }
                     for (int j = 1; j + 1 < clipA.Count; j++) { into.Add(i0); into.Add(i0 + j); into.Add(i0 + j + 1); }
                 }

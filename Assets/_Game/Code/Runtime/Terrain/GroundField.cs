@@ -111,11 +111,14 @@ namespace Meridian.Terrain
         public readonly List<int> fillTris = new List<int>(2048);
         public int Lines => lineStart.Count;
 
-        // segments: start / end edge keys and points
-        readonly List<int> segA = new List<int>(512), segB = new List<int>(512);
-        readonly List<Vector2> segPA = new List<Vector2>(512), segPB = new List<Vector2>(512);
-        readonly Dictionary<int, int> startAt = new Dictionary<int, int>(512), endAt = new Dictionary<int, int>(512);
-        readonly List<bool> used = new List<bool>(512);
+        // segments: start / end edge keys and points. U-211: the trace's own scratch is ONE set for every contour (static), not a set a
+        // chunk: it is used only inside Build, which runs on the main thread one chunk at a time (the terrain worker only generates
+        // tiles). A set a chunk was 33 KB at the chunk's making and grew again on each pooled chunk's first busy ground: the larger
+        // part of what a chunk's first outline allocated on arrival (70-123 KB a chunk by the Profiler, 11-10).
+        static readonly List<int> segA = new List<int>(1024), segB = new List<int>(1024);
+        static readonly List<Vector2> segPA = new List<Vector2>(1024), segPB = new List<Vector2>(1024);
+        static readonly Dictionary<int, int> startAt = new Dictionary<int, int>(1024), endAt = new Dictionary<int, int>(1024);
+        static readonly List<bool> used = new List<bool>(1024);
         float[] d; int n; int m; float iso; Vector2 origin;
         // U-157 (D-168): sub-node values that override the bilinear ((m + 1)² row-major; NaN: bilinear), and the 1 m cells they touch.
         float[] fine; bool[] fineCell;
@@ -178,7 +181,7 @@ namespace Meridian.Terrain
         }
 
         // Sub-cell scratch: the solid polygon walked corner → edge → corner (CCW: bl, B, br, R, tr, T, tl, L).
-        readonly Vector2[] poly = new Vector2[8];
+        static readonly Vector2[] poly = new Vector2[8];
 
         void SubCell(int i, int j)
         {
