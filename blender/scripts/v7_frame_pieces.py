@@ -593,7 +593,7 @@ def piece(ids, plain=False):
             t1 = time.time()
             bpy.ops.render.render(write_still=True, scene=scene.name)
             t_r = time.time() - t1
-            meta = {"id": pid, "asset": asset, "objects": [o.name for o in g], "scale": cfg.get("scale", 1.0), "yaw": cfg.get("yaw", 0.0),
+            meta = {"id": pid, "style": "v7", "asset": asset, "objects": [o.name for o in g], "scale": cfg.get("scale", 1.0), "yaw": cfg.get("yaw", 0.0),
                     "roll": cfg.get("roll", 0.0), "kind": cfg["kind"], "px_per_m": ppm, "size_px": [w, h], "pivot": pivot,
                     "width_m": round(hi.x - lo.x, 3), "height_m": round(hi.z, 3), "under_m": round(-min(lo.z, 0.0), 3), "depth_m": round(hi.y - lo.y, 3),
                     "tris": tris(g), "render_s": round(t_r, 1), "texture_s": round(tex_s, 1), "texture_strokes": tex_n}
@@ -651,7 +651,7 @@ def stand_piece(ids):
         t1 = time.time()
         bpy.ops.render.render(write_still=True)
         t_r = time.time() - t1
-        meta = {"id": sid, "asset": cfg["asset"], "kind": cfg["kind"], "px_per_m": ppm, "size_px": [w, h], "pivot": pivot,
+        meta = {"id": sid, "style": "v7", "asset": cfg["asset"], "kind": cfg["kind"], "px_per_m": ppm, "size_px": [w, h], "pivot": pivot,
                 "width_m": round(hi.x - lo.x, 3), "height_m": round(hi.z, 3), "under_m": 0.0, "trees": len(cfg["items"]), "tris": tris(copies), "render_s": round(t_r, 1)}
         meta.update(finish(sid, cfg["kind"], ppm, rp))
         os.remove(rp)

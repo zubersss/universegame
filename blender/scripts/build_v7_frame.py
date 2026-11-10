@@ -44,8 +44,10 @@ POOL = dict(x=8.8, y=0.9, rx=5.2, ry=3.4)         # the pool of light on the sta
 GREY = np.array([0.50, 0.50, 0.50], np.float32)   # the mannequin: neutral, for scale only
 
 # The stage: (piece, x_m, y_m, scale, flip). y_m = the foot's height above the ground line: on the strip a piece
-# farther back stands higher (0 .. 0.28), in the middle higher still. Flip only where the painted light does not
-# show (the far veils, the foreground's shade).
+# farther back stands higher (0 .. 0.28), in the middle higher still. D-206's rules (contract v3.5 section 12): NO flip
+# on the middle, near or play_front layers (the painted light would come from the wrong side; the far veils and the
+# foreground's silhouettes may flip); never two instances of one piece at one scale inside a screen width on one layer
+# (check_stage() refuses a layout that breaks either).
 STAGE = {
     "far_a": dict(haze=0.84, pieces=[("far_stand", -4.0, 1.05, 0.72, False)]),
     "far_b": dict(haze=0.66, pieces=[("far_stand", 27.0, 0.80, 1.00, True)]),
@@ -64,12 +66,13 @@ STAGE = {
         ("grass_dry", 6.6, 0.21, 1.00, False), ("weed", 7.0, 0.24, 1.00, False), ("grass_wide", 7.5, 0.23, 0.90, False),
         ("grass_mid", 9.1, 0.24, 0.80, False), ("grass_seed", 9.5, 0.10, 0.90, False),
         ("fern_a", 11.2, 0.26, 0.90, False), ("grass_dry", 12.7, 0.26, 0.80, False), ("grass_wide", 13.6, 0.25, 0.80, False),
-        ("calathea_b", 14.9, 0.23, 1.00, False), ("grass_mid", 16.3, 0.07, 1.00, False), ("fern_c", 16.0, 0.20, 1.00, False),
-        ("rock_big", 16.9, 0.13, 1.00, False), ("weed", 17.8, 0.18, 1.00, False), ("log", 18.2, 0.07, 1.00, False),
-        ("anthurium_a", 19.0, 0.02, 1.00, False), ("rock_flat", 19.5, 0.24, 1.00, False), ("grass_seed", 19.7, 0.05, 1.00, False)]),
-    # in FRONT of the surveyor's feet, on the ground's lip: low tufts only (UNITY: nothing here may cover the hands or the reticle)
-    "play_front": dict(haze=0.0, pieces=[("grass_mid", 3.3, -0.02, 0.70, False), ("grass_wide", 7.7, -0.03, 0.60, False),
-                                         ("grass_seed", 9.25, -0.02, 0.55, False), ("grass_mid", 15.9, -0.02, 0.75, False)]),
+        ("calathea_b", 14.9, 0.23, 1.00, False), ("grass_mid", 16.3, 0.07, 0.88, False), ("fern_c", 16.0, 0.20, 1.00, False),
+        ("rock_big", 16.9, 0.13, 1.00, False), ("weed", 17.8, 0.18, 0.84, False), ("log", 18.2, 0.07, 1.00, False),
+        ("anthurium_a", 19.0, 0.02, 1.00, False), ("rock_flat", 19.5, 0.24, 1.00, False), ("grass_seed", 19.7, 0.05, 0.82, False)]),
+    # in FRONT of the surveyor's feet, on the ground's lip: low tufts only, at most 0.30 m tall (D-206; UNITY: nothing here
+    # may cover the hands or the reticle)
+    "play_front": dict(haze=0.0, pieces=[("grass_mid", 3.3, -0.02, 0.42, False), ("grass_wide", 7.7, -0.03, 0.60, False),
+                                         ("grass_seed", 9.25, -0.02, 0.40, False), ("grass_wide", 15.9, -0.02, 0.50, False)]),
     # the foreground: x from the VIEW's left edge (a negative x: from its right edge), so it frames both cameras
     "foreground": dict(pieces=[("calathea_a", 0.5, -2.05, 2.6, True), ("fern_b", 2.3, -3.3, 2.2, False),
                                ("anthurium_a", -0.6, -2.3, 2.5, True), ("fern_c", -2.6, -3.5, 2.4, True)]),
@@ -85,6 +88,26 @@ MOUND = dict(x=15.15, w=1.7, h=0.42)              # the dug earth beside it
 MAN = [(SPAWN_X, 0.0), (11.5, -2.93)]             # the mannequin: on the stage, in the pit
 
 _PIECES = {}
+
+
+def check_stage():
+    """D-206's layout rules, checked before anything is painted. -> the number of placements."""
+    bad, n = [], 0
+    for layer, L in STAGE.items():
+        seen = {}
+        for pid, x_m, y_m, scale, flip in L["pieces"]:
+            n += 1
+            if flip and layer in ("middle", "near", "play_front"):
+                bad.append(f"{layer}: {pid} at {x_m} is flipped")
+            for x2 in seen.get((pid, round(scale, 3)), []):
+                if abs(x2 - x_m) < W / 96.0 and layer != "foreground":
+                    bad.append(f"{layer}: {pid} x{scale} at {x2} and at {x_m} (inside one screen width)")
+            seen.setdefault((pid, round(scale, 3)), []).append(x_m)
+            if layer == "play_front" and piece(pid)[1]["height_m"] * scale > 0.30:
+                bad.append(f"play_front: {pid} x{scale} stands {piece(pid)[1]['height_m'] * scale:.2f} m (over 0.30)")
+    if bad:
+        raise SystemExit("build_v7_frame: the stage breaks D-206:\n  " + "\n  ".join(bad))
+    return n
 
 
 def piece(pid):
@@ -472,6 +495,7 @@ def sheet(out, peak=None):
 
 
 if __name__ == "__main__":
+    print("stage:", check_stage(), "placements; D-206's rules hold", flush=True)
     if len(sys.argv) > 2 and sys.argv[1] == "one":                                                    # one frame only, to look at: one <ppm>
         F = Frame(int(sys.argv[2]))
         F.compose()
