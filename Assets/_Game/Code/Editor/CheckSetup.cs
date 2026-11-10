@@ -30,8 +30,38 @@ namespace Meridian.EditorTools
             var theme = AssetDatabase.LoadAssetAtPath<Meridian.UI.UiTheme>(SceneAuthoring.UiThemePath);
             if (theme != null) { FontAuthoring.EnsureHudFonts(theme); EditorUtility.SetDirty(theme); } // U-104 (D-090) fonts
             int bottoms = RecordOpaqueBottoms(); // U-164 (D-169)
+            if (PinDirect3D11()) Debug.Log("[MERIDIAN] CheckSetup: the Windows player's graphics API pinned to Direct3D 11 (D-194).");
             AssetDatabase.SaveAssets();
             Debug.Log($"[MERIDIAN] CheckSetup: {sidecars} planet sidecars, {sheets} sheet animators, {rigs} rig sets, {discs} space discs re-imported, {bottoms} set layers with an opaque bottom strip.");
+        }
+
+        /// <summary>The one graphics API of the Windows player (D-194).</summary>
+        public const UnityEngine.Rendering.GraphicsDeviceType PlayerApi = UnityEngine.Rendering.GraphicsDeviceType.Direct3D11;
+
+        /// <summary>True when the Windows player's graphics APIs are pinned to PlayerApi alone (not automatic).</summary>
+        public static bool Direct3D11Pinned(BuildTarget target)
+        {
+            var apis = PlayerSettings.GetGraphicsAPIs(target);
+            return !PlayerSettings.GetUseDefaultGraphicsAPIs(target) && apis != null && apis.Length == 1 && apis[0] == PlayerApi;
+        }
+
+        /// <summary>
+        /// D-194 (LEAD 11-09 23:5x): the Windows player draws on Direct3D 11, pinned. ProjectSettings left the graphics APIs automatic:
+        /// the built player took Direct3D 11 and the Editor Direct3D 12, and on the owner's Intel UHD a grainy BC7 texture costs several
+        /// times more to draw on 12, so the Editor's frame figures of 11-09 (the walls, the backdrop) said nothing of the player. Pinned,
+        /// the Editor takes the same API on its next start. Returns true when it changed the settings.
+        /// </summary>
+        public static bool PinDirect3D11()
+        {
+            bool changed = false;
+            foreach (var target in new[] { BuildTarget.StandaloneWindows64, BuildTarget.StandaloneWindows })
+            {
+                if (Direct3D11Pinned(target)) continue;
+                PlayerSettings.SetUseDefaultGraphicsAPIs(target, false);
+                PlayerSettings.SetGraphicsAPIs(target, new[] { PlayerApi });
+                changed = true;
+            }
+            return changed;
         }
 
         /// <summary>

@@ -74,6 +74,14 @@ try {
                 '-screen-fullscreen', '0', '-screen-width', '1920', '-screen-height', '1080', '-logFile', "`"$playerLog`"")
             if (-not $p.WaitForExit(480000)) { Stop-Process -Id $p.Id -Force; Write-Host 'PROBE TIMED OUT (8 min)'; $buildOk = $false }
             Write-Host "Player log: $playerLog"
+            # D-194 (LEAD 2026-11-09): the Windows player draws on Direct3D 11, pinned in ProjectSettings; the Editor's perf captures are
+            # forced to the same API. A probe whose player drew on anything else is not this game's and is red.
+            $api = $null
+            if (Test-Path $playerLog) { $api = Select-String -Path $playerLog -Pattern 'Version:\s+Direct3D [0-9.]+' | Select-Object -First 1 }
+            $apiText = 'no Direct3D line in the player log'
+            if ($api) { $apiText = ($api.Matches[0].Value -replace '\s+', ' ') }
+            Write-Host "Player graphics API: $apiText"
+            if ($apiText -notmatch 'Direct3D 11') { Write-Host 'PROBE RED: the player did not draw on Direct3D 11 (D-194)'; $buildOk = $false }
         }
     }
     if ($runProbe -and $buildOk -and $Control) {

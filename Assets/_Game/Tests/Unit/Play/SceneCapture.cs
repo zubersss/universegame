@@ -3467,6 +3467,7 @@ namespace Meridian.Tests
         {
             var name = Environment.GetEnvironmentVariable(Variable);
             if (string.IsNullOrEmpty(name)) Assert.Ignore($"Set {Variable} (tools/unity_capture.ps1).");
+            Assert.AreEqual(UnityEngine.Rendering.GraphicsDeviceType.Direct3D11, SystemInfo.graphicsDeviceType, "D-194: a perf capture is read on the player's API (tools/unity_capture.ps1 forces Direct3D 11)");
             bool wasCartoon = Meridian.View2D.CartoonStage.Enabled;
             Meridian.View2D.CartoonStage.Enabled = true;
             int vsync = QualitySettings.vSyncCount, target = Application.targetFrameRate;
@@ -4421,6 +4422,7 @@ namespace Meridian.Tests
             if (string.IsNullOrEmpty(name)) Assert.Ignore($"Set {Variable} (tools/unity_capture.ps1).");
             if (SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.Null)
                 Assert.Fail("No graphics device: run without -nographics.");
+            Assert.AreEqual(UnityEngine.Rendering.GraphicsDeviceType.Direct3D11, SystemInfo.graphicsDeviceType, "D-194: a perf capture is read on the player's API (tools/unity_capture.ps1 forces Direct3D 11)");
             bool wasCartoon = Meridian.View2D.CartoonStage.Enabled;
             Meridian.View2D.CartoonStage.Enabled = true;
             int vsync = QualitySettings.vSyncCount, target = Application.targetFrameRate;
