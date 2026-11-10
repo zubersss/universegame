@@ -82,6 +82,34 @@ function Get-PlayerExe([string]$Version, [switch]$Dev) {
     return Join-Path $RepoRoot ("Build\MERIDIAN_{0}{1}\MERIDIAN.exe" -f $Version, $suffix)
 }
 
+# D-203 (2026-11-10): a script never drives a built player into the owner's own save slot. The game autosaves after every
+# transition; the smoke and the memory probe fly them all, and the built player and the Editor share persistentDataPath.
+# From the build after 0.6.3 the player takes "-meridianSaveRoot <folder>" (SaveSystem.RootSwitch). A player's runtime
+# assembly holds the switch's text when it knows it: an older build would ignore it and write the real slot.
+function Test-PlayerSaveRootSwitch([string]$exe) {
+    $dll = Join-Path (Split-Path $exe) 'MERIDIAN_Data\Managed\MERIDIAN.Runtime.dll'
+    if (-not (Test-Path $dll)) { return $false }
+    $bytes = [System.IO.File]::ReadAllBytes($dll)
+    foreach ($skip in 0, 1) {   # the literal is UTF-16 in the assembly, at either byte alignment
+        $count = $bytes.Length - $skip
+        $count -= $count % 2
+        if ([System.Text.Encoding]::Unicode.GetString($bytes, $skip, $count).Contains('-meridianSaveRoot')) { return $true }
+    }
+    return $false
+}
+# A fresh folder under logs/ for one driven run's saves.
+function New-PlayerSaveRoot([string]$name) {
+    $root = Join-Path $LogDir $name
+    if (Test-Path $root) { Remove-Item $root -Recurse -Force }
+    New-Item -ItemType Directory -Force $root | Out-Null
+    return $root
+}
+# After a driven run: the player's log says it took the root (SaveSystem logs "[MERIDIAN] saves go to ...").
+function Test-PlayerTookSaveRoot([string]$playerLog) {
+    if (-not (Test-Path $playerLog)) { return $false }
+    return [bool](Select-String -Path $playerLog -Pattern '\[MERIDIAN\] saves go to' -Quiet)
+}
+
 function Get-LastRelease {
     if (-not (Test-Path $ReleaseStamp)) { return [datetime]::MinValue }
     try { return [datetime]::Parse((Get-Content $ReleaseStamp -Raw).Trim()) } catch { return [datetime]::MinValue }

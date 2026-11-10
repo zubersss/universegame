@@ -57,10 +57,21 @@ namespace Meridian.Tests
         [Test]
         public void SaveRootIsLocalLowZubersMeridian()
         {
+            // The PLAYER's root: with neither an override nor the test run's fallback (D-203: EditModeDefaults sets one so no test can
+            // save there). Read only: nothing is written while both are off.
+            string overrideWas = SaveSystem.RootOverride, fallbackWas = SaveSystem.FallbackRoot;
             SaveSystem.RootOverride = null;
-            var root = SaveSystem.Root.Replace('\\', '/');
-            StringAssert.EndsWith("/Zubers/MERIDIAN/saves", root, "Bible §10.7 + D-011");
-            StringAssert.Contains("AppData/LocalLow", root);
+            SaveSystem.FallbackRoot = null;
+            try
+            {
+                var root = SaveSystem.Root.Replace('\\', '/');
+                StringAssert.EndsWith("/Zubers/MERIDIAN/saves", root, "Bible §10.7 + D-011");
+                StringAssert.Contains("AppData/LocalLow", root);
+            }
+            finally { SaveSystem.RootOverride = overrideWas; SaveSystem.FallbackRoot = fallbackWas; }
+            // and the run's own root is what a test gets with no override
+            SaveSystem.RootOverride = null;
+            StringAssert.DoesNotContain("AppData/LocalLow", SaveSystem.Root.Replace('\\', '/'), "a test with no override saves to the run's own folder (D-203)");
         }
     }
 }

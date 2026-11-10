@@ -13,6 +13,12 @@ Write-Host "Smoke: build $Version"
 $exe = Get-PlayerExe $Version -Dev:$Dev
 if (-not (Test-Path $exe)) { Write-Host "SMOKE FAILED: no build at $exe (run tools/unity_profile.ps1 -Build -Release, or tools/unity_build.ps1 [-Release])"; exit 1 }
 Write-Host "Smoke player: $exe"
+# D-203: the smoke flies every transition and each one autosaves: the run saves into a folder of its own, never the owner's slot.
+if (-not (Test-PlayerSaveRootSwitch $exe)) {
+    Write-Host "SMOKE REFUSED (D-203): the player at $exe predates -meridianSaveRoot; driven by this script it would autosave into the owner's real save slot. Smoke a build made after 0.6.3."
+    exit 1
+}
+$saveRoot = New-PlayerSaveRoot 'smoke_saves'
 $out = Join-Path $LogDir 'smoke'
 if (Test-Path $out) { Remove-Item $out -Recurse -Force }
 New-Item -ItemType Directory -Force $out | Out-Null
@@ -20,7 +26,7 @@ $playerLog = Join-Path $LogDir 'player_smoke.log'
 
 try { Enter-HeavyJobLock 'unity_smoke' } catch { Write-Host "BLOCKED: $_"; exit 2 }
 try {
-    $playerArgs = @('-meridianSmoke', $out, '-screen-width', '1920', '-screen-height', '1080', '-screen-fullscreen', '0', '-logFile', $playerLog)
+    $playerArgs = @('-meridianSmoke', $out, '-meridianSaveRoot', "`"$saveRoot`"", '-screen-width', '1920', '-screen-height', '1080', '-screen-fullscreen', '0', '-logFile', $playerLog)
     $p = Start-Process -FilePath $exe -ArgumentList $playerArgs -PassThru
     $null = $p.Handle
     if (-not $p.WaitForExit(480000)) { Stop-Process -Id $p.Id -Force; Write-Host 'SMOKE FAILED: player did not quit within 480 s'; exit 1 } # U-194: 79 shots, ~375 s
@@ -31,7 +37,9 @@ $shots = @(Get-ChildItem $out -Filter 'smoke_*.png')
 $errors = @(Select-String -Path $playerLog -Pattern 'Exception|\[Error\]|error CS|NullReference' -ErrorAction SilentlyContinue |
     Where-Object { $_.Line -notmatch 'Crash!!!|UnityShaderCompiler' })
 $flavour = if ($done) { ((Get-Content (Join-Path $out 'smoke_done.txt') -Raw).Trim() -split ' ')[2] } else { '?' }   # U-143: release | development
-Write-Host "player exit $($p.ExitCode) | done marker $done ($flavour) | screenshots $($shots.Count) | error lines $($errors.Count)"
+$tookRoot = Test-PlayerTookSaveRoot $playerLog   # D-203
+Write-Host "player exit $($p.ExitCode) | done marker $done ($flavour) | screenshots $($shots.Count) | error lines $($errors.Count) | saves in $saveRoot : $tookRoot"
+if (-not $tookRoot) { Write-Host "SMOKE FAILED (D-203): the player's log has no '[MERIDIAN] saves go to' line: it did not take -meridianSaveRoot and may have written the owner's save slot"; exit 1 }
 $errors | Select-Object -First 10 | ForEach-Object { Write-Host "  $($_.Line.Trim())" }
 
 $report = Join-Path $RepoRoot ("coordination\reports\unity\smoke_" + $Version) # U-132: one folder per build (was per date)

@@ -68,12 +68,16 @@ try {
         $version = Get-GameVersion
         $exe = Get-PlayerExe $version -Dev   # U-143: the probe runs on the development player (its memory counters)
         if (-not (Test-Path $exe)) { Write-Host "PROBE: no player at $exe (build first)"; $buildOk = $false }
+        # D-203: the probe flies nine legs and each transition autosaves: its saves go to a folder of the run's own.
+        elseif (-not (Test-PlayerSaveRootSwitch $exe)) { Write-Host "PROBE REFUSED (D-203): the player at $exe predates -meridianSaveRoot; it would autosave into the owner's real save slot"; $buildOk = $false }
         else {
             $playerLog = Join-Path $LogDir "memory_probe_$stamp.log"
-            $p = Start-Process -FilePath $exe -PassThru -ArgumentList @('-meridianMemoryProbe', "`"$probeOut`"",
+            $probeSaves = New-PlayerSaveRoot 'probe_saves'
+            $p = Start-Process -FilePath $exe -PassThru -ArgumentList @('-meridianMemoryProbe', "`"$probeOut`"", '-meridianSaveRoot', "`"$probeSaves`"",
                 '-screen-fullscreen', '0', '-screen-width', '1920', '-screen-height', '1080', '-logFile', "`"$playerLog`"")
             if (-not $p.WaitForExit(480000)) { Stop-Process -Id $p.Id -Force; Write-Host 'PROBE TIMED OUT (8 min)'; $buildOk = $false }
             Write-Host "Player log: $playerLog"
+            if (-not (Test-PlayerTookSaveRoot $playerLog)) { Write-Host "PROBE RED (D-203): the player's log has no '[MERIDIAN] saves go to' line: it did not take -meridianSaveRoot"; $buildOk = $false }
             # D-194 (LEAD 2026-11-09): the Windows player draws on Direct3D 11, pinned in ProjectSettings; the Editor's perf captures are
             # forced to the same API. A probe whose player drew on anything else is not this game's and is red.
             $api = $null
@@ -88,9 +92,12 @@ try {
         # D-191 amended: the last build's player on the same machine, right after this build's
         $exeC = Get-PlayerExe $Control -Dev
         if (-not (Test-Path $exeC)) { Write-Host "CONTROL: no player at $exeC" }
+        # D-203: a control built before -meridianSaveRoot (0.6.3 and older) would write the owner's save slot: it is not run.
+        elseif (-not (Test-PlayerSaveRootSwitch $exeC)) { Write-Host "CONTROL SKIPPED (D-203): the player at $exeC predates -meridianSaveRoot; probing it would autosave into the owner's real save slot. No control row for this build." }
         else {
             $controlLog = Join-Path $LogDir "memory_probe_control_${Control}_$stamp.log"
-            $pc = Start-Process -FilePath $exeC -PassThru -ArgumentList @('-meridianMemoryProbe', "`"$controlOut`"",
+            $controlSaves = New-PlayerSaveRoot 'probe_control_saves'
+            $pc = Start-Process -FilePath $exeC -PassThru -ArgumentList @('-meridianMemoryProbe', "`"$controlOut`"", '-meridianSaveRoot', "`"$controlSaves`"",
                 '-screen-fullscreen', '0', '-screen-width', '1920', '-screen-height', '1080', '-logFile', "`"$controlLog`"")
             if (-not $pc.WaitForExit(480000)) { Stop-Process -Id $pc.Id -Force; Write-Host 'CONTROL PROBE TIMED OUT (8 min)' }
             else { $controlRan = Test-Path $controlOut }

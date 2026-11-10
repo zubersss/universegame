@@ -26,6 +26,11 @@ namespace Meridian.Save
         public static SaveSystem Instance { get; private set; }
         /// <summary>Tests point saves at a temporary folder instead of the player's real saves.</summary>
         public static string RootOverride;
+        /// <summary>Where saves go when no RootOverride is set, instead of the player's real folder (null in the game). A test RUN sets it
+        /// once for all its classes (PlayModeDefaults): until 11-10 every test that flew a transition without setting RootOverride,
+        /// and every one that set it and cleared it, autosaved into the player's own slot (the Editor and the built player share
+        /// persistentDataPath): a sweep overwrote the game the owner had played.</summary>
+        public static string FallbackRoot;
 
         public SceneDirector scenes;
         public TimeSystem time;
@@ -39,7 +44,7 @@ namespace Meridian.Save
         float sinceAutosave;
         double playSeconds;
 
-        public static string Root => RootOverride ?? Path.Combine(Application.persistentDataPath, "saves");
+        public static string Root => RootOverride ?? FallbackRoot ?? Path.Combine(Application.persistentDataPath, "saves");
         public string SlotFolder => Path.Combine(Root, "slot" + slot);
         public static string TerrainFile(PlanetId id) => $"terrain_{id.ToString().ToLowerInvariant()}.bin";
 
@@ -47,6 +52,36 @@ namespace Meridian.Save
         {
             if (Instance != null && Instance != this) { Destroy(gameObject); return; }
             Instance = this;
+            ReadCommandLineRoot();
+        }
+
+        /// <summary>The switch a script passes to a built player it drives (the release smoke, the memory probe): "-meridianSaveRoot
+        /// &lt;folder&gt;" sends that run's saves there. D-203 (11-10): those runs fly every transition, each one autosaves, and without
+        /// the switch they wrote the owner's own slot. Read once a process; with no switch the player saves where it always did.</summary>
+        public const string RootSwitch = "-meridianSaveRoot";
+        static bool commandLineRead;
+
+        static void ReadCommandLineRoot()
+        {
+            if (commandLineRead) return;
+            commandLineRead = true;
+            string root = RootFromArgs(System.Environment.GetCommandLineArgs());
+            if (root == null) return;
+            RootOverride = root;
+            Debug.Log($"[MERIDIAN] saves go to '{root}' for this run ({RootSwitch})");
+        }
+
+        /// <summary>The folder after RootSwitch in a command line (quotes off), or null: none given, or nothing after it.</summary>
+        public static string RootFromArgs(string[] args)
+        {
+            if (args == null) return null;
+            for (int i = 0; i + 1 < args.Length; i++)
+            {
+                if (args[i] != RootSwitch) continue;
+                string root = args[i + 1].Trim().Trim('"');
+                return root.Length > 0 ? root : null;
+            }
+            return null;
         }
 
         void OnDestroy() { if (Instance == this) Instance = null; }
