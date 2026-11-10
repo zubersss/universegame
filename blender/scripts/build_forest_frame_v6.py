@@ -31,6 +31,7 @@ import gp_raster as GR  # noqa: E402
 import build_specimens_v6 as SP  # noqa: E402
 import build_surveyor_v6 as SV  # noqa: E402
 import build_style_frame_v6 as SF  # noqa: E402  (the crate, the smelter and the clod as cels)
+import build_forest_kinds_v6 as FK  # noqa: E402  (the emergent tree, the fan palm, the bamboo, the paddle and heart plants)
 
 rgb, lerp = PT.rgb, PT.lerp
 W, H, Q = 1920, 1080, 2
@@ -277,15 +278,41 @@ def paint(ppm, x0, gy):
         P.img[..., c] = P.box(P.img[..., c], 2.5 * s)
     lap("air and far")
     # ---- MIDDLE: the thicket - behind the clearing pale and small (quiet behind the figures), fuller at the sides
-    for x, k, pale in ((9.6, 0.6, 0.55), (12.4, 0.66, 0.5), (15.8, 0.6, 0.55), (18.4, 0.64, 0.5), (21.0, 0.6, 0.5)):
-        S_.tree(x, 0.5, k, pale)
-    S_.palm(14.2, 0.45, 0.62, 0.5)
-    for x, k, pale in ((4.3, 0.82, 0.32), (6.8, 0.78, 0.36), (22.4, 0.8, 0.32), (24.6, 0.84, 0.3), (27.2, 0.8, 0.34)):
-        S_.tree(x, 0.3, k, pale)
-    S_.palm(5.6, 0.25, 0.9, 0.25)
-    S_.palm(23.4, 0.25, 0.95, 0.22)
-    for x, k, pale in ((2.9, 1.0, 0.14), (7.9, 0.95, 0.18), (20.4, 0.98, 0.16), (28.3, 1.0, 0.14)):
-        S_.tree(x, 0.12, k, pale)
+    # RE-PLANTED (LEAD 11-10 09:0x): a jungle, not an orchard - five kinds (the canopy tree, the emergent tree, the feather
+    # and the fan palm, bamboo), uneven spacing, clumps and gaps, plants overlapping in depth (a rank is painted back to
+    # front; later in a list = in front), two or three sizes of each, the emergent tree rising above the rest.
+    def put(kind, x, z, k, pale, flip=None, lean=0.0, **kw):
+        tf_, s_ = S_.local(x, z, k, (1 if rng.random() < 0.5 else -1) if flip is None else flip, lean)
+        kind(P, tf_, s_, pale, **kw)
+    E_, FP, BA = FK.emergent_into, FK.fan_palm_into, FK.bamboo_into
+    for kind, x, k, pale in ((E_, 11.5, 0.66, 0.55), ("tree", 8.7, 0.58, 0.55), ("tree", 10.2, 0.66, 0.5), (FP, 12.7, 0.62, 0.5), ("tree", 13.7, 0.56, 0.55),
+                             ("palm", 15.1, 0.62, 0.5), (E_, 16.6, 0.6, 0.55), ("tree", 18.0, 0.64, 0.5), (BA, 20.5, 0.6, 0.5), ("tree", 19.2, 0.58, 0.52)):
+        if kind == "tree":
+            S_.tree(x, 0.5, k, pale)
+        elif kind == "palm":
+            S_.palm(x, 0.45, k, pale)
+        else:
+            put(kind, x, 0.5, k, pale)
+    for kind, x, k, pale, lean in ((E_, 4.4, 0.9, 0.34, 0.0), ("tree", 3.5, 0.8, 0.34, 0), ("tree", 5.1, 0.86, 0.3, 0), (BA, 6.3, 0.82, 0.32, 0.0), (FP, 7.3, 0.86, 0.3, 0.16),
+                                   ("tree", 22.1, 0.8, 0.32, 0), (E_, 26.1, 0.94, 0.32, 0.0), ("tree", 24.9, 0.86, 0.3, 0), (BA, 23.2, 0.86, 0.3, 0.0), ("palm", 24.0, 0.92, 0.26, 0),
+                                   (FP, 27.4, 0.84, 0.32, -0.14), ("tree", 28.5, 0.82, 0.34, 0)):
+        if kind == "tree":
+            S_.tree(x, 0.3, k, pale)
+        elif kind == "palm":
+            S_.palm(x, 0.25, k, pale)
+        else:
+            put(kind, x, 0.3, k, pale, lean=lean)
+    for kind, x, k, pale, lean in (("tree", 2.4, 1.0, 0.14, 0), (BA, 3.3, 1.0, 0.16, 0.0), (FP, 8.0, 0.98, 0.18, 0.2), ("tree", 20.9, 0.98, 0.16, 0), ("palm", 21.9, 1.0, 0.14, 0),
+                                   (BA, 27.7, 1.02, 0.14, 0.0), ("tree", 29.3, 1.0, 0.14, 0)):
+        if kind == "tree":
+            S_.tree(x, 0.12, k, pale)
+        elif kind == "palm":
+            S_.palm(x, 0.12, k, pale)
+        else:
+            put(kind, x, 0.12, k, pale, lean=lean)
+    for kind, x, k, pale in ((FK.paddle_into, 2.0, 0.9, 0.16), (FK.heart_into, 3.9, 0.85, 0.18), (FK.paddle_into, 5.6, 0.8, 0.2), (FK.heart_into, 7.0, 0.8, 0.2),
+                             (FK.paddle_into, 22.6, 0.85, 0.18), (FK.heart_into, 24.2, 0.9, 0.16), (FK.paddle_into, 26.4, 0.9, 0.16), (FK.heart_into, 28.6, 0.85, 0.18)):
+        put(kind, x, 0.08, k, pale, flip=1)                                     # the understorey massed at their feet
     lap("thicket")
     # ---- THE CLEARING'S FLOOR behind the surface edge: undergrowth in level and upward dabs; the warm pool of light
     ug = fy(0.55) + 0.2 * ppm * P.line1(60 * s)
@@ -388,10 +415,20 @@ def paint(ppm, x0, gy):
             P.dab(x + math.cos(th) * L / 2, P.at(yb, x) + 2 * s + math.sin(th) * L / 2, L / 2, rng.uniform(0.8, 1.5) * s, th, keyed(col, x), 1.0, 5.0, 0.0)
     lap("ground")
     # ---- NEAR, in front: broad-leaved plants and grass in the lower corners, dark and crisp
-    for x, k in ((0.7, 1.5), (2.4, 1.2), (28.2, 1.3), (29.5, 1.55)) if ppm == 64 else ((x0 + 0.5, 1.4), (x0 + 1.9, 1.1), (x0 + 18.3, 1.2), (x0 + 19.5, 1.45)):
-        S_.plant(x, -0.12, k, 0.55)
-    for x, k in ((1.6, 1.3), (3.4, 1.0), (27.0, 1.1), (29.0, 1.3)) if ppm == 64 else ((x0 + 1.2, 1.2), (x0 + 2.8, 0.9), (x0 + 17.4, 1.0), (x0 + 19.0, 1.2)):
-        S_.blades(x, -0.1, k, 34, 0.45)
+    # (re-planted, LEAD 09:0x: denser - a bamboo clump cutting up the right edge; paddle and heart-leaf plants, the first
+    # broad-leaved plant and ferns massed in both lower corners; placed from the frame's own edges, in metres of this camera)
+    wv = W / ppm                                                                # the frame's width in metres
+    m_ = 64.0 / ppm                                                             # a near thing keeps its size ON SCREEN at either camera
+    put(FK.bamboo_into, x0 + wv - 0.9 * m_, -0.1, 1.7, 0.0, flip=1, n=5, dark=0.5)
+    for kind, dx, k in ((FK.paddle_into, 0.6, 1.45), ("plant", 1.7, 1.2), (FK.heart_into, 2.6, 1.25), (FK.heart_into, wv - 0.7, 1.4), ("plant", wv - 1.8, 1.25), (FK.paddle_into, wv - 2.9, 1.3)):
+        if kind == "plant":
+            S_.plant(x0 + dx * m_ if dx < wv / 2 else x0 + wv - (wv - dx) * m_, -0.12, k, 0.55)
+        else:
+            put(kind, x0 + dx * m_ if dx < wv / 2 else x0 + wv - (wv - dx) * m_, -0.12, k, 0.0, flip=1, dark=0.5)
+    for dx, k in ((1.2, 1.3), (3.4, 1.0), (wv - 3.6, 1.1), (wv - 1.2, 1.3)):
+        S_.blades(x0 + dx * m_ if dx < wv / 2 else x0 + wv - (wv - dx) * m_, -0.1, k, 34, 0.45)
+    for dx, k in ((3.6, 1.2), (wv - 4.2, 1.15)):
+        S_.fern(x0 + dx * m_ if dx < wv / 2 else x0 + wv - (wv - dx) * m_, -0.08, k, 0.0)
     lap("near plants")
     return P, yb, T
 
@@ -439,7 +476,7 @@ def cels(P, yb, ppm, x0, gy, K):
     put(cr, 9.52, ground(9.52) - 0.78 * ppm, 75 * u, 116 * u)
     shadow(11.75, ground(11.75) + 1, 64, 6)
     put(sm, 11.75, ground(11.75), 125 * u, 306 * u)
-    SV.K = K
+    SV.K, SV.RHYTHM = K, True                                                    # the figure with its rhythm rules on (LEAD 09:0x)
     idle, _st, _sec = SV.figure("idle", "side", w=200, cx=96, h=290).render()
     shadow(13.25, ground(13.25) + 1, 26, 5)
     put(CEL.down(idle, f), 13.2, ground(13.2), 96 * u, 270 * u)
@@ -449,7 +486,7 @@ def cels(P, yb, ppm, x0, gy, K):
     dx_, dy_ = PIT_X + 1.75, gy + FLOOR * ppm
     shadow(dx_ + 0.2, dy_ + 1, 46, 5, 0.34)
     put(CEL.down(dig, f), dx_, dy_, 130 * u, 330 * u)
-    SV.K = 4
+    SV.K, SV.RHYTHM = 4, False
     clods = [prop(SF.clod(11 + i, r), 48, 48, f"clod{i}") for i, r in enumerate((16, 13, 10, 8))]
     tx, ty = dx_ + 1.36, dy_ - 0.05 * ppm                                        # about where the blade bites
     for i, (ox, oy) in enumerate(((-14, -40), (12, -66), (36, -46), (54, -22), (-34, -16), (66, -60), (22, -94))):

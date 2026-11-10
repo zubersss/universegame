@@ -1,14 +1,17 @@
-"""B-248 (D-200): FOUR MORE FOREST KINDS as specimens, in ART v6 - previews only, nothing exported.
+"""B-248 (D-200): FOUR MORE FOREST KINDS in ART v6 - as specimens on one sheet, and as plants the frame can place.
 
-LEAD 11-10 08:5x, the first four of the plan in coordination/reports/blender/v6_earth_kinds.md, in this order:
+LEAD 11-10 08:5x, the first four of the plan in coordination/reports/blender/v6_earth_kinds.md:
   the EMERGENT TREE (a tall pale trunk rising clear, buttress roots as thin planes at its foot, a small high crown);
   the FAN PALM (a ringed, leaning trunk; pleated fans on stalks, every blade of a fan its own stroke);
-  the BROAD-LEAVED UNDERSTOREY in two more leaf shapes (a long paddle with torn edges; a heart-shaped leaf on a stalk);
-  the BAMBOO CLUMP (jointed canes that taper, a ring at every node, sprays of small lance leaves).
+  the BAMBOO CLUMP (jointed canes that taper, a ring at every node, sprays of small lance leaves);
+  the BROAD-LEAVED UNDERSTOREY in two more leaf shapes (a PADDLE leaf with side veins and a notched edge; a HEART
+  leaf on its own stalk).
 Painted by the form-following brush of build_specimens_v6 (tube / facet / ball) under the same ONE light; no drawn
-line. Each at the game's size (64 px per metre) and at 2x (the painting as made).
+line. Every kind is written about its own foot (0, 0) in px at 64 px per metre and painted through a placement
+(tf, s) - where it stands and how large - so the specimen sheet and build_forest_frame_v6 use the same rules; each
+part is painted inside its own window of the picture. pale = how far the haze has taken it (distance).
 
-  python -I build_forest_kinds_v6.py <review png>     the lock-free sheet
+  python -I build_forest_kinds_v6.py <review png>     the lock-free specimen sheet (the game's size and 2x)
 """
 import math
 import os
@@ -27,29 +30,44 @@ import build_specimens_v6 as SP  # noqa: E402
 
 rgb, lerp = PT.rgb, PT.lerp
 Q, LIGHT = SP.Q, SP.LIGHT
+HAZE = rgb("#BFCBBE")
 
 
-def canvas(w, h, seed, gy, shade=(0, 0, 0)):
-    P = PT.Painting(w, h, seed, Q)
-    P.img[:] = rgb(SP.BACK)
-    SP.ground(P, gy, int(w * 0.8))
-    if shade[2]:
-        SP.shade_pool(P, shade[0], gy + 6, shade[1], shade[2])
-    return P
+def hz(cols, pale, dark=0.0):
+    return [lerp(rgb(c) if isinstance(c, str) else c, HAZE, pale) * (1 - 0.35 * dark) for c in cols]
 
 
-def limb(P, pts, r0, r1, cols, flare=0.0, n_per=0.05, rings=0.0):
-    """A trunk, bough or cane: lit as a cylinder, its strokes laid across it (rings: a darker ring every `rings` px along)."""
-    m, v, ang, s = SP.tube(P, pts, lambda t: r1 + (r0 - r1) * (1 - t) + flare * (1 - t) ** 4)
-    lam = SP.lit_tube(v, ang) + 0.10 * P.fine
-    u = SP.values(lam, (0.05, 0.36, 0.7), cols)
-    P.lay(u, m)
-    area = float(m.sum()) / (Q * Q)
-    P.brush(u, m, int(n_per * area), (2.0, 2.0 + r0 * 0.55), (2.2, 4.0), SP.at(P, ang + math.pi / 2 + 0.55 * v), 0.12, (0.7, 1.0), 0.06, 0.012, 3.6, 0.3, clip=m)
-    P.brush(cols[0], m * (v < -0.72), int(0.03 * area), (2.0, 5.0), (2.5, 4.0), SP.at(P, ang), 0.1, (0.6, 0.9), 0.04, 0.008, 4.0, 0.1, clip=m)
-    if rings:                                                                   # nodes: a dark ring and a lighter band under it
+def win_of(m, pad=0):
+    rows, cols = np.flatnonzero(m.any(axis=1)), np.flatnonzero(m.any(axis=0))
+    if not len(rows):
+        return None
+    return (slice(max(int(rows[0]) - pad, 0), int(rows[-1]) + 1 + pad), slice(max(int(cols[0]) - pad, 0), int(cols[-1]) + 1 + pad))
+
+
+def into(P, w, u, m):
+    P.img[w] = P.img[w] * (1 - m[..., None]) + u * m[..., None]
+
+
+def flipped(tf):
+    return tf(1, 0)[0] < tf(0, 0)[0]
+
+
+def limb(P, pts, r0, r1, cols, flare=0.0, n_per=0.05, rings=0.0, s=1.0):
+    """A trunk, bough or cane (frame px): lit as a cylinder, strokes laid across it; rings: a dark ring every `rings` px."""
+    m, v, ang, _s = SP.tube(P, pts, lambda t: r1 + (r0 - r1) * (1 - t) + flare * (1 - t) ** 4)
+    w = win_of(m)
+    if w is None:
+        return None
+    mw = m[w]
+    u = SP.values(SP.lit_tube(v[w], ang[w]) + 0.10 * P.fine[w], (0.05, 0.36, 0.7), cols)
+    into(P, w, u, mw)
+    k = max(s, 0.4)
+    area = float(mw.sum()) / (Q * Q) / (k * k)
+    P.brush(u, mw, int(n_per * area), (2.0 * k, (2.0 + r0 / k * 0.55) * k), (2.2, 4.0), SP.at(P, ang + math.pi / 2 + 0.55 * v), 0.12, (0.7, 1.0), 0.06, 0.012, 3.6, 0.3, clip=m, win=w)
+    P.brush(cols[0], mw * (v[w] < -0.72), int(0.03 * area), (2.0 * k, 5.0 * k), (2.5, 4.0), SP.at(P, ang), 0.1, (0.6, 0.9), 0.04, 0.008, 4.0, 0.1, clip=m, win=w)
+    if rings:
         ctr = CEL.catmull([tuple(p) for p in pts], False, 8) if len(pts) >= 3 else [tuple(p) for p in pts]
-        ln = sum(math.hypot(ctr[i + 1][0] - ctr[i][0], ctr[i + 1][1] - ctr[i][1]) for i in range(len(ctr) - 1))
+        ln = sum(math.hypot(ctr[i + 1][0] - ctr[i][0], ctr[i + 1][1] - ctr[i][1]) for i in range(len(ctr) - 1)) or 1e-6
         d, nxt = 0.0, rings * 0.6
         for i in range(len(ctr) - 1):
             (x0, y0), (x1, y1) = ctr[i], ctr[i + 1]
@@ -58,184 +76,237 @@ def limb(P, pts, r0, r1, cols, flare=0.0, n_per=0.05, rings=0.0):
                 t = (nxt - d) / step
                 x, y, a = x0 + (x1 - x0) * t, y0 + (y1 - y0) * t, math.atan2(y1 - y0, x1 - x0) + math.pi / 2
                 r = r1 + (r0 - r1) * (1 - nxt / ln)
-                P.dab(x, y, r * 1.05, 0.9, a, cols[0], 1.0, 4.5, 0.0, clip=m)
-                P.dab(x + 1.6 * math.cos(a - math.pi / 2), y + 1.6 * math.sin(a - math.pi / 2), r * 0.9, 0.8, a, cols[3], 0.8, 4.0, 0.0, clip=m)
+                P.dab(x, y, r * 1.05, max(0.6, 0.9 * s), a, cols[0], 1.0, 4.5, 0.0, clip=m)
+                P.dab(x + 1.6 * s * math.cos(a - math.pi / 2), y + 1.6 * s * math.sin(a - math.pi / 2), r * 0.9, max(0.6, 0.8 * s), a, cols[3], 0.8, 4.0, 0.0, clip=m)
                 nxt += rings * P.rng.uniform(0.85, 1.15)
             d += step
     return m
 
 
-def cluster(P, cx, cy, r, cols, dim=0.0, n_per=0.055):
-    """A leaf cluster lit as a ball, laid leaf by leaf, with leaves past its edge."""
+def cluster(P, cx, cy, r, cols, dim=0.0, n_per=0.055, s=1.0):
+    """A leaf cluster (frame px) lit as a ball, laid leaf by leaf, with leaves past its edge."""
     rng = P.rng
-    m = np.zeros((P.ph, P.pw), np.float32)
+    y0, y1 = max(int((cy - 2 * r) * Q), 0), min(int((cy + 2 * r) * Q) + 1, P.ph)
+    x0, x1 = max(int((cx - 2 * r) * Q), 0), min(int((cx + 2 * r) * Q) + 1, P.pw)
+    if y1 <= y0 or x1 <= x0:
+        return
+    w = (slice(y0, y1), slice(x0, x1))
+    m = np.zeros((y1 - y0, x1 - x0), np.float32)
     for _ in range(4):
-        m = np.maximum(m, P.blob(cx + rng.uniform(-0.4, 0.4) * r, cy + rng.uniform(-0.3, 0.3) * r, r * rng.uniform(0.7, 1.0), r * rng.uniform(0.55, 0.8), 0.10, 0.45))
-    dx, dy = (P.xx - cx) / r, (P.yy - cy) / r
-    lam = dx * LIGHT[0] + dy * LIGHT[1] + np.sqrt(np.clip(1 - dx * dx - dy * dy, 0, 1)) * LIGHT[2] + 0.25 * P.fine - dim
-    u = SP.values(lam, (0.05, 0.42, 0.78), cols)
-    P.lay(u, m)
-    out = lambda x, y: math.atan2(y - cy, x - cx)                               # noqa: E731
-    area = float(m.sum()) / (Q * Q)
-    P.brush(u, m, int(n_per * area), (3.0, 5.6), (1.7, 2.6), out, 0.55, (0.8, 1.0), 0.05, 0.012, 4.6, 0.1)
-    P.brush(u, (P.box(m, 3) > 0.03) * (m < 0.5), int(0.02 * area), (3.0, 5.6), (1.9, 2.8), out, 0.7, (0.85, 1.0), 0.05, 0.012, 5.0, 0.0)
-
-
-def leaf(P, pts, rad, cols, near=1.0, veins=0, tears=0, vein_a=1.05):
-    """One broad leaf along a midrib: the half toward the light, the half away, a darker tip; strokes along it; a midrib;
-    side veins as lighter strokes; tears as dark slits from the edge toward the midrib (a paddle leaf's torn edge)."""
-    m, v, ang, s = SP.tube(P, pts, rad)
+        m = np.maximum(m, P.blob(cx + rng.uniform(-0.4, 0.4) * r, cy + rng.uniform(-0.3, 0.3) * r, r * rng.uniform(0.7, 1.0), r * rng.uniform(0.55, 0.8), 0.10, 0.45)[w])
     if not m.any():
+        return
+    dx, dy = (P.xx[:, w[1]] - cx) / r, (P.yy[w[0]] - cy) / r
+    lam = dx * LIGHT[0] + dy * LIGHT[1] + np.sqrt(np.clip(1 - dx * dx - dy * dy, 0, 1)) * LIGHT[2] + 0.25 * P.fine[w] - dim
+    u = SP.values(lam, (0.05, 0.42, 0.78), cols)
+    into(P, w, u, m)
+    out = lambda x, y: math.atan2(y - cy, x - cx)                               # noqa: E731
+    k = max(s, 0.6)
+    area = float(m.sum()) / (Q * Q) / (k * k)
+    P.brush(u, m, int(n_per * area), (3.0 * k, 5.6 * k), (1.7, 2.6), out, 0.55, (0.8, 1.0), 0.05, 0.012, 4.6, 0.1, win=w)
+    P.brush(u, (PT.box(m, int(round(3 * k * Q))) > 0.03) * (m < 0.5), int(0.02 * area), (3.0 * k, 5.6 * k), (1.9, 2.8), out, 0.7, (0.85, 1.0), 0.05, 0.012, 5.0, 0.0, win=w)
+
+
+def facet(P, poly, col, ang, s=1.0):
+    """A flat plane (frame px): one value, strokes down its slope, a brushed edge."""
+    full = GR._poly_mask(np.array([p[0] for p in poly], np.float32) * Q, np.array([p[1] for p in poly], np.float32) * Q, P.ph, P.pw).astype(np.float32)
+    w = win_of(full, 3)
+    if w is None:
+        return
+    m = np.clip((PT.box(full[w], 1) - 0.5 + 0.1 * P.fine[w]) * 5 + 0.5, 0, 1)
+    full[w] = m
+    into(P, w, col, m)
+    k = max(s, 0.5)
+    P.brush(col, m, int(0.05 * float(m.sum()) / (Q * Q) / (k * k)), (4 * k, 9 * k), (2.6, 4.2), ang, 0.12, (0.7, 1.0), 0.06, 0.012, 3.6, 0.3, clip=full, win=w)
+
+
+def leaf(P, pts, rad, cols, near=1.0, veins=0, tears=0, vein_a=1.05, s=1.0):
+    """One broad leaf along a midrib (frame px; rad(t) its half-width): the half toward the light, the half away, a darker
+    tip; strokes along it; a midrib; side veins as lighter strokes; tears as thin wedges cut out of its edge."""
+    m, v, ang, sa = SP.tube(P, pts, rad)
+    w = win_of(m)
+    if w is None:
         return
     rib = CEL.catmull([tuple(p) for p in pts], False, 8)
     n = len(rib)
-    for k in range(tears):                                                      # tears: thin wedges CUT out of the leaf's edge
-        i = min(max(int(n * (0.2 + 0.62 * k / max(tears - 1, 1))), 1), n - 2)   # (runs 1-2 drew them as dark slits: thorns)
+    for k in range(tears):
+        i = min(max(int(n * (0.2 + 0.62 * k / max(tears - 1, 1))), 1), n - 2)
         (x0, y0), (x1, y1) = rib[i - 1], rib[i + 1]
         a = math.atan2(y1 - y0, x1 - x0)
         r = rad(i / (n - 1))
         b = a + (1 if k % 2 else -1) * vein_a
         apex = (rib[i][0] + math.cos(b) * r * 0.5, rib[i][1] + math.sin(b) * r * 0.5)
         e = (rib[i][0] + math.cos(b) * r * 1.3, rib[i][1] + math.sin(b) * r * 1.3)
-        wedge = [apex, (e[0] - math.cos(a) * 2.0, e[1] - math.sin(a) * 2.0), (e[0] + math.cos(a) * 2.0, e[1] + math.sin(a) * 2.0)]
+        wedge = [apex, (e[0] - math.cos(a) * 2.0 * s, e[1] - math.sin(a) * 2.0 * s), (e[0] + math.cos(a) * 2.0 * s, e[1] + math.sin(a) * 2.0 * s)]
         m = m * (1 - GR._poly_mask(np.array([p[0] for p in wedge], np.float32) * Q, np.array([p[1] for p in wedge], np.float32) * Q, P.ph, P.pw))
-    lam = v * (-np.sin(ang) * LIGHT[0] + np.cos(ang) * LIGHT[1])
-    u = SP.values(lam + 0.1 * P.fine - 0.5 * (s > 0.9), (-0.12, 0.16), cols)
-    P.lay(u, m)
-    area = float(m.sum()) / (Q * Q)
-    P.brush(u, m, int(0.07 * area), (3.5, 7.5), (2.8, 4.4), SP.at(P, ang), 0.1, (0.7, 1.0), 0.04, 0.01, 4.2, 0.2, clip=m)
-    P.brush(cols[0] * 0.8, m * (np.abs(v) > 0.8) * (lam < 0), int(0.03 * area), (2.5, 5), (3, 4.5), SP.at(P, ang), 0.08, (0.6, 0.9), 0.03, 0.008, 4.4, 0.0, clip=m)
-    for k in range(veins):                                                      # side veins, both ways from the midrib
-        i = min(max(int(n * (0.14 + 0.72 * k / max(veins - 1, 1))), 1), n - 2)
+    m = m.astype(np.float32)
+    mw, vw, aw = m[w], v[w], ang[w]
+    lam = vw * (-np.sin(aw) * LIGHT[0] + np.cos(aw) * LIGHT[1])
+    u = SP.values(lam + 0.1 * P.fine[w] - 0.5 * (sa[w] > 0.9), (-0.12, 0.16), cols)
+    into(P, w, u, mw)
+    k = max(s, 0.6)
+    area = float(mw.sum()) / (Q * Q) / (k * k)
+    P.brush(u, mw, int(0.07 * area), (3.5 * k, 7.5 * k), (2.8, 4.4), SP.at(P, ang), 0.1, (0.7, 1.0), 0.04, 0.01, 4.2, 0.2, clip=m, win=w)
+    P.brush(cols[0] * 0.8, mw * (np.abs(vw) > 0.8) * (lam < 0), int(0.03 * area), (2.5 * k, 5 * k), (3, 4.5), SP.at(P, ang), 0.08, (0.6, 0.9), 0.03, 0.008, 4.4, 0.0, clip=m, win=w)
+    for j in range(veins):
+        i = min(max(int(n * (0.14 + 0.72 * j / max(veins - 1, 1))), 1), n - 2)
         (x0, y0), (x1, y1) = rib[i - 1], rib[i + 1]
         a = math.atan2(y1 - y0, x1 - x0)
         r = rad(i / (n - 1))
         for side in (-1, 1):
             b = a + side * vein_a
-            e = (rib[i][0] + math.cos(b) * r * 0.8, rib[i][1] + math.sin(b) * r * 0.8)
-            P.stroke([rib[i], e], 0.9, 0.5, np.clip(cols[2] * 1.1 + 0.03, 0, 1), 4.0)
-    P.stroke(rib[2:-3], 1.7, 0.6, lerp(cols[2], rgb("#DDE0A8"), 0.45) if near > 0.5 else cols[0] * 0.85, 4.0)
+            P.stroke([rib[i], (rib[i][0] + math.cos(b) * r * 0.8, rib[i][1] + math.sin(b) * r * 0.8)], 0.9 * k, 0.5 * k, np.clip(cols[2] * 1.1 + 0.03, 0, 1), 4.0)
+    P.stroke(rib[2:-3], 1.7 * k, 0.6 * k, lerp(cols[2], rgb("#DDE0A8"), 0.45) if near > 0.5 else cols[0] * 0.85, 4.0)
 
 
-def greens(near, dark=0.0):
-    return [lerp(rgb(c0), rgb(c1), near) * (1 - 0.35 * dark) for c0, c1 in (("#3F5A45", "#557A4C"), ("#56775A", "#7FA25F"), ("#7E9A6E", "#B5CC84"))]
+GREENS = (("#3F5A45", "#557A4C"), ("#56775A", "#7FA25F"), ("#7E9A6E", "#B5CC84"))
 
 
-# ---------------------------------------------------------------- the four kinds (frame units = px at the game's size)
-def emergent(seed=41):
+def greens(near, pale=0.0, dark=0.0):
+    return hz([lerp(rgb(c0), rgb(c1), near) for c0, c1 in GREENS], pale, dark)
+
+
+# ---------------------------------------------------------------- the kinds, each about its own foot (0, 0); y up is negative
+def emergent_into(P, tf, s=1.0, pale=0.0):
     """An emergent tree about 7.5 m tall: a pale trunk rising clear, four buttress roots as thin planes, a small high crown."""
-    P = canvas(270, 520, seed, 486, (112, 84, 9))
-    bark = [rgb(c) for c in ("#57504C", "#7C7468", "#A69C88", "#CFC5AC")]
-    leafs = [rgb(c) for c in ("#4E6A49", "#6C8B58", "#93AE6E", "#BACB8A")]
-    cluster(P, 134, 96, 36, leafs, 0.45)                                        # the crown's far side
-    for sx, w, h, tone, a in ((-1, 54, 88, 1, 1.15), (1, 50, 80, 3, 1.95), (-1, 26, 54, 0, 1.3), (1, 24, 46, 2, 1.8)):   # buttresses: thin planes
-        x0 = 138 + sx * 9
-        poly = [(x0, 486 - h), (x0 + sx * w * 0.45, 486 - h * 0.34), (x0 + sx * w, 488), (x0, 488)]
-        m = GR._poly_mask(np.array([p[0] for p in poly], np.float32) * Q, np.array([p[1] for p in poly], np.float32) * Q, P.ph, P.pw).astype(np.float32)
-        m = np.clip((P.box(m, 0.5) - 0.5 + 0.1 * P.fine) * 5 + 0.5, 0, 1)
-        P.lay(bark[tone], m)
-        P.brush(bark[tone], m, int(0.05 * float(m.sum()) / (Q * Q)), (4, 9), (2.6, 4.2), a, 0.12, (0.7, 1.0), 0.06, 0.012, 3.6, 0.3, clip=m)
-        P.stroke([poly[0], poly[1], poly[2]], 2.0, 1.2, bark[3] if sx > 0 else bark[0], 3.8)        # the plane's upper edge: lit or dark, as paint
-    limb(P, [(138, 488), (135, 380), (141, 260), (136, 150)], 12.5, 7.5, bark, flare=4, n_per=0.045)
-    for pts, r0, r1 in (([(136, 156), (118, 122), (94, 100)], 6, 2.2), ([(137, 152), (150, 112), (176, 92)], 6, 2.2), ([(136, 150), (136, 108), (130, 76)], 5.5, 2)):
-        limb(P, pts, r0, r1, bark)
-    for cx, cy, r in ((92, 92, 30), (132, 66, 34), (178, 84, 30), (112, 118, 22), (160, 116, 22)):
-        cluster(P, cx, cy, r, leafs)
-    return P
+    bark = hz(("#57504C", "#7C7468", "#A69C88", "#CFC5AC"), pale)
+    leafs = hz(("#4E6A49", "#6C8B58", "#93AE6E", "#BACB8A"), pale)
+    T = lambda pts: [tf(*p) for p in pts]                                      # noqa: E731
+    fl = flipped(tf)
+    cluster(P, *tf(-4, -392), 36 * s, leafs, 0.45, s=s)
+    for sx, wd, h, tone, a in ((-1, 54, 88, 1, 1.15), (1, 50, 80, 3, 1.95), (-1, 26, 54, 0, 1.3), (1, 24, 46, 2, 1.8)):
+        poly = T([(sx * 9, -h), (sx * 9 + sx * wd * 0.45, -h * 0.34), (sx * 9 + sx * wd, 2), (sx * 9, 2)])
+        lit = (sx > 0) != fl
+        facet(P, poly, bark[tone ^ 2 if fl else tone], math.pi - a if fl else a, s)       # mirrored: the lit and the dark sides change places
+        P.stroke(poly[:3], 2.0 * s, 1.2 * s, bark[3] if lit else bark[0], 3.8)
+    limb(P, T([(0, 2), (-3, -106), (3, -226), (-2, -336)]), 12.5 * s, 7.5 * s, bark, flare=4 * s, n_per=0.045, s=s)
+    for pts, r0, r1 in (([(-2, -330), (-20, -364), (-44, -386)], 6, 2.2), ([(-1, -334), (12, -374), (38, -394)], 6, 2.2), ([(-2, -336), (-2, -378), (-8, -410)], 5.5, 2)):
+        limb(P, T(pts), r0 * s, r1 * s, bark, s=s)
+    for cx, cy, r in ((-46, -394, 30), (-6, -420, 34), (40, -402, 30), (-26, -368, 22), (22, -370, 22)):
+        cluster(P, *tf(cx, cy), r * s, leafs, s=s)
 
 
-def fan_palm(seed=43):
+def fan_palm_into(P, tf, s=1.0, pale=0.0, dark=0.0):
     """A fan palm about 4.5 m tall: a ringed, leaning trunk; nine pleated fans on stalks, every blade its own stroke."""
-    P = canvas(240, 330, seed, 300, (96, 60, 7))
     rng = P.rng
-    bark = [rgb(c) for c in ("#4A3F3C", "#6A5A4C", "#8C7A62", "#AE9C7C")]
-    top = (126, 112)
+    bark = hz(("#4A3F3C", "#6A5A4C", "#8C7A62", "#AE9C7C"), pale, dark)
+    top = (8, -190)
     fans = []
     for i in range(9):
         a = math.radians(-178 + 176 * i / 8 + rng.uniform(-7, 7))
         fans.append((abs(math.cos(a)) + rng.uniform(0, 0.3), a, rng.uniform(26, 40), rng.uniform(30, 40)))
-    for depth, a, stalk, ln in sorted(fans, reverse=True):                      # the side fans first, the upright ones last
-        near = 1.0 - min(1.0, depth / 1.3) * 0.7
-        g = greens(near)
-        droop = 0.45 * stalk * abs(math.cos(a))
-        c = (top[0] + math.cos(a) * stalk, top[1] + math.sin(a) * stalk + droop)
-        P.stroke([top, ((top[0] + c[0]) / 2, (top[1] + c[1]) / 2 - 3), c], 2.0, 1.2, g[0] * 0.8, 4.0)        # the stalk
+    for depth, a, stalk, ln in sorted(fans, reverse=True):
+        g = greens(1.0 - min(1.0, depth / 1.3) * 0.7, pale, dark)
+        c = (top[0] + math.cos(a) * stalk, top[1] + math.sin(a) * stalk + 0.45 * stalk * abs(math.cos(a)))
+        P.stroke([tf(*top), tf((top[0] + c[0]) / 2, (top[1] + c[1]) / 2 - 3), tf(*c)], 2.0 * s, 1.2 * s, g[0] * 0.8, 4.0)
         fa = math.atan2(c[1] - top[1], c[0] - top[0])
-        for j in range(13):                                                     # the fan: thirteen blades over 160 degrees, pleated
+        for j in range(13):
             b = fa - math.radians(80) + math.radians(160) * j / 12
             L = ln * (0.72 + 0.28 * math.sin(math.pi * j / 12))
-            lit = (math.cos(b) * LIGHT[0] + math.sin(b) * LIGHT[1]) > -0.1
-            col = (g[2] if lit else g[1]) if j % 2 == 0 else (g[1] if lit else g[0])
             tip = (c[0] + math.cos(b) * L, c[1] + math.sin(b) * L + 0.1 * L * abs(math.cos(b)))
-            P.stroke([c, ((c[0] + tip[0]) / 2, (c[1] + tip[1]) / 2), tip], 4.2, 0.8, np.clip(col * (1 + rng.normal(0, 0.04)), 0, 1), 4.6)
-    limb(P, [(118, 302), (126, 232), (116, 168), top], 8.5, 5.5, bark, flare=4, n_per=0.07, rings=11)
+            p0, p1 = tf(*c), tf(*tip)
+            lit = ((p1[0] - p0[0]) * LIGHT[0] + (p1[1] - p0[1]) * LIGHT[1]) > -0.1 * L * s
+            col = (g[2] if lit else g[1]) if j % 2 == 0 else (g[1] if lit else g[0])
+            P.stroke([p0, ((p0[0] + p1[0]) / 2, (p0[1] + p1[1]) / 2), p1], 4.2 * s, 0.8 * s, np.clip(col * (1 + rng.normal(0, 0.04)), 0, 1), 4.6)
+    limb(P, [tf(*p) for p in ((0, 2), (8, -68), (-2, -132), top)], 8.5 * s, 5.5 * s, bark, flare=4 * s, n_per=0.07, rings=11 * s, s=s)
+
+
+def bamboo_into(P, tf, s=1.0, pale=0.0, n=9, dark=0.0):
+    """A bamboo clump about 6 m tall: canes that taper, a ring at every node, sprays of small lance leaves."""
+    rng = P.rng
+    canes = []
+    for _ in range(n):
+        canes.append((rng.random(), rng.uniform(-22, 26), rng.uniform(250, 356), rng.uniform(-0.16, 0.2), rng.uniform(3.4, 4.8)))
+    for depth, x0, h, lean, r0 in sorted(canes):
+        k = 0.45 + 0.55 * depth
+        cols = hz([lerp(rgb("#8E9A80"), rgb(c), k) for c in ("#5C6B3C", "#86924E", "#B4BA6C", "#D2D08A")], pale, dark)
+        g = greens(depth, pale, dark)
+        pts = [tf(*p) for p in ((x0, 2), (x0 + lean * h * 0.3, -h * 0.4), (x0 + lean * h * 0.75, -h * 0.75), (x0 + lean * h * 1.25, -h))]
+        limb(P, pts, r0 * s, 1.4 * s, cols, n_per=0.09, rings=rng.uniform(24, 32) * s, s=s)
+        ctr = CEL.catmull(pts, False, 8)
+        for i in range(int(len(ctr) * 0.45), len(ctr) - 1, 3):
+            x, y = ctr[i]
+            side = 1 if rng.random() < 0.5 else -1
+            for _j in range(int(rng.integers(3, 6))):
+                b = math.radians(rng.uniform(10, 70)) * side + (0 if side > 0 else math.pi)
+                L = rng.uniform(14, 22) * s
+                tip = (x + math.cos(b) * L, y + abs(math.sin(b)) * L * 0.9)
+                P.stroke([(x, y), ((x + tip[0]) / 2, (y + tip[1]) / 2 - 1.5 * s), tip], 3.2 * s, 0.6 * s, np.clip((g[2] if math.cos(b) * LIGHT[0] > 0 else g[1]) * (1 + rng.normal(0, 0.05)), 0, 1), 4.8)
+
+
+def paddle_into(P, tf, s=1.0, pale=0.0, dark=0.0, n=7):
+    """A paddle plant: long leaves with a strong midrib, side veins and a notched (torn) edge."""
+    rng, leaves = P.rng, []
+    for i in range(n):
+        a = math.radians(-150 + 120 * i / (n - 1) + rng.uniform(-6, 6))
+        ln = rng.uniform(96, 128) * (0.78 + 0.22 * abs(math.sin(a)))
+        droop = 0.5 * ln * abs(math.cos(a)) ** 1.5
+        leaves.append((rng.uniform(0, 1) + 0.5 * abs(math.cos(a)), [tf(0, -2), tf(math.cos(a) * ln * 0.5, math.sin(a) * ln * 0.6), tf(math.cos(a) * ln, math.sin(a) * ln + droop)], rng.uniform(13, 17) * s))
+    for depth, pts, w in sorted(leaves, key=lambda t: t[0]):
+        near = min(1.0, depth / 1.2)
+        leaf(P, pts, lambda t, w=w: 1.2 * s + w * math.sin(math.pi * min(1.0, 0.08 + t * 0.94) ** 0.9) ** 0.55, greens(near, pale, dark), near, veins=6, tears=4, s=s)
+
+
+def heart_into(P, tf, s=1.0, pale=0.0, dark=0.0, n=8):
+    """A heart-leaf plant: each leaf on its own stalk, broad at the stalk and pointed at the tip, veins fanning from the joint."""
+    rng, leaves = P.rng, []
+    for i in range(n):
+        a = math.radians(-160 + 140 * i / (n - 1) + rng.uniform(-8, 8))
+        leaves.append((rng.uniform(0, 1) + 0.5 * abs(math.cos(a)), a, rng.uniform(40, 74) * (0.7 + 0.3 * abs(math.sin(a))), rng.uniform(15, 21)))
+    for depth, a, st, w in sorted(leaves):
+        near = min(1.0, depth / 1.2)
+        g = greens(near, pale, dark)
+        j = (math.cos(a) * st, math.sin(a) * st)
+        P.stroke([tf(0, 0), tf(j[0] / 2 + 3 * math.cos(a + 1.57), j[1] / 2 + 3 * math.sin(a + 1.57)), tf(*j)], 2.2 * s, 1.4 * s, g[0] * 0.9, 4.0)
+        b = a + rng.uniform(0.5, 0.9) * (1 if math.cos(a) > 0 else -1) + (0.6 if abs(math.cos(a)) < 0.3 else 0.0)
+        ln = w * 2.5
+        tip = (j[0] + math.cos(b) * ln, j[1] + math.sin(b) * ln + 0.25 * ln)
+        back = (j[0] - math.cos(b) * w * 0.35, j[1] - math.sin(b) * w * 0.35)
+        leaf(P, [tf(*back), tf(*j), tf((j[0] + tip[0]) / 2, (j[1] + tip[1]) / 2 - 2), tf(*tip)],
+             lambda t, w=w: 0.8 * s + w * s * (math.sin(math.pi * min(1.0, 0.1 + t * 0.9) ** 0.45) ** 0.9), g, near, veins=4, vein_a=0.75, s=s)
+
+
+# ---------------------------------------------------------------- the specimen sheet
+def canvas(w, h, seed, gy, shade):
+    P = PT.Painting(w, h, seed, Q)
+    P.img[:] = rgb(SP.BACK)
+    SP.ground(P, gy, int(w * 0.8))
+    SP.shade_pool(P, shade[0], gy + 6, shade[1], shade[2])
     return P
 
 
-def understorey(seed=47):
-    """Two more broad-leaved plants: a PADDLE plant (long leaves with side veins and torn edges) and a HEART-leaf plant
-    (each leaf on its own stalk, broad at the stalk and pointed at the tip, veins fanning from the stalk)."""
-    P = canvas(360, 210, seed, 184, (120, 150, 9))
-    rng = P.rng
-    base, leaves = (100, 182), []
-    for i in range(7):                                                          # the paddle plant
-        a = math.radians(-150 + 120 * i / 6 + rng.uniform(-6, 6))
-        ln = rng.uniform(96, 128) * (0.78 + 0.22 * abs(math.sin(a)))
-        droop = 0.5 * ln * abs(math.cos(a)) ** 1.5
-        leaves.append((rng.uniform(0, 1) + 0.5 * abs(math.cos(a)), [base, (base[0] + math.cos(a) * ln * 0.5, base[1] + math.sin(a) * ln * 0.6), (base[0] + math.cos(a) * ln, base[1] + math.sin(a) * ln + droop)], rng.uniform(13, 17)))
-    for depth, pts, w in sorted(leaves, key=lambda t: t[0]):
-        near = min(1.0, depth / 1.2)
-        leaf(P, pts, lambda t, w=w: 1.2 + w * math.sin(math.pi * min(1.0, 0.08 + t * 0.94) ** 0.9) ** 0.55, greens(near), near, veins=6, tears=4)
-    base, leaves = (262, 182), []
-    for i in range(8):                                                          # the heart-leaf plant
-        a = math.radians(-160 + 140 * i / 7 + rng.uniform(-8, 8))
-        st = rng.uniform(40, 74) * (0.7 + 0.3 * abs(math.sin(a)))
-        leaves.append((rng.uniform(0, 1) + 0.5 * abs(math.cos(a)), a, st, rng.uniform(15, 21)))
-    for depth, a, st, w in sorted(leaves):
-        near = min(1.0, depth / 1.2)
-        g = greens(near)
-        j = (base[0] + math.cos(a) * st, base[1] + math.sin(a) * st)                 # where the stalk meets the leaf
-        P.stroke([base, ((base[0] + j[0]) / 2 + 3 * math.cos(a + 1.57), (base[1] + j[1]) / 2 + 3 * math.sin(a + 1.57)), j], 2.2, 1.4, g[0] * 0.9, 4.0)
-        b = a + rng.uniform(0.5, 0.9) * (1 if math.cos(a) > 0 else -1) + (0.6 if abs(math.cos(a)) < 0.3 else 0.0)   # the leaf hangs outward from its stalk
-        ln = w * 2.5
-        tip = (j[0] + math.cos(b) * ln, j[1] + math.sin(b) * ln + 0.25 * ln)
-        back = (j[0] - math.cos(b) * w * 0.35, j[1] - math.sin(b) * w * 0.35)        # the two lobes behind the stalk's joint
-        leaf(P, [back, j, ((j[0] + tip[0]) / 2, (j[1] + tip[1]) / 2 - 2), tip], lambda t, w=w: 0.8 + w * (math.sin(math.pi * min(1.0, 0.1 + t * 0.9) ** 0.45) ** 0.9), g, near, veins=4, vein_a=0.75)
+def at(ox, oy):
+    return lambda x, y: (ox + x, oy + y)
+
+
+def emergent(seed=41):
+    P = canvas(270, 520, seed, 486, (112, 84, 9))
+    emergent_into(P, at(138, 486))
+    return P
+
+
+def fan_palm(seed=43):
+    P = canvas(240, 330, seed, 300, (96, 60, 7))
+    fan_palm_into(P, at(118, 300))
     return P
 
 
 def bamboo(seed=53):
-    """A bamboo clump about 6 m tall: nine canes that taper, a ring at every node, sprays of small lance leaves."""
     P = canvas(230, 410, seed, 380, (100, 70, 8))
-    rng = P.rng
-    canes = []
-    for i in range(9):
-        x0 = 100 + rng.uniform(-22, 26)
-        h, lean = rng.uniform(250, 356), rng.uniform(-0.16, 0.2)
-        canes.append((rng.random(), x0, h, lean, rng.uniform(3.4, 4.8)))
-    for depth, x0, h, lean, r0 in sorted(canes):
-        k = 0.45 + 0.55 * depth
-        cols = [lerp(rgb("#8E9A80"), rgb(c), k) for c in ("#5C6B3C", "#86924E", "#B4BA6C", "#D2D08A")]
-        g = greens(depth)
-        pts = [(x0, 382), (x0 + lean * h * 0.3, 382 - h * 0.4), (x0 + lean * h * 0.75, 382 - h * 0.75), (x0 + lean * h * 1.25, 382 - h)]
-        limb(P, pts, r0, 1.4, cols, n_per=0.09, rings=rng.uniform(24, 32))
-        ctr = CEL.catmull(pts, False, 8)
-        for i in range(int(len(ctr) * 0.45), len(ctr) - 1, 3):                  # sprays of lance leaves at the upper nodes
-            x, y = ctr[i]
-            side = 1 if rng.random() < 0.5 else -1
-            for _ in range(int(rng.integers(3, 6))):
-                b = math.radians(rng.uniform(10, 70)) * side + (0 if side > 0 else math.pi)
-                L = rng.uniform(14, 22)
-                tip = (x + math.cos(b) * L, y + abs(math.sin(b)) * L * 0.9)
-                lit = math.cos(b) * LIGHT[0] > 0
-                P.stroke([(x, y), ((x + tip[0]) / 2, (y + tip[1]) / 2 - 1.5), tip], 3.2, 0.6, np.clip((g[2] if lit else g[1]) * (1 + rng.normal(0, 0.05)), 0, 1), 4.8)
+    bamboo_into(P, at(102, 380))
+    return P
+
+
+def understorey(seed=47):
+    P = canvas(360, 210, seed, 184, (120, 150, 9))
+    paddle_into(P, at(100, 184))
+    heart_into(P, at(262, 182))
     return P
 
 
 KINDS = (("an emergent tree", emergent), ("a fan palm", fan_palm), ("a bamboo clump", bamboo), ("two understorey plants", understorey))
 
 
-# ---------------------------------------------------------------- the sheet
 def preview(out):
     sys.path.insert(0, os.path.dirname(HERE))
     import review
@@ -269,7 +340,7 @@ def preview(out):
     rows = [head("B-248 (D-200): FOUR MORE FOREST KINDS in ART v6 (the plan's first four) - the form-following brush, the same ONE light, no drawn line. PREVIEW, nothing exported", 26),
             head("AT THE GAME'S SIZE (64 px per metre): " + " | ".join(m[0] for m in made)), row(made, 1),
             head("AT 2x (the paintings as made): " + " | ".join(m[0] for m in made[:3])), row(made[:3], 2),
-            head("AT 2x: " + made[3][0] + " (a paddle plant with side veins and torn edges; a heart-leaf plant, each leaf on its stalk)"), row(made[3:], 2)]
+            head("AT 2x: " + made[3][0] + " (a paddle plant with side veins and a notched edge; a heart-leaf plant, each leaf on its stalk)"), row(made[3:], 2)]
     lines = ["WHAT EACH COST: " + "; ".join(f"{m[0]} {m[3]} dabs, {m[4]:.1f} s" for m in made),
              f"this run: {time.time() - t0:.0f} s. Files in b248_kinds/: " + ", ".join(m[0].split()[-1] + "_2x.png" for m in made)]
     foot = np.tile(paper, (24 + 16 * len(lines), Wd, 1)).astype(np.float32)
