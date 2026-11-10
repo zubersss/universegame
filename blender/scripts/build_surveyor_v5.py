@@ -213,8 +213,8 @@ def _torso(d, ds, M, body, stripe, zx, bx, by):
     S(d, body, M["suit"], OUT, cyclic=True, rnd=9, keep="body")
     P_(d, stripe, M["stripe_f"], sharp=True, clip="body")
     F(d, M, [(zx, 50), (zx + 0.3, 60), (zx, 69)])                                                    # the zip
-    F(d, M, [(52, 30), (55.6, 34), (58.6, 33)], 0.9)                                                 # a fold under the arm
-    F(d, M, [(17, 60), (21, 63), (25, 62.4)], 0.9)                                                   # a fold at the waist
+    F(d, M, [(17, 60), (21, 63), (25, 62.4)], 0.9)                                                   # a fold at the waist (run 3 had
+    #                                                     one more under the arm: beside the badge it read as a lash on an eye)
     S(ds, C(bx, by, 8, 28), M["brass"], OUT * 0.8, cyclic=True, gap=0)                              # the compass badge
     # its compass rose: a flat four-pointed star (run 2's single upright needle on a brass disc read as a cat's eye)
     P_(ds, [(bx, by - 5.8), (bx + 1.3, by - 1.3), (bx + 4.4, by), (bx + 1.3, by + 1.3), (bx, by + 5.8), (bx - 1.3, by + 1.3),
@@ -239,7 +239,8 @@ def pack(d, M):
         P_(d, [(3, y - 2.4), (36, y - 2.4), (36, y + 2.4), (3, y + 2.4)], M["belt_f"], sharp=True, clip="pack")
     P_(d, [(24, 18.4), (30, 18.4), (30, 25.6), (24, 25.6)], M["brass_f"], rnd=1)                     # the upper strap's buckle
     P_(d, C(14, 38, 6, 22), M["steel_f"])                                                            # the dial: a flat disc
-    F(d, M, [(14, 38.4), (17.6, 34.4)], 0.9, ends=(1, 1))                                            # its needle
+    P_(d, [(13.0, 38.9), (18.3, 33.6), (15.0, 39.6)], M["pack_f"], sharp=True)                       # its hand: a flat red wedge (run
+    #                                                     3's dark pencil needle on the disc read as a pupil)
     F(d, M, [(7, 47), (20, 48), (33, 47)])                                                           # the lid's seam
 
 
@@ -600,20 +601,22 @@ def pose_image(P, facing, pose, prop=None, blink=False):
 FAR_PARTS = ("upper_arm", "forearm", "hand", "thigh", "shin", "boot", "boot34")
 
 
-def all_parts(boil=0, paint_of=None):
+def all_parts(boil=0, paint_of=None, key=None):
     """Every part as a finished cel at the large size: name -> (RGBA uint8, pivot in large px). boil: the line pass (0 =
     the drawing; 1, 2 = alternate pencil passes for the 12 Hz boil). paint_of: pass 0's layers, so an alternate pass
-    draws only its line over the SAME paint. Returns (parts, layers)."""
+    draws only its line over the SAME paint. key: (mul, add rgb) re-keys the whole figure's PAINT for a place or a time
+    of day (STYLE_V6 2.5: in shadow, at night), the pencil unchanged. Returns (parts, layers)."""
     P, LAY = {}, {}
+    far = FAR_KEY if key is None else (FAR_KEY[0] * key[0], FAR_KEY[1] * key[0] + np.array(key[1], np.float32))
     for name, (w, h, pivot, fn, band) in PARTS.items():
         paint, line = layers(name, boil)
         if paint_of is not None:
             paint = paint_of[name][0]
         LAY[name] = (paint, line)
         pv = (pivot[0] * K, pivot[1] * K)
-        P[name] = (CEL.compose(paint, line), pv)
+        P[name] = (CEL.compose(paint, line, key), pv)
         if name in FAR_PARTS:                                                  # the far limbs: the paint re-keyed, the line kept
-            P[name + "_far"] = (CEL.compose(paint, line, FAR_KEY), pv)
+            P[name + "_far"] = (CEL.compose(paint, line, far), pv)
     return P, LAY
 
 
