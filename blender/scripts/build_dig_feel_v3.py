@@ -8,7 +8,8 @@ D-190), the beam's contact by the Beam's own tone.
                                   straight below; UNITY lays four of them round the target
                           corner  a corner bracket for a 1 m cell: the frame's centre is the cell's top-left corner, its arms
                                   run right and down; turned for the other three
-                          pip     a small cross for the contact point itself
+                          pip     a short ground tick on the contact point itself (B-249; B-246's was a small cross, which
+                                  inside the four brackets read as a gun sight)
                         states are UNITY's, by tint and gap: in reach (as drawn, tight), clamped at the reach's edge
                         (mustard, the brackets pushed out), nothing to dig (red, wider still, no pip)
   fx/dig_chip/round     3 frames x 128x128, pivot centre: cracks from the contact point, three stages, for the brush
@@ -87,14 +88,31 @@ def corner_piece(j):
     return frame(RET, RET, fn, 930 + j)
 
 
-def pip_piece(j):
+PIP = "tick"    # B-249 (LEAD 11-10 11:0x, from the 0.6.3 smoke read, H3): B-246's pip was a small CROSS, and four arcs round
+#                 a cross read as a GUN SIGHT with the Beam in hand (D-087). "tick" = a short hand-drawn ground tick;
+#                 "diamond" = a small open diamond (the alternative shown on the preview); "cross" = the old one, kept
+#                 only so the preview can show it beside the new. The key, the two frame slots and the json do not change.
+
+
+def pip_piece(j, kind=None):
+    kind = kind or PIP
+
     def fn(d, M):
         c = RET / 2
-        a = wob([(c - 5.5, c), (c + 5.5, c)], 940 + j, 0.4)
-        b = wob([(c, c - 5.5), (c, c + 5.5)], 945 + j, 0.4)
-        G.stroke(d, G.hose_outline(a, 3.4), M["offwhite"], O * 0.7, cyclic=True)
-        G.stroke(d, G.hose_outline(b, 3.4), M["offwhite"], O * 0.7, cyclic=True)
-        G.stroke(d, [(c - 1.6, c - 1.6), (c + 1.6, c - 1.6), (c + 1.6, c + 1.6), (c - 1.6, c + 1.6)], M["offwhite_f"], 0.0, cyclic=True)
+        if kind == "cross":                                              # B-246's, superseded
+            a = wob([(c - 5.5, c), (c + 5.5, c)], 940 + j, 0.4)
+            b = wob([(c, c - 5.5), (c, c + 5.5)], 945 + j, 0.4)
+            G.stroke(d, G.hose_outline(a, 3.4), M["offwhite"], O * 0.7, cyclic=True)
+            G.stroke(d, G.hose_outline(b, 3.4), M["offwhite"], O * 0.7, cyclic=True)
+            G.stroke(d, [(c - 1.6, c - 1.6), (c + 1.6, c - 1.6), (c + 1.6, c + 1.6), (c - 1.6, c + 1.6)], M["offwhite_f"], 0.0, cyclic=True)
+        elif kind == "tick":                                             # one short stroke, a little off level: a pencil tick on the ground
+            a = wob([(c - 5.5, c + 0.9), (c - 1.8, c + 0.1), (c + 1.8, c - 0.2), (c + 5.5, c - 0.9)], 940 + j, 0.4)
+            G.stroke(d, G.hose_outline(a, 3.4), M["offwhite"], O * 0.7, cyclic=True)
+        else:                                                            # "diamond": four short strokes round an open middle
+            r = 6.0
+            p = wob([(c, c - r), (c + r, c), (c, c + r), (c - r, c)], 940 + j, 0.35)
+            for i in range(4):
+                G.stroke(d, G.hose_outline([p[i], p[(i + 1) % 4]], 2.4), M["offwhite"], O * 0.6, cyclic=True)
     return frame(RET, RET, fn, 950 + j)
 
 
@@ -549,5 +567,141 @@ def preview(out, footnote=None):
         print(ln)
 
 
-if __name__ == "__main__":
-    preview(sys.argv[1])
+# ---------------------------------------------------------------- B-249: the pip, old beside new
+def _place(dst, img, pivot, deg, at, tint=None):
+    """img (straight RGBA uint8) over dst (opaque float RGB): its pivot (px, y down) at `at`, turned deg CCW on screen, its
+    colour multiplied by tint. (preview()'s own place(), at 1x; that sheet's code is left as accepted.)"""
+    h, w = img.shape[:2]
+    f = img.astype(np.float32) / 255.0
+    if tint is not None:
+        f[..., :3] = f[..., :3] * tint
+    t = math.radians(deg)
+    c, s = math.cos(t), math.sin(t)
+    R = math.hypot(max(pivot[0], w - pivot[0]), max(pivot[1], h - pivot[1])) + 2
+    x0, x1 = max(int(at[0] - R), 0), min(int(at[0] + R) + 1, dst.shape[1])
+    y0, y1 = max(int(at[1] - R), 0), min(int(at[1] + R) + 1, dst.shape[0])
+    if x1 <= x0 or y1 <= y0:
+        return
+    yy, xx = np.mgrid[y0:y1, x0:x1].astype(np.float32)
+    u, v = xx + 0.5 - at[0], yy + 0.5 - at[1]
+    sx = pivot[0] + u * c - v * s - 0.5
+    sy = pivot[1] + u * s + v * c - 0.5
+    ix, iy = np.floor(sx).astype(int), np.floor(sy).astype(int)
+    fx, fy = (sx - ix)[..., None], (sy - iy)[..., None]
+
+    def tap(ax, ay):
+        ok = (ax >= 0) & (ax < w) & (ay >= 0) & (ay < h)
+        o = np.zeros(ax.shape + (4,), np.float32)
+        px = f[ay[ok], ax[ok]]
+        o[ok] = np.concatenate([px[..., :3] * px[..., 3:4], px[..., 3:4]], axis=-1)
+        return o
+    smp = (tap(ix, iy) * (1 - fx) * (1 - fy) + tap(ix + 1, iy) * fx * (1 - fy) + tap(ix, iy + 1) * (1 - fx) * fy
+           + tap(ix + 1, iy + 1) * fx * fy)
+    sub = dst[y0:y1, x0:x1]
+    sub[...] = smp[..., :3] + sub * (1 - smp[..., 3:4])
+
+
+def pip_preview(out):
+    """B-249: the old cross beside the tick and the open diamond, inside the Beam's white brackets (0.9 m) on tan soil, on
+    grey stone and on a dark back wall, at 1x and 4x; the pieces alone at 6x, both boil drawings; and the proof that
+    nothing else of the five exported sheets moves (the reticle's frames 0-3 and the other four sheets, pixel for pixel)."""
+    import time
+    from meridian import pngio
+    sys.path.insert(0, os.path.dirname(HERE))
+    import review
+    paper = np.array(review.PAPER, np.float32)
+    W, S = 1920, 160
+    kinds = (("cross", "OLD: the cross (B-246)"), ("tick", "NEW: the ground tick"), ("diamond", "the alternative: an open diamond"))
+    arcs = [arc_piece(0), arc_piece(1)]
+    pips = {k: [pip_piece(0, k), pip_piece(1, k)] for k, _n in kinds}
+    P = (RET / 2, RET / 2)
+
+    def fill(tier):
+        fp = os.path.join(ART, "terrain", "earth", "ground_fill_color.png" if tier == 1 else f"ground_fill_t{tier}_color.png")
+        if not os.path.isfile(fp):
+            return np.full((S, S, 3), 0.5, np.float32)
+        f = pngio.read_png_np(fp).astype(np.float32)[..., :3] / 255.0
+        return np.tile(f, (-(-S // f.shape[0]), -(-S // f.shape[1]), 1))[:S, :S].copy()
+    grounds = (("tan soil", lambda: fill(1)), ("grey stone", lambda: fill(3)),
+               ("a dark back wall", lambda: np.tile(np.array((0.33, 0.20, 0.16), np.float32), (S, S, 1))))
+
+    def scene(gfn, kind, j=0):
+        g = gfn()
+        c = S / 2
+        for q in range(4):
+            a = 45.0 + 90.0 * q
+            _place(g, arcs[j], P, a - 90.0, (c + R0 * math.cos(math.radians(a)), c - R0 * math.sin(math.radians(a))))
+        _place(g, pips[kind][j], P, 0, (c, c))
+        return g
+
+    def head(text, h=20):
+        hd = np.tile(paper, (h, W, 1)).astype(np.float32)
+        review._label(hd, text[:300], 6, 4, scale=1)
+        return hd
+
+    def row(cells, gap=8):
+        H = max(c.shape[0] for c in cells)
+        r = np.tile(paper, (H, W, 1)).astype(np.float32)
+        x = 0
+        for c in cells:
+            w = max(0, min(c.shape[1], W - x))
+            r[:c.shape[0], x:x + w] = c[:, :w]
+            x += c.shape[1] + gap
+        return r
+
+    def zoom(im, k):
+        return np.repeat(np.repeat(im, k, 0), k, 1)
+    rows = [head("B-249 (PREVIEW, nothing exported): the reticle's PIP, from the 0.6.3 smoke read (H3): four brackets round a cross read as a gun sight with the Beam. The Beam's white in-reach brackets (0.9 m) round each mark", 26)]
+    for gname, gfn in grounds:
+        rows.append(head(f"on {gname.upper()} at 1x: " + " | ".join(n for _k, n in kinds) + "     then the same three at 3x (the middle 96 px)"))
+        cells = [scene(gfn, k) for k, _n in kinds]
+        cells += [zoom(scene(gfn, k)[32:128, 32:128], 3) for k, _n in kinds]
+        rows.append(row(cells))
+    rows.append(head("the marks alone at 6x, both drawings of the boil: " + " | ".join(n for _k, n in kinds)))
+    cells = []
+    for k, _n in kinds:
+        for im in pips[k]:
+            f = im.astype(np.float32) / 255.0
+            on = np.tile(paper * 0.8, (RET, RET, 1)).astype(np.float32)
+            cells.append(zoom(f[..., :3] * f[..., 3:4] + on * (1 - f[..., 3:4]), 6)[60:228, 60:228])
+    rows.append(row(cells))
+    # the proof: with PIP as set, what an export would change
+    lines = [f"PIP = \"{PIP}\" in the source: an export rewrites fx/dig_reticle/base (png only: its frames 4 and 5); the key, the slots and the json stay"]
+    names = {"fx/dig_reticle/base": "fx/dig_reticle/base_color.png", "fx/dig_chip/round": "fx/dig_chip/round_color.png", "fx/dig_chip/cell": "fx/dig_chip/cell_color.png",
+             "fx/beam_contact/base": "fx/beam_contact/base_color.png", "fx/shovel_swish/base": "fx/shovel_swish/base_color.png"}
+    for key, sheet, extra, frames in kit():
+        fp = os.path.join(ART, *names[key].split("/"))
+        if not os.path.isfile(fp):
+            lines.append(f"{key}: no exported png found")
+            continue
+        old = pngio.read_png_np(fp)
+        if old.shape != sheet.shape:
+            lines.append(f"{key}: SIZE DIFFERS {old.shape} against {sheet.shape}")
+            continue
+        if key == "fx/dig_reticle/base":
+            wd = 4 * RET + 3 * v3.GUTTER
+            same = bool((old[:, :wd] == sheet[:, :wd]).all())
+            diff = int((old[:, wd:] != sheet[:, wd:]).any(axis=-1).sum())
+            lines.append(f"{key}: frames 0-3 (two arcs, two corners) {'IDENTICAL' if same else 'DIFFER'} to the exported png; frames 4-5 (the pip) differ in {diff} px; "
+                         f"palette {v3.palette_hits(sheet, 'earth')[0] * 100:.1f}%; the json's fields rebuilt equal: "
+                         f"{json.load(open(fp.replace('_color.png', '.json'), encoding='utf-8')).get('animations') == extra.get('animations')}")
+        else:
+            lines.append(f"{key}: {'IDENTICAL' if bool((old == sheet).all()) else 'DIFFERS'} to the exported png, pixel for pixel")
+    problems = checks(kit())
+    lines.append("checks: " + ("; ".join(problems) if problems else "none failed"))
+    foot = np.tile(paper, (24 + 16 * len(lines), W, 1)).astype(np.float32)
+    for i, ln in enumerate(lines):
+        review._label(foot, ln[:300], 6, 6 + 16 * i, scale=1)
+    img = np.vstack(rows + [foot])
+    review.draw(img, time.strftime("%m-%d %H:%M") + " B-249 the reticle's pip, old beside new (lock-free, fakegp + numpy; not exported)", 2, img.shape[0] - 14, (1.0, 1.0, 0.85))
+    review.write(out, img)
+    print("written", out, img.shape[1], "x", img.shape[0])
+    for ln in lines:
+        print(ln)
+
+
+if __name__ == "__main__":                       # <review png>  |  --pip <review png>
+    if len(sys.argv) > 2 and sys.argv[1] == "--pip":
+        pip_preview(sys.argv[2])
+    else:
+        preview(sys.argv[1])
