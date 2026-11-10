@@ -93,26 +93,34 @@ def arm_points(p):
     hand = (sh[0] + r * u[0], sh[1] + r * u[1])
     nb = (u[1], -u[0])
     mid = ((sh[0] + hand[0]) / 2 + p["elbow"] * nb[0], (sh[1] + hand[1]) / 2 + p["elbow"] * nb[1])
-    glove = (hand[0] + 0.04 * u[0], hand[1] + 0.04 * u[1])
-    return sh, mid, hand, glove, u
+    fl = math.hypot(hand[0] - mid[0], hand[1] - mid[1]) or 1.0
+    t = ((hand[0] - mid[0]) / fl, (hand[1] - mid[1]) / fl)      # the FOREARM's direction (the curve's tangent at the hand):
+    glove = (hand[0] + 0.04 * t[0], hand[1] + 0.04 * t[1])      # with a bent elbow it is not the shoulder-to-hand line
+    return sh, mid, hand, glove, t
+
+
+def nose_of(p):
+    """draw_surveyor's nose (side view): its centre; radius 0.055. The glove (radius ~0.115) must stay clear of it."""
+    hc = X1(p, 0.0, 1.52 + p.get("helmet_dz", 0.0))
+    return (hc[0] + 0.35, hc[1] - 0.06)
 
 
 def hand_of(pose):
-    """[x, z, angle]: the glove's centre (m from the pivot) and the tool's direction (rad, CCW from +x; the arm's own
+    """[x, z, angle]: the glove's centre (m from the pivot) and the tool's direction (rad, CCW from +x; the forearm's own
     direction where the pose names no tool angle)."""
     p = base(pose)
-    _sh, _mid, _hand, g, u = arm_points(p)
-    ang = math.radians(p["tool"]) if p["tool"] is not None else math.atan2(u[1], u[0])
+    _sh, _mid, _hand, g, t = arm_points(p)
+    ang = math.radians(p["tool"]) if p["tool"] is not None else math.atan2(t[1], t[0])
     return [round(g[0], 4), round(g[1], 4), round(ang, 4)]
 
 
 def front_arm(d, M, p, seed):
     """draw_surveyor's arm(1), stroke for stroke, turned with the arm: the sleeve, its fold, the mustard cuff with its
     stitches, the glove with its two finger lines. The hand is EMPTY."""
-    sh, mid, hand, g, u = arm_points(p)
-    a = p["arms"][1]
+    sh, mid, hand, g, t = arm_points(p)
+    a = math.atan2(t[0], -t[1])         # the forearm's angle in draw_surveyor's convention (0 = hanging)
 
-    def L(c, dx, dz):                   # an offset drawn for the hanging arm, turned to this arm's direction
+    def L(c, dx, dz):                   # an offset drawn for the hanging arm, turned to this forearm's direction
         r = rot((dx, dz), a)
         return (c[0] + r[0], c[1] + r[1])
     G.stroke(d, G.hose_outline(G.bezier(sh, mid, hand, n=10), 0.11), M["suit"], O, cyclic=True)
@@ -139,10 +147,11 @@ def draw_dig(d, M, pose, seed=0):
 DIG_KEYS = {
     "dig_down": [
         # 0 wind-up: up on the toes, the hand drawn back to the chest, the blade swung up ahead
-        dict(arms=(-0.55, 1.75), reach=0.34, elbow=0.13, tool=25, sz=1.07, lean=-0.07, bob=0.015, shift=-0.02, feet=(-0.08, 0.10),
+        dict(arms=(-0.55, 1.75), reach=0.34, elbow=0.13, tool=55, sz=1.07, lean=-0.07, bob=0.015, shift=-0.02, feet=(-0.08, 0.10),
              bob_tip=0.07, pack_swing=-0.08, hose_lag=0.04, look=(0.75, -0.35)),
-        # 1 CONTACT: the lunge - the arm at full reach ahead of the helmet, the blade planted in the ground in front
-        dict(arms=(-1.05, 2.06), reach=0.58, elbow=0.02, tool=-75, sz=0.88, lean=0.20, bob=-0.09, shift=0.06, feet=(-0.14, 0.20),
+        # 1 CONTACT: the lunge - the arm at full reach ahead of the helmet (the glove clear of the nose), the blade planted
+        # in the ground in front
+        dict(arms=(-1.05, 1.95), reach=0.58, elbow=0.02, tool=-75, sz=0.88, lean=0.20, bob=-0.09, shift=0.06, feet=(-0.14, 0.20),
              bob_tip=-0.11, pack_swing=0.15, pack_dz=-0.03, hose_lag=-0.06, look=(0.6, -0.8)),
         # 2 follow-through: the weight goes down the shaft - the hand drops and pushes, the blade sinks and levers back
         dict(arms=(-0.85, 1.80), reach=0.52, elbow=0.05, tool=-96, sz=0.84, lean=0.24, bob=-0.12, shift=0.07, feet=(-0.14, 0.20),
@@ -151,7 +160,7 @@ DIG_KEYS = {
         dict(arms=(-0.30, 1.55), reach=0.44, elbow=0.10, tool=-45, sz=1.04, lean=0.05, bob=0.01, shift=0.02, feet=(-0.11, 0.14),
              bob_tip=0.05, pack_swing=-0.06, pack_dz=0.03, hose_lag=0.03, look=(0.7, -0.5)),
         # 4 recover: toward idle, the tool coming down to the carry
-        dict(arms=(-0.08, 0.55), reach=0.42, elbow=0.07, tool=-20, sz=1.0, lean=0.01, feet=(-0.07, 0.07),
+        dict(arms=(-0.08, 0.45), reach=0.42, elbow=0.07, tool=-18, sz=1.0, lean=0.01, feet=(-0.07, 0.07),
              pack_swing=0.03, look=(0.6, -0.2)),
     ],
     "dig_fwd": [
@@ -168,7 +177,7 @@ DIG_KEYS = {
         dict(arms=(-0.35, 1.10), reach=0.44, elbow=0.10, tool=10, sz=1.03, lean=0.04, shift=0.02, feet=(-0.12, 0.20),
              bob_tip=0.06, pack_swing=-0.07, pack_dz=0.03, hose_lag=0.03, look=(0.75, 0.0)),
         # 4 recover
-        dict(arms=(-0.08, 0.50), reach=0.42, elbow=0.07, tool=-18, sz=1.0, lean=0.01, feet=(-0.07, 0.08),
+        dict(arms=(-0.08, 0.45), reach=0.42, elbow=0.07, tool=-16, sz=1.0, lean=0.01, feet=(-0.07, 0.08),
              pack_swing=0.03, look=(0.6, -0.1)),
     ],
     "dig_up": [
@@ -176,34 +185,38 @@ DIG_KEYS = {
         dict(arms=(-0.40, 0.55), reach=0.38, elbow=0.12, tool=20, sz=0.88, lean=-0.04, bob=-0.08, feet=(-0.10, 0.10),
              bob_tip=-0.05, pack_swing=0.06, pack_dz=-0.04, hose_lag=-0.03, look=(0.55, 0.6)),
         # 1 CONTACT: the spring - the whole body stretches up, the arm at full reach, the blade into the ceiling
-        dict(arms=(-0.95, 2.20), reach=0.58, elbow=0.02, tool=58, sz=1.10, lean=0.08, bob=0.04, shift=0.03, feet=(-0.10, 0.12),
+        dict(arms=(-0.95, 2.15), reach=0.60, elbow=0.02, tool=58, sz=1.10, lean=0.08, bob=0.04, shift=0.03, feet=(-0.10, 0.12),
              bob_tip=0.10, pack_swing=-0.12, pack_dz=0.05, hose_lag=0.06, look=(0.45, 0.9)),
-        # 2 follow-through: the blade scrapes on up and over
-        dict(arms=(-0.80, 2.35), reach=0.58, elbow=0.03, tool=72, sz=1.12, lean=0.10, bob=0.05, shift=0.04, feet=(-0.10, 0.12),
+        # 2 follow-through: the blade scrapes on up and over (the hand stays ahead of the helmet: 2.35 put the glove on the nose)
+        dict(arms=(-0.80, 2.10), reach=0.60, elbow=0.03, tool=72, sz=1.12, lean=0.10, bob=0.05, shift=0.04, feet=(-0.10, 0.12),
              bob_tip=0.06, pack_swing=-0.08, pack_dz=0.06, hose_lag=0.04, look=(0.4, 0.9)),
         # 3 settle: the drop back onto the heels, the blade coming down with its load
         dict(arms=(-0.25, 1.60), reach=0.45, elbow=0.10, tool=30, sz=0.95, lean=0.03, bob=-0.03, shift=0.01, feet=(-0.09, 0.10),
              bob_tip=-0.06, pack_swing=0.08, pack_dz=-0.04, hose_lag=-0.04, look=(0.6, 0.4)),
         # 4 recover
-        dict(arms=(-0.08, 0.50), reach=0.42, elbow=0.07, tool=-12, sz=1.0, lean=0.01, feet=(-0.07, 0.07),
+        dict(arms=(-0.08, 0.45), reach=0.42, elbow=0.07, tool=-14, sz=1.0, lean=0.01, feet=(-0.07, 0.07),
              pack_swing=0.03, look=(0.6, 0.0)),
     ],
 }
 
-# the Beam's aim poses: arm angle, reach, lean, shift, sz, bob, feet, look. Straight up and at 45 deg up the arm goes ahead
-# of the helmet (the glove clear of the nose); straight down the hand is ahead of the toes so the Beam clears the boot.
+# the Beam's aim poses: arm angle, reach, elbow, lean, shift, sz, bob, feet, look. The Beam lies along the FOREARM, so the
+# forearm is what points: at 45 deg and level the whole arm is straight; straight up and straight down the elbow bends (the
+# upper arm reaches ahead, the forearm stands plumb) - up, the hand is ahead of the helmet with the glove clear of the nose
+# (a straight vertical arm would cover the face); down, the hand is ahead of the toes so the Beam clears the boot.
 AIM_KEYS = {
-    "aim_up": dict(arms=(-0.35, 2.50), reach=0.55, lean=-0.25, shift=0.0, sz=1.03, bob=0.0, feet=(-0.10, 0.06), look=(0.3, 1.0)),
-    "aim_up45": dict(arms=(-0.30, 2.356), reach=0.58, lean=-0.08, sz=1.02, feet=(-0.09, 0.07), look=(0.55, 0.7)),
+    "aim_up": dict(arms=(-0.35, 2.40), reach=0.537, elbow=0.24, lean=-0.28, sz=1.03, feet=(-0.10, 0.06), look=(0.3, 1.0)),
+    "aim_up45": dict(arms=(-0.30, 2.356), reach=0.58, lean=-0.14, sz=1.02, feet=(-0.09, 0.07), look=(0.55, 0.7)),
     "aim_fwd": dict(arms=(-0.25, 1.571), reach=0.50, lean=0.03, sz=1.0, feet=(-0.08, 0.08), look=(0.8, 0.0)),
     "aim_down45": dict(arms=(-0.30, 1.00), reach=0.50, lean=0.10, sz=0.98, feet=(-0.09, 0.09), look=(0.65, -0.6)),
-    "aim_down": dict(arms=(-0.45, 0.72), reach=0.50, lean=0.20, shift=-0.06, sz=0.95, bob=-0.02, feet=(-0.10, 0.08), look=(0.4, -1.0)),
+    "aim_down": dict(arms=(-0.45, 0.72), reach=0.50, elbow=-0.24, lean=0.20, shift=-0.06, sz=0.95, bob=-0.02, feet=(-0.10, 0.08),
+                     look=(0.4, -1.0)),
 }
 
 
 def aim_pose(name, deg, j):
     """Drawing j (0, 1) of a hold: the same pose breathing (a hair taller, the pack and the plumb bob settling)."""
-    q = dict(AIM_KEYS[name], elbow=0.03, tool=deg)
+    q = dict({"elbow": 0.03}, **AIM_KEYS[name])
+    q["tool"] = deg
     q["sz"] = q.get("sz", 1.0) + 0.012 * j
     q.update(bob_tip=0.03 * j - 0.01, pack_swing=0.03 * j, pack_dz=-0.01 * j, hose_lag=0.015 * j)
     return q
@@ -264,7 +277,7 @@ def tip_of(hand, deg=None):
 # the marked contact points of the sheet, per direction: (label, the shovel's angle in deg on the contact drawing). Each
 # lies on the circle of the shovel's length about the contact drawing's glove: where the blade tip CAN be with the hand as
 # drawn. "far" is the reach's edge in that direction.
-MARKS = {"dig_down": (("near: at the toes", -118.0), ("far: the ground ahead", -60.0)),
+MARKS = {"dig_down": (("near: at the toes", -122.0), ("far: the ground ahead", -55.0)),
          "dig_fwd": (("low: the foot of a wall", -35.0), ("far: straight ahead", 0.0)),
          "dig_up": (("steep: overhead", 80.0), ("far: ahead and up", 35.0))}
 
@@ -453,13 +466,16 @@ def preview(out, footnote=None):
 
     poses = all_poses()
     hands = hand_sockets()
-    frames, widths, below = [], [], []
+    frames, widths, below, nose = [], [], [], []
     for f, pose in enumerate(poses):
         img, w, zmin = _frame(pose, f)
         frames.append(img)
         widths += w
         if zmin * PPU < -2.0:
             below.append(f)
+        pb = base(pose)
+        gl, ns = arm_points(pb)[3], nose_of(pb)
+        nose.append(math.hypot(gl[0] - ns[0], gl[1] - ns[1]))   # the glove (r 0.115) and the nose (r 0.055): 0.17 = touching
     idle, _w, _z = _frame(SV.idle_pose(0), 0, draw=lambda d, M, pose, seed=0: SV.draw_surveyor(d, M, pose, seed=seed))
     carry = carry_sockets()
 
@@ -535,6 +551,9 @@ def preview(out, footnote=None):
         problems.append(f"frames {clipped[:8]} touch the {m} px frame edge")
     if below:
         problems.append(f"frames {below[:8]} draw more than 2 px below the ground line")
+    on_nose = [f for f, dn in enumerate(nose) if dn < 0.19]
+    if on_nose:
+        problems.append(f"the glove is on or against the nose in frames {on_nose} (centre distances {[round(nose[f], 2) for f in on_nose]}, 0.17 = touching)")
     names = {c for c, _n, _l in CLIPS}
     for other in ("side", "side_b"):
         oj = json.load(open(os.path.join(art, "characters", "surveyor", other + ".json"), encoding="utf-8"))
@@ -560,6 +579,7 @@ def preview(out, footnote=None):
              "THE POSE MATHS (metres; x ahead of the feet's centre, z up from the ground line; the shovel is 1.33 m from grip to blade tip):"]
     lines += reach_lines()
     lines.append("the carried blade's lowest tip over each clip (m above the ground line): " + ", ".join(low))
+    lines.append(f"the glove's nearest approach to the nose (centre to centre, 0.17 m = touching): {min(nose):.2f} m at frame {nose.index(min(nose))}")
     foot = np.tile(paper, (24 + 16 * len(lines), 1920, 1)).astype(np.float32)
     for i, ln in enumerate(lines):
         review._label(foot, ln[:300], 6, 6 + 16 * i, scale=1)

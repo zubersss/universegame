@@ -16,6 +16,8 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.normpath(os.path.join(HERE, "..", ".."))
 sys.path.insert(0, HERE)
 from meridian import fakegp  # noqa: E402
+
+fakegp.install()                        # build_surveyor_v3 imports bpy at its top: the stub must be in place first
 import build_surveyor_v3 as NEW  # noqa: E402
 import build_surveyor_side_b as SB  # noqa: E402
 
