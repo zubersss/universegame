@@ -6,8 +6,12 @@
 # -Release (U-143): after a green probe the same code is built again as the release player in Build/MERIDIAN_<v>/ under the same
 # hold (no Development Build watermark; the owner's build); the probed development player stays in Build/MERIDIAN_<v>_dev/.
 # The Editor's memory rows stay as an upper bound. Limits are Bible 11.1 v4 (D-089).
-# Usage: tools/unity_profile.ps1 [-Build | -Probe] [-SkipGate] [-Release]
-param([switch]$Build, [switch]$Probe, [switch]$SkipGate, [switch]$Release)
+# -Control <version> (D-191 amended, LEAD 2026-11-09 21:1x): after this build's probe, the SAME probe runs on the last build's
+# development player (Build/MERIDIAN_<version>_dev/, still on disk) in the same lock, and this build's frame and transition rows
+# are judged against it: more than 20 % above the control is red (the release build is then not made). A figure recorded in
+# another hour is not a baseline: on 2026-11-09 the same 0.6.1 player read 28-48 % slower at night than in the afternoon.
+# Usage: tools/unity_profile.ps1 [-Build | -Probe] [-SkipGate] [-Release] [-Control 0.6.1]
+param([switch]$Build, [switch]$Probe, [switch]$SkipGate, [switch]$Release, [string]$Control = '')
 . (Join-Path $PSScriptRoot 'unity_common.ps1')
 
 $date = Get-Date -Format 'yyyy-MM-dd'
@@ -15,6 +19,8 @@ $stamp = Get-Date -Format 'yyyyMMdd_HHmmss'
 $xml = Join-Path $LogDir "profile_$stamp.xml"
 $report = Join-Path $RepoRoot "coordination\reports\unity\perf_$date.md"
 $probeOut = Join-Path $LogDir "memory_probe_$stamp.jsonl"
+$controlOut = Join-Path $LogDir "memory_probe_control_${Control}_$stamp.jsonl"
+$controlRan = $false
 $buildOk = $true
 $runProbe = $Build -or $Probe
 
@@ -68,6 +74,19 @@ try {
                 '-screen-fullscreen', '0', '-screen-width', '1920', '-screen-height', '1080', '-logFile', "`"$playerLog`"")
             if (-not $p.WaitForExit(480000)) { Stop-Process -Id $p.Id -Force; Write-Host 'PROBE TIMED OUT (8 min)'; $buildOk = $false }
             Write-Host "Player log: $playerLog"
+        }
+    }
+    if ($runProbe -and $buildOk -and $Control) {
+        # D-191 amended: the last build's player on the same machine, right after this build's
+        $exeC = Get-PlayerExe $Control -Dev
+        if (-not (Test-Path $exeC)) { Write-Host "CONTROL: no player at $exeC" }
+        else {
+            $controlLog = Join-Path $LogDir "memory_probe_control_${Control}_$stamp.log"
+            $pc = Start-Process -FilePath $exeC -PassThru -ArgumentList @('-meridianMemoryProbe', "`"$controlOut`"",
+                '-screen-fullscreen', '0', '-screen-width', '1920', '-screen-height', '1080', '-logFile', "`"$controlLog`"")
+            if (-not $pc.WaitForExit(480000)) { Stop-Process -Id $pc.Id -Force; Write-Host 'CONTROL PROBE TIMED OUT (8 min)' }
+            else { $controlRan = Test-Path $controlOut }
+            Write-Host "Control player log: $controlLog"
         }
     }
 } finally {
@@ -270,6 +289,43 @@ if ($runProbe) {
         if (-not $cok) { $memRed = $true }
         $rows += "| Climb $dot Earth (dev build) | p99 $le 20 ms, no frame > 50 ms outside the iris (U-148) | $($c.climbFrames) frames in $($c.climbSeconds) s to $($c.topSpeed) m/s: p99 $($c.climbP99Ms) ms, worst $($c.climbWorstMs) ms, $($c.climbOver50) over 50 ms; the iris $($c.irisFrames) frames, longest $($c.irisWorstMs) ms; in Space $($c.reachedSpace) | $(if ($cok) { 'green' } else { 'red' }) |"
     }
+    # D-191 amended: this build's frame and transition rows against the control's, both measured in this lock.
+    if ($Control) {
+        $rows += @('', "### The last build's control (D-191): $Control's development player probed in the same lock", '',
+            "| Row | $Control (control) | this build | this build against the control | Status |", '|---|---|---|---|---|')
+        if (-not $controlRan) { $rows += "| Control | | no control result (no player on disk, or its probe failed) | | red |"; $memRed = $true }
+        else {
+            $legsC = @(Get-Content $controlOut | Where-Object { $_.Trim() } | ForEach-Object { $_ | ConvertFrom-Json })
+            $byLegC = @{}
+            foreach ($l in $legsC) { if ($null -ne $l.leg -and $null -ne $l.systemMB) { $byLegC[[string]$l.leg] = $l } }
+            # one comparison: red when this build reads more than 20 % above the control (and the control read something)
+            function Add-ControlRow([string]$name, $now, $then, [string]$unit, [bool]$judged) {
+                if ($null -eq $now -or $null -eq $then -or [double]$then -le 0) { return }
+                $pct = [math]::Round(([double]$now / [double]$then - 1.0) * 100.0, 1)
+                $ok = (-not $judged) -or ($pct -le 20)
+                if (-not $ok) { $script:memRed = $true }
+                $script:rows += "| $name | $then $unit | $now $unit | $(if ($pct -ge 0) { '+' })$pct % | $(if (-not $judged) { 'info' } elseif ($ok) { 'green' } else { 'red (over 20 %)' }) |"
+            }
+            foreach ($l in $legs) {
+                $c = $byLegC[[string]$l.leg]
+                if ($null -eq $c) { continue }
+                if ($null -ne $l.transitionSec -and [double]$l.transitionSec -ge 0) { Add-ControlRow "Transition $dot $($l.leg)" $l.transitionSec $c.transitionSec 's' $true }
+            }
+            $climbC = @($legsC | Where-Object { $null -ne $_.climbP99Ms }) | Select-Object -First 1
+            $climbN = $climb | Select-Object -First 1
+            if ($null -ne $climbC -and $null -ne $climbN) {
+                Add-ControlRow "Climb p99 $dot Earth" $climbN.climbP99Ms $climbC.climbP99Ms 'ms' $true
+                Add-ControlRow "Climb worst frame $dot Earth" $climbN.climbWorstMs $climbC.climbWorstMs 'ms' $false   # one frame of ~1400: printed, not judged
+            }
+            $filmC = @($legsC | Where-Object { $null -ne $_.filmGpuOnMs }) | Select-Object -First 1
+            $filmN = $film | Select-Object -First 1
+            if ($null -ne $filmC -and $null -ne $filmN) {
+                Add-ControlRow "GPU frame, film on $dot Earth" $filmN.filmGpuOnMs $filmC.filmGpuOnMs 'ms' $true
+                Add-ControlRow "GPU frame, film off $dot Earth" $filmN.filmGpuOffMs $filmC.filmGpuOffMs 'ms' $true
+            }
+        }
+        $rows += "Machine at the start: $memStart; at the end: $memEnd"
+    }
     if (Test-Path $report) {
         $text = Get-Content $report -Raw -Encoding UTF8
         $cut = $text.IndexOf("`n## Memory in the development player")
@@ -278,7 +334,7 @@ if ($runProbe) {
     } else {
         Set-Content -Path $report -Value (($rows -join "`n") + "`n") -Encoding UTF8 -NoNewline
     }
-    $rows | Where-Object { $_ -like '| Memory*' -or $_ -like '| Residency*' -or $_ -like '| Film*' -or $_ -like '| Planet load*' -or $_ -like '| Transition*' -or $_ -like '| Bundles*' -or $_ -like '| Sprite atlases*' -or $_ -like '| Return*' -or $_ -like '| Mip*' -or $_ -like '| Boot*' -or $_ -like '| Creep*' -or $_ -like '| Heap*' -or $_ -like '| Climb*' -or $_ -like '| Space first*' } | ForEach-Object { Write-Host $_ }
+    $rows | Where-Object { $_ -like '| Memory*' -or $_ -like '| Residency*' -or $_ -like '| Film*' -or $_ -like '| Planet load*' -or $_ -like '| Transition*' -or $_ -like '| Bundles*' -or $_ -like '| Sprite atlases*' -or $_ -like '| Return*' -or $_ -like '| Mip*' -or $_ -like '| Boot*' -or $_ -like '| Creep*' -or $_ -like '| Heap*' -or $_ -like '| Climb*' -or $_ -like '| Space first*' -or $_ -like '| GPU frame*' -or $_ -like '| Control*' } | ForEach-Object { Write-Host $_ }
 }
 
 if ($SkipGate) { if ($memRed -or -not $buildOk) { Write-Host 'BUILD MEMORY RED'; exit 1 } else { Write-Host 'BUILD MEMORY GREEN'; exit (Complete-Release) } }
