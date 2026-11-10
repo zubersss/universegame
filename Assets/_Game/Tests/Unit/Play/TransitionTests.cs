@@ -153,5 +153,137 @@ namespace Meridian.Tests
             Assert.Less(side.ship.Body.position.y, y0, "descending");
             LogAssert.NoUnexpectedReceived();
         }
+
+        // ---------- U-206: no creature of another planet on arrival ----------
+
+        /// <summary>One creature put beside the surveyor (the director's despawn range is measured from it, aboard or not), so the planet is left with creatures alive.</summary>
+        static void SpawnBesideTheSurveyor(PlanetSideRoot side, Meridian.Creatures.Species species)
+        {
+            var at = (Vector2)side.player.transform.position + new Vector2(4f, 1f);
+            Assert.NotNull(side.creatures.Spawn(species, at), $"a {species} spawned on {side.Config.id}");
+            Assert.Greater(side.creatures.AliveCount, 0, $"creatures alive on {side.Config.id} before the planet change");
+        }
+
+        /// <summary>The real route out: aboard, just under the Escape Line climbing; checks creatures are still alive as the launch begins.</summary>
+        static IEnumerator LaunchWithCreaturesAlive(SceneDirector director, TransitionDirector transitions, Meridian.Creatures.Species species)
+        {
+            var side = director.PlanetSide;
+            var ship = side.ship;
+            SpawnBesideTheSurveyor(side, species);
+            ship.GetComponent<ShipBoarding>().ForceAboard();
+            ship.externalInput = true;
+            var p = new Vector2(ship.Body.position.x, side.Config.EscapeLineY - 0.5f);
+            ship.Body.position = p;
+            ship.transform.position = p;
+            ship.Body.linearVelocity = new Vector2(0f, 12f);
+            float timeout = Time.realtimeSinceStartup + 10f;
+            while (!transitions.Busy && Time.realtimeSinceStartup < timeout) { ship.Body.linearVelocity = new Vector2(0f, 12f); yield return null; }
+            Assert.IsTrue(transitions.Busy, $"the launch from {side.Config.id} began");
+            int alive = side.creatures.AliveCount;
+            TestContext.Out.WriteLine($"[MERIDIAN] U-206 leaving {side.Config.id} by the Escape Line: {alive} creature(s) alive, gulls {side.creatures.CountOf(Meridian.Creatures.Species.Gull)}");
+            Assert.Greater(alive, 0, $"creatures alive on {side.Config.id} as the launch begins");
+            while (transitions.Busy && Time.realtimeSinceStartup < timeout) yield return null;
+            Assert.AreEqual(ViewMode.Space, GameState.Instance.view, "in space");
+        }
+
+        /// <summary>The real route in: the space ship put just outside the body's ring flying inward (twice: the first pass sits inside the launch's invulnerable second).</summary>
+        static IEnumerator EnterFromSpace(SceneDirector director, TransitionDirector transitions, string bodyName)
+        {
+            var ship = director.Space.GetComponentInChildren<SpaceShip>();
+            ship.externalInput = true;
+            ship.intent = default;
+            for (int pass = 0; pass < 2; pass++)
+            {
+                var body = ship.world.Find(bodyName).Value;
+                ship.Position = body.position + new Vector2(0f, body.RingRadius + 0.5f);
+                ship.Velocity = new Vector2(0f, -40f);
+                if (pass == 0) yield return new WaitForSeconds(1.1f);
+            }
+            yield return WaitIdle(transitions, 15f);
+        }
+
+        /// <summary>
+        /// On arrival: nothing alive is another planet's species, and nothing draws the director's placeholder box (natives that spawned before
+        /// their sheet take it when it lands, U-108: they get a few seconds).
+        /// </summary>
+        static IEnumerator AssertOnlyNativesAlive(SceneDirector director, PlanetId planet, string route)
+        {
+            var side = director.PlanetSide;
+            Assert.NotNull(side, $"{route}: PlanetSide loaded");
+            Assert.AreEqual(planet, side.Config.id, route);
+            var creatures = side.creatures;
+            Assert.AreEqual(planet, creatures.Planet.id, $"{route}: the creature director is set for {planet}");
+            int alive = 0, boxes = 0;
+            foreach (var c in creatures.All)
+            {
+                if (!c.Alive) continue;
+                alive++;
+                Assert.AreEqual(planet, c.Spec.planet, $"{route}: a {c.Spec.id} is alive on {planet} at arrival (another planet's species has no sheet here and draws as its placeholder box)");
+            }
+            float until = Time.realtimeSinceStartup + 6f;
+            do
+            {
+                boxes = 0;
+                foreach (var c in creatures.All) if (c.Alive && c.IsPlaceholder && c.View.enabled) boxes++;
+                if (boxes > 0) yield return null;
+            } while (boxes > 0 && Time.realtimeSinceStartup < until);
+            foreach (var c in creatures.All)
+            {
+                if (!c.Alive) continue;
+                Assert.AreEqual(planet, c.Spec.planet, $"{route}: a {c.Spec.id} is alive on {planet} after arrival");
+                Assert.IsFalse(c.IsPlaceholder && c.View.enabled, $"{route}: a {c.Spec.id} draws the placeholder box on {planet}");
+            }
+            TestContext.Out.WriteLine($"[MERIDIAN] U-206 {route}: on {planet}, {alive} creature(s) alive at arrival, all {planet}'s; gulls {creatures.CountOf(Meridian.Creatures.Species.Gull)}; placeholder boxes {boxes}");
+        }
+
+        /// <summary>
+        /// U-206 (U-204 F14, the pale box behind the Pilgrim on Mars in 0.6.0's, 0.6.1's and 0.6.2's smoke): with creatures alive, Earth → Mars and
+        /// Mars → Earth by a direct load and by the real route (the Escape Line out, the ring in): no creature of another planet's species is alive
+        /// on arrival and none draws as a placeholder. The cause was the cartoon stage's camp gull, spawned on every planet's stage; Earth keeps it.
+        /// </summary>
+        [UnityTest]
+        public IEnumerator NoCreatureOfAnotherPlanetIsAliveOnArrival()
+        {
+            SceneDirector director = null;
+            yield return Boot(d => director = d);
+            var transitions = Object.FindAnyObjectByType<TransitionDirector>();
+            var catalog = GameState.Instance.catalog;
+            var gull = Meridian.Creatures.Species.Gull;
+            Assert.AreEqual(PlanetId.Earth, director.PlanetSide.Config.id, "the boot lands at Earth's camp");
+            TestContext.Out.WriteLine($"[MERIDIAN] U-206 boot: Earth, {director.PlanetSide.creatures.AliveCount} creature(s) alive, gulls {director.PlanetSide.creatures.CountOf(gull)}");
+
+            // 1. a direct load, Earth → Mars
+            SpawnBesideTheSurveyor(director.PlanetSide, Meridian.Creatures.Species.Stag);
+            yield return director.LoadPlanetSide(catalog.Get(PlanetId.Mars));
+            var side = director.PlanetSide;
+            side.hazards.enabled = false;
+            if (side.wardens != null) side.wardens.enabled = false;
+            Assert.AreEqual(0, side.creatures.CountOf(gull), "no gull on Mars (a direct load)");
+            yield return AssertOnlyNativesAlive(director, PlanetId.Mars, "direct load Earth → Mars");
+
+            // 2. a direct load, Mars → Earth: the camp's gull is back
+            SpawnBesideTheSurveyor(director.PlanetSide, Meridian.Creatures.Species.Dustskater);
+            yield return director.LoadPlanetSide(catalog.Get(PlanetId.Earth));
+            side = director.PlanetSide;
+            if (side.cartoon != null && side.cartoon.Active)
+                Assert.AreEqual(Meridian.View2D.CartoonStage.GullCount, side.creatures.CountOf(gull), "Earth's camp has its gull again (U-101)");
+            yield return AssertOnlyNativesAlive(director, PlanetId.Earth, "direct load Mars → Earth");
+            float settle = Time.realtimeSinceStartup + 20f;
+            while (!side.terrain.IsSettled && Time.realtimeSinceStartup < settle) yield return null;
+
+            // 3. the real route, Earth → Mars
+            yield return LaunchWithCreaturesAlive(director, transitions, Meridian.Creatures.Species.Stag);
+            yield return EnterFromSpace(director, transitions, "mars");
+            Assert.AreEqual(ViewMode.PlanetSide, GameState.Instance.view, "landed view");
+            Assert.AreEqual(0, director.PlanetSide.creatures.CountOf(gull), "no gull on Mars (the real route)");
+            yield return AssertOnlyNativesAlive(director, PlanetId.Mars, "real route Earth → Mars");
+
+            // 4. the real route, Mars → Earth
+            yield return LaunchWithCreaturesAlive(director, transitions, Meridian.Creatures.Species.Dustskater);
+            yield return EnterFromSpace(director, transitions, "earth");
+            Assert.AreEqual(ViewMode.PlanetSide, GameState.Instance.view, "landed view");
+            yield return AssertOnlyNativesAlive(director, PlanetId.Earth, "real route Mars → Earth");
+            LogAssert.NoUnexpectedReceived();
+        }
     }
 }
