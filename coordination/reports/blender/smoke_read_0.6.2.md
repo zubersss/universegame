@@ -174,8 +174,18 @@ read (21:37 on); the crops I owe are listed under the table.
 | G11 | smoke_33 | Two bears stand in one spot and read as one two-headed animal | (1525-1655, 598-680) | UNITY (spawn spacing or the smoke's staging) | low |
 | G12 | smoke_36, 37, 41, 43 | A dark soft-edged region low in the frame: in 36 / 37 a smudge with a reddish upper edge at the lower right, in 41 a brown shape with peaks along the bottom left, in 43 a dark wedge at the lower left. It is F7's old look (soft, stepped); F7 itself is fixed where the tier border shows as a clean line (smoke_5, 31, 54-58) | smoke_36 / 37: (1500-1920, 980-1080); smoke_41: (0-1000, 930-1080); smoke_43: (0-330, 850-1080) | UNITY: a second darkening that still follows a stepped surface height (my guess: the depth ambient or the next tier's border under a steep or carved surface) | medium that it is one cause |
 
-Crops owed when the lock is free (one light call): smoke_18 (860-1060, 600-720) at 4x for G5; smoke_21 Mars (1300-1430, 630-720)
-and (1790-1880, 940-1030) at 4x for G8 / G9; smoke_16 (780-1420, 400-590) at 2x for G6.
+### The four crops (cut 21:51 when the lock was free; viewed 21:5x) and LEAD's routing (21:5x)
+
+Build 0.6.2 went out on this read (LEAD 21:5x, USER-41). Routing: G1 on the page; G2, G3, G4, G7, G9, G10, G11, G12 →
+U-205 part 3 (G4: UNITY breaks the repeat; no art change unless a landmark is left); G6 ruled: the serpent is drawn at 1x of
+its sheet (a 3.5 m serpent), on U-192, no redraw; G8 = U-206; #17 = U-192's Site branch with the eleven icons.
+
+| # | Crop | What it shows |
+|---|------|---------------|
+| G5 | blender/preview/crop_smoke062_18_shape_4x.png (smoke_18, 860-1060 x 600-720, 4x) | Two small ground objects side by side behind the Beam's tip: a dark brown rounded lump (about 42 px wide at 1x) and a tan mound with a pointed top and dark zigzag grooves (about 62 px wide). Both are drawn SOFT: their edges step in blocks of 4-5 px at 1x, while the surveyor, the Beam and the lamp post beside them are crisp. They are not a plant, a spark or the dust (the new dust is a pale scalloped cloud, and LEAD saw the shape in 0.6.1). My reading: two of Mars's surface decor pieces (the set is rock_a, ventifact, dust_ripple, frost_patch, pebbles, rock_b: a rock and the grooved ventifact fit) drawn from a low-resolution copy of their texture (a low mip, or a small sprite scaled up). The same decor is crisp in smoke_21 Mars. Nothing weapon-like, no face. Owner: UNITY to name the two objects at that spot and why they draw soft. Confidence: high that they are soft; medium on which pieces they are |
+| G8 | crop_smoke062_21mars_square_4x.png (smoke_21 Mars, 1300-1430 x 630-720, 4x) | A plain cream rectangle, 44 x 32 px at 1x, hard-edged, with paper grain, no ink and nothing on it, over the far ridge. LEAD 21:5x: cause found (U-206: the camp gull spawned on every planet's stage), fixed for the next build |
+| G9 | crop_smoke062_21mars_blobs_4x.png (smoke_21 Mars, 1790-1880 x 940-1030, 4x) | Seven dark round balls in a cluster with one loose beside it, each with a small grey highlight. NAMED: it is my own buried detail, terrain/mars/fill_decor_3 ("blueberries_a": hematite spherules, 7 in a cluster with a glint each; build_ground_v3.FILL_DECOR), where the fill's scatter put it. No fault in the key. Two art notes on it: at 1x it reads as a bunch of dark grapes more than as mineral beads, and it is soft at 4x where the fill's own pebbles are crisp. If LEAD wants it clearer: a lighter hematite tone and a firmer ink ring (one re-export of two 64 / 48 px pieces). Low |
+| G6 | crop_smoke062_16_serpent_2x.png (smoke_16, 780-1420 x 400-590, 2x) | The serpent's outline is 5-6 px wide at 1x and soft-edged; the station's rigging lines crossing behind it are about 1 px and crisp. The head reads well (the eye pair, the closed smile, the cream belly). Confirms G6: the sheet is being scaled up about 2.7x. Ruled: 1x on U-192 |
 
 ## 5. Summary (21:5x, all 79 shots read at 1x)
 
