@@ -2,7 +2,7 @@
 Updated: 2026-11-09 19:2x · Session: 12 (resumed 14:03 after the owner's restart; THIS SESSION = zuber-4d; LEAD = zuber-d1, UNITY = zuber-a0) · older: coordination/status/archive/BLENDER_2026-11-09.md, BLENDER_2026-11-08.md, BLENDER_2026-11-07.md
 
 ## Current task
-**19:2x — RESUME HERE.** No lock and no want of mine; everything is committed and pushed. Two sheets are with LEAD (sent 19:26), nothing of them exported:
+**19:3x — RESUME HERE.** No lock and no want of mine; everything is committed and pushed. UNITY holds the lock for 0.6.2's release chain (about an hour of locks from 19:3x): FILES ONLY until LEAD says the release build is written. **B-225 and B-233 are both ACCEPTED by LEAD (19:2x) and both exports are HELD until then** (the tree is shared; B-225 changes layer3's height and adds layer4 before any code reads them). Then, in order: (a) export B-225 and B-233 as below; (b) one light run of U-205's test tile: `tools/blender_locked.ps1 -Job "U-205 test tile" -PyArgs blender/scripts/build_back_wall_v3.py,--no-grain,blender/preview/test_u205_earth_t3_no_grain.png,earth,3 -CapMB 700` (D-192: a wall without its paper grain, PREVIEW folder only, never exported; it also writes the grained tile beside it and prints both sizes and colour counts) and tell UNITY the two paths; (c) the 0.6.2 smoke read when the smoke lands, on the skeleton reports/blender/smoke_read_0.6.2.md (read tools only; the owner's page waits for it). The two accepted sheets:
 1. **B-225** (the sea reads underwater from the first metre): blender/preview/review_b225_sea_shallows_preview.png (19:19, the second run: the column's top plainer, bolder shafts, thicker caustic lines) + crop_b225_{1m,3m,10m_top,3m_shallows}.png. On ACCEPTED: `tools/blender_render.ps1 backgrounds/earth/sea_under` (a painted row: about 2 min; if the wrapper takes its light path hold heavy_blender.lock by hand), read the export's palette share and seams, check in `git status` that layers 1 and 2 are byte-identical, commit layers 0 / 3 / 4 + sea_under.json by explicit list, tell UNITY layer3's new height (128 px) and layer4's "shore_m" / "draw_before".
 2. **B-233** (the catalogue's ten site icons beside the accepted camp): blender/preview/review_b233_site_icons_preview.png (19:25, the second run: no single round window or dial on a rounded body or a box) + crop_b233_{earth,mars,mercury,venus}_2x.png, crop_b233_row64_silhouettes.png. On ACCEPTED: `tools/blender_render.ps1 icons/catalogue/sites` (a kit row: hold heavy_blender.lock by hand), ten new keys icons/catalogue/<label> (.json + _color.png each), commit by explicit list, 0 .meta.
 3. Any round LEAD orders on either; then whatever LEAD assigns (B-234 / B-235 / B-236 are promoted only on the owner's yes to B-231).
@@ -22,7 +22,7 @@ How I run: locks listed, then RAM read, each in its own call; `tools/blender_loc
 
 ## Ready for review
 - With the owner: B-231 (blender/preview/review_b231_surveyor_v5_design.png and the crop_b231_* crops).
-- With LEAD: B-225's preview, B-233's sheet (Current task 1 and 2).
+- ACCEPTED, export held until 0.6.2 is out: B-225's preview, B-233's sheet (Current task 1 and 2).
 - In Review until UNITY's import and captures: B-230, B-232, B-238, B-224, B-223.
 - B-189 / B-185 (waiting on U-159's captures): review_b141_mars_{canyon,storm,plains}(_dip).png, review_b152_venus_surface(_dip).png, review_b149_mercury_{day,twilight,night}_dip.png.
 
