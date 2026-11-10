@@ -13,6 +13,7 @@ At 18:52 the laptop has 0.12 GB of memory free and no build or render can start 
 3. If you are not using them, also close the **Xbox** app and any Chrome windows you don't need.
 4. Tell the Lead session "done: USER-40".
 If you are using Ollama for something of your own, say so instead and the team will wait or work around it. You can start it again whenever the team is idle.
+Update 18:59: the memory came back on its own at about 18:57 (Ollama let go of its 4.2 GB; it is still running, at 0.06 GB) and the team is working again. The ask stands, less urgently: while Ollama runs, it can take those 4 GB back at any moment and stop a build halfway; quitting it for the evening avoids that.
 
 ### USER-39 — Look over the new surveyor design (5 min, no game needed)
 The first design for the new-look surveyor you asked for after 0.6.0 is on this page: https://claude.ai/artifact/Ts7md2pqMrMby3hnTGZdiq
