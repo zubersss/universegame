@@ -21,6 +21,10 @@ tuft, a stitched suit with knee and elbow pads, a belt with a pouch, boot soles 
   python -I build_surveyor_v5.py <review png>     the lock-free design sheet: turnaround (side, front 3/4), the pose sheet
                                                   (idle, crouch, jump apex with bent knees, dig with the shovel) posed from
                                                   the rig, the part sheet, beside the v4 surveyor at 1x
+  export(art) / keys()                            (11-10, written and NOT YET RUN) render.py's kit path, for the owner's yes
+                                                  only: the manifest row {"key": KEY, "kit_set": true, "generator":
+                                                  "scripts/build_surveyor_v5.py", "numpy_only": true, "review_name":
+                                                  "b231_surveyor_v5"} is added at that moment, not before
 """
 import json
 import math
@@ -695,19 +699,21 @@ def all_parts(back=1):
     return P
 
 
-def sheet(P):
-    """Shelf-pack the parts onto one sheet (2 px gutters) -> (RGBA, [(name, rect bottom-left, pivot normalised)])."""
+def sheet(P, g=v3.GUTTER):
+    """Shelf-pack the parts onto one sheet -> (RGBA, [(name, rect bottom-left, pivot normalised)]). g: the gutter between
+    parts and around the sheet (11-10: the contract's 4 px, as ships/pilgrim/rig and the flora rig sets pack; rounds 1-2b
+    drew the sheet with 2 px, a layout difference only: no part's pixels change)."""
     names = sorted(P, key=lambda n: -P[n][0].shape[0])
-    W, x, y, row_h, placed = 512, 2, 2, 0, []
+    W, x, y, row_h, placed = 512, g, g, 0, []
     for n in names:
         img = P[n][0]
         h, w = img.shape[:2]
-        if x + w + 2 > W:
-            x, y, row_h = 2, y + row_h + 2, 0
+        if x + w + g > W:
+            x, y, row_h = g, y + row_h + g, 0
         placed.append((n, x, y, w, h))
-        x += w + 2
+        x += w + g
         row_h = max(row_h, h)
-    H = int(math.ceil((y + row_h + 2) / 4.0) * 4)
+    H = int(math.ceil((y + row_h + g) / 4.0) * 4)
     out = np.zeros((H, W, 4), np.uint8)
     rects = []
     for n, x, y, w, h in placed:
@@ -855,6 +861,61 @@ def preview(out, footnote=None):
         json.dump(rig_json(rects), fh, indent=1)
         fh.write("\n")
     print("rig json ->", js)
+
+
+# ---------------------------------------------------------------- the export (WRITTEN 11-10 00:5x, NOT YET RUN)
+def export_checks(P, sh, rects):
+    """What must hold before a file is written (contract 2 / 11.1 / 11.3): one line per problem."""
+    out = []
+    if sh.shape[0] > v3.MAX_SHEET or sh.shape[1] > v3.MAX_SHEET:
+        out.append(f"the sheet is {sh.shape[1]}x{sh.shape[0]} (cap {v3.MAX_SHEET})")
+    on_sheet = {n for n, _rect, _pivot in rects}
+    for n in sorted(P):
+        a = P[n][0][..., 3]
+        if a[0].any() or a[-1].any() or a[:, 0].any() or a[:, -1].any():
+            out.append(f"part {n}: paint on its rect's outermost row or column (clipped by its canvas?)")
+    for facing in ("side", "front34"):
+        bl = bones(facing)
+        names = [b[0] for b in bl]
+        if len(set(names)) != len(names):
+            out.append(f"{facing}: a bone name is used twice")
+        roots = [b[0] for b in bl if b[2] is None]
+        if len(roots) != 1:
+            out.append(f"{facing}: {len(roots)} root bones ({', '.join(roots)})")
+        for n, p, par, _o, _r, _length, _order in bl:
+            part_name = p + ("_far" if n in FAR else "")
+            if part_name not in on_sheet:
+                out.append(f"{facing}/{n}: its part {part_name} is not on the sheet")
+            if par is not None and par not in names:
+                out.append(f"{facing}/{n}: its parent {par} is not a bone of this facing")
+        if BLINK[facing][0] not in on_sheet:
+            out.append(f"{facing}: the blink swap's part {BLINK[facing][0]} is not on the sheet")
+    return out
+
+
+def export(art):
+    """ONLY after the owner's yes on the look-over (USER-39) and LEAD's word (B-231: no export before it): the part sheet
+    and the bone JSON -> characters/surveyor_v5/rig_color.png + rig.json, through render.py's kit path (export / keys /
+    preview). The manifest row is added at that moment and not before, so no batch run can ship the design early."""
+    P = all_parts()
+    sh, rects = sheet(P)
+    problems = export_checks(P, sh, rects)
+    if problems:
+        raise ValueError("B-231 checks: " + "; ".join(problems))
+    base = os.path.join(art, *KEY.split("/"))
+    os.makedirs(os.path.dirname(base), exist_ok=True)
+    n = pngio.write_png(base + "_color.png", sh)
+    meta = rig_json(rects)
+    meta["note"] = ("B-231 (C5, D-185): the v5 surveyor's part sheet and bones, exported after the owner's look-over; "
+                    "the contract's v4 rig schema follows it")
+    with open(base + ".json", "w", encoding="utf-8", newline="\n") as f:
+        json.dump(meta, f, indent=2)
+        f.write("\n")
+    return [(KEY, sh.shape[1], sh.shape[0], n)]
+
+
+def keys():
+    return [KEY]
 
 
 if __name__ == "__main__":                       # python -I build_surveyor_v5.py <review png>
