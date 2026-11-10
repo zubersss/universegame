@@ -6,7 +6,8 @@ param(
     [ValidateSet('EditMode', 'PlayMode')][string]$Mode = 'EditMode',
     [string]$Filter = '',
     [string]$Assembly = '',
-    [switch]$Graphics  # U-095: a real graphics device (the film pass and GPU timings exist only there)
+    [switch]$Graphics,  # U-095: a real graphics device (the film pass and GPU timings exist only there)
+    [switch]$SaveRootSwitch  # D-203: starts Unity with the player's own -meridianSaveRoot <logs/test_switch_saves> (SaveRootSwitchPlayTests, run alone)
 )
 . (Join-Path $PSScriptRoot 'unity_common.ps1')
 
@@ -24,6 +25,7 @@ try {
     $assembly = if ($Assembly) { $Assembly } elseif ($Mode -eq 'EditMode') { 'MERIDIAN.Tests.Unit;MERIDIAN.Tests.LeadQA' } else { 'MERIDIAN.Tests.Play;MERIDIAN.Tests.LeadQA' }
     $unityArgs = @('-runTests', '-testPlatform', $Mode, '-testResults', $xml, '-assemblyNames', $assembly)
     if ($Filter) { $unityArgs += @('-testFilter', $Filter) }
+    if ($SaveRootSwitch) { $unityArgs += @('-meridianSaveRoot', "`"$(New-PlayerSaveRoot 'test_switch_saves')`"") }
     $r = Invoke-UnityBatch $unityArgs "unity_test_${date}_$Mode.log" -Graphics:$Graphics
 } finally { Exit-HeavyJobLock }
 
