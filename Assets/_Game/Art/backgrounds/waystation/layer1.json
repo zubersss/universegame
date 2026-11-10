@@ -1,0 +1,53 @@
+{
+  "key": "backgrounds/waystation/layer1",
+  "style": "v3",
+  "width": 1920,
+  "height": 1080,
+  "ppu": 64,
+  "cradle": {
+    "px": [
+      660,
+      900
+    ],
+    "px_from_bottom_left": [
+      660,
+      180
+    ],
+    "m": [
+      -4.6875,
+      -5.625
+    ],
+    "half_width_px": 220,
+    "note": "the centre of the cradle's deck plate, its top edge"
+  },
+  "ship_ground": {
+    "px": [
+      660,
+      894
+    ],
+    "px_from_bottom_left": [
+      660,
+      186
+    ],
+    "m": [
+      -4.6875,
+      -5.5312
+    ],
+    "note": "put the Pilgrim rig's ground point here (its feet stand on the deck plate), drawn over layer1 and under layer2"
+  },
+  "clamps": {
+    "jaw_px_from_centre_line": 127,
+    "jaw_y_px": [
+      692,
+      744
+    ],
+    "note": "the two jaws' inner faces; they stand just outside the docked Pilgrim's landing fins"
+  },
+  "market_frame_px": [
+    916,
+    48,
+    1880,
+    1032
+  ],
+  "note": "B-223: the bay with its EMPTY cradle and clamps; the ship is not in the layer (LEAD 18:2x)"
+}

@@ -1,0 +1,13 @@
+{
+  "key": "icons/catalogue/camp",
+  "style": "v3",
+  "width": 128,
+  "height": 128,
+  "palette": "earth",
+  "ppu": 128,
+  "pivot": [
+    0.5,
+    0.5
+  ],
+  "note": "B-223: the catalogue's Camp (the spawn camp: the landing pad, a crate stack, a lamp post with a pennant)"
+}
