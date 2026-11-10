@@ -105,6 +105,27 @@ namespace Meridian.Tests
             Assert.AreEqual(0f, w.Offset(feet + new Vector2(0.5f, 0f), 1f, 0.25f, 0f).x, "nobody on the stage: no push");
         }
 
+        /// <summary>D-206b: the foreground clears round the surveyor (the big leaf covered the legs and the ground where the dig lands)
+        /// and fades out as a whole underground; nothing clears with nobody on the stage.</summary>
+        [Test]
+        public void TheForegroundClearsRoundTheSurveyorAndFadesUnderground()
+        {
+            var w = Blowing(216);
+            w.SetPusher(new Vector2(100f, 320f), true);
+            Assert.AreEqual(0f, w.ForegroundAlpha(100f), "over the surveyor: clear");
+            Assert.AreEqual(0f, w.ForegroundAlpha(102.5f), 1e-6f, "2.5 m off: still clear");
+            Assert.AreEqual(0.5f, w.ForegroundAlpha(97f), 1e-5f, "3 m off: half");
+            Assert.AreEqual(1f, w.ForegroundAlpha(103.5f), 1e-6f, "3.5 m off: whole");
+            Assert.AreEqual(1f, w.ForegroundAlpha(140f));
+            w.SetForegroundFade(0.25f);
+            Assert.AreEqual(0.25f, w.ForegroundAlpha(140f), 1e-6f, "the layer's own fade on top");
+            w.SetForegroundFade(0f);
+            Assert.AreEqual(0f, w.ForegroundAlpha(140f), "underground: the foreground is gone");
+            w.SetForegroundFade(1f);
+            w.SetPusher(new Vector2(100f, 320f), false);
+            Assert.AreEqual(1f, w.ForegroundAlpha(100f), "nobody on the stage: nothing clears");
+        }
+
         static LivingPiece Fern() => new LivingPiece { name = "fern", uv = new Rect(0.1f, 0.2f, 0.2f, 0.3f), sizeM = new Vector2(2.25f, 1.5f), pivot = new Vector2(0.5f, 0f), motion = LivingMotion.Sways, bendFromM = 0.15f, bendToM = 1.3f, bendPower = 1.5f, giveM = 0.22f };
 
         [Test]
@@ -124,6 +145,7 @@ namespace Meridian.Tests
                 Assert.AreEqual(40f, uv1[i].x, 1e-5f); Assert.AreEqual(300f, uv1[i].y, 1e-5f); // every vertex knows its root
                 Assert.AreEqual(0.22f, uv1[i].w, 1e-6f, "and the piece's give");
                 Assert.AreEqual(0.37f, uv2[i].x, 1e-6f); Assert.AreEqual(1f, uv2[i].y, "not mirrored");
+                Assert.AreEqual(0f, uv2[i].z, "not a foreground piece: it never clears");
                 Assert.That(uv1[i].z, Is.InRange(0f, 1f));
                 if (uv1[i].z < least) { least = uv1[i].z; stillAt = verts[i]; }
                 if (uv1[i].z > most) { most = uv1[i].z; freeAt = verts[i]; }
@@ -135,9 +157,10 @@ namespace Meridian.Tests
             Assert.Greater(((Vector2)freeAt - inst.at).magnitude, 1.3f - 1e-3f);
             // mirrored: the picture's right is the world's left, and the shader is told
             verts.Clear(); uv0.Clear(); uv1.Clear(); uv2.Clear(); cols.Clear(); tris.Clear();
-            inst.flip = true;
+            inst.flip = true; inst.clears = true;
             LivingMesh.Append(piece, inst, verts, uv0, uv1, uv2, cols, tris);
             int topRight = verts.Count - 1; // the last vertex: the picture's upper right corner
+            Assert.AreEqual(1f, uv2[topRight].z, "a foreground piece is flagged to clear");
             Assert.Less(verts[topRight].x, 40f, "mirrored about the root");
             Assert.AreEqual(-1f, uv2[topRight].y);
             // a standing piece: one quad that never bends; a piece that is gone: nothing
@@ -255,6 +278,8 @@ namespace Meridian.Tests
             Has("/ 1.4)", LivingWind.PushRadiusM, "the push's radius"); Has("0.28 *", LivingWind.PushGiveM, "the push's give");
             Has("(-0.6,", -LivingWind.PushBelowM, "the push's reach under the feet"); Has(", 1.6)", LivingWind.PushAboveM, "and over them");
             Has("/ 0.25)", LivingWind.PushSoftGiveM, "a soft plant's give");
+            Has("smoothstep(2.5,", LivingWind.ClearM, "the foreground is clear this near the surveyor");
+            Has(", 3.5,", LivingWind.ClearM + LivingWind.ClearEaseM, "and whole from here on");
         }
     }
 }

@@ -6,7 +6,7 @@
 // Globals set once a frame by LivingWind.Push(): no constant per piece, so a layer stays one draw call.
 float4 _LivingWind;      // direction x, direction y, strength 0..1, the wind's clock (s)
 float4 _LivingWindPhase; // the two gust waves' phases (from the seed)
-float4 _LivingPush;      // the surveyor's feet x, y; z = 1 while they are on the stage
+float4 _LivingPush;      // the surveyor's feet x, y; z = 1 while they are on the stage; w = the foreground's fade (0 underground)
 
 #define LIVING_TWO_PI 6.28318530718
 
@@ -46,6 +46,16 @@ float3 LivingBend(float3 positionOS, float4 sway, float4 sway2)
     float2 rootWS = TransformObjectToWorld(float3(sway.xy, 0.0)).xy;
     positionOS.xy += LivingOffset(rootWS, sway.z, sway.w, sway2.x);
     return positionOS;
+}
+
+// D-206b: a foreground piece (sway2.z = 1) is clear within 2.5 m of the surveyor's x and whole from 3.5 m on, and the whole
+// foreground fades with _LivingPush.w; every other vertex keeps its alpha. LivingWind.ForegroundAlpha in C#.
+float LivingAlpha(float4 sway, float4 sway2)
+{
+    float rootX = TransformObjectToWorld(float3(sway.xy, 0.0)).x;
+    float clearK = smoothstep(2.5, 3.5, abs(rootX - _LivingPush.x));
+    float a = lerp(1.0, clearK, _LivingPush.z) * _LivingPush.w;
+    return lerp(1.0, a, sway2.z);
 }
 
 #endif

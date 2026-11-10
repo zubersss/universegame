@@ -237,6 +237,7 @@ namespace Meridian.View2D.Living
                 {
                     piece = (int)kind, at = root + Vector2.down * sinkM, scale = scale * Mathf.Lerp(0.85f, 1.15f, Roll(i, salt + 2)),
                     flip = layer == Layer.Foreground && Roll(i, salt + 3) > 0.5f, // D-206: never on near, play or play_front
+                    clears = layer == Layer.Foreground, // D-206b: the foreground clears round the surveyor
                     phase = Roll(i, salt + 4), tint = tint,
                 });
             }
@@ -508,6 +509,16 @@ namespace Meridian.View2D.Living
             bool onFoot = player.isActiveAndEnabled && player.Body != null;
             Vector2 feet = onFoot ? (Vector2)player.transform.position : Vector2.zero;
             Wind.SetPusher(feet, onFoot && WindOn);
+            // D-206b: the whole foreground fades out as the camera eases underground (the close camera's own rule and ease)
+            if (Time.frameCount - lookedFrame >= Meridian.CameraRig.StageZoom.CheckEveryFrames || Time.frameCount < lookedFrame)
+            {
+                lookedFrame = Time.frameCount;
+                if (follow == null) follow = side.sideCamera.GetComponent<Meridian.Player.CameraFollow>();
+                Underground = onFoot && follow != null && Meridian.CameraRig.StageZoom.Underground(Underground, follow.DepthUnder(feet), follow.Roofed(feet));
+            }
+            foregroundFade = Mathf.SmoothDamp(foregroundFade, Underground ? 0f : 1f, ref foregroundVel, Meridian.CameraRig.StageZoom.EaseTime, Mathf.Infinity, Mathf.Max(1e-5f, dt));
+            if (foregroundFade < 1e-3f) foregroundFade = 0f; else if (foregroundFade > 0.999f) foregroundFade = 1f;
+            Wind.SetForegroundFade(foregroundFade);
             Wind.Push();
 
             float camX = side.sideCamera.transform.position.x;
@@ -531,6 +542,12 @@ namespace Meridian.View2D.Living
 
             if (rockGo.activeSelf != LightOn) { rockGo.SetActive(LightOn); lampGo.SetActive(LightOn); }
         }
+
+        /// <summary>D-206b: the surveyor counts as underground (the foreground is faded out then).</summary>
+        public bool Underground { get; private set; }
+        Meridian.Player.CameraFollow follow;
+        int lookedFrame = int.MinValue / 2;
+        float foregroundFade = 1f, foregroundVel;
 
         /// <summary>The camp's wind: from the west, a moderate breeze (the stage file's when pieces land).</summary>
         public static Vector2 WindDirection = Vector2.right;
@@ -556,7 +573,7 @@ namespace Meridian.View2D.Living
             unlit = lit = null; colour = normal = null;
             moteGo = shaftGo = vineGo = rockGo = lampGo = null;
             moteMesh = shaftMesh = vineMesh = null;
-            Chain = null; Wind = null; builtFor = null;
+            Chain = null; Wind = null; builtFor = null; follow = null; Underground = false; foregroundFade = 1f; foregroundVel = 0f;
             Built = false; Removed = 0;
             LivingWind.PushStill();
         }

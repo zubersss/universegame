@@ -311,6 +311,26 @@ if ($runProbe) {
         if (-not $cok) { $memRed = $true }
         $rows += "| Climb $dot Earth (dev build) | p99 $le 20 ms, no frame > 50 ms outside the iris (U-148) | $($c.climbFrames) frames in $($c.climbSeconds) s to $($c.topSpeed) m/s: p99 $($c.climbP99Ms) ms, worst $($c.climbWorstMs) ms, $($c.climbOver50) over 50 ms; the iris $($c.irisFrames) frames, longest $($c.irisWorstMs) ms; in Space $($c.reachedSpace) | $(if ($cok) { 'green' } else { 'red' }) |"
     }
+    # U-216 (D-205): the living stage's prices at Earth's camp in the dev player (MemoryProbe.LivingCost): six states interleaved. Reported, not gated.
+    $living = @()
+    if ($buildOk -and (Test-Path $probeOut)) { $living = @(Get-Content $probeOut | Where-Object { $_.Trim() } | ForEach-Object { $_ | ConvertFrom-Json } | Where-Object { $null -ne $_.livingStates }) }
+    foreach ($lv in $living) {
+        $st = @($lv.livingStates); $mn = @($lv.livingMainMs); $rd = @($lv.livingRenderMs); $gp = @($lv.livingGpuMs); $dr = @($lv.livingDraws)
+        $diff = { param($a, $b) '{0:+0.000;-0.000;0.000}' -f ([double]$a - [double]$b) }
+        $diffDraws = { param($a, $b) '{0:+0.0;-0.0;0.0}' -f ([double]$a - [double]$b) }
+        $rows += @('', "### The living stage (U-216): its price in the development player at Earth's camp, $($lv.livingPxPerMetre) px a metre, $($lv.width)${times}$($lv.height)", '',
+            "$($lv.livingPieces) stand-in pieces, $($lv.livingVertices) vertices; the lamp reads the normal map: $($lv.livingLampNormals). Medians of $($lv.livingRounds) interleaved rounds of $($lv.livingBlockFrames) frames a state; spread of a state's GPU blocks: $(@($lv.livingGpuSpreadMs) -join ' / ') ms, of its main-thread blocks: $(@($lv.livingMainSpreadMs) -join ' / ') ms. Reported, not gated.", '',
+            '| State | Main thread ms | Render thread ms | GPU frame ms | Draw calls |', '|---|---|---|---|---|')
+        for ($i = 0; $i -lt $st.Count; $i++) { $rows += "| $($st[$i]) | $($mn[$i]) | $($rd[$i]) | $($gp[$i]) | $($dr[$i]) |" }
+        $rows += @('', '| Price | Main thread ms | Render thread ms | GPU frame ms | Draw calls |', '|---|---|---|---|---|')
+        $rows += "| Living stage $dot the whole stage (all - off) | $(& $diff $mn[1] $mn[0]) | $(& $diff $rd[1] $rd[0]) | $(& $diff $gp[1] $gp[0]) | $(& $diffDraws $dr[1] $dr[0]) |"
+        $parts = @('the wind (the bend and the push)', 'the air (motes, leaves, shafts, the cloud shadow)', 'the vine chain', 'the lit piece and its lamp')
+        for ($i = 0; $i -lt 4; $i++) {
+            $k = $i + 2
+            $rows += "| Living stage $dot $($parts[$i]) (all - $($st[$k])) | $(& $diff $mn[1] $mn[$k]) | $(& $diff $rd[1] $rd[$k]) | $(& $diff $gp[1] $gp[$k]) | $(& $diffDraws $dr[1] $dr[$k]) |"
+        }
+        $rows += @('', "The chip's frame budget left with the whole stage on: GPU $('{0:0.00}' -f (16.6 - [double]$gp[1])) ms of 16.6 (its frame takes $($gp[1]) ms), main thread $('{0:0.00}' -f (16.6 - [double]$mn[1])) ms of 16.6 (it takes $($mn[1]) ms).")
+    }
     # D-191 amended: this build's frame and transition rows against the control's, both measured in this lock.
     if ($Control) {
         $rows += @('', "### The last build's control (D-191): $Control's development player probed in the same lock", '',
@@ -356,7 +376,7 @@ if ($runProbe) {
     } else {
         Set-Content -Path $report -Value (($rows -join "`n") + "`n") -Encoding UTF8 -NoNewline
     }
-    $rows | Where-Object { $_ -like '| Memory*' -or $_ -like '| Residency*' -or $_ -like '| Film*' -or $_ -like '| Planet load*' -or $_ -like '| Transition*' -or $_ -like '| Bundles*' -or $_ -like '| Sprite atlases*' -or $_ -like '| Return*' -or $_ -like '| Mip*' -or $_ -like '| Boot*' -or $_ -like '| Creep*' -or $_ -like '| Heap*' -or $_ -like '| Climb*' -or $_ -like '| Space first*' -or $_ -like '| GPU frame*' -or $_ -like '| Control*' } | ForEach-Object { Write-Host $_ }
+    $rows | Where-Object { $_ -like '| Memory*' -or $_ -like '| Residency*' -or $_ -like '| Film*' -or $_ -like '| Planet load*' -or $_ -like '| Transition*' -or $_ -like '| Bundles*' -or $_ -like '| Sprite atlases*' -or $_ -like '| Return*' -or $_ -like '| Mip*' -or $_ -like '| Boot*' -or $_ -like '| Creep*' -or $_ -like '| Heap*' -or $_ -like '| Climb*' -or $_ -like '| Space first*' -or $_ -like '| GPU frame*' -or $_ -like '| Control*' -or $_ -like '| Living*' } | ForEach-Object { Write-Host $_ }
 }
 
 if ($SkipGate) { if ($memRed -or -not $buildOk) { Write-Host 'BUILD MEMORY RED'; exit 1 } else { Write-Host 'BUILD MEMORY GREEN'; exit (Complete-Release) } }

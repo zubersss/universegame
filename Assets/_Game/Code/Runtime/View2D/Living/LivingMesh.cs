@@ -37,13 +37,15 @@ namespace Meridian.View2D.Living
         public Color32 tint;
         /// <summary>Its ground was dug away: it is no longer drawn.</summary>
         public bool gone;
+        /// <summary>A foreground piece: it clears round the surveyor and fades underground (D-206b).</summary>
+        public bool clears;
     }
 
     /// <summary>
     /// U-216 (D-206): the living stage's geometry. A layer is ONE mesh: each swaying piece a small grid (cells of about CellM)
     /// over its picture, each standing piece one quad. Every vertex carries what the wind needs, so the vertex shader moves the
     /// whole layer from a few global constants: uv1 = (root x, root y, bend weight, give in metres), uv2 = (phase, the normal's x
-    /// sign, 0, 0). Pure: lists in, lists out; the stage fills a Mesh from them once at load and again only when a piece goes.
+    /// sign, 1 for a foreground piece that clears round the surveyor, 0). Pure: lists in, lists out; the stage fills a Mesh from them once at load and again only when a piece goes.
     /// </summary>
     public static class LivingMesh
     {
@@ -78,7 +80,7 @@ namespace Meridian.View2D.Living
             int nx = sways ? CellsFor(piece.sizeM.x * scale) : 1, ny = sways ? CellsFor(piece.sizeM.y * scale) : 1;
             int first = vertices.Count;
             float w = piece.sizeM.x * scale, h = piece.sizeM.y * scale, side = inst.flip ? -1f : 1f;
-            var packed2 = new Vector4(inst.phase, side, 0f, 0f);
+            var packed2 = new Vector4(inst.phase, side, inst.clears ? 1f : 0f, 0f);
             for (int j = 0; j <= ny; j++)
             {
                 float v = (float)j / ny;

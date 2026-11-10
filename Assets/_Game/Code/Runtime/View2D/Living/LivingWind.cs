@@ -24,8 +24,23 @@ namespace Meridian.View2D.Living
         /// them) part to either side, at most PushGiveM at the tip of a soft plant (a stiff one by its give).</summary>
         public const float PushRadiusM = 1.4f, PushGiveM = 0.28f, PushBelowM = 0.6f, PushAboveM = 1.6f, PushSoftGiveM = 0.25f;
 
+        /// <summary>D-206b (LEAD on u216/1: the big leaf covered the surveyor's legs and the ground where the dig lands): a FOREGROUND
+        /// piece is clear within ClearM of the surveyor's x and whole from ClearM + ClearEaseM on; the whole foreground also fades
+        /// with ForegroundFade (the stage takes it to 0 as the camera eases underground).</summary>
+        public const float ClearM = 2.5f, ClearEaseM = 1f;
+        public float ForegroundFade { get; private set; } = 1f;
+        public void SetForegroundFade(float fade) { ForegroundFade = Mathf.Clamp01(fade); }
+
+        /// <summary>A foreground piece's alpha for a root at x (the shader's LivingAlpha for a vertex flagged as foreground). Pure.</summary>
+        public float ForegroundAlpha(float rootX)
+        {
+            float k = Mathf.Clamp01((Mathf.Abs(rootX - Pusher.x) - ClearM) / ClearEaseM);
+            float near = k * k * (3f - 2f * k);
+            return (Pushing ? near : 1f) * ForegroundFade;
+        }
+
         /// <summary>Shader constants (set by Push): (direction x, direction y, strength, clock), (phase A, phase B, 0, 0), (the pusher's
-        /// feet x, y, 1 when someone pushes, 0).</summary>
+        /// feet x, y, 1 when someone is on the stage, the foreground's fade).</summary>
         public static readonly int WindId = Shader.PropertyToID("_LivingWind"), PhaseId = Shader.PropertyToID("_LivingWindPhase"), PushId = Shader.PropertyToID("_LivingPush");
 
         public int Seed { get; }
@@ -99,7 +114,7 @@ namespace Meridian.View2D.Living
         {
             Shader.SetGlobalVector(WindId, new Vector4(Direction.x, Direction.y, Strength, Clock));
             Shader.SetGlobalVector(PhaseId, new Vector4(PhaseA, PhaseB, 0f, 0f));
-            Shader.SetGlobalVector(PushId, new Vector4(Pusher.x, Pusher.y, Pushing ? 1f : 0f, 0f));
+            Shader.SetGlobalVector(PushId, new Vector4(Pusher.x, Pusher.y, Pushing ? 1f : 0f, ForegroundFade));
         }
 
         /// <summary>A still field for the shader (the stage is off or gone: nothing a leftover material could move by).</summary>

@@ -260,6 +260,7 @@ namespace Meridian.Perf
                              $"\"bundles\":\"{Bundles()}\"}}");
             TopTextures(where, 15);
             if (where == "Earth") yield return FilmGpu(where); // U-095: the film pass's GPU cost at 1080p
+            if (where == "Earth") yield return LivingCost(where); // U-216: the living stage's four prices
         }
 
         /// <summary>U-112: the loaded objects of a type and their runtime memory in MB (Profiler.GetRuntimeMemorySizeLong; reports only: allocates).</summary>
@@ -336,6 +337,84 @@ namespace Meridian.Perf
             string Arr(List<float> l) { var sb = new StringBuilder("["); for (int i = 0; i < l.Count; i++) { if (i > 0) sb.Append(','); sb.Append(l[i].ToString("F3", ci)); } return sb.Append(']').ToString(); }
             lines.AppendLine($"{{\"leg\":\"{where}\",\"filmGpuOnMs\":{Mean(ons).ToString("F3", ci)},\"filmGpuOffMs\":{Mean(offs).ToString("F3", ci)},\"filmPassMs\":{Median(diffs).ToString("F3", ci)},\"filmSpreadMs\":{Spread(diffs).ToString("F3", ci)},\"filmOn\":{Arr(ons)},\"filmOff\":{Arr(offs)},\"filmDiffs\":{Arr(diffs)},\"filmBlockFrames\":{FilmBlockFrames},\"width\":{Screen.width},\"height\":{Screen.height}}}");
         }
+
+        // ---------- U-216: what the living stage costs on this chip ----------
+
+        /// <summary>U-216: frames in a block (after LivingSettleFrames to let a change land), and the rounds of the six states.</summary>
+        public const int LivingBlockFrames = 200, LivingSettleFrames = 40, LivingRounds = 3;
+
+        /// <summary>
+        /// U-216 (D-205): the living stage's price in the built player, at Earth's camp under U-213's close camera (96 px a metre), on
+        /// foot. Six states in turn, LivingRounds times over (interleaved, so drift between blocks does not land in one state): the
+        /// stage off; all of it on; then on with the wind, the air, the vine or the lit piece off. Per block the means of the main
+        /// thread's time, the render thread's, the GPU's frame time (FrameTimingManager) and the draw calls. One JSON line with every
+        /// state's median over the rounds: the stage's whole price is all - off, a part's price all - (all without it).
+        /// </summary>
+        IEnumerator LivingCost(string where)
+        {
+            var side = director.PlanetSide;
+            var ci = System.Globalization.CultureInfo.InvariantCulture;
+            if (side == null || side.player == null || side.terrain == null || !side.terrain.SmoothGround) { lines.AppendLine($"{{\"leg\":\"Living {where}\",\"livingError\":\"no smooth planet side\"}}"); yield break; }
+            bool zoomWas = Meridian.CameraRig.StageZoom.Enabled, stageWas = Meridian.View2D.Living.LivingStage.Enabled;
+            float ppmWas = Meridian.CameraRig.StageZoom.SurfacePxPerMetre;
+            var body = side.player.Body;
+            Vector2 standWas = body.position;
+            float x = side.spawnX + 14.5f;
+            var feet = new Vector2(x, side.terrain.SurfaceAt(x) + 0.05f);
+            body.position = feet; side.player.transform.position = feet; body.linearVelocity = Vector2.zero;
+            Meridian.CameraRig.StageZoom.Enabled = true; Meridian.CameraRig.StageZoom.SurfacePxPerMetre = 96f;
+            for (int i = 0; i < 120; i++) yield return null; // the camera eases in
+
+            int n = LivingStates.Length;
+            var main = new List<float>[n]; var render = new List<float>[n]; var gpu = new List<float>[n]; var draws = new List<float>[n];
+            for (int k = 0; k < n; k++) { main[k] = new List<float>(LivingRounds); render[k] = new List<float>(LivingRounds); gpu[k] = new List<float>(LivingRounds); draws[k] = new List<float>(LivingRounds); }
+            var timings = new FrameTiming[1];
+            var drawCalls = Unity.Profiling.ProfilerRecorder.StartNew(Unity.Profiling.ProfilerCategory.Render, "Draw Calls Count");
+            int pieces = 0, vertices = 0; bool lampNormals = false;
+            for (int round = 0; round < LivingRounds; round++)
+                for (int k = 0; k < n; k++)
+                {
+                    Meridian.View2D.Living.LivingStage.WindOn = k != 2;
+                    Meridian.View2D.Living.LivingStage.AirOn = k != 3;
+                    Meridian.View2D.Living.LivingStage.VineOn = k != 4;
+                    Meridian.View2D.Living.LivingStage.LightOn = k != 5;
+                    Meridian.View2D.Living.LivingStage.Enabled = k != 0;
+                    for (int i = 0; i < LivingSettleFrames; i++) yield return null;
+                    var stage = Meridian.View2D.Living.LivingStage.Instance;
+                    if (k == 1 && stage != null && stage.Built)
+                    {
+                        pieces = vertices = 0;
+                        for (int l = 0; l < Meridian.View2D.Living.LivingStage.Layers; l++) { pieces += stage.InstanceCount((Meridian.View2D.Living.LivingStage.Layer)l); vertices += stage.VertexCount((Meridian.View2D.Living.LivingStage.Layer)l); }
+                        lampNormals = stage.LampUsesNormals;
+                    }
+                    double m = 0, r = 0, g = 0, d = 0; int got = 0;
+                    for (int i = 0; i < LivingBlockFrames; i++)
+                    {
+                        yield return null;
+                        FrameTimingManager.CaptureFrameTimings();
+                        if (FrameTimingManager.GetLatestTimings(1, timings) != 1) continue;
+                        m += timings[0].cpuMainThreadFrameTime; r += timings[0].cpuRenderThreadFrameTime; g += timings[0].gpuFrameTime; d += drawCalls.LastValue; got++;
+                    }
+                    if (got == 0) got = 1;
+                    main[k].Add((float)(m / got)); render[k].Add((float)(r / got)); gpu[k].Add((float)(g / got)); draws[k].Add((float)(d / got));
+                }
+            drawCalls.Dispose();
+            Meridian.View2D.Living.LivingStage.WindOn = Meridian.View2D.Living.LivingStage.AirOn = Meridian.View2D.Living.LivingStage.VineOn = Meridian.View2D.Living.LivingStage.LightOn = true;
+            Meridian.View2D.Living.LivingStage.Enabled = stageWas;
+            Meridian.CameraRig.StageZoom.Enabled = zoomWas; Meridian.CameraRig.StageZoom.SurfacePxPerMetre = ppmWas;
+            body.position = standWas; side.player.transform.position = standWas; body.linearVelocity = Vector2.zero;
+            for (int i = 0; i < 120; i++) yield return null; // the camera eases back before the next leg
+
+            string Medians(List<float>[] of, string format) { var sb = new StringBuilder("["); for (int k = 0; k < n; k++) { if (k > 0) sb.Append(','); sb.Append(Median(of[k]).ToString(format, ci)); } return sb.Append(']').ToString(); }
+            string Spreads(List<float>[] of) { var sb = new StringBuilder("["); for (int k = 0; k < n; k++) { if (k > 0) sb.Append(','); sb.Append(Spread(of[k]).ToString("F3", ci)); } return sb.Append(']').ToString(); }
+            var names = new StringBuilder("[");
+            for (int k = 0; k < n; k++) { if (k > 0) names.Append(','); names.Append('"').Append(LivingStates[k]).Append('"'); }
+            names.Append(']');
+            lines.AppendLine($"{{\"leg\":\"Living {where}\",\"livingStates\":{names},\"livingMainMs\":{Medians(main, "F3")},\"livingRenderMs\":{Medians(render, "F3")},\"livingGpuMs\":{Medians(gpu, "F3")},\"livingDraws\":{Medians(draws, "F1")},\"livingGpuSpreadMs\":{Spreads(gpu)},\"livingMainSpreadMs\":{Spreads(main)},\"livingPieces\":{pieces},\"livingVertices\":{vertices},\"livingLampNormals\":{(lampNormals ? "true" : "false")},\"livingRounds\":{LivingRounds},\"livingBlockFrames\":{LivingBlockFrames},\"livingPxPerMetre\":96,\"width\":{Screen.width},\"height\":{Screen.height}}}");
+        }
+
+        /// <summary>The six states LivingCost measures, in its order.</summary>
+        public static readonly string[] LivingStates = { "off", "all", "no_wind", "no_air", "no_vine", "no_light" };
 
         /// <summary>D-180: frames per block, the pairs taken (at least, at most), and the spread of the pairs' differences that asks for more.</summary>
         public const int FilmBlockFrames = 300, FilmPairsMin = 4, FilmPairsMax = 8;

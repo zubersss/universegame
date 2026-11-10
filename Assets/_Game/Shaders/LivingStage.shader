@@ -68,6 +68,7 @@ Shader "MERIDIAN/LivingStage"
                 input.positionOS = LivingBend(input.positionOS, input.sway, input.sway2);
                 Varyings o = CommonLitVertex(input);
                 o.color = input.color * _Color;
+                o.color.a *= LivingAlpha(input.sway, input.sway2);
                 return o;
             }
 
@@ -149,6 +150,7 @@ Shader "MERIDIAN/LivingStage"
                 o.uv = input.uv;
                 o.side = input.sway2.y;
                 o.color = input.color * _Color;
+                o.color.a *= LivingAlpha(input.sway, input.sway2);
                 return o;
             }
 
@@ -208,6 +210,7 @@ Shader "MERIDIAN/LivingStage"
                 input.positionOS = LivingBend(input.positionOS, input.sway, input.sway2);
                 Varyings o = CommonUnlitVertex(input);
                 o.color = input.color * _Color;
+                o.color.a *= LivingAlpha(input.sway, input.sway2);
                 return o;
             }
 
