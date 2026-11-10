@@ -236,27 +236,44 @@ namespace Meridian.Tests
         /// new asserts: the AI allocates 0 B in every frame and no collection runs inside an AI frame. CreatureTests and
         /// InnerCreatureTests both measure through here.</summary>
         public const int AiWarmFrames = 150, AiMeasuredFrames = 300;
+        /// <summary>D-193a (LEAD 10:0x, 11-10): the warm-up is AiWarmFrames AND AiWarmSeconds since the spawn, whichever ends later. The
+        /// first-time frame is on the clock (about 0.45 s after twenty are spawned: InnerCreatureTests.AiWorstFrameDiagnosticInner,
+        /// 1.405 ms, once a process, no collection, no allocation) and a warm-up counted in frames alone let a faster frame (1-2 ms:
+        /// 150 frames in 0.3 s) move the steady window onto it: the row read 1.27, 1.52, 1.54 ms three times of five in 0.6.3's sweep.
+        /// Not a loosening: that frame is still measured, in the warm-up, and still bound (2.0 ms); the steady limits are unchanged.</summary>
+        public const float AiWarmSeconds = 1.0f;
         public static IEnumerator MeasureAi(CreatureDirector director, string label)
         {
-            double warmWorst = 0; int warmWorstAt = -1;
-            for (int i = 0; i < AiWarmFrames; i++)
+            double warmWorst = 0; int warmWorstAt = -1, warmFrames = 0;
+            float warmFrom = Time.time;
+            while (warmFrames < AiWarmFrames || Time.time - warmFrom < AiWarmSeconds)
             {
                 yield return null;
-                if (director.LastAiMs > warmWorst) { warmWorst = director.LastAiMs; warmWorstAt = i; }
+                if (director.LastAiMs > warmWorst) { warmWorst = director.LastAiMs; warmWorstAt = warmFrames; }
+                warmFrames++;
             }
+            float warmSeconds = Time.time - warmFrom;
             var samples = new List<double>(AiMeasuredFrames);
             double avg = 0; long bytes = 0; int allocFrames = 0, collections = 0;
-            for (int i = 0; i < AiMeasuredFrames; i++)
+            // the frame's live allocation beside the row (Unity's "GC Allocated In Frame": the whole frame, the Editor's floor of about
+            // 300 B in it): printed, not judged here. The director's own main-thread figure (LastAiAllocBytes) reads 0 for anything
+            // in this runtime: its assert below proves nothing until the director measures live (U-211).
+            long live = 0, liveMost = 0;
+            using (var gc = Unity.Profiling.ProfilerRecorder.StartNew(Unity.Profiling.ProfilerCategory.Memory, "GC Allocated In Frame"))
             {
-                yield return null;
-                samples.Add(director.LastAiMs); avg += director.LastAiMs;
-                if (director.LastAiAllocBytes > 0) { allocFrames++; bytes += director.LastAiAllocBytes; }
-                collections += director.LastAiCollections;
+                for (int i = 0; i < AiMeasuredFrames; i++)
+                {
+                    yield return null;
+                    samples.Add(director.LastAiMs); avg += director.LastAiMs;
+                    if (director.LastAiAllocBytes > 0) { allocFrames++; bytes += director.LastAiAllocBytes; }
+                    collections += director.LastAiCollections;
+                    if (i > 0 && gc.Valid) { long v = gc.LastValue; live += v; liveMost = System.Math.Max(liveMost, v); } // a frame late
+                }
             }
             avg /= AiMeasuredFrames;
             samples.Sort();
             double median = samples[samples.Count / 2], p99 = samples[(int)(samples.Count * 0.99) - 1], max = samples[samples.Count - 1];
-            TestContext.Out.WriteLine($"[MERIDIAN] AI with {label}: steady avg {avg:F3} ms, median {median:F3}, p99 {p99:F3}, worst {max:F3} over {AiMeasuredFrames} frames; the warm-up's worst {warmWorst:F3} ms at frame {warmWorstAt} of {AiWarmFrames}; the AI allocated {bytes} B in {allocFrames} frame(s), {collections} collection(s) inside AI frames; spike note: {(string.IsNullOrEmpty(director.LastSpikeNote) ? "none" : director.LastSpikeNote)}");
+            TestContext.Out.WriteLine($"[MERIDIAN] AI with {label}: steady avg {avg:F3} ms, median {median:F3}, p99 {p99:F3}, worst {max:F3} over {AiMeasuredFrames} frames; the warm-up {warmFrames} frames in {warmSeconds:F2} s (D-193a: {AiWarmFrames} frames and {AiWarmSeconds:F1} s), its worst {warmWorst:F3} ms at frame {warmWorstAt}; live allocation {live / (AiMeasuredFrames - 1)} B a frame (the most {liveMost} B; the whole frame, the Editor's floor in it); the director's dead main-thread figure {bytes} B in {allocFrames} frame(s); {collections} collection(s) inside AI frames; spike note: {(string.IsNullOrEmpty(director.LastSpikeNote) ? "none" : director.LastSpikeNote)}");
             Assert.LessOrEqual(warmWorst, 2.0, $"the warm-up's worst frame ≤ 2.0 ms (D-193): frame {warmWorstAt}");
             Assert.LessOrEqual(avg, 0.5, "average ≤ 0.5 ms AI (D-193)");
             Assert.LessOrEqual(median, 0.5, "median ≤ 0.5 ms AI (U-027, D-047)");
