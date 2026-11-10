@@ -214,10 +214,35 @@ namespace Meridian.Creatures
             return site;
         }
 
-        void SpawnPack(SpeciesSpec spec, float x, float playerY, int count)
+        /// <summary>U-205 (BLENDER's 0.6.2 read, G11: two bears on one spot read as one two-headed animal). The spawner leaves a body and
+        /// a half (3 m at least) between a new creature and the living ones of its species, and a pack's members stand 1.3 bodies apart in
+        /// whole tiles (2 at least; they stood 1.6 m apart whatever their size: a 2.1 m bear's pack-mate overlapped it).</summary>
+        public const float SpawnGapBodies = 1.5f, SpawnGapMin = 3f, PackStepBodies = 1.3f;
+        public static float SpawnGap(SpeciesSpec spec) => Mathf.Max(SpawnGapMin, SpawnGapBodies * spec.size.x);
+        public static int PackStepTiles(SpeciesSpec spec) => Mathf.Max(2, Mathf.CeilToInt(PackStepBodies * spec.size.x));
+        readonly List<Creature> packMates = new List<Creature>(8);
+
+        /// <summary>A pack of up to `count` from column x on, by the natural rules; a member that would stand inside SpawnGap of one of its
+        /// kind already alive is left out, and the pack ends at the first site its rule refuses. Returns how many it placed (tests).</summary>
+        public int SpawnPack(SpeciesSpec spec, float x, float playerY, int count)
         {
+            packMates.Clear();
+            int tx = Mathf.FloorToInt(x), step = PackStepTiles(spec);
+            float gap = SpawnGap(spec);
             for (int i = 0; i < count; i++)
-                if (SpawnAt(spec.id, Mathf.FloorToInt(x + i * 1.6f), playerY) == null) return;
+            {
+                int at = tx + i * step;
+                bool crowded = false;
+                foreach (var c in pool)
+                    if (c.Alive && c.Spec.id == spec.id && !packMates.Contains(c) && Mathf.Abs(c.Body.position.x - (at + 0.5f)) < gap) { crowded = true; break; }
+                if (crowded) continue;
+                var made = SpawnAt(spec.id, at, playerY);
+                if (made == null) break;
+                packMates.Add(made);
+            }
+            int placed = packMates.Count;
+            packMates.Clear();
+            return placed;
         }
 
         /// <summary>

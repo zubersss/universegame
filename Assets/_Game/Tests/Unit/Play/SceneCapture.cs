@@ -4247,6 +4247,135 @@ namespace Meridian.Tests
             finally { Meridian.View2D.CartoonStage.Enabled = wasCartoon; }
         }
 
+        /// <summary>U-205 → coordination/reports/unity/u205/. The sea's shallows (B-225: the light ceiling 2 m deep, the shallow seabed
+        /// within 40 m of the shore): 1_sea_1m, 2_sea_3m, 3_sea_10m by the beach (each where the water is deep enough, as near the shore
+        /// as that is), 4_sea_out (past 40 m: no shallow seabed). The walls inside a shaft (BLENDER's 0.6.2 read): the smoke's shaft
+        /// column bored 24 m from below, as the smoke stages it: 5_shaft_upper (the mouth and the Topsoil / Subsoil border: G2),
+        /// 6_shaft_lower (16 m down, where the hard step lay: G3), 7_shaft_whole (a 28 m frame: the wall tile's repeat, G4). The tier
+        /// border's height across the shaft's columns is logged with the line and the wobble kept there.</summary>
+        [UnityTest, Timeout(540000)]
+        public IEnumerator CaptureU205()
+        {
+            var name = Environment.GetEnvironmentVariable(Variable);
+            if (string.IsNullOrEmpty(name)) Assert.Ignore($"Set {Variable} (tools/unity_capture.ps1).");
+            if (SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.Null)
+                Assert.Fail("No graphics device: run without -nographics.");
+            bool wasCartoon = Meridian.View2D.CartoonStage.Enabled;
+            Meridian.View2D.CartoonStage.Enabled = true;
+            try
+            {
+#if UNITY_EDITOR
+                yield return UnityEditor.SceneManagement.EditorSceneManager.LoadSceneAsyncInPlayMode(
+                    CorePath, new LoadSceneParameters(LoadSceneMode.Single));
+#endif
+                var director = UnityEngine.Object.FindAnyObjectByType<SceneDirector>();
+                float timeout = Time.realtimeSinceStartup + 30f;
+                while ((!director.IsReady || !director.PlanetSide.terrain.IsSettled) && Time.realtimeSinceStartup < timeout) yield return null;
+                var dir = "coordination/reports/unity/u205";
+                Directory.CreateDirectory(dir);
+                var side = director.PlanetSide;
+                if (side.hazards != null) side.hazards.enabled = false;
+                if (side.dayNight != null) side.dayNight.Override = 0.45f;
+                side.creatures.autoSpawn = false; side.creatures.DespawnAll();
+                var cam = side.sideCamera;
+                var follow = cam.GetComponent<Meridian.Player.CameraFollow>();
+                var t = side.terrain;
+                var rig = side.rig;
+                var body = side.player.Body;
+                var stage = side.cartoon;
+                Assert.NotNull(stage, "the cartoon stage");
+                var smooth = stage.Smooth;
+                Assert.NotNull(smooth, "the smooth ground on Earth");
+                IEnumerator Park(Vector2 at)
+                {
+                    body.simulated = false;
+                    body.position = at; side.player.transform.position = at;
+                    yield return null;
+                    float until = Time.realtimeSinceStartup + 20f;
+                    while (!t.IsSettled && Time.realtimeSinceStartup < until) yield return null;
+                    if (follow != null) { follow.enabled = true; follow.SnapToTarget(); }
+                    for (int k = 0; k < 30; k++) yield return null;
+                }
+                IEnumerator Shot(string label)
+                {
+                    for (int k = 0; k < 20; k++) yield return null;
+                    var drops = rig.drops;
+                    if (drops != null) for (int k = drops.Live.Count - 1; k >= 0; k--) drops.Collect(drops.Live[k]);
+                    yield return new WaitForSeconds(1.2f);
+                    yield return Save(cam, $"{name}_{label}");
+                    File.Copy($"logs/capture_{name}_{label}.png", $"{dir}/{label}.png", true);
+                }
+
+                // ---- the sea (B-225) ----
+                var gen = (Meridian.Terrain.SolidWorldGenerator)t.BaseGenerator;
+                float water = side.Config.datumY + 1f;
+                Meridian.Terrain.EarthBiomes.Range(Meridian.Terrain.Biome.Ocean, out int os, out int len);
+                int first = os - 12;
+                while (first < os + len && !gen.SeaAt(first)) first++;
+                foreach (var (depth, label) in new[] { (1f, "1_sea_1m"), (3f, "2_sea_3m"), (10f, "3_sea_10m") })
+                {
+                    int x = first + 6;
+                    while (x < first + 200 && !(gen.SeaAt(x) && gen.SurfaceHeight(x) <= water - depth - 1.5f)) x++; // the water deep enough for the surveyor there
+                    yield return Park(new Vector2(x + 0.5f, water - depth));
+                    float until = Time.realtimeSinceStartup + 15f;
+                    while ((stage.SeaUnder == null || !stage.SeaUnder.gameObject.activeSelf || stage.SeaUnder.placeholders.Contains(true)) && Time.realtimeSinceStartup < until) yield return null;
+                    for (int k = 0; k < 30; k++) yield return null;
+                    yield return Shot(label);
+                    TestContext.Out.WriteLine($"[MERIDIAN] u205 {label}: x {x} ({x - first} columns out from the shore's first sea column {first}), {depth:0} m under the water line {water:0.0}, the seabed there {gen.SurfaceHeight(x)}; shore distance {stage.ShoreDistanceNow:0.0} m, the shallow seabed's alpha {(stage.SeaUnder != null ? stage.SeaUnder.LayerAlphaOf(4) : -1f):0.00}, the sea weight {stage.SeaWeight:0.00}");
+                }
+                {
+                    int x = first + 60;
+                    while (x < first + 400 && !(gen.SeaAt(x) && gen.SurfaceHeight(x) <= water - 4.5f)) x++;
+                    yield return Park(new Vector2(x + 0.5f, water - 3f));
+                    for (int k = 0; k < 60; k++) yield return null;
+                    yield return Shot("4_sea_out");
+                    TestContext.Out.WriteLine($"[MERIDIAN] u205 4_sea_out: x {x} ({x - first} columns out), 3 m under; shore distance {stage.ShoreDistanceNow:0.0} m, the shallow seabed's alpha {(stage.SeaUnder != null ? stage.SeaUnder.LayerAlphaOf(4) : -1f):0.00}");
+                }
+
+                // ---- the walls inside a shaft (G2, G3, G4): the smoke's column, bored from below as the smoke bores it ----
+                float until2 = Time.realtimeSinceStartup + 20f;
+                while (!(smooth.WallTier(1) && smooth.WallTier(2)) && Time.realtimeSinceStartup < until2) yield return null;
+                float ax = side.spawnX + 19.5f, top = t.SurfaceAt(ax), bottom = Mathf.Floor(top) - 24f;
+                yield return Park(new Vector2(ax, bottom + 1.0f));
+                int bored = 0;
+                var owner = rig.owner; rig.owner = null;
+                try
+                {
+                    for (float y = bottom + 0.7f; y <= top + 0.5f + 1e-3f; y += 0.5f)
+                        foreach (float dx in new[] { -1.1f, -0.55f, 0f, 0.55f, 1.1f })
+                            if (rig.Dig(new Vector2(ax + dx, y))) bored++;
+                }
+                finally { rig.owner = owner; }
+                for (int k = 0; k < 60; k++) yield return null; // the chunks under the opened columns re-shade
+                var tiers = Meridian.Mining.D1Tables.Current.tiers;
+                float from2 = tiers.Length > 1 ? tiers[1].fromM : 0f;
+                var sb = new System.Text.StringBuilder();
+                for (float x = ax - 3f; x <= ax + 3f + 1e-3f; x += 0.5f)
+                {
+                    float line = Meridian.Mining.DigRun.LineAt(t, x), keep = smooth.WobbleKeepAt(x);
+                    float border = line - from2 + keep * Meridian.View2D.SmoothGround.TierWobble(0, x);
+                    sb.Append($" [{x - ax:+0.0;-0.0}: line {line - top:0.00}, keep {keep:0.00}, border {border - top:0.00}]");
+                }
+                const int CS = Meridian.Terrain.TerrainConstants.ChunkSize;
+                TestContext.Out.WriteLine($"[MERIDIAN] u205 shaft at x {ax:0.0}: {bored} strokes, top {top:0.00}, floor {bottom:0.00}; a chunk's top edge at {Mathf.Floor(top / CS) * CS:0} ({top - Mathf.Floor(top / CS) * CS:0.0} m down); Subsoil from {from2:0} m under the line; across the shaft, metres from the ground (the Surface Line, the wobble kept, the Topsoil / Subsoil border):{sb}");
+                if (follow != null) follow.enabled = false;
+                cam.transform.position = new Vector3(ax, top - 8f, cam.transform.position.z);
+                yield return Shot("5_shaft_upper");
+                cam.transform.position = new Vector3(ax, top - 16.5f, cam.transform.position.z);
+                yield return Shot("6_shaft_lower");
+                float half0 = Meridian.CameraRig.SideView.HalfHeight(cam);
+                Meridian.CameraRig.SideView.SetHalfHeight(cam, 14f);
+                cam.transform.position = new Vector3(ax, top - 12f, cam.transform.position.z);
+                yield return Shot("7_shaft_whole");
+                Meridian.CameraRig.SideView.SetHalfHeight(cam, half0);
+                if (follow != null) follow.enabled = true;
+                body.simulated = true;
+                if (side.dayNight != null) side.dayNight.Override = null;
+                LogAssert.NoUnexpectedReceived();
+            }
+            finally { Meridian.View2D.CartoonStage.Enabled = wasCartoon; }
+        }
+
         /// <summary>U-196 (D-183: holes read as holes) → coordination/reports/unity/u196/: 1_camp_shaft_10m (a 2.4 m wide shaft 10 m down
         /// from the camp's ground: the back wall lit at the top and dim at the foot, the soft shadow inside every edge), 2_t3_room (a room
         /// 56 m under the Surface Line), 3_t5_core_room (212 m down), 4_mound_and_pit (a mound piled on the surface beside a pit: nothing

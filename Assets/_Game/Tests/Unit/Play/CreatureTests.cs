@@ -79,6 +79,55 @@ namespace Meridian.Tests
             LogAssert.NoUnexpectedReceived();
         }
 
+        /// <summary>U-205 (BLENDER's 0.6.2 read, G11: two bears on one spot in smoke_33): the spawner leaves a body and a half (3 m at
+        /// least) between a new creature and the living ones of its kind, and a pack's members stand 1.3 bodies apart in whole tiles.</summary>
+        [UnityTest]
+        public IEnumerator TheSpawnerKeepsItsKindApart()
+        {
+            yield return BootEarth();
+            side.dayNight.Override = 0.5f;
+            yield return null;
+            var bear = SpeciesSpec.Get(Species.BrownBear);
+            Assert.AreEqual(3.15f, CreatureDirector.SpawnGap(bear), 1e-4f, "a bear (2.1 m): a body and a half");
+            Assert.AreEqual(3, CreatureDirector.PackStepTiles(bear), "a bear's pack-mate: 3 tiles on (1.3 bodies, whole tiles)");
+            Assert.AreEqual(3f, CreatureDirector.SpawnGap(SpeciesSpec.Get(Species.Gull)), 1e-4f, "a small body: 3 m");
+            Assert.AreEqual(2, CreatureDirector.PackStepTiles(SpeciesSpec.Get(Species.Gull)), "2 tiles at least");
+
+            // a bear stands where the spawner would put another: none is placed within the gap, to either side of it
+            creatures.DespawnAll();
+            float px = player.transform.position.x;
+            var first = creatures.Spawn(Species.BrownBear, OnSurface(px - 30f, Species.BrownBear));
+            Assert.NotNull(first);
+            float bx = first.Body.position.x;
+            foreach (float dx in new[] { 0f, 1f, -2f, 3f })
+                Assert.AreEqual(0, creatures.SpawnPack(bear, bx + dx, player.Body.position.y, 1), $"no bear {dx:0} m from a bear");
+            Assert.AreEqual(1, creatures.CountOf(Species.BrownBear));
+            creatures.DespawnAll();
+
+            // the natural spawner by day: no two of a kind stand closer than a pack's step or the gap
+            for (int i = 0; i < 300; i++) creatures.SpawnTick();
+            int alive = 0, pairs = 0;
+            float closest = float.MaxValue; string who = "";
+            foreach (var a in creatures.All)
+            {
+                if (!a.Alive) continue;
+                alive++;
+                foreach (var b in creatures.All)
+                {
+                    if (!b.Alive || ReferenceEquals(a, b) || a.Spec.id != b.Spec.id) continue;
+                    pairs++;
+                    float d = Mathf.Abs(a.Body.position.x - b.Body.position.x);
+                    float least = Mathf.Min(CreatureDirector.PackStepTiles(a.Spec), CreatureDirector.SpawnGap(a.Spec));
+                    if (d - least < closest) { closest = d - least; who = $"{a.Spec.id} {d:0.0} m apart (least {least:0.0})"; }
+                    Assert.GreaterOrEqual(d, least - 1e-3f, $"two {a.Spec.id} {d:0.00} m apart");
+                }
+            }
+            TestContext.Out.WriteLine($"[MERIDIAN] u205 spawn spacing: {alive} alive after 300 ticks, {pairs / 2} pairs of a kind, the tightest: {who}");
+            Assert.Greater(alive, 0, "the spawner works");
+            creatures.DespawnAll();
+            LogAssert.NoUnexpectedReceived();
+        }
+
         [UnityTest]
         public IEnumerator WolfPacksSpawnOnlyAtNight()
         {

@@ -84,7 +84,14 @@ namespace Meridian.Core
                 if (side.player != null && side.rig != null)
                 {
                     var p = side.player.transform.position;
-                    bool dug = side.rig.Dig(new Vector2(p.x - 1.5f, p.y - 1.2f));
+                    // U-205 (BLENDER's 0.6.2 read, G7): on the smooth ground the strokes open the ground from its surface, as a player's dig
+                    // does. The one stroke was aimed 1.2 m under the surveyor and carved a closed pocket under unbroken grass: with B-230's
+                    // wall and the rim's shadow inside it that read as a buried boulder in every later camp shot (3b, 3d, 29, 59, 67).
+                    float gx = p.x - 1.5f;
+                    bool open = side.terrain != null && side.terrain.SmoothGround;
+                    float gy = open ? side.terrain.SurfaceAt(gx) : p.y;
+                    bool dug = side.rig.Dig(open ? new Vector2(gx, gy - 0.25f) : new Vector2(gx, p.y - 1.2f));
+                    if (open) side.rig.Dig(new Vector2(gx, gy - 0.9f)); // one stroke deeper: an open bowl
                     yield return Wait(0.6f);
                     Debug.Log($"[MERIDIAN] smoke dig: {dug}");
                     yield return Shot(folder, "smoke_3b_earth_dig.png");

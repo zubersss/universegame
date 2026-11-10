@@ -66,8 +66,16 @@ namespace Meridian.Core
             b.simulated = true;
             yield return Settle(side);
             for (int k = 0; k < 40; k++) yield return new WaitForFixedUpdate();
+            // U-205 (BLENDER's 0.6.2 read, G10: a small red mark on the PACK bar at 0 / 30 kg in smoke_61): it was a dug piece's icon caught
+            // as it landed in the readout (U-195's pack flight; a piece under 1 kg leaves the reading at 0). The room is shot with nothing
+            // in the air: the pieces still lying about go back to their pool and the flights under way land first.
+            var drops = side.rig.drops;
+            if (drops != null) for (int k = drops.Live.Count - 1; k >= 0; k--) drops.Collect(drops.Live[k]);
+            var flight = FindAnyObjectByType<HudPackFlight>();
+            float landBy = Time.realtimeSinceStartup + 2f;
+            while (flight != null && flight.InFlight > 0 && Time.realtimeSinceStartup < landBy) yield return null;
             yield return Wait(0.8f);
-            Debug.Log($"[MERIDIAN] smoke room at x {x:F1}, {depth:F0} m under the line: {n} strokes dug, tier {Meridian.Mining.DigRun.TierAt(t, b.position) + 1}, depth {Meridian.Mining.DigRun.Depth(t, b.position):F1} m");
+            Debug.Log($"[MERIDIAN] smoke room at x {x:F1}, {depth:F0} m under the line: {n} strokes dug, tier {Meridian.Mining.DigRun.TierAt(t, b.position) + 1}, depth {Meridian.Mining.DigRun.Depth(t, b.position):F1} m; pack flights landed {(flight != null ? flight.Landed : -1)}, in the air {(flight != null ? flight.InFlight : -1)}");
         }
 
         static IEnumerator EarthDigRun(string folder, PlanetSideRoot side)
