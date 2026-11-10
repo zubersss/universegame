@@ -30,12 +30,13 @@ G = fakegp.install()
 import gp_raster as GR  # noqa: E402
 
 PPU = 64                              # canvas units: a design px is 1 / PPU of a unit
-CHARCOAL = "#3A3533"                  # the pencil: dark charcoal, not black
-LINE = 1.68 / PPU                     # a contour's nominal radius: 3.36 design px wide = 1.68 px at the game's zoom (the
-#                                       tapered ends and the thinner flicks bring the measured mean to 1.5 px)
+CHARCOAL = "#2A2624"                  # the pencil: dark charcoal, not black (LEAD 11-10 07:1x: darker than run 4's #3A3533)
+LINE = 1.33 / PPU                     # a contour's nominal radius: 2.66 design px wide = 1.33 px at the game's zoom (the
+#                                       tapered ends and the thinner flicks bring the measured mean to 1.2 px; LEAD 07:1x:
+#                                       the film's photocopied line is tight and clean - run 4's 1.5 px read as a crayon)
 FLICK = 0.8 * LINE                    # folds, strands, small forms
-LINE_A = 0.94                         # the pencil's opacity over the paint
-PRESS = 0.40                          # the pressure's swing about the nominal width
+LINE_A = 0.96                         # the pencil's opacity over the paint
+PRESS = 0.50                          # the pressure's swing about the nominal width (0.5-2.0 px at the game's zoom)
 PERIOD = 26.0                         # ... over about this many design px
 WOBBLE, WPERIOD = 0.30, 16.0          # the hand's wobble (design px) and its period: under a pixel at the game's zoom
 E0 = 0.25                             # a tapered end's width against the stroke's
@@ -106,8 +107,9 @@ def hose(pts, w):
     return G.hose_outline(catmull(list(pts), False, 6) if len(pts) >= 3 else list(pts), w, cap_n=10)
 
 
-def taper(p0, p1, w0, w1, n=14, bulge=0.0):
-    """A limb segment's outline from p0 (width w0) to p1 (width w1), its sides gently bulged; it starts at p0's side."""
+def taper(p0, p1, w0, w1, n=14, bulge=0.0, cap0=0.0):
+    """A limb segment's outline from p0 (width w0) to p1 (width w1), its sides gently bulged; it starts at p0's side:
+    n + 1 points down one side, 9 round p1, n + 1 back up, 9 round p0 (that cap's radius less cap0)."""
     (x0, y0), (x1, y1) = p0, p1
     L = math.hypot(x1 - x0, y1 - y0)
     ux, uy = (x1 - x0) / L, (y1 - y0) / L
@@ -120,7 +122,7 @@ def taper(p0, p1, w0, w1, n=14, bulge=0.0):
         left.append((cx + nx * w, cy + ny * w))
         right.append((cx - nx * w, cy - ny * w))
     capb = C(x1, y1, w1 / 2, 10, a0=math.atan2(ny, nx), a1=math.atan2(ny, nx) - math.pi)
-    capa = C(x0, y0, w0 / 2, 10, a0=math.atan2(-ny, -nx), a1=math.atan2(-ny, -nx) - math.pi)
+    capa = C(x0, y0, w0 / 2 - cap0, 10, a0=math.atan2(-ny, -nx), a1=math.atan2(-ny, -nx) - math.pi)
     return left + capb[1:-1] + right[::-1] + capa[1:-1]
 
 
@@ -139,6 +141,7 @@ def S(d, pts, m, r=LINE, cyclic=False, rnd=None, sharp=False, **opt):
     opt: keep=name   remember this shape's paint mask (for clip=)
          clip=name   the paint is cut to that shape (a patch on a form)
          under=True  the paint goes UNDER the lines already drawn (a patch on a form keeps the form's lines)
+         shade=True  the shape is a flat SHADOW: the paint under it a step darker in its own hue (times SHADOW)
          gap=px      a closed line stops this far short of closing (default 2.5 on outlines of 70 px and more, else 0)
          at=0..1     where on the loop the line starts (and its gap sits); default 0 = the first point given
          ends=(a, b) the lengths of an open line's start and end tapers (default 2.5 and 6; a gapped outline 4 and 4)
@@ -250,7 +253,9 @@ def render(d, gp, W, H, K=4, ss=2, boil=0, tag="cel", paint=True):
                 if o.get("keep"):
                     keep[o["keep"]] = full
                 a = full[y0:y1, x0:x1].astype(np.float32) * m["fill_alpha"]
-                if paint:
+                if paint and o.get("shade"):                                   # a flat shadow shape: what is under it, darker
+                    pa[y0:y1, x0:x1, :3] *= 1 - a[..., None] * (1 - np.array(SHADOW, np.float32))
+                elif paint:
                     sub = pa[y0:y1, x0:x1]
                     sub[..., :3] = rgb(m["fill"]) * a[..., None] + sub[..., :3] * (1 - a[..., None])
                     sub[..., 3] = a + sub[..., 3] * (1 - a)
@@ -323,9 +328,9 @@ def shade(paint, band, K=4, back=1, tint=SHADOW):
     return out
 
 
-def dry(line, seed, amount=1.0):
+def dry(line, seed, amount=0.5):
     """The pencil's dry, slightly broken edge: the line's edge roughened by under a pixel (of the large drawing) and
-    a few specks of the cel left bare inside it."""
+    a few specks of the cel left bare inside it. (amount 1.0 was run 4's: a crayon at 4x; LEAD 07:1x: half of it.)"""
     rng = np.random.default_rng(seed)
     n1 = box(rng.standard_normal(line.shape).astype(np.float32), 1)
     n1 /= max(float(n1.std()), 1e-3)
