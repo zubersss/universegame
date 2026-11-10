@@ -2,7 +2,8 @@
 Updated: 2026-11-09 23:1x · Session: 12 (resumed 14:03 after the owner's restart; THIS SESSION = zuber-4d; LEAD = zuber-d1, UNITY = zuber-a0) · older: coordination/status/archive/BLENDER_2026-11-09.md (session 12's closed entries are there), BLENDER_2026-11-08.md, BLENDER_2026-11-07.md
 
 ## Current task
-**23:2x — RESUME HERE: B-241 (Ready, LEAD 23:1x; the card on the board), PREVIEWS ONLY, no export.** B-240 is DONE (Jupiter's close view ACCEPTED: blender/preview/review_b240_jupiter_close_preview.png). B-241, one sheet a giant, each to LEAD as it lands:
+**23:4x — RESUME HERE: B-241 is drawn and WITH LEAD (Saturn ACCEPTED 23:3x; Uranus, Neptune, Jupiter's motion check and the design note sent 23:39; source b11032ac).** Sheets: blender/preview/review_b241_{saturn,uranus,neptune}_close_preview.png, review_b241_jupiter_motion_preview.png, crops crop_b241_*.png. For LEAD to rule: Neptune's companion cloud drawn as ONE streak up close (close.json "streak"; its 17 blobs read as a grub); Uranus is level in the far art (no tilt to show). OWED by my own rule (giants_v3.py changed, in close_json only): both far-disc proofs again, between UNITY's locks, NEVER beside a probe lock (UNITY's U-207 trial tonight: two probe locks of about 7 min that need a quiet machine): `build_discs_v3.py --b239 Assets/_Game/Art blender/preview/b239 giants` then `... blender/preview/b239_inner inner`; add the result to reports/blender/b239_belt_table.md and tell LEAD. Then nothing is assigned: nothing of the close view is exported until its UNITY half is carded (after U-207 / U-197). The card as it was given, for reference:
+B-240 is DONE (Jupiter's close view ACCEPTED: blender/preview/review_b240_jupiter_close_preview.png). B-241, one sheet a giant, each to LEAD as it lands:
 - **Saturn**: five belts, the three ring bands with a `ring_edge` strip, the back half behind the globe and the front half over it (close.json "rings"); **Uranus**: belt_edge's variant 1 (NOTE for LEAD: the far disc draws Uranus's belts LEVEL, there is no tilt in build_discs_v3: the close view follows the far disc); **Neptune**: the dark storm and its companion cloud: two shapes side by side, so look at them at 2x for a face. Each at the swap (6 px per far texel) and at the closest zoom (12) over the far disc magnified the same.
 - **The motion check B-240 left out**: two frames of Jupiter a few ticks apart (frames 0 and 3), the close view over the far disc's own frames.
 - **The design note** (reports/blender/b237_limb_band_design.md) updated with LEAD's rulings and the 11.5.1 text: the close view follows the far limb's lumpy "rim"; a 128x128 pigment tile per giant; limb_band WITHOUT its inner shade (512x16); the ink's 2-3 px is the line's MEAN across root-2 steps with the far disc's hand jitter on top; the outline's jump at the swap (15 soft px to 2.5) accepted; the ink marks placed by close.json's ink_marks.
@@ -17,12 +18,13 @@ How I run: locks listed, then RAM read, each in its own call (RAM sat at 1.3-2.4
 - **Rule (LEAD, D-087):** the Beam reads as a mining tool, never a gun. Waiting on others: B-207 on PawsOnTheGround; B-204 on UNITY's capture; B-172 on U-151.
 
 ## Last completed
+- 11-09 23:26-23:39: B-241's four sheets (Saturn with rings: accepted; Uranus; Neptune, its cloud as one streak after the 2x face look; Jupiter's two-frame motion check: 40.4 % / 41.2 % of pixels changed, close / far) and the design note's sections 10-11 (b11032ac) → to LEAD.
 - 11-09 22:39-23:13: B-240 (1) the inner set byte-identical (3633d54d); B-240 (2) Jupiter's strips and close-view preview, two runs, the ink marks lifted into the shared table and both proofs re-run (5e4d8010) → to LEAD.
 - 11-09 22:03-22:33: B-239 Done (the shared belt table; far discs byte-identical before and after; the soft-limb default fixed).
 - Earlier today (B-220, B-223, B-224, B-225, B-228, B-229, B-230, B-232, B-233, B-238 exported or Done; the 0.6.2 smoke read; B-231 rounds 2 / 2b): coordination/status/archive/BLENDER_2026-11-09.md.
 
 ## Ready for review
-- With LEAD: B-240 (2), Jupiter's close-view sheet.
+- With LEAD: B-241's Uranus and Neptune sheets, Jupiter's motion check, the design note (Saturn accepted).
 - With the owner: B-231 (blender/preview/review_b231_surveyor_v5_design.png and the crop_b231_* crops).
 - In Review until UNITY's import and captures: B-224, B-223, B-225, B-233.
 - B-189 / B-185 (waiting on U-159's captures): review_b141_mars_{canyon,storm,plains}(_dip).png, review_b152_venus_surface(_dip).png, review_b149_mercury_{day,twilight,night}_dip.png.
@@ -38,7 +40,7 @@ How I run: locks listed, then RAM read, each in its own call (RAM sat at 1.3-2.4
 none. Waiting on: LEAD's judgement of B-240 (2); the owner's word on B-231; U-151 (B-172's export), U-152 (B-174).
 
 ## Proposals (undecided only)
-- B-240 (to LEAD 23:1x): the four rulings above (pigment tile, the inner shade, the ink's extremes; the rim is in).
+- B-241 (to LEAD 23:39): Neptune's cloud as one streak in the close view; Uranus level as the far disc draws it.
 - B-231: the blink's skin patch shows as a faint ring at 4x on the shaded face; LEAD: leave it unless it shows at 1x.
 
 ## Rules I keep (from slips)
@@ -58,4 +60,4 @@ none. Waiting on: LEAD's judgement of B-240 (2); the owner's word on B-231; U-15
 none (the owner's look at B-231 is LEAD's USER-39; 0.6.2 is USER-41).
 
 ## HeavyJobLock
-none held (last: 23:12:04-35, B-240's crops; 23:10:35-23:11:34 the preview; 23:09:57-23:10:34 and 23:06:28-23:09:28 the two proofs). No want on file. No background waiters.
+none held (last: 23:37:38-53, the motion crops; 23:36:58-23:37:19 the motion check; B-241's sheets 23:26-23:32). want_blender.lock on file since 23:39 behind heavy_unity.lock (23:38:59, U-207's dev build) for the giants' proof re-run. No background waiters.
