@@ -1,6 +1,19 @@
 # ART v6: the plant and rock kinds I would make for Earth (a plan for a yes on USER-44)
 
-Written 2026-11-10 08:4x at LEAD's ask; nothing here is built beyond the three specimens marked DONE. One line each.
+Written 2026-11-10 08:4x at LEAD's ask; one line each.
+
+**State 11-10 10:0x** (previews only; nothing exported, no tiling or alpha):
+- PAINTED and accepted as specimens or in the forest frame: 1 the canopy tree (one fork pattern), 2 the emergent tree
+  (its buttresses read as boards: a later pass), 3 the feather palm and the fan palm, 4 the ground fern, 5 the broad
+  leaf, the paddle and the heart leaf, 6 the bamboo clump, 7 the bough with leaf sprays and the liana, 8 the mossy
+  boulder and the fallen log (a cut end, moss, a fern on it). Sources: `build_specimens_v6.py`,
+  `build_forest_kinds_v6.py` (placeable `*_into(P, tf, s, pale)`), `build_forest_frame_v6.py` (the liana and the log
+  are written inside the frame, not yet as placeable kinds).
+- WRITTEN, UNRUN: 9 the three grasses (`turf_into`, `clump_into`, `plume_grass_into`) and 10 the savanna tree and the
+  thorn bush (`savanna_tree_into`, `thorn_bush_into`, the crown's `shelf`), in `blender/scripts/build_plains_kinds_v6.py`
+  with its own specimen sheet. A first run is a look at every shape, not a sheet.
+- NOT WRITTEN: 4's tree fern; 1's two more fork patterns and the low spreading form; 8's shelf fungus and the boulder
+  in three sizes; 11 and 12 (the coast); the plains' and the coast's ground palettes.
 Every kind is a rule in the manner of `blender/scripts/build_specimens_v6.py` (a form field steers the brush: TUBE =
 a centre line with a radius, FACET = a plane with one value and one stroke direction, BALL = a lit cluster), under the
 frame's one light, seeded so no two individuals are alike. "Cost" is my time to write and tune the rule; painting one
