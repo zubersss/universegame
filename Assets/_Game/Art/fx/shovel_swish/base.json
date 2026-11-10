@@ -1,0 +1,36 @@
+{
+  "key": "fx/shovel_swish/base",
+  "style": "v3",
+  "width": 320,
+  "height": 96,
+  "palette": "earth",
+  "ppu": 64,
+  "frame_width": 104,
+  "frame_height": 96,
+  "columns": 3,
+  "gutter": 4,
+  "frames": 3,
+  "fps": 12,
+  "pivot": [
+    0.0962,
+    0.8958
+  ],
+  "animations": [
+    {
+      "name": "swish",
+      "start": 0,
+      "length": 3,
+      "loop": false
+    }
+  ],
+  "arc": {
+    "radius_m": 1.2,
+    "from_deg": 0.0,
+    "to_deg": -75.0
+  },
+  "clips": [
+    "dig_down",
+    "dig_up"
+  ],
+  "note": "B-246: a smear behind the blade; the pivot is the swing's centre (the grip); the arc runs clockwise from level (0 deg) to to_deg (CCW from +x, so 75 below level), where the blade is on the contact drawing: turn it so that end lies on the contact's direction, mirror it for a swing the other way; show drawing 0 on the contact frame"
+}

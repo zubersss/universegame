@@ -1,0 +1,28 @@
+{
+  "key": "fx/beam_contact/base",
+  "style": "v3",
+  "width": 404,
+  "height": 64,
+  "palette": "earth",
+  "ppu": 64,
+  "frame_width": 64,
+  "frame_height": 64,
+  "columns": 6,
+  "gutter": 4,
+  "frames": 6,
+  "fps": 12,
+  "pivot": [
+    0.5,
+    0.5
+  ],
+  "animations": [
+    {
+      "name": "glow",
+      "start": 0,
+      "length": 6,
+      "loop": true,
+      "loop_from": 0
+    }
+  ],
+  "note": "B-246: the Beam's ray on its target - a glow and thrown grit, a mining tool's work (D-087); the sprite's up is away from the surface; cream: tint by the Beam's own tone (the ray's)"
+}

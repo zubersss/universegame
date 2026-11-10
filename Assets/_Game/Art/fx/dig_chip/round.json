@@ -1,0 +1,20 @@
+{
+  "key": "fx/dig_chip/round",
+  "style": "v3",
+  "width": 392,
+  "height": 128,
+  "palette": "earth",
+  "ppu": 64,
+  "frame_width": 128,
+  "frame_height": 128,
+  "columns": 3,
+  "gutter": 4,
+  "frames": 3,
+  "fps": 12,
+  "pivot": [
+    0.5,
+    0.5
+  ],
+  "stages": 3,
+  "note": "B-246: three crack stages from the contact point for the brush (frame = stage - 1; a stage keeps the one before and grows it); cream + ink: tint by the dug cell's tone_hex as the clods (D-190)"
+}

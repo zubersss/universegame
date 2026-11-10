@@ -287,6 +287,7 @@ def kit():
         {"pivot": [round(SWC[0] / SWW, 4), round(1 - SWC[1] / SWH, 4)],
          "animations": [{"name": "swish", "start": 0, "length": 3, "loop": False}],
          "arc": {"radius_m": SWR / PPU, "from_deg": 0.0, "to_deg": -SW_END},
+         "clips": ["dig_down", "dig_up"],        # LEAD 06:0x: the swings it is played on; the thrusts (dig_fwd, dig_fwd_near) have no arc
          "note": "B-246: a smear behind the blade; the pivot is the swing's centre (the grip); the arc runs clockwise from level "
                  "(0 deg) to to_deg (CCW from +x, so 75 below level), where the blade is on the contact drawing: turn it so that "
                  "end lies on the contact's direction, mirror it for a swing the other way; show drawing 0 on the contact frame"})

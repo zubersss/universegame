@@ -1,0 +1,43 @@
+{
+  "key": "fx/dig_reticle/base",
+  "style": "v3",
+  "width": 308,
+  "height": 48,
+  "palette": "earth",
+  "ppu": 64,
+  "frame_width": 48,
+  "frame_height": 48,
+  "columns": 6,
+  "gutter": 4,
+  "frames": 6,
+  "fps": 12,
+  "pivot": [
+    0.5,
+    0.5
+  ],
+  "ring_radius_m": 0.9,
+  "animations": [
+    {
+      "name": "arc",
+      "start": 0,
+      "length": 2,
+      "loop": true,
+      "loop_from": 0
+    },
+    {
+      "name": "corner",
+      "start": 2,
+      "length": 2,
+      "loop": true,
+      "loop_from": 0
+    },
+    {
+      "name": "pip",
+      "start": 4,
+      "length": 2,
+      "loop": true,
+      "loop_from": 0
+    }
+  ],
+  "note": "B-246 (D-196): arc = a bracket ON a circle (the pivot on the circle's line, the circle's middle straight below the frame: turn it about that middle, four round the target; its curve is 0.9 m, off by under a pixel on a wider circle); corner = a 1 m cell's top-left corner at the pivot, arms right and down (turn for the other three); pip = the contact point. States by tint and gap: in reach as drawn, clamped mustard and pushed out, nothing to dig red and wider with no pip. Cream + ink"
+}
