@@ -500,6 +500,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 9973f9d0ce9e9964fb55c37e704a6d2b
+    m_Address: terrain/mars/back_wall_basalt
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 9c980db02feb1e54ead7ae5af9f2a5b2
     m_Address: props/mars/meridian_beacon/animator
     m_ReadOnly: 0

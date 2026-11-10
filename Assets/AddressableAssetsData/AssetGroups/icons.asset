@@ -205,6 +205,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 43b9b3a4cdce52343a60f190c89ce82a
+    m_Address: icons/catalogue/vent_harvester
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 452d8fe3be930b946934ab9fa3edf40c
     m_Address: icons/ring_ice/base
     m_ReadOnly: 0
@@ -232,6 +237,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 4dfab379bf10cdf4bac9f9e7d3cdc42c
     m_Address: icons/nodes/dig_core_bit
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 4e7f899ac6f04bc41a2db0ad2dfa3090
+    m_Address: icons/catalogue/launch_complex
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -415,6 +425,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8e850f5fcf6055d4ebbf66e7a59d3829
+    m_Address: icons/catalogue/survey_archive
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 937f66cdf9e389743bf77bc90bfc3e4e
     m_Address: icons/deep_diamond/base
     m_ReadOnly: 0
@@ -425,6 +440,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 9a8743ba19e63fb4888c6d5560958e51
+    m_Address: icons/catalogue/solarite
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 9a92d4c87fc40ff49a031e9167fa2475
     m_Address: icons/metallic_hydrogen/base
     m_ReadOnly: 0
@@ -432,6 +452,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 9a940e8f11971af4bb99f077f9c9a75f
     m_Address: icons/nodes/sur_scan_2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 9cca04fa3948771468e6e6401ee9f788
+    m_Address: icons/catalogue/warden_vault
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -475,8 +500,18 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: ab24099e8526f5345a31de71b7070794
+    m_Address: icons/catalogue/meridian_beacon
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: acddea8cadbb68f45a53c386352e8a67
     m_Address: icons/nodes/end_fall_1
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: ad289acf01b2d484aa6b9f9eeb8643a4
+    m_Address: icons/catalogue/flare_shelter
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -492,6 +527,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: b0c242697b73cbd4ba1c0182cdc422a5
     m_Address: icons/smelter_bar_copper/base
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b2512c4dc7e89594992a77488b8b05f5
+    m_Address: icons/catalogue/halcyon_hauler
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -595,6 +635,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: de1e61e5e28f42a47b84080623c91246
+    m_Address: icons/catalogue/meridian_station
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: df7e6f1106efa8f42a4d931a69f789ee
     m_Address: icons/clay/base
     m_ReadOnly: 0
@@ -627,6 +672,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: ec7b1b46de5391b4b867b20e48fbbe56
     m_Address: icons/nodes/voy_thrust_2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: ed5d0da76b345934380f35a4707c40cf
+    m_Address: icons/catalogue/warden_outpost
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
