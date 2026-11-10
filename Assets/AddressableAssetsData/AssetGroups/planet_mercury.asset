@@ -90,6 +90,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 1e38b9001df085f4bafc4beb1257c6d1
+    m_Address: terrain/mercury/back_wall_t5
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 1fe6eb93c4d63a142acbc06fe36712b4
     m_Address: terrain/mercury/ground_decor_ice_3
     m_ReadOnly: 0
@@ -225,6 +230,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 544c08b92a88da04db429c4e7e92ef46
+    m_Address: terrain/mercury/back_wall_t3
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 54a786a9cacbbbc419537a11a4496102
     m_Address: terrain/mercury/ground_strip
     m_ReadOnly: 0
@@ -242,6 +252,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 5b4c41b7ab47d2844b680324815b9e47
     m_Address: backgrounds/mercury/twilight
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 5cc08028fe41f004682fc1d2f720488d
+    m_Address: terrain/mercury/back_wall_t4
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -277,11 +292,6 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 681ad70f1b568f745b1d133cebc3dd0c
     m_Address: backgrounds/mercury/layer1
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 6cdc3f1bcba02e9489a2d47bc65deab3
-    m_Address: terrain/mercury/dig_puff_ice
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -450,6 +460,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: ac80ac699e874414d9ba2570f63bcced
+    m_Address: terrain/mercury/back_wall_t1
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: ad19d4db1c901754faeacf43a11e41bb
     m_Address: props/mercury/meridian_beacon
     m_ReadOnly: 0
@@ -555,6 +570,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: cc926fa760e2872478b28f8708e7ef89
+    m_Address: terrain/mercury/back_wall_t2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: d112edb040dc9d44dbad294c6476d949
     m_Address: props/mercury/shelter_door/animator
     m_ReadOnly: 0
@@ -572,11 +592,6 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: d6c9ac9bb9a092546b5d683be29b0e06
     m_Address: terrain/mercury/ground_decor_2
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: e0619b4a9edec954c81c9bfa0aa71aec
-    m_Address: terrain/mercury/dig_puff_ice/animator
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

@@ -2605,42 +2605,7 @@ MonoBehaviour:
       start: 0
       length: 8
       loop: 0
-  - key: terrain/earth/dig_puff_sand
-    fps: 12
-    clips:
-    - name: puff
-      start: 0
-      length: 8
-      loop: 0
-  - key: terrain/earth/dig_puff_snow
-    fps: 12
-    clips:
-    - name: puff
-      start: 0
-      length: 8
-      loop: 0
-  - key: terrain/earth/dig_puff_stone
-    fps: 12
-    clips:
-    - name: puff
-      start: 0
-      length: 8
-      loop: 0
   - key: terrain/mars/dig_puff
-    fps: 12
-    clips:
-    - name: puff
-      start: 0
-      length: 8
-      loop: 0
-  - key: terrain/mars/dig_puff_basalt
-    fps: 12
-    clips:
-    - name: puff
-      start: 0
-      length: 8
-      loop: 0
-  - key: terrain/mars/dig_puff_frost
     fps: 12
     clips:
     - name: puff
@@ -2654,28 +2619,7 @@ MonoBehaviour:
       start: 0
       length: 8
       loop: 0
-  - key: terrain/mercury/dig_puff_ice
-    fps: 12
-    clips:
-    - name: puff
-      start: 0
-      length: 8
-      loop: 0
   - key: terrain/venus/dig_puff
-    fps: 12
-    clips:
-    - name: puff
-      start: 0
-      length: 8
-      loop: 0
-  - key: terrain/venus/dig_puff_tessera
-    fps: 12
-    clips:
-    - name: puff
-      start: 0
-      length: 8
-      loop: 0
-  - key: terrain/venus/dig_puff_vent
     fps: 12
     clips:
     - name: puff
