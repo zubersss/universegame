@@ -495,6 +495,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a8ba024d4cc3ff346b6123980a4da70b
+    m_Address: characters/surveyor/side_dig/animator
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: ae2cc3d8ddb414c4abdc6334f4505118
     m_Address: ships/pilgrim/puff
     m_ReadOnly: 0
@@ -602,6 +607,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: d604c8e9f10fdef4d8c56ade7c5f02ee
     m_Address: fx/dig_clods/t5
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d61f7e55036d33b4cb7d31de86077fa5
+    m_Address: characters/surveyor/side_dig
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

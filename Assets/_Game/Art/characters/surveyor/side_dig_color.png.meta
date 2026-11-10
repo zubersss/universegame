@@ -1,0 +1,912 @@
+fileFormatVersion: 2
+guid: d61f7e55036d33b4cb7d31de86077fa5
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -6492905044020254805
+    second: side_dig_color_0
+  - first:
+      213: 7628540283379075143
+    second: side_dig_color_1
+  - first:
+      213: 5477517039611061041
+    second: side_dig_color_2
+  - first:
+      213: 6463094395750833294
+    second: side_dig_color_3
+  - first:
+      213: 1217666788833128418
+    second: side_dig_color_4
+  - first:
+      213: 1812494342473180114
+    second: side_dig_color_5
+  - first:
+      213: -3019951586101201260
+    second: side_dig_color_6
+  - first:
+      213: 9038581069304515597
+    second: side_dig_color_7
+  - first:
+      213: -6043504946058167618
+    second: side_dig_color_8
+  - first:
+      213: -1328941805940108887
+    second: side_dig_color_9
+  - first:
+      213: 6915626512059882949
+    second: side_dig_color_10
+  - first:
+      213: 4416634974135766262
+    second: side_dig_color_11
+  - first:
+      213: -8809841266915070766
+    second: side_dig_color_12
+  - first:
+      213: -6537992777160098029
+    second: side_dig_color_13
+  - first:
+      213: -1517351453367708060
+    second: side_dig_color_14
+  - first:
+      213: 4672888100942065955
+    second: side_dig_color_15
+  - first:
+      213: 4006109613714981925
+    second: side_dig_color_16
+  - first:
+      213: 17450122762940384
+    second: side_dig_color_17
+  - first:
+      213: 6691415088325457462
+    second: side_dig_color_18
+  - first:
+      213: 9076689389577139419
+    second: side_dig_color_19
+  - first:
+      213: -9165184487004914508
+    second: side_dig_color_20
+  - first:
+      213: -730783907790691430
+    second: side_dig_color_21
+  - first:
+      213: 579997449912189812
+    second: side_dig_color_22
+  - first:
+      213: 9038588532693663034
+    second: side_dig_color_23
+  - first:
+      213: 8052664466550011527
+    second: side_dig_color_24
+  - first:
+      213: 9117817885527183561
+    second: side_dig_color_25
+  - first:
+      213: 2476899189383525181
+    second: side_dig_color_26
+  - first:
+      213: -6417431729542408908
+    second: side_dig_color_27
+  - first:
+      213: 2610736205074405468
+    second: side_dig_color_28
+  - first:
+      213: -5297345093888472220
+    second: side_dig_color_29
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 9
+  spritePivot: {x: 0.5, y: 0}
+  spritePixelsToUnits: 64
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationMethod: 0
+  spriteTessellationDetail: -1
+  spriteGeometrySubdivision: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 2
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: 25
+    textureCompression: 1
+    compressionQuality: 100
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 1
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: side_dig_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 392
+        width: 192
+        height: 192
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0ced047376b3e8c42b8b54aa47835909
+      internalID: 619474753
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: side_dig_1
+      rect:
+        serializedVersion: 2
+        x: 196
+        y: 392
+        width: 192
+        height: 192
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 7a87b9f39f5312f43af06426a973eab4
+      internalID: 450446463
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: side_dig_2
+      rect:
+        serializedVersion: 2
+        x: 392
+        y: 392
+        width: 192
+        height: 192
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9340fc0ddfcde284293dca155c49d0a1
+      internalID: 122740199
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: side_dig_3
+      rect:
+        serializedVersion: 2
+        x: 588
+        y: 392
+        width: 192
+        height: 192
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d133a24e97d88f54e8c465598d62933b
+      internalID: -477240466
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: side_dig_4
+      rect:
+        serializedVersion: 2
+        x: 784
+        y: 392
+        width: 192
+        height: 192
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 2a1460f556f7cbc4283d949cf6d2950c
+      internalID: -1885290382
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: side_dig_5
+      rect:
+        serializedVersion: 2
+        x: 980
+        y: 392
+        width: 192
+        height: 192
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6bad3fb1ccada3c46a6b7c320c508e06
+      internalID: -600420036
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: side_dig_6
+      rect:
+        serializedVersion: 2
+        x: 1176
+        y: 392
+        width: 192
+        height: 192
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 21d583b1e2011a44f8a2542199891c5c
+      internalID: -1717130458
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: side_dig_7
+      rect:
+        serializedVersion: 2
+        x: 1372
+        y: 392
+        width: 192
+        height: 192
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: af00e3de63cea7744a812f02ea229aba
+      internalID: 411238782
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: side_dig_8
+      rect:
+        serializedVersion: 2
+        x: 1568
+        y: 392
+        width: 192
+        height: 192
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 486901156a468c040b5960d779065974
+      internalID: -717709563
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: side_dig_9
+      rect:
+        serializedVersion: 2
+        x: 1764
+        y: 392
+        width: 192
+        height: 192
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 119f5eaa89e90a44fb1b989313327e80
+      internalID: 1683202071
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: side_dig_10
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 196
+        width: 192
+        height: 192
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5941dba63eb230f44a412dc8a0adda02
+      internalID: 48390684
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: side_dig_11
+      rect:
+        serializedVersion: 2
+        x: 196
+        y: 196
+        width: 192
+        height: 192
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 82289e9cd549b1544a1dfa9ebffb209d
+      internalID: -1701423990
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: side_dig_12
+      rect:
+        serializedVersion: 2
+        x: 392
+        y: 196
+        width: 192
+        height: 192
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 05bc674831a2cb742a2855b41a56e772
+      internalID: -1368605856
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: side_dig_13
+      rect:
+        serializedVersion: 2
+        x: 588
+        y: 196
+        width: 192
+        height: 192
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 26094233a69472b4da3d5f2575163ce0
+      internalID: 1184487182
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: side_dig_14
+      rect:
+        serializedVersion: 2
+        x: 784
+        y: 196
+        width: 192
+        height: 192
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 7b3412b0508d31844b13cc97c207ff5b
+      internalID: 619805942
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: side_dig_15
+      rect:
+        serializedVersion: 2
+        x: 980
+        y: 196
+        width: 192
+        height: 192
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 75d42585c3fc18c459ce75a6cdec2d0f
+      internalID: -1869162438
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: side_dig_16
+      rect:
+        serializedVersion: 2
+        x: 1176
+        y: 196
+        width: 192
+        height: 192
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 09911676e8a5f5c4a8727cfcfc14d55e
+      internalID: 1090273427
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: side_dig_17
+      rect:
+        serializedVersion: 2
+        x: 1372
+        y: 196
+        width: 192
+        height: 192
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 2251e081f25d5ff429dd1595e5c4afd7
+      internalID: 1012425081
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: side_dig_18
+      rect:
+        serializedVersion: 2
+        x: 1568
+        y: 196
+        width: 192
+        height: 192
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 489d2380d2f2d35428a77aa8c4f7a8dc
+      internalID: 1159444183
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: side_dig_19
+      rect:
+        serializedVersion: 2
+        x: 1764
+        y: 196
+        width: 192
+        height: 192
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9edcc10145310c542bdee64ea4e8e315
+      internalID: -789502215
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: side_dig_20
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 192
+        height: 192
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b8fbd2c5d8f83094bbb2a5f75191e40a
+      internalID: 1719928248
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: side_dig_21
+      rect:
+        serializedVersion: 2
+        x: 196
+        y: 0
+        width: 192
+        height: 192
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8bf53d1a4f960964e9aec7648cbad528
+      internalID: -176800142
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: side_dig_22
+      rect:
+        serializedVersion: 2
+        x: 392
+        y: 0
+        width: 192
+        height: 192
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 24eaa6e826ddea443a31470679135652
+      internalID: 1283653416
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: side_dig_23
+      rect:
+        serializedVersion: 2
+        x: 588
+        y: 0
+        width: 192
+        height: 192
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 790526265c0fb2443a29d1073ab4ff4c
+      internalID: -870003182
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: side_dig_24
+      rect:
+        serializedVersion: 2
+        x: 784
+        y: 0
+        width: 192
+        height: 192
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e2f18eaef32c564459f7adbdb51be894
+      internalID: 2145547547
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: side_dig_25
+      rect:
+        serializedVersion: 2
+        x: 980
+        y: 0
+        width: 192
+        height: 192
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c7ca6357beb3c9f46937f8acb74ebdd3
+      internalID: 544594802
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: side_dig_26
+      rect:
+        serializedVersion: 2
+        x: 1176
+        y: 0
+        width: 192
+        height: 192
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 17a81aef837d3294aa4d5f6223ded226
+      internalID: 1182891997
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: side_dig_27
+      rect:
+        serializedVersion: 2
+        x: 1372
+        y: 0
+        width: 192
+        height: 192
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 86a7e68646186dd4ba11a51c4f2d88f8
+      internalID: 790564831
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: side_dig_28
+      rect:
+        serializedVersion: 2
+        x: 1568
+        y: 0
+        width: 192
+        height: 192
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 2377937562618264988df27a2570dd86
+      internalID: -1131164317
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: side_dig_29
+      rect:
+        serializedVersion: 2
+        x: 1764
+        y: 0
+        width: 192
+        height: 192
+      alignment: 9
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c3d8c0644a467cf419d3e00f323c0c0b
+      internalID: -1958981914
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 3623ba5a70f50e8449dae8cb009c0b6e
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      side_dig_0: 619474753
+      side_dig_1: 450446463
+      side_dig_10: 48390684
+      side_dig_11: -1701423990
+      side_dig_12: -1368605856
+      side_dig_13: 1184487182
+      side_dig_14: 619805942
+      side_dig_15: -1869162438
+      side_dig_16: 1090273427
+      side_dig_17: 1012425081
+      side_dig_18: 1159444183
+      side_dig_19: -789502215
+      side_dig_2: 122740199
+      side_dig_20: 1719928248
+      side_dig_21: -176800142
+      side_dig_22: 1283653416
+      side_dig_23: -870003182
+      side_dig_24: 2145547547
+      side_dig_25: 544594802
+      side_dig_26: 1182891997
+      side_dig_27: 790564831
+      side_dig_28: -1131164317
+      side_dig_29: -1958981914
+      side_dig_3: -477240466
+      side_dig_4: -1885290382
+      side_dig_5: -600420036
+      side_dig_6: -1717130458
+      side_dig_7: 411238782
+      side_dig_8: -717709563
+      side_dig_9: 1683202071
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
