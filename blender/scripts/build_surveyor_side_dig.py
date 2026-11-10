@@ -52,11 +52,16 @@ PPU = 64
 FW = FH = 192
 SEED = 6
 KEY = "characters/surveyor/side_dig"
-DIG = ("dig_down", "dig_fwd", "dig_up")
+DIG = ("dig_down", "dig_fwd", "dig_up", "dig_fwd_near")
 AIM = (("aim_up", 90.0), ("aim_up45", 45.0), ("aim_fwd", 0.0), ("aim_down45", -45.0), ("aim_down", -90.0))
 CLIPS = [(c, 5, False) for c in DIG] + [(c, 2, True) for c, _a in AIM]
 CONTACT = 1                             # the drawing of a dig clip on which the work lands (D-196: 0.08 s after the press)
 SHOVEL_LEN = 1.33                       # props/rig/shovel: the blade tip from the grip (its json "blade_tip")
+# rev 2 (LEAD 02:0x): the glove may grip the SHAFT - the tool slid back through it by up to slide_max metres on that clip,
+# its D-grip end going back along its own line - so UNITY can put the blade tip ON a contact nearer than the shovel's
+# length. dig_fwd_near is the mid-shaft hold for a face at the nose; dig_fwd and dig_up take a slide too so the ranges
+# meet (reach_lines prints them). dig_down has none: a spade driven in up to 0.24 m is right (LEAD).
+SLIDE_MAX = {"dig_fwd": 0.70, "dig_up": 0.55, "dig_fwd_near": 0.95}
 CHEST = (0.0, 0.9)                      # the body's middle, for the reach numbers
 ROLES = ("wind-up", "CONTACT", "follow-through", "settle", "recover")
 DEFAULT_OUT = os.path.join(os.path.dirname(HERE), "sources", "characters", "surveyor_side_dig.blend")
@@ -153,9 +158,11 @@ DIG_KEYS = {
         # in the ground in front
         dict(arms=(-1.05, 1.95), reach=0.58, elbow=0.02, tool=-75, sz=0.88, lean=0.20, bob=-0.09, shift=0.06, feet=(-0.14, 0.20),
              bob_tip=-0.11, pack_swing=0.15, pack_dz=-0.03, hose_lag=-0.06, look=(0.6, -0.8)),
-        # 2 follow-through: the weight goes down the shaft - the hand drops and pushes, the blade sinks and levers back
-        dict(arms=(-0.85, 1.80), reach=0.52, elbow=0.05, tool=-96, sz=0.84, lean=0.24, bob=-0.12, shift=0.07, feet=(-0.14, 0.20),
-             bob_tip=-0.06, pack_swing=0.10, pack_dz=-0.05, hose_lag=-0.04, look=(0.6, -0.8)),
+        # 2 follow-through, rev 2 (LEAD: the first one drove the blade straight down at the toes - a second stab at one's own
+        # feet): the HEAVE - the handle levered down to the hip, the blade lifted out of the ground ahead with its load
+        # (about 0.45 m up), the body rocking back onto the rear foot. The clods fly up and back on this drawing
+        dict(arms=(0.55, 0.25), reach=0.44, elbow=0.10, tool=-3, sz=0.97, lean=-0.10, bob=-0.04, shift=-0.03, feet=(-0.14, 0.20),
+             bob_tip=-0.07, pack_swing=-0.12, pack_dz=0.03, hose_lag=0.05, look=(0.75, -0.25)),
         # 3 settle: the recoil - the body springs back up, the blade lifts clear with its scoop
         dict(arms=(-0.30, 1.55), reach=0.44, elbow=0.10, tool=-45, sz=1.04, lean=0.05, bob=0.01, shift=0.02, feet=(-0.11, 0.14),
              bob_tip=0.05, pack_swing=-0.06, pack_dz=0.03, hose_lag=0.03, look=(0.7, -0.5)),
@@ -164,9 +171,10 @@ DIG_KEYS = {
              pack_swing=0.03, look=(0.6, -0.2)),
     ],
     "dig_fwd": [
-        # 0 wind-up: the weight on the back foot, the hand drawn back past the hip, the shaft across the body
-        dict(arms=(0.90, -0.45), reach=0.36, elbow=0.12, tool=6, sz=1.03, lean=-0.14, shift=-0.05, feet=(-0.10, 0.08),
-             bob_tip=0.09, pack_swing=-0.10, hose_lag=0.05, look=(0.8, 0.0)),
+        # 0 wind-up, rev 2 (LEAD: more coil; the first was nearly idle with the shovel level): the body back on the rear
+        # foot and a little down, the elbow well back, the grip behind the hip, the shaft across the body
+        dict(arms=(1.10, -0.75), reach=0.34, elbow=0.14, tool=8, sz=0.97, lean=-0.22, bob=-0.02, shift=-0.10, feet=(-0.20, 0.06),
+             bob_tip=0.12, pack_swing=-0.14, hose_lag=0.06, look=(0.8, 0.0)),
         # 1 CONTACT: the thrust - a lunge onto the front foot, the arm at full reach, the blade at the wall
         dict(arms=(-1.20, 1.50), reach=0.58, elbow=0.02, tool=-4, sz=0.90, lean=0.26, bob=-0.05, shift=0.10, feet=(-0.16, 0.30),
              bob_tip=-0.13, pack_swing=0.18, pack_dz=-0.02, hose_lag=-0.07, look=(0.8, -0.1)),
@@ -196,6 +204,27 @@ DIG_KEYS = {
         # 4 recover
         dict(arms=(-0.08, 0.45), reach=0.42, elbow=0.07, tool=-14, sz=1.0, lean=0.01, feet=(-0.07, 0.07),
              pack_swing=0.03, look=(0.6, 0.0)),
+    ],
+    # rev 2 (LEAD 02:0x: "the near case is not an edge case, it is the tunnel"): a face 0.6-1.5 m ahead. A MID-SHAFT hold:
+    # the front glove low at the hip on the shaft, the D-grip end going back across the body to the back hand, a short jab
+    # with the weight behind it. The tool slides through this glove (SLIDE_MAX) so the blade tip meets the face.
+    "dig_fwd_near": [
+        # 0 wind-up: the body rocks well back (a face at 0.6 m leaves no room to lunge: the weight has to come from here),
+        # the glove drawn back past the hip
+        dict(arms=(-0.60, -0.40), reach=0.40, elbow=0.08, tool=3, sz=1.02, lean=-0.18, shift=-0.08, feet=(-0.15, 0.08),
+             bob_tip=0.10, pack_swing=-0.12, hose_lag=0.05, look=(0.8, -0.15)),
+        # 1 CONTACT: the jab - the hips and the shoulder go in behind the shaft, the glove a hand's width ahead of the belly
+        dict(arms=(-0.55, 0.0), reach=0.40, elbow=0.10, tool=3, sz=0.93, lean=0.12, bob=-0.04, shift=0.08, feet=(-0.16, 0.22),
+             bob_tip=-0.11, pack_swing=0.15, pack_dz=-0.02, hose_lag=-0.06, look=(0.8, -0.2)),
+        # 2 follow-through: the push - the weight keeps coming, the blade dips with its load
+        dict(arms=(-0.50, 0.32), reach=0.41, elbow=0.09, tool=-4, sz=0.91, lean=0.16, bob=-0.05, shift=0.11, feet=(-0.16, 0.22),
+             bob_tip=-0.06, pack_swing=0.10, pack_dz=-0.03, hose_lag=-0.04, look=(0.8, -0.2)),
+        # 3 settle: the recoil, the blade drawn back out and lifted
+        dict(arms=(-0.40, -0.05), reach=0.41, elbow=0.09, tool=7, sz=1.03, lean=0.0, shift=0.02, feet=(-0.12, 0.16),
+             bob_tip=0.05, pack_swing=-0.06, pack_dz=0.03, hose_lag=0.03, look=(0.75, -0.1)),
+        # 4 recover
+        dict(arms=(-0.08, 0.30), reach=0.42, elbow=0.07, tool=-12, sz=1.0, lean=0.01, feet=(-0.07, 0.08),
+             pack_swing=0.03, look=(0.6, -0.1)),
     ],
 }
 
@@ -246,14 +275,18 @@ def hand_sockets():
 
 
 # ---------------------------------------------------------------- the carry (side's idle, walk, run)
-CARRY_BASE, CARRY_SWING = -0.25, 0.25   # the tool's angle at rest (rad from +x: the blade ahead and a little down) and how
-#                                         much of the arm's own swing it takes (a hanging arm swung forward lifts the blade)
+# the tool at rest: its angle (rad from +x), how much of the arm's own swing it takes, and whether it is drawn BEHIND the
+# body. Two candidates for LEAD's pick (rev 2): "low" = the blade ahead and a little down (sheet 1: it read as a lance, and
+# a tip 0.04 m over the ground meets every rising slope); "shouldered" = the glove where it is, the shaft leaning back over
+# the shoulder behind the body, the blade up behind the helmet. The Beam's carry (a short tool, low at the side) is UNITY's.
+CARRY = {"low": (-0.25, 0.25, False), "shouldered": (math.radians(110.0), 0.08, True)}
 SIDE_CLIPS = (("idle", 0, 10, SV.idle_pose), ("walk", 10, 12, SV.walk_pose), ("run", 72, 12, SV.run_pose))
 
 
-def carry_sockets():
-    """{clip: {"start": side's first frame, "hand": [[x, z, angle], ...]}}: the front glove's centre on `side`'s frames
-    (build_rig_tools_v3._hand's own maths) and the carried tool's direction - held low at the side, not aimed."""
+def carry_sockets(kind="low"):
+    """{clip: {"start": side's first frame, "glove": [[x, z, angle], ...]}}: the front glove's centre on `side`'s frames
+    (build_rig_tools_v3._hand's own maths) and the carried tool's direction for that carry."""
+    base_a, swing, _behind = CARRY[kind]
     out = {}
     for name, start, n, fn in SIDE_CLIPS:
         rows = []
@@ -263,15 +296,23 @@ def carry_sockets():
             a = p["arms"][1]
             sh = X1(p, 0.04, 1.00)
             h = (sh[0] + 0.42 * math.sin(a), sh[1] - 0.42 * math.cos(a))
-            rows.append([round(h[0], 4), round(h[1] - 0.04, 4), round(CARRY_BASE + CARRY_SWING * a, 4)])
-        out[name] = {"start": start, "hand": rows}
+            rows.append([round(h[0], 4), round(h[1] - 0.04, 4), round(base_a + swing * a, 4)])
+        out[name] = {"start": start, "glove": rows}
     return out
 
 
-def tip_of(hand, deg=None):
-    """The shovel's blade tip for a socket triple (its own angle, or `deg`)."""
+def tip_of(hand, deg=None, slide=0.0):
+    """The shovel's blade tip for a socket triple (its own angle, or `deg`), the tool slid back through the glove by `slide`."""
     a = hand[2] if deg is None else math.radians(deg)
-    return (hand[0] + SHOVEL_LEN * math.cos(a), hand[1] + SHOVEL_LEN * math.sin(a))
+    return (hand[0] + (SHOVEL_LEN - slide) * math.cos(a), hand[1] + (SHOVEL_LEN - slide) * math.sin(a))
+
+
+def face_hit(hand, x_face, deg=None):
+    """A vertical face at x_face ahead, the tool at its drawn angle (or deg): -> (the slide that puts the blade tip on the
+    face, the tip). A negative slide = the face is past the blade."""
+    a = hand[2] if deg is None else math.radians(deg)
+    along = (x_face - hand[0]) / math.cos(a)
+    return SHOVEL_LEN - along, (x_face, hand[1] + along * math.sin(a))
 
 
 # the marked contact points of the sheet, per direction: (label, the shovel's angle in deg on the contact drawing). Each
@@ -279,27 +320,67 @@ def tip_of(hand, deg=None):
 # drawn. "far" is the reach's edge in that direction.
 MARKS = {"dig_down": (("near: at the toes", -122.0), ("far: the ground ahead", -55.0)),
          "dig_fwd": (("low: the foot of a wall", -35.0), ("far: straight ahead", 0.0)),
-         "dig_up": (("steep: overhead", 80.0), ("far: ahead and up", 35.0))}
+         "dig_up": (("steep: overhead", 80.0), ("far: ahead and up", 35.0)),
+         "dig_fwd_near": (("low", -20.0), ("level", 3.0))}
+FACES = (0.6, 1.2)                      # rev 2's two marked faces for dig_fwd_near (m ahead of the feet's centre)
 
 
 def reach_lines():
     """The pose maths LEAD asked for: per direction the contact drawing's glove, and for each marked point the blade tip
-    and its distance from the body's middle (0, 0.9) and from the feet."""
+    and its distance from the body's middle (0, 0.9) and from the feet; with a slide, how near the tip can come."""
     out = []
     for c in DIG:
         h = hand_of(DIG_KEYS[c][CONTACT])
-        out.append(f"{c}: contact glove ({h[0]:+.2f}, {h[1]:.2f}) m, the tool drawn at {math.degrees(h[2]):+.0f} deg; the blade tip "
-                   f"can be anywhere on the circle of {SHOVEL_LEN} m about that glove:")
+        sm = SLIDE_MAX.get(c, 0.0)
+        out.append(f"{c}: contact glove ({h[0]:+.2f}, {h[1]:.2f}) m, the tool drawn at {math.degrees(h[2]):+.0f} deg, slide_max {sm:g} m; "
+                   f"the blade tip can be {SHOVEL_LEN - sm:.2f}-{SHOVEL_LEN} m from that glove, in any direction UNITY turns the tool:")
         for label, deg in MARKS[c] + (("as drawn", math.degrees(h[2])),):
             t = tip_of(h, deg)
-            out.append(f"    {label} ({deg:+.0f} deg): tip ({t[0]:+.2f}, {t[1]:+.2f}) m = {math.hypot(t[0] - CHEST[0], t[1] - CHEST[1]):.2f} m "
-                       f"from the body's middle, {t[0]:.2f} m ahead of the feet, {t[1]:+.2f} m from the ground line")
+            ln = (f"    {label} ({deg:+.0f} deg): tip ({t[0]:+.2f}, {t[1]:+.2f}) m = {math.hypot(t[0] - CHEST[0], t[1] - CHEST[1]):.2f} m "
+                  f"from the body's middle, {t[0]:.2f} m ahead of the feet, {t[1]:+.2f} m from the ground line")
+            if sm:
+                n = tip_of(h, deg, sm)
+                ln += f"; at the full slide ({n[0]:+.2f}, {n[1]:+.2f}), {math.hypot(n[0] - CHEST[0], n[1] - CHEST[1]):.2f} m from the body's middle"
+            out.append(ln)
+    hn, hf = hand_of(DIG_KEYS["dig_fwd_near"][CONTACT]), hand_of(DIG_KEYS["dig_fwd"][CONTACT])
+    lo, hi = tip_of(hn, None, SLIDE_MAX["dig_fwd_near"])[0], tip_of(hn)[0]
+    lo2, hi2 = tip_of(hf, None, SLIDE_MAX["dig_fwd"])[0], tip_of(hf)[0]
+    out.append(f"A FACE AHEAD, the blade tip ON it at the drawn angles: dig_fwd_near {lo:.2f}-{hi:.2f} m (slide {SLIDE_MAX['dig_fwd_near']:g}-0), "
+               f"dig_fwd {lo2:.2f}-{hi2:.2f} m (slide {SLIDE_MAX['dig_fwd']:g}-0); nearer than {lo:.2f} m the blade goes into the face")
+    for xf in FACES:
+        s, t = face_hit(hn, xf)
+        out.append(f"    a face at {xf:g} m with dig_fwd_near: slide {s:.2f} m, the tip at ({t[0]:.2f}, {t[1]:.2f})"
+                   + ("" if 0 <= s <= SLIDE_MAX["dig_fwd_near"] else f" - OUT of its slide (0-{SLIDE_MAX['dig_fwd_near']:g}): the blade is {s - SLIDE_MAX['dig_fwd_near']:.2f} m into it"))
     return out
 
 
 def sockets():
     """Per-frame sockets for render.py's B-122 path: {frame: {"hand": [x, z, angle]}}."""
     return {str(f + 1): {"hand": h} for f, h in enumerate(hand_sockets())}
+
+
+# what UNITY's reader takes from side_dig.json (LEAD 02:0x, its four asks): "sockets": {"hand": [[x, z, angle], ...]} with
+# the name "hand" ONCE in the file and the angle in radians CCW from +x; per clip "contact" (0-based inside the clip) and,
+# where it has one, "slide_max" (m); a top-level "carry": {"angle": radians} (the carried tool rides the idle glove)
+SOCKETS_UNITS = ("per frame in sheet order: [x, z] metres from the pivot to the front glove's centre (x right, z up, facing "
+                 "right) and the tool's direction on that drawing (radians, counter-clockwise from +x)")
+CARRY_PICK = "low"                      # until LEAD picks between rev 2's two carry rows
+
+
+def clip_fields(c):
+    out = {}
+    if c in DIG:
+        out["contact"] = CONTACT
+        if SLIDE_MAX.get(c):
+            out["slide_max"] = SLIDE_MAX[c]
+    return out
+
+
+def carry_json(kind):
+    a, swing, behind = CARRY[kind]
+    return {"angle": round(a, 4), "swing": swing, "behind": behind,
+            "note": "the tool at rest on side's idle / walk / run glove: its direction (radians, CCW from +x) plus swing x the "
+                    "front arm's own angle; behind = sorted behind the body"}
 
 
 def build(out=DEFAULT_OUT):
@@ -322,13 +403,29 @@ ENTRY = {"key": KEY, "style": "v3", "palette_tints": [["sky", 0.25]],
          "source": "sources/characters/surveyor_side_dig.blend", "build": "scripts/build_surveyor_side_dig.py", "collection": "surveyor",
          "frame": [FW, FH], "pivot": [0.5, 0.0], "facing": "right", "squash_root": True, "planet": "earth", "seed": SEED,
          "beside": "characters/surveyor/side", "review_name": "b246_surveyor_side_dig",
-         "clips": [{"name": c, "frames": n, "loop": lp} for c, n, lp in CLIPS],
-         "note": "B-246 (D-196): the dig as one motion - dig_down / dig_fwd / dig_up (5 each, contact on drawing 1) and the "
-                 "Beam's five aim holds (2 each); the front hand empty, a 'hand' socket [x, z, angle] per frame; side and "
-                 "side_b untouched. NOT in the manifest until LEAD's ACCEPTED on sheet 1"}
+         "clips": [dict({"name": c, "frames": n, "loop": lp}, **clip_fields(c)) for c, n, lp in CLIPS],
+         "sockets_units": SOCKETS_UNITS, "json_extra": {"carry": carry_json(CARRY_PICK)},
+         "note": "B-246 (D-196): the dig as one motion - dig_down / dig_fwd / dig_up / dig_fwd_near (5 each, contact on drawing "
+                 "1, slide_max where the glove may grip the shaft) and the Beam's five aim holds (2 each); the front hand empty, "
+                 "a socket [x, z, angle] per frame; side and side_b untouched. NOT in the manifest until LEAD's ACCEPTED"}
 
 
 # ---------------------------------------------------------------- lock-free preview (sheet 1)
+def grip_frame():
+    """A PROPOSAL (rev 2, not carded): the front glove alone as a fist round a shaft - 32x32 @ PPU 64, pivot centre, the
+    shaft along +x. UNITY's tool sprite is drawn over the body, so it covers the glove that holds it; this one sprite laid
+    OVER the tool at the hand socket, turned to the tool's angle, makes the hand visibly hold the shaft (the mid-shaft hold
+    needs it most). The glove's own strokes (draw_surveyor's), three finger lines across the shaft."""
+    gp = fakegp.FakeGP()
+    M = SV.materials(gp)
+    d = fakegp.FakeDrawing()
+    G.stroke(d, G.lumpy_ellipse(0.0, 0.0, 0.115, 0.105, n=24, lump=0.06, seed=22), M["glove"], O, cyclic=True)
+    for x in (-0.05, 0.0, 0.05):
+        G.seam(d, G.bowed_line((x, 0.062), (x + 0.012, -0.055), bow=0.12, n=4), M["ink"])
+    img, _w = GR.render_frame(fakegp.strokes_of(d, gp), 32, 32, PPU, (0.5, 0.5), ss=2, seed=SEED * 1000 + 900)
+    return img
+
+
 def _frame(pose, f, draw=None):
     gp = fakegp.FakeGP()
     M = SV.materials(gp)
@@ -340,7 +437,9 @@ def _frame(pose, f, draw=None):
     return img, w, zmin
 
 
-def preview(out, footnote=None):
+def preview(out, footnote=None, rev2=True):
+    """rev2 (the default): only what LEAD asked of rev 2 - the new clip, dig_down, dig_fwd and the two carry rows; the
+    whole sheet (dig_up and the aim holds too, accepted as drawn) with --full. (All of it at once passed 1 GB.)"""
     import time
     import numpy as np
     sys.path.insert(0, os.path.dirname(HERE))
@@ -417,9 +516,14 @@ def preview(out, footnote=None):
     beams = {2: (beam, (bj["pivot"][0] * beam.shape[1], beam.shape[0] * 0.5)),
              1: (halve(beam), (bj["pivot"][0] * beam.shape[1] / 2, beam.shape[0] * 0.25))}
 
-    def cell(frame, k, wide_m, hand=None, deg=None, tool="shovel", marks=(), label=None):
+    fist = grip_frame()
+    fists = {1: fist, 2: np.repeat(np.repeat(fist, 2, 0), 2, 1)}
+
+    def cell(frame, k, wide_m, hand=None, deg=None, tool="shovel", marks=(), label=None, slide=0.0, under=False, wall=None,
+             grip=False):
         """One drawing on paper at k x: the 192 px frame at the left, `wide_m` metres of room past it, 1 m of ground below;
-        the tool on the socket (hand = [x, z, angle]; deg overrides the angle), red crosses at `marks` (x, z)."""
+        the tool on the socket (hand = [x, z, angle]; deg overrides the angle; slide = the tool slid back through the glove
+        by that many metres; under = the tool behind the body), a solid face from x = wall on, red crosses at `marks`."""
         W, H = int((3.0 + wide_m) * PPU) * k, (FH + PPU) * k
         img = np.tile(paper, (H, W, 1)).astype(np.float32)
         img[FH * k:] = soil
@@ -427,21 +531,33 @@ def preview(out, footnote=None):
 
         def px(x, z):
             return ((1.5 + x) * PPU * k, (3.0 - z) * PPU * k)
-        f = frame.astype(np.float32) / 255.0
-        f = np.repeat(np.repeat(f, k, 0), k, 1)
-        sub = img[:FH * k, :FW * k]
-        sub[...] = f[..., :3] * f[..., 3:4] + sub * (1 - f[..., 3:4])
-        if hand is not None:
+        if wall is not None:
+            x0 = int(px(wall, 0.0)[0])
+            img[:FH * k, x0:] = soil
+            img[:FH * k, x0:x0 + max(1, k)] = ink * 0.6 + paper * 0.4
+
+        def put_tool():
             a = math.degrees(hand[2]) if deg is None else deg
-            at = px(hand[0], hand[1])
+            ar = math.radians(a)
+            at = px(hand[0] - slide * math.cos(ar), hand[1] - slide * math.sin(ar))
             if tool == "beam":
-                mz = (hand[0] + bj["muzzle"][0] * math.cos(math.radians(a)) - bj["muzzle"][1] * math.sin(math.radians(a)),
-                      hand[1] + bj["muzzle"][0] * math.sin(math.radians(a)) + bj["muzzle"][1] * math.cos(math.radians(a)))
-                far = (mz[0] + 6.0 * math.cos(math.radians(a)), mz[1] + 6.0 * math.sin(math.radians(a)))
+                mz = (hand[0] + bj["muzzle"][0] * math.cos(ar) - bj["muzzle"][1] * math.sin(ar),
+                      hand[1] + bj["muzzle"][0] * math.sin(ar) + bj["muzzle"][1] * math.cos(ar))
+                far = (mz[0] + 6.0 * math.cos(ar), mz[1] + 6.0 * math.sin(ar))
                 seg(img, px(*mz), px(*far), 3.0 * k, teal)
                 place(img, beams[k][0], beams[k][1], a, at)
             else:
                 place(img, tools[k][0], tools[k][1], a, at)
+        if hand is not None and under:
+            put_tool()
+        f = frame.astype(np.float32) / 255.0
+        f = np.repeat(np.repeat(f, k, 0), k, 1)
+        sub = img[:FH * k, :FW * k]
+        sub[...] = f[..., :3] * f[..., 3:4] + sub * (1 - f[..., 3:4])
+        if hand is not None and not under:
+            put_tool()
+        if hand is not None and grip:                                    # the proposed fist, over the tool
+            place(img, fists[k], (16.0 * k, 16.0 * k), math.degrees(hand[2]) if deg is None else deg, px(hand[0], hand[1]))
         for (mx, mz_) in marks:
             cx, cy = px(mx, mz_)
             seg(img, (cx - 5 * k, cy - 5 * k), (cx + 5 * k, cy + 5 * k), 1.5 * k, red)
@@ -477,11 +593,30 @@ def preview(out, footnote=None):
         gl, ns = arm_points(pb)[3], nose_of(pb)
         nose.append(math.hypot(gl[0] - ns[0], gl[1] - ns[1]))   # the glove (r 0.115) and the nose (r 0.055): 0.17 = touching
     idle, _w, _z = _frame(SV.idle_pose(0), 0, draw=lambda d, M, pose, seed=0: SV.draw_surveyor(d, M, pose, seed=seed))
-    carry = carry_sockets()
+    carry, carry_b = carry_sockets("low"), carry_sockets("shouldered")
 
     rows = [np.tile(paper, (30, 1920, 1)).astype(np.float32)]
-    review._label(rows[0], "B-246 sheet 1 (PREVIEW, nothing exported): the dig as one motion - the body. The front hand is EMPTY in the art; the shovel and the Beam here are the game's own sprites laid on each frame's 'hand' socket. Red crosses = marked contact points", 6, 8)
-    for c in DIG:
+    review._label(rows[0], "B-246 sheet 1 REV 2 (PREVIEW, nothing exported): the dig as one motion - the body. The front hand is EMPTY in the art; the shovel and the Beam here are the game's own sprites laid on each frame's socket. Red crosses = marked contact points", 6, 8)
+    s = clip_start("dig_fwd_near")                                       # rev 2's new clip first: a face at 1.2 m and at 0.6 m
+    hc = hands[s + CONTACT]
+    for xf in FACES[::-1]:
+        sl, tip = face_hit(hc, xf)
+        sl = max(0.0, min(SLIDE_MAX["dig_fwd_near"], sl))
+        rows.append(head(f"dig_fwd_near (NEW, the mid-shaft hold) at 1x on a face {xf:g} m ahead: drawings 0-4, the tool slid {sl:.2f} m back through the glove (half that on the recover) | at 2x: wind-up, CONTACT, follow-through"))
+        cells = [cell(frames[s + j], 1, 0.75, hands[s + j], slide=sl if j < 4 else sl / 2, wall=xf, marks=(tip,) if j == CONTACT else (),
+                      label=f"{j} {ROLES[j]}") for j in range(5)]
+        rows.append(row(cells))
+        rows.append(row([cell(frames[s + j], 2, 0.75, hands[s + j], slide=sl, wall=xf, marks=(tip,) if j == CONTACT else (),
+                              label=f"{j} {ROLES[j]}") for j in (0, 1, 2)]))
+    rows.append(head("A PROPOSAL (not carded): one 32 px sprite, the glove as a fist, laid OVER the tool at the socket so the hand visibly holds the shaft. dig_fwd_near's CONTACT at 2x: a face at 0.6 m without / with it | a face at 1.2 m without / with it"))
+    cells = []
+    for xf in FACES:
+        sl, tip = face_hit(hc, xf)
+        sl = max(0.0, min(SLIDE_MAX["dig_fwd_near"], sl))
+        cells += [cell(frames[s + CONTACT], 2, 0.75, hc, slide=sl, wall=xf, label=f"{xf:g} m, as the game draws it today"),
+                  cell(frames[s + CONTACT], 2, 0.75, hc, slide=sl, wall=xf, grip=True, label=f"{xf:g} m, with the fist over the shaft")]
+    rows.append(row(cells))
+    for c in (("dig_down", "dig_fwd") if rev2 else ("dig_down", "dig_fwd", "dig_up")):
         s = clip_start(c)
         hc = hands[s + CONTACT]
         (nl, nd), (fl, fd) = MARKS[c]
@@ -492,7 +627,7 @@ def preview(out, footnote=None):
             cells.append(cell(frames[s + j], 1, 1.5, hands[s + j], deg=fd if j == CONTACT else None,
                               marks=(far, near) if j == CONTACT else (), label=f"{j} {ROLES[j]}"))
         cells.append(cell(frames[s + CONTACT], 1, 1.5, hc, deg=nd, marks=(far, near), label="1 CONTACT, near"))
-        cells.append(cell(idle, 1, 0.0, carry["idle"]["hand"][0], label="idle 0"))
+        cells.append(cell(idle, 1, 0.0, carry["idle"]["glove"][0], label="idle 0"))
         rows.append(row(cells))
         rows.append(head(f"{c} at 2x: wind-up, CONTACT (far mark), follow-through"))
         rows.append(row([cell(frames[s + j], 2, 1.5, hands[s + j], deg=fd if j == CONTACT else None,
@@ -501,13 +636,14 @@ def preview(out, footnote=None):
         rows.append(row([cell(frames[s + 3], 2, 1.5, hands[s + 3], label=f"3 {ROLES[3]}"),
                          cell(frames[s + 4], 2, 1.5, hands[s + 4], label=f"4 {ROLES[4]}"),
                          cell(frames[s + CONTACT], 2, 1.5, hc, deg=nd, marks=(far, near), label="1 CONTACT, near")]))
-    for j in (0, 1):
+    for j in (() if rev2 else (0, 1)):
         rows.append(head(f"the Beam's aim poses at 1x, drawing {j} of each two-drawing hold: " + ", ".join(c for c, _a in AIM) + " (the Beam on the socket, a ray from its muzzle)"))
         rows.append(row([cell(frames[clip_start(c) + j], 1, 3.0, hands[clip_start(c) + j], tool="beam", label=c) for c, _a in AIM]))
-    rows.append(head("aim_up45, aim_fwd, aim_down45 at 2x (drawing 0)"))
-    rows.append(row([cell(frames[clip_start(c)], 2, 1.5, hands[clip_start(c)], tool="beam", label=c) for c in ("aim_up45", "aim_fwd", "aim_down45")]))
-    rows.append(head("aim_up, aim_down at 2x (drawing 0)"))
-    rows.append(row([cell(frames[clip_start(c)], 2, 1.5, hands[clip_start(c)], tool="beam", label=c) for c in ("aim_up", "aim_down")]))
+    if not rev2:
+        rows.append(head("aim_up45, aim_fwd, aim_down45 at 2x (drawing 0)"))
+        rows.append(row([cell(frames[clip_start(c)], 2, 1.5, hands[clip_start(c)], tool="beam", label=c) for c in ("aim_up45", "aim_fwd", "aim_down45")]))
+        rows.append(head("aim_up, aim_down at 2x (drawing 0)"))
+        rows.append(row([cell(frames[clip_start(c)], 2, 1.5, hands[clip_start(c)], tool="beam", label=c) for c in ("aim_up", "aim_down")]))
 
     side_png = pngio.read_png_np(os.path.join(art, "characters", "surveyor", "side_color.png"))
     sm = json.load(open(os.path.join(art, "characters", "surveyor", "side.json"), encoding="utf-8"))
@@ -516,13 +652,22 @@ def preview(out, footnote=None):
     def side_frame(i):
         r, c = divmod(i, cols)
         return side_png[r * (FH + g):r * (FH + g) + FH, c * (FW + g):c * (FW + g) + FW]
-    rows.append(head("the carry (the tool at rest, held low at the side, not aimed): side's own exported frames with the shovel on carry_sockets() - idle 0, 5 | walk 0, 3, 6, 9 | run 0, 3, 6, 9"))
+    rows.append(head("THE CARRY, row A = LOW (as sheet 1: the blade ahead and a little down): side's own exported frames with the shovel on the glove - idle 0, 5 | walk 0, 3, 6, 9 | run 0, 3, 6, 9"))
     cells, low = [], []
     for name, start, n, _fn in SIDE_CLIPS:
         for i in ((0, 5) if name == "idle" else (0, 3, 6, 9)):
-            cells.append(cell(side_frame(start + i), 1, 0.0, carry[name]["hand"][i], label=f"{name} {i}"))
-        low.append(f"{name} {min(tip_of(h)[1] for h in carry[name]['hand']):+.2f}")
+            cells.append(cell(side_frame(start + i), 1, 0.0, carry[name]["glove"][i], label=f"{name} {i}"))
+        low.append(f"{name} {min(tip_of(h)[1] for h in carry[name]['glove']):+.2f}")
     rows.append(row(cells))
+    rows.append(head("THE CARRY, row B = SHOULDERED (the glove where it is, the shaft leaning back at 110 deg BEHIND the body, the blade up behind the helmet): the same frames"))
+    cells = []
+    for name, start, n, _fn in SIDE_CLIPS:
+        for i in ((0, 5) if name == "idle" else (0, 3, 6, 9)):
+            cells.append(cell(side_frame(start + i), 1, 0.0, carry_b[name]["glove"][i], label=f"{name} {i}", under=True))
+    rows.append(row(cells))
+    rows.append(head("the two carries at 2x: idle 0 and walk 3, LOW then SHOULDERED"))
+    rows.append(row([cell(side_frame(st + i), 2, 0.0, carry[nm]["glove"][i], label=f"{nm} {i} low") for nm, st, i in (("idle", 0, 0), ("walk", 10, 3))]
+                    + [cell(side_frame(st + i), 2, 0.0, carry_b[nm]["glove"][i], label=f"{nm} {i} shouldered", under=True) for nm, st, i in (("idle", 0, 0), ("walk", 10, 3))]))
 
     sheet_cols = v3.columns_for(FW, len(frames))
     sheet_rows = -(-len(frames) // sheet_cols)
@@ -536,15 +681,14 @@ def preview(out, footnote=None):
         anims.append({"name": c, "start": s, "length": n, "loop": lp})
         if lp:
             anims[-1]["loop_from"] = 0
-        if c in DIG:
-            anims[-1]["contact"] = CONTACT
+        anims[-1].update(clip_fields(c))
         s += n
     meta = {"key": KEY, "style": "v3", "frame_width": FW, "frame_height": FH, "columns": sheet_cols, "gutter": gg,
             "frames": len(frames), "fps": v3.FPS, "pivot": [0.5, 0.0], "facing": "right", "ppu": PPU, "animations": anims,
-            "squash_root": True, "sockets": {"hand": hands},
-            "sockets_units": "per frame in sheet order: [x, z] metres from the pivot to the front glove's centre (x right, z up, "
-                             "facing right) and the tool's direction on that drawing (rad, CCW from +x)"}
+            "squash_root": True, "sockets": {"hand": hands}, "sockets_units": SOCKETS_UNITS, "carry": carry_json(CARRY_PICK)}
     problems = v3.validate_sheet(meta, sheet.shape)
+    if json.dumps(meta).count('"hand"') != 1:
+        problems.append('the json names "hand" more than once (UNITY\'s socket reader finds the array by that name)')
     m = v3.EDGE_MARGIN
     clipped = [i for i, im in enumerate(frames) if im[:m, :, 3].any() or im[:, :m, 3].any() or im[:, -m:, 3].any()]
     if clipped:
@@ -567,7 +711,7 @@ def preview(out, footnote=None):
         json.dump(meta, fh, indent=2)
         fh.write("\n")
     with open(os.path.join(dd, "carry_sockets.json"), "w", encoding="utf-8", newline="\n") as fh:
-        json.dump(carry, fh, indent=2)
+        json.dump({"low": carry, "shouldered": carry_b}, fh, indent=2)
         fh.write("\n")
     outer = [w for w in widths if w[0] >= v3.OUTER_SPLIT]
     inner = [w for w in widths if w[0] < v3.OUTER_SPLIT]
@@ -596,5 +740,5 @@ def preview(out, footnote=None):
         print("  " + c + ": " + " | ".join(f"({h[0]:+.2f}, {h[1]:.2f}, {math.degrees(h[2]):+.0f})" for h in hands[s0:s0 + n]))
 
 
-if __name__ == "__main__":
-    preview(sys.argv[1])
+if __name__ == "__main__":                       # python -I build_surveyor_side_dig.py <review png> [--full]
+    preview(sys.argv[1], rev2="--full" not in sys.argv)
