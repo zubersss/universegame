@@ -311,6 +311,7 @@ TEXPAINT = {
     "grass": dict(kind="long", big=(10, 22, 2600), fine=(5, 10, 2600), vein=(6, 14, 2500), up=1.25, down=0.75, ridge=0.8, gain=1.35, sat=1.2, translucent=0.3),
     "rock": dict(kind="dry", big=(14, 30, 4800), fine=(7, 14, 4200), vein=(8, 20, 3000), up=1.22, down=0.74, ridge=2.0, gain=1.15, sat=1.15, translucent=0.0),
     "bark": dict(kind="dry", big=(14, 30, 4200), fine=(7, 14, 4200), vein=(8, 22, 5000), up=1.25, down=0.70, ridge=2.0, gain=1.25, sat=1.1, translucent=0.0),
+    "ground": dict(kind="dry", big=(18, 40, 4200), fine=(8, 18, 5200), vein=(8, 20, 4500), up=1.22, down=0.72, ridge=0.0, gain=1.1, sat=1.1, translucent=0.0),
 }
 GAIN = {"anthurium_botany_01": 2.1}               # a scan far darker than its neighbours (asset: the gain instead of its kind's)
 # What is done to the rendered piece (v7_paint): the brush's sizes are half-lengths in px AT THE GAME'S 96 px per metre
@@ -335,6 +336,79 @@ def tex_nodes(mat):
                 if key:
                     nodes[key] = n
     return nodes
+
+
+def stroke_layer(rgb, cover, cfg):
+    """How one colour map is laid as strokes. -> (base, lay): the calmed scan, and lay(P, under, under_up, under_dn), which
+    puts this map's strokes on a Painting: the broad and the fine ones in `under`'s colours along the scan's grain, then
+    the scan's fine lines as thin long strokes in under_dn (the dark ones) and under_up (the light ones). The same
+    Painting seed lays the same strokes again (the colour, then the heights for the normal map)."""
+    import numpy as np
+    import paint_v6 as PT
+    import painted_v6 as PV
+    import v7_paint as VP
+    h, w = rgb.shape[:2]
+    frac = max(0.2, float(cover.mean()))
+    base = np.dstack([PT.box(rgb[..., c], 3) for c in range(3)]).astype(np.float32)
+    lum = rgb @ VP.LUM
+    along = VP.grain(PT.box(lum, 2), 6)
+    ang = lambda x, y: float(along[min(max(int(y), 0), h - 1), min(max(int(x), 0), w - 1)])   # noqa: E731
+    hp = lum - PT.box(lum, 4)
+    s = float(np.percentile(np.abs(hp[cover > 0.5]), 90)) + 1e-4
+    light, dark = np.clip(hp / s - 0.45, 0, 1) * cover, np.clip(-hp / s - 0.45, 0, 1) * cover
+    tot = float(light.sum() + dark.sum()) + 1e-3
+    bank = VP.bank()
+
+    def lay(P, under, under_up, under_dn):
+        for a0, a1, n in (cfg["big"], cfg["fine"]):
+            PV.brush(P, bank, under, cover, int(n * frac), (a0, a1), angle=ang, spread=0.22, alpha=(0.8, 1.0), jitter=0.07, hue=0.014, kind=cfg["kind"])
+        a0, a1, n = cfg["vein"]
+        for mask, und in ((dark, under_dn), (light, under_up)):
+            PV.brush(P, bank, und, mask, int(n * frac * float(mask.sum()) / tot), (a0, a1), angle=ang, spread=0.07, alpha=(0.7, 0.95), jitter=0.02, hue=0.004, kind="long")
+    return base, lay
+
+
+GROUNDS = ("forest_floor", "brown_mud_leaves_01", "excavated_soil_wall", "red_laterite_soil_stones")
+
+
+def ground(names):
+    """THE GROUND MAPS (the strip, the earth cut, the pit, the dug earth): each scan's Diffuse map (a 16-bit PNG: read
+    here by bpy) laid as strokes like a material's colour map, MADE TO TILE (painted with a wrapped margin; each border
+    band cross-faded with its twin painted on the far side), written 8-bit: pieces/ground_<name>.png (1024 x 1024)."""
+    import numpy as np
+    import paint_v6 as PT
+    import v7_paint as VP
+    os.makedirs(PDIR, exist_ok=True)
+    V.fresh()
+    cfg, pad = TEXPAINT["ground"], 64
+    for name in names or GROUNDS:
+        t0 = time.time()
+        path = os.path.join(VENDOR, name, f"{name}_diff_1k.png")
+        if not os.path.isfile(path):
+            say(f"ground {name}: NOT DOWNLOADED")
+            continue
+        img = bpy.data.images.load(path, check_existing=False)
+        arr, is_float = V.np_of(img), img.is_float
+        bpy.data.images.remove(img)
+        rgb = arr[..., :3]
+        if is_float:                                                                       # a 16-bit file comes in linear: back to display values
+            rgb = np.where(rgb <= 0.0031308, rgb * 12.92, 1.055 * np.maximum(rgb, 0.0) ** (1 / 2.4) - 0.055).astype(np.float32)
+        h, w = rgb.shape[:2]
+        big = np.pad(rgb, ((pad, pad), (pad, pad), (0, 0)), mode="wrap")
+        base, lay = stroke_layer(big, np.ones(big.shape[:2], np.float32), cfg)
+        P = PT.Painting(big.shape[1], big.shape[0], 13, 1)
+        P.img[:] = base
+        lay(P, base, np.clip(base * cfg["up"], 0, 1), base * cfg["down"])
+        lm = (P.img @ VP.LUM)[..., None]
+        col = np.clip((lm + (P.img - lm) * cfg["sat"]) * cfg["gain"], 0, 1)
+        out = col[pad:-pad, pad:-pad].copy()
+        t = (np.arange(pad, dtype=np.float32) / pad)
+        out[:, :pad] = col[pad:-pad, w + pad:] * (1 - t)[None, :, None] + out[:, :pad] * t[None, :, None]       # the left band and its twin beyond the right edge
+        twin = col[h + pad:, pad:-pad].copy()
+        twin[:, :pad] = col[h + pad:, w + pad:] * (1 - t)[None, :, None] + twin[:, :pad] * t[None, :, None]
+        out[:pad] = twin * (1 - t)[:, None, None] + out[:pad] * t[:, None, None]                                # the top band and its twin below the bottom edge
+        V.write_png(os.path.join(PDIR, f"ground_{name}.png"), np.concatenate([out, np.ones((h, w, 1), np.float32)], axis=2))
+        say(f"ground {name}: {w}x{h} ({'16-bit, linear in' if is_float else '8-bit'}), {P.count} strokes, tiles; {time.time() - t0:.1f} s -> pieces/ground_{name}.png")
 
 
 def repaint(asset, mat, kind, seed=11):
@@ -367,23 +441,7 @@ def repaint(asset, mat, kind, seed=11):
             al = V.np_of(nodes["alpha"].image)[..., 0]
             if al.shape == (h, w):
                 cover = (PT.box(al, 3) > 0.03).astype(np.float32)                           # the leaf cards and a little round them
-        frac = max(0.2, float(cover.mean()))
-        base = np.dstack([PT.box(rgb[..., c], 3) for c in range(3)]).astype(np.float32)
-        lum = rgb @ VP.LUM
-        along = VP.grain(PT.box(lum, 2), 6)
-        ang = lambda x, y: float(along[min(max(int(y), 0), h - 1), min(max(int(x), 0), w - 1)])   # noqa: E731
-        hp = lum - PT.box(lum, 4)
-        s = float(np.percentile(np.abs(hp[cover > 0.5]), 90)) + 1e-4
-        light, dark = np.clip(hp / s - 0.45, 0, 1) * cover, np.clip(-hp / s - 0.45, 0, 1) * cover
-        tot = float(light.sum() + dark.sum()) + 1e-3
-        bank = VP.bank()
-
-        def lay(P, under, under_up, under_dn):
-            for a0, a1, n in (cfg["big"], cfg["fine"]):
-                PV.brush(P, bank, under, cover, int(n * frac), (a0, a1), angle=ang, spread=0.22, alpha=(0.8, 1.0), jitter=0.07, hue=0.014, kind=cfg["kind"])
-            a0, a1, n = cfg["vein"]
-            for mask, und in ((dark, under_dn), (light, under_up)):
-                PV.brush(P, bank, und, mask, int(n * frac * float(mask.sum()) / tot), (a0, a1), angle=ang, spread=0.07, alpha=(0.7, 0.95), jitter=0.02, hue=0.004, kind="long")
+        base, lay = stroke_layer(rgb, cover, cfg)
         P = PT.Painting(w, h, seed, 1)
         P.img[:] = base
         lay(P, base, np.clip(base * cfg["up"], 0, 1), base * cfg["down"])
@@ -616,5 +674,7 @@ if __name__ == "__main__":
             stand_piece([a for a in argv[1:] if a in STANDS])
     elif mode == "stand":
         stand_piece(argv[1:] or list(STANDS))
+    elif mode == "ground":
+        ground(argv[1:])
     else:
         raise SystemExit(f"v7_frame_pieces: unknown mode {mode}")
