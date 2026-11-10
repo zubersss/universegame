@@ -1,0 +1,12 @@
+{
+  "key": "planets/common/spot_rim",
+  "style": "v3",
+  "width": 512,
+  "height": 24,
+  "tile": true,
+  "clamp_v": true,
+  "rows_from": "top",
+  "note": "repeats along its length (x) only: clamp across its width (v)",
+  "role": "a storm's rim: RGB = the storm tone's share, no ink",
+  "cut_row": 12
+}

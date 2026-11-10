@@ -1,0 +1,12 @@
+{
+  "key": "planets/saturn/ring_edge",
+  "style": "v3",
+  "width": 512,
+  "height": 16,
+  "tile": true,
+  "clamp_v": true,
+  "rows_from": "top",
+  "note": "repeats along its length (x) only: clamp across its width (v)",
+  "role": "a ring's edge: RGB = the lower tone's share across the cut (0 above it, 1 below), A = the thin ink line",
+  "cut_row": 8
+}

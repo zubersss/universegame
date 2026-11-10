@@ -4,7 +4,7 @@ planets/common/close_view and build_giant_close_export_v3) writes the strips, th
 
 Above DiscSprite's near zoom a giant is not a magnified picture: it is drawn from planets/<giant>/close.json (the far
 disc's own belts, wobble, rim, night crescent and storms: giants_v3) as flat tones, with narrow painted STRIPS laid along
-the limb and along every edge at ONE scale fixed to the planet (close.json's strips.texels_per_far_texel, 7.5: a strip
+the limb and along every edge at ONE scale fixed to the planet (close.json's strips.scale, 7.5 strip texels per far texel: a strip
 texel is 0.80 screen px at the flight's 6 px per far texel and 1.20 at its 9; B-240 / B-241's sheets stepped the scale).
 
   the strips (drafts)   limb_band 512x64      the outline: 2.5 px ink with its jitter on row 16, a faint inner shade below it
@@ -166,7 +166,7 @@ def samp(tex, x, y, wrap_x=True):
 
 
 def strip_scale(m, k):
-    """A strip texel's size on screen at m px per far texel: m / k, k = close.json's strips.texels_per_far_texel. ONE scale,
+    """A strip texel's size on screen at m px per far texel: m / k, k = close.json's strips.scale. ONE scale,
     fixed to the planet (D-195, contract 11.5.1; RULED 7.5 on B-243's desk-check): the flight shows a giant at 6 to 9 px
     per far texel, so a strip texel is 0.80 to 1.20 px and nothing is re-laid. (B-240 / B-241's accepted sheets stepped
     the scale by root 2 from the swap: 6 texels per far texel at zoom 6, 8.49 at 7.7, 12 at 12, i.e. about 1 px a texel.)"""
@@ -218,7 +218,7 @@ def close_view(J, T, m, centre, W=1920, H=540, frame=0, space=None, stats=None):
     float (H, W, 3), the limb's ink alpha, the limb's distance field in px)."""
     space = SPACE if space is None else space
     Rs = J["radius_u"] * D.SPACE_PPU * m
-    sc = strip_scale(m, J["strips"]["texels_per_far_texel"])
+    sc = strip_scale(m, J["strips"]["scale"])
     yy, xx = np.mgrid[0:H, 0:W].astype(np.float64) + 0.5
     u = centre[0] + (xx - W / 2) / Rs
     v = centre[1] - (yy - H / 2) / Rs
@@ -306,7 +306,7 @@ def close_view(J, T, m, centre, W=1920, H=540, frame=0, space=None, stats=None):
                 continue
             us = np.linspace(uu, uu + ds["length"], 25)
             ribbon(ink_a, to_px(us, vb + ds["wave_amp"] * np.sin(ds["wave_freq"] * us + phase)), E, sc, stats)
-    for (u0, v0) in hz["groups"]:
+    for (u0, v0) in [(g["u"], g["v"]) for g in hz["groups"]]:               # (objects, not pairs: UNITY's JsonUtility)
         for j in range(hz["count"]):
             uc, vc, hl = u0 + hz["step"] * j, v0 + hz["step"] * j, hz["length"] / 2
             if uc * uc + vc * vc > hz["limit"]:
@@ -465,7 +465,7 @@ def preview(out, name="jupiter", footnote=None):
     paper = np.array(review.PAPER, np.float32)
     W = 1920
     rows = [np.tile(paper, (30, W, 1)).astype(np.float32)]
-    review._label(rows[0], f"{card.upper().replace('B', 'B-')} / B-243 {name}: the close view drawn from {name}_close.json + the strips at ONE scale ({J['strips']['texels_per_far_texel']:g} strip texels per far texel; PREVIEW, nothing exported); each zoom over the far disc magnified the same", 6, 8)
+    review._label(rows[0], f"{card.upper().replace('B', 'B-')} / B-243 {name}: the close view drawn from {name}_close.json + the strips at ONE scale ({J['strips']['scale']:g} strip texels per far texel; PREVIEW, nothing exported); each zoom over the far disc magnified the same", 6, 8)
     st = np.tile(paper, (300, W, 1)).astype(np.float32)                      # the strips
     review._label(st, f"the strips at 2x: limb_band 512x16 (the ink alone) | belt_edge 0 and 1 (white = the lower tone's share, red = the ink line that marks are cut from; {name} uses variant {variant}) | spot_rim | ring_edge 512x16 | close_grain at 1x | the pigment tile at 2x", 6, 4, scale=1)
 
@@ -492,7 +492,7 @@ def preview(out, name="jupiter", footnote=None):
         fv = far_view(name, m, centre)
         ink = la > 0.5
         arc = int((np.abs(dl) < 0.5).sum())
-        kk = J["strips"]["texels_per_far_texel"]
+        kk = J["strips"]["scale"]
         sc = strip_scale(m, kk)
         limb = (f"limb ink measured {float(ink.sum()) / arc:.2f} px over {arc} px of arc (the strip's own range "
                 f"{2.5 * 0.8 * sc:.2f}-{2.5 * 1.2 * sc:.2f})") if arc else "no limb in this window"
@@ -594,22 +594,29 @@ def keys():
 def kit():
     """Every close-view texture, drawn by the same functions the accepted sheets used: [(key, RGBA uint8, json fields)]."""
     mask = "RGB = the lower tone's share across the cut (0 above it, 1 below), A = the thin ink line"
+    # "tile": the importer's Repeat switch (UNITY 01:1x: it then repeats in both axes); "clamp_v": a strip repeats along
+    # its length only and must clamp across its width (UNITY clamps v for these keys when it wires U-208)
+    strip = {"tile": True, "clamp_v": True, "rows_from": "top",
+             "note": "repeats along its length (x) only: clamp across its width (v)"}
     out = [
-        ("planets/common/limb_band", limb_band(), {"role": "the outline's ink alone", "tile_x": True, "centre_row": int(LIMB_C)}),
-        ("planets/common/belt_edge_0", belt_edge(0), {"role": "a belt's edge, firm (Jupiter, Saturn): " + mask, "tile_x": True,
-                                                      "cut_row": EDGE_ROW, "variant": 0}),
-        ("planets/common/belt_edge_1", belt_edge(1), {"role": "a belt's edge, faint and streaky (Uranus, Neptune): " + mask,
-                                                      "tile_x": True, "cut_row": EDGE_ROW, "variant": 1}),
-        ("planets/common/spot_rim", spot_rim(), {"role": "a storm's rim: RGB = the storm tone's share, no ink", "tile_x": True,
-                                                 "cut_row": EDGE_ROW}),
-        ("planets/saturn/ring_edge", ring_edge(), {"role": "a ring's edge: " + mask, "tile_x": True, "cut_row": RING_ROW}),
-        ("planets/common/close_grain", close_grain(), {"role": "the paper's fine grain, a multiply tile in screen space",
-                                                       "tile_x": True, "tile_y": True, "multiply_unit": 127.5}),
+        ("planets/common/limb_band", limb_band(), dict(strip, role="the outline's ink alone", cut_row=int(LIMB_C))),
+        ("planets/common/belt_edge_0", belt_edge(0), dict(strip, role="a belt's edge, firm (Jupiter, Saturn): " + mask,
+                                                          cut_row=EDGE_ROW)),
+        ("planets/common/belt_edge_1", belt_edge(1), dict(strip, role="a belt's edge, faint and streaky (Uranus, Neptune): " + mask,
+                                                          cut_row=EDGE_ROW)),
+        ("planets/common/spot_rim", spot_rim(), dict(strip, role="a storm's rim: RGB = the storm tone's share, no ink",
+                                                     cut_row=EDGE_ROW)),
+        ("planets/saturn/ring_edge", ring_edge(), dict(strip, role="a ring's edge: " + mask, cut_row=RING_ROW)),
+        ("planets/common/close_grain", close_grain(), {"tile": True, "clamp_v": False, "multiply_unit": 127.5,
+                                                       "role": "the paper's fine grain, a multiply tile in screen space",
+                                                       "note": "repeats in both axes"}),
     ]
     for name in NAMES:
         pig, size = pigment(name)
-        out.append((f"planets/{name}/close_pigment", pig, {"role": "the far disc's slow tone variation, a multiply tile over the "
-                                                           "far sheet's frame", "multiply_unit": 127.5, "far_frame_px": size}))
+        out.append((f"planets/{name}/close_pigment", pig, {"tile": False, "multiply_unit": 127.5, "far_frame_px": size,
+                                                           "role": "the far disc's slow tone variation, a multiply tile over "
+                                                                   "the far sheet's frame",
+                                                           "note": "does not repeat: clamp both ways"}))
     return out
 
 
@@ -629,9 +636,9 @@ def export_checks(K, jsons):
         short = key.split("/")[-1]
         if (img.shape[1], img.shape[0]) != SIZES[short]:
             out.append(f"{key}: {img.shape[1]}x{img.shape[0]}, not {SIZES[short][0]}x{SIZES[short][1]}")
-        if meta.get("tile_x") and seam(img) > 1.6:
+        if meta.get("tile") and seam(img) > 1.6:
             out.append(f"{key}: seam {seam(img):.2f} in x")
-        if meta.get("tile_y") and seam(np.swapaxes(img, 0, 1)) > 1.6:
+        if meta.get("tile") and not meta.get("clamp_v") and seam(np.swapaxes(img, 0, 1)) > 1.6:
             out.append(f"{key}: seam {seam(np.swapaxes(img, 0, 1)):.2f} in y")
     hit = v3.palette_hits(K[0][1], "earth")[0]
     if hit < 0.995:
@@ -643,6 +650,10 @@ def export_checks(K, jsons):
             out.append(f"{name}/close.json: no {', '.join(missing)}")
         if "draft" in J:
             out.append(f"{name}/close.json: still flagged draft")
+        if "[[" in json.dumps(J, separators=(",", ":")):
+            out.append(f"{name}/close.json: an array of arrays (UNITY's JsonUtility cannot read one)")
+        if J.get("strips", {}).get("scale") != D.GT.STRIP_SCALE or J.get("strips", {}).get("rows_from") != "top":
+            out.append(f"{name}/close.json: strips.scale / rows_from")
         if (name == "saturn") != ("rings" in J) or (name == "saturn") != ("ring_edge" in J.get("strips", {})):
             out.append(f"{name}/close.json: rings / ring_edge on the wrong body")
         if set(J.get("strips", {})) & {"limb_band", "belt_edge", "spot_rim", "pigment", "grain"} != {"limb_band", "belt_edge", "spot_rim", "pigment", "grain"}:
@@ -703,16 +714,16 @@ def export_review(out, art=ART, footnote=None):
         if key.endswith("/close"):
             J = json.load(open(base + ".json", encoding="utf-8"))
             lines.append(f"{key}.json: {os.path.getsize(base + '.json')} bytes, {len(J['belts'])} belts, {len(J['storms'])} storms, "
-                         f"{J['strips']['texels_per_far_texel']:g} strip texels per far texel, belt edge {J['strips']['belt_edge']['key']}"
+                         f"{J['strips']['scale']:g} strip texels per far texel, belt edge {J['strips']['belt_edge']['key']}"
                          + (", rings" if "rings" in J else ""))
             continue
         im = pngio.read_png_np(base + "_color.png")
         meta = json.load(open(base + ".json", encoding="utf-8"))
         f = im.astype(np.float32) / 255.0
         ln = f"{key}: {im.shape[1]}x{im.shape[0]}, {os.path.getsize(base + '_color.png')} bytes"
-        if meta.get("tile_x"):
+        if meta.get("tile"):
             ln += f", seam {seam(im):.2f}"
-        if meta.get("tile_y"):
+        if meta.get("tile") and not meta.get("clamp_v"):
             ln += f" (in y {seam(np.swapaxes(im, 0, 1)):.2f})"
         short = key.split("/")[-1]
         if short == "limb_band":

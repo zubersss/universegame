@@ -1,0 +1,115 @@
+{
+  "key": "planets/uranus/close",
+  "style": "v3",
+  "note": "B-243 (contract 11.5.1, D-195): the far disc's own facts for the giants' close view, from the table the far disc is painted from (giants_v3). u right, v up, in disc radii; tones are the far disc's flat tones (the Earth palette, as every disc)",
+  "radius_u": 57,
+  "loop_frames": 12,
+  "fps": 12,
+  "belts": [
+    {
+      "v_top": 1.1,
+      "tone_hex": "#8CAEAF",
+      "night_hex": "#7D8F8B"
+    },
+    {
+      "v_top": 0.3,
+      "tone_hex": "#B8C5C0",
+      "night_hex": "#9C9F96"
+    },
+    {
+      "v_top": -0.3,
+      "tone_hex": "#82A9AA",
+      "night_hex": "#768C87"
+    }
+  ],
+  "edge_wobble": {
+    "amp": 0.02,
+    "freq": 3.0,
+    "formula": "edge y(x) = v_top - amp * sin(freq * pi * x + phase) * (1 - v_top^2); phase = 2 * pi * frame / loop_frames"
+  },
+  "ink_marks": {
+    "width_px_far": 1.25,
+    "dashes": {
+      "u0": [
+        -0.35,
+        0.25
+      ],
+      "length": 0.22,
+      "drift": 0.05,
+      "drift_per_v": 7,
+      "wave_amp": 0.04,
+      "wave_freq": 4.0,
+      "limit": 0.9,
+      "points": 6,
+      "edges": [
+        0.3,
+        -0.3
+      ],
+      "formula": "per edge vb and per u0: uu = u0 + drift * sin(phase + vb * drift_per_v); the dash runs u = uu ... uu + length at v(u) = vb + wave_amp * sin(wave_freq * u + phase); skipped where (|uu| + length)^2 + vb^2 > limit; phase = 2 * pi * frame / loop_frames"
+    },
+    "night_hatches": {
+      "groups": [
+        {
+          "u": -0.62,
+          "v": -0.42
+        },
+        {
+          "u": -0.3,
+          "v": -0.8
+        }
+      ],
+      "count": 3,
+      "step": 0.06,
+      "length": 0.1,
+      "limit": 0.86,
+      "formula": "stroke j (0 .. count - 1) of a group (u0, v0) = its u, v: from (u0 + step * j - length / 2, v0 + step * j - length / 2) to (+ length / 2, + length / 2); skipped where u^2 + v^2 > limit at its centre"
+    },
+    "note": "drawn over everything, storms included, as on the far disc"
+  },
+  "night": {
+    "centre": [
+      0.3,
+      0.3
+    ],
+    "radius": 1.06,
+    "toward_hex": "#5B4636",
+    "t": 0.3,
+    "note": "the face outside this circle is the night crescent: each tone mixed t of the way to toward_hex (night_hex per belt)"
+  },
+  "storms": [],
+  "swap": {
+    "above_px_per_far_texel": 6,
+    "below_px_per_far_texel": 5,
+    "note": "DiscSprite.NearAbove / NearBelow"
+  },
+  "strips": {
+    "scale": 7.5,
+    "rows_from": "top",
+    "limb_band": {
+      "key": "planets/common/limb_band",
+      "cut_row": 8
+    },
+    "belt_edge": {
+      "key": "planets/common/belt_edge_1",
+      "cut_row": 12
+    },
+    "spot_rim": {
+      "key": "planets/common/spot_rim",
+      "cut_row": 12
+    },
+    "pigment": {
+      "key": "planets/uranus/close_pigment"
+    },
+    "grain": {
+      "key": "planets/common/close_grain"
+    },
+    "note": "scale = strip texels per far-disc texel, ONE scale fixed to the planet at every zoom (no stepping); u runs along each curve from the body's own left, the limb with a whole number of repeats; cut_row is the row the strip's line or cut sits on, counted from the strip's top (limb_band: its ink's centre line; v = cut_row - the signed distance in strip texels); the pigment tile lies over the far sheet's frame (disc.json's frame_width x frame_height), value / 127.5; the grain is laid in screen space, value / 127.5"
+  },
+  "rim": {
+    "a3": 0.012,
+    "ph3": 3.737893,
+    "a5": 0.008,
+    "ph5": 1.500269,
+    "formula": "the limb, in disc radii: r(angle) = 1 + a3 * sin(3 * angle + ph3) + a5 * sin(5 * angle + ph5); angle = atan2(v, u)"
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "key": "planets/saturn/close_pigment",
+  "style": "v3",
+  "width": 128,
+  "height": 128,
+  "tile": false,
+  "multiply_unit": 127.5,
+  "far_frame_px": 596,
+  "role": "the far disc's slow tone variation, a multiply tile over the far sheet's frame",
+  "note": "does not repeat: clamp both ways"
+}

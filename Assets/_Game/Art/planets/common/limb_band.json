@@ -1,0 +1,12 @@
+{
+  "key": "planets/common/limb_band",
+  "style": "v3",
+  "width": 512,
+  "height": 16,
+  "tile": true,
+  "clamp_v": true,
+  "rows_from": "top",
+  "note": "repeats along its length (x) only: clamp across its width (v)",
+  "role": "the outline's ink alone",
+  "cut_row": 8
+}

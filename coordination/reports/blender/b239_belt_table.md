@@ -110,6 +110,34 @@ With section 3 that is every file the disc builder exports: 16 pngs and 9 sheet 
 |------|------------------|--------------------------|------------------------------|
 | 23:06 / 23:09 | B-240: the far disc's ink marks lifted into `giants_v3.MARKS` (read by `interior_marks`) | all byte-identical | all byte-identical |
 | 23:53 / 23:56 | B-241: `close_json` gained a storm's `streak` and its taper (the painting code untouched) | all byte-identical | all byte-identical |
+| 11-10 01:14–01:18 / 01:28–01:29 | B-243, BEFORE its export: `giants_v3` gained `STRIP_SCALE` 7.5, `EDGE_VARIANT`, `strips_json` (close.json's `strips`); the inner run also with `night_hatches.groups` written as objects (UNITY's JsonUtility) | all byte-identical | all byte-identical |
+| 11-10 01:30–01:33 / 01:33–01:34 | B-243, AFTER the export of `planets/common/close_view` (24 new files; no disc file written), same lock | all byte-identical | all byte-identical |
+
+B-243's hashes (sha1; rebuilt = exported in every row, 11-10 01:33 / 01:34; the 9 sheet jsons' text identical):
+
+| File | Bytes | sha1 |
+|------|-------|------|
+| planets/jupiter/disc | 1753456 | 91b43c2526d50762cb4b7cfd0c04aa72deb60d24 |
+| planets/saturn/disc | 1232774 | 39629e39c22a59ff40c68119f6639a53ba6b2b2a |
+| planets/uranus/disc | 482187 | e55e55a70725dc3fd3fca1e6757fa9617ea0233b |
+| planets/neptune/disc | 474902 | 180e4a9f2ba4f2883109bc33536463e1053c6502 |
+| planets/saturn/rings_back | 10776 | 55aaaa8b729d17248415365153630b4edac1f165 |
+| planets/saturn/rings_front | 11348 | 102c349eb3f003c78515fd5437732ea7d879864f |
+| planets/mercury/disc | 44567 | bf4bbdf23508a4907d205c68b3f3cd3f256359dc |
+| planets/mercury/disc_near | 243028 | 3274562e798904fdb56be7b7ae72b94ab6eed3a5 |
+| planets/venus/disc | 77512 | 69fff11b9f992660545842e43608ec289a592c0c |
+| planets/venus/disc_near | 263274 | be324d2713d9a10c23abdc44e2e86a1018b52f94 |
+| planets/earth/disc | 169435 | a3c986c81c67aa3460da027b9edbe037430a1611 |
+| planets/earth/disc_near | 253037 | 56aa047be2c01c3da658c65da29155b61be97dbd |
+| planets/mars/disc | 37946 | 51cb132151f7d7cb8fdc0e331bf9791c86d7a7e7 |
+| planets/mars/disc_near | 226806 | c18f7d8d49895f94864718ff998b1109c39996c8 |
+| planets/earth/luna | 4776 | f6de1e64b3f0068b3aedefd5d1d4df20e13c0ce0 |
+| planets/earth/luna_near | 127748 | 6acaa6fdb8c6467469d524688325105d16e2ec8a |
+
+The giants' BEFORE run (01:14) used the source as it stood before UNITY's field names went in (`strips.scale`, `cut_row`,
+`rows_from`, the hatch groups as objects); those edits touch only what `close_json` writes, and the AFTER runs prove the
+final source. B-243's export: `tools/blender_render.ps1 planets/common/close_view`, exit 0, 7.5 s, peak 356 MB, log line
+2026-11-10T01:30:00; every strip's seam 0.00 (close_grain 0.95 in x, 1.04 in y), limb_band's palette 100 %.
 
 ## 6. Not done, not checked
 

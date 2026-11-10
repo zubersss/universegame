@@ -1,0 +1,11 @@
+{
+  "key": "planets/common/close_grain",
+  "style": "v3",
+  "width": 256,
+  "height": 256,
+  "tile": true,
+  "clamp_v": false,
+  "multiply_unit": 127.5,
+  "role": "the paper's fine grain, a multiply tile in screen space",
+  "note": "repeats in both axes"
+}

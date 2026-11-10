@@ -99,18 +99,19 @@ EDGE_VARIANT = {"jupiter": 0, "saturn": 0, "uranus": 1, "neptune": 1}      # bel
 
 def strips_json(name):
     """close.json's "strips": which textures the close view lays, on which row each one's line sits, and the one scale."""
-    out = {
-        "texels_per_far_texel": STRIP_SCALE,
-        "limb_band": {"key": "planets/common/limb_band", "centre_row": 8},
+    out = {                                            # the field names are UNITY's (U-208, 11-10 01:1x: JsonUtility reads
+        "scale": STRIP_SCALE,                          # fixed names, flat number arrays and arrays of objects only)
+        "rows_from": "top",
+        "limb_band": {"key": "planets/common/limb_band", "cut_row": 8},
         "belt_edge": {"key": f"planets/common/belt_edge_{EDGE_VARIANT[name]}", "cut_row": 12},
         "spot_rim": {"key": "planets/common/spot_rim", "cut_row": 12},
         "pigment": {"key": f"planets/{name}/close_pigment"},
         "grain": {"key": "planets/common/close_grain"},
-        "note": "one scale, fixed to the planet: a strip texel covers 1 / texels_per_far_texel of a far-disc texel at every "
-                "zoom (no stepping); u runs along each curve from the body's own left, the limb with a whole number of "
-                "repeats; rows count from the strip's top (v = row - signed distance in strip texels); the pigment tile "
-                "lies over the far sheet's frame (disc.json's frame_width x frame_height), value / 127.5; the grain is "
-                "laid in screen space, value / 127.5",
+        "note": "scale = strip texels per far-disc texel, ONE scale fixed to the planet at every zoom (no stepping); u runs "
+                "along each curve from the body's own left, the limb with a whole number of repeats; cut_row is the row "
+                "the strip's line or cut sits on, counted from the strip's top (limb_band: its ink's centre line; v = "
+                "cut_row - the signed distance in strip texels); the pigment tile lies over the far sheet's frame "
+                "(disc.json's frame_width x frame_height), value / 127.5; the grain is laid in screen space, value / 127.5",
     }
     if "rings" in GIANTS[name]:
         out["ring_edge"] = {"key": "planets/saturn/ring_edge", "cut_row": 8}
@@ -144,8 +145,8 @@ def close_json(name, pal, to_hex, radius_u, loop_frames, fps, rim_phases=None):
                            formula="per edge vb and per u0: uu = u0 + drift * sin(phase + vb * drift_per_v); the dash runs u = uu "
                                    "... uu + length at v(u) = vb + wave_amp * sin(wave_freq * u + phase); skipped where "
                                    "(|uu| + length)^2 + vb^2 > limit; phase = 2 * pi * frame / loop_frames"),
-            "night_hatches": dict(MARKS["hatch"], groups=[list(p) for p in MARKS["hatch"]["groups"]],
-                                  formula="stroke j (0 .. count - 1) of a group (u0, v0): from (u0 + step * j - length / 2, "
+            "night_hatches": dict(MARKS["hatch"], groups=[{"u": p[0], "v": p[1]} for p in MARKS["hatch"]["groups"]],
+                                  formula="stroke j (0 .. count - 1) of a group (u0, v0) = its u, v: from (u0 + step * j - length / 2, "
                                           "v0 + step * j - length / 2) to (+ length / 2, + length / 2); skipped where "
                                           "u^2 + v^2 > limit at its centre"),
             "note": "drawn over everything, storms included, as on the far disc",
