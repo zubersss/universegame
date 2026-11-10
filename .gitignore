@@ -30,6 +30,8 @@ crashlytics-build.properties
 /blender/preview/
 /blender/**/*.blend1
 /coordination/locks/*.lock
+# Study reference from other people's work (film stills and the like): local only, never committed or pushed (D-199)
+/docs/reference/
 *.tmp
 Thumbs.db
 .DS_Store
