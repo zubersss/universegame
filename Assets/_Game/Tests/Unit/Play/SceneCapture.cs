@@ -4376,6 +4376,164 @@ namespace Meridian.Tests
             finally { Meridian.View2D.CartoonStage.Enabled = wasCartoon; }
         }
 
+        /// <summary>U-207 (LEAD 22:2x, from U-205's finding that a grainy tile costs a fifth more a full-screen layer in BC7 on this iGPU):
+        /// the surface view at the camp with the painted backdrop's layers as imported (BC7), as DXT5 and as RGBA32 (copies made here from
+        /// the source PNGs: no art and no import rule changed), and with the backdrop off (the level marker). Read on purpose at both of
+        /// the machine's levels: a short block straight after a 20 s pause, a 20 s warm-up of sustained rendering, two full rounds, then
+        /// a second pause and short block. Every row names its block; a block's two markers say whether it was read at one level. The
+        /// formats' resident sizes are logged; u207/1_bc7, 2_dxt5, 3_rgba32 are the same frame for a 4x side-by-side.</summary>
+        [UnityTest, Timeout(600000)]
+        public IEnumerator CaptureU207Backdrop()
+        {
+            var name = Environment.GetEnvironmentVariable(Variable);
+            if (string.IsNullOrEmpty(name)) Assert.Ignore($"Set {Variable} (tools/unity_capture.ps1).");
+            if (SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.Null)
+                Assert.Fail("No graphics device: run without -nographics.");
+            bool wasCartoon = Meridian.View2D.CartoonStage.Enabled;
+            Meridian.View2D.CartoonStage.Enabled = true;
+            int vsync = QualitySettings.vSyncCount, target = Application.targetFrameRate;
+            QualitySettings.vSyncCount = 0; Application.targetFrameRate = -1;
+            var made = new System.Collections.Generic.List<UnityEngine.Object>();
+            try
+            {
+#if UNITY_EDITOR
+                yield return UnityEditor.SceneManagement.EditorSceneManager.LoadSceneAsyncInPlayMode(
+                    CorePath, new LoadSceneParameters(LoadSceneMode.Single));
+#endif
+                var director = UnityEngine.Object.FindAnyObjectByType<SceneDirector>();
+                float timeout = Time.realtimeSinceStartup + 30f;
+                while ((!director.IsReady || !director.PlanetSide.terrain.IsSettled) && Time.realtimeSinceStartup < timeout) yield return null;
+                var dir = "coordination/reports/unity/u207";
+                Directory.CreateDirectory(dir);
+                var side = director.PlanetSide;
+                if (side.hazards != null) side.hazards.enabled = false;
+                if (side.dayNight != null) side.dayNight.Override = 0.45f;
+                side.creatures.autoSpawn = false; side.creatures.DespawnAll();
+                var cam = side.sideCamera;
+                var stage = side.cartoon;
+                Assert.NotNull(stage, "the cartoon stage");
+                var set = stage.Layers;
+                Assert.NotNull(set, "the painted set");
+                timeout = Time.realtimeSinceStartup + 20f;
+                while (set.placeholders.Contains(true) && Time.realtimeSinceStartup < timeout) yield return null;
+                for (int k = 0; k < 60; k++) yield return null;
+                Assert.IsFalse(set.placeholders.Contains(true), "the set's layers are painted");
+
+                // the three sets of sprites: as imported, and DXT5 / RGBA32 copies from the source PNGs with the imported textures' sampler settings
+                int n = set.renderers.Count;
+                var bc7 = new Sprite[n]; var dxt5 = new Sprite[n]; var rgba = new Sprite[n];
+                long bytesBc7 = 0, bytesDxt5 = 0, bytesRgba = 0, texels = 0;
+                var what = new System.Text.StringBuilder();
+                for (int i = 0; i < n; i++)
+                {
+                    var sr = set.renderers[i];
+                    bc7[i] = sr.sprite;
+                    var ot = bc7[i].texture;
+                    string path = Path.GetFullPath(Path.Combine(Application.dataPath, "_Game", "Art", set.SceneKey, $"layer{set.Layout.layers[i].n}_color.png"));
+                    Assert.IsTrue(File.Exists(path), $"the layer's source at {path}");
+                    var bytes = File.ReadAllBytes(path);
+                    foreach (var fmt in new[] { TextureFormat.DXT5, TextureFormat.RGBA32 })
+                    {
+                        var tex = new Texture2D(2, 2, TextureFormat.RGBA32, false, false) { name = $"u207_layer{i}_{fmt}" };
+                        Assert.IsTrue(tex.LoadImage(bytes, false), path);
+                        tex.wrapModeU = ot.wrapModeU; tex.wrapModeV = ot.wrapModeV; tex.filterMode = ot.filterMode; tex.anisoLevel = ot.anisoLevel;
+#if UNITY_EDITOR
+                        if (fmt != TextureFormat.RGBA32) UnityEditor.EditorUtility.CompressTexture(tex, fmt, UnityEditor.TextureCompressionQuality.Best);
+#endif
+                        tex.Apply(false, true);
+                        var o = bc7[i];
+                        var sp = Sprite.Create(tex, o.rect, new Vector2(o.pivot.x / o.rect.width, o.pivot.y / o.rect.height), o.pixelsPerUnit, 0, SpriteMeshType.FullRect);
+                        sp.name = o.name + "_" + fmt;
+                        made.Add(tex); made.Add(sp);
+                        long size = UnityEngine.Profiling.Profiler.GetRuntimeMemorySizeLong(tex);
+                        if (fmt == TextureFormat.DXT5) { dxt5[i] = sp; bytesDxt5 += size; } else { rgba[i] = sp; bytesRgba += size; }
+                        what.Append(fmt == TextureFormat.DXT5 ? $" [layer{set.Layout.layers[i].n}: {ot.width} x {ot.height} {ot.format} as imported, {ot.filterMode}, {ot.wrapModeU} / {ot.wrapModeV}; copies {tex.width} x {tex.height} {tex.format}" : $" and {tex.format}]");
+                    }
+                    bytesBc7 += UnityEngine.Profiling.Profiler.GetRuntimeMemorySizeLong(ot);
+                    texels += (long)ot.width * ot.height;
+                    yield return null;
+                }
+                TestContext.Out.WriteLine($"[MERIDIAN] u207 set {set.SceneKey}: {n} layers:{what}; resident as loaded: BC7 {bytesBc7 / 1048576f:F2} MB, DXT5 {bytesDxt5 / 1048576f:F2} MB, RGBA32 {bytesRgba / 1048576f:F2} MB ({texels / 1e6f:F2} M texels)");
+
+                var rt = new RenderTexture(1920, 1080, 24, RenderTextureFormat.ARGB32);
+                var px = new Texture2D(1, 1, TextureFormat.RGBA32, false);
+                made.Add(px);
+                float lastAvg = 0f;
+                void RenderOnce()
+                {
+                    cam.targetTexture = rt; cam.Render(); cam.targetTexture = null;
+                    var prev = RenderTexture.active; RenderTexture.active = rt; px.ReadPixels(new Rect(0, 0, 1, 1), 0, 0); px.Apply(); RenderTexture.active = prev;
+                }
+                IEnumerator Measure(string block, string state, int settle, int frames)
+                {
+                    for (int k = 0; k < settle; k++) { yield return null; RenderOnce(); } // settle under the same load as the measure
+                    var times = new float[frames];
+                    for (int k = 0; k < frames; k++)
+                    {
+                        yield return null;
+                        var w = System.Diagnostics.Stopwatch.StartNew();
+                        RenderOnce();
+                        times[k] = (float)w.Elapsed.TotalMilliseconds;
+                    }
+                    var sorted = (float[])times.Clone();
+                    System.Array.Sort(sorted);
+                    float avg = 0f; foreach (var x in times) avg += x; avg /= frames;
+                    lastAvg = avg;
+                    TestContext.Out.WriteLine($"[MERIDIAN] u207 {block} | {state}: avg {avg:F2} ms, p50 {sorted[frames / 2]:F2}, p99 {sorted[(int)(frames * 0.99f)]:F2}, max {sorted[frames - 1]:F2} ({frames} frames at t {Time.realtimeSinceStartup:F0} s)");
+                }
+                void Use(Sprite[] sprites) { set.gameObject.SetActive(true); for (int i = 0; i < n; i++) set.renderers[i].sprite = sprites[i]; }
+                var states = new (string label, Sprite[] sprites)[] { ("the backdrop as imported, BC7", bc7), ("the backdrop as DXT5", dxt5), ("the backdrop as RGBA32", rgba) };
+                IEnumerator Block(string block, int settle, int frames)
+                {
+                    set.gameObject.SetActive(false);
+                    yield return Measure(block, "marker before (the backdrop off)", settle, frames);
+                    float m0 = lastAvg;
+                    var avgs = new float[states.Length];
+                    for (int s = 0; s < states.Length; s++) { Use(states[s].sprites); yield return Measure(block, states[s].label, settle, frames); avgs[s] = lastAvg; }
+                    set.gameObject.SetActive(false);
+                    yield return Measure(block, "marker after (the backdrop off)", settle, frames);
+                    float m1 = lastAvg;
+                    Use(bc7);
+                    TestContext.Out.WriteLine($"[MERIDIAN] u207 {block} SUMMARY: marker {m0:F2} -> {m1:F2} ms ({(Mathf.Abs(m1 - m0) <= 0.1f * Mathf.Min(m0, m1) ? "one level" : "THE LEVEL MOVED INSIDE THE BLOCK")}); BC7 {avgs[0]:F2}, DXT5 {avgs[1]:F2} ({avgs[1] / avgs[0]:F2} of BC7), RGBA32 {avgs[2]:F2} ({avgs[2] / avgs[0]:F2} of BC7); the backdrop's own cost over the marker: BC7 {avgs[0] - (m0 + m1) * 0.5f:+0.00;-0.00}, DXT5 {avgs[1] - (m0 + m1) * 0.5f:+0.00;-0.00}, RGBA32 {avgs[2] - (m0 + m1) * 0.5f:+0.00;-0.00} ms");
+                }
+                IEnumerator Pause(float seconds)
+                {
+                    float until = Time.realtimeSinceStartup + seconds;
+                    while (Time.realtimeSinceStartup < until) yield return null; // the Editor's own Game view only: no 1080p render
+                }
+
+                // the same frame in the three formats, for the 4x side-by-side (before any timing)
+                for (int s = 0; s < states.Length; s++)
+                {
+                    Use(states[s].sprites);
+                    for (int k = 0; k < 10; k++) yield return null;
+                    string label = s == 0 ? "1_bc7" : s == 1 ? "2_dxt5" : "3_rgba32";
+                    yield return Save(cam, $"{name}_{label}");
+                    File.Copy($"logs/capture_{name}_{label}.png", $"{dir}/{label}.png", true);
+                }
+                Use(bc7);
+
+                yield return Pause(20f);
+                yield return Block("A, straight after a 20 s pause (90 frames a row)", 8, 90);
+                float warm = Time.realtimeSinceStartup + 20f;
+                while (Time.realtimeSinceStartup < warm) { yield return null; RenderOnce(); } // 20 s of sustained rendering
+                yield return Block("B, after a 20 s warm-up (300 frames a row), round 1", 30, 300);
+                yield return Block("B, sustained, round 2", 30, 300);
+                yield return Pause(20f);
+                yield return Block("C, straight after a second 20 s pause (90 frames a row)", 8, 90);
+                TestContext.Out.WriteLine($"[MERIDIAN] u207 screen: Game view {Screen.width} x {Screen.height}, {SystemInfo.graphicsDeviceName}, quality '{QualitySettings.names[QualitySettings.GetQualityLevel()]}'");
+                rt.Release(); UnityEngine.Object.Destroy(rt);
+                if (side.dayNight != null) side.dayNight.Override = null;
+                LogAssert.NoUnexpectedReceived();
+            }
+            finally
+            {
+                foreach (var o in made) if (o != null) UnityEngine.Object.Destroy(o);
+                QualitySettings.vSyncCount = vsync; Application.targetFrameRate = target;
+                Meridian.View2D.CartoonStage.Enabled = wasCartoon;
+            }
+        }
+
         /// <summary>U-196 (D-183: holes read as holes) → coordination/reports/unity/u196/: 1_camp_shaft_10m (a 2.4 m wide shaft 10 m down
         /// from the camp's ground: the back wall lit at the top and dim at the foot, the soft shadow inside every edge), 2_t3_room (a room
         /// 56 m under the Surface Line), 3_t5_core_room (212 m down), 4_mound_and_pit (a mound piled on the surface beside a pit: nothing
