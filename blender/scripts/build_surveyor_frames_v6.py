@@ -39,6 +39,8 @@ SV.RHYTHM = True                                  # the figure's default since t
 STAND = SV.skeleton(IDLE)["P"][1]                 # the pelvis's height standing (m)
 SPEED = {"walk": 4.0, "run": 6.5, "stroll": 1.632}   # ground speeds (m/s): PlayerMotion.WalkSpeed and SprintSpeed (read 11-10); the stroll's own (0.136 m a frame)
 ONLY_CLIPS = None                                 # the clips to draw (names), or all
+REPACK = False                                    # False = the pages AS EXPORTED (2c151225: the stroll on side_air, every box 288 wide). True = LEAD's repack
+#                                                   of 13:2x (the stroll on side, whose box is then 252 wide): written, UNRUN, and ON HOLD with B-252 (D-204)
 
 
 # ---------------------------------------------------------------- poses between poses
@@ -308,18 +310,22 @@ def clips():
     wv, sv = SPEED["walk"] / 12.0, SPEED["run"] / 12.0                           # metres a frame at 12 fps
     lope = gait(LOPE, LOPE_BODY, 30, 0.5, (30, 8), 0.45, {0: {"len_leg_n": 1.03}, 1: {"squash": 0.985}})   # (run 6: elbows at 52 and open palms held both hands out in front, a tray again: the arms hang and swing past the hips, loose fists)
     sprint = gait(SPRINT, SPRINT_BODY, 62, -0.5, (91, 9), 0.48, {1: {"len_leg_n": 1.04}})
-    # PAGES (LEAD 12:2x), each one sheet of at most 2048 x 2048: at this box and a 4 px gutter a sheet holds 7 x 6 = 42
-    # frames. side with the stroll would be 46, so the stroll rides side_air (36); side is 34.
+    # PAGES (LEAD 12:2x), each one sheet of at most 2048 x 2048. THE REPACK (LEAD 13:2x, on UNITY's point that a ground
+    # clip on the air page costs a sheet-key swap at 2.5 m/s): the four ground clips share side, whose box is 252 px wide
+    # (PAGE_W: 8 x 6 = 48 frames; the ground drawings reach 104 px behind and 110 ahead of the pivot); side_air and
+    # side_dig keep 288. (The first export, 2c151225, had the stroll on side_air.)
     side = [("side", "idle", loop([IDLE, I_B], 10), "2 keys (the breath out, in), 8 in-betweens"),
             ("side", "walk", fists(cycle(lope, 12, (0, 1, 2), wv, wv, heights=LOPE_H)),
              f"a LOPE for the game's {SPEED['walk']:.1f} m/s: EVERY FRAME A KEY (6 a step, the other step their mirror); a foot down on frames 0-2 / 6-8 (set by reach), in the air 3-5 / 9-11; upright, the arms hanging and swinging past the hips"),
             ("side", "run", fists(cycle(sprint, 12, (0, 1), sv, 0.06, heights=SPRINT_H)),
              f"a SPRINT for the game's {SPEED['run']:.1f} m/s: EVERY FRAME A KEY (6 a step, mirrored); a foot down on frames 0-1 / 6-7 (by reach), in the air 2-5 / 8-11; a strong lean, the knee high, the fists to the chin"),
+            ("side" if REPACK else "side_air", "stroll", cycle([(0, W_C), (1.5, W_D), (3, W_P), (4.5, W_U)], 12, (0, 1, 2, 3, 4, 5), SPEED["stroll"] / 12.0, 0.35, tail=1),
+             f"a true WALK at {SPEED['stroll']:.2f} m/s for the start and stop ramps (4 keys a step: contact, down, passing, up; 4 in-betweens a step), a foot always down, set by reach"),
             ("side_air", "jump", once([(0.0, J_0), (0.2, J_1), (0.42, J_2), (0.6, J_2B), (1.0, J_3)], 8), "5 keys (anticipation, launch, off the toes, just off the ground, the apex), 3 in-betweens"),
             ("side_air", "fall", loop([F_0, F_1], 8), "2 keys, 6 in-betweens"),
-            ("side_air", "land", once([(0.0, L_0), (0.3, L_1), (0.62, L_2), (1.0, IDLE)], 8), "4 keys (touch, squash, rebound, the idle), 4 in-betweens"),
-            ("side_air", "stroll", cycle([(0, W_C), (1.5, W_D), (3, W_P), (4.5, W_U)], 12, (0, 1, 2, 3, 4, 5), SPEED["stroll"] / 12.0, 0.35, tail=1),
-             f"a true WALK at {SPEED['stroll']:.2f} m/s for a loaded pack (4 keys a step: contact, down, passing, up; 4 in-betweens a step), a foot always down, set by reach")]
+            ("side_air", "land", once([(0.0, L_0), (0.3, L_1), (0.62, L_2), (1.0, IDLE)], 8), "4 keys (touch, squash, rebound, the idle), 4 in-betweens")]
+    if not REPACK:
+        side.append(side.pop(3))                                                # as exported: the stroll is side_air's last clip
     far = {"ua_f": -6, "el_f": 26}                                              # (run 1: both hands on a tool held low put the far elbow out behind the pack, a loop)
     dig = []
     for name, ks in DIG.items():
@@ -390,6 +396,7 @@ def reach_lines():
 
 # ---------------------------------------------------------------- the export (B-250; LEAD's word 12:4x)
 KEYBASE = "characters/surveyor_v6"
+PAGE_W = {"side": 252} if REPACK else {}          # a page's own box width where it is not BOX_W (the repacked ground page: 46 frames in 8 x 6)
 LOOPS = {"idle", "walk", "run", "stroll", "fall", "aim_up", "aim_up45", "aim_fwd", "aim_down45", "aim_down"}
 HAND_UNITS = {
     "side_dig": "per frame in sheet order: [x, z] metres from the pivot to the front glove's centre (x right, z up, facing right) and the "
@@ -447,6 +454,8 @@ def build_pages():
         by.setdefault(sheet, []).append((name, poses))
     out, clipped = {}, []
     for sheet, cl in by.items():
+        pw = PAGE_W.get(sheet, BOX_W)                                           # this page's box: the drawing's middle pw columns (the pivot stays its middle)
+        x_off = (BOX_W - pw) // 2
         frames, anims, hands, stows, grips = [], [], [], [], []
         for name, poses in cl:
             an = {"name": name, "start": len(frames), "length": len(poses), "loop": name in LOOPS}
@@ -459,8 +468,11 @@ def build_pages():
             anims.append(an)
             for i, p in enumerate(poses):
                 fr, sock = draw(p, f"{name}{i}")[:2]
-                al = fr[..., 3] > 0.02
                 m = v3.EDGE_MARGIN
+                if x_off and (fr[:, :x_off + m, 3] > 0.02).any() | (fr[:, BOX_W - x_off - m:, 3] > 0.02).any():
+                    clipped.append(f"{sheet}/{name} {i} (the {pw} px box)")
+                fr = fr[:, x_off:x_off + pw]
+                al = fr[..., 3] > 0.02
                 if al[:m].any() or al[:, :m].any() or al[:, -m:].any():
                     clipped.append(f"{sheet}/{name} {i}")
                 frames.append(straight(fr))
@@ -472,14 +484,14 @@ def build_pages():
                     hands.append([round(f[0], 4), round(f[1], 4), round(arm_of(p), 4)])
                     stows.append(stow_of(p))
         n = len(frames)
-        cols = v3.columns_for(BOX_W, n)
+        cols = v3.columns_for(pw, n)
         rws = -(-n // cols)
         g = v3.GUTTER
-        img = np.zeros((rws * BOX_H + (rws - 1) * g, cols * BOX_W + (cols - 1) * g, 4), np.uint8)
+        img = np.zeros((rws * BOX_H + (rws - 1) * g, cols * pw + (cols - 1) * g, 4), np.uint8)
         for i, fr in enumerate(frames):
             r, c = divmod(i, cols)
-            img[r * (BOX_H + g):r * (BOX_H + g) + BOX_H, c * (BOX_W + g):c * (BOX_W + g) + BOX_W] = fr
-        meta = {"key": f"{KEYBASE}/{sheet}", "style": "v3", "art": "v6", "frame_width": BOX_W, "frame_height": BOX_H, "columns": cols, "gutter": g,
+            img[r * (BOX_H + g):r * (BOX_H + g) + BOX_H, c * (pw + g):c * (pw + g) + pw] = fr
+        meta = {"key": f"{KEYBASE}/{sheet}", "style": "v3", "art": "v6", "frame_width": pw, "frame_height": BOX_H, "columns": cols, "gutter": g,
                 "frames": n, "fps": 12, "pivot": [0.5, GROUND / BOX_H], "facing": "right", "ppu": 128, "animations": anims, "squash_root": True,
                 "sockets": {"hand": hands}, "sockets_units": HAND_UNITS["side_dig" if sheet == "side_dig" else "side"]}
         if sheet == "side_dig":
@@ -501,11 +513,18 @@ def build_pages():
             meta["stow"] = stows
             meta["stow_units"] = ("per frame in sheet order: [x, z] metres from the pivot to a stowed tool's grip end on the pack, and the tool's direction "
                                   "there (radians, counter-clockwise from +x); see side_dig's carry")
-            meta["note"] = ("B-250 (D-200): the v6 surveyor, every frame its own drawing from a pose. ground_speed (m/s) is the speed at which a clip's "
-                            "planted foot does not slide at 12 fps: walk is a lope, run a sprint, stroll a true walk"
-                            if sheet == "side" else
-                            "B-250 (D-200): the v6 surveyor in the air, and the stroll (a true walk; its page has the room). jump ends on its apex; fall loops; "
-                            "land ends on the idle's first drawing")
+            if REPACK:
+                meta["note"] = ("B-250 (D-200): the v6 surveyor on the ground, every frame its own drawing from a pose. ground_speed (m/s) is the speed at "
+                                "which a clip's planted foot does not slide at 12 fps: walk is a lope, run a sprint, stroll a true walk. This page's frames "
+                                "are 252 px wide (side_air's and side_dig's are 288); the pivot is the same on all three"
+                                if sheet == "side" else
+                                "B-250 (D-200): the v6 surveyor in the air. jump ends on its apex; fall loops; land ends on the idle's first drawing")
+            else:                                                               # the words as exported
+                meta["note"] = ("B-250 (D-200): the v6 surveyor, every frame its own drawing from a pose. ground_speed (m/s) is the speed at which a clip's "
+                                "planted foot does not slide at 12 fps: walk is a lope, run a sprint, stroll a true walk"
+                                if sheet == "side" else
+                                "B-250 (D-200): the v6 surveyor in the air, and the stroll (a true walk; its page has the room). jump ends on its apex; fall loops; "
+                                "land ends on the idle's first drawing")
         if json.dumps(meta).count('"hand"') != 1:
             raise ValueError(f"B-250 {sheet}: the json must carry the name hand once (UNITY's reader)")
         out[sheet] = (img, meta)
@@ -522,8 +541,9 @@ def export(art):
     for sheet, (img, meta) in pages.items():
         if img.shape[0] > v3.MAX_SHEET or img.shape[1] > v3.MAX_SHEET or img.shape[0] % 4 or img.shape[1] % 4:
             raise ValueError(f"B-250 {sheet}: a sheet of {img.shape[1]}x{img.shape[0]}")
+        fw = meta["frame_width"]
         for an in meta["animations"]:
-            fs = [img[r * (BOX_H + 4):r * (BOX_H + 4) + BOX_H, c * (BOX_W + 4):c * (BOX_W + 4) + BOX_W]
+            fs = [img[r * (BOX_H + 4):r * (BOX_H + 4) + BOX_H, c * (fw + 4):c * (fw + 4) + fw]
                   for r, c in (divmod(i, meta["columns"]) for i in range(an["start"], an["start"] + an["length"]))]
             if any(not f[..., 3].any() for f in fs):
                 raise ValueError(f"B-250 {sheet}/{an['name']}: an empty frame")
