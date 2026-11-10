@@ -299,7 +299,7 @@ which holds the far disc's own facts: `radius_u`, `loop_frames`, `fps`, `belts` 
 `streak` where a chain of blobs is drawn as one tapered capsule up close), `ink_marks` (`dashes`, `night_hatches`),
 Saturn's `rings`, and the `swap` zooms. Belts, storms and ring bands are flat-toned geometry; the hand-drawn part is
 tiling strips: `planets/common/limb_band` (512×16, the ink outline alone, its centre line on row 8),
-`planets/common/belt_edge` (1024×24, two variants: 0 firm for Jupiter and Saturn, 1 faint for Uranus and Neptune;
+`planets/common/belt_edge_0` and `planets/common/belt_edge_1` (1024×24 each: 0 firm for Jupiter and Saturn, 1 faint for Uranus and Neptune;
 RGB = the lower tone's share across a ragged cut on row 12, A = a thin ink line that marks are cut from),
 `planets/common/spot_rim` (512×24, no ink), `planets/saturn/ring_edge` (512×16, A = the thin ink line). The tone is
 multiplied by `planets/<giant>/close_pigment` (128×128, over the far frame's square, value / 127.5) and by the
