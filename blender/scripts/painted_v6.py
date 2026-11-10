@@ -30,9 +30,9 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import crop_png  # noqa: E402
 import paint_v6 as PT  # noqa: E402
-import build_specimens_v6 as SP  # noqa: E402
 
-LIGHT = SP.LIGHT
+LIGHT = np.array([0.58, -0.62, 0.53], np.float32)   # the frame's ONE light (build_specimens_v6.LIGHT), written out here so this module
+#                                                     needs numpy only: art v7's Blender scripts import it inside Blender (no fake-GP modules)
 DRY_AT = 1.5                                      # a stroke whose paint lies in more than this many separate bands across its width is a dry drag
 TONE = 0.5                                        # how much of a stroke's own light and dark is kept when it is laid (1.0 speckled a lit form)
 
