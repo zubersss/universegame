@@ -75,6 +75,44 @@ Rules:
 - Motion: full drawn animation on twos (12 drawings a second) with squash, stretch, overlap and follow-through; the
   rig's joints are hidden by overlapping flat shapes, never by a painted blend.
 
+## 4a. Draughtsmanship and level of detail (added after the owner's first look, D-200)
+
+The owner on the first style test: "I like the colours but the details I don't like ... this still looks like a
+1930s cartoon, big circle head and eyes. Make it look like the reference photos: the same style and the same level
+of detail, from the proportions to everything." Sections 2 and 3 say how the picture is made. This section says how
+it is DRAWN, from a second look at the stills (twelve of twenty-two viewed).
+
+**Figures**
+1. **Natural proportions, caricatured lightly.** A person stands about five to five and a half heads tall, with
+   lean limbs. Nothing is a ball on a body.
+2. **Built, not outlined.** The head is a skull and a jaw; the body has shoulders, a rib cage, hips; limbs have
+   elbows, wrists, knees, ankles. Hands have a palm, a thumb and fingers that grip; feet have a heel and toes or a
+   shoe built on them. Forms overlap, and a short line shows where one passes in front of another.
+3. **Small features.** An eye is about a fifth of the head's width at most, with an upper lid and a brow that
+   carry the expression; a nose and an ear are drawn. No disc eyes, no dot-and-arc faces.
+4. **Hair, fur and cloth as designed masses** with a few tuft or fold flicks at their edges and where they bend.
+5. **A thin, sure line.** Long confident curves, thin against the figure's size; inside lines only where they
+   describe form (a shoulder, a belly's overlap, a knuckle). The line on a figure filling half the frame is about
+   two pixels wide.
+6. **Animals** by the same rules: real anatomy first (the shoulder blade, the haunch, the hock), then the
+   character. No rubber-hose limbs anywhere.
+7. **It moves as drawings.** Every frame is its own drawing, on twos, with the silhouette changing through a
+   move (a twist, a reach, a bend). A figure cut into fixed parts and hinged cannot do this, so v6 figures ship as
+   drawn frames, not as a runtime puppet.
+
+**Scenery**
+1. **Things, not shapes.** A near or middle layer is made of plants one can name: a broad-leaved bush with each
+   leaf painted in two or three values and a midrib stroke, a palm with separate fronds, bamboo with its nodes, a
+   grass clump of single blades. A tree has a trunk with weight, roots, branches that taper.
+2. **The brush follows the form.** Bark strokes wrap the trunk; a rock is turned by strokes that follow its
+   planes; one light direction holds across the whole picture.
+3. **Dense near, quiet behind the action.** The near layer frames the view with overlapping foliage; the middle
+   is a thicket; the far layers are haze and soft silhouettes. The stage where the figures act stays simple.
+4. **Painted accents, not pencil.** Near foliage and rocks may carry darker painted contours and veins laid by
+   the brush. That is still painting: it is never the cel's pencil line.
+5. **Ground cover.** The ground is covered: leaves, litter, low plants, stones half in the earth, light and
+   shadow across them.
+
 ## 5. What v6 does not change
 
 Original designs only (D-087, D-101: no faces on plants or objects). No combat. The solar system, the digging game,
@@ -82,10 +120,12 @@ every rule and number. The art contract's keys, sizes and budgets, until a v6 co
 
 ## 6. How it arrives
 
-1. A style test first (milestone C5, re-scoped): the surveyor (B-231 round 3) and one style frame of the Earth
-   camp (B-248) in this look, shown to the owner on one page beside today's game.
-2. On the owner's yes: the rigged surveyor (U-199), then Earth's stage, then planet by planet. The shipped v3 / v4
-   art keeps shipping until each piece is replaced.
+1. A style test first (milestone C5, re-scoped). The first test (the surveyor of B-231 round 3 and the Earth camp
+   frame of B-248) went to the owner on 11-10: the colours were liked, the drawing was not (§4a). The second test:
+   a model sheet of the redesigned surveyor and a specimen sheet of scenery, then one frame of Earth's forest edge
+   at two camera sizes, on one page beside today's game.
+2. On the owner's yes: the v6 surveyor as drawn frames (U-199), then Earth's stage, then planet by planet. The
+   shipped v3 / v4 art keeps shipping until each piece is replaced.
 
 Where sections 2 and 3 come from: search summaries of Smithsonian Magazine's article on the photocopied line, of
 Andreas Deja's published notes on the film's line, palette and background painters, of the film's pressbook (760

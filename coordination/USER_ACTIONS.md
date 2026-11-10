@@ -6,14 +6,6 @@ Owner: LEAD (only the Lead edits this). Do the open items below, then tell the L
 
 ## Open
 
-### USER-43 — Look over the new art style (5 min, no game needed)
-You asked for the art style of the 1967 film The Jungle Book. The first test of it is on this page: https://claude.ai/artifact/DfszsRAPjF6hwbjr5i36GX
-It shows one full picture of the Earth camp in the new look (with a button to flip to the game as it looks today) and the surveyor redrawn with fine pencil lines. Nothing in the game changes until you answer. Tell the Lead session:
-1. Is this the look? Yes, close but change something, or no.
-2. The surveyor: is the figure the right weight beside the crates and smelter, and do you like the face?
-3. The painted scenery: good enough to roll out as it is, or do you want real scanned brush strokes in it first?
-4. The colours underground: too dull, about right, or still too loud?
-A "yes" starts the surveyor being built as a moving, jointed figure, then Earth's scenery being repainted, then the other planets one at a time (weeks). A "change this" is about half an hour a round. Build 0.6.3 (the reworked digging) does not wait for this.
 
 ### USER-42 — Free about half a gigabyte of memory (2 min) — not blocking right now, but the margin is thin
 Thank you for restarting the three windows (00:50). Update 01:01: once the new windows settled, free memory rose to 1.9 GB and the team's builds and tests can start again. The laptop itself was not restarted (it has been on since yesterday 11:44) and builds need 1.5 GB free, so one busy app can stop them again. Either of these gives a safe margin:
@@ -48,6 +40,7 @@ If you get too many "allow this command?" prompts, tell the Lead "approve PowerS
 allow rules" and accept the edit when Claude Code asks you. Otherwise skip this.
 
 ## Done
+- 2026-11-10 07:4x · USER-43 answered within minutes of the page (https://claude.ai/artifact/DfszsRAPjF6hwbjr5i36GX): "ive seen the first look and i like the colors but the details i dont like look at the reference photos again i want that level of detail or at least as close as possible this still looks like a 1930s cartoon big cricle head and eyes make it look like the reference photos the same style as the jungle and same level to details from the proportions to everything pretty much try to make the movie but in game and moving form just the style tho none of the story or anything else" → D-200, STYLE_V6 §4a: the surveyor redesigned to natural proportions and built drawing, figures as drawn frames, scenery at the film's level of detail, the colours kept; specimens to the Lead first, then a second look-over page. Not answered: the scanned-brush question (asked again if the specimens fall short).
 - 2026-11-10 06:1x · USER-39 answered: the owner on the new surveyor design: "Polish up the surveyor a bit more then that I want fine lines that dont render into pixels" → D-198 (the v5 line is fine and drawn large enough never to show pixels), B-231 round 3; a new look-over page follows when round 3's plates pass the Lead. Read as: the design's direction stands, the finish and the line change. Not answered: the figure's weight beside the camp props, the face side-on, the poses (asked again on the new page).
 - 2026-11-10 01:1x · USER-41 done: the owner played 0.6.2: "The digging is wacky it feels disconnected from clicks and the avatar smoothen that out to the max like a pro make the animations and the connections incredible" → D-196 (the dig as one motion), U-209, B-246; Build 0.6.3 is for it. Not yet answered from USER-41 / USER-38: do the holes look right, is the shovel a good start, does the Beam feel like a reward, is 250 Scrip right (asked again with 0.6.3).
 - 2026-11-09 13:5x · USER-36 done: the owner played 0.6.0: "I like the digging so far"; make digging more satisfying and rewarding (a dirt animation), the dug part should look like a hole rather than an opaque part, dirt should collapse when dug all the way under; then the big one: keep the cartoon but much higher quality, a modern hand-drawn or painted look rather than 1930s animation, never digital or 3D-cartoony; better art and more moving parts for the animals and characters, especially the surveyor, with crouching and jumps with knees that bend; and much better audio → D-183 / D-184 / D-185 / D-186; U-195..U-199, B-230..B-232; milestone C5 (the v5 style test) before any redraw.
