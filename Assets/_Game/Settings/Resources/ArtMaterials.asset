@@ -5211,6 +5211,95 @@ MonoBehaviour:
     values:
     - 0.3
     - 0.06
+  tones:
+  - key: terrain/earth/ground_fill
+    color:
+      serializedVersion: 2
+      rgba: 4282020756
+  - key: terrain/earth/ground_fill_sand
+    color:
+      serializedVersion: 2
+      rgba: 4291815154
+  - key: terrain/earth/ground_fill_t2
+    color:
+      serializedVersion: 2
+      rgba: 4281747035
+  - key: terrain/earth/ground_fill_t3
+    color:
+      serializedVersion: 2
+      rgba: 4287796619
+  - key: terrain/earth/ground_fill_t4
+    color:
+      serializedVersion: 2
+      rgba: 4284114254
+  - key: terrain/earth/ground_fill_t5
+    color:
+      serializedVersion: 2
+      rgba: 4279704094
+  - key: terrain/mars/ground_fill
+    color:
+      serializedVersion: 2
+      rgba: 4284642995
+  - key: terrain/mars/ground_fill_basalt
+    color:
+      serializedVersion: 2
+      rgba: 4284311140
+  - key: terrain/mars/ground_fill_t2
+    color:
+      serializedVersion: 2
+      rgba: 4281023068
+  - key: terrain/mars/ground_fill_t3
+    color:
+      serializedVersion: 2
+      rgba: 4284311140
+  - key: terrain/mars/ground_fill_t4
+    color:
+      serializedVersion: 2
+      rgba: 4281023068
+  - key: terrain/mars/ground_fill_t5
+    color:
+      serializedVersion: 2
+      rgba: 4279704094
+  - key: terrain/mercury/ground_fill
+    color:
+      serializedVersion: 2
+      rgba: 4292141801
+  - key: terrain/mercury/ground_fill_t2
+    color:
+      serializedVersion: 2
+      rgba: 4289376182
+  - key: terrain/mercury/ground_fill_t3
+    color:
+      serializedVersion: 2
+      rgba: 4286998133
+  - key: terrain/mercury/ground_fill_t4
+    color:
+      serializedVersion: 2
+      rgba: 4282923070
+  - key: terrain/mercury/ground_fill_t5
+    color:
+      serializedVersion: 2
+      rgba: 4279704094
+  - key: terrain/venus/ground_fill
+    color:
+      serializedVersion: 2
+      rgba: 4283916888
+  - key: terrain/venus/ground_fill_t2
+    color:
+      serializedVersion: 2
+      rgba: 4281283909
+  - key: terrain/venus/ground_fill_t3
+    color:
+      serializedVersion: 2
+      rgba: 4288327357
+  - key: terrain/venus/ground_fill_t4
+    color:
+      serializedVersion: 2
+      rgba: 4281283909
+  - key: terrain/venus/ground_fill_t5
+    color:
+      serializedVersion: 2
+      rgba: 4279704094
   modelClipSets:
   - key: characters/calibration/base
     fps: 30

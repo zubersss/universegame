@@ -111,6 +111,55 @@ namespace Meridian.Rendering
             return true;
         }
 
+        /// <summary>D-190 (1): a ground fill's main tone (its json's "tone_hex": the fill's opaque pixels snapped to the planet's palette,
+        /// the tone with the largest share). The dig's clods and dust are coloured by the fill drawn at the dug cell. ArtTones registers
+        /// them from the jsons (CheckSetup, or -ExecuteMethod Meridian.EditorTools.ArtTones.Run).</summary>
+        [System.Serializable]
+        public sealed class ArtTone
+        {
+            public string key;
+            public Color32 color;
+        }
+        public List<ArtTone> tones = new List<ArtTone>();
+        static Dictionary<string, Color> toneLookup;
+        static int toneLookupCount = -1;
+
+        /// <summary>A key's registered tone; false where its json has none (or no registry).</summary>
+        public static bool ToneFor(string key, out Color tone)
+        {
+            tone = Color.white;
+            var a = Active;
+            if (a == null || a.tones == null || key == null) return false;
+            if (toneLookup == null || toneLookupCount != a.tones.Count)
+            {
+                toneLookup = new Dictionary<string, Color>(a.tones.Count);
+                foreach (var t in a.tones) if (t != null && t.key != null) toneLookup[t.key] = t.color;
+                toneLookupCount = a.tones.Count;
+            }
+            return toneLookup.TryGetValue(key, out tone);
+        }
+
+        /// <summary>Editor: ArtTones records a json's tone (null: the field is gone). Returns true when it changed.</summary>
+        public bool SetTone(string key, Color32? color)
+        {
+            tones ??= new List<ArtTone>();
+            int i = tones.FindIndex(t => t.key == key);
+            if (color == null)
+            {
+                if (i < 0) return false;
+                tones.RemoveAt(i);
+                toneLookupCount = -1;
+                return true;
+            }
+            var c = color.Value;
+            if (i >= 0 && tones[i].color.r == c.r && tones[i].color.g == c.g && tones[i].color.b == c.b && tones[i].color.a == c.a) return false;
+            if (i >= 0) tones[i].color = c; else tones.Add(new ArtTone { key = key, color = c });
+            tones.Sort((x, y) => string.CompareOrdinal(x.key, y.key));
+            toneLookupCount = -1;
+            toneLookup = null;
+            return true;
+        }
+
         static ArtMaterials active;
         static HashSet<string> lookup;
 

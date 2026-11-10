@@ -43,6 +43,28 @@ namespace Meridian.Tests
             Assert.IsFalse(CreatureDirector.HoldsOff(0f, 1f), "no follow distance: the ordinary chase");
         }
 
+        /// <summary>U-204 F17 (B-228's read of smoke_43: the Maw followed the surveyor to the beach and lay across the sand in 2 m of
+        /// water): a chasing swimmer holds where its own water ends toward the surveyor and keeps its clearance over the seabed.</summary>
+        [Test]
+        public void AChasingSwimmerStaysInWaterItFitsIn()
+        {
+            var toShore = new Vector2(3f, -1f); // the surveyor is to the right and lower
+            Assert.AreEqual(toShore, CreatureDirector.SwimChase(toShore, 40f, false, 300f, 280f), "deep water ahead, well over its floor: the plain chase");
+            var held = CreatureDirector.SwimChase(toShore, 40f, true, 300f, 280f);
+            Assert.AreEqual(0f, held.x, "the water toward the surveyor is too shallow: no further that way");
+            Assert.AreEqual(-1f, held.y, 1e-6f, "its depth is its own");
+            var away = CreatureDirector.SwimChase(new Vector2(-3f, 0.5f), 40f, true, 300f, 280f);
+            Assert.AreEqual(-3f, away.x, 1e-6f, "away from the shallows it moves freely");
+            var low = CreatureDirector.SwimChase(toShore, 40f, false, 279.5f, 280f);
+            Assert.AreEqual(3f, low.x, 1e-6f);
+            Assert.AreEqual(0f, low.y, "at its floor clearance it sinks no further");
+            var rising = CreatureDirector.SwimChase(new Vector2(1f, 2f), 40f, false, 279.5f, 280f);
+            Assert.AreEqual(2f, rising.y, 1e-6f, "but it may rise");
+            // the Maw's numbers: it needs 20 m of water (its 5 m of body and 15 m over the floor)
+            var spec = SpeciesSpec.Get(Species.HadalMaw);
+            Assert.AreEqual(20f, spec.WaterDepthNeeded, 1e-4f, "the depth the Maw's own water has");
+        }
+
         [Test]
         public void TheRigSetHasSixBonesTheLureSwapsAndAFourBeatSway()
         {

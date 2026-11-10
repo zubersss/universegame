@@ -421,6 +421,7 @@ namespace Meridian.Creatures
                     var to = new Vector2(dx, dy + 0.6f);
                     want = to.sqrMagnitude > 1e-4f ? to.normalized * speed : Vector2.zero;
                     if (HoldsOff(spec.followDistance, to.magnitude)) want = Vector2.zero; // U-119 (D-087): the Maw follows at a distance
+                    if (spec.habitat == Habitat.Water) want = SwimChase(want, dx, c.shallowAhead, pos.y, c.swimFloor); // U-204 F17: only through water it fits in
                 }
                 else want = new Vector2(c.dir * speed, Mathf.Clamp((c.altitude - pos.y) * 1.5f, -speed - 1f, speed + 1f));
                 v = Vector2.MoveTowards(v, want, FlyAccel * dt);
@@ -509,6 +510,17 @@ namespace Meridian.Creatures
         /// <summary>U-119 (D-087): a hunter with a follow distance stops short of it (the Maw keeps 14 m off the surveyor). Pure.</summary>
         public static bool HoldsOff(float followDistance, float distance) => followDistance > 0f && distance < followDistance;
 
+        /// <summary>U-204 F17 (B-228's read of smoke_43: the Hadal Maw followed the surveyor to the beach and lay across the sand slope in
+        /// 2 m of water): a chasing swimmer goes only through water it fits in. Where the water toward the surveyor (`dx`: the surveyor's
+        /// side) is shallower than its species needs it holds its place sideways, and it never sinks under its clearance over the
+        /// seabed (`lowest`: the least height of its centre here). Pure.</summary>
+        public static Vector2 SwimChase(Vector2 want, float dx, bool shallowAhead, float y, float lowest)
+        {
+            if (shallowAhead && want.x * dx > 0f) want.x = 0f;
+            if (y <= lowest && want.y < 0f) want.y = 0f;
+            return want;
+        }
+
         /// <summary>Seconds between two bumps by one creature.</summary>
         public const float BumpEvery = 1.2f;
         /// <summary>U-099: a creature that wanted to move but stood still this long is blocked by something the tiles do not show.</summary>
@@ -525,6 +537,15 @@ namespace Meridian.Creatures
             var spec = c.Spec;
             if (Planet.id == PlanetId.Mercury) TrackZone(c, now);
             if (spec.Flies) c.altitude = AltitudeFor(c);
+            if (spec.habitat == Habitat.Water && spec.temper == Temper.Hunts)
+            {
+                // U-204 F17: at each think, whether the water half a body toward the surveyor is as deep as the species needs, and its
+                // floor clearance here (a hunter only: the others never chase; a few tile reads a think, inside the AI budget)
+                int here = Mathf.FloorToInt(c.Body.position.x);
+                int ahead = here + (dx > 0f ? 1 : -1) * Mathf.Max(1, Mathf.CeilToInt(spec.size.x * 0.5f));
+                c.shallowAhead = WaterDepthAbove(ahead, terrain.TopSolidY(ahead)) < spec.WaterDepthNeeded;
+                c.swimFloor = terrain.TopSolidY(here) + 1f + spec.floorClearance + spec.size.y * 0.5f;
+            }
 
             bool playerAlive = vitals == null || !vitals.Dead;
             if (spec.temper == Temper.Territorial)

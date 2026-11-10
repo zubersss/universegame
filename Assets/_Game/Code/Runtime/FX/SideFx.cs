@@ -46,7 +46,7 @@ namespace Meridian.FX
             // as the clods; until then DigFeel's clods are the scoop's debris alone.
             if (shovel && Meridian.Mining.DigFeel.PuffRedrawn && FxSheet.Get(ArtKeys.Fx.ShovelFlick).Ready)
             {
-                LastFlickTint = Meridian.Mining.DigFeel.Tone(tier);
+                LastFlickTint = Meridian.Mining.DigFeel.ToneAt(rig.terrain, at, tier);
                 Flicks++;
                 pool.Play(ArtKeys.Fx.ShovelFlick, at, 1f, 0f, player != null && at.x < player.Body.position.x, LastFlickTint); // thrown back over the shoulder
             }
@@ -66,7 +66,7 @@ namespace Meridian.FX
         {
             var puff = Puff();
             if (puff == null || !FxSheet.Get(puff).Ready) return false;
-            LastPuffTint = Meridian.Mining.DigFeel.PuffTone(tier);
+            LastPuffTint = Meridian.Mining.DigFeel.PuffToneAt(rig != null ? rig.terrain : null, at, tier);
             LastPuffAt = at;
             Puffs++;
             pool.Play(puff, at, Meridian.Mining.DigFeel.PuffScaleNow, 0f, false, LastPuffTint);

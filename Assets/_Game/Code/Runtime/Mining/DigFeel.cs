@@ -26,8 +26,8 @@ namespace Meridian.Mining
         public const float MouthM = 0.45f;
         /// <summary>D-190 (LEAD, from BLENDER's B-232 / B-238 sheet): the dig's debris is drawn once in cream and ink and coloured here by
         /// the dug cell's tone, lifted toward white so the art keeps its light side: clods 35 % on T1-T3 and 60 % on T4-T5 (the deep tiers'
-        /// thin shards read weakly on their dark fills), the dust puff 60 %. The tone today is the tier's depth-chip colour (D1_TABLES);
-        /// D-190 (1) wants the fill actually drawn at the cell (a biome's sand or snow in Topsoil): a known gap until the fills carry a tone.</summary>
+        /// thin shards read weakly on their dark fills), the dust puff 60 %. The tone is the fill's drawn at the cell (D-190 (1): its
+        /// json's "tone_hex"; Earth's sand puffs cream, Topsoil brown), the tier's depth-chip colour where a fill carries none.</summary>
         public const float ToneLiftShallow = 0.35f, ToneLiftDeep = 0.6f, PuffLift = 0.6f;
         public const int DeepLiftFromTier = 3;
         public static float ToneLiftOf(int tier) => tier >= DeepLiftFromTier ? ToneLiftDeep : ToneLiftShallow;
@@ -38,32 +38,68 @@ namespace Meridian.Mining
         public static float PuffScaleNow => PuffRedrawn ? 1f : 0.6f;
         public static float PuffAlphaNow => PuffRedrawn ? 0.85f : 0.7f;
 
-        static Color[] tones, puffTones;
-        static void Tones()
+        // ---------- D-190 (1): the tone of the fill drawn at the dug cell ----------
+
+        /// <summary>The key of the fill drawn at a cell: in the first tier the planet's ground_fill, or the band's own fill where the
+        /// planet has one and the cell lies in that band (Earth's sand, Mars's basalt; the other bands lie over ground_fill);
+        /// ground_fill_t2..t5 under it (0-based tier; past the last: the last). Pure.</summary>
+        public static string FillKey(Meridian.Planets.PlanetId planet, int tier, bool bandFill)
         {
-            var t = D1Tables.Current.tiers;
-            if (tones != null && tones.Length == t.Length) return;
-            tones = new Color[t.Length]; puffTones = new Color[t.Length];
-            for (int i = 0; i < t.Length; i++)
+            string p = planet.ToString().ToLowerInvariant();
+            int t = Mathf.Clamp(tier, 0, Tiers - 1);
+            if (t >= 1) return $"terrain/{p}/ground_fill_t{t + 1}";
+            string alt = bandFill ? Meridian.View2D.SmoothGround.AltFillKey(planet) : null;
+            return $"terrain/{p}/{alt ?? "ground_fill"}";
+        }
+
+        static readonly System.Collections.Generic.Dictionary<int, Color> groundTones = new System.Collections.Generic.Dictionary<int, Color>(64);
+        static int groundTonesOf = -2;
+
+        /// <summary>The ground's own tone at a cell: the drawn fill's (its json's "tone_hex", BLENDER's db44edd1, in the ArtMaterials
+        /// registry), else the tier's depth-chip colour (a fill without the field). Looked up once a fill; nothing allocates after.</summary>
+        public static Color GroundTone(Meridian.Planets.PlanetId planet, int tier, bool bandFill)
+        {
+            var reg = ArtMaterials.Active;
+            int count = reg != null && reg.tones != null ? reg.tones.Count : -1;
+            if (count != groundTonesOf) { groundTones.Clear(); groundTonesOf = count; }
+            int t = Mathf.Clamp(tier, 0, Tiers - 1);
+            bool band = bandFill && t == 0 && Meridian.View2D.SmoothGround.AltFillKey(planet) != null;
+            int id = ((int)planet * Tiers + t) * 2 + (band ? 1 : 0);
+            if (groundTones.TryGetValue(id, out var c)) return c;
+            if (!ArtMaterials.ToneFor(FillKey(planet, t, band), out c))
             {
-                var chip = t[i].ChipColor;
-                var c = Color.Lerp(chip, Color.white, ToneLiftOf(i)); c.a = 1f; tones[i] = c;
-                var p = Color.Lerp(chip, Color.white, PuffLift); p.a = 1f; puffTones[i] = p;
+                var tiers = D1Tables.Current.tiers;
+                c = tiers.Length == 0 ? Color.white : tiers[Mathf.Clamp(t, 0, tiers.Length - 1)].ChipColor;
             }
+            c.a = 1f;
+            groundTones[id] = c;
+            return c;
         }
-        /// <summary>The tone a depth tier's clods are multiplied by (0-based tier; past the last: the last).</summary>
-        public static Color Tone(int tier)
+
+        /// <summary>The tone a cell's clods (and the shovel's crumbs) are multiplied by: the ground's tone there lifted toward white.</summary>
+        public static Color Tone(Meridian.Planets.PlanetId planet, int tier, bool bandFill)
         {
-            Tones();
-            return tones.Length == 0 ? Color.white : tones[Mathf.Clamp(tier, 0, tones.Length - 1)];
+            var c = Color.Lerp(GroundTone(planet, tier, bandFill), Color.white, ToneLiftOf(tier));
+            c.a = 1f;
+            return c;
         }
-        /// <summary>The dust puff's tint at a depth tier: the tier's tone lifted PuffLift, at the puff's alpha.</summary>
-        public static Color PuffTone(int tier)
+        /// <summary>The dust puff's tint at a cell: the ground's tone there lifted PuffLift, at the puff's alpha.</summary>
+        public static Color PuffTone(Meridian.Planets.PlanetId planet, int tier, bool bandFill)
         {
-            Tones();
-            var c = puffTones.Length == 0 ? Color.white : puffTones[Mathf.Clamp(tier, 0, puffTones.Length - 1)];
+            var c = Color.Lerp(GroundTone(planet, tier, bandFill), Color.white, PuffLift);
             c.a = PuffAlphaNow;
             return c;
+        }
+
+        /// <summary>At a point of a planet side: the planet from its terrain, the band's fill from the ground drawn at that x.</summary>
+        public static Color ToneAt(TerrainStreamer t, Vector2 at, int tier) => Tone(PlanetOf(t), tier, BandFillAt(at.x));
+        public static Color PuffToneAt(TerrainStreamer t, Vector2 at, int tier) => PuffTone(PlanetOf(t), tier, BandFillAt(at.x));
+        static Meridian.Planets.PlanetId PlanetOf(TerrainStreamer t) => t != null && t.Config != null ? t.Config.id : Meridian.Planets.PlanetId.Earth;
+        /// <summary>The cell's column draws the band's own fill (the smooth ground of the planet side that is up).</summary>
+        public static bool BandFillAt(float x)
+        {
+            var g = Meridian.View2D.SmoothGround.Current;
+            return g != null && g.BandFillAt(x);
         }
         public const int SortingOrder = 41; // over the stroke's puff (FxPool, 40)
 
@@ -157,7 +193,7 @@ namespace Meridian.Mining
             var t = rig.terrain;
             int tier = t != null && rig.D1 ? DigRun.TierAt(t, at) : 0;
             Vector2 hand = rig.owner != null ? (Vector2)rig.owner.position + new Vector2(0f, 0.9f) : at + Vector2.up;
-            Burst(at, hand, ClodsFor(cells), tier, Tone(tier));
+            Burst(at, hand, ClodsFor(cells), tier, ToneAt(t, at, tier));
             if (follow == null && side.sideCamera != null) follow = side.sideCamera.GetComponent<Meridian.Player.CameraFollow>();
             var stroke = at - hand;
             if (follow != null && stroke.sqrMagnitude > 1e-6f) { follow.Kick(stroke, KickPixels); LastKick = stroke.normalized; }

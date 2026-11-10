@@ -60,6 +60,10 @@ namespace Meridian.Creatures
         internal float knockFor, knockVx, flashFor;
         /// <summary>U-099: seconds the body has stood still while wanting to move (a wall the terrain check cannot see: props, pieces).</summary>
         internal float blockedFor, keepDirUntil, blockAnchorX, blockAnchorT, waitUntil;
+        /// <summary>U-204 F17: a swimmer's last think found the water toward the surveyor shallower than the species needs, and the
+        /// lowest its centre may go where it is (its floor clearance over the seabed).</summary>
+        internal bool shallowAhead;
+        internal float swimFloor = float.NegativeInfinity;
         /// <summary>
         /// U-099: the clip picked last frame (0 idle, 1 walk, 2 attack/bump, 3 hurt); tests read it.
         /// U-108: while Airborne on a sheet with a `fly` clip it is that clip's index (4 on the B-127 gull's v3 sheet).

@@ -4115,8 +4115,10 @@ namespace Meridian.Tests
         /// <summary>U-196 (D-183: holes read as holes) → coordination/reports/unity/u196/: 1_camp_shaft_10m (a 2.4 m wide shaft 10 m down
         /// from the camp's ground: the back wall lit at the top and dim at the foot, the soft shadow inside every edge), 2_t3_room (a room
         /// 56 m under the Surface Line), 3_t5_core_room (212 m down), 4_mound_and_pit (a mound piled on the surface beside a pit: nothing
-        /// darkens above the natural surface).</summary>
-        [UnityTest, Timeout(300000)]
+        /// darkens above the natural surface). With B-230's walls (LEAD 18:0x, the closing set): 5_sand_dig (a pit in Earth's desert, whose
+        /// band fill has no wall of its own and keeps its shaded fill, and one shovel stroke's dust and clods in the sand's tone, D-190 (1)),
+        /// 6_mars_shaft (a 7 m shaft: the walls differ a planet; Mercury's and Venus's wait for their smooth ground, U-177).</summary>
+        [UnityTest, Timeout(540000)]
         public IEnumerator CaptureU196Holes()
         {
             var name = Environment.GetEnvironmentVariable(Variable);
@@ -4177,6 +4179,12 @@ namespace Meridian.Tests
                     File.Copy($"logs/capture_{name}_{label}.png", $"{dir}/{label}.png", true);
                 }
                 int camp = Mathf.FloorToInt(Meridian.Planet.POI.PoiCatalog.SpawnCamp.CenterX);
+                // B-230: the five walls in before the first hole is shot
+                var smooth = side.cartoon != null ? side.cartoon.Smooth : null;
+                Assert.NotNull(smooth, "the smooth ground on Earth");
+                timeout = Time.realtimeSinceStartup + 20f;
+                while (!(smooth.WallTier(1) && smooth.WallTier(2) && smooth.WallTier(3) && smooth.WallTier(4) && smooth.WallTier(5)) && Time.realtimeSinceStartup < timeout) yield return null;
+                TestContext.Out.WriteLine($"[MERIDIAN] u196 walls on Earth: t1 {smooth.WallTier(1)}, t2 {smooth.WallTier(2)}, t3 {smooth.WallTier(3)}, t4 {smooth.WallTier(4)}, t5 {smooth.WallTier(5)}");
 
                 // 1: a 10 m shaft from the camp's ground, the camera on its middle (the surveyor at its foot)
                 float sx = camp + 20.5f, top = t.SurfaceAt(sx);
@@ -4211,7 +4219,83 @@ namespace Meridian.Tests
                 if (follow != null) follow.enabled = false;
                 cam.position = new Vector3(mx + 0.6f, t.SurfaceAt(mx + 0.6f) + 0.8f, cam.position.z);
                 yield return Shot("4_mound_and_pit");
-                TestContext.Out.WriteLine($"[MERIDIAN] u196 4_mound_and_pit: {piled} tiles piled at x {mx:0.0}, a pit of {pit} strokes at x {mx + 3.4f:0.0}");
+                TestContext.Out.WriteLine($"[MERIDIAN] u196 4_mound_and_pit: {piled} tiles piled at x {mx:0.0}, a pit of {pit} strokes at x {mx + 3.4f:0.0}; the wall art {smooth.WallArt}");
+
+                // 5: a dig in the desert. Its band draws its own fill (ground_fill_sand), which has no wall in B-230: the wall there stays
+                // that fill, shaded. One shovel stroke beside the pit: its dust and clods in the sand's tone (D-190 (1)), in the air at the shot.
+                float desert = float.NaN;
+                for (int d = 16; d <= 4000 && float.IsNaN(desert); d += 16)
+                    foreach (int sgn in new[] { 1, -1 })
+                    {
+                        float x0 = camp + sgn * d;
+                        if (float.IsNaN(desert) && smooth.BandFillAt(x0 - 8f) && smooth.BandFillAt(x0) && smooth.BandFillAt(x0 + 8f)) desert = x0 + 0.5f;
+                    }
+                if (float.IsNaN(desert)) TestContext.Out.WriteLine("[MERIDIAN] u196 5_sand_dig: no desert column within 4 km of the camp: not shot");
+                else
+                {
+                    yield return Park(new Vector2(desert, t.SurfaceAt(desert) + 0.05f));
+                    int sandPit = Carve(desert + 3.1f, t.SurfaceAt(desert + 3.1f) - 1.2f, 0.9f, 1.3f);
+                    if (follow != null) follow.enabled = false;
+                    cam.position = new Vector3(desert + 1.4f, t.SurfaceAt(desert + 1.4f) + 0.4f, cam.position.z);
+                    for (int k = 0; k < 20; k++) yield return null;
+                    if (rig.drops != null) for (int k = rig.drops.Live.Count - 1; k >= 0; k--) rig.drops.Collect(rig.drops.Live[k]);
+                    yield return new WaitForSeconds(1.2f); // the carving's clods and puffs gone
+                    var strokeAt = new Vector2(desert + 1.2f, t.SurfaceAt(desert + 1.2f) - 0.3f);
+                    var toolWas = Meridian.Progress.SkillStats.ToolOverride;
+                    Meridian.Progress.SkillStats.ToolOverride = Meridian.Rig.DigTool.Shovel;
+                    bool struck = rig.Dig(strokeAt);
+                    Meridian.Progress.SkillStats.ToolOverride = toolWas;
+                    yield return new WaitForSeconds(0.16f);
+                    yield return Save(side.sideCamera, $"{name}_5_sand_dig");
+                    File.Copy($"logs/capture_{name}_5_sand_dig.png", $"{dir}/5_sand_dig.png", true);
+                    var sandFx = UnityEngine.Object.FindAnyObjectByType<Meridian.FX.SideFx>();
+                    TestContext.Out.WriteLine($"[MERIDIAN] u196 5_sand_dig: the desert at x {desert:0.0} ({desert - camp:0} m from the camp), a pit of {sandPit} strokes, the stroke {(struck ? "landed" : "MISSED")}, the band's fill there {Meridian.Mining.DigFeel.BandFillAt(strokeAt.x)}, the dust's tint {(sandFx != null ? ColorUtility.ToHtmlStringRGB(sandFx.LastPuffTint) : "-")} (sand lifted: {ColorUtility.ToHtmlStringRGB(Meridian.Mining.DigFeel.PuffTone(Meridian.Planets.PlanetId.Earth, 0, true))}, Topsoil lifted: {ColorUtility.ToHtmlStringRGB(Meridian.Mining.DigFeel.PuffTone(Meridian.Planets.PlanetId.Earth, 0, false))})");
+                    yield return new WaitForSeconds(0.8f);
+                }
+
+                // 6: a 7 m shaft on Mars: the planet's own walls. (Mercury and Venus keep their block ground until U-177: GroundField.Smooth
+                // is Earth and Mars; their walls are imported and draw once their ground is the smooth one.)
+                foreach (var (planetId, label) in new[] { (Meridian.Planets.PlanetId.Mars, "6_mars_shaft") })
+                {
+                    yield return director.LoadPlanetSide(GameState.Instance.catalog.Get(planetId));
+                    side = director.PlanetSide; t = side.terrain; rig = side.rig; body = side.player.Body;
+                    follow = side.sideCamera.GetComponent<Meridian.Player.CameraFollow>();
+                    cam = side.sideCamera.transform;
+                    timeout = Time.realtimeSinceStartup + 30f;
+                    while (!t.IsSettled && Time.realtimeSinceStartup < timeout) yield return null;
+                    if (side.hazards != null) side.hazards.enabled = false;
+                    if (side.dayNight != null) side.dayNight.Override = 0.45f;
+                    side.creatures.autoSpawn = false; side.creatures.DespawnAll();
+                    var ground = side.cartoon != null ? side.cartoon.Smooth : null;
+                    timeout = Time.realtimeSinceStartup + 20f;
+                    while (ground != null && !(ground.WallTier(1) && ground.WallTier(2)) && Time.realtimeSinceStartup < timeout) yield return null;
+                    if (planetId == Meridian.Planets.PlanetId.Mars && side.ship != null && side.ship.Body != null)
+                    {
+                        // U-204 F14 (B-228: a flat pale square, about 0.7 x 0.5 m, floats behind the Pilgrim on Mars at hatch height): name
+                        // every small drawn thing round the ship, so the key without art can be told to BLENDER.
+                        var shipAt = side.ship.Body.position;
+                        foreach (var r in UnityEngine.Object.FindObjectsByType<Renderer>(FindObjectsInactive.Exclude))
+                        {
+                            if (!r.enabled) continue;
+                            var b = r.bounds;
+                            if (Mathf.Abs(b.center.x - shipAt.x) > 9f || b.center.y < shipAt.y + 0.5f || b.center.y > shipAt.y + 9f) continue;
+                            if (b.size.x > 1.8f || b.size.y > 1.8f || b.size.x < 0.15f) continue;
+                            var sr = r as SpriteRenderer;
+                            string path = r.name;
+                            for (var up = r.transform.parent; up != null && path.Length < 160; up = up.parent) path = up.name + "/" + path;
+                            string drawn = sr != null ? (sr.sprite != null ? sr.sprite.name + " (" + (sr.sprite.texture != null ? sr.sprite.texture.name : "no texture") + ")" : "NO SPRITE")
+                                : (r.sharedMaterial != null && r.sharedMaterial.mainTexture != null ? r.sharedMaterial.mainTexture.name : "no main texture");
+                            TestContext.Out.WriteLine($"[MERIDIAN] u204 F14 near the Pilgrim: {path}: {r.GetType().Name} {b.size.x:0.00} x {b.size.y:0.00} m at ({b.center.x - shipAt.x:+0.0;-0.0}, {b.center.y - shipAt.y:+0.0;-0.0}) from the ship, drawing {drawn}, order {r.sortingOrder}{(sr != null ? ", colour " + ColorUtility.ToHtmlStringRGBA(sr.color) : "")}");
+                        }
+                    }
+                    float px = Mathf.Floor(body.position.x) + 10.5f, ptop = t.SurfaceAt(px);
+                    int strokes = Carve(px, ptop - 3.3f, 1.2f, 3.6f); // the shaft first: parked in solid ground the surveyor is lifted out (SolidRescue, 18:33's run)
+                    yield return Park(new Vector2(px, ptop - 6.4f));
+                    if (follow != null) follow.enabled = false;
+                    cam.position = new Vector3(px, ptop - 3.0f, cam.position.z);
+                    yield return Shot(label);
+                    TestContext.Out.WriteLine($"[MERIDIAN] u196 {label}: {strokes} strokes at x {px:0.0}, the ground at {ptop:0.0}; walls t1 {(ground != null && ground.WallTier(1))}, the wall art {(ground != null && ground.WallArt)}");
+                }
                 LogAssert.NoUnexpectedReceived();
             }
             finally { Meridian.View2D.CartoonStage.Enabled = wasCartoon; }

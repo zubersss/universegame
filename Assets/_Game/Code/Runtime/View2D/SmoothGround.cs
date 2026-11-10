@@ -119,6 +119,68 @@ namespace Meridian.View2D
         public const float TierTransition = 0.35f;
         /// <summary>Tiers 2..5's fills (B-203's ground_fill_t2..t5; null until loaded or where a planet has none).</summary>
         readonly Sprite[] tierFills = new Sprite[4];
+
+        // ---------- U-196 (B-230): the dug cell's back face ----------
+
+        /// <summary>B-230's back walls (terrain/&lt;planet&gt;/back_wall_t1..t5: cut earth one step darker than its tier's fill, no ink
+        /// outline, a 256 px tile at 64 px a metre; null until loaded or where a planet has none).</summary>
+        readonly Sprite[] walls = new Sprite[5];
+        Material wallMaterial;
+        /// <summary>A wall tile's side in metres (the fills' is 8).</summary>
+        public const float WallTileM = 4f;
+        static readonly int TileTexelsId = Shader.PropertyToID("_TileTexels");
+        /// <summary>The back wall draws B-230's tiles (false: the fill shaded, as before the art and where a planet has no walls).</summary>
+        public bool WallArt => wallMaterial != null && walls[0] != null;
+        /// <summary>Tier `tier`'s wall (1..5) is in.</summary>
+        public bool WallTier(int tier) => tier >= 1 && tier <= 5 && walls[tier - 1] != null;
+        public Material WallMaterialNow => wallMaterial;
+
+        /// <summary>The back wall's material: MERIDIAN/GroundTiers over the walls (t1 its base, t2..t5 by depth under the Surface Line, as
+        /// the fills crossfade), read at world / 4. The same shader on the submesh the back wall already had: no draw call more. Null
+        /// until the first wall is in or where the registry has no tier material: the fill's own material then draws the wall, shaded.</summary>
+        Material WallMaterial()
+        {
+            if (!TierShader || walls[0] == null || walls[0].texture == null || lineTex == null) return null;
+            var proto = Meridian.Rendering.ArtMaterials.Active != null ? Meridian.Rendering.ArtMaterials.Active.groundTiers : null;
+            if (proto == null) return null;
+            if (wallMaterial == null) { wallMaterial = new Material(proto) { name = "GroundWalls_" + planet }; DressWalls(); }
+            return wallMaterial;
+        }
+
+        void DressWalls()
+        {
+            var m = wallMaterial;
+            if (m == null || walls[0] == null || walls[0].texture == null) return;
+            m.mainTexture = walls[0].texture;
+            var t = Meridian.Mining.D1Tables.Current;
+            var from = Vector4.zero;
+            for (int k = 0; k < 4; k++)
+            {
+                var s = walls[k + 1];
+                m.SetTexture(TierIds[k], s != null ? s.texture : walls[0].texture);
+                from[k] = s != null && t.tiers.Length > k + 1 ? t.tiers[k + 1].fromM : 1e6f; // a tier without its wall keeps the one over it
+            }
+            m.SetVector(TierFromId, from);
+            m.SetVector(TierBlendId, new Vector4(TierTransition, TierTransition, TierTransition, TierTransition));
+            m.SetFloat(TileTexelsId, walls[0].texture.width);
+            if (lineTex != null) { m.SetTexture(LineTexId, lineTex); m.SetVector(LineParamsId, new Vector4(1f / lineTex.width, WallTileM, lineBase, lineSpan)); }
+        }
+
+        /// <summary>Tests: the materials a chunk's ground mesh draws its back wall and its body with (false where the chunk has no mesh).</summary>
+        public bool ChunkMaterials(TerrainChunk c, out Material backWall, out Material body)
+        {
+            backWall = body = null;
+            if (c == null || !meshes.TryGetValue(c, out var f) || f == null) return false;
+            var m = f.GetComponent<MeshRenderer>().sharedMaterials;
+            if (m == null || m.Length <= SubBody) return false;
+            backWall = m[SubBack]; body = m[SubBody];
+            return true;
+        }
+
+        /// <summary>The smooth ground of the planet side that is up (null between planets).</summary>
+        public static SmoothGround Current { get; private set; }
+        /// <summary>D-190 (1): column x draws the band's own fill (Earth's sand, Mars's basalt) more than the planet's ground_fill.</summary>
+        public bool BandFillAt(float x) => Active && biomes && fillSand != null && SandWeight(x) >= 0.5f;
         readonly Dictionary<Texture, Material> tierMaterials = new Dictionary<Texture, Material>(4);
         Texture2D lineTex;
         static readonly int Tier2Id = Shader.PropertyToID("_Tier2Tex"), Tier3Id = Shader.PropertyToID("_Tier3Tex"), Tier4Id = Shader.PropertyToID("_Tier4Tex"),
@@ -620,6 +682,7 @@ namespace Meridian.View2D
             }
             lineTex.Apply(false, false);
             foreach (var m in tierMaterials.Values) if (m != null) DressTiers(m);
+            DressWalls();
         }
 
         /// <summary>The line's world height the shader reads at column texel x (the texture's value, decoded). Tests.</summary>
@@ -689,6 +752,7 @@ namespace Meridian.View2D
             biomes = false;
             for (int i = 1; i < Variants; i++) biomes |= variantKey[i] != null; // U-159: the planet has region sets
             Active = true;
+            Current = this;
             TerrainChunk.OutlineBuilt -= OnOutline;
             TerrainChunk.OutlineBuilt += OnOutline;
             for (int i = 0; i < Variants; i++)
@@ -707,6 +771,12 @@ namespace Meridian.View2D
                 int tier = k;
                 Probe($"terrain/{planet}/ground_fill_t{k + 2}", s => { tierFills[tier] = s; Repeat(s); foreach (var m in tierMaterials.Values) if (m != null) DressTiers(m); });
             }
+            // U-196 (B-230): the back walls; the first one in turns the wall's material over (the chunks rebuild over the next frames)
+            for (int k = 0; k < walls.Length; k++)
+            {
+                int tier = k;
+                Probe($"terrain/{planet}/back_wall_t{k + 1}", s => { walls[tier] = s; Repeat(s); DressWalls(); if (tier == 0) QueueAll(); });
+            }
             BuildLine();
             ProbeDecor();
             ProbeTop(); // U-186
@@ -718,12 +788,13 @@ namespace Meridian.View2D
         public void Deactivate()
         {
             Active = false;
+            if (Current == this) Current = null;
             TerrainChunk.OutlineBuilt -= OnOutline;
             foreach (var kv in meshes) if (kv.Value != null) kv.Value.gameObject.SetActive(false);
             Release();
         }
 
-        void OnDestroy() { TerrainChunk.OutlineBuilt -= OnOutline; Release(); if (lineTex != null) Destroy(lineTex); }
+        void OnDestroy() { if (Current == this) Current = null; TerrainChunk.OutlineBuilt -= OnOutline; Release(); if (lineTex != null) Destroy(lineTex); }
 
         void Release()
         {
@@ -732,6 +803,9 @@ namespace Meridian.View2D
             for (int i = 0; i < Variants; i++) bands[i] = null;
             fill = fillSand = rim = null;
             for (int k = 0; k < tierFills.Length; k++) tierFills[k] = null;
+            for (int k = 0; k < walls.Length; k++) walls[k] = null;
+            if (wallMaterial != null) Destroy(wallMaterial);
+            wallMaterial = null;
             rebuildQueue.Clear();
             foreach (var m in tierMaterials.Values) if (m != null) Destroy(m);
             tierMaterials.Clear();
@@ -884,7 +958,13 @@ namespace Meridian.View2D
             bool worldFill = fill != null && fill.texture != null && fill.rect.width >= fill.texture.width - 0.5f;
             Vector2 FillUv(float lx, float ly) => worldFill ? new Vector2((wx0 + lx) / 8f, (wy0 + ly) / 8f) : fillUv;
             Vector2 WorldUv(float lx, float ly) => new Vector2((wx0 + lx) / 8f, (wy0 + ly) / 8f);
-            var back = new Color(fillTint.r * BackShade, fillTint.g * BackShade, fillTint.b * BackShade, 1f);
+            // U-196 (B-230): the back wall is the tier's wall tile where it is in (already one step darker than the fill: only the hole's
+            // shading multiplies it), else the fill shaded as before the art.
+            var wallMat = worldFill ? WallMaterial() : null;
+            bool wallOn = wallMat != null;
+            Vector2 WallUv(float lx, float ly) => new Vector2((wx0 + lx) / WallTileM, (wy0 + ly) / WallTileM);
+            System.Func<float, float, Vector2> backUv = wallOn ? WallUv : FillUv;
+            var back = wallOn ? Color.white : new Color(fillTint.r * BackShade, fillTint.g * BackShade, fillTint.b * BackShade, 1f);
 
             // Does any of this chunk take the desert's sand fill? (Most chunks: no, and they skip the overlay.)
             bool sandFill = false;
@@ -916,7 +996,7 @@ namespace Meridian.View2D
                         float yb = j - 0.5f, top = j + 0.5f;
                         float t0 = Mathf.Min(h0, top), t1 = Mathf.Min(h1, top);
                         if (t0 <= yb && t1 <= yb) continue;
-                        BackQuadShaded(tris[SubBack], c, wy0, x0, x1, yb, t0, t1, back, 1f, 1f, FillUv);
+                        BackQuadShaded(tris[SubBack], c, wy0, x0, x1, yb, t0, t1, back, 1f, 1f, backUv);
                         if (sandFill)
                         {
                             float s0 = SandWeight(wx0 + x0), s1 = SandWeight(wx0 + x1);
@@ -954,7 +1034,7 @@ namespace Meridian.View2D
                     float len = (q - p).magnitude;
                     // U-157: the band only on the natural surface; a dug floor or a mound's top is earth, ink-rimmed.
                     if (segN.y > SurfaceFacing && variantCount[Grass] > 0 && OnSurface(c, (p + q) * 0.5f, wy0)) quads += BandByBiome(p, q, np, nq, wx0);
-                    else { RimShadow(c, p, q, np, nq, wy0, FillUv); Rim(p, q, np, nq, arc); } // U-196: the hole's soft inner shadow under the ink rim
+                    else { RimShadow(c, p, q, np, nq, wy0, backUv); Rim(p, q, np, nq, arc); } // U-196: the hole's soft inner shadow under the ink rim
                     arc += len;
                 }
             }
@@ -969,8 +1049,8 @@ namespace Meridian.View2D
             for (int i = 0; i < SubCount; i++) mesh.SetTriangles(tris[i], i, false);
             mesh.bounds = new Bounds(new Vector3(C * 0.5f - 0.5f, C * 0.5f - 0.5f, 0f), new Vector3(C + 2f, C + 2f, 1f));
             // U-182: the fills draw by depth tier where the tier shader is in (worldFill: the uv is world / 8, which the shader reads back).
-            mats[SubBack] = (worldFill && TierShader ? TierMaterialFor(fillSprite.texture) : null) ?? MaterialFor(fillSprite != null ? fillSprite.texture : null);
-            mats[SubBody] = mats[SubBack];
+            mats[SubBody] = (worldFill && TierShader ? TierMaterialFor(fillSprite.texture) : null) ?? MaterialFor(fillSprite != null ? fillSprite.texture : null);
+            mats[SubBack] = wallOn ? wallMat : mats[SubBody]; // U-196: the walls' material on the back wall's submesh, the same shader
             mats[SubBackSand] = (fillSand != null && TierShader ? TierMaterialFor(fillSand.texture) : null) ?? MaterialFor(fillSand != null ? fillSand.texture : null);
             mats[SubBodySand] = mats[SubBackSand];
             for (int i = 0; i < DecorSubs; i++) mats[SubDecor + i] = MaterialFor(decorTex[i]);

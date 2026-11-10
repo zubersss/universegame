@@ -3,6 +3,7 @@ using Meridian.Audio;
 using Meridian.Core;
 using Meridian.Items;
 using Meridian.Mining;
+using Meridian.Planets;
 using Meridian.Player;
 using Meridian.UI;
 using NUnit.Framework;
@@ -55,11 +56,13 @@ namespace Meridian.Tests
             Assert.AreEqual("fx/dig_clods/t5", DigFeel.ClodsKey(9), "past the last tier: the last sheet");
         }
 
-        /// <summary>LEAD 17:0x: clods and the dig puff take the dug cell's tier tone (the depth chip's colour lifted toward white), not the
-        /// surface ground's: Topsoil brown, Stone grey.</summary>
+        /// <summary>LEAD 17:0x / D-190: clods and the dig puff take the tone of the ground dug, lifted toward white, not the surface's:
+        /// Topsoil brown, Stone grey. D-190 (1): the ground's tone is the drawn fill's own (its json's tone_hex), so Earth's sand puffs
+        /// cream where Topsoil puffs brown; a fill without the field falls back to its tier's depth chip.</summary>
         [Test]
-        public void TheToneIsTheDugTiersNotTheSurfaces()
+        public void TheToneIsTheDugFillsNotTheSurfaces()
         {
+            const PlanetId E = PlanetId.Earth;
             var tiers = D1Tables.Current.tiers;
             Assert.GreaterOrEqual(tiers.Length, 3, "at least three tiers in the tables");
             for (int k = 0; k < tiers.Length; k++)
@@ -67,21 +70,43 @@ namespace Meridian.Tests
                 // D-190 (2): clods lifted 35 % toward white on T1-T3 and 60 % on T4-T5; the dust puff 60 % at its alpha
                 float lift = k >= 3 ? 0.6f : 0.35f;
                 Assert.AreEqual(lift, DigFeel.ToneLiftOf(k), 1e-6f, $"T{k + 1}'s lift");
-                var want = Color.Lerp(tiers[k].ChipColor, Color.white, lift);
-                var tone = DigFeel.Tone(k);
+                var ground = DigFeel.GroundTone(E, k, false);
+                Assert.AreEqual(1f, ground.a, 1e-6f, "the ground's tone is opaque");
+                var want = Color.Lerp(ground, Color.white, lift);
+                var tone = DigFeel.Tone(E, k, false);
                 Assert.AreEqual(want.r, tone.r, 1e-4f, $"T{k + 1} red"); Assert.AreEqual(want.g, tone.g, 1e-4f, $"T{k + 1} green"); Assert.AreEqual(want.b, tone.b, 1e-4f, $"T{k + 1} blue");
                 Assert.AreEqual(1f, tone.a, 1e-6f, "opaque");
-                var dust = Color.Lerp(tiers[k].ChipColor, Color.white, 0.6f);
-                var puff = DigFeel.PuffTone(k);
+                var dust = Color.Lerp(ground, Color.white, 0.6f);
+                var puff = DigFeel.PuffTone(E, k, false);
                 Assert.AreEqual(dust.r, puff.r, 1e-4f, $"T{k + 1} puff red"); Assert.AreEqual(dust.g, puff.g, 1e-4f, $"T{k + 1} puff green"); Assert.AreEqual(dust.b, puff.b, 1e-4f, $"T{k + 1} puff blue");
                 Assert.AreEqual(DigFeel.PuffRedrawn ? 0.85f : 0.7f, puff.a, 1e-6f, "the puff's alpha (0.85 on B-238's dust, 0.7 on the old ball)");
+                // every tier's debris stays readable on its fill: lifted, never darker than a mid grey (T5's fill is ink)
+                Assert.Greater(tone.maxColorComponent, 0.55f, $"T{k + 1}'s clods are not lost in the dark");
             }
             Assert.AreEqual(DigFeel.PuffRedrawn ? 1f : 0.6f, DigFeel.PuffScaleNow, 1e-6f, "the puff's scale (1 on B-238's dust)");
-            Color t1 = DigFeel.Tone(0), t3 = DigFeel.Tone(2);
+            Color t1 = DigFeel.Tone(E, 0, false), t3 = DigFeel.Tone(E, 2, false);
             Assert.Greater(t1.r - t1.b, 0.15f, "Topsoil: a brown (red well over blue)");
             Assert.Less(Mathf.Abs(t3.r - t3.b), 0.06f, "Stone: a grey");
             Assert.Greater(Mathf.Abs(t1.r - t3.r) + Mathf.Abs(t1.g - t3.g) + Mathf.Abs(t1.b - t3.b), 0.15f, "T1 and T3 read apart");
-            Assert.AreEqual(DigFeel.Tone(tiers.Length - 1), DigFeel.Tone(99), "past the last tier: the last tone");
+            Assert.AreEqual(DigFeel.Tone(E, tiers.Length - 1, false), DigFeel.Tone(E, 99, false), "past the last tier: the last tone");
+
+            // D-190 (1): the fill drawn at the cell
+            Assert.AreEqual("terrain/earth/ground_fill", DigFeel.FillKey(E, 0, false));
+            Assert.AreEqual("terrain/earth/ground_fill_sand", DigFeel.FillKey(E, 0, true), "Earth's desert draws its own fill");
+            Assert.AreEqual("terrain/mars/ground_fill_basalt", DigFeel.FillKey(PlanetId.Mars, 0, true), "Mars's basalt plain draws its own fill");
+            Assert.AreEqual("terrain/mercury/ground_fill", DigFeel.FillKey(PlanetId.Mercury, 0, true), "Mercury's bands lie over ground_fill");
+            Assert.AreEqual("terrain/earth/ground_fill_t3", DigFeel.FillKey(E, 2, true), "under the first tier: the tier's fill, band or no band");
+            Assert.AreEqual("terrain/venus/ground_fill_t5", DigFeel.FillKey(PlanetId.Venus, 9, false), "past the last tier: the last fill");
+            Assert.IsTrue(Meridian.Rendering.ArtMaterials.ToneFor("terrain/earth/ground_fill", out var soil), "Topsoil's tone is registered (ArtTones)");
+            Assert.IsTrue(Meridian.Rendering.ArtMaterials.ToneFor("terrain/earth/ground_fill_sand", out var sand), "the sand's tone is registered");
+            Assert.AreEqual((Color)new Color32(0x94, 0x73, 0x3A, 255), soil, "Topsoil #94733A (db44edd1)");
+            Assert.AreEqual((Color)new Color32(0xF2, 0xE6, 0xCF, 255), sand, "sand #F2E6CF");
+            Assert.AreEqual(soil, DigFeel.GroundTone(E, 0, false));
+            Assert.AreEqual(sand, DigFeel.GroundTone(E, 0, true), "in the desert the first tier's tone is the sand's");
+            Assert.AreEqual(DigFeel.GroundTone(E, 2, false), DigFeel.GroundTone(E, 2, true), "deeper tiers have no band fill");
+            Assert.AreEqual(DigFeel.GroundTone(PlanetId.Mercury, 0, false), DigFeel.GroundTone(PlanetId.Mercury, 0, true), "a planet without a band fill");
+            var sandPuff = DigFeel.PuffTone(E, 0, true); var soilPuff = DigFeel.PuffTone(E, 0, false);
+            Assert.Greater(sandPuff.b - soilPuff.b, 0.1f, "the desert's dust is the paler (cream against Topsoil's brown)");
         }
 
         [UnityTest, Timeout(240000)]
@@ -122,7 +147,7 @@ namespace Meridian.Tests
             Assert.AreEqual(bursts0 + 1, feel.Bursts, "one burst a stroke");
             Assert.IsTrue(feel.LastBurstOnSheet, "the clods are B-232's, not the stand-in");
             Assert.AreEqual(flicks0 + 1, fx0.Flicks, "the shovel's flick is back (D-190 (4))");
-            Assert.AreEqual(DigFeel.Tone(0), fx0.LastFlickTint, "the flick's crumbs in the clods' tone");
+            Assert.AreEqual(DigFeel.Tone(PlanetId.Earth, 0, false), fx0.LastFlickTint, "the flick's crumbs in the clods' tone");
             Assert.AreEqual(DigFeel.ClodsFor(cells), feel.LastBurst, $"clods for {cells} cells");
             Assert.That(feel.LastBurst, Is.InRange(DigFeel.MinClods, DigFeel.MaxClods));
             Assert.AreEqual(feel.LastBurst, feel.Alive, "every clod of the burst is drawn");
@@ -133,7 +158,7 @@ namespace Meridian.Tests
                 seen++;
                 Assert.That(cv.magnitude, Is.InRange(DigFeel.SpeedMin - 1e-3f, DigFeel.SpeedMax + 1e-3f), "launch speed 2-4 m/s");
                 Assert.Less(Vector2.Distance(cp, at), DigFeel.MouthM + 0.3f, "thrown from the cell's mouth");
-                Assert.AreEqual(DigFeel.Tone(0), feel.TintOf(i), "at camp: Topsoil's tone");
+                Assert.AreEqual(DigFeel.Tone(PlanetId.Earth, 0, false), feel.TintOf(i), "at camp: Topsoil's tone (its fill's, D-190 (1))");
             }
             Assert.AreEqual(feel.LastBurst, seen);
             Assert.AreEqual(0, DigRun.TierAt(side.terrain, at), "the camp's stroke is in the first tier");
@@ -180,13 +205,13 @@ namespace Meridian.Tests
             {
                 if (!feel.Clod(i, out _, out _, out _)) continue;
                 deepClods++;
-                Assert.AreEqual(DigFeel.Tone(2), feel.TintOf(i), "at 56 m: Stone's tone, not the surface's");
+                Assert.AreEqual(DigFeel.Tone(PlanetId.Earth, 2, false), feel.TintOf(i), "at 56 m: Stone's tone, not the surface's");
             }
             Assert.AreEqual(feel.LastBurst, deepClods, "the deep burst's clods");
             // D-190: the stroke's dust puff takes the same cell's tone (the one puff: no band set's own)
             var fx = Object.FindAnyObjectByType<Meridian.FX.SideFx>();
             Assert.NotNull(fx, "SideFx on the planet side");
-            Assert.AreEqual(DigFeel.PuffTone(2), fx.LastPuffTint, "the deep stroke's puff: Stone's dust");
+            Assert.AreEqual(DigFeel.PuffTone(PlanetId.Earth, 2, false), fx.LastPuffTint, "the deep stroke's puff: Stone's dust");
             Assert.Less(Vector2.Distance(fx.LastPuffAt, deepAt), 0.01f, "played at the stroke");
             StringAssert.EndsWith("/dig_puff", fx.PuffAt(deepAt), "the planet's one puff");
             body.position = p; side.player.transform.position = p;
@@ -199,7 +224,60 @@ namespace Meridian.Tests
             var moundAt = side.player.Body.position + new Vector2(-2.2f, 0.6f);
             Assert.IsTrue(side.rig.Place(moundAt, side.rig.GroundMaterial), "the Builder (as a raw tool) piles a mound beside the surveyor");
             Assert.AreEqual(puffs + 1, fx.Puffs, "the mound's puff");
-            Assert.AreEqual(DigFeel.PuffTone(0), fx.LastPuffTint, "a mound at camp: Topsoil's dust, tinted");
+            Assert.AreEqual(DigFeel.PuffTone(PlanetId.Earth, 0, false), fx.LastPuffTint, "a mound at camp: Topsoil's dust, tinted");
+            yield return null;
+            LogAssert.NoUnexpectedReceived();
+        }
+
+        /// <summary>U-196 (B-230): a dug cell's back face is its tier's wall tile: the chunk's back-wall submesh draws with the walls'
+        /// material (MERIDIAN/GroundTiers over back_wall_t1..t5, read at world / 4), the body with the fills' as before: one shader, the
+        /// submesh the back wall already had. D-190 (1): the camp lies outside the desert, so its dust is Topsoil's.</summary>
+        [UnityTest, Timeout(240000)]
+        public IEnumerator ADugCellShowsItsTiersWallBehindIt()
+        {
+            PlanetSideRoot side = null;
+            yield return Boot(s => side = s);
+            var smooth = side.cartoon != null ? side.cartoon.Smooth : null;
+            Assert.NotNull(smooth, "the smooth ground on Earth");
+            Assert.AreSame(smooth, Meridian.View2D.SmoothGround.Current, "the ground of the planet side that is up");
+            float until = Time.realtimeSinceStartup + 20f;
+            while (!(smooth.WallTier(1) && smooth.WallTier(2) && smooth.WallTier(3) && smooth.WallTier(4) && smooth.WallTier(5)) && Time.realtimeSinceStartup < until) yield return null;
+            for (int tier = 1; tier <= 5; tier++) Assert.IsTrue(smooth.WallTier(tier), $"B-230's back_wall_t{tier} loads on Earth");
+
+            var p = side.player.Body.position;
+            var at = p + new Vector2(1.5f, -0.5f);
+            Assert.IsFalse(DigFeel.BandFillAt(at.x), "the camp is not in the desert");
+            Assert.IsTrue(side.rig.Dig(at), "a stroke at camp");
+            until = Time.realtimeSinceStartup + 10f;
+            while (!smooth.WallArt && Time.realtimeSinceStartup < until) yield return null;
+            for (int i = 0; i < 10; i++) yield return null; // the chunk's mesh after the stroke
+            Assert.IsTrue(smooth.WallArt, "the walls' material is made with the first chunk that draws a back wall");
+
+            Meridian.Terrain.TerrainChunk chunk = null;
+            int C = Meridian.Terrain.TerrainConstants.ChunkSize;
+            foreach (Transform child in side.terrain.transform)
+            {
+                var c = child.GetComponent<Meridian.Terrain.TerrainChunk>();
+                if (c != null && Mathf.FloorToInt(at.x / C) == c.cx && Mathf.FloorToInt(at.y / C) == c.cy) chunk = c;
+            }
+            Assert.NotNull(chunk, "the chunk the stroke opened");
+            Assert.IsTrue(smooth.ChunkMaterials(chunk, out var wall, out var body), "the chunk's ground mesh");
+            Assert.AreSame(smooth.WallMaterialNow, wall, "the back wall draws with the walls' material");
+            Assert.AreNotSame(wall, body, "the body keeps the fills' material");
+            Assert.AreSame(body.shader, wall.shader, "one shader for both (MERIDIAN/GroundTiers)");
+            StringAssert.Contains("back_wall_t1", wall.mainTexture.name, "tier 1's wall is the material's base");
+            for (int tier = 2; tier <= 5; tier++)
+                StringAssert.Contains($"back_wall_t{tier}", wall.GetTexture($"_Tier{tier}Tex").name, $"tier {tier}'s wall by depth");
+            StringAssert.Contains("ground_fill", body.mainTexture.name, "the body's base is the fill");
+            Assert.AreEqual(Meridian.View2D.SmoothGround.WallTileM, wall.GetVector("_LineParams").y, 1e-4f, "a wall tile is 4 m (its uv is world / 4)");
+            Assert.AreEqual(8f, body.GetVector("_LineParams").y, 1e-4f, "a fill tile is 8 m");
+            Assert.AreEqual(wall.mainTexture.width, wall.GetFloat("_TileTexels"), 1e-4f, "the wall's texels a tile");
+            Assert.AreEqual(body.GetVector("_TierFrom"), wall.GetVector("_TierFrom"), "the walls change at the fills' depths");
+            Assert.AreEqual(TextureWrapMode.Repeat, wall.mainTexture.wrapMode, "the wall tiles");
+
+            var fx = Object.FindAnyObjectByType<Meridian.FX.SideFx>();
+            Assert.AreEqual(DigFeel.PuffTone(PlanetId.Earth, 0, false), fx.LastPuffTint, "the camp's dust: Topsoil's fill tone");
+            Assert.AreEqual(DigFeel.PuffToneAt(side.terrain, at, 0), fx.LastPuffTint);
             yield return null;
             LogAssert.NoUnexpectedReceived();
         }
