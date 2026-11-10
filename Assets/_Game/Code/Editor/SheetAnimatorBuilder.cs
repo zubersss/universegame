@@ -51,17 +51,20 @@ namespace Meridian.EditorTools
             // U-115 (D-121): a `side` sheet's controller also takes the clips of its sibling `side_b` (B-134: dig, build, surprise,
             // jetpack, climb_in; a stand-in placeholder until it lands). Those clips bind side_b's drawings, so the one SpriteRenderer
             // swaps texture with the clip and SurveyorAnim.ResolveOn finds the five as real states. A name `side` already has wins.
+            // U-209 (D-196, B-246): and of `side_dig` (the shovel's dig_down / dig_fwd / dig_fwd_near / dig_up and the Beam's aim holds), the
+            // same way: its frames are named side_dig_<i>, which tells the tool view which hand-socket table a drawn frame reads.
             if (variant == "side")
             {
-                string bKey = key + "_b";
-                string bColor = File.Exists(ArtImporter.ArtColorPath(bKey)) ? ArtImporter.ArtColorPath(bKey) : ArtImporter.PlaceholderColorPath(bKey);
-                var bSheet = File.Exists(bColor) ? ArtImporter.SheetFor(bColor, bKey) : null;
-                if (bSheet != null && bSheet.IsV3 && bSheet.IsSheet && bSheet.animations != null)
+                foreach (var suffix in SideSiblings)
                 {
+                    string bKey = key + suffix;
+                    string bColor = File.Exists(ArtImporter.ArtColorPath(bKey)) ? ArtImporter.ArtColorPath(bKey) : ArtImporter.PlaceholderColorPath(bKey);
+                    var bSheet = File.Exists(bColor) ? ArtImporter.SheetFor(bColor, bKey) : null;
+                    if (bSheet == null || !bSheet.IsV3 || !bSheet.IsSheet || bSheet.animations == null) continue;
                     var bSprites = AssetDatabase.LoadAllAssetsAtPath(bColor).OfType<Sprite>().GroupBy(sp => sp.name).ToDictionary(g => g.Key, g => g.First());
                     if (bSprites.Count > 0)
                         foreach (var c in bSheet.animations)
-                            if (have.Add(c.name)) AddClipState(machine, key, variant + "_b", c, bSprites);
+                            if (have.Add(c.name)) AddClipState(machine, key, variant + suffix, c, bSprites);
                 }
             }
             EditorUtility.SetDirty(controller);
@@ -76,14 +79,18 @@ namespace Meridian.EditorTools
             }
             AssetDatabase.SaveAssets(); // the address must reach disk before the Editor quits (an -ExecuteMethod run)
             // U-115: when the second sheet (re)imports, the `side` controller that carries its clips is rebuilt with the new drawings.
-            if (variant == "side_b")
+            foreach (var suffix in SideSiblings)
             {
-                string sideKey = key.Substring(0, key.Length - 2);
+                if (variant != "side" + suffix) continue;
+                string sideKey = key.Substring(0, key.Length - suffix.Length);
                 string sideColor = File.Exists(ArtImporter.ArtColorPath(sideKey)) ? ArtImporter.ArtColorPath(sideKey) : ArtImporter.PlaceholderColorPath(sideKey);
                 if (File.Exists(sideColor)) BuildIfV3(sideColor, sideKey);
             }
             return controller;
         }
+
+        /// <summary>The sheets whose clips a `side` sheet's controller also carries, by their key's suffix (D-121: side_b; U-209: side_dig).</summary>
+        public static readonly string[] SideSiblings = { "_b", "_dig" };
 
         /// <summary>One clip state: one key per drawing (`&lt;variant&gt;_&lt;frame&gt;` of `sprites`), the U-105 events, loop per the json; idle is the default state.</summary>
         static void AddClipState(AnimatorStateMachine machine, string key, string variant, ArtImporter.SheetClip c, System.Collections.Generic.Dictionary<string, Sprite> sprites)

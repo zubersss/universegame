@@ -270,6 +270,10 @@ namespace Meridian.Rendering
         public string name;
         public int start, length;
         public bool loop;
+        /// <summary>U-209 (B-246's side_dig): the drawing inside the clip on which a swing makes its contact (its json's "contact",
+        /// 0-based; 0 where the json gives none) and how far the tool may slide back through the glove on it (its "slide_max", m).</summary>
+        public int contact;
+        public float slideMax;
     }
 
     [System.Serializable]

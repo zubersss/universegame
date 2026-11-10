@@ -36,7 +36,12 @@ namespace Meridian.EditorTools
 
         public static Roots Active = new Roots();
 
-        [Serializable] public class SheetClip { public string name; public int start, length; public bool loop; public int loop_from; }
+        [Serializable] public class SheetClip
+        {
+            public string name; public int start, length; public bool loop; public int loop_from;
+            /// <summary>U-209 (B-246's side_dig): the swing's contact drawing inside the clip (0-based) and the tool's slide through the glove on it (m).</summary>
+            public int contact; public float slide_max;
+        }
 
         [Serializable]
         public class SheetManifest
@@ -956,7 +961,7 @@ namespace Meridian.EditorTools
             var clips = new List<Meridian.Rendering.ArtClip>();
             if (sheet?.animations != null)
                 foreach (var c in sheet.animations)
-                    clips.Add(new Meridian.Rendering.ArtClip { name = c.name, start = c.start, length = c.length, loop = c.loop });
+                    clips.Add(new Meridian.Rendering.ArtClip { name = c.name, start = c.start, length = c.length, loop = c.loop, contact = c.contact, slideMax = c.slide_max });
             if (clips.Count == 0 && !File.Exists(Active.materialRegistry)) return;
             var reg = Registry();
             if (!reg.SetClips(key, sheet != null ? sheet.fps : 12, clips)) return;

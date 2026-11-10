@@ -56,6 +56,10 @@ namespace Meridian.Player
         public static ArtMaterials.ArtSocket SocketTable(Sprite drawn) =>
             ArtMaterials.SocketFor("props/rig/jetpack_mk2", SheetB(drawn) ? "back_socket_b" : "back_socket");
 
+        /// <summary>U-209: the row of the back-socket table a drawn frame reads. B-246's side_dig frames have no back socket of their own:
+        /// the pack sits as on the side sheet's first idle drawing.</summary>
+        public static int BackFrame(Sprite drawn) => RigToolView.SheetDig(drawn) ? 0 : FrameOf(drawn);
+
         /// <summary>Where the pack sits now in the world (the Beam's cable runs there): the drawn frame's back socket, else 0.33 m behind and
         /// 0.93 m up from the feet.</summary>
         public static Vector2 PackWorld(Meridian.View2D.SpriteCharacterView v, Transform feet, bool left)
@@ -63,7 +67,7 @@ namespace Meridian.Player
             if (v != null && v.Renderer != null)
             {
                 var table = SocketTable(v.Renderer.sprite);
-                int i = FrameOf(v.Renderer.sprite);
+                int i = BackFrame(v.Renderer.sprite);
                 if (table != null && table.Has(i))
                 {
                     bool flip = v.Renderer.flipX;
@@ -108,7 +112,7 @@ namespace Meridian.Player
             if (sprite == lastSprite && flip == lastFlip && Overlay.enabled) return;
             lastSprite = sprite; lastFlip = flip;
             var table = SocketTable(view.Renderer.sprite);
-            FrameIndex = FrameOf(sprite);
+            FrameIndex = BackFrame(sprite);
             if (table == null || !table.Has(FrameIndex)) { Show(false); return; }
             int i = FrameIndex;
             float x = table[i, 0], z = table[i, 1], swing = table[i, 2] * Mathf.Rad2Deg;

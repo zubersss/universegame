@@ -165,7 +165,8 @@ namespace Meridian.View2D
 
         /// <summary>A v3 sheet has its own clip set (contract §11.2); old names fall back to the closest one it has.</summary>
         /// <summary>The clip itself, else its named stand-in on this sheet (SurveyorAnim.ResolveOn, U-105), else idle.</summary>
-        string Resolve(string clip) => SurveyorAnim.ResolveOn(clip, Has);
+        string Resolve(string clip) => SurveyorAnim.ResolveOn(clip, has ??= Has); // U-209: one delegate, not one a frame (Play asks every LateUpdate)
+        System.Func<string, bool> has;
 
         bool Has(string clip)
         {

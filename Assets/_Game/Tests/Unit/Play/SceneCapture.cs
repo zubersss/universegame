@@ -6556,6 +6556,187 @@ namespace Meridian.Tests
         }
 
         /// <summary>
+        /// U-209 (D-196: the dig as one motion) → coordination/reports/unity/u209/: frame strips for LEAD's eyes. Each strip is every frame
+        /// from the press (frame 0, a white edge) to the contact + 6 at a fixed 60 fps step, twelve tiles of 640 x 480 px cut from a 2x
+        /// render (5 x 3.75 m at the art's own 128 px a metre), six a row, the contact frame with an amber edge. The shovel down / forward
+        /// / up on Topsoil (5 m under the Surface Line) and in Stone (56 m), the Beam forward on both, a 0.05 s tap, a click past reach.
+        /// </summary>
+        [UnityTest, Timeout(600000)]
+        public IEnumerator CaptureU209Strips()
+        {
+            var name = Environment.GetEnvironmentVariable(Variable);
+            if (string.IsNullOrEmpty(name)) Assert.Ignore($"Set {Variable} (tools/unity_capture.ps1).");
+            if (SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.Null)
+                Assert.Fail("No graphics device: run without -nographics.");
+            bool wasCartoon = Meridian.View2D.CartoonStage.Enabled;
+            Meridian.View2D.CartoonStage.Enabled = true;
+            var toolWas = Meridian.Progress.SkillStats.ToolOverride;
+            const int Frames = 12, Cols = 6, W = 640, H = 480, Edge = 6;
+            var full = new RenderTexture(3840, 2160, 24, RenderTextureFormat.ARGB32);
+            var tile = new Texture2D(W, H, TextureFormat.RGB24, false);
+            Meridian.Rig.RigTools rig = null;
+            Meridian.Player.PlayerRigInput input = null;
+            Rigidbody2D body = null;
+            try
+            {
+#if UNITY_EDITOR
+                yield return UnityEditor.SceneManagement.EditorSceneManager.LoadSceneAsyncInPlayMode(
+                    CorePath, new LoadSceneParameters(LoadSceneMode.Single));
+#endif
+                var director = UnityEngine.Object.FindAnyObjectByType<SceneDirector>();
+                float timeout = Time.realtimeSinceStartup + 30f;
+                while ((!director.IsReady || !director.PlanetSide.terrain.IsSettled) && Time.realtimeSinceStartup < timeout) yield return null;
+                var dir = "coordination/reports/unity/u209";
+                Directory.CreateDirectory(dir);
+                var side = director.PlanetSide;
+                if (side.hazards != null) side.hazards.enabled = false;
+                if (side.dayNight != null) side.dayNight.Override = 0.45f;
+                side.creatures.autoSpawn = false; side.creatures.DespawnAll();
+                var t = side.terrain;
+                rig = side.rig;
+                body = side.player.Body;
+                side.player.externalInput = true; side.player.intent = default;
+                input = side.player.GetComponent<Meridian.Player.PlayerRigInput>();
+                var follow = side.sideCamera.GetComponent<Meridian.Player.CameraFollow>();
+                var cam = side.sideCamera;
+                var stroke = input.Stroke;
+                float x0 = Mathf.Floor(body.position.x);
+                Time.captureDeltaTime = 1f / 60f;
+
+                // the surveyor held still in a hollow 3 m wide and `high` m tall, `depth` m under the Surface Line at x, `ahead` m off its middle
+                IEnumerator Hollow(float x, float depth, int high, float ahead = 0f)
+                {
+                    float floorY = Meridian.Mining.DigRun.LineAt(t, x) - depth;
+                    int fx = Mathf.FloorToInt(x), fy = Mathf.FloorToInt(floorY);
+                    body.simulated = false;
+                    body.position = new Vector2(fx + 0.5f, fy + 1.05f); side.player.transform.position = body.position;
+                    yield return null;
+                    float until = Time.realtimeSinceStartup + 20f;
+                    while (!t.IsSettled && Time.realtimeSinceStartup < until) yield return null;
+                    for (int c = fx - 1; c <= fx + 1; c++) for (int y = fy; y < fy + high; y++) t.SetTile(c, y, Meridian.Terrain.TileId.Air);
+                    yield return new WaitForFixedUpdate();
+                    body.position = new Vector2(fx + 0.5f + ahead, fy + 0.05f); side.player.transform.position = body.position;
+                    body.linearVelocity = Vector2.zero;
+                    for (int k = 0; k < 30; k++) yield return null;
+                }
+                // one strip: the tool, the cursor's point, the frames the button is held from the press
+                IEnumerator Strip(string label, Meridian.Rig.DigTool tool, Vector2 aim, int heldFrames)
+                {
+                    Meridian.Progress.SkillStats.ToolOverride = tool;
+                    rig.BeamPower = 1f;
+                    input.module = Meridian.Rig.RigModule.Beam;
+                    input.holdUse = false;
+                    input.AimAt(aim);
+                    for (int k = 0; k < 120 && stroke.Active; k++) yield return null;
+                    stroke.Reset();
+                    var view = input.ToolView;
+                    float until = Time.realtimeSinceStartup + 10f;
+                    while ((view.Tool.sprite == null || (tool == Meridian.Rig.DigTool.Beam && !view.RayReady)) && Time.realtimeSinceStartup < until) yield return null;
+                    var drops = rig.drops; // the last strip's drops off the frame (back to their pool)
+                    if (drops != null) for (int k = drops.Live.Count - 1; k >= 0; k--) drops.Collect(drops.Live[k]);
+                    // the camera fixed between the surveyor and where the dig lands
+                    rig.DigTarget(aim, out var lands, out bool pulled);
+                    var mid = ((Vector2)body.position + new Vector2(0f, 0.9f) + lands) * 0.5f;
+                    if (follow != null) follow.enabled = false;
+                    cam.aspect = 1920f / 1080f;
+                    cam.transform.position = new Vector3(mid.x, mid.y, cam.transform.position.z);
+                    for (int k = 0; k < 100; k++) yield return null; // the stage lays out; the last stroke's clods and puffs are gone; the tool is stowed
+                    var sheet = new Texture2D(W * Cols, H * ((Frames + Cols - 1) / Cols), TextureFormat.RGB24, false);
+                    int contactAt = -1;
+                    var contactKind = Meridian.Player.DigContact.Whiff;
+                    int press = Time.frameCount + 1;
+                    System.Action<Meridian.Player.DigContact, Vector2, int> onContact = (kind, at, stage) => { if (contactAt < 0) { contactAt = Time.frameCount - press; contactKind = kind; } };
+                    stroke.Contacted += onContact;
+                    float miss = 0f, slide = 0f, lunge = 0f;
+                    bool rayOnFrame0 = false;
+                    input.holdUse = true;
+                    yield return null; // frame 0: its Update has seen the press
+                    for (int f = 0; f < Frames; f++)
+                    {
+                        if (f >= heldFrames - 1) input.holdUse = false;
+                        yield return null; // frame f's drawing stands
+                        if (f == 0) rayOnFrame0 = view.Beam.enabled;
+                        if (f == contactAt) { miss = view.TipMiss; slide = view.SlideNow; lunge = view.LungeNow; }
+                        cam.targetTexture = full; cam.Render(); cam.targetTexture = null;
+                        var prev = RenderTexture.active;
+                        RenderTexture.active = full;
+                        tile.ReadPixels(new Rect((full.width - W) / 2, (full.height - H) / 2, W, H), 0, 0);
+                        tile.Apply();
+                        RenderTexture.active = prev;
+                        var px = tile.GetPixels32();
+                        // the press' frame in a white edge, the contact's in amber
+                        if (f == 0 || f == contactAt)
+                        {
+                            var ink = f == contactAt ? new Color32(255, 176, 32, 255) : new Color32(255, 255, 255, 255);
+                            for (int y = 0; y < H; y++)
+                                for (int x = 0; x < W; x++)
+                                    if (x < Edge || y < Edge || x >= W - Edge || y >= H - Edge) px[y * W + x] = ink;
+                        }
+                        sheet.SetPixels32((f % Cols) * W, sheet.height - H * (f / Cols + 1), W, H, px);
+                    }
+                    stroke.Contacted -= onContact;
+                    input.holdUse = false;
+                    sheet.Apply();
+                    Directory.CreateDirectory("logs");
+                    File.WriteAllBytes($"logs/capture_{name}_{label}.png", sheet.EncodeToPNG());
+                    File.Copy($"logs/capture_{name}_{label}.png", $"{dir}/{label}.png", true);
+                    UnityEngine.Object.Destroy(sheet);
+                    var off = lands - rig.DigOrigin;
+                    TestContext.Out.WriteLine($"[MERIDIAN] u209 {label}: {tool}, the dig lands ({off.x:+0.00;-0.00}, {off.y:+0.00;-0.00}) m from the shoulder{(pulled ? " (the click pulled in to the reach)" : "")}, {Meridian.Mining.DigRun.TierAt(t, lands) + 1 switch { 1 => "Topsoil", 2 => "Subsoil", 3 => "Stone", 4 => "Deep", _ => "Core" }}, stroke time {rig.StrokeSeconds(lands):0.00} s, held {Mathf.Min(heldFrames, Frames)} frames; " +
+                        (tool == Meridian.Rig.DigTool.Beam ? $"the ray on in frame 0: {rayOnFrame0}" : $"contact in frame {contactAt} ({contactKind}), the tip's miss {miss:+0.00;-0.00;0.00} m (slide {slide:0.00}, lunge {lunge:0.00}), on a dig clip: {view.SwingOnClip}") + $"; frames 0-{Frames - 1} left to right, top row first");
+                    for (int k = 0; k < 120 && stroke.Active; k++) yield return null;
+                }
+
+                int spot = 0;
+                foreach (var (ground, depth) in new[] { ("topsoil", 5f), ("stone", 56f) })
+                {
+                    yield return Hollow(x0 + 40f + 14f * spot++, depth, 3);
+                    Vector2 feet = body.position;
+                    yield return Strip($"shovel_fwd_{ground}", Meridian.Rig.DigTool.Shovel, feet + new Vector2(1.6f, 0.7f), 99);
+                    yield return Hollow(x0 + 40f + 14f * spot++, depth, 3, 0.6f); // the wall's face 0.9 m ahead: dig_fwd_near's reach
+                    feet = body.position;
+                    yield return Strip($"shovel_near_{ground}", Meridian.Rig.DigTool.Shovel, feet + new Vector2(1.0f, 0.6f), 99);
+                    yield return Hollow(x0 + 40f + 14f * spot++, depth, 3);
+                    feet = body.position;
+                    yield return Strip($"shovel_down_{ground}", Meridian.Rig.DigTool.Shovel, feet + new Vector2(0.9f, -0.35f), 99);
+                    yield return Hollow(x0 + 40f + 14f * spot++, depth, 2);
+                    feet = body.position;
+                    yield return Strip($"shovel_up_{ground}", Meridian.Rig.DigTool.Shovel, feet + new Vector2(0.6f, 1.85f), 99);
+                    yield return Hollow(x0 + 40f + 14f * spot++, depth, 3);
+                    feet = body.position;
+                    yield return Strip($"beam_fwd_{ground}", Meridian.Rig.DigTool.Beam, new Vector2(Mathf.Floor(feet.x) + 2.5f, Mathf.Floor(feet.y) + 0.6f), 99);
+                }
+                // a 0.05 s tap in Stone: three frames held, the swing runs on
+                yield return Hollow(x0 + 40f + 14f * spot++, 56f, 3);
+                yield return Strip("shovel_tap_stone", Meridian.Rig.DigTool.Shovel, (Vector2)body.position + new Vector2(1.6f, 0.7f), 3);
+                // a click 7 m off on the open ground: the swing digs at the reach's edge on the aim line
+                {
+                    float sx = x0 + 22.5f;
+                    body.simulated = false;
+                    var feet = new Vector2(sx, t.SurfaceAt(sx) + 0.05f);
+                    body.position = feet; side.player.transform.position = feet;
+                    yield return null;
+                    float until = Time.realtimeSinceStartup + 20f;
+                    while (!t.IsSettled && Time.realtimeSinceStartup < until) yield return null;
+                    for (int k = 0; k < 30; k++) yield return null;
+                    yield return Strip("shovel_past_reach_surface", Meridian.Rig.DigTool.Shovel, feet + new Vector2(5f, -5f), 99);
+                }
+                LogAssert.NoUnexpectedReceived();
+            }
+            finally
+            {
+                Time.captureDeltaTime = 0f;
+                if (input != null) { input.holdUse = false; input.externalAim = false; }
+                if (rig != null) rig.BeamPower = 0f;
+                if (body != null) body.simulated = true;
+                Meridian.Progress.SkillStats.ToolOverride = toolWas;
+                Meridian.View2D.CartoonStage.Enabled = wasCartoon;
+                UnityEngine.Object.Destroy(tile);
+                full.Release();
+            }
+        }
+
+        /// <summary>
         /// U-192 (BLENDER's 0.6.2 read: G1, G6, the catalogue's Site branch) → coordination/reports/unity/u192/: 2_catalogue_earth / _mars /
         /// _mercury / _venus (every entry surveyed: the eleven Site icons by their labels, B-223's camp and B-233's ten), 3_venus_serpent
         /// (the veil serpent at 1x beside the Meridian station, a gentle drifter 9 m off), 1_bay_docked (Earth's Waystation as the player

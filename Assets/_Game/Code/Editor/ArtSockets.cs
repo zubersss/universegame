@@ -14,7 +14,8 @@ namespace Meridian.EditorTools
     /// </summary>
     public static class ArtSockets
     {
-        public static readonly string[] Fields = { "muzzle", "cable_socket", "back_socket", "back_socket_b", "hand_socket", "hand_socket_b", "held_b", "reel" }; // U-176: side_b's reel (reel_up's hands)
+        public static readonly string[] Fields = { "muzzle", "cable_socket", "back_socket", "back_socket_b", "hand_socket", "hand_socket_b", "held_b", "reel", // U-176: side_b's reel (reel_up's hands)
+            "blade_tip", "hand" }; // U-209: the shovel's blade tip; B-246's side_dig "hand" rows ([x, z, angle] a frame)
         const string ArtRoot = "Assets/_Game/Art/";
 
         [MenuItem("MERIDIAN/Art/Register sockets (U-183)")]
@@ -41,6 +42,15 @@ namespace Meridian.EditorTools
                         found++;
                         seen.Add(key + "#" + field);
                         if (reg.SetSocket(key, field, stride, values)) changed++;
+                    }
+                    // U-209 (B-246's side_dig): the rest poses, each an object of numbers: [angle, swing, behind] in one row
+                    foreach (var pose in Poses)
+                    {
+                        var values = ParseObject(text, pose, PoseFields);
+                        if (values == null) continue;
+                        found++;
+                        seen.Add(key + "#" + pose);
+                        if (reg.SetSocket(key, pose, PoseFields.Length, values)) changed++;
                     }
                 }
             }
@@ -90,6 +100,50 @@ namespace Meridian.EditorTools
             bool perFrame = inner.IndexOf('"') >= 0 || inner.Contains("null");
             stride = perFrame ? 1 : flat.Length;
             return flat.Length > 0 ? flat : null;
+        }
+
+        /// <summary>U-209: the dig sheet's rest poses ("carry": stowed; "ready": low in front) and the numbers each holds, in the row's order.</summary>
+        public static readonly string[] Poses = { "carry", "ready" };
+        public static readonly string[] PoseFields = { "angle", "swing", "behind" };
+
+        /// <summary>A json object's named numbers as one row (true reads 1, false 0, a missing field 0): "carry": {"angle": 2.18, "swing":
+        /// 0.08, "behind": true} → [2.18, 0.08, 1]. Null when the json has no such object, or it has none of the fields. Pure.</summary>
+        public static float[] ParseObject(string json, string name, string[] fields)
+        {
+            int at = json.IndexOf("\"" + name + "\"", System.StringComparison.Ordinal);
+            if (at < 0) return null;
+            int i = json.IndexOf(':', at) + 1;
+            while (i < json.Length && char.IsWhiteSpace(json[i])) i++;
+            if (i >= json.Length || json[i] != '{') return null;
+            int depth = 0, end = -1;
+            bool str = false;
+            for (int k = i; k < json.Length; k++)
+            {
+                char c = json[k];
+                if (str) { if (c == '"' && json[k - 1] != '\\') str = false; continue; }
+                if (c == '"') str = true;
+                else if (c == '{') depth++;
+                else if (c == '}' && --depth == 0) { end = k; break; }
+            }
+            if (end < 0) return null;
+            string body = json.Substring(i, end - i + 1);
+            var row = new float[fields.Length];
+            bool any = false;
+            for (int f = 0; f < fields.Length; f++)
+            {
+                int a = body.IndexOf("\"" + fields[f] + "\"", System.StringComparison.Ordinal);
+                if (a < 0) continue;
+                int v = body.IndexOf(':', a) + 1;
+                while (v < body.Length && char.IsWhiteSpace(body[v])) v++;
+                int e = v;
+                while (e < body.Length && body[e] != ',' && body[e] != '}' && !char.IsWhiteSpace(body[e])) e++;
+                string token = body.Substring(v, e - v);
+                if (token == "true") row[f] = 1f;
+                else if (token == "false") row[f] = 0f;
+                else if (!float.TryParse(token, NumberStyles.Float, CultureInfo.InvariantCulture, out row[f])) continue;
+                any = true;
+            }
+            return any ? row : null;
         }
 
         /// <summary>The index of the bracket closing the one at `open` (strings skipped), or -1.</summary>

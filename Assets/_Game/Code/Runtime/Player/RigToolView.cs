@@ -76,8 +76,8 @@ namespace Meridian.Player
             return d;
         }
 
-        // the hand's socket tables, read once per registry (a lookup builds its key string)
-        ArtMaterials.ArtSocket handTable, handTableB, heldTableB, handTableDig;
+        // the hand's socket tables and the dig sheet's rest poses, read once per registry (a lookup builds its key string)
+        ArtMaterials.ArtSocket handTable, handTableB, heldTableB, handTableDig, readyPose, stowPose;
         ArtMaterials tablesOf;
         int tablesCount = -2;
 
@@ -91,6 +91,8 @@ namespace Meridian.Player
             handTableB = ArtMaterials.SocketFor("props/rig/hand_socket", "hand_socket_b");
             heldTableB = ArtMaterials.SocketFor("props/rig/hand_socket", "held_b");
             handTableDig = ArtMaterials.SocketFor(DigSheetKey, "hand");
+            readyPose = ArtMaterials.SocketFor(DigSheetKey, "ready");
+            stowPose = ArtMaterials.SocketFor(DigSheetKey, "carry");
             ReadLookSockets();
         }
 
@@ -140,7 +142,8 @@ namespace Meridian.Player
             Crack = Child("DigCrack", Meridian.View2D.SpriteCharacterView.SurveyorOrder - 1);
             Reticle = Child("DigReticle", Meridian.View2D.SpriteCharacterView.SurveyorOrder);
             Glow = Child("BeamGlow", Meridian.View2D.SpriteCharacterView.SurveyorOrder + 1);
-            Beam.enabled = Ghost.enabled = Crack.enabled = Reticle.enabled = Glow.enabled = false;
+            Fist = Child("GripFist", Meridian.View2D.SpriteCharacterView.SurveyorOrder + 1); // over the tool
+            Beam.enabled = Ghost.enabled = Crack.enabled = Reticle.enabled = Glow.enabled = Fist.enabled = false;
             var cg = new GameObject("BeamCable");
             cg.transform.SetParent(transform, false);
             Cable = cg.AddComponent<LineRenderer>();
@@ -168,11 +171,38 @@ namespace Meridian.Player
         {
             ReadLooks();
             ghostSheet = FxSheet.Get(ArtKeys.Fx.BuilderGhost);
+            LoadFist();
         }
 
         void OnDestroy()
         {
             foreach (var h in toolHandles) if (h.IsValid()) global::Meridian.Art.ArtLoad.Release(h);
+            if (fistHandle.IsValid()) global::Meridian.Art.ArtLoad.Release(fistHandle);
+        }
+
+        /// <summary>B-246's props/rig/grip_fist (the surveyor's front glove as a fist round a shaft: its pivot on the shaft's centre line at
+        /// the hand socket, the shaft along its +x). Probed quietly (D-143): without it the tool rides the drawn glove bare.</summary>
+        public const string FistKey = "props/rig/grip_fist";
+        public SpriteRenderer Fist { get; private set; }
+        AsyncOperationHandle<IList<Sprite>> fistHandle;
+
+        void LoadFist()
+        {
+            var loc = Addressables.LoadResourceLocationsAsync(FistKey);
+            loc.Completed += l =>
+            {
+                bool exists = l.Status == AsyncOperationStatus.Succeeded && l.Result != null && l.Result.Count > 0;
+                global::Meridian.Art.ArtLoad.Release(l);
+                if (!exists || this == null) return;
+                fistHandle = ArtLoad.Asset<IList<Sprite>>(FistKey);
+                fistHandle.Completed += op =>
+                {
+                    if (this == null || op.Status != AsyncOperationStatus.Succeeded || op.Result == null || op.Result.Count == 0) return;
+                    Fist.sprite = op.Result[0];
+                    var mat = ArtMaterials.MaterialFor(FistKey);
+                    if (mat != null) Fist.sharedMaterial = mat;
+                };
+            };
         }
 
         /// <summary>U-183: each module's Mk from the bought nodes; a changed look loads its sprite (the old one released) and the Beam's ray.</summary>
@@ -242,11 +272,13 @@ namespace Meridian.Player
 
         // ---------- U-209 (D-196): the dig slot's tool in the stroke ----------
 
-        /// <summary>The dig tool's two rest states (LEAD 02:1x, B-246): READY, low in the hand in front (degrees from the level, pointing
-        /// ahead and down), held for ReadySeconds after the last swing, so a burst of clicks never stows and un-stows it; then STOWED
-        /// (the shovel over the shoulder, drawn behind the body), switching on the 12 Hz tick. The Beam keeps the low carry. The
-        /// sheet's own angles replace these when side_dig.json lands.</summary>
-        public const float CarryDegrees = -38f, StowDegrees = 125f, ReadySeconds = 1.5f;
+        /// <summary>The dig tool's two rest states (LEAD 02:1x, B-246): READY, low in the hand in front, held for ReadySeconds after the
+        /// last swing, so a burst of clicks never stows and un-stows it; then STOWED (the shovel's shaft behind the torso, its blade up
+        /// behind the helmet: drawn behind the body, no fist), switching on the 12 Hz tick. The Beam keeps the low carry. Both ride the
+        /// side sheet's glove; the tool's direction is the pose's angle plus its share of the front arm's own swing (side_dig.json's
+        /// "ready" / "carry": radians, counter-clockwise from +x facing right). These are the json's numbers, used where the registry
+        /// does not hold them yet.</summary>
+        public const float ReadyRadians = -0.25f, ReadySwing = 0.25f, StowRadians = 2.1817f, StowSwing = 0.08f, ReadySeconds = 1.5f;
         /// <summary>The Beam's angle follows its aim critically damped over about this long.</summary>
         public const float BeamDampSeconds = 0.06f;
         /// <summary>How far the tool may slide back through the glove on a swing's contact drawing (a mid-shaft hold), by the swing's clip:
@@ -258,8 +290,30 @@ namespace Meridian.Player
         /// <summary>The swing's drawings where no dig clip drives the hand: the tool's angle off the line to the target (degrees, + raised):
         /// the wind-up, the CONTACT, the pry, the toss, the recover.</summary>
         static readonly float[] SwingArc = { 55f, 0f, -14f, 26f, 10f };
-        /// <summary>The share of the contact's slide and lunge each drawing carries.</summary>
+        /// <summary>The share of the contact's slide and lunge each drawing carries: on the idle glove; on a dig clip (B-246 drew the
+        /// slide held over the first four drawings and halved on the recover).</summary>
         static readonly float[] SwingReach = { 0.4f, 1f, 0.8f, 0.3f, 0f };
+        static readonly float[] ClipReach = { 1f, 1f, 1f, 1f, 0.5f };
+
+        /// <summary>The forward swing's clip for a target: of dig_fwd (its blade on a face 1.51-2.20 m ahead) and dig_fwd_near (0.57-1.52 m)
+        /// the one whose contact glove meets it with the smaller miss. Null where the sheet or its sockets are not in.</summary>
+        string ForwardClipFor(Vector2 target, bool left)
+        {
+            ReadTables();
+            if (body == null || handTableDig == null) return null;
+            var set = ArtMaterials.ClipsFor(DigSheetKey);
+            if (set == null || !set.TryGet(SurveyorAnim.DigFwd, out var far) || !set.TryGet(SurveyorAnim.DigFwdNear, out var near)) return null;
+            return Mathf.Abs(ContactMiss(near, target, left)) < Mathf.Abs(ContactMiss(far, target, left)) ? SurveyorAnim.DigFwdNear : SurveyorAnim.DigFwd;
+        }
+
+        /// <summary>The tip's miss of `target` on a dig clip's contact drawing, from that drawing's glove (DigPose).</summary>
+        float ContactMiss(ArtClip clip, Vector2 target, bool left)
+        {
+            int frame = clip.start + clip.contact;
+            if (!handTableDig.Has(frame)) return float.MaxValue;
+            Vector2 glove = body.SquashRoot.TransformPoint(new Vector2(left ? -handTableDig[frame, 0] : handTableDig[frame, 0], handTableDig[frame, 1]));
+            return DigPose.Contact(glove, target, RigTools.ShovelBlade, clip.slideMax, RigTools.ShovelLungeM, out _, out _, out _, out _, out _);
+        }
         /// <summary>The body by drawing: its lean toward the target (degrees) and its shift along the line to it (m): back for the
         /// wind-up, into the contact, the recoil, settling. D-196: the lean at most 6 degrees, the recoil at most 0.06 m.</summary>
         static readonly float[] SwingLean = { -3f, 6f, 2f, 1f, 0f };
@@ -301,7 +355,7 @@ namespace Meridian.Player
         public int RayShownFrame { get; private set; } = -1;
         public bool RayReady => beamSheet != null && beamSheet.Ready;
 
-        float aimVelocity;
+        float aimVelocity, clipSlide;
         int swingSeen = -1;
         string strokeClip;
 
@@ -343,7 +397,10 @@ namespace Meridian.Player
                 swingSeen = stroke.Swings;
                 SwingShownFrame = Time.frameCount;
                 strokeClip = SurveyorAnim.DigClipFor(toTarget);
+                if (strokeClip == SurveyorAnim.DigFwd || strokeClip == SurveyorAnim.DigFwdNear) strokeClip = ForwardClipFor(target, left) ?? strokeClip;
                 SwingOnClip = body != null && body.PlayStroke(strokeClip, DigStroke.SwingSeconds);
+                clipSlide = SlideMaxOf(strokeClip);
+                if (SwingOnClip && ArtMaterials.ClipsFor(DigSheetKey) is ArtClipSet set && set.TryGet(strokeClip, out var drawn)) clipSlide = drawn.slideMax; // the sheet's own number
             }
             if (!swing && !ray) { SwingOnClip = false; strokeClip = null; }
             float lean = swing && !SwingOnClip ? SwingLean[drawing] * (left ? 1f : -1f) : 0f; // toward the target: clockwise facing right
@@ -372,10 +429,10 @@ namespace Meridian.Player
                 float blade = RigTools.ShovelBlade;
                 // a clip's own slide where the sheet plays it; the idle glove (no dig clip yet) may slide for any direction: it never
                 // rises to the stroke as the clips' hand does
-                SlideMaxNow = SwingOnClip ? SlideMaxOf(strokeClip) : FallbackSlideMax;
+                SlideMaxNow = SwingOnClip ? clipSlide : FallbackSlideMax;
                 float miss = DigPose.Contact(HandWorld, target, blade, SlideMaxNow, RigTools.ShovelLungeM,
                     out _, out var dir, out float slide, out float lunge, out _);
-                float share = SwingReach[drawing];
+                float share = SwingOnClip ? ClipReach[drawing] : SwingReach[drawing];
                 // the lunge: the body carries the glove toward a target the blade alone does not reach
                 Vector2 carried = dir * (lunge * share);
                 if (body != null && carried != Vector2.zero) body.SetStrokePose(shift + carried, lean);
@@ -435,11 +492,15 @@ namespace Meridian.Player
                 aimVelocity = 0f;
             }
             Stowed = stowed;
-            int order = Meridian.View2D.SpriteCharacterView.SurveyorOrder - (stowed ? 1 : 0); // stowed: behind the body
+            int order = Meridian.View2D.SpriteCharacterView.SurveyorOrder - (stowed && StowBehind ? 1 : 0); // stowed: behind the body
             if (Tool.sortingOrder != order) Tool.sortingOrder = order;
             var rotation = Quaternion.Euler(0f, 0f, AimDegrees);
             Tool.transform.SetPositionAndRotation(toolAt, rotation);
             Tool.flipY = left; // keep the tool upright when pointing left
+            // B-246's fist: the glove closed round the shaft, over the tool at the hand socket and turned with it; not when stowed
+            bool fist = digSlot && !away && !stowed && Fist.sprite != null;
+            if (Fist.enabled != fist) Fist.enabled = fist;
+            if (fist) { Fist.transform.SetPositionAndRotation(HandWorld, rotation); Fist.flipY = left; }
             var muzzle = muzzleOf[(int)input.module];
             if (left) muzzle.y = -muzzle.y;
             MuzzleWorld = toolAt + (Vector2)(rotation * muzzle);
@@ -452,9 +513,23 @@ namespace Meridian.Player
             UpdateCable(left);
         }
 
-        /// <summary>The ready pose's and the stowed pose's angle for a side (degrees, counter-clockwise from +x).</summary>
-        public static float CarryAngle(bool left) => left ? 180f - CarryDegrees : CarryDegrees;
-        public static float StowAngle(bool left) => left ? 180f - StowDegrees : StowDegrees;
+        /// <summary>The front arm's own angle on the drawn frame (degrees: 0 hanging, positive forward), from the glove's socket where it
+        /// carries one (props/rig/hand_socket's third number is the arm's direction, -90 hanging); 0 where it does not.</summary>
+        public float ArmDegrees => HandSocketHasAngle ? HandSocketDegrees + 90f : 0f;
+
+        /// <summary>The ready pose's and the stowed pose's tool direction for a side, the arm's swing taken in (degrees, counter-clockwise from +x).</summary>
+        public float CarryAngle(bool left) => RestAngle(readyPose, ReadyRadians, ReadySwing, left);
+        public float StowAngle(bool left) => RestAngle(stowPose, StowRadians, StowSwing, left);
+
+        float RestAngle(ArtMaterials.ArtSocket pose, float radians, float swing, bool left)
+        {
+            if (pose != null && pose.stride >= 2 && pose.Has(0)) { radians = pose[0, 0]; swing = pose[0, 1]; }
+            float deg = radians * Mathf.Rad2Deg + swing * ArmDegrees;
+            return left ? 180f - deg : deg;
+        }
+
+        /// <summary>The stowed tool is drawn behind the body (side_dig.json's carry.behind; true where the registry has no carry pose).</summary>
+        bool StowBehind => stowPose == null || stowPose.stride < 3 || !stowPose.Has(0) || stowPose[0, 2] > 0.5f;
 
         /// <summary>U-183: the Beam's cable (B-205: arm-mounted, cable-fed): from the tool's cable_socket to the pack on the surveyor's back
         /// (the jetpack's back socket for the drawn frame; the pack's usual place when there is none), sagging a little.</summary>
