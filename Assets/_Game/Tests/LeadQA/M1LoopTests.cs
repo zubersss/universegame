@@ -107,7 +107,7 @@ namespace Meridian.Tests.LeadQA
                     if (Vector2.Dot(perp, mars.position - earth.position) < 0f) perp = -perp;
                     target = earth.position + (toShip + perp).normalized * (earth.WellRadius + 30f);
                 }
-                Steer(craft, target);
+                Steer(craft, target, arrive: target == mars.position);
                 if (craft.InWellOf == "mars" && craft.LastPull.magnitude > 0f) feltMars = true;
                 Assert.IsFalse(craft.Destroyed, "ship survived the flight");
                 yield return null;
@@ -165,15 +165,29 @@ namespace Meridian.Tests.LeadQA
             LogAssert.NoUnexpectedReceived();
         }
 
-        static void Steer(SpaceShip craft, Vector2 target)
+        /// <summary>
+        /// The scripted pilot. It steers for the VELOCITY it wants, not for the target's bearing: the thrust goes along
+        /// (wanted velocity − current velocity), so sideways speed is cancelled and the craft cannot settle into a circle
+        /// round the target. Pointing straight at Mars at full thrust did exactly that in 0.6.3's sweep (seven turns at
+        /// 73 units a second, 136 from Mars, outside its well, until the window ran out). With `arrive` the wanted speed
+        /// falls with the distance, so the craft comes into the well slowly enough to be caught by it.
+        /// </summary>
+        static void Steer(SpaceShip craft, Vector2 target, bool arrive = false)
         {
+            const float Cruise = 80f, ArriveGain = 0.8f, ArriveFloor = 12f;
             Vector2 to = target - craft.Position;
-            float desired = Mathf.Atan2(to.y, to.x) * Mathf.Rad2Deg;
+            float dist = to.magnitude;
+            Vector2 dir = dist > 1e-3f ? to / dist : Vector2.right;
+            float wantSpeed = arrive ? Mathf.Min(Cruise, Mathf.Max(ArriveFloor, dist * ArriveGain)) : Cruise;
+            Vector2 need = dir * wantSpeed - craft.Velocity;
+            bool onIt = need.sqrMagnitude < 4f; // within 2 units a second of the wanted velocity: coast, nose on the target
+            Vector2 aim = onIt ? to : need;
+            float desired = Mathf.Atan2(aim.y, aim.x) * Mathf.Rad2Deg;
             float delta = Mathf.DeltaAngle(craft.Heading, desired);
             craft.intent = new ShipIntent
             {
                 rotate = Mathf.Clamp(delta / 20f, -1f, 1f),
-                thrust = Mathf.Abs(delta) < 30f ? 1f : 0f,
+                thrust = !onIt && Mathf.Abs(delta) < 30f ? 1f : 0f,
             };
         }
 
