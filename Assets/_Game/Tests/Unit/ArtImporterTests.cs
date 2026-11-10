@@ -280,6 +280,8 @@ namespace Meridian.Tests
         {
             Assert.IsTrue(Meridian.Art.ArtKeys.IsBackWall("terrain/earth/back_wall_t3"), "by key");
             Assert.IsTrue(Meridian.Art.ArtKeys.IsBackWall("Assets/_Game/Art/terrain/mars/back_wall_t5_color.png"), "by path");
+            Assert.IsTrue(Meridian.Art.ArtKeys.IsBackWall("terrain/earth/back_wall_sand"), "B-242: the band fill's own wall, by key");
+            Assert.IsTrue(Meridian.Art.ArtKeys.IsBackWall("Assets/_Game/Art/terrain/mars/back_wall_basalt_color.png"), "B-242: by path");
             Assert.IsFalse(Meridian.Art.ArtKeys.IsBackWall("terrain/earth/ground_fill_t3"));
             Assert.IsFalse(Meridian.Art.ArtKeys.IsBackWall("props/earth/back_wall_t3"), "only under terrain/");
             Assert.IsFalse(Meridian.Art.ArtKeys.IsBackWall(null));

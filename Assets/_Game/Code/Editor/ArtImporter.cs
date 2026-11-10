@@ -593,7 +593,7 @@ namespace Meridian.EditorTools
             {
                 var dir = root + "terrain";
                 if (!Directory.Exists(dir)) continue;
-                foreach (var file in Directory.GetFiles(dir, "back_wall_t*_color.png", SearchOption.AllDirectories))
+                foreach (var file in Directory.GetFiles(dir, "back_wall_*_color.png", SearchOption.AllDirectories)) // B-242: the band fills' walls too
                 {
                     var path = ArtRules.Normalize(file);
                     var ti = AssetImporter.GetAtPath(path) as TextureImporter;

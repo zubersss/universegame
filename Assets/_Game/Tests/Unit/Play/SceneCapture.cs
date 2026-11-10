@@ -4893,6 +4893,129 @@ namespace Meridian.Tests
             finally { Meridian.View2D.CartoonStage.Enabled = wasCartoon; }
         }
 
+        /// <summary>B-242 (the band fills' own back walls) → coordination/reports/unity/b242/: 1_earth_sand_shaft (a 2.4 m wide shaft 7 m
+        /// down in Earth's desert: back_wall_sand behind it, the hole's inner shadow over it), 2_earth_sand_border (a trench across the
+        /// desert's border: the sand's wall fades into Topsoil's with the fill), 3_mars_basalt_shaft (a 7 m shaft in Olympus's basalt:
+        /// back_wall_basalt).</summary>
+        [UnityTest, Timeout(420000)]
+        public IEnumerator CaptureB242Walls()
+        {
+            var name = Environment.GetEnvironmentVariable(Variable);
+            if (string.IsNullOrEmpty(name)) Assert.Ignore($"Set {Variable} (tools/unity_capture.ps1).");
+            if (SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.Null)
+                Assert.Fail("No graphics device: run without -nographics.");
+            bool wasCartoon = Meridian.View2D.CartoonStage.Enabled;
+            Meridian.View2D.CartoonStage.Enabled = true;
+            try
+            {
+#if UNITY_EDITOR
+                yield return UnityEditor.SceneManagement.EditorSceneManager.LoadSceneAsyncInPlayMode(
+                    CorePath, new LoadSceneParameters(LoadSceneMode.Single));
+#endif
+                var director = UnityEngine.Object.FindAnyObjectByType<SceneDirector>();
+                float timeout = Time.realtimeSinceStartup + 30f;
+                while ((!director.IsReady || !director.PlanetSide.terrain.IsSettled) && Time.realtimeSinceStartup < timeout) yield return null;
+                var dir = "coordination/reports/unity/b242";
+                Directory.CreateDirectory(dir);
+                foreach (var (planetId, wallKey) in new[] { (Meridian.Planets.PlanetId.Earth, "back_wall_sand"), (Meridian.Planets.PlanetId.Mars, "back_wall_basalt") })
+                {
+                    if (director.PlanetSide == null || director.PlanetSide.Config.id != planetId)
+                        yield return director.LoadPlanetSide(GameState.Instance.catalog.Get(planetId));
+                    var side = director.PlanetSide;
+                    var t = side.terrain;
+                    var rig = side.rig;
+                    var body = side.player.Body;
+                    var follow = side.sideCamera.GetComponent<Meridian.Player.CameraFollow>();
+                    var cam = side.sideCamera.transform;
+                    timeout = Time.realtimeSinceStartup + 30f;
+                    while (!t.IsSettled && Time.realtimeSinceStartup < timeout) yield return null;
+                    if (side.hazards != null) side.hazards.enabled = false;
+                    if (side.dayNight != null) side.dayNight.Override = 0.45f;
+                    side.creatures.autoSpawn = false; side.creatures.DespawnAll();
+                    IEnumerator Park(Vector2 at)
+                    {
+                        body.simulated = false;
+                        body.position = at; side.player.transform.position = at;
+                        yield return null;
+                        float until = Time.realtimeSinceStartup + 20f;
+                        while (!t.IsSettled && Time.realtimeSinceStartup < until) yield return null;
+                        if (follow != null) { follow.enabled = true; follow.SnapToTarget(); }
+                        for (int k = 0; k < 30; k++) yield return null;
+                    }
+                    int Carve(float cx, float cy, float halfW, float halfH)
+                    {
+                        int dug = 0;
+                        var owner = rig.owner; rig.owner = null;
+                        try
+                        {
+                            for (float dy = -halfH; dy <= halfH + 1e-3f; dy += 0.6f)
+                                for (float dx = -halfW; dx <= halfW + 1e-3f; dx += 0.6f)
+                                    if (rig.Dig(new Vector2(cx + dx, cy + dy))) dug++;
+                        }
+                        finally { rig.owner = owner; }
+                        return dug;
+                    }
+                    IEnumerator Shot(string label)
+                    {
+                        for (int k = 0; k < 20; k++) yield return null;
+                        var drops = rig.drops; // the carving's drops off the shot (back to their pool)
+                        if (drops != null) for (int k = drops.Live.Count - 1; k >= 0; k--) drops.Collect(drops.Live[k]);
+                        yield return new WaitForSeconds(1.2f); // the carving's clods and puffs gone
+                        yield return Save(side.sideCamera, $"{name}_{label}");
+                        File.Copy($"logs/capture_{name}_{label}.png", $"{dir}/{label}.png", true);
+                    }
+                    var smooth = side.cartoon != null ? side.cartoon.Smooth : null;
+                    Assert.NotNull(smooth, $"the smooth ground on {planetId}");
+                    timeout = Time.realtimeSinceStartup + 20f;
+                    while (!(smooth.WallTier(1) && smooth.AltWallArt) && Time.realtimeSinceStartup < timeout) yield return null;
+                    string planet = planetId.ToString().ToLowerInvariant();
+                    TestContext.Out.WriteLine($"[MERIDIAN] b242 {planet}: {wallKey} in {smooth.AltWallArt} (the key {Meridian.View2D.SmoothGround.AltWallKey(planetId)}), tier 1's wall {smooth.WallTier(1)}");
+
+                    // the nearest stretch of the band's own fill that holds 8 m to either side of a column
+                    float from = Mathf.Floor(body.position.x), own = float.NaN;
+                    for (int d = 16; d <= 4000 && float.IsNaN(own); d += 16)
+                        foreach (int sgn in new[] { 1, -1 })
+                        {
+                            float x0 = from + sgn * d;
+                            if (float.IsNaN(own) && smooth.BandFillAt(x0 - 8f) && smooth.BandFillAt(x0) && smooth.BandFillAt(x0 + 8f)) own = x0 + 0.5f;
+                        }
+                    if (float.IsNaN(own)) { TestContext.Out.WriteLine($"[MERIDIAN] b242 {planet}: no stretch of the band's own fill within 4 km of x {from:0}: NOT SHOT"); continue; }
+
+                    // a 7 m shaft: the surveyor beside the spot first (its chunks in), the carve, then parked at its foot (parked in solid
+                    // ground it is lifted out: SolidRescue)
+                    float top = t.SurfaceAt(own);
+                    yield return Park(new Vector2(own - 3f, t.SurfaceAt(own - 3f) + 0.05f));
+                    int strokes = Carve(own, top - 3.3f, 1.2f, 3.6f);
+                    yield return Park(new Vector2(own, top - 6.4f));
+                    if (follow != null) follow.enabled = false;
+                    cam.position = new Vector3(own, top - 3.0f, cam.position.z);
+                    string shaft = planetId == Meridian.Planets.PlanetId.Earth ? "1_earth_sand_shaft" : "3_mars_basalt_shaft";
+                    yield return Shot(shaft);
+                    TestContext.Out.WriteLine($"[MERIDIAN] b242 {shaft}: {strokes} strokes at x {own:0.0} ({own - from:+0;-0} m from the start), the ground at {top:0.0}, the foot {Meridian.Mining.DigRun.Depth(t, new Vector2(own, top - 6.9f)):0.0} m under the line; the wall's material {(smooth.AltWallMaterialNow != null ? smooth.AltWallMaterialNow.mainTexture.name : "NOT MADE: the fill shaded")}");
+
+                    if (planetId != Meridian.Planets.PlanetId.Earth) continue;
+                    // the desert's border: the nearest column on either side where the sand's weight falls under a half; a trench across it
+                    float border = float.NaN;
+                    for (int d = 8; d <= 2000 && float.IsNaN(border); d++)
+                        foreach (int sgn in new[] { 1, -1 })
+                            if (float.IsNaN(border) && !smooth.BandFillAt(own + sgn * d)) border = own + sgn * d;
+                    if (float.IsNaN(border)) { TestContext.Out.WriteLine("[MERIDIAN] b242 2_earth_sand_border: no border within 2 km: NOT SHOT"); continue; }
+                    float btop = t.SurfaceAt(border);
+                    yield return Park(new Vector2(border - 6f, t.SurfaceAt(border - 6f) + 0.05f)); // the border's chunks in before the carve
+                    int trench = 0;
+                    for (float x = border - 4.2f; x <= border + 4.2f + 1e-3f; x += 1.2f)
+                        trench += Carve(x, t.SurfaceAt(x) - 1.3f, 0.6f, 1.3f); // along the ground, whatever its slope
+                    for (int k = 0; k < 10; k++) yield return null;
+                    if (follow != null) follow.enabled = false;
+                    cam.position = new Vector3(border, btop - 0.6f, cam.position.z);
+                    yield return Shot("2_earth_sand_border");
+                    TestContext.Out.WriteLine($"[MERIDIAN] b242 2_earth_sand_border: {trench} strokes across x {border:0.0} ({border - own:+0;-0} m from the shaft), the ground at {btop:0.0}; the sand's fill at -3 m {smooth.BandFillAt(border - 3f)}, at +3 m {smooth.BandFillAt(border + 3f)}");
+                }
+                LogAssert.NoUnexpectedReceived();
+            }
+            finally { Meridian.View2D.CartoonStage.Enabled = wasCartoon; }
+        }
+
         /// <summary>U-175 (D-174): the Skill Tree panel topside at Earth's camp, B-204's mock-up state (six bought, Beam Power III chosen):
         /// 1_skill_tree.png with 2 of its 6 hematite (BUY greyed, the reason), 2_skill_tree_ready.png with 6 → coordination/reports/unity/u175/.</summary>
         [UnityTest, Timeout(240000)]

@@ -285,6 +285,132 @@ namespace Meridian.Tests
             LogAssert.NoUnexpectedReceived();
         }
 
+        /// <summary>B-242: where the band's own fill is drawn (Earth's desert sand), a dug cell's back face is that fill's own wall tile.
+        /// The overlay submesh that carried the sand fill, shaded, draws with a second walls' material whose base is back_wall_sand (the
+        /// planet's t2..t5 under it at the same depths, the same tile size and row shift), white under the hole's shading and read at
+        /// world / 4; and the hole's soft inner shadow lies in that submesh, over the wall (laid in the planet's wall it was covered by
+        /// the overlay: a pit in the desert had none).</summary>
+        [UnityTest, Timeout(300000)]
+        public IEnumerator ADugCellInTheDesertShowsTheSandsWall()
+        {
+            PlanetSideRoot side = null;
+            yield return Boot(s => side = s);
+            var smooth = side.cartoon != null ? side.cartoon.Smooth : null;
+            Assert.NotNull(smooth, "the smooth ground on Earth");
+            float until = Time.realtimeSinceStartup + 20f;
+            while (!(smooth.WallTier(1) && smooth.AltWallArt) && Time.realtimeSinceStartup < until) yield return null;
+            Assert.IsTrue(smooth.WallTier(1), "tier 1's wall");
+            Assert.IsTrue(smooth.AltWallArt, "B-242's back_wall_sand loads on Earth");
+
+            // the nearest stretch of sand that holds 8 m to either side (CaptureU196Holes' 5_sand_dig finds its desert the same way)
+            int camp = Mathf.FloorToInt(Meridian.Planet.POI.PoiCatalog.SpawnCamp.CenterX);
+            float desert = float.NaN;
+            for (int d = 16; d <= 4000 && float.IsNaN(desert); d += 16)
+                foreach (int sgn in new[] { 1, -1 })
+                {
+                    float x0 = camp + sgn * d;
+                    if (float.IsNaN(desert) && smooth.BandFillAt(x0 - 8f) && smooth.BandFillAt(x0) && smooth.BandFillAt(x0 + 8f)) desert = x0 + 0.5f;
+                }
+            Assert.IsFalse(float.IsNaN(desert), "a stretch of sand within 4 km of the camp");
+
+            var t = side.terrain;
+            var body = side.player.Body;
+            body.simulated = false;
+            var feet = new Vector2(desert - 3f, t.SurfaceAt(desert - 3f) + 0.05f);
+            body.position = feet; side.player.transform.position = feet;
+            var follow = side.sideCamera.GetComponent<Meridian.Player.CameraFollow>();
+            if (follow != null) follow.SnapToTarget();
+            yield return null;
+            until = Time.realtimeSinceStartup + 30f;
+            while (!t.IsSettled && Time.realtimeSinceStartup < until) yield return null;
+            for (int i = 0; i < 10; i++) yield return null;
+
+            // a pit 1.8 m wide and about 3 m deep, open at the sand's surface (5_sand_dig's carve)
+            float top = t.SurfaceAt(desert), pitY = top - 1.2f;
+            int strokes = 0;
+            var owner = side.rig.owner; side.rig.owner = null;
+            try
+            {
+                for (float dy = -1.3f; dy <= 1.3f + 1e-3f; dy += 0.6f)
+                    for (float dx = -0.9f; dx <= 0.9f + 1e-3f; dx += 0.6f)
+                        if (side.rig.Dig(new Vector2(desert + dx, pitY + dy))) strokes++;
+            }
+            finally { side.rig.owner = owner; }
+            Assert.Greater(strokes, 4, "a pit in the sand");
+            var drops = side.rig.drops;
+            if (drops != null) for (int k = drops.Live.Count - 1; k >= 0; k--) drops.Collect(drops.Live[k]);
+            for (int i = 0; i < 20; i++) yield return null; // the chunk's mesh after the last stroke
+            until = Time.realtimeSinceStartup + 10f;
+            while (smooth.AltWallMaterialNow == null && Time.realtimeSinceStartup < until) yield return null;
+            for (int i = 0; i < 10; i++) yield return null;
+            var alt = smooth.AltWallMaterialNow;
+            Assert.NotNull(alt, "the sand wall's material is made with the first chunk that draws it");
+            var wall = smooth.WallMaterialNow;
+            Assert.NotNull(wall, "the planet's walls' material");
+
+            Assert.AreNotSame(wall, alt, "a material of its own");
+            Assert.AreSame(wall.shader, alt.shader, "one shader for both (MERIDIAN/GroundTiers)");
+            StringAssert.Contains("back_wall_sand", alt.mainTexture.name, "the sand's wall is the material's base");
+            StringAssert.Contains("back_wall_t1", wall.mainTexture.name, "the planet's walls keep tier 1's");
+            for (int tier = 2; tier <= 5; tier++)
+                Assert.AreSame(wall.GetTexture($"_Tier{tier}Tex"), alt.GetTexture($"_Tier{tier}Tex"), $"under the sand, tier {tier}'s wall by depth");
+            Assert.AreEqual(wall.GetVector("_TierFrom"), alt.GetVector("_TierFrom"), "at the planet's depths");
+            Assert.AreEqual(Meridian.View2D.SmoothGround.WallTileM, alt.GetVector("_LineParams").y, 1e-4f, "a wall tile is 4 m (its uv is world / 4)");
+            Assert.AreEqual(alt.mainTexture.width, alt.GetFloat("_TileTexels"), 1e-4f, "the wall's texels a tile");
+            Assert.AreEqual(Meridian.View2D.SmoothGround.WallRowShift, alt.GetFloat("_RowShift"), 1e-5f, "its rows are shifted as the tiers' walls'");
+            Assert.AreEqual(TextureWrapMode.Repeat, alt.mainTexture.wrapMode, "the wall tiles");
+
+            // the pit's chunks: the overlay submesh (1) draws the sand's wall, white under the hole's shading at world / 4, with the inner
+            // shadow's ink in it; the planet's wall submesh (0) under it carries no ink there
+            const int C = Meridian.Terrain.TerrainConstants.ChunkSize;
+            int chunks = 0, wallVerts = 0, inkOver = 0, inkUnder = 0;
+            float brightest = 0f;
+            foreach (var chunk in Object.FindObjectsByType<Meridian.Terrain.TerrainChunk>())
+            {
+                if (Mathf.Abs((chunk.cx + 0.5f) * C - desert) > C || Mathf.Abs((chunk.cy + 0.5f) * C - pitY) > C) continue;
+                if (!smooth.ChunkAltWall(chunk, out var drawn, out _, out int altIndices) || altIndices == 0) continue;
+                MeshFilter mf = null;
+                foreach (var f in chunk.GetComponentsInChildren<MeshFilter>()) if (f.name == "SmoothGround") mf = f;
+                Assert.NotNull(mf, "the chunk's ground mesh");
+                var vs = mf.sharedMesh.vertices; var cs = mf.sharedMesh.colors; var uvs = mf.sharedMesh.uv;
+                bool pit = false;
+                foreach (int vi in mf.sharedMesh.GetTriangles(1))
+                {
+                    var col = cs[vi];
+                    Vector3 w = mf.transform.TransformPoint(vs[vi]);
+                    if (Mathf.Abs(w.x - desert) > 1.6f || w.y < pitY - 2f || w.y > top + 0.1f) continue; // the pit's own stretch
+                    pit = true;
+                    if (col.r + col.g + col.b <= 0f) { if (col.a > 0.01f) inkOver++; continue; } // the inner shadow: ink, fading to clear
+                    wallVerts++;
+                    Assert.AreEqual(1f, col.a, 1e-3f, "whole in the sand: the sand's wall covers the planet's");
+                    Assert.AreEqual(col.r, col.g, 1e-4f, "white under the hole's shading (the tile is drawn as painted)");
+                    Assert.AreEqual(col.r, col.b, 1e-4f);
+                    brightest = Mathf.Max(brightest, col.r);
+                    Assert.AreEqual(w.x / Meridian.View2D.SmoothGround.WallTileM, uvs[vi].x, 2e-3f, "read at world / 4");
+                    Assert.AreEqual(w.y / Meridian.View2D.SmoothGround.WallTileM, uvs[vi].y, 2e-3f);
+                }
+                if (!pit) continue;
+                chunks++;
+                Assert.AreSame(alt, drawn, "the pit's overlay submesh draws with the sand wall's material");
+                foreach (int vi in mf.sharedMesh.GetTriangles(0))
+                {
+                    var col = cs[vi];
+                    Vector3 w = mf.transform.TransformPoint(vs[vi]);
+                    if (Mathf.Abs(w.x - desert) > 1.6f || w.y < pitY - 2f || w.y > top + 0.1f) continue;
+                    if (col.r + col.g + col.b <= 0f && col.a > 0.01f) inkUnder++;
+                }
+            }
+            TestContext.Out.WriteLine($"[MERIDIAN] b242 sand pit at x {desert:0.0} ({desert - camp:0} m from the camp), the sand at {top:0.0}, {strokes} strokes: {chunks} chunk(s), {wallVerts} sand-wall vertices, brightest {brightest:0.000}, the inner shadow's ink {inkOver} over / {inkUnder} under");
+            Assert.Greater(chunks, 0, "a chunk draws the pit's sand wall");
+            Assert.Greater(wallVerts, 20, "the pit's back face");
+            Assert.Greater(brightest, 0.7f, "near the pit's mouth the tile is drawn as painted (the shaded fill stopped at 0.55)");
+            Assert.Greater(inkOver, 0, "the hole's inner shadow lies over the sand's wall");
+            Assert.AreEqual(0, inkUnder, "and not under it");
+            body.simulated = true;
+            yield return null;
+            LogAssert.NoUnexpectedReceived();
+        }
+
         /// <summary>U-205 (BLENDER's 0.6.2 read, G3): a shaft open to the sky is lit all the way down. Its back wall carries the depth term
         /// alone (55 % of its shade from 6 m under the natural surface), in every chunk it crosses: the sky scan stopped 12 cells over a
         /// chunk's top, so a chunk lying deeper read the shaft as shut and its wall went a fifth darker in one hard step at its top edge

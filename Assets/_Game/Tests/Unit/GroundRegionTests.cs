@@ -27,7 +27,18 @@ namespace Meridian.Tests
                     if (k != null) Assert.IsTrue(System.IO.File.Exists($"{Art}{planet}/{k}.json"), $"{id}: {k} exported");
                 var alt = SmoothGround.AltFillKey(id);
                 if (alt != null) Assert.IsTrue(System.IO.File.Exists($"{Art}{planet}/{alt}.json"), $"{id}: {alt} exported");
+                // B-242: a band fill of its own has a back wall of its own, by the fill's name
+                var wall = SmoothGround.AltWallKey(id);
+                Assert.AreEqual(alt == null, wall == null, $"{id}: a wall for the band's own fill, and only for one");
+                if (wall != null)
+                {
+                    Assert.IsTrue(System.IO.File.Exists($"{Art}{planet}/{wall}.json"), $"{id}: {wall} exported");
+                    Assert.IsTrue(Meridian.Art.ArtKeys.IsBackWall($"terrain/{planet}/{wall}"), $"{id}: {wall} imports by the walls' rule");
+                }
             }
+            Assert.AreEqual("back_wall_sand", SmoothGround.AltWallKey(PlanetId.Earth), "the desert's sand");
+            Assert.AreEqual("back_wall_basalt", SmoothGround.AltWallKey(PlanetId.Mars), "Olympus's basalt");
+            Assert.IsNull(SmoothGround.AltWallKey(PlanetId.Venus), "no fill of its own, no wall");
             // Earth (B-178): unchanged.
             EarthBiomes.Range(Biome.Desert, out int ds, out int dl);
             Assert.AreEqual(SmoothGround.Sand, SmoothGround.VariantFor(PlanetId.Earth, ds + dl / 2, 340, 320, 4096));

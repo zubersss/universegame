@@ -81,6 +81,15 @@ namespace Meridian.View2D
                 default: return 0;
             }
         }
+
+        /// <summary>B-242: the wall behind a dug cell where the band's own fill is drawn (AltFillKey): back_wall_sand on Earth,
+        /// back_wall_basalt on Mars; null where slot 1 shares the planet's fill. A tile as the tiers' walls (256 px, 4 m) with no tier of
+        /// its own: it stands where tier 1's wall would, the planet's t2..t5 under it. Pure.</summary>
+        public static string AltWallKey(Meridian.Planets.PlanetId id)
+        {
+            string alt = AltFillKey(id);
+            return alt != null && alt.StartsWith("ground_fill_") ? "back_wall_" + alt.Substring("ground_fill_".Length) : null;
+        }
         string[] variantKey = VariantKeys(Meridian.Planets.PlanetId.Earth);
         Meridian.Planets.PlanetId planetId;
         /// <summary>U-128's crossfade width at a biome border (m).</summary>
@@ -137,6 +146,12 @@ namespace Meridian.View2D
         /// <summary>Tier `tier`'s wall (1..5) is in.</summary>
         public bool WallTier(int tier) => tier >= 1 && tier <= 5 && walls[tier - 1] != null;
         public Material WallMaterialNow => wallMaterial;
+        /// <summary>B-242: the band fill's own wall (AltWallKey; null until loaded or where the planet has none) and its material: the
+        /// walls' material again with that tile as its base, on the submesh the band fill's shaded overlay already had (no draw call more).</summary>
+        Sprite wallAlt;
+        Material wallAltMaterial;
+        public bool AltWallArt => wallAlt != null;
+        public Material AltWallMaterialNow => wallAltMaterial;
 
         /// <summary>The back wall's material: MERIDIAN/GroundTiers over the walls (t1 its base, t2..t5 by depth under the Surface Line, as
         /// the fills crossfade), read at world / 4. The same shader on the submesh the back wall already had: no draw call more. Null
@@ -167,12 +182,29 @@ namespace Meridian.View2D
             return wallMaterial;
         }
 
+        /// <summary>B-242: the band fill's wall material, made with the first chunk that draws that wall. Null until the tile and the
+        /// walls' own material are in, and under the perf probe's fill copies: the band's fill then draws the wall, shaded, as before.</summary>
+        Material WallAltMaterial()
+        {
+            if (wallAlt == null || wallAlt.texture == null || ProbeFillTextures) return null;
+            var wall = WallMaterial();
+            if (wall == null) return null;
+            if (wallAltMaterial == null) { wallAltMaterial = new Material(wall) { name = "GroundWallsAlt_" + planet }; DressWalls(); }
+            return wallAltMaterial;
+        }
+
         void DressWalls()
         {
-            var m = wallMaterial;
+            DressWall(wallMaterial, null);
+            DressWall(wallAltMaterial, wallAlt != null ? wallAlt.texture : null);
+        }
+
+        /// <summary>One wall material's textures and depths. `alt` (B-242): the tile that stands in tier 1's place.</summary>
+        void DressWall(Material m, Texture alt)
+        {
             if (m == null || walls[0] == null || walls[0].texture == null) return;
             bool copy = ProbeFillTextures && fill != null && fill.texture != null; // the perf probe: the fill's own textures on this material
-            var baseTex = copy ? fill.texture : walls[0].texture;
+            var baseTex = copy ? fill.texture : alt != null ? alt : walls[0].texture;
             var over = copy ? null : WallProbeTexture; // U-205's probe: one tier's wall replaced by the capture's test tile
             m.mainTexture = over != null && WallProbeTier == 1 ? over : baseTex;
             var t = Meridian.Mining.D1Tables.Current;
@@ -198,6 +230,20 @@ namespace Meridian.View2D
             var m = f.GetComponent<MeshRenderer>().sharedMaterials;
             if (m == null || m.Length <= SubBody) return false;
             backWall = m[SubBack]; body = m[SubBody];
+            return true;
+        }
+
+        /// <summary>Tests (B-242): the material a chunk's mesh draws the band fill's back wall with, and the indices in the planet's wall
+        /// submesh and in the band fill's (false where the chunk has no mesh).</summary>
+        public bool ChunkAltWall(TerrainChunk c, out Material altWall, out int wallIndices, out int altWallIndices)
+        {
+            altWall = null; wallIndices = altWallIndices = 0;
+            if (c == null || !meshes.TryGetValue(c, out var f) || f == null || f.sharedMesh == null) return false;
+            var m = f.GetComponent<MeshRenderer>().sharedMaterials;
+            if (m == null || m.Length <= SubBackSand || f.sharedMesh.subMeshCount <= SubBackSand) return false;
+            altWall = m[SubBackSand];
+            wallIndices = (int)f.sharedMesh.GetIndexCount(SubBack);
+            altWallIndices = (int)f.sharedMesh.GetIndexCount(SubBackSand);
             return true;
         }
 
@@ -808,6 +854,8 @@ namespace Meridian.View2D
                 int tier = k;
                 Probe($"terrain/{planet}/back_wall_t{k + 1}", s => { walls[tier] = s; Repeat(s); DressWalls(); if (tier == 0) QueueAll(); });
             }
+            string altWall = AltWallKey(id); // B-242: the band fill's own wall (Earth's sand, Mars's basalt)
+            if (altWall != null) Probe($"terrain/{planet}/{altWall}", s => { wallAlt = s; Repeat(s); DressWalls(); QueueAll(); });
             BuildLine();
             ProbeDecor();
             ProbeTop(); // U-186
@@ -864,6 +912,9 @@ namespace Meridian.View2D
             for (int k = 0; k < walls.Length; k++) walls[k] = null;
             if (wallMaterial != null) Destroy(wallMaterial);
             wallMaterial = null;
+            wallAlt = null;
+            if (wallAltMaterial != null) Destroy(wallAltMaterial);
+            wallAltMaterial = null;
             rebuildQueue.Clear();
             foreach (var m in tierMaterials.Values) if (m != null) Destroy(m);
             tierMaterials.Clear();
@@ -1030,6 +1081,15 @@ namespace Meridian.View2D
             bool sandFill = false;
             if (biomes && fillSand != null && fillSand.texture != null)
                 for (int i = -2; i <= C + 2 && !sandFill; i++) sandFill = SandWeight(wx0 + i) > 0f;
+            // B-242: where the band's own fill is drawn, the wall behind a dug cell is that fill's own tile (back_wall_sand, back_wall_basalt),
+            // read as the tiers' walls are and faded in with the fill; until it is in, the band's fill shaded, as before the art.
+            var altWallMat = sandFill && wallArt ? WallAltMaterial() : null;
+            bool altWall = altWallMat != null;
+            var sandBack = altWall ? Color.white : new Color(BackShade, BackShade, BackShade, 1f);
+            System.Func<float, float, Vector2> sandUv = altWall ? backUv : WorldUv;
+            // The hole's soft inner shadow goes in the last back submesh this chunk draws: laid in the planet's wall under the band fill's
+            // overlay it was covered wherever that overlay is whole (a pit in the desert had no inner shadow).
+            rimShadowSub = sandFill ? SubBackSand : SubBack;
 
             // 1. The back wall: under the natural surface curve, shaded (and the desert's sand over it, faded in). U-187: only where it can show,
             // behind the cells dug (or a cave's air) under the natural surface and one cell round them; the body covers the rest, so the
@@ -1042,7 +1102,6 @@ namespace Meridian.View2D
                 bool anyBack = false;
                 for (int m = 0; m < backMask.Length && !anyBack; m++) anyBack = backMask[m];
                 if (anyBack) HoleShadeGrid(wx0, wy0); // U-196: only a chunk with a hole pays for its shading
-                var sandBack = new Color(BackShade, BackShade, BackShade, 1f);
                 for (int i = 0; i < C && anyBack; i++)
                 {
                     float h0 = c.SurfaceCurve[i] - wy0, h1 = c.SurfaceCurve[i + 1] - wy0;
@@ -1060,7 +1119,7 @@ namespace Meridian.View2D
                         if (sandFill)
                         {
                             float s0 = SandWeight(wx0 + x0), s1 = SandWeight(wx0 + x1);
-                            if (s0 > 0f || s1 > 0f) BackQuadShaded(tris[SubBackSand], c, wy0, x0, x1, yb, t0, t1, sandBack, s0, s1, WorldUv);
+                            if (s0 > 0f || s1 > 0f) BackQuadShaded(tris[SubBackSand], c, wy0, x0, x1, yb, t0, t1, sandBack, s0, s1, sandUv);
                         }
                     }
                 }
@@ -1111,8 +1170,8 @@ namespace Meridian.View2D
             // U-182: the fills draw by depth tier where the tier shader is in (worldFill: the uv is world / 8, which the shader reads back).
             mats[SubBody] = (worldFill && TierShader ? TierMaterialFor(fillSprite.texture) : null) ?? MaterialFor(fillSprite != null ? fillSprite.texture : null);
             mats[SubBack] = wallOn ? wallMat : mats[SubBody]; // U-196: the walls' material on the back wall's submesh, the same shader
-            mats[SubBackSand] = (fillSand != null && TierShader ? TierMaterialFor(fillSand.texture) : null) ?? MaterialFor(fillSand != null ? fillSand.texture : null);
-            mats[SubBodySand] = mats[SubBackSand];
+            mats[SubBodySand] = (fillSand != null && TierShader ? TierMaterialFor(fillSand.texture) : null) ?? MaterialFor(fillSand != null ? fillSand.texture : null);
+            mats[SubBackSand] = altWall ? altWallMat : mats[SubBodySand]; // B-242: the band fill's own wall on the overlay's submesh
             for (int i = 0; i < DecorSubs; i++) mats[SubDecor + i] = MaterialFor(decorTex[i]);
             for (int i = 0; i < Variants; i++) mats[SubBand + i] = MaterialFor(variantCount[i] > 0 ? variantSprites[i][0].texture : null);
             mats[SubRim] = MaterialFor(rim != null ? rim.texture : null);
@@ -1334,9 +1393,12 @@ namespace Meridian.View2D
             int i0 = v.Count;
             Add(new Vector3(p.x, p.y, 0.005f), uvOf(p.x, p.y), ink); Add(new Vector3(q.x, q.y, 0.005f), uvOf(q.x, q.y), ink);
             Add(new Vector3(qf.x, qf.y, 0.005f), uvOf(qf.x, qf.y), clear); Add(new Vector3(pf.x, pf.y, 0.005f), uvOf(pf.x, pf.y), clear);
-            var into = tris[SubBack];
+            var into = tris[rimShadowSub];
             into.Add(i0); into.Add(i0 + 1); into.Add(i0 + 2); into.Add(i0); into.Add(i0 + 2); into.Add(i0 + 3);
         }
+        /// <summary>The back submesh the chunk being built lays its inner shadows in: the planet's wall, or the band fill's overlay where
+        /// the chunk has one (it draws over the wall).</summary>
+        int rimShadowSub = SubBack;
 
         /// <summary>The body's triangles again in the sand fill, alpha = the sand's weight: whole where the weight holds at 0 or 1 across a
         /// triangle, else clipped into 1 m slabs (column centre to column centre) so the vertex alpha follows the fade.</summary>
