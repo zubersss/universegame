@@ -74,7 +74,9 @@ def spiral(cx, cz, r, turns=2.2, n=40):
 def draw_surveyor(d, M, pose=None, seed=0):
     p = dict(view="side", expr="happy", bob=0.0, sz=1.0, lean=0.0, legs=((0.0, 0.0), (0.0, 0.0)),
              arms=(0.0, 0.0), look=None, blink=0.0, bob_tip=0.0, pack_swing=0.0, pack_dz=0.0, hose_lag=0.0, puff=0.0, star_rot=0.6, speed=0.0,
-             shift=0.0, helmet_dz=0.0, eye_pop=1.0)       # B-134 side_b keys; their defaults leave `side` stroke-identical
+             shift=0.0, helmet_dz=0.0, eye_pop=1.0,       # B-134 side_b keys; their defaults leave `side` stroke-identical
+             front_arm=True)                              # B-246: False = the side view's front arm is left to the caller
+    #                                                       (side_dig draws its own, over the helmet, so it can stretch and bend)
     p.update(pose or {})
     view, expr = p["view"], p["expr"]
     face_dir = {"side": 1.0, "tq": 0.55, "front": 0.0}[view]
@@ -225,7 +227,8 @@ def draw_surveyor(d, M, pose=None, seed=0):
 
     # front arm (side), both arms (front / tq)
     if view == "side":
-        arm(1, arms[1])
+        if p["front_arm"]:
+            arm(1, arms[1])
     else:
         arm(0, arms[0])
         arm(1, arms[1])
