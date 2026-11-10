@@ -6,13 +6,11 @@ Owner: LEAD (only the Lead edits this). Do the open items below, then tell the L
 
 ## Open
 
-### USER-42 — Restart the three windows and the laptop (5 min) — heavy jobs are blocked until then
-Since 23:58 the laptop has had 0.9 to 1.2 GB of memory free with nothing of the team's running; builds, tests and renders need 1.5 GB. The memory is held by the three Claude windows themselves: after ten hours each holds about 1 GB (0.33 GB when fresh). File-only work continues; nothing heavy can start.
-1. In each of the two worker windows, wait until it is not in the middle of a command (both write their resume point at the top of their status file).
-2. Close the three windows, the Lead's last.
-3. Restart the laptop. Leave Ollama and the Xbox app closed if you are not using them.
-4. Open the three windows again and paste the usual resume message into each (Lead, Unity, Blender).
-Nothing is lost: everything is in the project files, and the new Lead re-creates the review timer and finds the two workers.
+### USER-42 — Free about half a gigabyte of memory (2 min) — builds and tests are blocked until then
+Thank you for restarting the three windows (00:50). The laptop itself was not restarted (it has been on since yesterday 11:44), and at 00:56 it still has only 0.9 GB of memory free; builds, tests and the heavier renders need 1.5 GB. File-only work continues in all three windows; nothing heavy can start. Either of these fixes it:
+- **Quick:** close the **Copilot** app (it holds 0.4 GB), the **Xbox** app (0.3 GB) and the **Settings** window (0.2 GB). For Copilot and Xbox, look in the system tray by the clock (click the ^ arrow), right-click the icon and choose Quit or Close.
+- **Thorough:** close the three Claude windows (the Lead's last), restart the laptop, open the three windows again and paste the usual resume message into each.
+Then tell the Lead session "done: USER-42". Nothing is lost either way: everything is in the project files.
 
 ### USER-41 — Play Build 0.6.2: ten minutes of digging (10 min)
 Two of your 0.6.0 asks are in: digging that throws clods and dust, and holes that look like holes. The page with pictures: https://claude.ai/artifact/Xfb4R17qVr5K8DkFp4aLpT

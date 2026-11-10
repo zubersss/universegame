@@ -1,4 +1,6 @@
-# MERIDIAN — Asset Contract v3.3 (+ D-165 fill_decor, D-166 island belly)
+# MERIDIAN — Asset Contract v3.4 (+ D-165 fill_decor, D-166 island belly)
+
+> **v3.4 (D-195, 2026-11-10):** §11.5.1, the giants' close view: no `disc_near` for a gas or ice giant; flat-toned geometry from `planets/<giant>/close.json` with tiling ink strips, a pigment tile per giant and a screen-space grain.
 
 > **v3.3 (D-164, 2026-11-08):** §11.10, the giants' island set: a rounded belly mapped under each floe and a painted haze fill below the floe line, on §11.9's mapping.
 
@@ -289,6 +291,28 @@ other key shape (the importer accepts 4-segment keys only as `layer<N>`).
 **11.5 Planet discs (space view).** `planets/<planet>/disc_color.png`, watercolour fill + ink
 outline, ≤ 1024² (Saturn with rings ≤ 2048×1024); **no faces or expressions** (D-101): a character idle from bands, storms, caps and rings as a sheet ≤ 12 frames
 (`disc.json`, fps 12) or a rig (`disc_rig.json`, e.g. ring wobble, band swirl UV scroll).
+
+**11.5.1 Giants' close view (v3.4, D-195; D-128's painted close-up band).** A gas or ice giant has no
+`disc_near` frame. Above DiscSprite's near zoom it is drawn from `planets/<giant>/close.json` (a json-only key),
+which holds the far disc's own facts: `radius_u`, `loop_frames`, `fps`, `belts` (`v_top` from +1 north to −1 south,
+`tone_hex`, `night_hex`), `edge_wobble`, the lumpy limb `rim`, the `night` crescent, `storms` (with `blobs`, and a
+`streak` where a chain of blobs is drawn as one tapered capsule up close), `ink_marks` (`dashes`, `night_hatches`),
+Saturn's `rings`, and the `swap` zooms. Belts, storms and ring bands are flat-toned geometry; the hand-drawn part is
+tiling strips: `planets/common/limb_band` (512×16, the ink outline alone, its centre line on row 8),
+`planets/common/belt_edge` (1024×24, two variants: 0 firm for Jupiter and Saturn, 1 faint for Uranus and Neptune;
+RGB = the lower tone's share across a ragged cut on row 12, A = a thin ink line that marks are cut from),
+`planets/common/spot_rim` (512×24, no ink), `planets/saturn/ring_edge` (512×16, A = the thin ink line). The tone is
+multiplied by `planets/<giant>/close_pigment` (128×128, over the far frame's square, value / 127.5) and by the
+screen-space `planets/common/close_grain` (256×256, tiles both ways, value / 127.5). Every strip tiles in x with a
+seam score ≤ 1.6. **One strip scale, fixed to the planet** (no zoom stepping: the flight shows a giant at 6 to 9
+screen px per far texel): 7.3 strip texels per far-disc texel, so a strip texel is 0.82 screen px at 6 and 1.23 at 9
+and the limb's ink is 2–3 px wide as the line's MEAN across that range (the far disc's ±20 % hand jitter rides on
+it); u runs along each curve from the body's own left with a whole number of repeats, so nothing swims. `close.json`
+carries the scale; if B-243's desk-check of the previewer gives another number, that number replaces 7.3 here by a
+LEAD edit before the export. The close view adds nothing the far disc lacks and moves by the far disc's own
+formulas, so the swap is a cut on a 12 Hz tick. No faces (D-101). The tones and numbers in `close.json` come from the
+table the far disc is painted from (`giants_v3`); a change to either is proven by rebuilding the exported far discs
+byte for byte. About 0.21 megapixels for all four giants.
 
 **11.6 UI, title cards, film overlays.** `ui/<group>/<name>_color.png` (§5 D-044 rule): paper
 panels and painted signs as 9-slice PNGs with `"slice": [l, t, r, b]` in the json; title cards
