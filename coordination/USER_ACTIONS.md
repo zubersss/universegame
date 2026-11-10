@@ -25,11 +25,10 @@ A NOTE ON YOUR SAVED GAME (found 12:00, our fault): the team's automatic test ru
 
 
 
-### USER-42 — Free about half a gigabyte of memory (2 min) — not blocking right now, but the margin is thin
-Thank you for restarting the three windows (00:50). Update 01:01: once the new windows settled, free memory rose to 1.9 GB and the team's builds and tests can start again. The laptop itself was not restarted (it has been on since yesterday 11:44) and builds need 1.5 GB free, so one busy app can stop them again. Either of these gives a safe margin:
-- **Quick:** close the **Copilot** app (it holds 0.4 GB), the **Xbox** app (0.3 GB) and the **Settings** window (0.2 GB). For Copilot and Xbox, look in the system tray by the clock (click the ^ arrow), right-click the icon and choose Quit or Close.
-- **Thorough:** close the three Claude windows (the Lead's last), restart the laptop, open the three windows again and paste the usual resume message into each.
-Then tell the Lead session "done: USER-42". Nothing is lost either way: everything is in the project files.
+### USER-42 — Close two apps that started with Windows (1 min) — not blocking, but the art renders are at their limit
+Thank you for restarting the laptop (14:18) and the three windows. At 14:27 there are 1.96 GB of memory free: builds and tests can run (they need 1.5 GB), and the new painted-art renders have just enough (they need 1.9 GB). Two apps started by themselves with Windows and hold about 0.6 GB that the renders would use:
+- the **Copilot** app (0.5 GB) and the **Xbox** app (0.1 GB). For each: look in the system tray by the clock (click the ^ arrow), right-click the icon and choose Quit or Close.
+Then tell the Lead session "done: USER-42". If you are using either, leave it: the team waits its turn instead.
 
 ### USER-40 — Free the laptop's memory: quit Ollama (1 min) — the team is blocked on this
 At 18:52 the laptop has 0.12 GB of memory free and no build or render can start (they need 1.5 GB). The biggest holder is the **Ollama** app: 4.2 GB, running since 11:47 this morning. It is not part of the game team.
