@@ -6,6 +6,15 @@ Owner: LEAD (only the Lead edits this). Do the open items below, then tell the L
 
 ## Open
 
+### USER-46 — Download two AI-painted pictures from your Canva (2 min)
+You said: find a painter's hand, or do it with AI. I made a first test through your Canva account: a sheet of painted brush strokes and one painted plant. They look right, but the connection only gives me small previews. The full-size files are in your Canva:
+1. Open https://www.canva.com/M/MAHaiaVHLwU (the brush strokes). Click **Download** (or the three dots, then Download) and choose PNG.
+2. Open https://www.canva.com/M/MAHaiW2ItKs (the plant). Download it the same way.
+3. Move both files into `C:\dev\universegame\docs\art_sources\v6_painted\` (create nothing; the folder exists). Any file names are fine.
+4. Tell the Lead session "done: USER-46".
+The art team then paints the same forest plants with these strokes and shows you the difference. If it is better, I make a whole set the same way and ask you for one more download.
+If you would rather not do downloads, say so and I will look for a route that needs none.
+
 ### USER-45 — Play Build 0.6.3: ten minutes of the rebuilt digging (10 min)
 You said digging felt disconnected from your clicks and from the surveyor. It has been rebuilt. The page with frame-by-frame pictures: https://claude.ai/artifact/TdyF9gzKsFWzXebcu5KUSm
 1. Double-click `C:\dev\universegame\Build\MERIDIAN_0.6.3\MERIDIAN.exe` and choose **NEW**.
@@ -17,14 +26,6 @@ You said digging felt disconnected from your clicks and from the surveyor. It ha
 Then tell the Lead session: does a click feel connected to the dig now; do the surveyor and shovel look like they are doing the digging; are several hits on hard ground satisfying or tedious; and from last time: do the holes look right, is the shovel a good start, is 250 Scrip right for the Beam?
 Known already: the surveyor is still the round-headed one (the new look is on its own page, USER-44); the marker's small cross is being redrawn; upward digging in a low tunnel pushes the blade into the ceiling; Mars and Space may hitch slightly (a memory fault found today, fixed next); no collapse yet and the sounds are still synthesized.
 
-### USER-44 — Second look at the new art style (5 min, no game needed)
-You liked the colours of the first test and not the drawing ("still looks like a 1930s cartoon, big circle head and eyes"). The second test is on the same page: https://claude.ai/artifact/DfszsRAPjF6hwbjr5i36GX
-It shows the surveyor redrawn with natural proportions, and Earth's forest edge painted plant by plant, at two camera distances with a button to flip to today's game. It also says plainly where this still falls short of the film. Nothing in the game changes until you answer. Tell the Lead session:
-1. The figure: is this the right direction now? If something is still off, say what (the face, the build, the clothes).
-2. The camera: closer all the time, today's distance, or close on the surface and pulling back as you dig deep?
-3. The scenery: good enough to start repainting Earth, more plant kinds and denser planting first, or a painter's hand brought in (real brush strokes or painted plants, scanned)?
-4. Anything else you want changed before the work starts.
-A yes on the scenery is about a working week for Earth and three to four days for each planet after it. Build 0.6.3 (the reworked digging) does not wait for this.
 
 
 ### USER-42 — Free about half a gigabyte of memory (2 min) — not blocking right now, but the margin is thin
@@ -60,6 +61,7 @@ If you get too many "allow this command?" prompts, tell the Lead "approve PowerS
 allow rules" and accept the edit when Claude Code asks you. Otherwise skip this.
 
 ## Done
+- 2026-11-10 11:3x · USER-44 answered: "I like it so far but find a painters hand or you do it ai is so capable nowadays and continue doing the rest" → D-202: art v6 accepted as shown and rolling out (a playable slice first: the Earth camp with the v6 surveyor); the painter's hand from AI-painted strokes and plates (pilot made, USER-46 for the full-size files); the camera ruled by the Lead (close on the surface, easing back underground), since the owner did not choose.
 - 2026-11-10 07:4x · USER-43 answered within minutes of the page (https://claude.ai/artifact/DfszsRAPjF6hwbjr5i36GX): "ive seen the first look and i like the colors but the details i dont like look at the reference photos again i want that level of detail or at least as close as possible this still looks like a 1930s cartoon big cricle head and eyes make it look like the reference photos the same style as the jungle and same level to details from the proportions to everything pretty much try to make the movie but in game and moving form just the style tho none of the story or anything else" → D-200, STYLE_V6 §4a: the surveyor redesigned to natural proportions and built drawing, figures as drawn frames, scenery at the film's level of detail, the colours kept; specimens to the Lead first, then a second look-over page. Not answered: the scanned-brush question (asked again if the specimens fall short).
 - 2026-11-10 06:1x · USER-39 answered: the owner on the new surveyor design: "Polish up the surveyor a bit more then that I want fine lines that dont render into pixels" → D-198 (the v5 line is fine and drawn large enough never to show pixels), B-231 round 3; a new look-over page follows when round 3's plates pass the Lead. Read as: the design's direction stands, the finish and the line change. Not answered: the figure's weight beside the camp props, the face side-on, the poses (asked again on the new page).
 - 2026-11-10 01:1x · USER-41 done: the owner played 0.6.2: "The digging is wacky it feels disconnected from clicks and the avatar smoothen that out to the max like a pro make the animations and the connections incredible" → D-196 (the dig as one motion), U-209, B-246; Build 0.6.3 is for it. Not yet answered from USER-41 / USER-38: do the holes look right, is the shovel a good start, does the Beam feel like a reward, is 250 Scrip right (asked again with 0.6.3).
