@@ -520,7 +520,8 @@ def entry_for(name):
     return {"key": f"creatures/venus/{name}", "style": "v3", "source": f"sources/creatures/venus_{name}_v3.blend",
             "build": "scripts/build_creatures_venus_v3.py", "build_fn": f"build_{name}", "collection": name,
             "frame": list(sp["frame"]), "pivot": list(sp.get("pivot", (0.5, 0.0))), "facing": "right", "squash_root": True,
-            "planet": "venus", "seed": sp["seed"], "bg_scene": "-", "beside": "characters/surveyor/side",
+            "planet": "venus", "seed": sp["seed"], "bg_scene": "deck" if name == "veil_serpent" else "-",   # B-224: beside the Venus deck
+            "beside": "characters/surveyor/side",
             "review_name": f"b147_venus_{name}", "clips": [{"name": c, "frames": n, "loop": lp} for c, n, lp in sp["clips"]],
             "self_check": dict(sp["self_check"], style="the B-132 kit (Gus's construction); LEAD judges"), "ours": sp["ours"],
             "replaces_v2": True, "note": "B-147 design (Venus creature re-ink)"}

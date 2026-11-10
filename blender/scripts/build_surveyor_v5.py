@@ -35,7 +35,9 @@ from meridian import pngio, v3  # noqa: E402
 import build_ui_v3 as U  # noqa: E402  (installs fakegp; px canvases, y down)
 
 G = U.G
-OUT, INN = G.OUTER * 1.4, G.INNER * 1.4          # v5 ink: ~3.5 px outer / ~1.75 px inner on a 256 px figure
+OUT, INN = G.OUTER * 2.0, G.INNER * 2.0          # round 2 (LEAD 18:0x (1)): the v3 props' weight at the game's zoom, 2.5 px outer /
+#                                                   1.25 px inner at 1x = 5 / 2.5 px on the 256 px figure (round 1: 3.5 / 1.75, a
+#                                                   line finer than everything around it)
 TAU = 2 * math.pi
 PX = 128                                          # px per metre (2.0 m = 256 px)
 ART = os.path.normpath(os.path.join(HERE, "..", "..", "Assets", "_Game", "Art"))
@@ -126,41 +128,52 @@ def _shift(a, dy, dx):
     return out
 
 
-def paint(u8, seed, depth=0.2, cool=0.35, glow=0.10, far=False, cast=None):
-    """Gouache shading on a rendered part, lit from above (LEAN a touch to the upper left): a shadow shape on the underside
-    of the form with a ragged brushed edge (no smooth digital ramp), a cool shadow tint, a lit rim along the top edges, a
-    streaky brush texture and the paper grain. cast = (row0, row1): a shadow cast across the part there (under the helmet's
-    ring, under the belt). far: the far-side limb, one step darker and cooler."""
+BACK = 1              # round 2 (LEAD 18:0x (3)): the shadow band lies on each part's lower end and on its BACK edge (+1), the side
+#                       that turns under when a limb is raised forward (the jump's thigh, the dig's arms, a walk's swing), so the
+#                       band is a true underside in the poses. -1 puts it on the lower RIGHT as the v3 props shade (facing right);
+#                       then a raised limb carries its shadow on top. The sheet shows both (the last-but-one row); the rig
+#                       mirrors either way
+COOL_SHADE = (0.70, 0.77, 0.84)                   # the band's tint (a multiply): a clear cool step on suit, pack and boots
+SKIN_SHADE = (0.90, 0.76, 0.72)                   # on skin: one soft warm step
+
+
+def paint(u8, seed, band=6, glow=0.10, cast=None, soft=False, streak=0.012, grain=0.03, tint=COOL_SHADE, strength=0.8):
+    """Gouache shading on a rendered part, lit from above: ONE shadow band on the form's underside, `band` px deep (about
+    30 % of the part's width: LEAD 18:0x, visible at the game's zoom), a brushed edge (soft: a soft edge, for skin), a lit
+    rim along the top edges, the brush streaks (round 2: a third of round 1's contrast on the suit, none on skin - at 2x
+    they read as wood grain) and the paper grain. cast = (row0, row1): a shadow cast across the part there (under the
+    helmet's ring, under the belt)."""
     rng = np.random.default_rng(seed)
     f = u8.astype(np.float32) / 255.0
     a = f[..., 3]
     h, w = a.shape
-    d = max(2, int(round(depth * min(h, w))))
-    shade = np.clip(a - _shift(a, -d, -int(round(d * LEAN))), 0, 1)             # the form's underside (a touch to its right)
+    d = max(2, int(round(band)))
+    shade = np.clip(a - _shift(a, -d, BACK * d), 0, 1)                          # the lower end and the back (BACK -1: right) edge
     if cast is not None:
         shade[cast[0]:cast[1]] = np.maximum(shade[cast[0]:cast[1]], a[cast[0]:cast[1]])
-    noise = _blur(rng.standard_normal((h, w)).astype(np.float32), 2)
-    noise /= max(float(noise.std()), 1e-3)
-    shade = np.clip((_blur(shade, max(1, d // 3)) - 0.35 + 0.18 * noise) * 3.0, 0, 1) * a   # a ragged painted edge
+    if soft:
+        shade = np.clip(_blur(shade, max(2, d // 2)) * 1.3, 0, 1) * a
+    else:
+        noise = _blur(rng.standard_normal((h, w)).astype(np.float32), 2)
+        noise /= max(float(noise.std()), 1e-3)
+        shade = np.clip((_blur(shade, 1) - 0.35 + 0.08 * noise) * 3.0, 0, 1) * a   # a brushed edge, one clear shape
     dl = max(1, d // 3)
-    lit = np.clip(a - _shift(a, dl, int(round(dl * LEAN))), 0, 1)               # the rim along the top edges
+    lit = np.clip(a - _shift(a, dl, -BACK * max(1, dl // 2)), 0, 1)             # the rim along the top (and front) edges
     lit = np.clip(_blur(lit, 1) * 1.6 - 0.2, 0, 1) * a
     ink = (f[..., :3].max(axis=2) < 0.22)                                       # leave the ink lines dark
-    sh_col = rgb(PAL["sky"]) * 0.55 + rgb(PAL["brown"]) * 0.25
     out = f[..., :3].copy()
-    k = (0.30 * shade)[..., None]
-    out = out * (1 - k) + (out * (1 - cool) + sh_col * cool) * k
+    k = (strength * shade)[..., None]
+    out = out * (1 - k) + out * np.array(tint, np.float32) * k
     out = out + (rgb(PAL["offwhite"]) - out) * (glow * lit)[..., None]
-    streak = rng.standard_normal((h, w)).astype(np.float32)                     # brush texture: streaks along a diagonal
-    streak = np.apply_along_axis(lambda v: np.convolve(v, np.ones(7, np.float32) / 7, mode="same"), 1, streak)
-    streak = (streak - streak.mean()) / max(float(streak.std()), 1e-3)
-    out *= (1 + 0.035 * streak)[..., None]
-    if far:
-        out = out * 0.80 + sh_col * 0.08
+    if streak > 0:
+        st = rng.standard_normal((h, w)).astype(np.float32)                     # brush texture: streaks along the rows
+        st = np.apply_along_axis(lambda v: np.convolve(v, np.ones(7, np.float32) / 7, mode="same"), 1, st)
+        st = (st - st.mean()) / max(float(st.std()), 1e-3)
+        out *= (1 + streak * st)[..., None]
     out = np.where(ink[..., None], f[..., :3], out)
     res = np.dstack([np.clip(out, 0, 1), a])
     img = np.clip(np.rint(res * 255), 0, 255).astype(np.uint8)
-    return U.paper_grain(img, seed, 0.03)
+    return U.paper_grain(img, seed, grain)
 
 
 # ---------------------------------------------------------------- the parts (px, y down, in their own canvas)
@@ -178,48 +191,73 @@ def m2p(v):
     return v * PX
 
 
+# Round 2 (LEAD 18:0x (1), (2)): chunky, still jointed. The round-1 drawings stay in their own coordinates and are widened /
+# enlarged in place by xf(), each on a canvas grown to hold it and the heavier line; the joints (pivots, bone lengths, the
+# 2.0 m height, the 0.61 m bubble) do not move, so the poses and the crouch's height hold
+WIDE = 1.35           # torso, hips and limbs: 35 % wider
+BIG = 1.25            # boots and gloves: 25 % larger
+HK = 1.2              # the head: 20 % larger in the same bubble (it filled 56 % of the glass; now about 70 %)
+
+
+def xf(d, cx=0.0, kx=1.0, cy=0.0, ky=1.0, dx=0.0, dy=0.0):
+    """The drawing with every point scaled (kx, ky) about (cx, cy), then moved (dx, dy). Line widths are not scaled."""
+    return G.Xf(d, lambda pts: [(cx + (x - cx) * kx + dx, cy + (y - cy) * ky + dy) for x, y in pts])
+
+
 # limb lengths (metres) - the bones use the same numbers. 2.0 m to the helmet's top: legs 0.03 + 0.34 + 0.33 + the boot's
 # 0.18, the torso 0.56, the head and helmet 0.55; the hands hang at ~0.64 m (mid thigh)
 L_UA, L_FA, L_TH, L_SH = 0.28, 0.26, 0.34, 0.33
 
 
-@part("upper_arm", 40, 54, (20, 9), depth=0.25)
+@part("upper_arm", 48, 60, (24, 12), band=6)
 def upper_arm(d, M):
+    d = xf(d, 20, WIDE, dx=4, dy=3)
     G.stroke(d, taper((20, 9), (20, 9 + m2p(L_UA)), 15, 13, bulge=1.5), M["suit"], OUT, cyclic=True)
     G.stroke(d, [(13, 18), (27, 16)], M["ink"], INN)                                               # a seam at the shoulder
 
 
-@part("forearm", 40, 50, (20, 7), depth=0.25)
+@part("forearm", 48, 58, (24, 11), band=5.5)
 def forearm(d, M):
+    d = xf(d, 20, WIDE, dx=4, dy=4)
     y1 = 7 + m2p(L_FA)
     G.stroke(d, taper((20, 7), (20, y1), 13, 12, bulge=1.0), M["suit"], OUT, cyclic=True)
     G.stroke(d, C(20, 9, 8.5, 14, ry=6.5), M["pad"], INN, cyclic=True)                              # the elbow pad
     G.stroke(d, [(12.5, y1 - 8), (27.5, y1 - 8), (28.5, y1 + 2), (11.5, y1 + 2)], M["cuff"], OUT, cyclic=True)   # mustard cuff
 
 
-@part("hand", 36, 36, (16, 6), depth=0.2)
+@part("hand", 46, 44, (19, 8), band=5)
 def hand(d, M):
+    d = xf(d, 16, BIG, 6, BIG, dx=3, dy=2)                                                           # 25 % larger about the wrist
     G.stroke(d, [(10, 4), (22, 4), (25, 14), (26, 23), (21, 29), (12, 29), (8, 22), (8, 12)], M["glove"], OUT, cyclic=True)   # a mitt
     G.stroke(d, hose([(24, 14), (30, 19), (29, 24)], 6.5), M["glove"], INN, cyclic=True)           # the thumb
     for x in (13, 17.5):                                                                              # finger creases
         G.stroke(d, [(x, 21), (x + 0.5, 28)], M["ink"], INN)
 
 
-@part("thigh", 48, 62, (24, 8), depth=0.25)
+@part("thigh", 56, 72, (28, 15), band=8)
 def thigh(d, M):
+    d = xf(d, 24, WIDE, dx=4, dy=7)
     G.stroke(d, taper((24, 8), (24, 8 + m2p(L_TH)), 20, 16, bulge=2.0), M["suit"], OUT, cyclic=True)
     G.stroke(d, [(31, 18), (32, 40)], M["ink"], INN)                                                 # the side seam
 
 
-@part("shin", 44, 58, (22, 6), depth=0.25)
+@part("shin", 52, 68, (26, 13), band=6.5)
 def shin(d, M):
+    d = xf(d, 22, WIDE, dx=4, dy=7)
     y1 = 6 + m2p(L_SH)
     G.stroke(d, taper((22, 6), (22, y1), 16, 13, bulge=1.2), M["suit"], OUT, cyclic=True)
     G.stroke(d, C(24, 9, 9.5, 14, ry=7.5), M["pad"], INN, cyclic=True)                              # the knee pad
 
 
-@part("boot", 52, 30, (20, 4), depth=0.22)
+# the boot's sole, boot-local metres from the ankle: heel and toe (solve() stands the figure on them). Round 2 enlarges the
+# boot 25 % about the point of the sole under the ankle, so the sole keeps its 0.18 m under the joint (the 2.0 m height
+# holds), the shaft climbs the shin and the boot grows to heel and toe
+SOLE = ((-0.117, -0.18), (0.283, -0.18))
+
+
+@part("boot", 68, 40, (24, 13), band=6)
 def boot(d, M):
+    d = xf(d, 20, BIG, 27, BIG, dx=4, dy=9)
     G.stroke(d, [(12, 2), (28, 2), (30, 10), (46, 14), (50, 20), (49, 24), (8, 24), (8, 12)], M["boot"], OUT, cyclic=True)   # the boot
     G.stroke(d, [(7, 22), (50, 22), (49, 27), (8, 27)], M["sole"], INN, cyclic=True)                # the sole
     for x in (14, 22, 30, 38):                                                                       # treads
@@ -228,96 +266,127 @@ def boot(d, M):
     G.stroke(d, [(31, 12), (36, 9)], M["ink"], INN)                                                  # a lace
 
 
-@part("hips", 60, 34, (30, 8), depth=0.22, cast=(12, 17))                                           # (the belt's shadow)
+@part("hips", 76, 38, (38, 10), band=8, cast=(14, 19))                                              # (the belt's shadow)
 def hips(d, M):
+    d = xf(d, 30, WIDE, dx=8, dy=2)
     G.stroke(d, [(9, 4), (51, 4), (54, 18), (48, 30), (12, 30), (6, 18)], M["suit"], OUT, cyclic=True)   # the seat of the suit
     G.stroke(d, [(7, 3), (53, 3), (53, 11), (7, 11)], M["belt"], OUT, cyclic=True)                 # the belt
     G.stroke(d, [(27, 2), (35, 2), (35, 12), (27, 12)], M["brass"], INN, cyclic=True)              # its buckle
     G.stroke(d, [(40, 11), (51, 11), (50, 23), (41, 23)], M["belt"], INN, cyclic=True)            # a pouch
 
 
-@part("torso", 76, 84, (36, 76), depth=0.2, cast=(11, 19))                                          # (the helmet's shadow on the shoulders)
+@part("torso", 92, 88, (44, 78), band=16, cast=(13, 21))                                            # (the helmet's shadow on the shoulders)
 def torso(d, M):
+    ds = xf(d, dx=8 + (44 - 36) * (WIDE - 1), dy=2)                                                  # the badge: round, at its widened place
+    d = xf(d, 36, WIDE, dx=8, dy=2)
     body = [(20, 76), (54, 76), (60, 52), (61, 26), (56, 12), (46, 6), (26, 6), (16, 12), (13, 28), (14, 54)]
     G.stroke(d, body, M["suit"], OUT, cyclic=True)                                                   # the chest (pivot: the hips)
     G.stroke(d, [(47, 7), (55, 12), (22, 76), (13, 64), (14, 56)], M["stripe_f"], 0.0, cyclic=True)   # the MERIDIAN stripe
     G.stroke(d, [(47, 7), (14, 56)], M["ink"], INN)
     G.stroke(d, [(55, 12), (22, 76)], M["ink"], INN)
     G.stroke(d, body, M["ink"], OUT, cyclic=True)
-    G.stroke(d, C(44, 36, 7, 16), M["brass"], INN, cyclic=True)                                     # the compass badge
-    G.stroke(d, [(44, 31), (45.5, 36), (44, 41), (42.5, 36)], M["stripe"], INN * 0.6, cyclic=True)
+    G.stroke(ds, C(44, 36, 8, 16), M["brass"], INN, cyclic=True)                                    # the compass badge
+    G.stroke(ds, [(44, 30.5), (45.8, 36), (44, 41.5), (42.2, 36)], M["stripe"], INN * 0.6, cyclic=True)
     G.stroke(d, [(22, 4), (50, 4), (52, 10), (20, 10)], M["steel"], OUT, cyclic=True)              # the helmet's neck ring
     G.stroke(d, [(28, 50), (28, 70)], M["ink"], INN)                                                 # a zip seam
 
 
-@part("pack", 40, 72, (30, 16), depth=0.25)
+@part("pack", 48, 74, (38, 18), band=8)
 def pack(d, M):
+    d = xf(d, 30, 1.25, dx=8, dy=2)                                                                  # 25 % deeper behind the wider back
     G.stroke(d, hose([(26, 14), (28, 7), (34, 5)], 5.5), M["hose"], INN, cyclic=True)              # the air hose to the helmet (desk-check: its end was cut by the canvas top)
     G.stroke(d, [(8, 12), (30, 12), (34, 18), (34, 62), (30, 68), (10, 68), (5, 62), (5, 18)], M["pack"], OUT, cyclic=True)   # the float pack
     G.stroke(d, [(7, 46), (33, 46)], M["ink"], INN)                                                  # its lid
     G.stroke(d, [(12, 20), (18, 20), (18, 40), (12, 40)], M["pack_sh"], INN, cyclic=True)        # a vent
 
 
-@part("head", 72, 76, (32, 68), depth=0.18)
+# The heads, round 2 (LEAD 18:0x (2), (3), (4)): each round-1 head drawn 20 % larger about its face's centre and 4 px lower, so
+# it fills about 70 % of the same 0.61 m bubble with its hair inside the glass; the eye 14 px wide on the 256 px figure
+# (7 px at the game's zoom; round 1: 5); clean skin (no streaks), one soft shadow shape, the blush. The side face - what the
+# player sees nearly all the time - has a rounded nose, a smile line from the profile, a bold eyebrow, and the ear as a
+# small plain C with one fold. The neck stays unscaled on the pivot.
+EYE = (48.0, 28.0, 6.0, 7.6)                      # the side head's eye in the round-1 drawing space: centre x, y, radii
+EYE34 = ((31.0, 0.9), (47.0, 1.0))                # the front-3/4 head's eyes: centre x, scale (the far one narrower); y 28
+E34 = (5.6, 7.4)                                  # ... their radii at scale 1
+
+
+def _hs(x, y):
+    """A point of the side head's round-1 drawing space -> its canvas px."""
+    return 38 + (x - 38) * HK - 1, 32 + (y - 32) * HK + 10
+
+
+def _h34(x, y):
+    return 37 + (x - 37) * HK, 32 + (y - 32) * HK + 10
+
+
+@part("head", 72, 80, (32, 70), band=12, soft=True, streak=0.0, grain=0.012, tint=SKIN_SHADE, strength=0.7)
 def head(d, M):
-    d = G.Xf(d, lambda pts: [(x, y + 4) for x, y in pts])                                           # desk-check: 4 px more headroom (the
-    G.stroke(d, C(38, 32, 22, 32, ry=24), M["skin"], OUT, cyclic=True)                              # tuft was cut); the face, in profile
-    G.stroke(d, [(55, 30), (63, 35.5), (57, 40)], M["skin"], INN, cyclic=True)                      # the nose
+    dn = xf(d, dy=6)
+    d = xf(d, 38, HK, 32, HK, dx=-1, dy=10)
+    G.stroke(dn, [(30, 56), (46, 56), (44, 64), (32, 64)], M["skin"], INN, cyclic=True)            # the neck (under the chin)
+    G.stroke(d, C(38, 32, 22, 32, ry=24), M["skin"], OUT, cyclic=True)                              # the face, in profile
+    G.stroke(d, C(60.5, 36, 4.6, 14, ry=4.0), M["skin"], OUT, cyclic=True)                          # a rounded nose (round 1: a
+    G.stroke(d, C(57, 36, 5.4, 12, ry=3.0), M["skin_f"], 0.0, cyclic=True)                          # pointed triangle), open into the face
     G.stroke(d, hose([(24, 12), (32, 4), (44, 6), (50, 12)], 9), M["hair"], INN, cyclic=True)      # the hair tuft
-    G.stroke(d, hose([(44, 6), (50, 1), (54, 4)], 5), M["hair"], INN, cyclic=True)                  # its cowlick
-    G.stroke(d, C(48, 28, 5, 14, ry=6.5), M["eye"], INN, cyclic=True)                               # an oval eye
-    G.stroke(d, C(50, 29, 2.8, 10, ry=3.6), M["iris_f"], 0.0, cyclic=True)
-    G.stroke(d, C(51, 28, 1.3, 8), M["pupil_f"], 0.0, cyclic=True)
-    G.stroke(d, C(52, 26.5, 0.8, 6), M["eye_f"], 0.0, cyclic=True)                                  # the catch-light
-    G.stroke(d, hose([(43, 19), (48, 17), (54, 19)], 2.2), M["brow"], 0.0, cyclic=True)             # the eyebrow
-    G.stroke(d, C(46, 40, 4.5, 12, ry=3), M["cheek_f"], 0.0, cyclic=True)                           # the cheek
-    G.stroke(d, [(50, 45), (54, 47), (58, 45)], M["ink"], INN)                                       # a small smile
-    G.stroke(d, C(29, 36, 3.6, 12, ry=5.2), M["skin"], INN, cyclic=True)                            # the ear: just behind the head's
-    G.stroke(d, [(30.2, 33.6), (28.2, 36), (30, 38.6)], M["ink"], INN)                               # centre, under the eye line, with
-    #                                                                                                 its fold (the 17:17 sheet at 4x: a
-    #                                                                                                 plain ring of the eye's size at the
-    #                                                                                                 eye's height read as a second, blank eye)
-    G.stroke(d, [(30, 56), (46, 56), (44, 64), (32, 64)], M["skin"], INN, cyclic=True)             # the neck
+    G.stroke(d, hose([(44, 6), (49, 3.5), (53, 6.5)], 5), M["hair"], INN, cyclic=True)              # its cowlick (inside the glass)
+    ex, ey, erx, ery = EYE
+    G.stroke(d, C(ex, ey, erx, 16, ry=ery), M["eye"], INN, cyclic=True)                             # an oval eye
+    G.stroke(d, C(ex + 1.6, ey + 0.8, 4.1, 12, ry=5.3), M["iris_f"], 0.0, cyclic=True)              # a large iris: a soft gaze (at
+    G.stroke(d, C(ex + 2.4, ey + 0.6, 2.2, 8), M["pupil_f"], 0.0, cyclic=True)                      # 3.4 px in so much white it stared)
+    G.stroke(d, C(ex + 3.8, ey - 1.6, 1.1, 6), M["eye_f"], 0.0, cyclic=True)                        # the catch-light
+    G.stroke(d, hose([(41.5, 18), (48, 15.5), (55, 18)], 3.0), M["brow"], 0.0, cyclic=True)         # the eyebrow
+    G.stroke(d, C(45.5, 41.5, 4.8, 12, ry=3), M["cheek_f"], 0.0, cyclic=True)                       # the blush
+    G.stroke(d, [(56.3, 46.4), (53.5, 47.9), (50, 47.3), (47.2, 44.8)], M["ink"], INN)               # the smile: from the profile
+    #                                                                                                 in, its corner turned up
+    G.stroke(d, C(28.5, 36.5, 3.6, 10, ry=5.0, a0=math.radians(55), a1=math.radians(305)), M["ink"], INN)   # the ear: a small
+    G.stroke(d, [(29.2, 34.8), (28.0, 36.6), (29.4, 38.2)], M["ink"], INN * 0.8)                     # plain C and one fold (round 1's
+    #                                                                                                 ring of the eye's size at the eye's
+    #                                                                                                 height read as a second, blank eye)
 
 
-@part("head34", 72, 78, (36, 70), depth=0.18)
+@part("head34", 72, 80, (36, 70), band=12, soft=True, streak=0.0, grain=0.012, tint=SKIN_SHADE, strength=0.7)
 def head34(d, M):
-    d = G.Xf(d, lambda pts: [(x, y + 6) for x, y in pts])                                           # (6 px more headroom, as head)
+    dn = xf(d, dy=6)
+    d = xf(d, 37, HK, 32, HK, dy=10)
+    G.stroke(dn, [(28, 55), (46, 55), (44, 64), (30, 64)], M["skin"], INN, cyclic=True)            # the neck
+    G.stroke(d, C(14, 33, 4, 12, ry=5.5), M["skin"], INN, cyclic=True)                              # the far ear (behind the face)
     G.stroke(d, C(37, 32, 23, 32, ry=24), M["skin"], OUT, cyclic=True)                              # the face, three-quarter
     G.stroke(d, hose([(18, 14), (28, 4), (44, 4), (54, 12)], 10), M["hair"], INN, cyclic=True)
-    G.stroke(d, hose([(40, 4), (46, -1), (51, 2)], 5), M["hair"], INN, cyclic=True)
-    for cx, sc in ((31, 0.9), (47, 1.0)):                                                          # two oval eyes (the far one narrower)
-        G.stroke(d, C(cx, 28, 4.6 * sc, 14, ry=6.3), M["eye"], INN, cyclic=True)
-        G.stroke(d, C(cx + 1.2, 29, 2.6 * sc, 10, ry=3.4), M["iris_f"], 0.0, cyclic=True)
-        G.stroke(d, C(cx + 1.4, 28.5, 1.2, 8), M["pupil_f"], 0.0, cyclic=True)
-        G.stroke(d, C(cx + 2.2, 27, 0.8, 6), M["eye_f"], 0.0, cyclic=True)
-        G.stroke(d, hose([(cx - 5 * sc, 19.5), (cx, 17.5), (cx + 5 * sc, 19.5)], 2.2), M["brow"], 0.0, cyclic=True)
-    G.stroke(d, hose([(40, 32), (43, 37), (40, 39)], 3.2), M["skin_sh_f"], 0.0, cyclic=True)        # the nose
-    G.stroke(d, C(27, 39, 4, 12, ry=2.6), M["cheek_f"], 0.0, cyclic=True)
-    G.stroke(d, C(51, 39, 4.5, 12, ry=2.8), M["cheek_f"], 0.0, cyclic=True)
-    G.stroke(d, [(33, 45), (39, 48), (46, 45)], M["ink"], INN)
-    G.stroke(d, C(14, 33, 4, 12, ry=5.5), M["skin"], INN, cyclic=True)
-    G.stroke(d, [(28, 55), (46, 55), (44, 64), (30, 64)], M["skin"], INN, cyclic=True)
+    G.stroke(d, hose([(40, 4), (45.5, 2), (50, 4.5)], 5), M["hair"], INN, cyclic=True)
+    for cx, sc in EYE34:                                                                            # two oval eyes
+        G.stroke(d, C(cx, 28, E34[0] * sc, 16, ry=E34[1]), M["eye"], INN, cyclic=True)
+        G.stroke(d, C(cx + 0.9, 28.8, 3.9 * sc, 12, ry=5.1), M["iris_f"], 0.0, cyclic=True)
+        G.stroke(d, C(cx + 1.2, 28.6, 2.0, 8), M["pupil_f"], 0.0, cyclic=True)
+        G.stroke(d, C(cx + 2.4, 26.6, 1.1, 6), M["eye_f"], 0.0, cyclic=True)
+        G.stroke(d, hose([(cx - 6 * sc, 18.6), (cx, 16.2), (cx + 6 * sc, 18.6)], 3.0), M["brow"], 0.0, cyclic=True)
+    G.stroke(d, hose([(40, 33), (43.5, 38), (40, 40.5)], 3.6), M["skin_sh_f"], 0.0, cyclic=True)    # the nose
+    G.stroke(d, C(26.5, 40.5, 4.2, 12, ry=2.8), M["cheek_f"], 0.0, cyclic=True)
+    G.stroke(d, C(51.5, 40.5, 4.8, 12, ry=3.0), M["cheek_f"], 0.0, cyclic=True)
+    G.stroke(d, [(33, 45.5), (39, 48.5), (46, 45.5)], M["ink"], INN)
 
 
 # The blink (LEAD 14:5x: ONE closed-eye swap part per facing now; the rest of the face-swap set after acceptance): a skin
 # patch the size of the open eye and its ink, the closed lid's line on it; shown on the head bone at BLINK's offset
-@part("blink", 18, 20, (9, 10))
+@part("blink", 24, 28, (12, 14))
 def blink(d, M):
-    G.stroke(d, C(9, 10, 6.3, 16, ry=7.8), M["skin_f"], 0.0, cyclic=True)
-    G.stroke(d, C(9, 10, 4.3, 8, ry=2.8, a0=math.radians(15), a1=math.radians(165)), M["ink"], INN)   # the lid, bowed down
+    G.stroke(d, C(12, 14, EYE[2] * HK + 2.2, 18, ry=EYE[3] * HK + 2.1), M["skin_f"], 0.0, cyclic=True)
+    G.stroke(d, C(12, 14.5, 6.4, 8, ry=3.6, a0=math.radians(15), a1=math.radians(165)), M["ink"], INN)   # the lid, bowed down
 
 
-@part("blink34", 30, 20, (15, 10))
+_GAP34 = (EYE34[1][0] - EYE34[0][0]) * HK         # the two eyes' spacing on the enlarged head (px)
+
+
+@part("blink34", 40, 28, (20, 14))
 def blink34(d, M):
-    for cx, sc in ((7, 0.9), (23, 1.0)):                                                            # head34's eyes at x 31 / 47
-        G.stroke(d, C(cx, 10, 4.6 * sc + 1.3, 16, ry=7.6), M["skin_f"], 0.0, cyclic=True)
-        G.stroke(d, C(cx, 10, 3.9 * sc, 8, ry=2.7, a0=math.radians(15), a1=math.radians(165)), M["ink"], INN)
+    for cx, sc in ((20 - _GAP34 / 2, EYE34[0][1]), (20 + _GAP34 / 2, EYE34[1][1])):
+        G.stroke(d, C(cx, 14, E34[0] * sc * HK + 2.1, 18, ry=E34[1] * HK + 2.0), M["skin_f"], 0.0, cyclic=True)
+        G.stroke(d, C(cx, 14.5, 5.6 * sc, 8, ry=3.4, a0=math.radians(15), a1=math.radians(165)), M["ink"], INN)
 
 
-# the blink's part and its pivot's offset (m) from the head's pivot, per facing: the open eye's centre (side: head (48, 28)
-# px against its pivot (32, 64); front34: the midpoint of the two eyes (39, 28) against (36, 64))
-BLINK = {"side": ("blink", (0.125, 0.28125)), "front34": ("blink34", (0.0234, 0.28125))}
+# the blink's part and its pivot's offset (m) from the head's pivot, per facing: the open eye's centre on the canvas against
+# the head's pivot (side: (32, 70); front34: the midpoint of the two eyes against (36, 70))
+BLINK = {"side": ("blink", ((_hs(EYE[0], EYE[1])[0] - 32) / PX, (70 - _hs(EYE[0], EYE[1])[1]) / PX)),
+         "front34": ("blink34", ((_h34((EYE34[0][0] + EYE34[1][0]) / 2, 28)[0] - 36) / PX, (70 - _h34(0, 28)[1]) / PX))}
 
 
 @part("helmet", 100, 100, (50, 92), depth=0.0, glow=0.0)
@@ -329,38 +398,44 @@ def helmet(d, M):
     G.stroke(d, [(22, 86), (78, 86), (76, 94), (24, 94)], M["steel"], OUT, cyclic=True)            # the seal ring
 
 
-@part("antenna", 30, 44, (15, 40), depth=0.2)
+@part("antenna", 34, 50, (17, 45), band=2)
 def antenna(d, M):
-    G.stroke(d, hose([(15, 40), (14, 34), (16, 28), (14, 22), (16, 16)], 2.6), M["lead"], INN, cyclic=True)   # a coiled spring stalk
-    G.stroke(d, [(15, 16), (15, 12)], M["ink"], INN)
-    G.stroke(d, [(9, 4), (21, 4), (15, 14)], M["brass"], OUT, cyclic=True)                          # the brass plumb bob on the spring
-    G.stroke(d, C(15, 4, 2.2, 8), M["brass"], INN, cyclic=True)
+    db = xf(d, 15, 1.3, 9, 1.3, dx=2, dy=5)                                                          # the bob 30 % larger (it carries
+    d = xf(d, dx=2, dy=5)                                                                            # the heavier line)
+    G.stroke(d, hose([(15, 40), (14, 34), (16, 28), (14, 22), (16, 16)], 3.6), M["lead"], INN, cyclic=True)   # a coiled spring stalk
+    G.stroke(d, [(15, 16), (15, 13)], M["ink"], INN)
+    G.stroke(db, [(9, 4), (21, 4), (15, 14)], M["brass"], OUT, cyclic=True)                         # the brass plumb bob on the spring
+    G.stroke(db, C(15, 4, 2.2, 8), M["brass"], INN, cyclic=True)
 
 
-@part("torso34", 80, 84, (40, 76), depth=0.2, cast=(11, 19))
+@part("torso34", 96, 88, (48, 78), band=16, cast=(13, 21))
 def torso34(d, M):
+    ds = xf(d, dx=8 + (50 - 40) * (WIDE - 1), dy=2)
+    d = xf(d, 40, WIDE, dx=8, dy=2)
     body = [(20, 76), (60, 76), (66, 52), (66, 26), (60, 12), (50, 6), (28, 6), (17, 12), (12, 28), (13, 54)]
     G.stroke(d, body, M["suit"], OUT, cyclic=True)
     G.stroke(d, [(50, 6), (60, 12), (28, 76), (18, 72), (16, 64)], M["stripe_f"], 0.0, cyclic=True)
     G.stroke(d, [(50, 6), (16, 64)], M["ink"], INN)
     G.stroke(d, [(60, 12), (28, 76)], M["ink"], INN)
     G.stroke(d, body, M["ink"], OUT, cyclic=True)
-    G.stroke(d, C(50, 38, 7, 16), M["brass"], INN, cyclic=True)
-    G.stroke(d, [(50, 33), (51.5, 38), (50, 43), (48.5, 38)], M["stripe"], INN * 0.6, cyclic=True)
+    G.stroke(ds, C(50, 38, 8, 16), M["brass"], INN, cyclic=True)
+    G.stroke(ds, [(50, 32.5), (51.8, 38), (50, 43.5), (48.2, 38)], M["stripe"], INN * 0.6, cyclic=True)
     G.stroke(d, [(22, 4), (58, 4), (60, 10), (20, 10)], M["steel"], OUT, cyclic=True)
     G.stroke(d, [(40, 46), (40, 72)], M["ink"], INN)
 
 
-@part("hips34", 64, 34, (32, 8), depth=0.22, cast=(12, 17))
+@part("hips34", 80, 38, (40, 10), band=8, cast=(14, 19))
 def hips34(d, M):
+    d = xf(d, 32, WIDE, dx=8, dy=2)
     G.stroke(d, [(8, 4), (56, 4), (58, 18), (52, 30), (12, 30), (6, 18)], M["suit"], OUT, cyclic=True)
     G.stroke(d, [(6, 3), (58, 3), (58, 11), (6, 11)], M["belt"], OUT, cyclic=True)
     G.stroke(d, [(28, 2), (36, 2), (36, 12), (28, 12)], M["brass"], INN, cyclic=True)
     G.stroke(d, [(43, 11), (54, 11), (53, 23), (44, 23)], M["belt"], INN, cyclic=True)
 
 
-@part("boot34", 44, 30, (22, 4), depth=0.22)
+@part("boot34", 56, 42, (27, 13), band=6)
 def boot34(d, M):
+    d = xf(d, 22, BIG, 28, BIG, dx=5, dy=9)                                                          # as the boot: about its sole
     G.stroke(d, [(12, 2), (30, 2), (32, 10), (38, 16), (39, 22), (35, 25), (8, 25), (7, 14)], M["boot"], OUT, cyclic=True)
     G.stroke(d, [(6, 23), (40, 23), (39, 28), (7, 28)], M["sole"], INN, cyclic=True)
     G.stroke(d, [(11, 4), (31, 4)], M["ink"], INN)
@@ -384,8 +459,8 @@ def render_part(name):
         img = np.clip(np.rint(np.dstack([out, out_a]) * 255), 0, 255).astype(np.uint8)
         return img
     if name.startswith("blink"):                                               # a swap overlay: no form shading (a rim or a
-        return U.paper_grain(img, 101 + len(name), 0.03)                       # shade would outline the patch on the face)
-    return paint(img, 101 + len(name), **{k: v for k, v in kw.items() if k in ("depth", "cool", "glow", "cast")})
+        return U.paper_grain(img, 101 + len(name), 0.012)                      # shade would outline the patch on the face)
+    return paint(img, 101 + len(name), **kw)
 
 
 # ---------------------------------------------------------------- the rig (metres; offsets from the parent's pivot at rest)
@@ -394,18 +469,21 @@ def bones(facing):
     if facing == "side":
         T, Hd, Hp, Bt = "torso", "head", "hips", "boot"
         sh_f, sh_b, hp_f, hp_b = (0.0, 0.42), (0.01, 0.42), (0.01, -0.03), (-0.02, -0.03)
-        pack_off, head_off = (-0.16, 0.36), (0.02, 0.56)
+        pack_off, head_off = (-0.22, 0.36), (0.02, 0.56)                       # round 2: the pack 0.06 m further back (the wider back)
     else:
         T, Hd, Hp, Bt = "torso34", "head34", "hips34", "boot34"
-        sh_f, sh_b, hp_f, hp_b = (0.17, 0.42), (-0.15, 0.43), (0.09, -0.03), (-0.08, -0.03)
-        pack_off, head_off = (-0.13, 0.38), (0.0, 0.56)
+        sh_f, sh_b, hp_f, hp_b = (0.23, 0.42), (-0.2, 0.43), (0.12, -0.03), (-0.108, -0.03)   # round 2: x 1.35 with the body
+        pack_off, head_off = (-0.18, 0.38), (0.0, 0.56)
     return [
         ("hips", Hp, None, (0.0, 0.92), 0.0, 0.0, 12),
         ("torso", T, "hips", (0.0, 0.0), 0.0, 0.56, 8),      # under the near leg (a raised thigh crosses it), the belt over both
         ("pack", "pack", "torso", pack_off, 0.0, 0.0, 4),
         ("head", Hd, "torso", head_off, 0.0, 0.0, 14),
         ("helmet", "helmet", "head", (0.02, -0.06), 0.0, 0.0, 16),
-        ("antenna", "antenna", "helmet", (-0.04, 0.63), 0.0, 0.3, 17),     # over the bubble (it lies back across it in crouch)
+        ("antenna", "antenna", "helmet", (-0.04, 0.615), 0.0, 0.3, 17),    # over the bubble (it lies back across it in crouch);
+        #                                                                    round 2: its foot ON the rim's line (0.63 stood it
+        #                                                                    above the rim, and the heavier stalk took the crouch
+        #                                                                    from 0.97 to 0.98 m)
         ("upper_arm_b", "upper_arm", "torso", sh_b, 0.0, L_UA, 1),
         ("forearm_b", "forearm", "upper_arm_b", (0.0, -L_UA), 0.0, L_FA, 2),
         ("hand_b", "hand", "forearm_b", (0.0, -L_FA), 0.0, 0.12, 3),
@@ -436,15 +514,22 @@ POSES = {   # degrees counter-clockwise, added to rest; "lift" raises the root a
     # draws the 1 m line
     "crouch": {"torso": -76, "head": 58, "antenna": 123, "upper_arm_f": 45, "forearm_f": 90, "upper_arm_b": 38, "forearm_b": 94,
                "thigh_f": 115, "shin_f": -142, "boot_f": 27, "thigh_b": 95, "shin_b": -152, "boot_b": 57, "root_scale_z": 0.92},
-    # the 17:17 sheet: the near arm at 150 crossed the bubble and hid the face (the arms cannot reach over a 0.6 m bubble): the
-    # near arm now reaches forward and up, clear of the glass; the far arm stays raised behind it
-    "jump": {"torso": -8, "head": 10, "upper_arm_f": 108, "forearm_f": 25, "upper_arm_b": 125, "forearm_b": 40,
+    # the 17:17 sheet: the near arm at 150 crossed the bubble and hid the face (the arms cannot reach over a 0.6 m bubble).
+    # Round 2 (LEAD 18:0x (5)): the counter-swing - the near arm forward and up, clear of the glass, the far arm back and down
+    "jump": {"torso": -8, "head": 10, "upper_arm_f": 108, "forearm_f": 25, "upper_arm_b": -40, "forearm_b": 20,
              "thigh_f": 78, "shin_f": -96, "boot_f": 18, "thigh_b": 40, "shin_b": -104, "boot_b": 30, "lift": 0.42},
     # a lunge on the shovel: the near hand on the D-grip at (0.33, 0.93) m from the hips' ground point, the shovel 48 deg
-    # down (DIG_AIM), its tip ~0.1 m in the ground 1.25 m ahead; the far hand on the haft 0.3 m down it; the back foot on its toe
+    # down (DIG_AIM), its tip ~0.1 m in the ground 1.25 m ahead; the far hand on the haft 0.3 m down it; the back foot on its
+    # toe (round 2: 35.8 for 32, the longer boot's toe 0.283 m ahead of the ankle)
     "dig": {"torso": -24, "head": 18, "upper_arm_f": -18.8, "forearm_f": 121.6, "upper_arm_b": 35.3, "forearm_b": 41.3,
-            "thigh_f": 40, "shin_f": -52, "boot_f": 12, "thigh_b": -25, "shin_b": -27, "boot_b": 32},
+            "thigh_f": 40, "shin_f": -52, "boot_f": 12, "thigh_b": -25, "shin_b": -27, "boot_b": 35.8},
+    # round 2 (LEAD 18:0x (6)): one walk CONTACT pose - the near heel down ahead (its toe up 14 deg), the far foot behind on
+    # its toe (the heel up 22 deg), the arms swung against the legs. By hand: the heel at -0.844 m and the toe at -0.843 m
+    # under the hips' pivot
+    "walk": {"torso": -4, "head": 4, "upper_arm_f": -24, "forearm_f": 16, "upper_arm_b": 26, "forearm_b": 24,
+             "thigh_f": 27, "shin_f": -6, "boot_f": -7, "thigh_b": -20, "shin_b": -28, "boot_b": 26},
 }
+GRIP = (0.03 * BIG, -0.09 * BIG)                  # the near hand's grip socket (m from the wrist): with the glove, 25 % further
 DIG_AIM = -126.8      # the shovel's turn from the near hand's angle (the hand's world angle 78.8 in "dig": 48 deg below level)
 
 
@@ -461,7 +546,7 @@ def rig_json(parts_rects):
                    {"chain": ["upper_arm_b", "forearm_b"], "effector": "hand_b", "bend": "back"},
                    {"chain": ["thigh_f", "shin_f"], "effector": "boot_f", "bend": "forward"},
                    {"chain": ["thigh_b", "shin_b"], "effector": "boot_b", "bend": "forward"}],
-            "sockets": {"hand_f_grip": {"bone": "hand_f", "offset_m": [0.03, -0.09]},
+            "sockets": {"hand_f_grip": {"bone": "hand_f", "offset_m": [round(GRIP[0], 4), round(GRIP[1], 4)]},
                         "helmet_top": {"bone": "antenna", "offset_m": [0.0, 0.3]}},
             "swaps": {"blink": {"part": BLINK[facing][0], "bone": "head", "offset_m": [round(v, 4) for v in BLINK[facing][1]], "order": 14.5,
                                 "note": "shown over the head (under the helmet) while the eyes are closed; hidden otherwise"}}})
@@ -527,7 +612,7 @@ def solve(facing, pose):
     for bt in ("boot_f", "boot_b"):
         x, z, a = world[bt]
         t = math.radians(a)
-        for ox, oz in ((-0.09, -0.18), (0.24, -0.18)):                         # heel and toe of the sole, boot-local
+        for ox, oz in SOLE:                                                    # heel and toe of the sole, boot-local
             soles.append(z + ox * math.sin(t) + oz * math.cos(t))
     dz = -min(soles) + pose.get("lift", 0.0)
     return {n: (x, z + dz, a) for n, (x, z, a) in world.items()}
@@ -537,7 +622,7 @@ def sole_z(world, boot):
     """The lowest point of a boot's sole (m above the ground) in a solved pose: 0 = standing on it."""
     x, z, a = world[boot]
     t = math.radians(a)
-    return min(z + ox * math.sin(t) + oz * math.cos(t) for ox, oz in ((-0.09, -0.18), (0.24, -0.18)))
+    return min(z + ox * math.sin(t) + oz * math.cos(t) for ox, oz in SOLE)
 
 
 def squash(img, ground, sz):
@@ -570,7 +655,7 @@ def pose_image(P, facing, pose, W=300, H=380, ground=350, cx=150, prop=None, bli
             pimg, ppiv, aim = prop                                             # drawn over the body and the far hand, under the
             x, z, a = world["hand_f"]                                          # near arm (its mitt closes over the D-grip)
             t = math.radians(a)
-            gx, gz = x + 0.03 * math.cos(t) + 0.09 * math.sin(t), z + 0.03 * math.sin(t) - 0.09 * math.cos(t)
+            gx, gz = x + GRIP[0] * math.cos(t) - GRIP[1] * math.sin(t), z + GRIP[0] * math.sin(t) + GRIP[1] * math.cos(t)
             place(dst, pimg, ppiv, a + aim, (cx + gx * PX, ground - gz * PX))
         img, pivot = P[p + ("_far" if n in FAR else "")]
         x, z, a = world[n]
@@ -583,11 +668,17 @@ def pose_image(P, facing, pose, W=300, H=380, ground=350, cx=150, prop=None, bli
     return squash(dst, ground, pose.get("root_scale_z", 1.0))
 
 
-def all_parts():
+def all_parts(back=1):
+    """Every part rendered and painted. back: paint()'s BACK (the shadow band on the back edge, or -1: on the right)."""
+    global BACK
     P = {}
-    for name, (w, h, pivot, fn, kw) in PARTS.items():
-        img = render_part(name)
-        P[name] = (img, pivot)
+    keep, BACK = BACK, back
+    try:
+        for name, (w, h, pivot, fn, kw) in PARTS.items():
+            img = render_part(name)
+            P[name] = (img, pivot)
+    finally:
+        BACK = keep
     for name in ("upper_arm", "forearm", "hand", "thigh", "shin", "boot", "boot34"):  # the far limbs: one step darker
         img = P[name][0].astype(np.float32) / 255.0
         img[..., :3] = img[..., :3] * 0.8 + (rgb(PAL["sky"]) * 0.55 + rgb(PAL["brown"]) * 0.25) * 0.08
@@ -631,14 +722,26 @@ def preview(out, footnote=None):
     if os.path.isfile(shovel):
         simg = pngio.read_png_np(shovel)
         prop = (simg, (simg.shape[1] * 0.0667, simg.shape[0] * 0.5), DIG_AIM)   # B-226's shovel, pivot at the D-grip (PPU 128, as v5)
-    W = 1560
+    W = 1760                                                                     # (round 2: five poses in the pose row)
     GROUND = 350                                                                 # pose_image's ground row
 
-    def strip(cells, label, h=430):
+    def tex(name):
+        p = os.path.join(ART, "terrain", "earth", name + "_color.png")
+        return pngio.read_png_np(p)[..., :3].astype(np.float32) / 255.0 if os.path.isfile(p) else None
+
+    def tiled(t, hh, ww):
+        return np.tile(t, (-(-hh // t.shape[0]), -(-ww // t.shape[1]), 1))[:hh, :ww]
+
+    def strip(cells, label, h=430, bg=None):
         """cells: (name, premultiplied float image, its ground row[, a ceiling in m]): each stands on the strip's ground line; a
-        ceiling draws a red line that far above the ground across the cell (the crouch's 1 m gap, LEAD 14:4x)."""
+        ceiling draws a red line that far above the ground across the cell (the crouch's 1 m gap, LEAD 14:4x). bg = (wall,
+        floor) textures: the strip is a dug cell at 1x - the tier's back wall behind the figures, its fill under their feet."""
         r = np.tile(paper, (h, W, 1)).astype(np.float32)
         r[h - 40:h - 36] = ground_col
+        if bg is not None and bg[0] is not None:
+            r[18:h - 40] = tiled(bg[0], h - 58, W)
+            if bg[1] is not None:
+                r[h - 40:h] = tiled(bg[1], 40, W)
         review._label(r, label, 6, 4, scale=1)
         x = 10
         for name, img, g, *rest in cells:
@@ -658,8 +761,8 @@ def preview(out, footnote=None):
     turn = [("side, facing right (idle)", side, GROUND), ("the rig mirrored: facing left", side[:, ::-1].copy(), GROUND),
             ("front 3/4 (idle)", pose_image(P, "front34", POSES["idle"]), GROUND)]
     rows = [np.tile(paper, (28, W, 1)).astype(np.float32)]
-    review._label(rows[0], "B-231 the v5 surveyor (C5 design, D-185): a rigged cut-out, jointed limbs, painted shading lit from above; 2.0 m = 256 px", 6, 8)
-    rows.append(strip(turn, "turnaround (posed from the rig): lit from above with a slight lean to the upper left, so the mirrored rig reads the same (LEAD 14:5x)"))
+    review._label(rows[0], "B-231 the v5 surveyor (C5 design, D-185), ROUND 2: a rigged cut-out, jointed limbs, the props' line weight, one cool shadow band a part; 2.0 m = 256 px", 6, 8)
+    rows.append(strip(turn, "turnaround (posed from the rig): lit from above, the shadow band on each part's lower end and back edge, so the mirrored rig reads the same"))
 
     def half(im):
         """The game's zoom: the 256 px drawing at 1/2."""
@@ -700,19 +803,34 @@ def preview(out, footnote=None):
     faces = [(f"{fc}: {'the blink swap' if cl else 'eyes open'}", face(fc, cl), None) for fc in ("side", "front34") for cl in (False, True)]
     rows.append(strip([(n, im, im.shape[0]) for n, im, _g in faces], "the face at 2x: eyes open and the ONE blink swap part per facing (the rest of the face set after acceptance)", h=300))
     pimg = {k: pose_image(P, "side", POSES[k]) for k in ("idle", "crouch", "jump")}
+    pimg["walk"] = pose_image(P, "side", POSES["walk"], W=340, cx=160)
     pimg["dig"] = pose_image(P, "side", POSES["dig"], W=400, cx=120, prop=prop)                    # (wider: the shovel reaches 1.25 m)
     csz, ctop = POSES["crouch"].get("root_scale_z", 1.0), top_m(pimg["crouch"], GROUND)
     over = f", {100 * (ctop - 1.0):.0f} cm INTO THE 1 m LINE" if ctop > 1.0 else ""
-    poses = [("idle", pimg["idle"], GROUND), (f"crouch x{csz:g}: top {ctop:.2f} m{over}", pimg["crouch"], GROUND, 1.0),
-             ("jump", pimg["jump"], GROUND), ("dig", pimg["dig"], GROUND)]
-    rows.append(strip(poses, f"pose sheet (side): idle, crouch (a deep tuck under a 1 m gap, root squash {csz:g}, measured top {ctop:.2f} m), jump apex (knees tucked, arms up), dig with B-226's shovel"))
-    rows.append(strip([(k, half(pimg[k]), GROUND // 2) for k in ("idle", "crouch", "jump", "dig")],
-                      "the same poses at the game's zoom (1x): the shading is baked on each part at rest, so judge it here on the jump's raised thigh and arms and the dig's bent arm (LEAD 14:5x; the fix, if needed, is U-199's contact shade)", h=260))
-    for k in ("idle", "crouch", "jump", "dig"):                                  # the measured heights, for the sheet's reader
+    poses = [("idle", pimg["idle"], GROUND), ("walk (contact)", pimg["walk"], GROUND),
+             (f"crouch x{csz:g}: top {ctop:.3f} m{over}", pimg["crouch"], GROUND, 1.0), ("jump", pimg["jump"], GROUND), ("dig", pimg["dig"], GROUND)]
+    rows.append(strip(poses, f"pose sheet (side): idle, a walk contact, crouch (a deep tuck under a 1 m gap, root squash {csz:g}, measured top {ctop:.3f} m), jump apex (knees tucked, the counter-swing), dig with B-226's shovel"))
+    order = ("idle", "walk", "crouch", "jump", "dig")
+    rows.append(strip([(k, half(pimg[k]), GROUND // 2) for k in order],
+                      "the same poses at the game's zoom (1x): the shading is baked on each part at rest; the band on the back edge turns under on the jump's raised thigh and the dig's arms", h=260))
+    # LEAD 18:0x (6): the surveyor lives in holes - the 1x row inside a dug cell of Subsoil and of Stone (B-230's back wall
+    # behind, the tier's fill underfoot); here the far limbs' one-step-darker tone is judged too
+    for tname, t in (("Subsoil", 2), ("Stone", 3)):
+        cells = [("idle", half(side), GROUND // 2), ("facing left", half(side)[:, ::-1].copy(), GROUND // 2)]
+        cells += [(k, half(pimg[k]), GROUND // 2) for k in order[1:]]
+        rows.append(strip(cells, f"at the game's zoom (1x) in a dug cell of {tname}: terrain/earth/back_wall_t{t} behind (as exported; the game darkens it further with depth), ground_fill_t{t} underfoot",
+                          h=250, bg=(tex(f"back_wall_t{t}"), tex(f"ground_fill_t{t}"))))
+    # the band's side, both ways (see BACK): A as drawn in every other row, B on the lower right as the v3 props shade
+    PB = all_parts(back=-1)
+    alt = [("A idle: the band on the back edge", side, GROUND), ("A jump: it lies under the raised thigh and arm", pimg["jump"], GROUND),
+           ("B idle: the band on the lower right", pose_image(PB, "side", POSES["idle"]), GROUND),
+           ("B jump: it lies on top of them", pose_image(PB, "side", POSES["jump"]), GROUND)]
+    rows.append(strip(alt, "the shadow band's side: A (this sheet) on each part's back edge, B on the lower right as the v3 props are shaded; either mirrors with the rig"))
+    for k in order:                                                              # the measured heights, for the sheet's reader
         w_ = solve("side", POSES[k])
         hx, hz, ha = w_["helmet"]
         top = hz + 0.3125 * math.cos(math.radians(ha)) + 0.305
-        print(f"{k}: hips {w_['hips'][1]:.2f} m, the bubble's top {top:.2f} m unscaled, drawn top {top_m(pimg[k], GROUND):.2f} m (root scale z "
+        print(f"{k}: hips {w_['hips'][1]:.2f} m, the bubble's top {top:.2f} m unscaled, drawn top {top_m(pimg[k], GROUND):.3f} m (root scale z "
               f"{POSES[k].get('root_scale_z', 1.0):g}), soles f / b {sole_z(w_, 'boot_f'):+.3f} / {sole_z(w_, 'boot_b'):+.3f} m")
     ps = np.tile(paper, (sh.shape[0] + 30, W, 1)).astype(np.float32)
     review._label(ps, f"the part sheet characters/surveyor_v5/rig_color.png ({sh.shape[1]}x{sh.shape[0]}, {len(rects)} parts on pivots; far limbs a step darker)", 6, 4, scale=1)
