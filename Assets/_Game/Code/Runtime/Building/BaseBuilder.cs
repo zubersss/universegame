@@ -103,6 +103,8 @@ namespace Meridian.Building
             Clear();
             if (terrain != null) { terrain.TileChanged -= OnTile; terrain.TileChanged += OnTile; }
             if (rig != null) { rig.placePiece = PlaceItem; rig.dismantle = Dismantle; }
+            pieceProbe ??= PieceStandsAt; // U-209: the dig's target probe
+            if (rig != null && !rig.workables.Contains(pieceProbe)) rig.workables.Add(pieceProbe);
             var state = State;
             if (state == null) return;
             foreach (var a in state.aerostats) if (a.planet == PlanetKey) MakeAerostat(a);
@@ -128,6 +130,11 @@ namespace Meridian.Building
         // ---------- lookups ----------
 
         bool TerrainSolid(Vector2Int c) => terrain != null && TileId.IsSolid(terrain.GetTile(c.x, c.y));
+
+        System.Func<Vector2, bool> pieceProbe;
+
+        /// <summary>U-209: a base piece stands at the point (Dismantle's own lookup, nothing taken down).</summary>
+        public bool PieceStandsAt(Vector2 world) => PieceAt(new Vector2Int(Mathf.FloorToInt(world.x), Mathf.FloorToInt(world.y))) != null;
 
         public Piece PieceAt(Vector2Int c)
         {

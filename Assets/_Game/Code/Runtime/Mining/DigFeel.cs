@@ -160,10 +160,61 @@ namespace Meridian.Mining
             drops = rig.drops;
             if (drops != null) drops.PickedUpAt += OnPicked;
             for (int t = 0; t < Tiers; t++) FxSheet.Get(TierKeys[t]); // asked now: the first stroke finds B-232's sheets ready (or known absent)
+            // U-209: the stroke's own moments: the swing's start (a whoosh) and each contact (a chip where the cell stays shut)
+            digStroke = side.player != null && side.player.GetComponent<Meridian.Player.PlayerRigInput>() is Meridian.Player.PlayerRigInput input ? input.Stroke : null;
+            if (digStroke != null) { digStroke.SwingStarted += OnSwing; digStroke.Contacted += OnContact; }
+        }
+        Meridian.Player.DigStroke digStroke;
+
+        // ---------- U-209 (D-196): the stroke's chips ----------
+
+        /// <summary>A chip (a contact that adds work and leaves the cell shut): its crumbs, their size and speed against a clod's, the
+        /// camera's kick (screen px, one frame), and the chip's pitch by depth tier (soft soil low, stone high).</summary>
+        public const int ChipCrumbsMin = 1, ChipCrumbsMax = 2;
+        public const float CrumbScale = 0.6f, CrumbSpeed = 0.65f, ChipKickPixels = 1f, ChipPitchBase = 0.85f, ChipPitchStep = 0.11f;
+        /// <summary>Tests: chips since load, the last one's crumbs, the swings whose whoosh sounded.</summary>
+        public int Chips { get; private set; }
+        public int LastChipCrumbs { get; private set; }
+        public int Whooshes { get; private set; }
+
+        void OnSwing(Vector2 target, bool diggable)
+        {
+            if (!isActiveAndEnabled || Busy) return;
+            Whooshes++;
+            var audio = Meridian.Audio.AudioDirector.Instance;
+            if (audio != null) audio.Play(Meridian.Audio.Sfx.Swish, 0.5f);
+        }
+
+        void OnContact(Meridian.Player.DigContact kind, Vector2 at, int stage)
+        {
+            if (kind != Meridian.Player.DigContact.Chip || !isActiveAndEnabled || Busy || rig == null) return;
+            var t = rig.terrain;
+            int tier = t != null && rig.D1 ? DigRun.TierAt(t, at) : 0;
+            Vector2 hand = HandOf(at);
+            int crumbs = Random.Range(ChipCrumbsMin, ChipCrumbsMax + 1);
+            Throw(at, AxisFrom(at, hand), crumbs, tier, ToneAt(t, at, tier), CrumbScale, CrumbSpeed);
+            Chips++;
+            LastChipCrumbs = crumbs;
+            if (follow == null && side.sideCamera != null) follow = side.sideCamera.GetComponent<Meridian.Player.CameraFollow>();
+            var line = at - hand;
+            if (follow != null && line.sqrMagnitude > 1e-6f) { follow.Kick(line, ChipKickPixels); LastKick = line.normalized; }
+            var audio = Meridian.Audio.AudioDirector.Instance;
+            if (audio != null) audio.Play(Meridian.Audio.Sfx.Chip, 0.75f, ChipPitchBase + ChipPitchStep * Mathf.Clamp(tier, 0, Tiers - 1));
+        }
+
+        /// <summary>The surveyor's hand for a stroke at `at` (the shoulder over the rig's owner; over the point where there is none).</summary>
+        Vector2 HandOf(Vector2 at) => rig != null && rig.owner != null ? (Vector2)rig.owner.position + new Vector2(0f, 0.9f) : at + Vector2.up;
+
+        /// <summary>The debris' axis for a stroke at `at` from `hand`: back toward the hand and up (the open side; the follow-through's toss).</summary>
+        public static Vector2 AxisFrom(Vector2 at, Vector2 hand)
+        {
+            Vector2 back = hand - at;
+            return ((back.sqrMagnitude > 1e-6f ? back.normalized : Vector2.zero) + Vector2.up * 1.2f).normalized;
         }
 
         void OnDestroy()
         {
+            if (digStroke != null) { digStroke.SwingStarted -= OnSwing; digStroke.Contacted -= OnContact; }
             if (rig != null) rig.Dug -= OnDug;
             if (drops != null) drops.PickedUpAt -= OnPicked;
             if (flight != null) flight.Arrived -= OnArrived;
@@ -192,8 +243,12 @@ namespace Meridian.Mining
             if (cells <= 0) return; // a base piece came down or a node was cut: no ground opened
             var t = rig.terrain;
             int tier = t != null && rig.D1 ? DigRun.TierAt(t, at) : 0;
-            Vector2 hand = rig.owner != null ? (Vector2)rig.owner.position + new Vector2(0f, 0.9f) : at + Vector2.up;
-            Burst(at, hand, ClodsFor(cells), tier, ToneAt(t, at, tier));
+            Vector2 hand = HandOf(at);
+            // U-209: a stroke's debris flies along its follow-through (the axis the stroke told the rig), else back toward the hand and up
+            var axis = rig.StrokeAxis.sqrMagnitude > 1e-6f ? rig.StrokeAxis.normalized : AxisFrom(at, hand);
+            Throw(at, axis, ClodsFor(cells), tier, ToneAt(t, at, tier), 1f, 1f);
+            Bursts++;
+            LastBurst = ClodsFor(cells);
             if (follow == null && side.sideCamera != null) follow = side.sideCamera.GetComponent<Meridian.Player.CameraFollow>();
             var stroke = at - hand;
             if (follow != null && stroke.sqrMagnitude > 1e-6f) { follow.Kick(stroke, KickPixels); LastKick = stroke.normalized; }
@@ -205,22 +260,29 @@ namespace Meridian.Mining
         /// within SpreadDeg of it, each at SpeedMin..SpeedMax. Tests call it directly.</summary>
         public void Burst(Vector2 at, Vector2 hand, int count, int tier, Color tint)
         {
+            Throw(at, AxisFrom(at, hand), count, tier, tint, 1f, 1f);
+            Bursts++;
+            LastBurst = count;
+        }
+
+        /// <summary>Throws `count` pieces from `at` about `axis` (a unit vector), each `size` times a clod and `speed` times its launch
+        /// speed: a stroke's clods (1, 1), a chip's crumbs (U-209).</summary>
+        void Throw(Vector2 at, Vector2 axis, int count, int tier, Color tint, float size, float speed)
+        {
             var sheet = FxSheet.Get(ClodsKey(tier));
             bool onSheet = sheet.Ready && sheet.frames.Length >= ClipsPerSheet;
             var clips = onSheet ? ArtMaterials.ClipsFor(sheet.key) : null;
-            Vector2 back = hand - at;
-            Vector2 axis = ((back.sqrMagnitude > 1e-6f ? back.normalized : Vector2.zero) + Vector2.up * 1.2f).normalized;
             float axisDeg = Mathf.Atan2(axis.y, axis.x) * Mathf.Rad2Deg;
             float now = Time.time;
             for (int n = 0; n < count; n++)
             {
                 int i = Take();
                 float a = (axisDeg + Random.Range(-SpreadDeg, SpreadDeg)) * Mathf.Deg2Rad;
-                float speed = Random.Range(SpeedMin, SpeedMax);
+                float launch = Random.Range(SpeedMin, SpeedMax) * speed;
                 // from the cell's mouth, not its middle: 2-4 m/s clears 0.2-0.8 m, and thrown from the bowl's centre (u195's first captures)
                 // the burst stayed in the hole as one clump
                 pos[i] = at + axis * MouthM + new Vector2(Random.Range(-0.2f, 0.2f), Random.Range(-0.08f, 0.12f));
-                vel[i] = new Vector2(Mathf.Cos(a), Mathf.Sin(a)) * speed;
+                vel[i] = new Vector2(Mathf.Cos(a), Mathf.Sin(a)) * launch;
                 born[i] = now;
                 landed[i] = false;
                 shown[i] = -1;
@@ -233,14 +295,14 @@ namespace Meridian.Mining
                     if (clips != null && clip < clips.clips.Count && clips.clips[clip].length > 0) { clipStart[i] = clips.clips[clip].start; clipLength[i] = clips.clips[clip].length; }
                     else { clipLength[i] = Mathf.Max(1, sheet.frames.Length / ClipsPerSheet); clipStart[i] = clip * clipLength[i]; }
                     if (sheet.material != null) sr.sharedMaterial = sheet.material;
-                    sr.transform.localScale = Vector3.one;
+                    sr.transform.localScale = Vector3.one * size;
                     spin[i] = 0f; angle[i] = 0f; // the sheet's frames tumble
                 }
                 else
                 {
                     sheetOf[i] = null;
                     sr.sprite = StandIn(clip);
-                    sr.transform.localScale = Vector3.one; // drawn at B-232's size (13-20 px at 64 px a metre): the swap to the sheet changes nothing
+                    sr.transform.localScale = Vector3.one * size; // drawn at B-232's size (13-20 px at 64 px a metre): the swap to the sheet changes nothing
                     if (standInMaterial == null) standInMaterial = ArtMaterials.MaterialFor(Meridian.Art.ArtKeys.Fx.ShovelFlick); // lit as the shovel's flick is
                     if (standInMaterial != null) sr.sharedMaterial = standInMaterial;
                     spin[i] = Random.Range(-StandInSpinDeg, StandInSpinDeg);
@@ -250,8 +312,6 @@ namespace Meridian.Mining
                 sr.transform.SetPositionAndRotation(new Vector3(pos[i].x, pos[i].y, 0f), Quaternion.Euler(0f, 0f, angle[i]));
                 sr.enabled = true;
             }
-            Bursts++;
-            LastBurst = count;
             LastBurstOnSheet = onSheet;
         }
 

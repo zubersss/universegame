@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace Meridian.Audio
 {
-    public enum Sfx { Jump, Land, Dig, Place, UiClick, Boom, Shovel, ClodFall, PackTick } // U-150: Boom, U-193: Shovel, U-195: ClodFall, PackTick appended (every older value stays)
+    public enum Sfx { Jump, Land, Dig, Place, UiClick, Boom, Shovel, ClodFall, PackTick, Swish, Chip } // U-150: Boom, U-193: Shovel, U-195: ClodFall, PackTick, U-209: Swish, Chip appended (every older value stays)
 
     /// <summary>
     /// Plays the game's sounds (Bible §10.3, Core): pooled one-shot sources, a thrust loop and an
@@ -25,6 +25,12 @@ namespace Meridian.Audio
         /// <summary>U-195 (D-183): a scoop's clods landing and the pack's tick as a material arrives; unset, SfxSynth's placeholders (U-198 wires
         /// D-186's recorded samples).</summary>
         public AudioClip clodFall, packTick;
+        /// <summary>U-209 (D-196): the dig swing's whoosh, a chip on a contact that does not open the cell (pitched by tier), and the Beam's
+        /// hum while its ray runs; unset, SfxSynth's placeholders (U-198 wires the recorded samples).</summary>
+        public AudioClip swish, chip, beamHum;
+        /// <summary>U-209: the Beam's hum is sounding (independent of the audio device); on within the frame the ray starts.</summary>
+        public bool BeamHumOn { get; private set; }
+        public const float BeamHumVolume = 0.35f;
         /// <summary>U-150: after a boom the engine sound rises (louder, higher) and settles back over RiseSeconds.</summary>
         public const float RiseSeconds = 0.6f, RiseVolume = 0.35f, RisePitch = 0.12f;
         /// <summary>U-150: 1 right after a boom, back to 0 over RiseSeconds (tests read it).</summary>
@@ -56,6 +62,7 @@ namespace Meridian.Audio
             thrustSource.clip = thrust;
             ambientSource = Source("Ambient", true);
             ambientSource.clip = ambient;
+            beamSource = Source("BeamHum", true); // U-209
             ApplySettings();
             GameSettings.Changed += ApplySettings;
         }
@@ -102,6 +109,7 @@ namespace Meridian.Audio
                 player = scenes.PlanetSide.player;
                 terrain = scenes.PlanetSide.terrain;
                 if (player != null) { player.Jumped += OnJumped; player.Landed += OnLanded; }
+                digInput = player != null ? player.GetComponent<PlayerRigInput>() : null; // U-209: the Beam's hum follows its stroke
                 if (terrain != null) terrain.TileChanged += OnTileChanged;
                 sideShip = scenes.PlanetSide.ship;
                 if (sideShip != null) sideShip.SoundBarrierBroken += OnBoom;
@@ -115,7 +123,7 @@ namespace Meridian.Audio
             if (player != null) { player.Jumped -= OnJumped; player.Landed -= OnLanded; }
             if (terrain != null) terrain.TileChanged -= OnTileChanged;
             if (sideShip != null) sideShip.SoundBarrierBroken -= OnBoom;
-            player = null; terrain = null; sideShip = null;
+            player = null; terrain = null; sideShip = null; digInput = null;
         }
 
         void OnDestroy()
@@ -132,7 +140,10 @@ namespace Meridian.Audio
             Play(newId != TileId.Air ? Sfx.Place : Meridian.Progress.SkillStats.DigTool == Meridian.Rig.DigTool.Shovel ? Sfx.Shovel : Sfx.Dig);
         void OnBoom() { Play(Sfx.Boom); Rise = 1f; }
 
-        public void Play(Sfx id, float volume = 1f)
+        public void Play(Sfx id, float volume = 1f) => Play(id, volume, 1f);
+
+        /// <summary>U-209: a one-shot at a pitch (a chip by its depth tier). The voice's pitch is its own until its next sound.</summary>
+        public void Play(Sfx id, float volume, float pitch)
         {
             var clip = id switch
             {
@@ -140,15 +151,40 @@ namespace Meridian.Audio
                 Sfx.Shovel => shovel != null ? shovel : (shovel = SfxSynth.ShovelClip()),
                 Sfx.ClodFall => clodFall != null ? clodFall : (clodFall = SfxSynth.Clip("clod_fall_placeholder", SfxSynth.ClodFall())),
                 Sfx.PackTick => packTick != null ? packTick : (packTick = SfxSynth.Clip("pack_tick_placeholder", SfxSynth.PackTick())),
+                Sfx.Swish => swish != null ? swish : (swish = SfxSynth.Clip("swish_placeholder", SfxSynth.Swish())),
+                Sfx.Chip => chip != null ? chip : (chip = SfxSynth.Clip("chip_placeholder", SfxSynth.Chip())),
                 _ => uiClick,
             };
             LastPlayed = id;
+            LastPitch = pitch;
             PlayCount++;
             if (clip == null) return;
             var v = voices[nextVoice];
             nextVoice = (nextVoice + 1) % Voices;
+            if (v.pitch != pitch) v.pitch = pitch;
             v.PlayOneShot(clip, volume * SfxLevel);
         }
+
+        /// <summary>The last one-shot's pitch (tests).</summary>
+        public float LastPitch { get; private set; } = 1f;
+
+        /// <summary>U-209: the Beam's hum follows the dig stroke: on the frame its ray starts, off when it stops.</summary>
+        void StepBeamHum()
+        {
+            bool on = digInput != null && digInput.isActiveAndEnabled && digInput.Stroke.Phase == DigPhase.Beam;
+            if (on == BeamHumOn) return;
+            BeamHumOn = on;
+            if (beamSource == null) return;
+            if (on)
+            {
+                if (beamSource.clip == null) beamSource.clip = beamHum != null ? beamHum : (beamHum = SfxSynth.Clip("beam_hum_placeholder", SfxSynth.BeamHum()));
+                beamSource.volume = BeamHumVolume * SfxLevel;
+                beamSource.Play();
+            }
+            else beamSource.Stop();
+        }
+        AudioSource beamSource;
+        PlayerRigInput digInput;
 
         void Update()
         {
@@ -157,6 +193,7 @@ namespace Meridian.Audio
             bool sideThrust = sideShip != null && sideShip.isActiveAndEnabled && sideShip.piloted && sideShip.Flight.Throttle > 0.01f;
             bool thrusting = spaceThrust || sideThrust;
             Rise = Mathf.MoveTowards(Rise, 0f, Time.deltaTime / RiseSeconds);
+            StepBeamHum();
             if (thrusting != ThrustOn)
             {
                 ThrustOn = thrusting;

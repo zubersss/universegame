@@ -111,10 +111,25 @@ namespace Meridian.Mining
 
         public Planet PlanetOf(PlanetId id)
         {
-            string s = id.ToString();
-            foreach (var p in planets) if (p.id == s) return p;
-            return null;
+            // U-209: looked up once a planet (the enum's name allocated on every call, and a stroke asks every contact)
+            if (planetOf == null || planetsIndexed != planets)
+            {
+                planetsIndexed = planets;
+                var ids = (PlanetId[])Enum.GetValues(typeof(PlanetId));
+                int top = 0;
+                foreach (var v in ids) top = Mathf.Max(top, (int)v);
+                planetOf = new Planet[top + 1];
+                foreach (var v in ids)
+                {
+                    string s = v.ToString();
+                    foreach (var p in planets) if (p.id == s) planetOf[(int)v] = p;
+                }
+            }
+            int i = (int)id;
+            return i >= 0 && i < planetOf.Length ? planetOf[i] : null;
         }
+        [NonSerialized] Planet[] planetOf;
+        [NonSerialized] Planet[] planetsIndexed;
 
         /// <summary>The planet's base hardness (1 where the tables do not list it: the giants are not dug).</summary>
         public float PlanetHardness(PlanetId id) => PlanetOf(id)?.hardness ?? 1f;

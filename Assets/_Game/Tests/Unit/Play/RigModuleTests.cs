@@ -134,7 +134,9 @@ namespace Meridian.Tests
                 Assert.AreEqual(0.5f, s.pivot.y / s.rect.height, 0.01f, "grip pivot y");
                 Assert.Less(Vector2.Distance(tool.Tool.transform.position, tool.HandWorld), 1e-3f, "tool at the hand");
                 Vector2 toAim = rig.AimWorld - tool.HandWorld;
-                Assert.AreEqual(Mathf.Atan2(toAim.y, toAim.x) * Mathf.Rad2Deg, tool.AimDegrees, 0.5f, "turned to the aim");
+                // U-209 (D-196): the dig slot's tool is carried at rest, whatever the cursor does; the other modules point at the aim
+                if (m == RigModule.Beam) Assert.IsTrue(tool.Carrying, "the dig tool is carried with the button up");
+                else Assert.AreEqual(Mathf.Atan2(toAim.y, toAim.x) * Mathf.Rad2Deg, tool.AimDegrees, 0.5f, "turned to the aim");
                 Assert.AreEqual(RigModules.Muzzle(m).magnitude, Vector2.Distance(tool.HandWorld, tool.MuzzleWorld), 0.005f, "muzzle offset " + m);
                 Assert.IsFalse(tool.Tool.flipY);
             }
@@ -164,7 +166,7 @@ namespace Meridian.Tests
             Assert.AreEqual(tool.BeamLength, tool.Beam.size.x, 1e-3f, "tiled to the hit length");
             Assert.AreEqual(SpriteDrawMode.Tiled, tool.Beam.drawMode);
             rig.holdUse = false;
-            yield return null;
+            yield return new WaitForSeconds(Meridian.Player.DigStroke.BeamTapSeconds + 0.1f); // U-209: a tap's ray is seen for 0.1 s at least
             yield return null;
             Assert.IsFalse(tool.Beam.enabled, "off when released");
             LogAssert.NoUnexpectedReceived();

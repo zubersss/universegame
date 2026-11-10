@@ -42,6 +42,8 @@ namespace Meridian.Player
         public float LastImpactSpeed { get; private set; }
         public Jetpack Jetpack { get; private set; }
         public int Facing { get; private set; } = 1;
+        /// <summary>U-209: turns the surveyor to a side (a dig swing faces its target); a move input turns it again.</summary>
+        public void Face(int dir) { if (dir != 0) Facing = dir > 0 ? 1 : -1; }
         public event System.Action Jumped;
         /// <summary>Raised on touchdown with the impact speed (m/s).</summary>
         public event System.Action<float> Landed;

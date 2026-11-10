@@ -43,7 +43,31 @@ namespace Meridian.Hazards
             clusters.Clear();
             window = float.NaN;
             if (rig != null) rig.harvest = active ? (System.Func<Vector2, int>)(w => (int)TryHarvest(w)) : null;
+            if (rig != null)
+            {
+                // U-209: the dig's target probe (a crystal is something to swing at, in or out of its window)
+                probe ??= CrystalAt;
+                rig.workables.Remove(probe);
+                if (active) rig.workables.Add(probe);
+            }
             enabled = active;
+        }
+        System.Func<Vector2, bool> probe;
+
+        /// <summary>U-209: a crystal cluster stands at the point (TryHarvest's own hit test, nothing harvested).</summary>
+        public bool CrystalAt(Vector2 world)
+        {
+            if (!active) return false;
+            if (!bound) Bind();
+            for (int i = 0; i < clusters.Count; i++)
+            {
+                var c = clusters[i];
+                if (c.view == null) continue;
+                var b = c.view.bounds;
+                b.Expand(0.3f);
+                if (b.Contains(new Vector3(world.x, world.y, b.center.z))) return true;
+            }
+            return false;
         }
 
         void Bind()

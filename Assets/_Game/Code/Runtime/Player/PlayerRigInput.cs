@@ -11,7 +11,7 @@ namespace Meridian.Player
     /// Left click uses the module: the Beam digs and the Builder places while held; the Survey pulses once per
     /// press (with a cooldown); the Grapple does nothing until its task (D-087 retired the Lance from slot 2).
     /// </summary>
-    public sealed class PlayerRigInput : MonoBehaviour
+    public sealed class PlayerRigInput : MonoBehaviour, IDigWorld
     {
         public const float SurveyCooldown = 1.2f;
 
@@ -76,23 +76,54 @@ namespace Meridian.Player
             if (uiFree && rig != null && ((secondary != null && secondary.WasPressedThisFrame()) || secondaryLatched)) Secondary();
             secondaryLatched = false;
             if (Grapple != null) Grapple.held = pressed && module == RigModule.Grapple && rig != null;
-            bool edge = primary.WasPressedThisFrame() || (holdUse && !heldLast);
+            bool edge = (primary.WasPressedThisFrame() || (holdUse && !heldLast)) && uiFree;
             heldLast = holdUse;
-            Using = rig != null && view != null && pressed;
-            if (!Using) { strokeHeld = 0f; StrokeProgress = 0f; return; }
-            // U-174 (D-174): a Beam stroke takes its time (0.25 s x the planet's and the tier's hardness / Beam power, capped at 8 s), held.
-            if (module == RigModule.Beam)
+            bool ready = rig != null && view != null;
+            // U-209 (D-196): the dig slot's stroke. A press starts a swing this frame and commits it; the D1 stroke time (U-174: 0.25 s
+            // for the Beam, 0.5 s for the shovel, x the planet's and the tier's hardness / the dig power) is the work a target needs.
+            if (ready && module == RigModule.Beam)
             {
-                float need = rig.StrokeSeconds(AimWorld);
-                if (need > 0f)
-                {
-                    strokeHeld += Time.deltaTime;
-                    StrokeProgress = Mathf.Clamp01(strokeHeld / need);
-                    if (strokeHeld < need) return;
-                    strokeHeld = 0f;
-                }
+                int swings = Stroke.Swings;
+                var phase = Stroke.Phase;
+                Stroke.Step(this, Time.deltaTime, edge, pressed, AimWorld);
+                if (Stroke.Swings != swings || (Stroke.Phase == DigPhase.Beam && phase != DigPhase.Beam)) StrokeStartFrame = Time.frameCount;
+                Using = pressed || Stroke.Active;
+                StrokeProgress = Stroke.Active ? Stroke.WorkAt(Stroke.Target) : 0f;
+                int toward = Stroke.Active ? (Stroke.Target.x < rig.DigOrigin.x ? -1 : 1) : 0;
+                // the surveyor turns to the swing's target and keeps that side after it (the flip only between swings)
+                if (toward != 0 && controller != null && (Stroke.Swings != swings || Stroke.Phase == DigPhase.Beam)) controller.Face(toward);
+                StrokeFacing = toward;
+                return;
             }
+            if (Stroke.Active) Stroke.Cancel();
+            StrokeFacing = 0;
+            StrokeProgress = 0f;
+            Using = ready && pressed;
+            if (!Using) return;
             Use(module, edge);
+        }
+
+        /// <summary>U-209: the dig tool's stroke (the views and tests read it).</summary>
+        public DigStroke Stroke { get; } = new DigStroke();
+        /// <summary>U-209: the side the stroke under way faces (-1 left, 1 right; 0: no stroke, the surveyor's own facing).</summary>
+        public int StrokeFacing { get; private set; }
+        /// <summary>U-209: the frame the last swing (or the ray) began: the frame whose Update saw the press (DigResponseTests).</summary>
+        public int StrokeStartFrame { get; private set; } = -1;
+
+        // ---------- IDigWorld: what the stroke works on ----------
+
+        DigTool IDigWorld.Tool => rig.Tool;
+        bool IDigWorld.Target(Vector2 aim, out Vector2 point, out bool clamped) => rig.DigTarget(aim, out point, out clamped);
+        float IDigWorld.StrokeSeconds(Vector2 point) => rig.StrokeSeconds(point);
+        bool IDigWorld.Open(Vector2 point)
+        {
+            // the debris flies along the stroke's follow-through: from the contact back toward the hand and up (DigFeel.Burst's axis)
+            Vector2 hand = ToolView != null ? ToolView.HandWorld : rig.DigOrigin;
+            Vector2 back = hand - point;
+            rig.StrokeAxis = ((back.sqrMagnitude > 1e-6f ? back.normalized : Vector2.zero) + Vector2.up * 1.2f).normalized;
+            bool dug = rig.Dig(point);
+            rig.StrokeAxis = Vector2.zero;
+            return dug;
         }
 
         /// <summary>One use of a module at the current aim (tests call this directly). `pressedNow`: the press edge.</summary>
@@ -113,8 +144,7 @@ namespace Meridian.Player
             }
         }
 
-        float strokeHeld;
-        /// <summary>U-174: the Beam stroke under way (0..1; the tool view and tests read it).</summary>
+        /// <summary>U-174 / U-209: the work the stroke's target holds (0..1; 0 with no stroke under way). Tests and the smoke read it.</summary>
         public float StrokeProgress { get; private set; }
 
         /// <summary>Tests: a right click on the next frame.</summary>

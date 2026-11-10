@@ -123,6 +123,8 @@ namespace Meridian.Mining
             if (planet == PlanetId.Earth) Probe(VaultKey);
             hook = Harvest;
             if (rig != null && !rig.harvesters.Contains(hook)) rig.harvesters.Add(hook);
+            probe ??= NodeAt; // U-209: the dig's target probe
+            if (rig != null && !rig.workables.Contains(probe)) rig.workables.Add(probe);
             t.TileChanged += OnTile;
             Refresh();
         }
@@ -130,6 +132,7 @@ namespace Meridian.Mining
         public void Deactivate()
         {
             if (rig != null && hook != null) rig.harvesters.Remove(hook);
+            if (rig != null && probe != null) rig.workables.Remove(probe);
             if (terrain != null) terrain.TileChanged -= OnTile;
             foreach (var h in handles) if (h.IsValid()) ArtLoad.Release(h);
             handles.Clear(); art.Clear();
@@ -366,6 +369,21 @@ namespace Meridian.Mining
                     p.view.sprite = Frame(VaultKey, p.openFrame + 1, Placeholder.Ring);
                 }
             }
+        }
+
+        System.Func<Vector2, bool> probe;
+
+        /// <summary>U-209: a node stands at the point (Harvest's own hit test, nothing taken): something to swing at, spent or not.</summary>
+        public bool NodeAt(Vector2 world)
+        {
+            if (!Active) return false;
+            for (int i = 0; i < nodes.Count; i++)
+            {
+                var n = nodes[i];
+                if (Mathf.Abs(world.x - (n.x + 0.5f)) > NodeHalfWidth || world.y < n.y - 0.3f || world.y > n.y + NodeHeight) continue;
+                return true;
+            }
+            return false;
         }
 
         /// <summary>The Beam at a node: 1 item per stroke while it has charges and its window is open (1), glancing off a harvested or crusted node (0); -1 when no node is there.</summary>

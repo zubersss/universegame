@@ -125,6 +125,36 @@ namespace Meridian.View2D
         public void Override(string clip, float seconds) { overrideClip = clip; overrideUntil = Time.time + seconds; }
         string overrideClip; float overrideUntil;
 
+        // ---- U-209 (D-196): the dig stroke on the drawn surveyor ----
+
+        /// <summary>The sheet (or its controller) has this clip by its own name (no stand-in).</summary>
+        public bool HasClip(string clip) => !string.IsNullOrEmpty(clip) && Has(clip);
+
+        /// <summary>Plays a stroke's clip from its first drawing for `seconds` (a swing's dig_down / dig_fwd / dig_up, a Beam aim pose)
+        /// when the sheet has it by name; false, and nothing changes, when it has not (B-246's clips arrive by key).</summary>
+        public bool PlayStroke(string clip, float seconds)
+        {
+            if (!HasClip(clip)) return false;
+            Override(clip, seconds);
+            Play(clip, true);
+            return true;
+        }
+
+        /// <summary>The side the stroke under way faces (-1 / 1; 0: the surveyor's own facing). The flip waits for the swing's end.</summary>
+        public int StrokeFacing { get; set; }
+        /// <summary>The stroke's pose on the squash root: an offset from the feet (the lunge toward a far target, the recoil at the
+        /// contact; m) and a lean about the feet (degrees, counter-clockwise). Zero outside a stroke.</summary>
+        public Vector2 StrokeOffset { get; private set; }
+        public float StrokeLean { get; private set; }
+        /// <summary>Sets the stroke's pose now (RigToolView, before it places the tool on the drawn hand); held off while climb_in
+        /// carries the root to the ship's door.</summary>
+        public void SetStrokePose(Vector2 offset, float leanDegrees)
+        {
+            if (ClimbingIn) { offset = Vector2.zero; leanDegrees = 0f; }
+            if (offset != StrokeOffset) { StrokeOffset = offset; if (climbUntil <= 0f) SquashRoot.localPosition = new Vector3(offset.x, offset.y, 0f); }
+            if (!Mathf.Approximately(leanDegrees, StrokeLean)) { StrokeLean = leanDegrees; SquashRoot.localRotation = Quaternion.Euler(0f, 0f, leanDegrees); }
+        }
+
         public void SetFacing(int dir)
         {
             if (dir == 0) return;
@@ -249,7 +279,7 @@ namespace Meridian.View2D
                     ladder = player.ClimbingOn == Meridian.Player.ClimbKind.Ladder, reeling = player.Reeling || player.ClimbingOn == Meridian.Player.ClimbKind.Winch,
                 };
                 Play(overrideClip != null && Time.time < overrideUntil ? overrideClip : SurveyorAnim.Pick(input));
-                SetFacing(player.Facing);
+                SetFacing(StrokeFacing != 0 ? StrokeFacing : player.Facing); // U-209: a swing holds the side of its target
             }
             SquashRoot.localScale = Squash.Step(dt);
             // U-176 (B-210): climb_ladder steps 0.5 m a cycle (8 frames at 12 fps): it paces with the climb, still on a rung; reel_up runs

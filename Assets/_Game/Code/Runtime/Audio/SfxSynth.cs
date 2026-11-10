@@ -120,6 +120,64 @@ namespace Meridian.Audio
         }
 
         /// <summary>A synthesized sound as a clip (allocates once per call: callers keep it).</summary>
+        public const float SwishSeconds = 0.14f, ChipSeconds = 0.1f, BeamHumSeconds = 0.5f;
+
+        /// <summary>U-209 (D-196): the swing's whoosh at its start: air over the blade, a band of noise that rises and is gone before the
+        /// contact (0.083 s in). Stands in until U-198's sample. Deterministic, mono at `rate`, in [−1, 1].</summary>
+        public static float[] Swish(int rate = Rate)
+        {
+            var s = new float[Mathf.CeilToInt(SwishSeconds * rate)];
+            var rng = new System.Random(209);
+            double lp = 0, lp2 = 0;
+            for (int i = 0; i < s.Length; i++)
+            {
+                float t = i / (float)rate;
+                float noise = (float)rng.NextDouble() * 2f - 1f;
+                double k = 0.05 + 0.25 * (t / SwishSeconds);                 // the band opens as the blade speeds up
+                lp += (noise - lp) * k;
+                lp2 += (lp - lp2) * 0.5;
+                float env = Mathf.Sin(Mathf.PI * Mathf.Clamp01(t / SwishSeconds)); // in and out, no click
+                s[i] = Mathf.Clamp((float)(lp - 0.6 * lp2) * 2.2f * env * env, -1f, 1f) * 0.6f;
+            }
+            return s;
+        }
+
+        /// <summary>U-209: a chip: the blade's edge biting ground that does not open yet: a dull knock (140 Hz, gone in 40 ms) under a
+        /// short crack of grit. AudioDirector pitches it by the depth tier (soft soil low, stone high). Stands in until U-198's samples.
+        /// Deterministic, mono at `rate`, in [−1, 1].</summary>
+        public static float[] Chip(int rate = Rate)
+        {
+            var s = new float[Mathf.CeilToInt(ChipSeconds * rate)];
+            var rng = new System.Random(2091);
+            double hp = 0, prev = 0;
+            for (int i = 0; i < s.Length; i++)
+            {
+                float t = i / (float)rate;
+                float noise = (float)rng.NextDouble() * 2f - 1f;
+                hp = 0.82 * (hp + noise - prev); prev = noise;
+                float knock = 0.8f * Mathf.Sin(2f * Mathf.PI * 140f * t) * Mathf.Exp(-t * 70f);
+                float crack = (float)hp * 0.55f * Mathf.Exp(-t * 120f);
+                float grit = t > 0.02f && rng.NextDouble() < 0.04 ? (float)hp * 0.35f * Mathf.Exp(-(t - 0.02f) * 40f) : 0f;
+                s[i] = Mathf.Clamp(knock + crack + grit, -1f, 1f) * 0.8f;
+            }
+            return s;
+        }
+
+        /// <summary>U-209: the Beam's hum while its ray runs: 110 Hz with its octave and a fifth, breathing four times a second. Whole
+        /// cycles of every part in its half second, so it loops without a click. Stands in until U-198's sample. Mono at `rate`.</summary>
+        public static float[] BeamHum(int rate = Rate)
+        {
+            var s = new float[Mathf.RoundToInt(BeamHumSeconds * rate)];
+            for (int i = 0; i < s.Length; i++)
+            {
+                float t = i / (float)rate;
+                float breath = 0.85f + 0.15f * Mathf.Sin(2f * Mathf.PI * 4f * t);
+                float v = 0.5f * Mathf.Sin(2f * Mathf.PI * 110f * t) + 0.28f * Mathf.Sin(2f * Mathf.PI * 220f * t) + 0.14f * Mathf.Sin(2f * Mathf.PI * 330f * t);
+                s[i] = v * breath * 0.6f;
+            }
+            return s;
+        }
+
         public static AudioClip Clip(string name, float[] data)
         {
             var clip = AudioClip.Create(name, data.Length, 1, Rate, false);

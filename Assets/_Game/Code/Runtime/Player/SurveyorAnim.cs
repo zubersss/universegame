@@ -34,6 +34,35 @@ namespace Meridian.Player
         /// <summary>U-176 (B-210, side_b): the ladder's climb and the reel up a line.</summary>
         public const string ClimbLadder = "climb_ladder", ReelUp = "reel_up";
         public const float SurpriseTime = 0.5f;
+        /// <summary>U-209 (B-246): the shovel's swing by direction (five drawings at 12 fps, the contact on drawing 2, the front hand empty
+        /// with its hand_socket per frame) and the Beam's aim poses by direction. Played by name where the sheet has them; never a stand-in
+        /// (side_b's dig carries a baked pick, U-203).</summary>
+        public const string DigDown = "dig_down", DigFwd = "dig_fwd", DigFwdNear = "dig_fwd_near", DigUp = "dig_up";
+        public const string AimUp = "aim_up", AimUp45 = "aim_up45", AimFwd = "aim_fwd", AimDown45 = "aim_down45", AimDown = "aim_down";
+        /// <summary>The swing's clip is dig_fwd within this many degrees of level, dig_up above, dig_down below.</summary>
+        public const float DigClipSplitDeg = 35f;
+        /// <summary>LEAD 02:0x: a forward contact nearer than this (m from the shoulder) takes dig_fwd_near (a mid-shaft hold).</summary>
+        public const float DigNearM = 1.45f;
+
+        /// <summary>The aim's angle over the level, facing either way (degrees: 90 straight up, -90 straight down).</summary>
+        public static float Elevation(UnityEngine.Vector2 dir) => UnityEngine.Mathf.Atan2(dir.y, UnityEngine.Mathf.Abs(dir.x)) * UnityEngine.Mathf.Rad2Deg;
+
+        /// <summary>U-209: the swing's clip for a contact `to` away from the shoulder: the nearest of down / forward / up by its
+        /// elevation, the forward one's near drawing under DigNearM. Pure.</summary>
+        public static string DigClipFor(UnityEngine.Vector2 to)
+        {
+            float e = Elevation(to);
+            if (e > DigClipSplitDeg) return DigUp;
+            if (e < -DigClipSplitDeg) return DigDown;
+            return to.sqrMagnitude < DigNearM * DigNearM ? DigFwdNear : DigFwd;
+        }
+
+        /// <summary>U-209: the Beam's aim pose for an aim: the nearest of up, up 45, forward, down 45, down. Pure.</summary>
+        public static string AimClipFor(UnityEngine.Vector2 dir)
+        {
+            float e = Elevation(dir);
+            return e > 67.5f ? AimUp : e > 22.5f ? AimUp45 : e > -22.5f ? AimFwd : e > -67.5f ? AimDown45 : AimDown;
+        }
 
         /// <summary>Every clip Pick can return (U-105: each must resolve to a real clip or a named stand-in on the live sheet).</summary>
         public static readonly string[] AllClips =
