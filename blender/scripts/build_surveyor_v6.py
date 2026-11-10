@@ -94,12 +94,29 @@ L_TH, L_SH, L_UA, L_FA, ANKLE = 0.42, 0.41, 0.30, 0.27, 0.092
 HEEL, TOE = (-0.078, -ANKLE), (0.20, -ANKLE)       # the boot's sole, from the ankle (the foot's own axes)
 LAT = {"leg": 0.085, "arm": 0.205}                 # how far to the side the hips' and shoulders' joints sit
 
+# THE RHYTHM RULES (LEAD 11-10 08:4x). WRITTEN AS SOURCE AND NOT YET RUN: RHYTHM stays False until a sheet drawn with
+# them has been looked at, so the accepted model sheet's drawings do not change by a pixel meanwhile.
+#   twist    pose["twist"] (deg): the shoulders turned against the hips about the spine. In profile the near shoulder
+#            comes forward by LAT sin(twist) and the far one goes back, the hips counter-turn by 0.4 of it, and the
+#            chest is seen wider as it turns toward us (trunk_levels gives each cross-section its share of the turn).
+#   bow      every limb's centre line bows a little (seg(bow=), BOW): the thigh forward, the shin back, the upper arm
+#            back, the forearm forward - the long S of a leg and of an arm instead of two straight tubes.
+#   folds    Fig.folds(): cloth gathers on the INSIDE of a bend, one more flick for every 45 degrees of it (behind a
+#            knee; across the waist's front when the chest leans over the pelvis, across its back when it leans away).
+#   stretch  pose["len_arm_n"], ["len_arm_f"], ["len_leg_n"], ["len_leg_f"] (1.0 = as built): a reaching limb
+#            lengthens and thins (its volume kept). pose["squash"] (1.0 = none): the whole figure pressed toward the
+#            ground and widened by the same volume rule (a landing), or drawn out (a jump's take-off, above 1.0).
+# Poses may already carry these keys; with RHYTHM False they are ignored.
+RHYTHM = False
+BOW = {"thigh": 0.035, "shin": -0.03, "upper_arm": -0.02, "forearm": 0.025}    # the bow, as a share of the segment's length
+
 
 def skeleton(p):
     """The joints of a pose (degrees): pelvis, chest, neck, head = forward lean; th_ / ua_ = thigh / upper arm swung
     forward; kn_ / el_ = knee / elbow bent; ft_ = the foot's pitch (toe up +); _n the near side, _f the far. The lower
-    sole stands on the ground (plus lift)."""
+    sole stands on the ground (plus lift). With RHYTHM: twist and len_* (above)."""
     g = lambda k, d=0.0: math.radians(p.get(k, d))  # noqa: E731
+    tw = g("twist") if RHYTHM else 0.0
     J = {"P": (0.0, 0.0)}
     pel, che = g("pelvis"), g("chest")
     J["W"] = mul(up(pel), 0.14)
@@ -109,15 +126,18 @@ def skeleton(p):
     J["A"] = add(J["N"], mul(up(g("neck")), 0.05))
     lows = []
     for s in ("n", "f"):
-        hip = mul(up(pel), -0.05)
+        sg = 1 if s == "n" else -1
+        ll = p.get("len_leg_" + s, 1.0) if RHYTHM else 1.0                      # a stretched leg, a stretched arm
+        la = p.get("len_arm_" + s, 1.0) if RHYTHM else 1.0
+        hip = add(mul(up(pel), -0.05), (-sg * LAT["leg"] * math.sin(0.4 * tw), 0.0))    # the hips counter-turn
         th, kn, ft = g("th_" + s), g("kn_" + s), g("ft_" + s)
-        knee = add(hip, mul(dn(th), L_TH))
-        ank = add(knee, mul(dn(th - kn), L_SH))
-        sh = add(J["SH"], mul(up(che), -0.035))
+        knee = add(hip, mul(dn(th), L_TH * ll))
+        ank = add(knee, mul(dn(th - kn), L_SH * ll))
+        sh = add(add(J["SH"], mul(up(che), -0.035)), (sg * LAT["arm"] * math.sin(tw), 0.0))   # the near shoulder forward
         ua, el = g("ua_" + s), g("el_" + s)
-        elb = add(sh, mul(dn(ua), L_UA))
+        elb = add(sh, mul(dn(ua), L_UA * la))
         J.update({"hip_" + s: hip, "knee_" + s: knee, "ank_" + s: ank, "sh_" + s: sh, "elb_" + s: elb,
-                  "wr_" + s: add(elb, mul(dn(ua + el), L_FA))})
+                  "wr_" + s: add(elb, mul(dn(ua + el), L_FA * la))})
         lows += [add(ank, rot(q, ft))[1] for q in (HEEL, TOE)]
     dz = -min(lows) + p.get("lift", 0.0)
     return {k: (v[0], v[1] + dz) for k, v in J.items()}
@@ -134,10 +154,11 @@ def ik(root, target, l1, l2):
 
 
 # ---------------------------------------------------------------- shapes (metres, z up)
-def seg(a, b, wa, wb, bulge=0.0, n=8, cap0=0.0, peak=0.5):
+def seg(a, b, wa, wb, bulge=0.0, n=8, cap0=0.0, peak=0.5, bow=0.0):
     """A limb segment a -> b as four runs of points: one side a -> b, the cap round b, the other side b -> a, the cap
     round a (its radius less cap0). bulge: how much fuller than a straight taper, fullest at `peak` of its length (a
-    thigh, a calf, a forearm: fuller above, tapering to the joint below)."""
+    thigh, a calf, a forearm: fuller above, tapering to the joint below). bow: its centre line bowed to one side by
+    this share of its length at the middle (nothing at the joints, so they stay where the skeleton put them)."""
     e = math.log(0.5) / math.log(peak)
     (x0, z0), (x1, z1) = a, b
     ln = math.hypot(x1 - x0, z1 - z0) or 1e-6
@@ -147,7 +168,8 @@ def seg(a, b, wa, wb, bulge=0.0, n=8, cap0=0.0, peak=0.5):
     for i in range(n + 1):
         t = i / n
         w = (wa * (1 - t) + wb * t) / 2 + bulge * math.sin(math.pi * t ** e)
-        cx, cz = x0 + (x1 - x0) * t, z0 + (z1 - z0) * t
+        k = bow * ln * math.sin(math.pi * t)
+        cx, cz = x0 + (x1 - x0) * t + nx * k, z0 + (z1 - z0) * t + nz * k
         left.append((cx + nx * w, cz + nz * w))
         right.append((cx - nx * w, cz - nz * w))
     an = math.atan2(nz, nx)
@@ -178,20 +200,46 @@ class Fig:
         sway = 0.0
         if self.view == "front":
             sway = -0.045 * (min(z, 0.95) / 0.95 if z <= 0.95 else max(0.25, 1 - 0.75 * (z - 0.95) / 0.5))
-        return (q[0] * self.cs - lat * self.sn + sway, z)
+        sq = self.squash()
+        return ((q[0] * self.cs - lat * self.sn + sway) / math.sqrt(sq), z * sq)
 
-    def aw(self, w, dep):
-        """A form w wide (side to side) and dep deep (front to back): how wide it is seen from this view."""
-        return 2 * math.hypot(w / 2 * self.sn, dep / 2 * self.cs)
+    def squash(self):
+        """RHYTHM: how far the whole figure is pressed toward the ground (below 1) or drawn out (above 1)."""
+        return float(self.p.get("squash", 1.0)) if RHYTHM else 1.0
+
+    def bow(self, k):
+        """RHYTHM: a limb segment's bow (seen less as the figure turns to face us: it bows in its own plane)."""
+        return BOW[k] * self.cs if RHYTHM else 0.0
+
+    def thin(self, k):
+        """RHYTHM: a stretched limb is thinner by the square root of its stretch (its volume kept)."""
+        return 1.0 / math.sqrt(self.p.get(k, 1.0)) if RHYTHM else 1.0
+
+    def folds(self, j, b, u, bend):
+        """RHYTHM: cloth gathered on the inside of a bend at joint j: b = the unit direction into the bend's inside, u =
+        the lower segment's direction; one more flick for every 45 degrees of bend (at most three)."""
+        if not RHYTHM or abs(bend) < 20:
+            return
+        for i in range(min(3, 1 + int(abs(bend) / 45))):
+            o = 0.022 * i
+            F(self.d, self.M, [(j[0] + b[0] * 0.05 + u[0] * (o - 0.012), j[1] + b[1] * 0.05 + u[1] * (o - 0.012)),
+                               (j[0] + b[0] * 0.024 + u[0] * (o + 0.004), j[1] + b[1] * 0.024 + u[1] * (o + 0.004)),
+                               (j[0] - b[0] * 0.004 + u[0] * (o + 0.016), j[1] - b[1] * 0.004 + u[1] * (o + 0.016))], 0.75, ends=(1.5, 3))
+
+    def aw(self, w, dep, turn=0.0):
+        """A form w wide (side to side) and dep deep (front to back): how wide it is seen from this view (turn: its own
+        extra turn toward the viewer, radians - a twisted chest). A squashed figure is wider by the volume rule."""
+        ps = self.psi + turn
+        return 2 * math.hypot(w / 2 * math.sin(ps), dep / 2 * math.cos(ps)) / math.sqrt(self.squash())
 
     def tone(self, k, far):
         return self.M[k + (self.far if far else "")]
 
     # ---- limbs
-    def lower(self, a, b, wa, wb, bulge, tone, far):
+    def lower(self, a, b, wa, wb, bulge, tone, far, bow=0.0):
         """A lower limb: its paint runs up under the joint and its line is open across it (no line crosses the bend);
         fullest a third of the way down (a calf, a forearm)."""
-        o = seg(a, b, wa, wb, bulge, cap0=0.004, peak=0.3)
+        o = seg(a, b, wa, wb, bulge, cap0=0.004, peak=0.3, bow=bow)
         P_(self.d, o[0] + o[1] + o[2] + o[3], self.tone(tone + "_f", far), under=False)
         S(self.d, o[0] + o[1] + o[2], self.M["ln"], LINE, ends=(3, 3))
 
@@ -200,15 +248,18 @@ class Fig:
         lat = LAT["leg"] * (-1 if far else 1)
         hip, knee, ank = (self.pr(self.J[k + s], lat) for k in ("hip_", "knee_", "ank_"))
         d, M = self.d, self.M
-        th = seg(hip, knee, self.aw(0.165, 0.19), self.aw(0.112, 0.12), 0.013, peak=0.3)      # a thigh: full above, lean at the knee
+        tn = self.thin("len_leg_" + s)
+        th = seg(hip, knee, self.aw(0.165, 0.19) * tn, self.aw(0.112, 0.12) * tn, 0.013, peak=0.3, bow=self.bow("thigh"))   # a thigh: full above, lean at the knee
         S(d, th[0] + th[1] + th[2] + th[3], self.tone("suit", far), LINE, cyclic=True)
-        self.lower(knee, ank, self.aw(0.108, 0.116), self.aw(0.08, 0.085), 0.016, "suit", far)   # a calf
+        self.lower(knee, ank, self.aw(0.108, 0.116) * tn, self.aw(0.08, 0.085) * tn, 0.016, "suit", far, self.bow("shin"))   # a calf
         kn = self.p.get("kn_" + s, 0.0)
         ux, uz = (ank[0] - knee[0]), (ank[1] - knee[1])
         ln = math.hypot(ux, uz) or 1e-6
         ux, uz = ux / ln, uz / ln
         bx, bz = uz, -ux                                                        # across the shin: toward the back of the knee
-        if kn > 25 and self.view != "front":                                    # the cloth gathers behind a bent knee
+        if RHYTHM and self.view != "front":
+            self.folds(knee, (bx, bz), (ux, uz), kn)                            # the cloth behind a bent knee, by its bend
+        elif kn > 25 and self.view != "front":                                  # the cloth gathers behind a bent knee
             F(d, M, [(knee[0] + bx * 0.045, knee[1] + bz * 0.045 + 0.02), (knee[0] + bx * 0.02, knee[1] + bz * 0.02), (knee[0] + bx * 0.04 + ux * 0.03, knee[1] + bz * 0.04 + uz * 0.03)], 0.8)
         F(d, M, [(knee[0] + bx * 0.035 + ux * 0.05, knee[1] + bz * 0.035 + uz * 0.05), (knee[0] + ux * 0.062, knee[1] + uz * 0.062), (knee[0] - bx * 0.03 + ux * 0.05, knee[1] - bz * 0.03 + uz * 0.05)], 0.8)
         self.boot(ank, math.radians(self.p.get("ft_" + s, 0.0)), far)
@@ -255,9 +306,10 @@ class Fig:
         lat = LAT["arm"] * (-1 if far else 1)
         sh, elb, wr = (self.pr(self.J[k + s], lat * (1.0 if k == "sh_" else 1.06)) for k in ("sh_", "elb_", "wr_"))
         d, M = self.d, self.M
-        ua = seg(sh, elb, self.aw(0.105, 0.115), self.aw(0.086, 0.092), 0.004)
+        tn = self.thin("len_arm_" + s)
+        ua = seg(sh, elb, self.aw(0.105, 0.115) * tn, self.aw(0.086, 0.092) * tn, 0.004, bow=self.bow("upper_arm"))
         S(d, ua[0] + ua[1] + ua[2] + ua[3], self.tone("suit", far), LINE, cyclic=True)
-        self.lower(elb, wr, self.aw(0.076, 0.082), self.aw(0.054, 0.058), 0.012, "skin", far)   # a forearm: full below the elbow
+        self.lower(elb, wr, self.aw(0.076, 0.082) * tn, self.aw(0.054, 0.058) * tn, 0.012, "skin", far, self.bow("forearm"))   # a forearm: full below the elbow
         ang = math.atan2(wr[0] - elb[0], -(wr[1] - elb[1])) + math.radians(self.p.get("wr_" + s, 0.0))
         self.hand(wr, ang, self.grip[1 if far else 0], far, -1 if (self.view == "front" and far) else 1)
         ux, uz = elb[0] - sh[0], elb[1] - sh[1]                                 # the rolled sleeve: a thick roll over the elbow
@@ -277,12 +329,14 @@ class Fig:
         lv = (("CR", 0.20, 0.17, 0.0), ("P", 0.345, 0.235, -0.008), ("W", 0.275, 0.195, 0.0), ("R", 0.335, 0.235, 0.01),
               ("C", 0.40, 0.25, 0.016), ("SH", 0.40, 0.19, 0.0), ("N", 0.15, 0.13, 0.0))
         pts = [self.pr(J[k]) for k, *_r in lv]
+        tw = math.radians(self.p.get("twist", 0.0)) if RHYTHM else 0.0
+        share = {"CR": -0.4, "P": -0.4, "W": 0.15, "R": 0.4, "C": 0.75, "SH": 1.0, "N": 1.0}   # each section's share of the twist
         for i, (k, w, dep, sh) in enumerate(lv):
             a, b = pts[max(i - 1, 0)], pts[min(i + 1, len(pts) - 1)]
             ln = math.hypot(b[0] - a[0], b[1] - a[1]) or 1e-6
             n = ((b[1] - a[1]) / ln, -(b[0] - a[0]) / ln)                         # to the spine's right: the front, in profile
             c = (pts[i][0] + n[0] * sh * self.cs, pts[i][1] + n[1] * sh * self.cs)
-            out.append((c, n, self.aw(w, dep) / 2))
+            out.append((c, n, self.aw(w, dep, tw * share[k]) / 2))
         return out
 
     def T(self, u, v):
@@ -318,6 +372,11 @@ class Fig:
         S(d, [(b[0] + 0.028 * math.cos(t), b[1] + 0.028 * math.sin(t)) for t in np.linspace(0, 2 * math.pi, 16, endpoint=False)], M["brass"], LINE * 0.6, cyclic=True, gap=0)
         P_(d, [(b[0], b[1] + 0.02), (b[0] + 0.005, b[1] + 0.005), (b[0] + 0.016, b[1]), (b[0] + 0.005, b[1] - 0.005), (b[0], b[1] - 0.02),
                (b[0] - 0.005, b[1] - 0.005), (b[0] - 0.016, b[1]), (b[0] - 0.005, b[1] + 0.005)], M["stripe_f"], sharp=True)
+        if RHYTHM:                                                              # the waist folds on the side the chest leans to
+            lean = self.p.get("chest", 0.0) - self.p.get("pelvis", 0.0)
+            sgn = 1 if lean > 0 else -1
+            for i in range(min(3, int(abs(lean) / 15))):
+                F(d, M, [T(sgn * 0.98, 0.42 + 0.035 * i), T(sgn * 0.62, 0.40 + 0.035 * i), T(sgn * 0.3, 0.415 + 0.035 * i)], 0.7)
         F(d, M, [T(-0.2, 0.43), T(0.1, 0.455), T(0.45, 0.43)], 0.7)                                  # a crease over the belt
         if self.view != "side":                                                 # the pack's straps over the shoulders
             for u in (-0.55, 0.55):
@@ -458,23 +517,23 @@ class Fig:
         return img, st, time.time() - t0
 
 
-# ---------------------------------------------------------------- the poses (degrees)
+# ---------------------------------------------------------------- the poses (degrees; twist and len_* are RHYTHM keys, ignored while it is off)
 POSES = {
     # the weight on the near leg, the far knee eased and its heel off the ground; the spine a little curved
-    "idle": {"pelvis": -3, "chest": 4, "neck": 6, "head": 2, "th_n": 1, "kn_n": 2, "th_f": 12, "kn_f": 26, "ft_f": -16,
+    "idle": {"twist": 4, "pelvis": -3, "chest": 4, "neck": 6, "head": 2, "th_n": 1, "kn_n": 2, "th_f": 12, "kn_f": 26, "ft_f": -16,
              "ua_n": -7, "el_n": 14, "ua_f": 9, "el_f": 22},
     # a walk's contact: the near heel down ahead, the far foot pushing off its toes, the arms counter-swung
-    "walk": {"pelvis": 2, "chest": 6, "neck": 4, "th_n": 27, "kn_n": 6, "ft_n": 17, "th_f": -20, "kn_f": 26, "ft_f": -32,
+    "walk": {"twist": -14, "pelvis": 2, "chest": 6, "neck": 4, "th_n": 27, "kn_n": 6, "ft_n": 17, "th_f": -20, "kn_f": 26, "ft_f": -32,
              "ua_n": -28, "el_n": 16, "ua_f": 26, "el_f": 34},
     # a deep crouch under the 1 m line: folded at hips and knees, the back level, the head ducked, a hand to the ground
     # (the antenna laid back along the pack: "ant")
     "crouch": {"pelvis": 64, "chest": 82, "neck": 64, "head": 50, "th_n": 118, "kn_n": 152, "ft_n": 0, "th_f": 100, "kn_f": 154, "ft_f": -26,
                "ua_n": 40, "el_n": 62, "ua_f": 30, "el_f": 70, "ant": -150},
     # a jump's apex: the knees tucked unevenly, one arm thrown up and forward, the other back
-    "jump": {"pelvis": 4, "chest": 8, "neck": -4, "th_n": 66, "kn_n": 98, "ft_n": -22, "th_f": 14, "kn_f": 72, "ft_f": -36,
+    "jump": {"twist": 10, "len_arm_n": 1.06, "pelvis": 4, "chest": 8, "neck": -4, "th_n": 66, "kn_n": 98, "ft_n": -22, "th_f": 14, "kn_f": 72, "ft_f": -36,
              "ua_n": 128, "el_n": 26, "ua_f": -34, "el_f": 22, "lift": 0.32},
     # the dig's contact: a lunge, the weight over the front knee, both hands on the shovel (set by reach, below)
-    "dig": {"pelvis": 16, "chest": 30, "neck": 16, "head": 14, "th_n": 50, "kn_n": 62, "th_f": -30, "kn_f": 22, "ft_f": -34},
+    "dig": {"twist": 12, "pelvis": 16, "chest": 30, "neck": 16, "head": 14, "th_n": 50, "kn_n": 62, "th_f": -30, "kn_f": 22, "ft_f": -34},
 }
 DIG_AIM = -47.0                                   # the shovel's angle at the dig's contact (deg from level)
 
