@@ -15,7 +15,11 @@ param(
     [string[]]$Textures = @(),
     [string[]]$Alphas = @(),
     [string]$Res = '1k',
-    [string]$UsedBy = 'B-258'
+    [string]$UsedBy = 'B-258',
+    [string]$BundleName = '',
+    [string]$BundleUrl = '',
+    [string]$BundlePage = '',
+    [string]$BundleLicence = ''
 )
 $repo = Split-Path -Parent $PSScriptRoot
 $others = @(Get-ChildItem (Join-Path $repo 'coordination\locks') -File | Where-Object { ($_.Name -like 'heavy_*' -or $_.Name -like 'want_*') -and $_.Name -notlike '*_blender.lock' })
@@ -98,5 +102,36 @@ foreach ($id in $Alphas) {
             "$id : $n alpha map(s) added and listed in MANIFEST.md"
         } else { "$id : no new alpha map" }
     } catch { $bad++; "$id : FAILED $($_.Exception.Message)" }
+}
+# -BundleName / -BundleUrl / -BundlePage / -BundleLicence: ONE file from another source than Poly Haven's API (Blender
+# Studio's CC0 human base meshes: a zip from blender.org) into a NEW folder of its own. No API listing exists to check it
+# against, so the manifest carries its SHA-256, its bytes, the page it is offered on and the licence AS THAT PAGE STATES
+# IT; a zip is unpacked into <folder>/unzipped/ (new, empty) and every file in it listed with its own hash. A .blend from
+# a bundle is opened only by tools/blender_scene.ps1 (--disable-autoexec: no script in it runs) and only read from.
+if ($BundleName -and $BundleUrl) {
+    $dir = Join-Path $root $BundleName
+    if (Test-Path $dir) { "$BundleName : the folder exists already, skipped" }
+    else {
+        try {
+            New-Item -ItemType Directory -Force $dir | Out-Null
+            $file = [System.IO.Path]::GetFileName(([uri]$BundleUrl).AbsolutePath)
+            $dst = Join-Path $dir $file
+            Invoke-WebRequest -Uri $BundleUrl -UserAgent $ua -OutFile $dst -TimeoutSec 1200 -UseBasicParsing
+            $len = (Get-Item $dst).Length
+            $sha = (Get-FileHash $dst -Algorithm SHA256).Hash.ToLower()
+            $text = "`n### ${BundleName}: a bundle from outside Poly Haven`n$BundlePage ; licence as the page states it: $BundleLicence ; downloaded $(Get-Date -Format 'yyyy-MM-dd HH:mm') ; used by $UsedBy`n`n| File (under blender/vendor_cc0/$BundleName/) | Bytes | SHA-256 | URL |`n|---|---|---|---|`n| $file | $len | $sha | $BundleUrl |`n"
+            $n = 1
+            if ($file -like '*.zip') {
+                $un = Join-Path $dir 'unzipped'
+                Expand-Archive -Path $dst -DestinationPath $un
+                foreach ($f in Get-ChildItem $un -Recurse -File) {
+                    $rel = 'unzipped/' + ($f.FullName.Substring($un.Length + 1) -replace '\\', '/')
+                    $text += "| $rel | $($f.Length) | $((Get-FileHash $f.FullName -Algorithm SHA256).Hash.ToLower()) | (from the zip) |`n"; $n++
+                }
+            }
+            [System.IO.File]::AppendAllText($manifest, $text, $utf8)
+            "$BundleName : $n file(s), $([math]::Round($len / 1MB, 1)) MB downloaded; listed in MANIFEST.md"
+        } catch { $bad++; "$BundleName : FAILED $($_.Exception.Message)" }
+    }
 }
 if ($bad -gt 0) { exit 1 }
