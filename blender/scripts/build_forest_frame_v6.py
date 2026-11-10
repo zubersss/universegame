@@ -285,31 +285,64 @@ def paint(ppm, x0, gy):
         tf_, s_ = S_.local(x, z, k, (1 if rng.random() < 0.5 else -1) if flip is None else flip, lean)
         kind(P, tf_, s_, pale, **kw)
     E_, FP, BA = FK.emergent_into, FK.fan_palm_into, FK.bamboo_into
-    for kind, x, k, pale in ((E_, 11.5, 0.66, 0.55), ("tree", 8.7, 0.58, 0.55), ("tree", 10.2, 0.66, 0.5), (FP, 12.7, 0.62, 0.5), ("tree", 13.7, 0.56, 0.55),
-                             ("palm", 15.1, 0.62, 0.5), (E_, 16.6, 0.6, 0.55), ("tree", 18.0, 0.64, 0.5), (BA, 20.5, 0.6, 0.5), ("tree", 19.2, 0.58, 0.52)):
-        if kind == "tree":
-            S_.tree(x, 0.5, k, pale)
-        elif kind == "palm":
-            S_.palm(x, 0.45, k, pale)
-        else:
-            put(kind, x, 0.5, k, pale)
-    for kind, x, k, pale, lean in ((E_, 4.4, 0.9, 0.34, 0.0), ("tree", 3.5, 0.8, 0.34, 0), ("tree", 5.1, 0.86, 0.3, 0), (BA, 6.3, 0.82, 0.32, 0.0), (FP, 7.3, 0.86, 0.3, 0.16),
-                                   ("tree", 22.1, 0.8, 0.32, 0), (E_, 26.1, 0.94, 0.32, 0.0), ("tree", 24.9, 0.86, 0.3, 0), (BA, 23.2, 0.86, 0.3, 0.0), ("palm", 24.0, 0.92, 0.26, 0),
-                                   (FP, 27.4, 0.84, 0.32, -0.14), ("tree", 28.5, 0.82, 0.34, 0)):
+    wv, m_ = W / ppm, 64.0 / ppm                                                # the frame's width (m); a near thing's size on screen
+
+    def shade_at(x, z, k):
+        """CAST SHADE (LEAD 09:1x): what stands in front darkens what is behind it, down and to the left of it (the light
+        comes from the upper right). Laid just before the plant itself is painted."""
+        P.glaze(P.blob(fx(x - 0.5 * k), fy(z + 1.7 * k), 1.3 * k * ppm, 2.1 * k * ppm, 0.6, 0.3), (0.80, 0.82, 0.93), 0.5)
+
+    def liana(p0, p1, sag, leaves=7):
+        """A liana slung between two points (m): a thin sagging stem and a few leaves hanging from it."""
+        at_ = lambda t: (fx(p0[0] + (p1[0] - p0[0]) * t), fy(p0[1] + (p1[1] - p0[1]) * t - sag * 4 * t * (1 - t)))   # noqa: E731
+        FK.limb(P, [at_(t) for t in (0, 0.2, 0.4, 0.6, 0.8, 1.0)], 2.2 * s, 1.8 * s, FK.hz(("#3E3438", "#5A4B44", "#7C6A58", "#A08F74"), 0.15), s=s)
+        g = FK.greens(0.6, 0.15)
+        for _ in range(leaves):
+            x, y = at_(rng.uniform(0.1, 0.9))
+            P.dab(x + rng.uniform(-3, 3) * s, y + 7 * s, 6 * s, 2.4 * s, math.pi / 2 + rng.normal(0, 0.4), g[int(rng.integers(0, 3))], 1.0, 4.6, 0.0)
+
+    # THE FAR RANKS AS HAZE (LEAD 09:1x): behind the clearing a soft mass with a few lights in it - not small pale copies of
+    # the near kinds; trunks only hinted; two emergent trees rise out of it as pale shapes
+    line = fy(4.7) + 1.2 * ppm * (0.6 * P.line1(150 * s) + 0.4 * P.line1(36 * s))
+    span = np.clip((xx - fx(6.5)) / (2.5 * ppm), 0, 1) * np.clip((fx(22.5) - xx) / (2.5 * ppm), 0, 1)
+    mh = P.below(line, 16 * s) * above * span
+    uh = lerp(rgb("#8FAA98"), rgb("#C6D0B6"), np.clip((yy - fy(4.7)) / (4.7 * ppm), 0, 1) ** 0.8)   # (run 4: too pale, it read as mist; more body at its top)
+    P.lay(uh, mh * 0.9)
+    P.brush(uh, mh, int(1500 * s), (14 * s, 40 * s), (1.2, 2.2), 0.0, 1.2, (0.35, 0.7), 0.03, 0.008, 1.4, 0.1)
+    for x in (8.6, 10.6, 13.2, 15.2, 17.9, 20.2):                               # (run 4: nine thin ones read as poles; fewer, broad, soft)
+        P.stroke([(fx(x), fy(0.4)), (fx(x + rng.uniform(-0.2, 0.2)), fy(2.0)), (fx(x + rng.uniform(-0.3, 0.3)), fy(3.6))], 13 * s, 8 * s, rgb("#86A090"), 1.2)
+    for x, z, rx, rz in ((10.4, 2.6, 1.3, 1.6), (13.9, 3.1, 1.0, 1.9), (15.6, 1.9, 1.4, 1.2), (18.3, 2.8, 1.1, 1.7), (12.2, 1.4, 1.6, 0.9)):
+        P.lay(rgb("#E9E6C4"), P.blob(fx(x), fy(z), rx * ppm, rz * ppm, 0.8, 0.3) * 0.42)                 # a few lights in it
+    del mh
+    for c in range(3):
+        P.img[..., c] = P.box(P.img[..., c], 2.0 * s)
+    put(E_, 11.5, 0.5, 0.66, 0.66)
+    put(E_, 16.6, 0.5, 0.6, 0.68)
+    # THE SIDES, two ranks; TANGLE (LEAD 09:1x): plants half hidden behind others and cut by the frame's edges (placed
+    # from this camera's own edges), each throwing its shade on what is behind it
+    for kind, x, k, pale, lean in ((E_, 4.4, 0.9, 0.34, 0.0), ("tree", 3.5, 0.8, 0.34, 0), ("palm", 5.6, 0.9, 0.3, 0), ("tree", 5.1, 0.86, 0.3, 0), (BA, 6.3, 0.82, 0.32, 0.0),
+                                   (FP, 7.3, 0.86, 0.3, 0.16), ("tree", 22.1, 0.8, 0.32, 0), (E_, 26.1, 0.94, 0.32, 0.0), ("tree", 24.9, 0.86, 0.3, 0), (BA, 23.2, 0.86, 0.3, 0.0),
+                                   ("palm", 24.0, 0.92, 0.26, 0), (FP, 27.4, 0.84, 0.32, -0.14), ("tree", 28.5, 0.82, 0.34, 0)):
+        shade_at(x, 0.3, k)
         if kind == "tree":
             S_.tree(x, 0.3, k, pale)
         elif kind == "palm":
             S_.palm(x, 0.25, k, pale)
         else:
             put(kind, x, 0.3, k, pale, lean=lean)
-    for kind, x, k, pale, lean in (("tree", 2.4, 1.0, 0.14, 0), (BA, 3.3, 1.0, 0.16, 0.0), (FP, 8.0, 0.98, 0.18, 0.2), ("tree", 20.9, 0.98, 0.16, 0), ("palm", 21.9, 1.0, 0.14, 0),
-                                   (BA, 27.7, 1.02, 0.14, 0.0), ("tree", 29.3, 1.0, 0.14, 0)):
+    for kind, x, k, pale, lean in ((BA, x0 + 0.2, 1.05, 0.14, 0.0), ("tree", 2.4, 1.0, 0.14, 0), (BA, 3.3, 1.0, 0.16, 0.0), (FP, 8.0, 0.98, 0.18, 0.2), ("tree", 20.9, 0.98, 0.16, 0),
+                                   (FP, 20.2, 0.9, 0.18, -0.1), ("palm", 21.9, 1.0, 0.14, 0), (BA, 27.7, 1.02, 0.14, 0.0), ("tree", 29.3, 1.0, 0.14, 0),
+                                   ("tree", x0 + wv + 0.6, 1.1, 0.12, 0)):
+        shade_at(x, 0.12, k)
         if kind == "tree":
             S_.tree(x, 0.12, k, pale)
         elif kind == "palm":
             S_.palm(x, 0.12, k, pale)
         else:
             put(kind, x, 0.12, k, pale, lean=lean)
+    liana((20.9, 3.5), (22.3, 4.1), 1.1)                                        # lianas slung between trunks
+    liana((2.4, 3.7), (4.4, 4.6), 1.0)
+    liana((24.0, 3.0), (26.1, 5.0), 0.9, 5)
     for kind, x, k, pale in ((FK.paddle_into, 2.0, 0.9, 0.16), (FK.heart_into, 3.9, 0.85, 0.18), (FK.paddle_into, 5.6, 0.8, 0.2), (FK.heart_into, 7.0, 0.8, 0.2),
                              (FK.paddle_into, 22.6, 0.85, 0.18), (FK.heart_into, 24.2, 0.9, 0.16), (FK.paddle_into, 26.4, 0.9, 0.16), (FK.heart_into, 28.6, 0.85, 0.18)):
         put(kind, x, 0.08, k, pale, flip=1)                                     # the understorey massed at their feet
@@ -327,6 +360,19 @@ def paint(ppm, x0, gy):
     poolrow = np.clip(pool[P.pix(0, fy(0.3))[0]] * 1.3, 0, 1).copy()
     for x, k, pale in ((6.1, 0.9, 0.16), (8.4, 0.8, 0.2), (19.9, 0.85, 0.2), (21.8, 0.95, 0.14), (25.3, 0.9, 0.16), (3.6, 1.0, 0.1)):
         S_.fern(x, 0.1, k, pale)
+    # the near layer's shade on the ground beside the stage (LEAD 09:1x): violet, soft, at both sides of the warm pool
+    for cx_ in (x0 + 2.6 * m_, x0 + wv - 2.2 * m_):
+        P.glaze(above * P.blob(fx(cx_), fy(0.3), 3.4 * m_ * ppm, 0.55 * ppm, 0.6, 0.3), (0.72, 0.75, 0.94), 0.75)
+    # a fallen log at the clearing's edge: a lying trunk, its cut end with growth rings, moss along its top, a fern on it
+    lg = [(fx(19.2), fy(0.27)), (fx(20.2), fy(0.31)), (fx(21.3), fy(0.37))]
+    P.glaze(above * P.blob(fx(20.0), fy(0.07), 1.3 * ppm, 0.13 * ppm, 0.6, 0.2), COOL, 0.7)
+    mlog = FK.limb(P, lg, 0.2 * ppm, 0.17 * ppm, FK.hz(("#3E3438", "#5A4B44", "#7C6A58", "#A08F74"), 0.12), s=s)
+    for a_, b_, c_ in ((0.19, 0.075, "#B8A078"), (0.125, 0.048, "#9A8460"), (0.06, 0.024, "#C0AA80")):
+        P.dab(lg[0][0], lg[0][1], a_ * ppm, b_ * ppm, math.pi / 2 + 0.04, rgb(c_), 1.0, 4.6, 0.0)
+    if mlog is not None:
+        for t_ in rng.uniform(0.08, 0.98, 18):
+            P.dab(lg[0][0] + (lg[2][0] - lg[0][0]) * t_, lg[0][1] + (lg[2][1] - lg[0][1]) * t_ - 0.15 * ppm, rng.uniform(5, 9) * s, 2.6 * s, rng.normal(0, 0.3), rgb("#7F9257"), 0.95, 3.6, 0.1, clip=mlog)
+    S_.fern(20.7, 0.45, 0.6, 0.1, 7)
     lap("floor")
     # ---- NEAR, behind the ground's edge: the big trunk at the left and leaves hanging in from above it
     tf, s2 = S_.local(x0 + 1.3 * 64 / ppm, -0.1, 1.75, 1, 0.06)                 # (near things are placed from the frame's own edges)
@@ -347,6 +393,11 @@ def paint(ppm, x0, gy):
         for j in sorted(range(7), key=lambda j: abs(j - 3), reverse=True):      # each spray: seven leaves fanned downward
             a, ln = math.radians(28 + 124 * j / 6 + rng.uniform(-8, 8)), rng.uniform(0.6, 1.0) * ppm * (0.8 + 0.2 * math.sin(math.pi * j / 6))
             S_.leaf([b0, (b0[0] + math.cos(a) * ln * 0.5, b0[1] + math.sin(a) * ln * 0.42), (b0[0] + math.cos(a) * ln, b0[1] + math.sin(a) * ln)], 0.13 * ppm, dl, 0.25 + 0.75 * (1 - abs(j - 3) / 3))
+    for pts in ([(tx + 190 * s, 56 * s), (tx + 150 * s, 170 * s), (tx + 80 * s, 236 * s), (tx + 26 * s, 170 * s), (tx + 6 * s, 120 * s)],
+                [(tx + 330 * s, 60 * s), (tx + 338 * s, 140 * s), (tx + 326 * s, 230 * s)]):
+        FK.limb(P, pts, 2.8 * s, 2.0 * s, dk, s=s)                              # lianas from the bough: a loop back to the trunk, a free end
+        for px_, py_ in CEL.catmull(pts, False, 3)[1::2]:
+            P.dab(px_ + 4 * s, py_ + 6 * s, 7 * s, 2.8 * s, 1.2, dl[int(rng.integers(0, 3))], 1.0, 4.8, 0.0)
     lap("near trunk")
     # ---- THE EARTH: the first frame's beds, quiet; angular stones; roots; the pit
     yb = gy + (2.2 * P.line1(38 * s) + 1.2 * P.line1(7 * s)) * s
@@ -510,7 +561,7 @@ def preview(out):
         return hd
     rows = [head("B-248 (D-200): THE ONE FRAME - Earth's forest edge with the camp, in ART v6. The same place painted twice, each at its own scale (nothing enlarged). The stage is PAINT laid by a form-following brush under one light; what acts is a CEL. PREVIEW", 26)]
     lines = []
-    for name, ppm, x0, gy, K, fname in CAMERAS:
+    for name, ppm, x0, gy, K, fname in [c for c in CAMERAS if ONLY is None or c[1] in ONLY]:
         t0 = time.time()
         P, yb, T = paint(ppm, x0, gy)
         t_paint = time.time() - t0
@@ -532,5 +583,10 @@ def preview(out):
         print(ln)
 
 
-if __name__ == "__main__":
+ONLY = None                                       # the cameras to paint (px per metre), or all
+
+
+if __name__ == "__main__":                       # <png> [--only 96 [64]]
+    if len(sys.argv) > 3 and sys.argv[2] == "--only":
+        ONLY = {int(a) for a in sys.argv[3:]}
     preview(sys.argv[1])
