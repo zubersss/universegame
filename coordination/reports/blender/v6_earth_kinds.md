@@ -9,7 +9,8 @@ Written 2026-11-10 08:4x at LEAD's ask; one line each.
   boulder and the fallen log (a cut end, moss, a fern on it). Sources: `build_specimens_v6.py`,
   `build_forest_kinds_v6.py` (placeable `*_into(P, tf, s, pale)`), `build_forest_frame_v6.py` (the liana and the log
   are written inside the frame, not yet as placeable kinds).
-- PAINTED AS SPECIMENS 10:14-10:35 (four runs each, with LEAD to judge): 9 the three grasses (`turf_into`,
+- PAINTED AS SPECIMENS 10:14-10:35 (four runs each), ACCEPTED by LEAD 10:4x; two NOT TO BE USED YET: the tree fern
+  (a palm until its fronds are twice divided and a crozier shows) and the tide line (debris, not weed): 9 the three grasses (`turf_into`,
   `clump_into`, `plume_grass_into`) and 10 the savanna tree and the thorn bush (`savanna_tree_into`,
   `thorn_bush_into`, the crown's `shelf`), in `blender/scripts/build_plains_kinds_v6.py`; 4's tree fern and a
   placeable ground fern (`tree_fern_into`, `fern_into`, `frond` in `build_forest_kinds_v6.py`, shown on the plains'
