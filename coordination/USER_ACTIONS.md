@@ -12,16 +12,6 @@ Thank you for restarting the three windows (00:50). Update 01:01: once the new w
 - **Thorough:** close the three Claude windows (the Lead's last), restart the laptop, open the three windows again and paste the usual resume message into each.
 Then tell the Lead session "done: USER-42". Nothing is lost either way: everything is in the project files.
 
-### USER-41 — Play Build 0.6.2: ten minutes of digging (10 min)
-Two of your 0.6.0 asks are in: digging that throws clods and dust, and holes that look like holes. The page with pictures: https://claude.ai/artifact/Xfb4R17qVr5K8DkFp4aLpT
-1. Double-click `C:\dev\universegame\Build\MERIDIAN_0.6.2\MERIDIAN.exe` and choose **NEW**.
-2. Dig at the camp with the left mouse button held: watch the clods and the find flying to the PACK gauge.
-3. Dig a shaft straight down about ten metres and look at it: does it read as a hole?
-4. Keep going past 10 m into Subsoil: the clods, dust and back wall change with the layer.
-5. Fly out (Space), sell (G), buy The Beam (K, 250 Scrip) and dig again.
-Then tell the Lead session: does digging feel better, is it enough or do you want more (bigger clods, more shake, more sound), and do the holes look right? This build includes everything in 0.6.1b, so USER-38's shovel questions can be answered here too (is the shovel a good start, does the Beam feel like a reward, is 250 Scrip right).
-Known already: ground does not collapse yet and the sounds are still synthesized (both next); the docking bay's cradle is empty; a small pale box hangs near you on arrival at any planet but Earth (fixed for the next build).
-
 ### USER-40 — Free the laptop's memory: quit Ollama (1 min) — the team is blocked on this
 At 18:52 the laptop has 0.12 GB of memory free and no build or render can start (they need 1.5 GB). The biggest holder is the **Ollama** app: 4.2 GB, running since 11:47 this morning. It is not part of the game team.
 1. Look in the system tray (the small icons by the clock, bottom right; click the ^ arrow if it is hidden) for the Ollama llama icon.
@@ -58,6 +48,7 @@ If you get too many "allow this command?" prompts, tell the Lead "approve PowerS
 allow rules" and accept the edit when Claude Code asks you. Otherwise skip this.
 
 ## Done
+- 2026-11-10 01:1x · USER-41 done: the owner played 0.6.2: "The digging is wacky it feels disconnected from clicks and the avatar smoothen that out to the max like a pro make the animations and the connections incredible" → D-196 (the dig as one motion), U-209, B-246; Build 0.6.3 is for it. Not yet answered from USER-41 / USER-38: do the holes look right, is the shovel a good start, does the Beam feel like a reward, is 250 Scrip right (asked again with 0.6.3).
 - 2026-11-09 13:5x · USER-36 done: the owner played 0.6.0: "I like the digging so far"; make digging more satisfying and rewarding (a dirt animation), the dug part should look like a hole rather than an opaque part, dirt should collapse when dug all the way under; then the big one: keep the cartoon but much higher quality, a modern hand-drawn or painted look rather than 1930s animation, never digital or 3D-cartoony; better art and more moving parts for the animals and characters, especially the surveyor, with crouching and jumps with knees that bend; and much better audio → D-183 / D-184 / D-185 / D-186; U-195..U-199, B-230..B-232; milestone C5 (the v5 style test) before any redraw.
 - 2026-11-09 12:5x · USER-37 done: the ChatGPT app is closed (it held 1.27 GB); free RAM 1.99 GB at 12:51 and UNITY's U-193 check started. You can reopen it when the team is idle.
 - 2026-11-09 10:2x · USER-35 resolved: free RAM rose to 2.5–2.9 GB around 09:59 (apps closed or gone idle) and UNITY's 0.6.0 checks ran at the flat gate; nothing left to do. Edge can be reopened.

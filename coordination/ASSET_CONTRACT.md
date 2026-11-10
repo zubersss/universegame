@@ -305,11 +305,11 @@ RGB = the lower tone's share across a ragged cut on row 12, A = a thin ink line 
 multiplied by `planets/<giant>/close_pigment` (128×128, over the far frame's square, value / 127.5) and by the
 screen-space `planets/common/close_grain` (256×256, tiles both ways, value / 127.5). Every strip tiles in x with a
 seam score ≤ 1.6. **One strip scale, fixed to the planet** (no zoom stepping: the flight shows a giant at 6 to 9
-screen px per far texel): 7.3 strip texels per far-disc texel, so a strip texel is 0.82 screen px at 6 and 1.23 at 9
-and the limb's ink is 2–3 px wide as the line's MEAN across that range (the far disc's ±20 % hand jitter rides on
-it); u runs along each curve from the body's own left with a whole number of repeats, so nothing swims. `close.json`
-carries the scale; if B-243's desk-check of the previewer gives another number, that number replaces 7.3 here by a
-LEAD edit before the export. The close view adds nothing the far disc lacks and moves by the far disc's own
+screen px per far texel): 7.5 strip texels per far-disc texel (ruled on B-243's desk-check, replacing LEAD's first 7.3), so a strip texel is
+0.80 screen px at 6 and 1.20 at 9: the limb's ink is 2.00–3.00 px wide as the line's MEAN across that range and the
+thin line 1.00–1.50 px, §11.1's two ink ranges at both ends (the far disc's ±20 % hand jitter rides on it); u runs
+along each curve from the body's own left with a whole number of repeats, so nothing swims. `close.json` carries the
+scale as `strips`. The close view adds nothing the far disc lacks and moves by the far disc's own
 formulas, so the swap is a cut on a 12 Hz tick. No faces (D-101). The tones and numbers in `close.json` come from the
 table the far disc is painted from (`giants_v3`); a change to either is proven by rebuilding the exported far discs
 byte for byte. About 0.21 megapixels for all four giants.
