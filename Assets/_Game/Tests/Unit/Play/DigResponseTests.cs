@@ -229,8 +229,9 @@ namespace Meridian.Tests
                 Assert.IsTrue(view.Carrying && !view.Stowed, "ready after the swing");
                 Assert.Less(Mathf.Abs(Mathf.DeltaAngle(view.CarryAngle(false), view.AimDegrees)), 1e-2f, "the ready pose: low, in front");
                 Assert.AreEqual(RigToolView.ReadyRadians * Mathf.Rad2Deg + RigToolView.ReadySwing * view.ArmDegrees, view.AimDegrees, 0.05f, "side_dig.json's ready angle and a quarter of the drawn arm's own (the held body here hangs in its fall pose, arm raised)");
-                Assert.AreEqual(Meridian.View2D.SpriteCharacterView.SurveyorOrder, view.Tool.sortingOrder);
+                Assert.AreEqual(Meridian.View2D.SpriteCharacterView.SurveyorOrder + 1, view.Tool.sortingOrder, "the ready tool is drawn in front of the body");
                 Assert.AreEqual(view.Fist.sprite != null, view.Fist.enabled, "B-246's fist over the ready tool (where its sprite is in)");
+                Assert.Greater(view.Fist.sortingOrder, view.Tool.sortingOrder, "the fist over the tool");
                 input.AimAt(feet + new Vector2(-2f, 2f));
                 for (int i = 0; i < 30; i++) yield return null;
                 Assert.IsFalse(view.Stowed, "still ready 0.5 s on");
@@ -278,7 +279,18 @@ namespace Meridian.Tests
                 Assert.IsTrue(view.ReticleClamped, "the cursor is past the reach");
                 Assert.IsTrue(view.ReticleDiggable, "the line meets ground inside it");
                 Assert.LessOrEqual(Vector2.Distance(view.ReticleAt, shoulder), reach + 1e-3f, "the contact inside the reach, from the shoulder (D-196b)");
-                Assert.AreEqual(RigToolView.ReticleAtReach, view.Reticle.color, "tinted as clamped");
+                Assert.AreEqual(view.ReticleOnArt ? RigToolView.ReticleClampedTint : RigToolView.ReticleAtReach, view.ReticleTint, "tinted as clamped (mustard on B-246's brackets)");
+                if (view.ReticleOnArt)
+                {
+                    for (int i = 0; i < 4; i++)
+                    {
+                        Assert.IsTrue(view.Bracket(i).enabled, $"bracket {i} of four round the brush's circle");
+                        Assert.AreEqual(RigTools.BrushRadius + RigToolView.ClampedGapM, Vector2.Distance(view.Bracket(i).transform.position, view.ReticleCentre), 0.01f, "pushed out 0.09 m: clamped");
+                    }
+                    Assert.IsTrue(view.Pip.enabled, "the pip on the contact");
+                    Assert.Less(Vector2.Distance(view.Pip.transform.position, view.ReticleAt), 1e-3f);
+                    Assert.IsFalse(view.Reticle.enabled, "the stand-in ring is off");
+                }
                 Assert.AreEqual(RigTools.BrushPush, Vector2.Distance(view.ReticleCentre, view.ReticleAt), 0.02f, "the ring is the brush's circle: its middle pushed into the ground from the contact");
                 Vector2 dugAt = default;
                 bool dug = false;
@@ -303,7 +315,12 @@ namespace Meridian.Tests
                 input.AimAt(air);
                 yield return null; yield return null;
                 Assert.IsFalse(view.ReticleDiggable, "nothing there");
-                Assert.AreEqual(RigToolView.ReticleNothing, view.Reticle.color, "the reticle's empty state");
+                Assert.AreEqual(view.ReticleOnArt ? RigToolView.ReticleNothingTint : RigToolView.ReticleNothing, view.ReticleTint, "the reticle's empty state (red on B-246's brackets)");
+                if (view.ReticleOnArt)
+                {
+                    Assert.IsFalse(view.Pip.enabled, "no pip where there is nothing to dig");
+                    Assert.AreEqual(RigTools.BrushRadius + RigToolView.NothingGapM, Vector2.Distance(view.Bracket(0).transform.position, view.ReticleCentre), 0.01f, "pushed out 0.2 m");
+                }
                 int whiffs = stroke.Whiffs, opens = stroke.Opens, swings = stroke.Swings, bursts = side.digFeel.Bursts, chips = side.digFeel.Chips;
                 input.holdUse = true; yield return null; yield return null; input.holdUse = false;
                 int frames = 2;
@@ -314,6 +331,14 @@ namespace Meridian.Tests
                 Assert.AreEqual(0f, stroke.WorkAt(stroke.Target), "no work lands");
                 Assert.AreEqual(0, side.digFeel.Bursts - bursts, "no debris");
                 Assert.AreEqual(0, side.digFeel.Chips - chips);
+
+                // LEAD's rule: the reticle fades to 40 % once the cursor has been still 1.5 s with the button up; whole again when it moves
+                for (int i = 0; i < 130; i++) yield return null; // over 2 s at the 60 fps step
+                Assert.AreEqual(RigToolView.ReticleIdleStrength, view.ReticleStrength, 0.02f, "faded with a still cursor");
+                input.AimAt(air + new Vector2(0.3f, 0f));
+                for (int i = 0; i < 20; i++) yield return null;
+                Assert.AreEqual(1f, view.ReticleStrength, 0.02f, "whole again when the cursor moves");
+                TestContext.Out.WriteLine($"[MERIDIAN] u209 reticle: on B-246's art {view.ReticleOnArt}; strength {RigToolView.ReticleIdleStrength:0.0} with a still cursor, 1.0 within 0.3 s of a move");
                 LogAssert.NoUnexpectedReceived();
             }
             finally { Restore(); }
@@ -358,6 +383,8 @@ namespace Meridian.Tests
                         stroke.Reset(); // no kept work: a swing near the last contact would go on working that one
                         int contacts = stroke.Contacts;
                         input.holdUse = true; yield return null; input.holdUse = false;
+                        yield return null; // the press' frame is drawn: the wind-up drawing
+                        var windTip = view.TipWorld;
                         for (int i = 0; i < 12 && stroke.Contacts == contacts; i++) yield return null;
                         Assert.AreEqual(contacts + 1, stroke.Contacts, $"{stand} {deg} deg: the contact");
                         yield return null; // the contact frame's drawing is on the view (the contact drawing lasts five frames)
@@ -371,7 +398,11 @@ namespace Meridian.Tests
                         DigPose.Span(blade, view.SlideMaxNow, RigTools.ShovelLungeM, out float nearest, out float farthest);
                         bool reachable = fromGlove >= nearest - 1e-3f && fromGlove <= farthest + 1e-3f;
                         total++;
-                        log.Append($"\n  {stand}, aim {deg:+0;-0;0} deg: {view.Body.Clip}, the contact {Vector2.Distance(contact, shoulder):0.00} m from the shoulder and {fromGlove:0.00} m from the glove (the clip reaches {nearest:0.00}-{farthest:0.00}): tip {gap:0.000} m off, slide {view.SlideNow:0.00}, lunge {view.LungeNow:0.00}, miss {view.TipMiss:+0.00;-0.00;0.00}{(reachable ? "" : view.TipMiss < 0f ? " (nearer than the clip reaches: the blade buries)" : " (farther than the clip reaches: the tip stops short)")}");
+                        // LEAD 06:5x: a thrust must travel: its wind-up drawing holds the blade back from where the contact puts it
+                        float travel = Vector2.Distance(windTip, view.TipWorld);
+                        if (view.Body.Clip == SurveyorAnim.DigFwd || view.Body.Clip == SurveyorAnim.DigFwdNear)
+                            Assert.GreaterOrEqual(travel, 0.35f, $"{stand} {deg} deg ({view.Body.Clip}): the blade travels at least 0.35 m from the wind-up drawing to the contact");
+                        log.Append($"\n  {stand}, aim {deg:+0;-0;0} deg: {view.Body.Clip}, the tip travels {travel:0.00} m from the wind-up, the contact {Vector2.Distance(contact, shoulder):0.00} m from the shoulder and {fromGlove:0.00} m from the glove (the clip reaches {nearest:0.00}-{farthest:0.00}): tip {gap:0.000} m off, slide {view.SlideNow:0.00}, lunge {view.LungeNow:0.00}, miss {view.TipMiss:+0.00;-0.00;0.00}{(reachable ? "" : view.TipMiss < 0f ? " (nearer than the clip reaches: the blade buries)" : " (farther than the clip reaches: the tip stops short)")}");
                         if (reachable)
                         {
                             held++;

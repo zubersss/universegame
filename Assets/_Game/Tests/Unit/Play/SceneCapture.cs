@@ -6577,12 +6577,14 @@ namespace Meridian.Tests
             Meridian.Rig.RigTools rig = null;
             Meridian.Player.PlayerRigInput input = null;
             Rigidbody2D body = null;
+            LateFrameHook hook = null;
             try
             {
 #if UNITY_EDITOR
                 yield return UnityEditor.SceneManagement.EditorSceneManager.LoadSceneAsyncInPlayMode(
                     CorePath, new LoadSceneParameters(LoadSceneMode.Single));
 #endif
+                hook = new GameObject("U209FrameGrab").AddComponent<LateFrameHook>();
                 var director = UnityEngine.Object.FindAnyObjectByType<SceneDirector>();
                 float timeout = Time.realtimeSinceStartup + 30f;
                 while ((!director.IsReady || !director.PlanetSide.terrain.IsSettled) && Time.realtimeSinceStartup < timeout) yield return null;
@@ -6651,12 +6653,15 @@ namespace Meridian.Tests
                     stroke.Contacted += onContact;
                     float miss = 0f, slide = 0f, lunge = 0f;
                     bool rayOnFrame0 = false;
-                    input.holdUse = true;
-                    yield return null; // frame 0: its Update has seen the press
-                    for (int f = 0; f < Frames; f++)
+                    // A frame is grabbed after its last LateUpdate (the hook runs after every other script): what THAT frame draws, the
+                    // tool's pose and the debris its Update threw together. Grabbed from the coroutine (between Update and LateUpdate)
+                    // the picture held the frame before's pose with this frame's debris: the clods looked a frame early (LEAD 06:5x).
+                    int grab = -1;
+                    hook.late = () =>
                     {
-                        if (f >= heldFrames - 1) input.holdUse = false;
-                        yield return null; // frame f's drawing stands
+                        if (grab < 0) return;
+                        int f = grab;
+                        grab = -1;
                         if (f == 0) rayOnFrame0 = view.Beam.enabled;
                         if (f == contactAt) { miss = view.TipMiss; slide = view.SlideNow; lunge = view.LungeNow; }
                         cam.targetTexture = full; cam.Render(); cam.targetTexture = null;
@@ -6675,7 +6680,16 @@ namespace Meridian.Tests
                                     if (x < Edge || y < Edge || x >= W - Edge || y >= H - Edge) px[y * W + x] = ink;
                         }
                         sheet.SetPixels32((f % Cols) * W, sheet.height - H * (f / Cols + 1), W, H, px);
+                    };
+                    input.holdUse = true;
+                    yield return null; // frame 0: its Update has seen the press; its LateUpdate comes next
+                    for (int f = 0; f < Frames; f++)
+                    {
+                        grab = f;                                        // this frame, at the end of its LateUpdate
+                        if (f >= heldFrames - 1) input.holdUse = false;  // the next Update sees the button up
+                        yield return null;
                     }
+                    hook.late = null;
                     stroke.Contacted -= onContact;
                     input.holdUse = false;
                     sheet.Apply();
@@ -6721,7 +6735,7 @@ namespace Meridian.Tests
                     float until = Time.realtimeSinceStartup + 20f;
                     while (!t.IsSettled && Time.realtimeSinceStartup < until) yield return null;
                     for (int k = 0; k < 30; k++) yield return null;
-                    yield return Strip("shovel_past_reach_surface", Meridian.Rig.DigTool.Shovel, feet + new Vector2(5f, -5f), 99);
+                    yield return Strip("shovel_past_reach_surface", Meridian.Rig.DigTool.Shovel, feet + new Vector2(2f, -6f), 99); // steep: its line meets the ground inside the reach on any slope
                 }
                 LogAssert.NoUnexpectedReceived();
             }
@@ -6733,6 +6747,7 @@ namespace Meridian.Tests
                 if (body != null) body.simulated = true;
                 Meridian.Progress.SkillStats.ToolOverride = toolWas;
                 Meridian.View2D.CartoonStage.Enabled = wasCartoon;
+                if (hook != null) UnityEngine.Object.Destroy(hook.gameObject);
                 UnityEngine.Object.Destroy(tile);
                 full.Release();
             }

@@ -142,9 +142,11 @@ namespace Meridian.Player
             Crack = Child("DigCrack", Meridian.View2D.SpriteCharacterView.SurveyorOrder - 1);
             Reticle = Child("DigReticle", Meridian.View2D.SpriteCharacterView.SurveyorOrder);
             Glow = Child("BeamGlow", Meridian.View2D.SpriteCharacterView.SurveyorOrder + 1);
-            Fist = Child("GripFist", Meridian.View2D.SpriteCharacterView.SurveyorOrder + 1); // over the tool
+            Fist = Child("GripFist", Meridian.View2D.SpriteCharacterView.SurveyorOrder + 2); // over the tool, which is over the body
             Pip = Child("DigPip", Meridian.View2D.SpriteCharacterView.SurveyorOrder + 1);     // the reticle's mark on the contact point
-            Beam.enabled = Ghost.enabled = Crack.enabled = Reticle.enabled = Glow.enabled = Fist.enabled = Pip.enabled = false;
+            for (int i = 0; i < brackets.Length; i++) { brackets[i] = Child("ReticleBracket" + i, Meridian.View2D.SpriteCharacterView.SurveyorOrder + 1); brackets[i].enabled = false; }
+            Swish = Child("ShovelSwish", Meridian.View2D.SpriteCharacterView.SurveyorOrder + 2);
+            Beam.enabled = Ghost.enabled = Crack.enabled = Reticle.enabled = Glow.enabled = Fist.enabled = Pip.enabled = Swish.enabled = false;
             var cg = new GameObject("BeamCable");
             cg.transform.SetParent(transform, false);
             Cable = cg.AddComponent<LineRenderer>();
@@ -173,6 +175,7 @@ namespace Meridian.Player
             ReadLooks();
             ghostSheet = FxSheet.Get(ArtKeys.Fx.BuilderGhost);
             LoadFist();
+            LoadDigFx();
         }
 
         void OnDestroy()
@@ -308,12 +311,20 @@ namespace Meridian.Player
         }
 
         /// <summary>The tip's miss of `target` on a dig clip's contact drawing, from that drawing's glove (DigPose).</summary>
-        float ContactMiss(ArtClip clip, Vector2 target, bool left)
+        float ContactMiss(ArtClip clip, Vector2 target, bool left) =>
+            ContactGlove(clip, left, out var glove)
+                ? DigPose.Contact(glove, target, RigTools.ShovelBlade, clip.slideMax, RigTools.ShovelLungeM, out _, out _, out _, out _, out _)
+                : float.MaxValue;
+
+        /// <summary>The glove of a dig clip's contact drawing in the world, for a facing (the sheet's hand row of that frame under the
+        /// surveyor's root as it stands now). False where the sheet's rows are not in.</summary>
+        bool ContactGlove(ArtClip clip, bool left, out Vector2 glove)
         {
+            glove = default;
             int frame = clip.start + clip.contact;
-            if (!handTableDig.Has(frame)) return float.MaxValue;
-            Vector2 glove = body.SquashRoot.TransformPoint(new Vector2(left ? -handTableDig[frame, 0] : handTableDig[frame, 0], handTableDig[frame, 1]));
-            return DigPose.Contact(glove, target, RigTools.ShovelBlade, clip.slideMax, RigTools.ShovelLungeM, out _, out _, out _, out _, out _);
+            if (body == null || handTableDig == null || !handTableDig.Has(frame)) return false;
+            glove = body.SquashRoot.TransformPoint(new Vector2(left ? -handTableDig[frame, 0] : handTableDig[frame, 0], handTableDig[frame, 1]));
+            return true;
         }
         /// <summary>The body by drawing: its lean toward the target (degrees) and its shift along the line to it (m): back for the
         /// wind-up, into the contact, the recoil, settling. D-196: the lean at most 6 degrees, the recoil at most 0.06 m.</summary>
@@ -360,7 +371,8 @@ namespace Meridian.Player
         public int RayShownFrame { get; private set; } = -1;
         public bool RayReady => beamSheet != null && beamSheet.Ready;
 
-        float aimVelocity, clipSlide;
+        float aimVelocity, clipSlide, swingSlide, swingLunge;
+        Vector2 swingDir = Vector2.right;
         int swingSeen = -1;
         string strokeClip;
 
@@ -402,11 +414,21 @@ namespace Meridian.Player
                 // from its first drawing, where the sheet has one (B-246)
                 swingSeen = input.StrokeStartFrame;
                 SwingShownFrame = Time.frameCount;
+                if (body != null) body.SetStrokePose(Vector2.zero, 0f); // the clips' gloves are measured from the root at rest (a chained swing left its recover's lunge on it)
                 strokeClip = SurveyorAnim.DigClipFor(toTarget);
                 if (strokeClip == SurveyorAnim.DigFwd || strokeClip == SurveyorAnim.DigFwdNear) strokeClip = ForwardClipFor(target, left) ?? strokeClip;
                 SwingOnClip = body != null && body.HasClip(strokeClip);
                 clipSlide = SlideMaxOf(strokeClip);
-                if (SwingOnClip && ArtMaterials.ClipsFor(DigSheetKey) is ArtClipSet set && set.TryGet(strokeClip, out var drawn)) clipSlide = drawn.slideMax; // the sheet's own number
+                swingDir = line; swingSlide = swingLunge = 0f;
+                if (SwingOnClip && ArtMaterials.ClipsFor(DigSheetKey) is ArtClipSet set && set.TryGet(strokeClip, out var drawn))
+                {
+                    clipSlide = drawn.slideMax; // the sheet's own number
+                    // the swing's slide and lunge, fixed from the clip's CONTACT glove: the other drawings carry them, so the wind-up
+                    // holds the blade back by as much as its glove is drawn back and the contact brings it onto the face
+                    ReadTables();
+                    if (ContactGlove(drawn, left, out var contactGlove))
+                        DigPose.Contact(contactGlove, target, RigTools.ShovelBlade, clipSlide, RigTools.ShovelLungeM, out _, out swingDir, out swingSlide, out swingLunge, out _);
+                }
             }
             if (!swing && !ray) { SwingOnClip = false; strokeClip = null; }
             // the body's drawing by the stroke's own clock, shown now: the glove read below is this frame's (the Animator on its own
@@ -439,8 +461,13 @@ namespace Meridian.Player
                 // a clip's own slide where the sheet plays it; the idle glove (no dig clip yet) may slide for any direction: it never
                 // rises to the stroke as the clips' hand does
                 SlideMaxNow = SwingOnClip ? clipSlide : FallbackSlideMax;
-                float miss = DigPose.Contact(HandWorld, target, blade, SlideMaxNow, RigTools.ShovelLungeM,
-                    out _, out var dir, out float slide, out float lunge, out _);
+                // The contact's slide and lunge: from this frame's glove on the contact drawing (and on the idle glove); on a clip's
+                // other drawings the swing's own, fixed from the clip's contact glove. Measured from the wind-up's drawn-back glove the
+                // blade would already rest on the face: the thrust would have no travel.
+                Vector2 dir = swingDir;
+                float slide = swingSlide, lunge = swingLunge, miss = 0f;
+                if (!SwingOnClip || drawing == DigStroke.ContactDrawing)
+                    miss = DigPose.Contact(HandWorld, target, blade, SlideMaxNow, RigTools.ShovelLungeM, out _, out dir, out slide, out lunge, out _);
                 float share = SwingOnClip ? ClipReach[drawing] : SwingReach[drawing];
                 // the lunge: the body carries the glove toward a target the blade alone does not reach
                 Vector2 carried = dir * (lunge * share);
@@ -501,7 +528,10 @@ namespace Meridian.Player
                 aimVelocity = 0f;
             }
             Stowed = stowed;
-            int order = Meridian.View2D.SpriteCharacterView.SurveyorOrder - (stowed && StowBehind ? 1 : 0); // stowed: behind the body
+            // The dig tool is drawn IN FRONT of the body (LEAD 06:5x: the whole shaft across the torso to its grip, the fist over it;
+            // level with the body it was hidden behind the fist and the spade read short); stowed it goes behind. The other modules
+            // keep the body's own order.
+            int order = Meridian.View2D.SpriteCharacterView.SurveyorOrder + (!digSlot ? 0 : stowed && StowBehind ? -1 : 1);
             if (Tool.sortingOrder != order) Tool.sortingOrder = order;
             var rotation = Quaternion.Euler(0f, 0f, AimDegrees);
             Tool.transform.SetPositionAndRotation(toolAt, rotation);
@@ -518,6 +548,7 @@ namespace Meridian.Player
 
             UpdateBeam(ray, target);
             UpdateReticle(digSlot && !away, shovel);
+            UpdateSwish(swing, drawing, left);
             UpdateGhost();
             UpdateCable(left);
         }
@@ -595,8 +626,21 @@ namespace Meridian.Player
             Beam.transform.SetPositionAndRotation(MuzzleWorld, Quaternion.Euler(0f, 0f, Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg));
             Beam.size = new Vector2(Mathf.Max(0.01f, len), BeamHeight);
             if (!glow) return;
-            if (Glow.sprite != GlowSprite) { Glow.sprite = GlowSprite; Glow.color = GlowTint; }
-            Glow.transform.position = new Vector3(BeamEnd.x, BeamEnd.y, 0f);
+            bool flare = contactSheet != null && contactSheet.Ready;
+            ContactOnArt = flare;
+            if (flare)
+            {
+                // B-246's fx/beam_contact: a six-drawing flare, its up away from the surface (back along the ray), in the Beam's tone
+                int k = contactSheet.FrameAt(beamAge);
+                if (k >= 0 && Glow.sprite != contactSheet.frames[k]) Glow.sprite = contactSheet.frames[k];
+                if (Glow.color != BeamTone) Glow.color = BeamTone;
+                Glow.transform.SetPositionAndRotation(new Vector3(BeamEnd.x, BeamEnd.y, 0f), Quaternion.Euler(0f, 0f, Mathf.Atan2(-dir.y, -dir.x) * Mathf.Rad2Deg - 90f));
+                Glow.transform.localScale = Vector3.one;
+                return;
+            }
+            if (Glow.sprite != GlowSprite) Glow.sprite = GlowSprite;
+            if (Glow.color != GlowTint) Glow.color = GlowTint;
+            Glow.transform.SetPositionAndRotation(new Vector3(BeamEnd.x, BeamEnd.y, 0f), Quaternion.identity);
             Glow.transform.localScale = Vector3.one * (GlowSize * (1f + 0.12f * Mathf.Sin(beamAge * 38f))); // a quick flicker: work under way
         }
 
@@ -610,45 +654,192 @@ namespace Meridian.Player
         /// brush's circle on smooth ground, the cell on block ground; tinted by what it found; the crack mark of the work kept there.</summary>
         void UpdateReticle(bool on, bool shovel)
         {
-            on &= rig != null && rig.terrain != null;
-            if (Reticle.enabled != on) Reticle.enabled = on;
+            // hidden in menus and during a transition (in flight the tool, and the reticle with it, is away)
+            on &= rig != null && rig.terrain != null && input.UiFree && !TransitionBusy;
+            bool art = reticleSheet != null && reticleSheet.Ready && reticleSheet.frames.Length >= 6;
+            ReticleOnArt = on && art;
+            if (Reticle.enabled != (on && !art)) Reticle.enabled = on && !art;
+            for (int i = 0; i < brackets.Length; i++) if (brackets[i].enabled != (on && art)) brackets[i].enabled = on && art;
             if (!on) { if (Crack.enabled) Crack.enabled = false; if (Pip.enabled) Pip.enabled = false; CrackStage = 0; return; }
             var stroke = input.Stroke;
             Vector2 at; bool diggable, clamped;
             if (stroke.Active) { at = stroke.Target; diggable = stroke.Diggable; clamped = stroke.Clamped; }
             else diggable = rig.DigTarget(input.AimWorld, out at, out clamped);
             bool brush = rig.Brush;
-            // D-196b: the reticle's mark is ON the contact; its ring is the brush's own circle (the centre pushed into the ground from
-            // the contact), on block ground the cell the line stops on
+            // D-196b: the reticle's mark is ON the contact; its brackets stand round what opens: the brush's own circle (its centre
+            // pushed into the ground from the contact), on block ground the cell the line stops on
             Vector2 centre = diggable ? rig.DigPoint(at) : at;
             if (!brush) { var cell = RigTools.TileOf(centre); centre = new Vector2(cell.x + 0.5f, cell.y + 0.5f); }
             ReticleAt = at; ReticleCentre = centre; ReticleDiggable = diggable; ReticleClamped = clamped;
-            if (Pip.enabled != diggable) Pip.enabled = diggable;
-            if (diggable)
+            // LEAD 06:1x: at full strength while the button is down or the cursor moved in the last 1.5 s, else faded to about 40 %
+            bool lively = input.Pressed || stroke.Active || Time.time - input.LastAimMoveTime < ReticleFullSeconds;
+            ReticleStrength = Mathf.MoveTowards(ReticleStrength, lively ? 1f : ReticleIdleStrength, Time.deltaTime * ReticleFadePerSecond);
+            bool hit = shovel && stroke.Phase == DigPhase.Swing && stroke.Drawing == DigStroke.ContactDrawing; // the hit reads on the mark
+            if (art)
             {
-                if (Pip.sprite != GlowSprite) { Pip.sprite = GlowSprite; Pip.color = ReticleInReach; }
-                Pip.transform.position = new Vector3(at.x, at.y, 0f);
-                Pip.transform.localScale = Vector3.one * PipSize;
+                // B-246's fx/dig_reticle: four brackets and a pip, a two-drawing boil; the state by tint and gap
+                var tint = !diggable ? ReticleNothingTint : clamped ? ReticleClampedTint : Color.white;
+                ReticleTint = tint;
+                tint.a = ReticleStrength;
+                int boil = (int)(Time.time * ReticleBoilHz) & 1;
+                float gap = (!diggable ? NothingGapM : clamped ? ClampedGapM : 0f) + (hit ? ContactGapM : 0f);
+                var piece = reticleSheet.frames[(brush ? 0 : 2) + boil];
+                for (int i = 0; i < brackets.Length; i++)
+                {
+                    var b = brackets[i];
+                    if (b.sprite != piece) b.sprite = piece;
+                    if (b.color != tint) b.color = tint;
+                    if (brush)
+                    {
+                        // an arc sits ON the circle: its pivot on the line, the circle's middle straight below the frame as drawn
+                        float a = 45f + 90f * i, rad = a * Mathf.Deg2Rad, r = RigTools.BrushRadius + gap;
+                        b.transform.SetPositionAndRotation(new Vector3(centre.x + r * Mathf.Cos(rad), centre.y + r * Mathf.Sin(rad), 0f), Quaternion.Euler(0f, 0f, a - 90f));
+                    }
+                    else
+                    {
+                        // a corner's pivot is the cell's top-left corner, its arms right and down; a quarter turn counter-clockwise each for
+                        // the bottom-left, the bottom-right, the top-right
+                        float h = 0.5f + gap * 0.7071f;
+                        float cx = i == 0 || i == 1 ? -h : h, cy = i == 0 || i == 3 ? h : -h;
+                        b.transform.SetPositionAndRotation(new Vector3(centre.x + cx, centre.y + cy, 0f), Quaternion.Euler(0f, 0f, 90f * i));
+                    }
+                }
+                if (Pip.enabled != diggable) Pip.enabled = diggable; // no pip where there is nothing to dig
+                if (diggable)
+                {
+                    var cross = reticleSheet.frames[4 + boil];
+                    if (Pip.sprite != cross) Pip.sprite = cross;
+                    if (Pip.color != tint) Pip.color = tint;
+                    Pip.transform.position = new Vector3(at.x, at.y, 0f);
+                    Pip.transform.localScale = Vector3.one;
+                }
             }
-            var sprite = brush ? Ring : CellBox;
-            if (Reticle.sprite != sprite) Reticle.sprite = sprite;
-            var tint = !diggable ? ReticleNothing : clamped ? ReticleAtReach : ReticleInReach;
-            if (Reticle.color != tint) Reticle.color = tint;
-            float size = brush ? 2f * RigTools.BrushRadius : 1f;
-            if (!diggable) size *= NothingScale;
-            else if (shovel && stroke.Phase == DigPhase.Swing && stroke.Drawing == DigStroke.ContactDrawing) size *= ContactPop; // the hit reads on the ring
-            Reticle.transform.position = new Vector3(centre.x, centre.y, 0f);
-            Reticle.transform.localScale = Vector3.one * size;
-            // the crack: the work its target holds, in three stages
+            else
+            {
+                // the stand-in until the sheet is in: a ring the brush's size (or the cell's box) and a soft dot on the contact
+                var tint = !diggable ? ReticleNothing : clamped ? ReticleAtReach : ReticleInReach;
+                ReticleTint = tint;
+                tint.a *= ReticleStrength;
+                if (Pip.enabled != diggable) Pip.enabled = diggable;
+                if (diggable)
+                {
+                    if (Pip.sprite != GlowSprite) Pip.sprite = GlowSprite;
+                    if (Pip.color != tint) Pip.color = tint;
+                    Pip.transform.position = new Vector3(at.x, at.y, 0f);
+                    Pip.transform.localScale = Vector3.one * PipSize;
+                }
+                var sprite = brush ? Ring : CellBox;
+                if (Reticle.sprite != sprite) Reticle.sprite = sprite;
+                if (Reticle.color != tint) Reticle.color = tint;
+                float size = brush ? 2f * RigTools.BrushRadius : 1f;
+                if (!diggable) size *= NothingScale;
+                else if (hit) size *= ContactPop;
+                Reticle.transform.position = new Vector3(centre.x, centre.y, 0f);
+                Reticle.transform.localScale = Vector3.one * size;
+            }
+            // the crack: the work the target holds, in three stages, on the lump of ground that will open
             int stage = diggable ? DigStroke.StageOf(stroke.WorkAt(at)) : 0;
             CrackStage = stage;
             bool crack = stage > 0;
             if (Crack.enabled != crack) Crack.enabled = crack;
             if (!crack) return;
-            var mark = CrackSprite(stage);
-            if (Crack.sprite != mark) { Crack.sprite = mark; Crack.color = CrackInk; }
-            Crack.transform.position = new Vector3(at.x, at.y, 0f);
-            Crack.transform.localScale = Vector3.one * ((brush ? 2f * RigTools.BrushRadius : 1f) * CrackShare);
+            var chips = brush ? chipRound : chipCell;
+            bool chipArt = chips != null && chips.Ready && chips.frames.Length >= DigStroke.ChipStages;
+            CrackOnArt = chipArt;
+            var mark = chipArt ? chips.frames[stage - 1] : CrackSprite(stage);
+            if (Crack.sprite != mark)
+            {
+                Crack.sprite = mark;
+                if (chipArt && chips.material != null) Crack.sharedMaterial = chips.material;
+            }
+            // B-246: cream and ink, multiplied by the dug ground's tone as the clods are (D-190)
+            var ink = chipArt ? Meridian.Mining.DigFeel.ToneAt(rig.terrain, at, rig.D1 ? Meridian.Mining.DigRun.TierAt(rig.terrain, at) : 0) : CrackInk;
+            if (Crack.color != ink) Crack.color = ink;
+            Crack.transform.position = new Vector3(centre.x, centre.y, 0f);
+            Crack.transform.localScale = Vector3.one * (chipArt ? (brush ? RigTools.BrushRadius / 0.9f : 1f) : (brush ? 2f * RigTools.BrushRadius : 1f) * CrackShare);
+        }
+
+        // ---------- B-246's dig fx (sheet 2), each a stand-in of mine until its sheet is in ----------
+
+        public const string ReticleKey = "fx/dig_reticle/base", ChipRoundKey = "fx/dig_chip/round", ChipCellKey = "fx/dig_chip/cell",
+            BeamContactKey = "fx/beam_contact/base", SwishKey = "fx/shovel_swish/base";
+        /// <summary>The reticle's states on the art: untinted and tight in reach; mustard and pushed out 0.09 m where the cursor is past
+        /// the reach; red and pushed out 0.2 m with no pip where there is nothing to dig; a small push on the contact drawing.</summary>
+        public static readonly Color ReticleClampedTint = new Color(0.851f, 0.663f, 0.247f, 1f), ReticleNothingTint = new Color(0.784f, 0.333f, 0.239f, 1f);
+        public const float ClampedGapM = 0.09f, NothingGapM = 0.2f, ContactGapM = 0.05f;
+        /// <summary>LEAD's rule: full strength for this long after the cursor moves (and while the button is down), else this share; the
+        /// boil's rate (the two drawings on twos).</summary>
+        public const float ReticleFullSeconds = 1.5f, ReticleIdleStrength = 0.4f, ReticleFadePerSecond = 4f, ReticleBoilHz = 6f;
+        /// <summary>The Beam's own tone its contact flare is multiplied by (the Mk1 ray's teal; the Mks' colours are not in data yet).</summary>
+        public static readonly Color BeamTone = new Color(0.36f, 0.78f, 0.72f, 1f);
+        /// <summary>The swish is drawn from level to this far below (its json's arc); turned so its end lies on the blade.</summary>
+        public const float SwishArcDegrees = 75f;
+
+        FxSheet reticleSheet, chipRound, chipCell, contactSheet, swishSheet;
+        readonly SpriteRenderer[] brackets = new SpriteRenderer[4];
+        /// <summary>The reticle's four brackets (the art's; off while the stand-in ring draws) and the shovel's swish.</summary>
+        public SpriteRenderer Bracket(int i) => brackets[i];
+        public SpriteRenderer Swish { get; private set; }
+        /// <summary>Tests: the reticle, the crack and the contact flare draw B-246's art (false: my stand-ins); the reticle's strength
+        /// (1 lively, 0.4 idle) and its state's tint before the strength.</summary>
+        public bool ReticleOnArt { get; private set; }
+        public bool CrackOnArt { get; private set; }
+        public bool ContactOnArt { get; private set; }
+        public float ReticleStrength { get; private set; } = 1f;
+        public Color ReticleTint { get; private set; }
+
+        Meridian.Transitions.TransitionDirector director;
+        float directorSearchAt;
+        /// <summary>A climb or an entry runs (looked for once a second until found).</summary>
+        bool TransitionBusy
+        {
+            get
+            {
+                if (director == null && Time.unscaledTime >= directorSearchAt)
+                {
+                    director = FindAnyObjectByType<Meridian.Transitions.TransitionDirector>();
+                    directorSearchAt = Time.unscaledTime + 1f;
+                }
+                return director != null && director.Busy;
+            }
+        }
+
+        void LoadDigFx()
+        {
+            reticleSheet = FxSheet.Get(ReticleKey);
+            chipRound = FxSheet.Get(ChipRoundKey);
+            chipCell = FxSheet.Get(ChipCellKey);
+            contactSheet = FxSheet.Get(BeamContactKey);
+            swishSheet = FxSheet.Get(SwishKey);
+            // the reticle is a mark on the screen, not a thing in the world: unlit, so it reads the same in a dark hole
+            var unlit = ArtMaterials.Active != null ? ArtMaterials.Active.unlit : null;
+            if (unlit != null) { foreach (var b in brackets) b.sharedMaterial = unlit; Pip.sharedMaterial = unlit; Reticle.sharedMaterial = unlit; Glow.sharedMaterial = unlit; }
+        }
+
+        Vector2 swishAt;
+        float swishDeg;
+
+        /// <summary>B-246's fx/shovel_swish on the arcs (dig_down, dig_up; not on the thrusts): its three drawings on the contact, the
+        /// follow-through and the settle, its pivot (the swing's centre) on the contact drawing's glove, turned so its end lies on
+        /// the blade, mirrored with the facing; dig_up's swing is upward: mirrored in y.</summary>
+        void UpdateSwish(bool swing, int drawing, bool left)
+        {
+            bool arc = strokeClip == SurveyorAnim.DigDown || strokeClip == SurveyorAnim.DigUp;
+            int f = drawing - DigStroke.ContactDrawing;
+            bool on = swing && SwingOnClip && arc && swishSheet != null && swishSheet.Ready && f >= 0 && f < swishSheet.frames.Length;
+            if (Swish.enabled != on) Swish.enabled = on;
+            if (!on) return;
+            if (f == 0) { swishAt = HandWorld; swishDeg = AimDegrees; } // the contact drawing's glove and tool angle
+            if (Swish.sprite != swishSheet.frames[f])
+            {
+                Swish.sprite = swishSheet.frames[f];
+                if (swishSheet.material != null) Swish.sharedMaterial = swishSheet.material;
+            }
+            bool up = strokeClip == SurveyorAnim.DigUp;
+            float asRight = left ? 180f - swishDeg : swishDeg;                   // the tool's angle as drawn facing right
+            float turn = up ? asRight - SwishArcDegrees : asRight + SwishArcDegrees;
+            Swish.flipX = left; Swish.flipY = up;
+            Swish.transform.SetPositionAndRotation(new Vector3(swishAt.x, swishAt.y, 0f), Quaternion.Euler(0f, 0f, left ? -turn : turn));
         }
 
         static Sprite ring, cellBox, glowSprite;

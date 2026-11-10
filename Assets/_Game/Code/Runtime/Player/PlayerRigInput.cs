@@ -68,10 +68,12 @@ namespace Meridian.Player
             if (next.WasPressedThisFrame()) module = RigModules.Next(module, +1);
 
             var screen = aim.ReadValue<Vector2>();
+            if ((screen - lastScreen).sqrMagnitude > 1f) { lastScreen = screen; LastAimMoveTime = Time.time; } // U-209: the reticle is at full strength for a while after the cursor moves
             if (view != null && !externalAim) AimWorld = (Vector2)view.ScreenToWorldPoint(new Vector3(screen.x, screen.y, -view.transform.position.z));
             // While the inventory panel is open, clicks select slots, not tiles (U-045).
             bool uiFree = !Meridian.UI.InventoryPanel.AnyOpen && !Meridian.UI.CraftingPanel.AnyOpen && !Meridian.UI.CataloguePanel.AnyOpen && !Meridian.UI.SellPanel.AnyOpen && !Meridian.UI.SkillTreePanel.AnyOpen;
             bool pressed = (primary.IsPressed() || holdUse) && uiFree;
+            UiFree = uiFree; Pressed = pressed;
             // U-176: the right click: the Builder's ladder (or the winch at a shaft's mouth), the Grapple's second hook (asc_grapple_3)
             if (uiFree && rig != null && ((secondary != null && secondary.WasPressedThisFrame()) || secondaryLatched)) Secondary();
             secondaryLatched = false;
@@ -109,6 +111,12 @@ namespace Meridian.Player
         public int StrokeFacing { get; private set; }
         /// <summary>U-209: the frame the last swing (or the ray) began: the frame whose Update saw the press (DigResponseTests).</summary>
         public int StrokeStartFrame { get; private set; } = -1;
+        /// <summary>U-209 (the reticle's rule, LEAD 06:1x): no panel takes the clicks; the primary button is down; when the cursor last
+        /// moved on the screen (or a script last pointed the rig).</summary>
+        public bool UiFree { get; private set; } = true;
+        public bool Pressed { get; private set; }
+        public float LastAimMoveTime { get; private set; } = -99f;
+        Vector2 lastScreen;
 
         // ---------- IDigWorld: what the stroke works on ----------
 
@@ -173,7 +181,7 @@ namespace Meridian.Player
         }
 
         /// <summary>Points the rig at a world point without the mouse (tests, scripted demos).</summary>
-        public void AimAt(Vector2 world) { externalAim = true; AimWorld = world; }
+        public void AimAt(Vector2 world) { externalAim = true; if (world != AimWorld) LastAimMoveTime = Time.time; AimWorld = world; }
 
         /// <summary>True once AimAt was used: the mouse no longer moves the aim.</summary>
         public bool externalAim;
