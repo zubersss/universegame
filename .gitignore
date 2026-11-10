@@ -39,3 +39,7 @@ Thumbs.db
 # Python
 __pycache__/
 *.pyc
+
+# D-205 (art v7): raw CC0 downloads (scans, base meshes, materials) stay out of git; the manifest beside them is committed
+blender/vendor_cc0/*
+!blender/vendor_cc0/MANIFEST.md
