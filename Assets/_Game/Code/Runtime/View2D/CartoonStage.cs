@@ -362,6 +362,9 @@ namespace Meridian.View2D
         public const float FloraSpacing = 2.5f;
         /// <summary>U-101 / B-113: gulls over the camp in C0.</summary>
         public const int GullCount = 1;
+        /// <summary>U-204 F14: the camp's gull is Earth's alone (its species' planet). The stage asked for one on every planet, and off Earth it flew as its placeholder box.</summary>
+        public static bool CampGullOn(Meridian.Planets.PlanetId planet) =>
+            Meridian.Creatures.SpeciesSpec.Get(Meridian.Creatures.Species.Gull).planet == planet;
 
         public ParallaxLayers Layers { get; private set; }
         /// <summary>U-109: the sky above the painted layers (the gradient to space black and the starfield over the last third of the climb).</summary>
@@ -522,7 +525,10 @@ namespace Meridian.View2D
             Ground.SetDecks(GroundStrip.DecksFor(config.id), GroundStrip.VenusDeck); // U-125: the deck planks along Venus's floating station (none elsewhere)
             if (Meridian.Art.ModelView.CartoonMaterial != null) foreach (var mv in side.GetComponentsInChildren<Meridian.Art.ModelView>(true)) mv.Wear(Meridian.Art.ModelView.CartoonMaterial);
             // U-101: one gull (B-113) over the camp; the director keeps it (it flees and bumps like any critter).
-            if (side.creatures != null && side.player != null && side.creatures.CountOf(Meridian.Creatures.Species.Gull) < GullCount)
+            // U-204 F14 (B-228's "flat pale square" behind the Pilgrim on Mars, in 0.6.0's and 0.6.1's smoke too; named from 0.6.2's
+            // player log): the gull was spawned on EVERY planet's stage. Off Earth its sheet is not loaded (the director keeps only the
+            // planet's own species' art), so it flew as its 0.7 x 0.5 m placeholder box. Earth's camp alone has a gull.
+            if (CampGullOn(config.id) && side.creatures != null && side.player != null && side.creatures.CountOf(Meridian.Creatures.Species.Gull) < GullCount)
                 side.creatures.Spawn(Meridian.Creatures.Species.Gull, (Vector2)side.player.transform.position + new Vector2(7f, 3.5f));
 
             if (side.player != null && Surveyor == null)

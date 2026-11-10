@@ -66,6 +66,13 @@ namespace Meridian.Tests
             yield return null;
             Assert.AreEqual(Meridian.View2D.CartoonStage.StormAlpha(storm.Intensity), stage.StormLayers.alpha, 1e-4f, "the veil's alpha follows the storm");
             TestContext.Out.WriteLine($"[MERIDIAN] mars storm veil: phase {storm.Phase}, intensity {storm.Intensity:F2}, alpha {stage.StormLayers.alpha:F2}, plants {plants}");
+            // U-204 F14: the camp's gull is Earth's. The stage spawned one on every planet, and here it flew as a pale 0.7 x 0.5 m placeholder box
+            // behind the Pilgrim (0.6.0's, 0.6.1's and 0.6.2's smoke_21 Mars). Nothing alive on Mars is another planet's species.
+            Assert.IsFalse(Meridian.View2D.CartoonStage.CampGullOn(PlanetId.Mars), "no camp gull on Mars");
+            Assert.IsTrue(Meridian.View2D.CartoonStage.CampGullOn(PlanetId.Earth), "Earth's camp keeps its gull (U-101)");
+            Assert.AreEqual(0, side.creatures.CountOf(Meridian.Creatures.Species.Gull), "no gull alive on Mars");
+            foreach (var c in side.creatures.All)
+                if (c.Alive) Assert.AreEqual(PlanetId.Mars, c.Spec.planet, $"{c.Spec.id} alive on Mars is a Mars species (another planet's has no sheet here and draws as its placeholder)");
             LogAssert.NoUnexpectedReceived();
         }
 
