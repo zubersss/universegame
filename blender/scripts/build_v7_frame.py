@@ -342,28 +342,9 @@ class Frame:
                 self.img[y0:y1, x0:x1] *= 1 - m * (1 - np.array([0.42, 0.52, 0.66], np.float32))[None, None, :]
 
     def mannequin(self, x_m, y_m):
-        """A plain neutral-grey figure 1.84 m tall, side view, for SCALE only (no design: capsules)."""
-        k = self.k
-        bx0, by0 = int(self.px(x_m - 0.45, 0)[0]), int(self.px(0, y_m + 1.90)[1])
-        bw, bh = int(0.9 * k), int(1.95 * k)
-        xm, ym = self.metres(bx0, by0, bw, bh)
-        xm, ym = xm - x_m, ym - y_m
-        d = np.full((bh, bw), 9.0, np.float32)
-
-        def cap(ax, ay, bx_, by_, ra, rb):
-            vx, vy = bx_ - ax, by_ - ay
-            t = np.clip(((xm - ax) * vx + (ym - ay) * vy) / max(vx * vx + vy * vy, 1e-6), 0, 1)
-            return np.hypot(xm - (ax + t * vx), ym - (ay + t * vy)) - (ra + (rb - ra) * t)
-        for c in ((0.0, 1.50, 0.0, 1.02, 0.135, 0.12), (0.0, 1.02, 0.0, 0.92, 0.125, 0.12),            # chest, hips
-                  (0.01, 1.60, 0.02, 1.52, 0.055, 0.06),                                              # neck
-                  (-0.02, 0.92, -0.07, 0.50, 0.085, 0.060), (-0.07, 0.50, -0.10, 0.07, 0.058, 0.042),  # the back leg
-                  (0.03, 0.92, 0.09, 0.50, 0.085, 0.060), (0.09, 0.50, 0.10, 0.07, 0.058, 0.042),      # the front leg
-                  (-0.11, 0.035, 0.03, 0.035, 0.035, 0.035), (0.09, 0.035, 0.24, 0.035, 0.035, 0.035),  # feet
-                  (0.0, 1.46, 0.02, 1.17, 0.052, 0.042), (0.02, 1.17, 0.10, 0.92, 0.042, 0.036)):      # the arm
-            d = np.minimum(d, cap(*c))
-        d = np.minimum(d, np.hypot((xm - 0.025) / 0.098, (ym - 1.725) / 0.115) * 0.098 - 0.098)        # the head: 0.23 m
-        a = np.clip(0.5 - d * k, 0, 1)
-        over(self.img, np.concatenate([np.broadcast_to(GREY, (bh, bw, 3)) * a[..., None], a[..., None]], axis=2), bx0, by0)
+        """A plain neutral-grey figure 1.84 m tall, side view, for SCALE only (v7_paint.mannequin)."""
+        fx, fy = self.px(x_m, y_m)
+        VP.mannequin(self.img, self.k, fx, fy, GREY)
 
     def shafts(self, amount=0.13):
         """Light coming in through the canopy: a few soft beams from the upper right, ending on the stage."""
