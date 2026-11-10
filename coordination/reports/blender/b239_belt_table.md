@@ -81,10 +81,33 @@ Two differences from the design note's sketch of this json, both because the far
 a mix toward brown (`toward_hex` + `t`, with `night_hex` given per belt), not a multiply colour; and a storm is a list of
 blobs, because Neptune's cloud is a chain of seventeen.
 
-## 5. Not done, not checked
+## 5. B-240 (1): the inner set (22:45)
 
-- The four inner planets, Luna and the near frames were not rebuilt in this proof (their code is untouched but for
-  `shade()` and the night crescent's test, which now read the table's 0.3 and (0.30, 0.30, 1.06)).
+The same compare for everything else the change touched (through `shade()` and the night crescent's test):
+`build_discs_v3.py --b239 Assets/_Game/Art blender/preview/b239_inner inner`, in my lock 22:45:12-22:45:56 (44 s, peak
+212 MB), on the code as it is after B-239. "Before" is the exported file (drawn by the old code); "after" is the rebuilt
+one. All ten files BYTE-IDENTICAL, all five sheet jsons' text identical; nothing to fix.
+
+| File | Size | sha1 (exported = rebuilt) |
+|------|------|---------------------------|
+| planets/mercury/disc_color.png (1292 x 104, 12 frames) | 44,567 bytes | bf4bbdf23508a4907d205c68b3f3cd3f256359dc |
+| planets/mercury/disc_near_color.png (512 x 512, k 5.86) | 243,028 | 3274562e798904fdb56be7b7ae72b94ab6eed3a5 |
+| planets/venus/disc_color.png (2012 x 164, 12 frames) | 77,512 | 69fff11b9f992660545842e43608ec289a592c0c |
+| planets/venus/disc_near_color.png (512 x 512, k 3.42) | 263,274 | be324d2713d9a10c23abdc44e2e86a1018b52f94 |
+| planets/earth/disc_color.png (1932 x 348, 12 frames) | 169,435 | a3c986c81c67aa3460da027b9edbe037430a1611 |
+| planets/earth/disc_near_color.png (512 x 512, k 3.28) | 253,037 | 56aa047be2c01c3da658c65da29155b61be97dbd |
+| planets/mars/disc_color.png (1532 x 124, 12 frames) | 37,946 | 51cb132151f7d7cb8fdc0e331bf9791c86d7a7e7 |
+| planets/mars/disc_near_color.png (512 x 512, k 4.82) | 226,806 | c18f7d8d49895f94864718ff998b1109c39996c8 |
+| planets/earth/luna_color.png (812 x 64, 12 frames) | 4,776 | f6de1e64b3f0068b3aedefd5d1d4df20e13c0ce0 |
+| planets/earth/luna_near_color.png (356 x 356, k 8.00) | 127,748 | 6acaa6fdb8c6467469d524688325105d16e2ec8a |
+
+The near frames' jsons were not compared (their dict is built inline in `near_export`, which B-239 did not touch).
+With section 3 that is every file the disc builder exports: 16 pngs and 9 sheet jsons, all reproduced byte for byte.
+
+## 6. Not done, not checked
+
+- Added since B-239 (B-240): the drafts gain `rim` (the far limb is lumpy, not a circle: r(angle) = 1 + 0.012 sin(3 angle +
+  ph3) + 0.008 sin(5 angle + ph5), the two phases per body), so the close view's limb can follow the far disc's own curve.
 - No art was drawn and nothing was exported; `git status` shows no change under Assets/_Game/Art/planets.
 - The drafts' hex tones were not compared against pixels of the exported discs by a separate check; they are computed
   from the same recipes the byte-identical painting uses.

@@ -762,14 +762,28 @@ PAINT_FROM_TABLE = True          # B-239: paint(), BAND_EDGES, the night crescen
 #                                  (it was False for the BEFORE run of 22:13, commit a1935c8b: the numbers still inline)
 
 
-def b239(art, out_dir):
+def rim_phases(name):
+    """The two phases of a body's lumpy limb, as Disc draws them (the first two draws of its seeded stream)."""
+    rng = np.random.default_rng(zlib.crc32(name.encode()) % 1000)
+    return rng.uniform(0, 6), rng.uniform(0, 6)
+
+
+def close_draft(name):
+    """planets/<giant>/close.json's draft, from the shared table and this builder's palette, radii and loop lengths."""
+    return GT.close_json(name, PAL, lambda c: v3.rgb_hex([float(x) * 255 for x in c]), RADIUS_U[name], FRAMES.get(name, 12),
+                         v3.FPS, rim_phases=rim_phases(name))
+
+
+def b239(art, out_dir, which="giants"):
     """B-239's proof and drafts: rebuild the four giants' far discs and Saturn's two ring parts, write each to out_dir and
     compare the written file BYTE FOR BYTE with the exported one under art (and the sheet json's text); then write the
-    close.json drafts (GT.close_json) into out_dir. Nothing under art is written. -> (lines, how many differ)."""
+    close.json drafts (GT.close_json) into out_dir. Nothing under art is written. -> (lines, how many differ).
+    which="inner" (B-240 (1)): the same compare for everything else the change touched through shade() and the night
+    crescent's test: the four inner planets' far discs, Luna, and each one's near frame (D-128) where one is exported."""
     import hashlib
     import json as _json
     os.makedirs(out_dir, exist_ok=True)
-    lines, bad = [f"B-239 proof: paint() reads the giants from {'giants_v3.GIANTS' if PAINT_FROM_TABLE else 'its own inline numbers (BEFORE)'}"], 0
+    lines, bad = [f"B-239 proof ({which}): paint() reads the giants from {'giants_v3.GIANTS' if PAINT_FROM_TABLE else 'its own inline numbers (BEFORE)'}"], 0
 
     def sha(p):
         with open(p, "rb") as fh:
@@ -789,19 +803,34 @@ def b239(art, out_dir):
         lines.append(f"{label}: {shape[1]}x{shape[0]}{extra}, {os.path.getsize(new)} bytes | rebuilt sha1 {a} | exported sha1 {b} | "
                      + ("BYTE-IDENTICAL" if same else "DIFFERS" + note))
 
-    for name in GT.GIANTS:
+    names = list(GT.GIANTS) if which == "giants" else [n for n in ORDER + ["luna"] if n not in GT.GIANTS]
+    for name in names:
+        planet, variant = ("earth", "luna") if name == "luna" else (name, "disc")
         frames, R = build_disc(name)
-        key = f"planets/{name}/disc"
+        key = f"planets/{planet}/{variant}"
         meta = sheet_meta(key, frames, R, name)
         sheet = pack(frames, meta["columns"])
-        new = os.path.join(out_dir, f"{name}_disc_color.png")
+        new = os.path.join(out_dir, f"{planet}_{variant}_color.png")
         pngio.write_png(new, sheet)
-        compare(key, new, os.path.join(art, "planets", name, "disc_color.png"), sheet.shape, f", {len(frames)} frames")
-        with open(os.path.join(art, "planets", name, "disc.json"), encoding="utf-8") as fh:
+        compare(key, new, os.path.join(art, "planets", planet, f"{variant}_color.png"), sheet.shape, f", {len(frames)} frames")
+        with open(os.path.join(art, "planets", planet, f"{variant}.json"), encoding="utf-8") as fh:
             same_json = fh.read() == _json.dumps(meta, indent=2) + "\n"
         lines.append(f"{key}.json: " + ("text identical" if same_json else "TEXT DIFFERS"))
         bad += 0 if same_json else 1
         del frames, sheet
+        ref = os.path.join(art, "planets", planet, f"{variant}_near_color.png")          # the near frame (D-128), where exported
+        im, k = build_near(name)
+        if im is not None and os.path.isfile(ref):
+            new = os.path.join(out_dir, f"{planet}_{variant}_near_color.png")
+            pngio.write_png(new, im)
+            compare(f"{key}_near", new, ref, im.shape, f", k {k:.2f}")
+        elif (im is not None) != os.path.isfile(ref):
+            bad += 1
+            lines.append(f"{key}_near: the builder {'makes' if im is not None else 'makes no'} near frame (k {k:.2f}) but one "
+                         f"{'is' if os.path.isfile(ref) else 'is not'} exported: MISMATCH")
+    if which != "giants":
+        lines.append(f"RESULT: {'all byte-identical' if not bad else str(bad) + ' DIFFER'}")
+        return lines, bad
     back, front = saturn_rings(RADIUS_U["saturn"] * SPACE_PPU)
     for nm, im in (("rings_back", back), ("rings_front", front)):
         new = os.path.join(out_dir, f"saturn_{nm}_color.png")
@@ -810,7 +839,7 @@ def b239(art, out_dir):
     for name in GT.GIANTS:                                       # the close.json drafts (preview only)
         p = os.path.join(out_dir, f"{name}_close.json")
         with open(p, "w", encoding="utf-8", newline="\n") as fh:
-            _json.dump(GT.close_json(name, PAL, lambda c: v3.rgb_hex([float(x) * 255 for x in c]), RADIUS_U[name], FRAMES.get(name, 12), v3.FPS), fh, indent=2)
+            _json.dump(close_draft(name), fh, indent=2)
             fh.write("\n")
         lines.append(f"draft written: {p.replace(os.sep, '/')}")
     lines.append(f"RESULT: {'all byte-identical' if not bad else str(bad) + ' DIFFER'}")
@@ -818,8 +847,8 @@ def b239(art, out_dir):
 
 
 if __name__ == "__main__":
-    if len(sys.argv) > 3 and sys.argv[1] == "--b239":             # build_discs_v3.py --b239 <art> <out dir>
-        _lines, _bad = b239(sys.argv[2], sys.argv[3])
+    if len(sys.argv) > 3 and sys.argv[1] == "--b239":             # build_discs_v3.py --b239 <art> <out dir> [giants | inner]
+        _lines, _bad = b239(sys.argv[2], sys.argv[3], sys.argv[4] if len(sys.argv) > 4 else "giants")
         print("\n".join(_lines))
         sys.exit(1 if _bad else 0)
     if len(sys.argv) > 2 and sys.argv[1] == "--near":            # build_discs_v3.py --near <art> <preview dir> <review png> [--dry]

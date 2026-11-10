@@ -71,9 +71,14 @@ def storm_blobs(s):
     return [(s["lon"], s["lat"], s["rad"])]
 
 
-def close_json(name, pal, to_hex, radius_u, loop_frames, fps):
+RIM = (0.012, 3, 0.008, 5)                             # the far disc's lumpy limb: r(angle) = 1 + a3 * sin(3 angle + ph3)
+#                                                         + a5 * sin(5 angle + ph5), the two phases drawn per body (Disc)
+
+
+def close_json(name, pal, to_hex, radius_u, loop_frames, fps, rim_phases=None):
     """The DRAFT of planets/<giant>/close.json (B-239: into blender/preview only; the close view is not carded as art).
-    pal: slot -> colour (0..1); to_hex(colour) -> '#RRGGBB'."""
+    pal: slot -> colour (0..1); to_hex(colour) -> '#RRGGBB'; rim_phases: the body's (ph3, ph5) from build_discs_v3
+    (B-240: the far limb is not a circle, so the close view's limb must follow the same curve or it jumps at the swap)."""
     g = GIANTS[name]
 
     def h(recipe):
@@ -98,6 +103,10 @@ def close_json(name, pal, to_hex, radius_u, loop_frames, fps):
         "storms": [],
         "swap": {"above_px_per_far_texel": 6, "below_px_per_far_texel": 5, "note": "DiscSprite.NearAbove / NearBelow"},
     }
+    if rim_phases is not None:
+        out["rim"] = {"a3": RIM[0], "ph3": round(float(rim_phases[0]), 6), "a5": RIM[2], "ph5": round(float(rim_phases[1]), 6),
+                      "formula": "the limb, in disc radii: r(angle) = 1 + a3 * sin(3 * angle + ph3) + a5 * sin(5 * angle + ph5); "
+                                 "angle = atan2(v, u)"}
     for s in g["storms"]:
         row = {"name": s["name"], "tone_hex": h(s["tone"]), "night_hex": night(s["tone"]), "drift_turns_per_loop": s["drift"],
                "blobs": [{"lon_turns": round(a, 4), "v": round(b, 4), "radius": c} for a, b, c in storm_blobs(s)],
