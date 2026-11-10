@@ -624,6 +624,21 @@ if __name__ == "__main__":
     mode = argv[0] if argv else "probe"
     if mode == "probe":
         probe()
+    elif mode == "survey":                       # what every downloaded set holds (no render): to choose the frame's pieces
+        for asset in sorted(os.listdir(VENDOR)):
+            if not os.path.isfile(os.path.join(VENDOR, asset, asset + ".gltf")) or (len(argv) > 1 and asset not in argv[1:]):
+                continue
+            fresh()
+            t0 = time.time()
+            obs = load(asset)
+            lo, hi = bounds(obs)
+            parts = []
+            for o in sorted(obs, key=lambda o: o.name):
+                ol, oh = bounds([o])
+                parts.append(f"{o.name.replace(asset, '~')} {oh.x - ol.x:.2f}x{oh.y - ol.y:.2f}x{oh.z - ol.z:.2f} m z{ol.z:+.2f} {sum(len(p.vertices) - 2 for p in o.data.polygons) // 1000}k")
+            mats = sorted({s.material.name for o in obs for s in o.material_slots if s.material})
+            say(f"{asset}: {len(obs)} objects over {hi.x - lo.x:.1f} m, {len(mats)} material(s), import {time.time() - t0:.1f} s: " + "; ".join(parts[:14])
+                + (f"; ... {len(parts) - 14} more" if len(parts) > 14 else ""))
     elif mode == "paint":
         paint()
     elif mode == "edge":                         # only the brushed edge again, from the files a paint run left (no 3D render)

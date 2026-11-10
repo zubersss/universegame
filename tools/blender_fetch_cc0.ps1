@@ -1,7 +1,7 @@
 <#
 .SYNOPSIS
   Fetch CC0 assets from Poly Haven into blender/vendor_cc0/<id>/ and list them in blender/vendor_cc0/MANIFEST.md.
-  tools/blender_fetch_cc0.ps1 -Models a,b,c [-Textures x,y] [-Res 1k]
+  tools/blender_fetch_cc0.ps1 -Models a,b,c [-Textures x,y] [-Alphas a,b] [-Res 1k]
 .DESCRIPTION
   Art v7 (D-205). For each id: a NEW folder of its own (an existing one is skipped, never overwritten); models as glTF
   (data only: the .gltf, its .bin and its textures; never a .blend), textures as the Diffuse map in PNG; every file's size
@@ -13,6 +13,7 @@
 param(
     [string[]]$Models = @(),
     [string[]]$Textures = @(),
+    [string[]]$Alphas = @(),
     [string]$Res = '1k',
     [string]$UsedBy = 'B-258'
 )
@@ -63,5 +64,39 @@ foreach ($job in @(@{ kind = 'model'; ids = $Models }, @{ kind = 'texture'; ids 
             "$id : '$($info.name)' by $authors : $($files.Count) files, $([math]::Round($total / 1MB, 1)) MB, all matched; listed in MANIFEST.md"
         } catch { $bad++; "$id : FAILED $($_.Exception.Message)" }
     }
+}
+# -Alphas: Poly Haven's glTF does not list a plant's ALPHA map (the cut-out of its leaf cards: "Alpha", or "leaves_alpha"
+# on a tree), so a fern or a grass imports as solid cards. Each such map is added as a NEW file to the asset's existing
+# folder (textures/<its own name>; an existing file is never overwritten) with its own section in the manifest.
+foreach ($id in $Alphas) {
+    $dir = Join-Path $root $id
+    if (-not (Test-Path $dir)) { "$id : no folder yet (fetch the model first), skipped"; $bad++; continue }
+    try {
+        $f = Invoke-RestMethod -Uri "https://api.polyhaven.com/files/$id" -UserAgent $ua -TimeoutSec 30
+        $rows = ''; $n = 0
+        foreach ($p in $f.PSObject.Properties) {
+            if ($p.Name -notmatch '(?i)alpha') { continue }
+            $d = $p.Value.$Res.png
+            if ($null -eq $d) { continue }
+            $name = [System.IO.Path]::GetFileName(([uri]$d.url).AbsolutePath)
+            $dst = Join-Path $dir ("textures\" + $name)
+            if (Test-Path $dst) { "$id : textures/$name exists already, skipped"; continue }
+            New-Item -ItemType Directory -Force (Split-Path -Parent $dst) | Out-Null
+            Invoke-WebRequest -Uri $d.url -UserAgent $ua -OutFile $dst -TimeoutSec 600 -UseBasicParsing
+            $len = (Get-Item $dst).Length
+            $md5 = (Get-FileHash $dst -Algorithm MD5).Hash.ToLower()
+            $sha = (Get-FileHash $dst -Algorithm SHA256).Hash.ToLower()
+            if ($md5 -ne $d.md5 -or $len -ne $d.size) {
+                Remove-Item $dst -Force
+                $bad++; "  MISMATCH textures/${name}: $len bytes, md5 $md5 (the API: $($d.size), $($d.md5)): removed, not listed"; continue
+            }
+            $rows += "| textures/$name | $len | $sha | $($d.url) |`n"; $n++
+        }
+        if ($n -gt 0) {
+            $text = "`n### ${id}: its Alpha map (the cut-out of the leaf cards; not in the glTF's own file list)`nhttps://polyhaven.com/a/$id ; PNG, $Res ; downloaded $(Get-Date -Format 'yyyy-MM-dd HH:mm') ; used by $UsedBy`n`n| File (under blender/vendor_cc0/$id/) | Bytes | SHA-256 | URL |`n|---|---|---|---|`n" + $rows
+            [System.IO.File]::AppendAllText($manifest, $text, $utf8)
+            "$id : $n alpha map(s) added and listed in MANIFEST.md"
+        } else { "$id : no new alpha map" }
+    } catch { $bad++; "$id : FAILED $($_.Exception.Message)" }
 }
 if ($bad -gt 0) { exit 1 }

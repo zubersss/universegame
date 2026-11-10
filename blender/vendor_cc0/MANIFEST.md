@@ -215,3 +215,66 @@ https://polyhaven.com/a/red_laterite_soil_stones · the Diffuse map, PNG, 1k · 
 | File (under blender/vendor_cc0/red_laterite_soil_stones/) | Bytes | SHA-256 | URL |
 |---|---|---|---|
 | red_laterite_soil_stones_diff_1k.png | 6384617 | 96f3e55c2cf202e609faea9234847805563375d8edf466fb30f06413dda1f2a1 | https://dl.polyhaven.org/file/ph-assets/Textures/png/1k/red_laterite_soil_stones/red_laterite_soil_stones_diff_1k.png |
+
+### fern_02: its Alpha map (the cut-out of the leaf cards; not in the glTF's own file list)
+https://polyhaven.com/a/fern_02 ; PNG, 1k ; downloaded 2026-11-10 14:27 ; used by B-258 part 3 (the frame)
+
+| File (under blender/vendor_cc0/fern_02/) | Bytes | SHA-256 | URL |
+|---|---|---|---|
+| textures/fern_02_alpha_1k.png | 114589 | ea3c64284c7ebdeedf484d2d816eae92825ec526140c3bb83859ddc7a64001f9 | https://dl.polyhaven.org/file/ph-assets/Models/png/1k/fern_02/fern_02_alpha_1k.png |
+
+### anthurium_botany_01: its Alpha map (the cut-out of the leaf cards; not in the glTF's own file list)
+https://polyhaven.com/a/anthurium_botany_01 ; PNG, 1k ; downloaded 2026-11-10 14:27 ; used by B-258 part 3 (the frame)
+
+| File (under blender/vendor_cc0/anthurium_botany_01/) | Bytes | SHA-256 | URL |
+|---|---|---|---|
+| textures/anthurium_botany_01_alpha_1k.png | 45560 | 74a7f17e6d9da6174a5bb0b28bc5effa1fdc07e7755ba39d8c62f79a2dfe0887 | https://dl.polyhaven.org/file/ph-assets/Models/png/1k/anthurium_botany_01/anthurium_botany_01_alpha_1k.png |
+
+### calathea_orbifolia_01: its Alpha map (the cut-out of the leaf cards; not in the glTF's own file list)
+https://polyhaven.com/a/calathea_orbifolia_01 ; PNG, 1k ; downloaded 2026-11-10 14:27 ; used by B-258 part 3 (the frame)
+
+| File (under blender/vendor_cc0/calathea_orbifolia_01/) | Bytes | SHA-256 | URL |
+|---|---|---|---|
+| textures/calathea_orbifolia_01_alpha_1k.png | 57282 | 24336cb9a92fb48e9521d8674c50f96e1b32a664265c8c0e9eda8429767d4cdf | https://dl.polyhaven.org/file/ph-assets/Models/png/1k/calathea_orbifolia_01/calathea_orbifolia_01_alpha_1k.png |
+
+### grass_medium_01: its Alpha map (the cut-out of the leaf cards; not in the glTF's own file list)
+https://polyhaven.com/a/grass_medium_01 ; PNG, 1k ; downloaded 2026-11-10 14:27 ; used by B-258 part 3 (the frame)
+
+| File (under blender/vendor_cc0/grass_medium_01/) | Bytes | SHA-256 | URL |
+|---|---|---|---|
+| textures/grass_medium_01_alpha_1k.png | 648718 | 711a8e49af758d6a6ce1f610db858899a27be19da6d1866bd35c13bc7b8ffeff | https://dl.polyhaven.org/file/ph-assets/Models/png/1k/grass_medium_01/grass_medium_01_alpha_1k.png |
+
+### grass_medium_02: its Alpha map (the cut-out of the leaf cards; not in the glTF's own file list)
+https://polyhaven.com/a/grass_medium_02 ; PNG, 1k ; downloaded 2026-11-10 14:27 ; used by B-258 part 3 (the frame)
+
+| File (under blender/vendor_cc0/grass_medium_02/) | Bytes | SHA-256 | URL |
+|---|---|---|---|
+| textures/grass_medium_02_alpha_1k.png | 110617 | 15976877b3dbd22cd496a9549f1eb7d86710846a3631fb87eedbf046519e339f | https://dl.polyhaven.org/file/ph-assets/Models/png/1k/grass_medium_02/grass_medium_02_alpha_1k.png |
+
+### shrub_03: its Alpha map (the cut-out of the leaf cards; not in the glTF's own file list)
+https://polyhaven.com/a/shrub_03 ; PNG, 1k ; downloaded 2026-11-10 14:27 ; used by B-258 part 3 (the frame)
+
+| File (under blender/vendor_cc0/shrub_03/) | Bytes | SHA-256 | URL |
+|---|---|---|---|
+| textures/shrub_03_alpha_1k.png | 79069 | daef00278879a024fd05216aaa1376067a5f25f1b911d08d9bbdc50fda4a0d66 | https://dl.polyhaven.org/file/ph-assets/Models/png/1k/shrub_03/shrub_03_alpha_1k.png |
+
+### island_tree_02: its Alpha map (the cut-out of the leaf cards; not in the glTF's own file list)
+https://polyhaven.com/a/island_tree_02 ; PNG, 1k ; downloaded 2026-11-10 14:27 ; used by B-258 part 3 (the frame)
+
+| File (under blender/vendor_cc0/island_tree_02/) | Bytes | SHA-256 | URL |
+|---|---|---|---|
+| textures/island_tree_02_leaves_alpha_1k.png | 57438 | f4341f147988dbe6b58d9ca841a8f0e4bcff25bc40d05f9877da82006d489c39 | https://dl.polyhaven.org/file/ph-assets/Models/png/1k/island_tree_02/island_tree_02_leaves_alpha_1k.png |
+
+### pachira_aquatica_01: its Alpha map (the cut-out of the leaf cards; not in the glTF's own file list)
+https://polyhaven.com/a/pachira_aquatica_01 ; PNG, 1k ; downloaded 2026-11-10 14:27 ; used by B-258 part 3 (the frame)
+
+| File (under blender/vendor_cc0/pachira_aquatica_01/) | Bytes | SHA-256 | URL |
+|---|---|---|---|
+| textures/pachira_aquatica_01_leaves_alpha_1k.png | 68381 | 2021600eca558c0b38d342168f0086550143fc7f676113b3dc5b47f56f4e3a82 | https://dl.polyhaven.org/file/ph-assets/Models/png/1k/pachira_aquatica_01/pachira_aquatica_01_leaves_alpha_1k.png |
+
+### moss_01: its Alpha map (the cut-out of the leaf cards; not in the glTF's own file list)
+https://polyhaven.com/a/moss_01 ; PNG, 1k ; downloaded 2026-11-10 14:27 ; used by B-258 part 3 (the frame)
+
+| File (under blender/vendor_cc0/moss_01/) | Bytes | SHA-256 | URL |
+|---|---|---|---|
+| textures/moss_01_alpha_1k.png | 85174 | 00da5c2d0164338c2330587737ff65cefb5575de0c7019ae20bd6f60976608c0 | https://dl.polyhaven.org/file/ph-assets/Models/png/1k/moss_01/moss_01_alpha_1k.png |
