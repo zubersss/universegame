@@ -355,9 +355,16 @@ def head34(d, M):
     G.stroke(d, hose([(40, 4), (45.5, 2), (50, 4.5)], 5), M["hair"], INN, cyclic=True)
     for cx, sc in EYE34:                                                                            # two oval eyes
         G.stroke(d, C(cx, 28, E34[0] * sc, 16, ry=E34[1]), M["eye"], INN, cyclic=True)
-        G.stroke(d, C(cx + 0.9, 28.8, 3.9 * sc, 12, ry=5.1), M["iris_f"], 0.0, cyclic=True)
+        G.stroke(d, C(cx + 0.9, 28.8, 3.5 * sc, 12, ry=4.6), M["iris_f"], 0.0, cyclic=True)
         G.stroke(d, C(cx + 1.2, 28.6, 2.0, 8), M["pupil_f"], 0.0, cyclic=True)
-        G.stroke(d, C(cx + 2.4, 26.6, 1.1, 6), M["eye_f"], 0.0, cyclic=True)
+        G.stroke(d, C(cx + 2.4, 26.9, 1.1, 6), M["eye_f"], 0.0, cyclic=True)
+        # round 2b (LEAD 18:2x): both eyes wide open read startled - an upper lid across the top of each iris (a relaxed look):
+        # skin over the eye above the lid's line, then the line
+        rx, ry, lid = E34[0] * sc, E34[1], 0.42
+        a = math.asin(lid)
+        G.stroke(d, C(cx, 28, rx - 1.1, 10, ry=ry - 1.1, a0=math.pi + a, a1=TAU - a), M["skin_f"], 0.0, cyclic=True)
+        x0 = (rx - 0.4) * math.cos(a)
+        G.stroke(d, [(cx - x0, 28 - lid * ry + 0.3), (cx, 28 - lid * ry - 0.5), (cx + x0, 28 - lid * ry + 0.3)], M["ink"], INN)
         G.stroke(d, hose([(cx - 6 * sc, 18.6), (cx, 16.2), (cx + 6 * sc, 18.6)], 3.0), M["brow"], 0.0, cyclic=True)
     G.stroke(d, hose([(40, 33), (43.5, 38), (40, 40.5)], 3.6), M["skin_sh_f"], 0.0, cyclic=True)    # the nose
     G.stroke(d, C(26.5, 40.5, 4.2, 12, ry=2.8), M["cheek_f"], 0.0, cyclic=True)
@@ -402,7 +409,9 @@ def helmet(d, M):
 def antenna(d, M):
     db = xf(d, 15, 1.3, 9, 1.3, dx=2, dy=5)                                                          # the bob 30 % larger (it carries
     d = xf(d, dx=2, dy=5)                                                                            # the heavier line)
-    G.stroke(d, hose([(15, 40), (14, 34), (16, 28), (14, 22), (16, 16)], 3.6), M["lead"], INN, cyclic=True)   # a coiled spring stalk
+    G.stroke(d, hose([(15, 40), (14, 34), (16, 28), (14, 22), (16, 16)], 5.0), M["brass"], INN * 0.6, cyclic=True)   # a coiled spring
+    #                                               stalk, in the bob's brass under a thin line (round 2b, LEAD 18:2x: the dark
+    #                                               lead stalk was lost on a dug cell's wall)
     G.stroke(d, [(15, 16), (15, 13)], M["ink"], INN)
     G.stroke(db, [(9, 4), (21, 4), (15, 14)], M["brass"], OUT, cyclic=True)                         # the brass plumb bob on the spring
     G.stroke(db, C(15, 4, 2.2, 8), M["brass"], INN, cyclic=True)
