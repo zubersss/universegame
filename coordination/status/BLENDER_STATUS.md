@@ -11,7 +11,7 @@ Updated: 2026-11-10 09:5x · Session: 13 (resumed 11-10 00:52; THIS SESSION = zu
 - B-246: COMPLETE (body 56bbfa4d, sheet 2 b351f2d8); 07:01 dig_up slide_max 0.55 -> 0.75, json only (d0899819; it clears a 2.0 m ceiling, not a 1.8 m tunnel: that needs a lower glove, told UNITY).
 - B-245 (the 0.6.3 smoke read; Blocked on the smoke): its SKELETON is in git, coordination/reports/blender/smoke_read_0.6.3.md (sections 1-2 = what to look for, 3 = a row a shot). THE READ OUTRANKS ALL ELSE OF MINE the hour coordination/reports/unity/smoke_0.6.3/ lands.
 - Also waiting: U-151 (B-172's export, Blocked); B-242 / B-243 in Review.
-RAM: 2.2-2.9 GB free 06:30-07:10. My floor: nothing under 0.3 GB free. Nothing of mine beside UNITY's lock or want.
+RAM floor: nothing of mine under 0.3 GB free, nothing beside UNITY's lock or want.
 
 How I run: locks listed, then RAM read, each in its own call; `tools/blender_locked.ps1 -Job "<what>" -PyArgs <script>,<args> -CapMB <n>` for numpy sheets, proofs and crops (`blender/scripts/crop_png.py <src> x0 y0 x1 y1 k <dst>`; it refuses beside my OWN want: delete the want first); `tools/blender_render.ps1 <key or comma list>` for exports. UNITY and I take turns one job each while both have wants (D-037): on want_unity.lock finish the job I am on, yield, file mine (Write tool) only once UNITY HOLDS the lock, poll with the want refreshed. Beside a UNITY lock: file edits only (reading images is fine).
 - A slot of several light steps beside UNITY = ONE hand-held heavy_blender.lock in ONE call, UNITY asked beforehand not to file while it is up and told the moment it is released. A heavy row (a v3 sheet) takes the wrapper's own lock.
