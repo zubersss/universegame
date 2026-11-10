@@ -17,7 +17,7 @@ its shot is read.
 | smoke_10 waystation | The v3 docking bay: riveted cream panels under a brown truss, the brass porthole open onto Earth and Luna, BAY 2 and HALCYON FREIGHT, the hazard-striped cradle with the bay's two clamps, the railing and lamp in front. The Pilgrim stands on the cradle as its own sprite (not baked in). The market list inside its panel (F10) | B-223 (7a58e321), `backgrounds/waystation/layer0..2`, layer1.json's anchors; U-192; U-204 F10 | no 3D grey bay left; the ship's feet on the deck plate at the cradle's centre (x 660 of 1920), drawn once, in front of the clamps and behind the railing; the clamps' jaws beside the fins, not through them; nothing important under the market panel; the lettering sharp; no banding in the dark sky through the porthole |
 | smoke_18 Mars shelter | The shelter walls seated on the slope with no wedge of daylight under the downhill corner (F16) | U-200 | both stacks: the foot meets the drawn ground along its whole width; the wall not sunk past its base line uphill |
 | smoke_20 settings | The space ship's key list without "Fire: LMB" (F12) | U-204 F12 (287203a2) | text only; the panel's art unchanged |
-| smoke_42 Earth forest valley | LEAD lists it as changed; the commit that changed it is not named in my notes (my guess: U-200's sorting of props against the ground, or the dug-cell look if the shot now holds a dig) | to be named by LEAD when the smoke lands | read it whole against 0.6.1b's "ok": trees and props on the ground line, nothing drawn in front of what it stands behind |
+| smoke_42 Earth forest valley | Two changes (LEAD 19:3x): no empty depth tag at the top centre while topside; the pack reset before the shot, so PACK reads empty, not 30 / 30 in red. The shovel in hand as in 0.6.1b | U-201 (4588b3f0, 0.6.1b); the smoke script's staging (rides 0.6.2's check) | no empty paper bar at the top centre; PACK's readout not red and not full; the valley's art as in 0.6.1b ("ok") |
 | smoke_47 D1 first dig | The DIG DOWN card with the shovel in the surveyor's glove (B-229), the card clear of the tool slot's name plate (F4); the first scoop with the new dust and clods if the frame catches a stroke | B-229 (d7353cd6); U-204 F4 (d8282916); B-238 / B-232 (df2defa3) | the card's picture is the shovel, not the Beam; SHOVEL readable in the slot beside the card; the scoop's bowl round; any dust low and pale, in the soil's tone |
 | smoke_54 D1 pack full | In the shaft: B-230's back wall behind every dug cell (the tier's own wall, one step darker than its fill, darker with depth), the rim's ink gradient on the dug edges, the tier border a line that follows the slope with a 0.35 m crossfade (F7); the card clear of the slot's name (F4) | B-230 (d9edc71e) + U-196 (3bcd5956); U-204 F4 | the wall reads as a hole behind the surveyor, not an opaque block and not the fill's flat copy; T1's wall with roots and worm holes, T2's with pebbles; no tile seam every 4 m; no face in the wall's marks at 1x; no blurred stair-steps at the tier border |
 | smoke_55 D1 jetpack | As 54; no shovel held up like a flag while flying (F18) | U-204 F18 (287203a2) | the hands empty or the tool hidden on the jetpack; the flame and puffs as before |
@@ -39,16 +39,16 @@ its shot is read.
 | F3 | a raw key on the Float cell Mk2 tile | fixed (U-204) | smoke_64, 9 |
 | F4 | a hint card over the tool slot's name plate | fixed (U-204, d8282916) | smoke_2, 2b, 4, 47, 54 |
 | F5 | an empty depth bar topside | fixed in 0.6.1b (U-201) | smoke_2, 3, 4 |
-| F6 | "Earth night" in the day's light | LEAD's queue names F6 with 0.6.2's check; state not known to me | smoke_3, 18 |
+| F6 | "Earth night" in the day's light | ruled (LEAD 19:3x): the shot is renamed for what it shows, the camp by day; night on the cartoon stage is a Backlog line. Expected: a day shot under a day name | smoke_3 |
 | F7 | the tier border as blurred stair-steps | fixed: a 0.35 m crossfade that follows the surface (U-196) | smoke_5, 31, 32, 36, 41, 54-57 |
 | F8 | Saturn up close: a stepped edge, no bands | still open (B-237 Blocked: a painted limb band with the giants' pass) | smoke_7 |
-| F9 | two item icons alike at inventory size | in LEAD's queue with 0.6.2's check; the item keys not yet named to me | smoke_8 |
+| F9 | two item icons alike at inventory size | no art fault (LEAD 19:3x): the smoke staged one item, Stone, in two stacks; UNITY now stages two different materials. Expected: two different icons | smoke_8 |
 | F10 | the market's list past the panel's bottom | fixed (U-204) | smoke_10 |
-| F11 | a flat grey square as a mineral's silhouette | not routed in my notes | smoke_11 |
+| F11 | a flat grey square as a mineral's silhouette | CLOSED, no fault (LEAD 19:3x): it is icons/snow/base, the Snow tile's drop (a pale cube), shown as its own silhouette while unscanned | smoke_11 |
 | F12 | "Fire: LMB" in the ship's key list | fixed (U-204) | smoke_20 |
 | F13 | a hint's arrow over a title card | fixed (U-204, d8282916) | smoke_21 Earth, Mars |
-| F14 | a pale flat square behind the Pilgrim on Mars | in LEAD's queue with 0.6.2's check; the object not yet named to me | smoke_21 Mars |
-| F15 | a soft upright band where two biome fills meet | not routed in my notes (low) | smoke_41 |
+| F14 | a pale flat square behind the Pilgrim on Mars | unknown (LEAD 19:3x): UNITY's probe of a loaded Mars did not find it; it looks for it in the smoke's own landing shot. If I see it again: its pixel box and the shot's name, and it becomes a card | smoke_21 Mars (0.6.1: about 1350-1395, 660-695) |
+| F15 | a soft upright band where two biome fills meet | unchanged (Backlog, low; not in 0.6.2) | smoke_41 |
 | F16 | a wedge of daylight under the shelter walls' downhill corner | fixed (U-200, accepted) | smoke_18 |
 | F17 | the Hadal Maw at the beach in 2 m of water | fixed (U-204 F17: a hunting swimmer holds where the water is too shallow) | smoke_43 |
 | F18 | the shovel held up like a flag on the jetpack | fixed (U-204) | smoke_55 |
