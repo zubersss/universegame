@@ -356,11 +356,11 @@ Lifted from `coordination/reports/blender/v7_piece_format.md` (BLENDER, 4075cb81
 
 **12.2 Colour map (exception to §2).** 8-bit RGBA, straight alpha, sRGB, cropped to its content plus an 8 px transparent margin, colour bled 8 px under alpha 0, shipped with mips. It CARRIES THE PAINTED LIGHT. Conditions: one light key per region (the stage file's `light`), so a piece serves anywhere in its region; each piece rendered ALONE (its own form shadow only: no neighbour's shadow, no ground shadow; the contact shade on the ground is the game's).
 
-**12.3 Px per metre (exception to §2 and §11.1).** `"ppu"` per piece: rendered and painted at 384, shipped shrunk to **192** (near, play plane, figures), **128** (middle), **32-48** (a far veil strip, enlarged by the game). PROVISIONAL until B-263's price list and U-216's probe on the built player: texture memory decides.
+**12.3 Px per metre (exception to §2 and §11.1).** `"ppu"` per piece: rendered and painted at 384, shipped shrunk to **192** (near, play plane, figures), **128** (middle), **32-48** (a far veil strip, enlarged by the game). One ppu 192 set serves both the 96 and the 128 camera (D-206a: no ppu 256 set). The texture format (RGBA32, or BC7 with BC5 normals) is decided by U-217's A/B on the built player; B-263 shows v7 fits the texture budget only compressed.
 
 **12.4 Piece json.** `pivot` [x, y] 0..1 from the bottom-left = the ROOT (a hanging piece: its attachment); `width_m`, `height_m`, `under_m`; `motion`: `stands` | `sways` | `hangs`; `bend` {`from_m`, `to_m`, `power`} (weight = clamp((d - from) / (to - from), 0, 1) ^ power, d = metres from the pivot); `give_m` (the farthest tip's travel in a full gust); optional `spine_px`, and for `hangs` `half_width_px` and `free_end`; optional `parts` (information only). A `sways` piece is at most about 1024 px tall; a taller thing is a `stands` trunk plus its own swaying crowns. A part that moves on its own is its own piece.
 
-**12.5 Normal map.** §2's convention unchanged (camera space, OpenGL, (n+1)/2, linear, (128,128,255) where transparent, dilated 8 px), on the colour's layout; the painted surface's normal. No mask map in the pilot.
+**12.5 Normal map.** Only for figures and for `near` and `play_front` pieces (D-206a: not the middle, the far veils, the foreground or the ground). §2's convention unchanged (camera space, OpenGL, (n+1)/2, linear, (128,128,255) where transparent, dilated 8 px), on the colour's layout; the painted surface's normal. No mask map in the pilot.
 
 **12.6 Atlases.** One per region and layer, rotation off, max page 2048; a far veil is its own unpacked texture, clamp.
 
