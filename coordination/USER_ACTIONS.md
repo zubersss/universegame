@@ -6,14 +6,6 @@ Owner: LEAD (only the Lead edits this). Do the open items below, then tell the L
 
 ## Open
 
-### USER-46 — Download two AI-painted pictures from your Canva (2 min)
-You said: find a painter's hand, or do it with AI. I made a first test through your Canva account: a sheet of painted brush strokes and one painted plant. They look right, but the connection only gives me small previews. The full-size files are in your Canva:
-1. Open https://www.canva.com/M/MAHaiaVHLwU (the brush strokes). Click **Download** (or the three dots, then Download) and choose PNG.
-2. Open https://www.canva.com/M/MAHaiW2ItKs (the plant). Download it the same way.
-3. Move both files into `C:\dev\universegame\docs\art_sources\v6_painted\` (create nothing; the folder exists). Any file names are fine.
-4. Tell the Lead session "done: USER-46".
-The art team then paints the same forest plants with these strokes and shows you the difference. If it is better, I make a whole set the same way and ask you for one more download.
-If you would rather not do downloads, say so and I will look for a route that needs none.
 
 ### USER-45 — Play Build 0.6.3: ten minutes of the rebuilt digging (10 min)
 You said digging felt disconnected from your clicks and from the surveyor. It has been rebuilt. The page with frame-by-frame pictures: https://claude.ai/artifact/TdyF9gzKsFWzXebcu5KUSm
@@ -62,6 +54,7 @@ If you get too many "allow this command?" prompts, tell the Lead "approve PowerS
 allow rules" and accept the edit when Claude Code asks you. Otherwise skip this.
 
 ## Done
+- 2026-11-10 12:0x · USER-46 withdrawn: the owner pointed out Canva is connected ("I have canvas as a connector tho"); the Lead exported both files itself through a holding design in the owner's Canva (2048 × 2048 PNG, in docs/art_sources/v6_painted/). No downloads are asked of the owner. The same message: "I dont care for any unsaved gameplay so far just when its done": the overwritten saves (D-203) are no loss to the owner; the fix stands.
 - 2026-11-10 11:3x · USER-44 answered: "I like it so far but find a painters hand or you do it ai is so capable nowadays and continue doing the rest" → D-202: art v6 accepted as shown and rolling out (a playable slice first: the Earth camp with the v6 surveyor); the painter's hand from AI-painted strokes and plates (pilot made, USER-46 for the full-size files); the camera ruled by the Lead (close on the surface, easing back underground), since the owner did not choose.
 - 2026-11-10 07:4x · USER-43 answered within minutes of the page (https://claude.ai/artifact/DfszsRAPjF6hwbjr5i36GX): "ive seen the first look and i like the colors but the details i dont like look at the reference photos again i want that level of detail or at least as close as possible this still looks like a 1930s cartoon big cricle head and eyes make it look like the reference photos the same style as the jungle and same level to details from the proportions to everything pretty much try to make the movie but in game and moving form just the style tho none of the story or anything else" → D-200, STYLE_V6 §4a: the surveyor redesigned to natural proportions and built drawing, figures as drawn frames, scenery at the film's level of detail, the colours kept; specimens to the Lead first, then a second look-over page. Not answered: the scanned-brush question (asked again if the specimens fall short).
 - 2026-11-10 06:1x · USER-39 answered: the owner on the new surveyor design: "Polish up the surveyor a bit more then that I want fine lines that dont render into pixels" → D-198 (the v5 line is fine and drawn large enough never to show pixels), B-231 round 3; a new look-over page follows when round 3's plates pass the Lead. Read as: the design's direction stands, the finish and the line change. Not answered: the figure's weight beside the camp props, the face side-on, the poses (asked again on the new page).
