@@ -57,6 +57,8 @@ def nearest(pal, c, avoid=()):
 
 
 VARIANTS = {"sand": "earth", "basalt": "mars"}       # B-242: the surface-variant fills that get their own wall: variant -> planet
+VARIANT_BASE = {"sand": 0.30}                        # ... whose wall's base is the fill's main tone with this share of its second
+#                                                      (sand: offwhite with 0.30 mustard, a warm tan); basalt keeps its one grey
 
 
 def variant_keys():
@@ -91,12 +93,21 @@ def tier_colours(planet, t):
     # one step darker
     main = order[0]
     others = [k for k in order[1:8] if k != "ink" and counts[k] >= 0.01]
-    back = toward_ink(pal[main])                                          # T5's fill is mostly ink: its wall stays ink
+    base, wall = pal[main], f"{main} mixed {DARKEN:.2f} toward ink"
+    mix = None
+    if t in VARIANT_BASE and others:                                      # B-242 (LEAD 00:0x): a variant wall takes the fill's
+        s, second = VARIANT_BASE[t], others[0]                            # MAIN TONES, not only its largest one (sand: offwhite
+        base = pal[main] * (1 - s) + pal[second] * s                      # toward ink alone lost the warmth: grey concrete)
+        wall = f"{main} with {s:.2f} {second}, mixed {DARKEN:.2f} toward ink"
+        mix = {"tones": [main, second], "shares": [round(1 - s, 2), s], "toward_ink": DARKEN}
+    back = toward_ink(base)                                               # T5's fill is mostly ink: its wall stays ink
     dark = toward_ink(back, 0.45)                                         # holes, cracks
-    light = toward_ink(pal[main] * 0.55 + pal["offwhite"] * 0.45, 0.2)    # roots, strata lines: the main tone, paler
+    light = toward_ink(base * 0.55 + pal["offwhite"] * 0.45, 0.2)         # roots, strata lines: the main tone, paler
     accents = [toward_ink(pal[k]) for k in others[:3]] or [light]         # pebbles: the fill's other tones, as dark as the wall
     brightest = max(order[:8], key=lambda k: float(pal[k].max() - pal[k].min()) + float(pal[k].mean()) * 0.3)
-    names = {"fill_main": main, "wall": f"{main} mixed {DARKEN:.2f} toward ink", "accents": others[:3], "bright": brightest}
+    names = {"fill_main": main, "wall": wall, "accents": others[:3], "bright": brightest}
+    if mix:
+        names["wall_mix"] = mix
     return pal, {"back": back, "dark": dark, "light": light, "accents": accents, "bright": toward_ink(pal[brightest], 0.15)}, names
 
 
@@ -415,25 +426,38 @@ def draw_tier(planet, t, grain=0.035):
         grey = R["accents"][1] if len(R["accents"]) > 1 else R["dark"]   # rev: the fill's grey-tan, as its own pebbles (the first
         layers += [(shells, R["light"]), (ribs, R["dark"]), (peb, grey), (lit, R["light"])]   # accent, mustard, made gold beads)
     elif t == "basalt":                                                  # B-242, Mars's basalt fill: columnar joints, vesicles
-        ncol = 6                                                         # six columns across the 4 m tile (about 0.65 m each)
+        # rev 3 (LEAD 00:0x: whole-height joints read as planks): STACKED COLUMN SEGMENTS. Six columns of unequal width; each
+        # joint is three straight, slightly tilted runs of 1.33 m (none over about 1.5 m) and steps sideways where one run
+        # ends; at every step a curved cross-joint (a column's ball-and-socket) runs to the next joint; the breaks are
+        # staggered from column to column so no course of bricks forms. Periodic down and across the tile.
+        ncol, nseg = 6, 3
+        seg = N / nseg
         joints, edge, cross = (np.zeros((N, N), np.float32) for _ in range(3))
-        ys = np.linspace(0, N, 49)
-        curves = []
-        for k in range(ncol):                                            # each joint a near-upright line, wandering a little,
-            x0 = (k + rng.uniform(0.15, 0.85)) * N / ncol                # periodic down the tile; the columns of unequal width
-            a1, a2, p1, p2 = rng.uniform(3, 7), rng.uniform(1.5, 3.5), rng.uniform(0, math.tau), rng.uniform(0, math.tau)
-            pts = [(x0 + a1 * math.sin(math.tau * y / N + p1) + a2 * math.sin(2 * math.tau * y / N + p2), y) for y in ys]
-            curves.append(pts)
-            stroke(joints, pts, 2.0)
-            stroke(edge, [(x + 3.0, y) for x, y in pts], 1.0, val=0.25)  # its lit side, faint (rev: at 0.5 with ringed pits
-            #                                                              the first run read as riveted steel plates)
-        for k in range(ncol):                                            # one curved cross-joint a column, staggered so no
-            y = ((k * 0.37) % 1.0 + rng.uniform(-0.06, 0.06)) * N        # two neighbours line up into a course of bricks
-            i = int((y % N) / N * 48)
-            xl, xr = curves[k][i][0], curves[(k + 1) % ncol][i][0] + (N if k == ncol - 1 else 0)
-            sag = rng.uniform(7, 14) * (1 if rng.uniform() < 0.5 else -1)   # curved, as a column's ball-and-socket joint
-            stroke(cross, [(xl, y), (xl + (xr - xl) * 0.25, y + sag * 0.75), ((xl + xr) / 2, y + sag),
-                           (xl + (xr - xl) * 0.75, y + sag * 0.75), (xr, y)], 1.4, val=0.8)
+        JT = []                                                          # per joint: (its first break's y, [(x top, x bottom)])
+        for k in range(ncol):
+            x0 = (k + rng.uniform(0.25, 0.75)) * N / ncol
+            offs = rng.permutation([-11.0, 0.0, 11.0]) + rng.uniform(-2, 2, nseg)
+            y0 = ((k * 0.37) % 1.0 + rng.uniform(-0.06, 0.06)) * seg
+            JT.append((y0, [(x0 + o + rng.uniform(-3, 3), x0 + o + rng.uniform(-3, 3)) for o in offs]))
+
+        def jx(k, y):
+            """Joint k's x at height y, on the run it has there (k = ncol is joint 0 one tile to the right)."""
+            y0, runs = JT[k % ncol]
+            q = ((y - y0) % N) / seg
+            j = min(int(q), nseg - 1)
+            return runs[j][0] + (runs[j][1] - runs[j][0]) * (q - j) + (N if k >= ncol else 0)
+
+        for k in range(ncol):
+            y0, runs = JT[k]
+            for j, (xa, xb) in enumerate(runs):
+                ya, yb = y0 + j * seg, y0 + (j + 1) * seg
+                stroke(joints, [(xa, ya), (xb, yb)], 2.0)
+                stroke(edge, [(xa + 3.0, ya), (xb + 3.0, yb)], 1.0, val=0.25)   # its lit side, faint (at 0.5 with ringed pits
+                #                                                                  the first run read as riveted steel plates)
+                xl, xr = min(xa, runs[j - 1][1]), jx(k + 1, ya)          # the cross-joint at this run's top covers the step
+                sag = rng.uniform(7, 14) * (1 if rng.uniform() < 0.5 else -1)
+                stroke(cross, [(xl, ya), (xl + (xr - xl) * 0.25, ya + sag * 0.75), ((xl + xr) / 2, ya + sag),
+                               (xl + (xr - xl) * 0.75, ya + sag * 0.75), (xr, ya)], 1.4, val=0.8)
         holes, lips = np.zeros((N, N), np.float32), np.zeros((N, N), np.float32)
         for cx, cy in place_spots(rng, 6, 90, 40, 180, busy=np.maximum(joints, cross), clear=13, up=48,
                                   cell=lambda x, y: int(x / (N / ncol)) % ncol):   # vesicles: clear of the joints, one a column
