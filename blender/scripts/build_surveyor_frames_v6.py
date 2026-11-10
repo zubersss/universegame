@@ -339,10 +339,10 @@ def preview(out):
         review._label(hd, text[:310], 6, 4, scale=1)
         return hd
 
-    def cell(fr, box, k=1, label=None):
+    def cell(fr, box, k=1, label=None, g=None):
         x0, y0, x1, y1 = (v * k for v in box)
         c = np.tile(SV.STAGE, (y1 - y0, x1 - x0, 1)).astype(np.float32)
-        gy = fr.shape[0] - GROUND * k - y0
+        gy = fr.shape[0] - (GROUND * k if g is None else g) - y0
         c[gy:gy + k] = line
         s = fr[y0:y1, x0:x1]
         c[...] = s[..., :3] + c * (1 - s[..., 3:4])
@@ -415,11 +415,19 @@ def preview(out):
             strip_png(f"{name}_2x.png", b2)
             rows.append(head(f"{name} at TWICE the export size (the same drawings shrunk less: 256 px per metre)"))
             rows += flow(b2)
+            f96 = [CEL.down(np.repeat(np.repeat(g[4], 3, 0), 3, 1), 8) for g in got]      # 256 x 3 / 8 = 96 px per metre
+            f64 = [CEL.down(fr, 2) for fr in frames]
+            c96 = [cell(fr, bbox(f96, 4), label=str(i), g=GROUND * 3 // 4) for i, fr in enumerate(f96)]
+            c64 = [cell(fr, bbox(f64, 3), label=str(i), g=GROUND // 2) for i, fr in enumerate(f64)]
+            strip_png(f"{name}_96.png", c96)
+            strip_png(f"{name}_64.png", c64)
+            rows.append(head(f"{name} AS THE GAME SHOWS IT: at 96 px per metre (the camera on the surface), then at 64 px per metre (underground)"))
+            rows += flow(c96 + c64)
     x0 = min(b[0] for b in boxes.values())
     x1 = max(b[2] for b in boxes.values())
     y0 = min(b[1] for b in boxes.values())
     side_n, dig_n = 98, 30
-    lines += [f"{nfr} drawings this run in {time.time() - t0:.0f} s ({min(secs):.1f}-{max(secs):.1f} s each). Slice 1 = 58 frames of side + 30 of side_dig, from 39 key poses (17 on side, 22 on side_dig); 37 of the 88 frames are in-betweens of POSES (each drawn fresh), none of pictures.",
+    lines += [f"{nfr} drawings this run in {time.time() - t0:.0f} s ({min(secs):.1f}-{max(secs):.1f} s each). Slice 1 = 58 frames of side + 30 of side_dig, from 40 key poses (18 on side, 22 on side_dig); 38 of the 88 frames are in-betweens of POSES (each drawn fresh), none of pictures.",
               f"THE FRAME BOX here: {BOX_W}x{BOX_H} px at 128 px per metre, pivot [0.5, {GROUND / BOX_H:.4f}]. What the drawings use: x {x0}..{x1} of {BOX_W}, the top at row {y0} (6 px pad). Frames touching the box's edge: {', '.join(clipped) if clipped else 'none'}.",
               f"AS SHEETS at this box: side's {side_n} frames = {side_n * BOX_W * BOX_H / (2048 * 2048):.1f} sheets of 2048x2048 ({side_n * BOX_W * BOX_H * 4 / 1048576:.0f} MB uncompressed, a quarter of that in BC7); side_dig's {dig_n} = {dig_n * BOX_W * BOX_H / (2048 * 2048):.2f} of one ({dig_n * BOX_W * BOX_H * 4 / 1048576:.0f} MB). ONE 2048 sheet does not hold side at twice the game's size: LEAD's to rule (two pages, or 1.5x).",
               "SOCKETS (side_dig, per frame: the front glove's centre x, z in metres from the pivot, the tool's direction in rad):"]

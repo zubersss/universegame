@@ -250,7 +250,9 @@ class Scene:
 
 
 # ---------------------------------------------------------------- the place
-def paint(ppm, x0, gy):
+def paint(ppm, x0, gy, hook=None):
+    """hook(stage, P, scene): called after the thicket's understorey ("understorey") and after the near plants ("near"),
+    so a pilot can lay its own things into those layers (B-251's painted plates). None = the frame as accepted."""
     S_ = Scene(ppm, x0, gy)
     P, rng, s = S_.P, S_.rng, S_.s
     yy, xx = P.yy, P.xx
@@ -387,6 +389,8 @@ def paint(ppm, x0, gy):
     for kind, x, k, pale in ((FK.paddle_into, 2.0, 0.9, 0.16), (FK.heart_into, 3.9, 0.85, 0.18), (FK.paddle_into, 5.6, 0.8, 0.2), (FK.heart_into, 7.0, 0.8, 0.2),
                              (FK.paddle_into, 22.6, 0.85, 0.18), (FK.heart_into, 24.2, 0.9, 0.16), (FK.paddle_into, 26.4, 0.9, 0.16), (FK.heart_into, 28.6, 0.85, 0.18)):
         put(kind, x, 0.08, k, pale, flip=1)                                     # the understorey massed at their feet
+    if hook:
+        hook("understorey", P, S_)
     lap("thicket")
     # ---- THE CLEARING'S FLOOR behind the surface edge: undergrowth in level and upward dabs; the warm pool of light
     ug = fy(0.55) + 0.2 * ppm * P.line1(60 * s)
@@ -521,6 +525,8 @@ def paint(ppm, x0, gy):
         S_.blades(x0 + dx * m_ if dx < wv / 2 else x0 + wv - (wv - dx) * m_, -0.1, k, 34, 0.45)
     for dx, k in ((3.6, 1.2), (wv - 4.2, 1.15)):
         S_.fern(x0 + dx * m_ if dx < wv / 2 else x0 + wv - (wv - dx) * m_, -0.08, k, 0.0)
+    if hook:
+        hook("near", P, S_)
     lap("near plants")
     return P, yb, T
 

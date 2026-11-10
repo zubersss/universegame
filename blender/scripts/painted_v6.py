@@ -81,6 +81,18 @@ class Stroke:
     half-length and half-width of its body in the mask's px, its kind."""
     def __init__(self, mask, tone, a, b, kind):
         self.mask, self.tone, self.a, self.b, self.kind = mask, tone, a, b, kind
+        self._mips = None
+
+    def mips(self):
+        """[(mask, tone)] at full size, half, a quarter ...: a stroke painted 300 px long is laid 20 to 60 px long, and
+        sampled straight from the large picture it would shimmer."""
+        if self._mips is None:
+            m, t = self.mask, self.tone
+            self._mips = [(m, t)]
+            while min(m.shape) >= 6:
+                m, t = shrink(m, 2).astype(np.float32), shrink(t, 2).astype(np.float32)
+                self._mips.append((m, t))
+        return self._mips
 
 
 def _turn(img, deg, fill=0.0):
@@ -163,10 +175,14 @@ def stamp(P, st, cx, cy, a, th, col, alpha=1.0, clip=None, wide=1.0):
     dx = np.arange(x0, x1, dtype=np.float32)[None, :] - cx
     dy = np.arange(y0, y1, dtype=np.float32)[:, None] - cy
     c, s = math.cos(th), math.sin(th)
-    u, v = (dx * c + dy * s) / k + st.a - 0.5, (-dx * s + dy * c) / (k * wide) + st.b - 0.5
+    mips = st.mips()
+    lv = min(len(mips) - 1, max(0, int(math.floor(math.log2(1.0 / max(k, 1e-6)) + 0.5)))) if k < 1 else 0   # the mip nearest the size it is laid at
+    mask, tone = mips[lv]
+    f = float(2 ** lv)
+    u, v = ((dx * c + dy * s) / k + st.a) / f - 0.5, ((-dx * s + dy * c) / (k * wide) + st.b) / f - 0.5
     ix, iy = np.floor(u).astype(int), np.floor(v).astype(int)
     fx, fy = u - ix, v - iy
-    h, w = st.mask.shape
+    h, w = mask.shape
 
     def tap(src, ax, ay, fill):
         ok = (ax >= 0) & (ax < w) & (ay >= 0) & (ay < h)
@@ -177,11 +193,11 @@ def stamp(P, st, cx, cy, a, th, col, alpha=1.0, clip=None, wide=1.0):
     def sample(src, fill):
         return (tap(src, ix, iy, fill) * (1 - fx) * (1 - fy) + tap(src, ix + 1, iy, fill) * fx * (1 - fy)
                 + tap(src, ix, iy + 1, fill) * (1 - fx) * fy + tap(src, ix + 1, iy + 1, fill) * fx * fy)
-    m = sample(st.mask, 0.0)
+    m = sample(mask, 0.0)
     if clip is not None:
         m = m * clip[y0:y1, x0:x1]
     m = (m * alpha)[..., None]
-    paint = np.clip(np.asarray(col, np.float32)[None, None, :] * sample(st.tone, 1.0)[..., None], 0, 1)
+    paint = np.clip(np.asarray(col, np.float32)[None, None, :] * sample(tone, 1.0)[..., None], 0, 1)
     sub = P.img[y0:y1, x0:x1]
     P.img[y0:y1, x0:x1] = sub * (1 - m) + paint * m
     P.count += 1
