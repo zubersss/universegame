@@ -881,8 +881,9 @@ namespace Meridian.Player
         float swishDeg;
 
         /// <summary>B-246's fx/shovel_swish on the arcs (dig_down, dig_up; not on the thrusts): its three drawings on the contact, the
-        /// follow-through and the settle, its pivot (the swing's centre) on the contact drawing's glove, turned so its end lies on
-        /// the blade, mirrored with the facing; dig_up's swing is upward: mirrored in y.</summary>
+        /// follow-through and the settle, its pivot (the swing's centre) on the contact drawing's tool origin (the glove where the
+        /// tool did not slide), turned so its end lies on the blade, mirrored with the facing; dig_up's swing is upward: mirrored in y.</summary>
+        public Vector2 SwishAt => swishAt;
         void UpdateSwish(bool swing, int drawing, bool left)
         {
             bool arc = strokeClip == SurveyorAnim.DigDown || strokeClip == SurveyorAnim.DigUp;
@@ -890,7 +891,9 @@ namespace Meridian.Player
             bool on = swing && SwingOnClip && arc && swishSheet != null && swishSheet.Ready && f >= 0 && f < swishSheet.frames.Length;
             if (Swish.enabled != on) Swish.enabled = on;
             if (!on) return;
-            if (f == 0) { swishAt = HandWorld; swishDeg = AimDegrees; } // the contact drawing's glove and tool angle
+            // the contact drawing's tool: its own origin (the glove, less the slide a near target took: from the glove itself a slid
+            // tool's swish stood a slide's length past the blade, in the ground over a ceiling) and its angle: the arc ends on the blade
+            if (f == 0) { swishAt = Tool.transform.position; swishDeg = AimDegrees; }
             if (Swish.sprite != swishSheet.frames[f])
             {
                 Swish.sprite = swishSheet.frames[f];

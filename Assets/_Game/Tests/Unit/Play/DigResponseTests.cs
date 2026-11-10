@@ -408,6 +408,13 @@ namespace Meridian.Tests
                         var contact = stroke.Target;
                         Assert.Less(Mathf.Abs(Vector3.Cross(dir, contact - shoulder).z), 0.03f, $"{stand} {deg} deg: the contact on the aim's line");
                         Assert.IsTrue(rig.SolidAt(contact + dir * 0.05f) && !rig.SolidAt(contact - dir * 0.05f), $"{stand} {deg} deg: the contact is the ground's face");
+                        // B-246's swish: on the arcs only (dig_down, dig_up), pivoted on the tool's own origin, so its end lies on the blade
+                        // wherever the tool slid (pivoted on the glove it stood a slide's length past the blade: over a ceiling, in the ground)
+                        bool arc = view.Body.Clip == SurveyorAnim.DigDown || view.Body.Clip == SurveyorAnim.DigUp;
+                        bool swishIn = Meridian.FX.FxSheet.Get(RigToolView.SwishKey).Ready;
+                        Assert.AreEqual(arc && view.SwingOnClip && swishIn, view.Swish.enabled, $"{stand} {deg} deg ({view.Body.Clip}): the swish on the arcs, not on the thrusts");
+                        if (view.Swish.enabled)
+                            Assert.Less(Vector2.Distance(view.Swish.transform.position, view.Tool.transform.position), 1e-3f, $"{stand} {deg} deg: the swish turns about the tool's origin: its end on the blade");
                         float gap = Vector2.Distance(view.TipWorld, contact);
                         float fromGlove = Vector2.Distance(view.HandWorld, contact) + view.LungeNow; // the glove before the lunge
                         DigPose.Span(blade, view.SlideMaxNow, RigTools.ShovelLungeM, out float nearest, out float farthest);
