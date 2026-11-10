@@ -23,20 +23,20 @@ import numpy as np
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 from meridian import pngio  # noqa: E402
+import cel_v6 as CEL  # noqa: E402
 import paint_v6 as PT  # noqa: E402
 import build_specimens_v6 as SP  # noqa: E402
 import build_forest_kinds_v6 as FK  # noqa: E402
 import build_plains_kinds_v6 as PK  # noqa: E402
 
 rgb, lerp = PT.rgb, PT.lerp
-LIGHT, HAZE = SP.LIGHT, FK.HAZE
+Q, LIGHT, HAZE = SP.Q, SP.LIGHT, FK.HAZE
 PALM_BARK = ("#4A3F3C", "#6A5A4C", "#8C7A62", "#AE9C7C")   # the forest palms' bark: deep, shade, mid, lit
 NUT = ("#6E5A3A", "#93794C", "#B89A62")
 MARRAM = ("#5E7358", "#A9BC8A")                            # dune grass: a grey sea green, the far blade and the near blade
-ROCK = {"lit": "#A9A49A", "half": "#8B877F", "mid": "#6E6B69", "shade": "#54525C"}
-WET = (0.72, 0.78, 0.90)                                   # a wet plane: its own value, darker and cooler
+WET = (0.74, 0.77, 0.82)                                   # a wet surface: its own value, darker and a little cooler (run 1: 0.72 / 0.78 / 0.90 went navy)
 WEED = ("#4A4A30", "#6A6240", "#8A7A50")
-DRIFT = ("#8C867A", "#ADA696", "#CCC5B2", "#E6E0CE")       # bleached wood: deep, shade, mid, lit
+DRIFT = ("#A8A294", "#BCB5A4", "#CFC8B6", "#E2DCCB")       # bleached wood: deep, shade, mid, lit - close values (run 1's wider ones banded it)
 
 
 def tone(c, pale=0.0, dark=0.0):
@@ -44,7 +44,7 @@ def tone(c, pale=0.0, dark=0.0):
 
 
 # ---------------------------------------------------------------- 11. the leaning coconut palm and dune grass
-def coconut_palm_into(P, tf, s=1.0, pale=0.0, dark=0.0, n=13):
+def coconut_palm_into(P, tf, s=1.0, pale=0.0, dark=0.0, n=11):
     """A coconut palm about 6.5 m: a long ringed trunk that leans and curves toward +x (mirror it to face the sea), a
     crown of long drooping fronds in a far and a near half, a cluster of nuts under them."""
     rng = P.rng
@@ -55,18 +55,22 @@ def coconut_palm_into(P, tf, s=1.0, pale=0.0, dark=0.0, n=13):
     fr = []
     for i in range(n):
         a = math.radians(-204 + 228 * i / (n - 1) + rng.uniform(-6, 6))         # from hanging at the left, over the top, to hanging at the right
-        fr.append((rng.random() + 0.4 * abs(math.cos(a)), a, rng.uniform(96, 128)))
-    fr.sort()
-    for depth, a, ln in fr[:n // 2]:
-        FK.frond(P, tf, s, top, a, ln, ln * (0.3 + 0.9 * abs(math.cos(a))), back, 20)
+        fr.append((a, rng.uniform(118, 148)))
+    # (Run 1: a weeping crown - every frond hung straight down, the far ones all on one side. Now the fronds arch out
+    # and droop toward their tips, and far and near fronds alternate round the crown.)
+    droop = lambda a, ln: ln * (0.18 + 0.6 * abs(math.cos(a)))                  # noqa: E731
+    # (Run 2: thirteen broad fronds closed into one leafy dome. A coconut's are long and narrow with sky between them:
+    # eleven, their leaflets 0.15 of the frond's length.)
+    for a, ln in fr[1::2]:
+        FK.frond(P, tf, s, top, a, ln, droop(a, ln), back, 22, wide=0.15)
     FK.limb(P, [tf(*p) for p in ((0, 2), (26, -120), (70, -250), top)], 9 * s, 5.5 * s, bark, flare=5 * s, n_per=0.07, rings=10 * s, s=s)
     for ox, oy in ((-7, 9), (2, 13), (10, 8), (-2, 5), (6, 3)):                 # the nuts, each a round dab with its lit side
         x, y = tf(top[0] + ox, top[1] + oy)
         P.dab(x, y, 5.0 * s, 4.4 * s, 0.0, nuts[1], 1.0, 4.4, 0.0)
         P.dab(x + 1.4 * s * LIGHT[0], y + 1.4 * s * LIGHT[1], 2.4 * s, 2.0 * s, 0.0, nuts[2], 1.0, 4.0, 0.0)
         P.dab(x - 1.8 * s * LIGHT[0], y - 1.8 * s * LIGHT[1], 2.6 * s, 1.6 * s, 0.6, nuts[0], 0.9, 4.0, 0.0)
-    for depth, a, ln in fr[n // 2:]:
-        FK.frond(P, tf, s, top, a, ln, ln * (0.3 + 0.9 * abs(math.cos(a))), cols, 20)
+    for a, ln in fr[0::2]:
+        FK.frond(P, tf, s, top, a, ln, droop(a, ln), cols, 22, wide=0.15)
 
 
 def dune_grass_into(P, tf, s=1.0, pale=0.0, dark=0.0, n=34, dry=0.45, wind=1):
@@ -78,40 +82,65 @@ def dune_grass_into(P, tf, s=1.0, pale=0.0, dark=0.0, n=34, dry=0.45, wind=1):
     for depth, bx, a, ln, bend in sorted(bl):
         c0, c1 = (PK.STRAW[0], PK.STRAW[2]) if rng.random() < dry else MARRAM
         col = tone(lerp(rgb(c0), rgb(c1), depth), pale, dark) * (1 + rng.normal(0, 0.05))
-        pts = [tf(bx, 1), tf(bx + math.cos(a) * ln * 0.5, math.sin(a) * ln * 0.55), tf(bx + math.cos(a + bend) * ln, math.sin(a + bend) * ln + 0.2 * ln * abs(bend))]
-        P.stroke(pts, 2.4 * s, 0.5 * s, np.clip(col, 0, 1), 5.0)
+        arc = CEL.catmull([(bx, 1), (bx + math.cos(a) * ln * 0.5, math.sin(a) * ln * 0.55), (bx + math.cos(a + bend) * ln, min(math.sin(a + bend) * ln + 0.2 * ln * abs(bend), -3.0))], False, 6)
+        P.stroke([tf(*p) for p in arc], 2.4 * s, 0.5 * s, np.clip(col, 0, 1), 5.0)   # (run 2: three points made an elbow in a strongly bent blade)
 
 
 # ---------------------------------------------------------------- 12. sea-worn rocks, the tide line, driftwood
-def sea_rock_into(P, tf, s=1.0, pale=0.0, dark=0.0, wet_y=-12):
-    """A sea-worn boulder about 1.5 m wide and 0.9 m tall: a lit top, three side planes, and below the line y = wet_y the
-    same planes WET (darker, cooler) under a thin pale edge; weed hangs from that line, barnacles sit above it."""
+def boulder(P, cx, cy, rx, ry, cols, s=1.0, ground=None):
+    """A sea-worn boulder's form (frame px): three rounded lumps as one mass, lit as a ball in four values, the strokes
+    running round it; cut level at `ground` (a frame row), where it sits in the sand. -> its whole-picture mask."""
+    y0, y1 = max(int((cy - 1.7 * ry) * Q), 0), min(int((cy + 1.7 * ry) * Q) + 1, P.ph)
+    x0, x1 = max(int((cx - 1.7 * rx) * Q), 0), min(int((cx + 1.7 * rx) * Q) + 1, P.pw)
+    if y1 <= y0 or x1 <= x0:
+        return None
+    w = (slice(y0, y1), slice(x0, x1))
+    full = np.zeros((P.ph, P.pw), np.float32)
+    for ox, oy, kx, ky in ((0.0, 0.0, 1.0, 1.0), (-0.42, 0.24, 0.62, 0.7), (0.46, 0.27, 0.58, 0.66)):
+        full = np.maximum(full, P.blob(cx + ox * rx, cy + oy * ry, kx * rx, ky * ry, 0.07, 0.16))
+    if ground is not None:
+        full = (full * (P.yy < ground)).astype(np.float32)
+    m = full[w]
+    if not m.any():
+        return None
+    dx, dy = (P.xx[:, w[1]] - cx) / (1.15 * rx), (P.yy[w[0]] - cy) / (1.15 * ry)
+    lam = dx * LIGHT[0] + dy * LIGHT[1] + np.sqrt(np.clip(1 - dx * dx - dy * dy, 0, 1)) * LIGHT[2] + 0.18 * P.fine[w]
+    u = SP.values(lam, (0.0, 0.34, 0.66), cols)
+    FK.into(P, w, u, m)
+    round_ = lambda x, y: math.atan2((x - cx) / rx, -(y - cy) / ry)             # noqa: E731  along the form's contour
+    k = max(s, 0.6)
+    P.brush(u, m, int(0.05 * float(m.sum()) / (Q * Q) / (k * k)), (4 * k, 9 * k), (2.2, 3.8), round_, 0.25, (0.7, 1.0), 0.05, 0.01, 3.6, 0.3, clip=full, win=w)
+    return full
+
+
+def sea_rock_into(P, tf, s=1.0, pale=0.0, dark=0.0, wet_y=-17):
+    """A sea-worn boulder about 1.5 m wide and 0.85 m tall, ROUNDED (the forest's rock is planes): below the wavering
+    line y = wet_y it is WET - darker and a little cooler; a few pale glints on that line's lit side, weed hanging from
+    it, barnacles in small tight patches above it.
+    (Run 1 was four hard planes with a navy wet band under a white stripe: a box tied with a ribbon.)"""
     rng = P.rng
-    fl = FK.flipped(tf)
-    T = lambda poly: [tf(*p) for p in poly]                                    # noqa: E731
-    planes = (("lit", 0.12, [(-34, -44), (-8, -56), (22, -54), (40, -40), (26, -30), (-10, -34)], None),
-              ("shade", 1.22, [(-46, wet_y - 2), (-34, -44), (-10, -34), (-18, wet_y)], [(-48, 2), (-46, wet_y - 2), (-18, wet_y), (-20, 2)]),
-              ("mid", 1.5, [(-10, -34), (26, -30), (22, wet_y), (-18, wet_y)], [(-18, wet_y), (22, wet_y), (20, 2), (-20, 2)]),
-              ("half", 1.92, [(26, -30), (40, -40), (50, -18), (48, wet_y), (22, wet_y)], [(22, wet_y), (48, wet_y), (50, 2), (20, 2)]))
-    for name, a, dry_poly, wet_poly in planes:
-        if fl:                                                                  # mirrored: the planes toward and away from the light change places
-            name = {"shade": "half", "half": "shade"}.get(name, name)
-        c = tone(ROCK[name], pale, dark)
-        ang = math.pi - a if fl else a
-        FK.facet(P, T(dry_poly), c, ang, s)
-        if wet_poly is not None:
-            FK.facet(P, T(wet_poly), np.clip(c * np.array(WET, np.float32), 0, 1), ang, s)
-    P.stroke(T([(-46, wet_y - 2), (-18, wet_y), (22, wet_y), (48, wet_y)]), 1.4 * s, 1.0 * s, tone("#C9CDD0", pale, dark), 3.6)   # the wet line's lit edge
-    P.stroke(T([(-34, -44), (-10, -34), (26, -30), (40, -40)]), 2.0 * s, 1.2 * s, tone("#C4BFB2", pale, dark), 3.5)                # the top's lit rim
+    cols = [tone(c, pale, dark) for c in ("#4E4C55", "#6A6766", "#8A867E", "#ABA69B")]
+    cx, cy = tf(0, -24)
+    full = boulder(P, cx, cy, 46 * s, 30 * s, cols, s, tf(0, 2)[1])
+    if full is None:
+        return
+    wy = tf(0, wet_y)[1]
+    P.glaze(full * P.below(wy + 1.5 * s * P.line1(24 * s), 1.5 * s), WET, 1.0)
+    glint = tone("#B9BDBE", pale, dark)
+    way = -1 if FK.flipped(tf) else 1
+    for lx in (8, 17, 25, 34):                                                  # the wet line's lit side: a few short glints, not a stripe
+        x, y = tf(way * (lx + rng.uniform(-2, 2)), wet_y - 1 + rng.uniform(-1, 1))
+        P.dab(x, y, rng.uniform(2.2, 3.6) * s, 0.8 * s, rng.normal(0, 0.15), glint, 0.85, 4.0, 0.0, clip=full)
     weed = FK.hz(WEED, pale, dark)
-    for _ in range(11):                                                         # weed hangs from the wet line
-        x, y = tf(rng.uniform(-42, 44), wet_y + rng.uniform(2, 6))
-        P.dab(x, y, rng.uniform(3.5, 6.0) * s, 1.7 * s, math.pi / 2 + rng.normal(0, 0.3), weed[int(rng.integers(0, 3))], 1.0, 4.2, 0.1)
-    barn = tone("#D8D4C4", pale, dark)
-    for cx, cy in ((-24, wet_y - 6), (6, wet_y - 5), (34, wet_y - 7)):          # barnacles: small pale dots in three patches above it
-        for _ in range(5):
-            x, y = tf(cx + rng.uniform(-6, 6), cy + rng.uniform(-3, 3))
-            P.dab(x, y, 1.5 * s, 1.3 * s, 0.0, barn, 0.95, 4.6, 0.0)
+    for wx, k in ((-30, 4), (-6, 3), (27, 5)):                                  # weed hangs from the wet line in three uneven clumps
+        for _ in range(k):                                                      # (run 3: eleven pale marks in an even row along a dark band: a row of teeth)
+            x, y = tf(wx + rng.uniform(-6, 6), wet_y + rng.uniform(2, 9))
+            P.dab(x, y, rng.uniform(3.5, 7.0) * s, 1.7 * s, math.pi / 2 + rng.normal(0, 0.3), weed[int(rng.integers(0, 2))], 1.0, 4.2, 0.1, clip=full)
+    barn = tone("#BFBBAC", pale, dark)
+    for bx, by in ((-22, wet_y - 6), (12, wet_y - 9)):                          # barnacles: small grey-cream dots in two tight patches above it
+        for _ in range(6):
+            x, y = tf(bx + rng.uniform(-4, 4), by + rng.uniform(-2.5, 2.5))
+            P.dab(x, y, 1.2 * s, 1.0 * s, 0.0, barn, 0.9, 4.6, 0.0, clip=full)
 
 
 def wrack_into(P, tf, s=1.0, pale=0.0, dark=0.0, width=200):
@@ -135,22 +164,27 @@ def wrack_into(P, tf, s=1.0, pale=0.0, dark=0.0, width=200):
 def driftwood_into(P, tf, s=1.0, pale=0.0, dark=0.0):
     """DRIFTWOOD about 2.4 m long: a bleached log lying on the sand, a little bent, one branch stub, a broken end with its
     rings, a few cracks along the grain."""
+    # (Run 1 read as a SNAKE: strokes laid across the log made dark bands on a pale body, a long curved stub was a
+    # raised tail, a ringed end an eye. Now: close values, the grain as long strokes ALONG the log, a short broken stub,
+    # a splintered end with no rings.)
     rng = P.rng
     wood = FK.hz(DRIFT, pale, dark)
     ctr = [(-76, -9), (-30, -11), (24, -8), (78, -12)]
-    FK.limb(P, [tf(*p) for p in ctr], 9 * s, 6.5 * s, wood, n_per=0.06, s=s)
-    FK.limb(P, [tf(*p) for p in ((18, -12), (30, -28), (46, -38))], 3.6 * s, 1.4 * s, wood, n_per=0.08, s=s)   # a branch stub
-    e0, e1 = tf(*ctr[0]), tf(*ctr[1])
-    across = PK.ang_of(e0, e1) + math.pi / 2
-    for a_, b_, c in ((8.6, 3.4, wood[1]), (5.6, 2.2, wood[0]), (2.6, 1.0, wood[2])):                           # the broken end: three rings
-        P.dab(e0[0], e0[1], a_ * s, b_ * s, across, c, 1.0, 4.6, 0.0)
-    crack = tone("#6E6A60", pale, dark)
-    for _ in range(5):                                                          # cracks along the grain
-        t = rng.uniform(0.15, 0.85)
-        x = ctr[0][0] + (ctr[3][0] - ctr[0][0]) * t
-        y = -10 + rng.uniform(-3, 3)
+    FK.limb(P, [tf(*p) for p in ctr], 9 * s, 6.5 * s, wood, n_per=0.0, s=s)
+    FK.limb(P, [tf(*p) for p in ((20, -14), (27, -26))], 3.8 * s, 2.8 * s, wood, n_per=0.0, s=s)                # a short broken stub
+    for _ in range(26):                                                         # the grain: long thin strokes along the log, pale above, grey below
+        ln = rng.uniform(14, 34)
+        x = rng.uniform(-70, 70 - ln)
+        y = -10 + rng.uniform(-5.5, 4.5)
+        P.stroke([tf(x, y), tf(x + ln, y + rng.uniform(-1.2, 1.2))], 1.2 * s, 0.5 * s, wood[3] if y < -10 else wood[1], 4.4)
+    crack = tone("#8A8478", pale, dark)
+    for _ in range(4):                                                          # a few cracks along the grain
         ln = rng.uniform(10, 22)
+        x = rng.uniform(-60, 60 - ln)
+        y = -10 + rng.uniform(-3, 3)
         P.stroke([tf(x, y), tf(x + ln, y + rng.uniform(-1, 1))], 0.9 * s, 0.4 * s, crack, 4.6)
+    for dy in (-5, -1, 3):                                                      # the broken end: splinters past it
+        P.stroke([tf(-74, -9 + dy), tf(-84 - rng.uniform(0, 5), -9 + dy * 1.5)], 2.0 * s, 0.5 * s, wood[2] if dy < 0 else wood[1], 4.4)
 
 
 # ---------------------------------------------------------------- the specimen sheet (unrun)

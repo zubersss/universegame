@@ -96,12 +96,14 @@ def plume_grass_into(P, tf, s=1.0, pale=0.0, dark=0.0, n=9, dry=0.35, blades=44)
         out = 1 if math.cos(a) >= 0 else -1                                     # the way it leans, in its own px
         if what == "blade":
             droop = ln * (0.18 + 0.5 * abs(math.cos(a)))                        # a long blade bends over under its own weight
-            pts = [tf(bx, 1), tf(bx + math.cos(a) * ln * 0.5, math.sin(a) * ln * 0.62), tf(bx + math.cos(a) * ln + out * 0.12 * ln, math.sin(a) * ln + droop)]
-            P.stroke(pts, 3.2 * s, 0.6 * s, blade_col(rng, depth, pale, dark, dry), 5.0)
+            tip_y = min(math.sin(a) * ln + droop, -3.0)                         # (run 1: tips went into the ground; and three points made a kink)
+            arc = CEL.catmull([(bx, 1), (bx + math.cos(a) * ln * 0.5, math.sin(a) * ln * 0.62), (bx + math.cos(a) * ln + out * 0.12 * ln, tip_y)], False, 6)
+            P.stroke([tf(*p) for p in arc], 3.2 * s, 0.6 * s, blade_col(rng, depth, pale, dark, dry), 5.0)
             continue
         straw = np.clip(lerp(lerp(rgb(STRAW[0]), rgb(STRAW[2]), depth), HAZE, pale) * (1 - 0.35 * dark), 0, 1)
         top = (bx + math.cos(a) * ln + out * 0.05 * ln, math.sin(a) * ln)
-        P.stroke([tf(bx, 1), tf(bx + math.cos(a) * ln * 0.5, math.sin(a) * ln * 0.5), tf(*top)], 1.7 * s, 0.9 * s, straw, 4.6)
+        stem = CEL.catmull([(bx, 1), (bx + math.cos(a) * ln * 0.5, math.sin(a) * ln * 0.5), top], False, 6)
+        P.stroke([tf(*p) for p in stem], 1.7 * s, 0.9 * s, straw, 4.6)
         nod = rng.uniform(0.25, 0.6) * out                                      # the head nods over to the side the stem leans
         axis = [top, (top[0] + math.cos(a + nod * 0.5) * head * 0.5, top[1] + math.sin(a + nod * 0.5) * head * 0.5),
                 (top[0] + math.cos(a + nod) * head, top[1] + math.sin(a + nod) * head + 0.12 * head)]
@@ -157,8 +159,8 @@ def savanna_tree_into(P, tf, s=1.0, pale=0.0, dark=0.0):
     fork = (4, -118)
     for cx, cy, rx, ry in ((14, -276, 196, 20), (-150, -250, 60, 12)):          # the crown's far side, in shade, behind the wood
         shelf(P, *tf(cx, cy), rx * s, ry * s, leafs, 0.45, s=s)
-    for pts, r0, r1 in (([(-3, 0), (-22, 5), (-40, 8)], 6, 1.6), ([(4, 0), (24, 5), (44, 9)], 6, 1.6)):
-        FK.limb(P, T(pts), r0 * s, r1 * s, bark, s=s)                           # two roots
+    for pts, r0, r1 in (([(-4, -7), (-16, 0), (-27, 4)], 7.5, 3.0), ([(5, -7), (17, 0), (29, 4)], 7.5, 3.0)):
+        FK.limb(P, T(pts), r0 * s, r1 * s, bark, s=s)                           # two short thick roots (run 1: long thin ones read as a bird's feet)
     FK.limb(P, T([(0, 3), (-7, -42), (-2, -84), fork]), 11 * s, 8.5 * s, bark, flare=6 * s, s=s)   # the trunk, leaning a little
     boughs = (([fork, (-48, -186), (-116, -228), (-176, -246)], 7.5, 2.6),
               ([fork, (12, -186), (30, -244), (38, -282)], 7.0, 2.4),
@@ -180,6 +182,7 @@ def thorn_bush_into(P, tf, s=1.0, pale=0.0, dark=0.0, n=8):
     leafs = FK.hz(SAV_LEAF, pale, dark)
     thorn = np.clip(lerp(rgb("#DCD3B4"), HAZE, pale) * (1 - 0.35 * dark), 0, 1)
     shelf(P, *tf(2, -56), 62 * s, 10 * s, leafs, 0.45, s=s)                     # the far side, in shade
+    shelf(P, *tf(-4, -38), 46 * s, 9 * s, leafs, 0.5, s=s)                      # (run 1: an umbrella on sticks, a small tree; a bush is leafy to its knees)
     for i in range(n):
         a = math.radians(-152 + 124 * i / (n - 1) + rng.uniform(-5, 5))
         ln = rng.uniform(44, 62) * (0.8 + 0.2 * abs(math.sin(a)))
@@ -193,11 +196,11 @@ def thorn_bush_into(P, tf, s=1.0, pale=0.0, dark=0.0, n=8):
             x, y = ctr[j]
             b = ang_of(ctr[j - 1], ctr[j]) + (1 if (j // 3) % 2 else -1) * rng.uniform(0.9, 1.3)
             P.stroke([(x, y), (x + math.cos(b) * 5.0 * s, y + math.sin(b) * 5.0 * s)], 1.0 * s, 0.4 * s, thorn, 5.0)
-    for cx, cy, rx, ry in ((-36, -60, 34, 9), (10, -72, 42, 10), (46, -58, 30, 8)):
-        shelf(P, *tf(cx, cy), rx * s, ry * s, leafs, s=s)
+    for cx, cy, rx, ry in ((-46, -36, 26, 8), (42, -34, 28, 8), (-36, -60, 34, 9), (10, -72, 42, 10), (46, -58, 30, 8), (0, -24, 22, 7)):
+        shelf(P, *tf(cx, cy), rx * s, ry * s, leafs, s=s)                       # low side shelves first, the top ones over them, a low one in front
 
 
-# ---------------------------------------------------------------- the specimen sheet (unrun)
+# ---------------------------------------------------------------- the specimen sheet (first run 11-10 10:14)
 def grasses(seed=61):
     P = FK.canvas(430, 210, seed, 184, (170, 190, 8))
     turf_into(P, FK.at(72, 184), width=110)

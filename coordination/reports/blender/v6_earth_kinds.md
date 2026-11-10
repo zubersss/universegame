@@ -9,16 +9,18 @@ Written 2026-11-10 08:4x at LEAD's ask; one line each.
   boulder and the fallen log (a cut end, moss, a fern on it). Sources: `build_specimens_v6.py`,
   `build_forest_kinds_v6.py` (placeable `*_into(P, tf, s, pale)`), `build_forest_frame_v6.py` (the liana and the log
   are written inside the frame, not yet as placeable kinds).
-- WRITTEN, UNRUN: 9 the three grasses (`turf_into`, `clump_into`, `plume_grass_into`) and 10 the savanna tree and the
-  thorn bush (`savanna_tree_into`, `thorn_bush_into`, the crown's `shelf`), in `blender/scripts/build_plains_kinds_v6.py`
-  with its own specimen sheet; 4's tree fern and a placeable ground fern (`tree_fern_into`, `fern_into`, `frond` in
-  `build_forest_kinds_v6.py`, shown on the plains' sheet). A first run is a look at every shape, not a sheet.
-  11 and 12, the coast (`coconut_palm_into`, `dune_grass_into`, `sea_rock_into`, `wrack_into`, `driftwood_into`, and a
-  generic `sheet()`), in `blender/scripts/build_coast_kinds_v6.py`, UNRUN too.
+- PAINTED AS SPECIMENS 10:14-10:35 (four runs each, with LEAD to judge): 9 the three grasses (`turf_into`,
+  `clump_into`, `plume_grass_into`) and 10 the savanna tree and the thorn bush (`savanna_tree_into`,
+  `thorn_bush_into`, the crown's `shelf`), in `blender/scripts/build_plains_kinds_v6.py`; 4's tree fern and a
+  placeable ground fern (`tree_fern_into`, `fern_into`, `frond` in `build_forest_kinds_v6.py`, shown on the plains'
+  sheet; `fern_into` itself is still unrun); 11 and 12, the coast (`coconut_palm_into`, `dune_grass_into`,
+  `sea_rock_into` on `boulder`, `wrack_into`, `driftwood_into`, a generic `sheet()`), in
+  `blender/scripts/build_coast_kinds_v6.py`. Sheets: blender/preview/review_b248_plains_kinds_preview.png and
+  review_b248_coast_kinds_preview.png. None is in a frame yet.
 - NOT WRITTEN: 1's two more fork patterns and the low spreading form; 8's shelf fungus and the boulder
   in three sizes; the liana and the log as placeable kinds; the plains' and the coast's ground palettes.
-- TO RUN, when LEAD says and no lock or want of UNITY's is up: the plains' sheet, then the coast's (each a light
-  numpy sheet, well under a minute); expect faults on a first run of unrun code.
+- What the first runs showed and what was changed is in renders_2026-11-10.md (10:14 on) and in the sources'
+  comments (a weeping palm, a box tied with a ribbon, a snake, a row of teeth: each named and fixed).
 Every kind is a rule in the manner of `blender/scripts/build_specimens_v6.py` (a form field steers the brush: TUBE =
 a centre line with a radius, FACET = a plane with one value and one stroke direction, BALL = a lit cluster), under the
 frame's one light, seeded so no two individuals are alike. "Cost" is my time to write and tune the rule; painting one

@@ -270,9 +270,10 @@ def heart_into(P, tf, s=1.0, pale=0.0, dark=0.0, n=8):
 FERN = ("#476244", "#66894F", "#9DB96A")
 
 
-def frond(P, tf, s, base, a, ln, droop, cols, n=13):
+def frond(P, tf, s, base, a, ln, droop, cols, n=13, taper=False, wide=0.22):
     """One frond (its own px about the plant's foot): a rachis that arcs out and droops, a leaflet down each side at
-    every step, each its own dab. The frame's Scene.frond made placeable; the light is read from the PLACED rachis."""
+    every step, each its own dab. The frame's Scene.frond made placeable; the light is read from the PLACED rachis.
+    taper: a fern's frond - broad at its base and narrowing to the tip, thinner leaflets (a palm's is widest midway)."""
     rng = P.rng
     pts = [base, (base[0] + math.cos(a) * ln * 0.5, base[1] + math.sin(a) * ln * 0.55), (base[0] + math.cos(a) * ln, base[1] + math.sin(a) * ln + droop)]
     rib = CEL.catmull(pts, False, n)
@@ -283,12 +284,14 @@ def frond(P, tf, s, base, a, ln, droop, cols, n=13):
         (x0, y0), (x1, y1) = rib[i - 1], rib[i]
         t = i / len(rib)
         ang = math.atan2(y1 - y0, x1 - x0)
-        ll = ln * 0.22 * math.sin(math.pi * min(1.0, t * 1.05)) ** 0.6 + 2
+        if taper and t < 0.14:
+            continue                                                            # a bare stalk at the crown's heart (run 2: the broad bases merged into one green mass)
+        ll = (ln * 0.2 * (1 - t) ** 0.7 + 2) if taper else (ln * wide * math.sin(math.pi * min(1.0, t * 1.05)) ** 0.6 + 2)   # wide: the leaflet's length as a part of the frond's
         for side in (-1, 1):
             b = ang + side * 1.0
             c = cols[2] if (lit and side < 0) else cols[1] if lit else cols[0] if side > 0 else cols[1]
             px, py = tf(x1 + math.cos(b) * ll * 0.5, y1 + math.sin(b) * ll * 0.5)
-            P.dab(px, py, ll * 0.5 * s, max(0.9, ll * 0.12 * s), math.pi - b if fl else b, np.clip(c * (1 + rng.normal(0, 0.05)), 0, 1), 1.0, 4.6, 0.0)
+            P.dab(px, py, ll * 0.5 * s, max(0.9, ll * (0.085 if taper else 0.12) * s), math.pi - b if fl else b, np.clip(c * (1 + rng.normal(0, 0.05)), 0, 1), 1.0, 4.6, 0.0)
     P.stroke([tf(*p) for p in rib], 1.6 * s, 0.6 * s, cols[0] * 0.85, 4.0)
 
 
@@ -307,22 +310,34 @@ def tree_fern_into(P, tf, s=1.0, pale=0.0, dark=0.0, n=13):
     rng = P.rng
     bark = hz(("#3A302C", "#54463A", "#746350", "#978466"), pale, dark)
     cols, back = hz(FERN, pale, dark), hz(FERN, pale, min(1.0, dark + 0.5))
-    dead = hz(("#6E5B40", "#8E7A54", "#AD9A6C"), pale, dark)
+    dead = hz(("#5E4C38", "#7A6548", "#94805A"), pale, dark)                    # (run 3: pale, in two matched pairs they hung like a doll's legs)
     top = (5, -150)
     fr = []
     for i in range(n):
         a = math.radians(-176 + 172 * i / (n - 1) + rng.uniform(-6, 6))
-        fr.append((rng.random() + 0.4 * abs(math.cos(a)), a, rng.uniform(84, 110)))
-    fr.sort()
-    for depth, a, ln in fr[:n // 2]:                                           # the crown's far half, behind the trunk
-        frond(P, tf, s, top, a, ln, ln * (0.35 + 0.75 * abs(math.cos(a))), back, 18)
-    limb(P, [tf(*p) for p in ((0, 2), (-5, -52), (3, -104), top)], 9 * s, 7 * s, bark, flare=3 * s, n_per=0.08, rings=9 * s, s=s)
-    for _ in range(5):                                                          # dead fronds hang down against the trunk
-        side = 1 if rng.random() < 0.5 else -1
-        x0, y0, ln = top[0] + side * rng.uniform(2, 6), top[1] + rng.uniform(4, 14), rng.uniform(34, 52)
-        P.stroke([tf(x0, y0), tf(x0 + side * 10, y0 + ln * 0.45), tf(x0 + side * rng.uniform(8, 14), y0 + ln)], 2.4 * s, 0.8 * s, dead[int(rng.integers(0, 3))], 4.2)
-    for depth, a, ln in fr[n // 2:]:                                            # the near half
-        frond(P, tf, s, top, a, ln, ln * (0.35 + 0.75 * abs(math.cos(a))), cols, 18)
+        fr.append((a, rng.uniform(84, 110)))
+    # (Run 1: a weeping palm - the fronds hung halfway down the trunk, the far ones all on one side, a ringed palm's
+    # trunk. Now: the fronds arch out and only their tips droop; far and near fronds alternate round the crown; each
+    # frond tapers from a broad base; the trunk is fibrous, with old frond scars instead of rings.)
+    for a, ln in fr[1::2]:                                                      # every other frond is on the far side, behind the trunk
+        frond(P, tf, s, top, a, ln, ln * (0.12 + 0.42 * abs(math.cos(a))), back, 22, taper=True)
+    trunk = ((0, 2), (-5, -52), (3, -104), top)
+    mt = limb(P, [tf(*p) for p in trunk], 9 * s, 7 * s, bark, flare=3 * s, n_per=0.08, s=s)
+    if mt is not None:
+        ctr = CEL.catmull(list(trunk), False, 8)
+        for _ in range(30):                                                     # old frond scars: small slanting marks, dark and pale
+            i = int(rng.integers(1, len(ctr) - 1))
+            p0, p1 = tf(*ctr[i - 1]), tf(*ctr[i])
+            along = math.atan2(p1[1] - p0[1], p1[0] - p0[0])
+            off = rng.uniform(-6, 6) * s
+            P.dab(p1[0] - math.sin(along) * off, p1[1] + math.cos(along) * off, 3.2 * s, 1.5 * s, along + rng.choice((-0.7, 0.7)),
+                  bark[0] if rng.random() < 0.6 else bark[3], 0.9, 4.2, 0.1, clip=mt)
+    for i in range(7):                                                          # dead fronds hang down against the trunk: uneven, close to it
+        side = 1 if i % 3 else -1
+        x0, y0, ln = top[0] + side * rng.uniform(1, 5), top[1] + rng.uniform(3, 16), rng.uniform(18, 50)
+        P.stroke([tf(x0, y0), tf(x0 + side * rng.uniform(4, 8), y0 + ln * 0.45), tf(x0 + side * rng.uniform(4, 10), y0 + ln)], 2.2 * s, 0.8 * s, dead[int(rng.integers(0, 3))], 4.2)
+    for a, ln in fr[0::2]:                                                      # the near fronds
+        frond(P, tf, s, top, a, ln, ln * (0.12 + 0.42 * abs(math.cos(a))), cols, 22, taper=True)
     for d, h in ((1, rng.uniform(16, 22)), (-1, rng.uniform(12, 17))):          # young fronds, still curled
         tx, ty = top
         P.stroke([tf(tx, ty), tf(tx + d * 2, ty - h * 0.6), tf(tx + d * 5, ty - h), tf(tx + d * 9, ty - h * 0.82), tf(tx + d * 7, ty - h * 0.62)], 2.2 * s, 1.2 * s, cols[1], 4.4)
