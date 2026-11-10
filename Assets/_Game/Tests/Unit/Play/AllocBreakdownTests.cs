@@ -104,9 +104,9 @@ namespace Meridian.Tests
                     yield return Row("+ the drawn surveyor off (SpriteCharacterView)");
                     player.enabled = false;
                     yield return Row("+ the player controller off");
-                    foreach (var c in Object.FindObjectsByType<Canvas>(FindObjectsSortMode.None)) c.enabled = false;
+                    foreach (var c in Object.FindObjectsByType<Canvas>()) c.enabled = false;
                     yield return Row("+ every Canvas off (the HUD)");
-                    foreach (var a in Object.FindObjectsByType<Animator>(FindObjectsSortMode.None)) a.enabled = false;
+                    foreach (var a in Object.FindObjectsByType<Animator>()) a.enabled = false;
                     yield return Row("+ every Animator off");
                     if (side.cartoon != null) side.cartoon.enabled = false;
                     yield return Row("+ the cartoon stage off (CartoonStage's own update)");
@@ -116,10 +116,10 @@ namespace Meridian.Tests
                     yield return Row("+ the terrain streamer off");
                     foreach (var m in side.GetComponentsInChildren<MonoBehaviour>(true)) m.enabled = false;
                     yield return Row("+ every script under the planet side off");
-                    foreach (var m in Object.FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None))
+                    foreach (var m in Object.FindObjectsByType<MonoBehaviour>())
                         if (m != null && m.gameObject.scene.name != "DontDestroyOnLoad" && m.GetType().Namespace != null && m.GetType().Namespace.StartsWith("Meridian")) m.enabled = false;
                     yield return Row("+ every Meridian script in the scene off");
-                    foreach (var cam in Object.FindObjectsByType<Camera>(FindObjectsSortMode.None)) cam.enabled = false;
+                    foreach (var cam in Object.FindObjectsByType<Camera>()) cam.enabled = false;
                     yield return Row("+ every camera off (nothing drawn)");
                     foreach (var root in SceneManager.GetActiveScene().GetRootGameObjects()) root.SetActive(false);
                     yield return Row("+ every root object of the scene inactive (the Editor and the test runner alone)");
