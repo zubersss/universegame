@@ -1,27 +1,42 @@
 """B-231 (D-185, milestone C5): the v5 surveyor - a DESIGN for the owner's look-over; previews only, no export before it.
 
-v5 (D-185): a modern hand-drawn cartoon. KEPT from v4: hand-drawn / painted (ink + gouache texture, no digital gradients or
-3D look), an original character, faces only on people and animals, no combat. CHANGED: jointed limbs (shoulder, elbow, wrist,
-hip, knee, ankle) and natural cartoon proportions instead of rubber hoses and pie-cut eyes; painted shading and fabric texture
-on the suit; cleaner but still hand-wobbly ink; a RIGGED CUT-OUT (parts + bones) so crouch, bent-knee jumps and head turns
-are cheap.
+ROUND 3, in ART v6 "cel on painted" (D-198 + D-199, docs/STYLE_V6.md). The owner on round 2b: "Polish up the surveyor a
+bit more than that. I want fine lines that don't render into pixels." (D-198), then: the art style of a 1960s cel film
+(D-199): everything that acts is a CEL - a charcoal pencil line and flat paint. The design, the proportions, the face
+and the bones STAND (no joint, pivot, length or pose changed). What changed:
+  - every part is drawn at K = 4 times the round-2 size: 512 px per metre (2.0 m = 1024 px). In play it is only ever
+    shrunk; every plate of the sheet is the large drawing shrunk by block means, none enlarges a pixel.
+  - the LINE is a pencil line (cel_v6.py): dark charcoal everywhere, pressure in it (about 40 % thicker and thinner along
+    a stroke), tapered ends, a slightly dry edge, outlines that may stop short of closing; mean 1.5 px at the game's
+    zoom (round 2b: a 2.5 px ink outline). FEWER lines than round 2: a line where a form turns or overlaps, a few
+    flicks for folds and hair; no stitching, no treads, no ticks.
+  - the PAINT is flat: one colour an area, no texture, no grain, no gradient; at most ONE flat shadow shape per form
+    (a step darker, a clean edge); colour patches meet their form with no line (the MERIDIAN stripe, the pack's straps
+    and dial, the buckles, the blush); the glass is a flat tint with one flat highlight shape.
+  - kept from LEAD's round-3 list: the joint cuffs (flat round shapes ON the elbow and knee pivots, so they hide the
+    cut-out seam at every pose), clear gloves (fingers, thumb, a cuff line), the boots' sole line, the pack's straps
+    and dial.
+  - a second LINE pass over the same paint (boil = 1): the 12 Hz boil of STYLE_V6 2.6; the sheet prints what it costs.
+
+v5 (D-185): KEPT from v4: an original character, faces only on people and animals, no combat. CHANGED: jointed limbs
+(shoulder, elbow, wrist, hip, knee, ankle) and natural cartoon proportions instead of rubber hoses and pie-cut eyes; a
+RIGGED CUT-OUT (parts + bones) so crouch, bent-knee jumps and head turns are cheap.
 
 The surveyor keeps v4's identity marks so the player knows them: the big fishbowl helmet, the surveyor's PLUMB BOB on a
-springy antenna, the teal MERIDIAN stripe with the compass badge on the off-white suit, the soft-red float pack, white gloves
-with mustard cuffs, brown boots. New: an oval-eyed, eyebrowed face (a warm, curious grown-up, not a baby), a mustard hair
-tuft, a stitched suit with knee and elbow pads, a belt with a pouch, boot soles with treads.
+springy antenna, the teal MERIDIAN stripe with the compass badge on the off-white suit, the soft-red float pack, white
+gloves with mustard cuffs, brown boots.
 
-  Height 2.0 m = 256 px (PPU 128). The rig, per facing (side = profile facing right; front34 = three-quarter front):
+  The rig, per facing (side = profile facing right; front34 = three-quarter front):
     hips (root) -> torso -> head -> antenna;  torso -> pack;  torso -> upper_arm -> forearm -> hand (near f / far b);
-    hips -> thigh -> shin -> boot (near f / far b).  Far limbs are the near parts painted one step darker.
-  Part sheet: characters/surveyor_v5/rig_color.png (parts on pivots); rig.json: parts (name, rect [x, y, w, h] from the
-  bottom-left, pivot), facings (bones: name, part, parent, offset_m from the parent's pivot at rest, rest_deg, length_m,
-  order), ik chains (arm, leg) with the bend side, sockets (hand_f grip, helmet top). Angles are degrees counter-clockwise.
+    hips -> thigh -> shin -> boot (near f / far b).  Far limbs are the near parts with their paint re-keyed one step
+    darker (the pencil line is the same).
+  Part sheet: characters/surveyor_v5/rig_color.png (parts on pivots, 512 px per metre); rig.json: parts (name, rect [x, y,
+  w, h] from the bottom-left, pivot), facings (bones: name, part, parent, offset_m from the parent's pivot at rest,
+  rest_deg, length_m, order), ik chains (arm, leg) with the bend side, sockets (hand_f grip, helmet top). Angles are
+  degrees counter-clockwise.
 
-  python -I build_surveyor_v5.py <review png>     the lock-free design sheet: turnaround (side, front 3/4), the pose sheet
-                                                  (idle, crouch, jump apex with bent knees, dig with the shovel) posed from
-                                                  the rig, the part sheet, beside the v4 surveyor at 1x
-  export(art) / keys()                            (11-10, written and NOT YET RUN) render.py's kit path, for the owner's yes
+  python -I build_surveyor_v5.py <review png>     the lock-free design sheet (round 3's plates)
+  export(art) / keys()                            (written and NOT YET RUN) render.py's kit path, for the owner's yes
                                                   only: the manifest row {"key": KEY, "kit_set": true, "generator":
                                                   "scripts/build_surveyor_v5.py", "numpy_only": true, "review_name":
                                                   "b231_surveyor_v5"} is added at that moment, not before
@@ -30,20 +45,21 @@ import json
 import math
 import os
 import sys
+import zlib
 
 import numpy as np
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 from meridian import pngio, v3  # noqa: E402
-import build_ui_v3 as U  # noqa: E402  (installs fakegp; px canvases, y down)
+import cel_v6 as CEL  # noqa: E402  (installs fakegp; design px canvases, y down)
 
-G = U.G
-OUT, INN = G.OUTER * 2.0, G.INNER * 2.0          # round 2 (LEAD 18:0x (1)): the v3 props' weight at the game's zoom, 2.5 px outer /
-#                                                   1.25 px inner at 1x = 5 / 2.5 px on the 256 px figure (round 1: 3.5 / 1.75, a
-#                                                   line finer than everything around it)
+G = CEL.G
+S, P_, F, C, hose, taper = CEL.S, CEL.P, CEL.F, CEL.C, CEL.hose, CEL.taper
+K = 4                                             # the parts are rendered K times the design size (512 px per metre)
+OUT = CEL.LINE                                    # a contour's nominal radius (the pencil: cel_v6.py)
 TAU = 2 * math.pi
-PX = 128                                          # px per metre (2.0 m = 256 px)
+PX = 128                                          # design px per metre (2.0 m = 256 px); the large drawing is PX * K
 ART = os.path.normpath(os.path.join(HERE, "..", "..", "Assets", "_Game", "Art"))
 KEY = "characters/surveyor_v5/rig"
 PAL = v3.PALETTES["earth"]
@@ -58,135 +74,42 @@ def mixh(a, b, t):
     return v3.rgb_hex(tuple(int(round(v)) for v in (ca * (1 - t) + cb * t) * 255))
 
 
-# the suit's tones (all mixed from the Earth palette)
+# the cel's paints (all mixed from the Earth palette; STYLE_V6 2.5: mid-value and a little warm, so the figure reads as
+# one clear shape against a painting)
 TONES = {
-    "suit": PAL["offwhite"], "suit_sh": mixh(PAL["offwhite"], PAL["sky"], 0.35), "stripe": PAL["teal"],
-    "skin": mixh(PAL["offwhite"], PAL["red"], 0.22), "skin_sh": mixh(PAL["offwhite"], PAL["red"], 0.42),
-    "cheek": mixh(PAL["offwhite"], PAL["red"], 0.55), "hair": PAL["mustard"], "brow": mixh(PAL["brown"], v3.INK, 0.3),
-    "eye": PAL["offwhite"], "iris": mixh(PAL["teal"], v3.INK, 0.35), "pupil": v3.INK, "mouth": mixh(PAL["red"], v3.INK, 0.35),
-    "pack": PAL["red"], "pack_sh": mixh(PAL["red"], PAL["brown"], 0.45), "cuff": PAL["mustard"], "brass": PAL["mustard"],
-    "glove": PAL["offwhite"], "boot": PAL["brown"], "sole": mixh(PAL["brown"], v3.INK, 0.45), "pad": mixh(PAL["offwhite"], PAL["sky"], 0.55),
-    "belt": mixh(PAL["brown"], PAL["mustard"], 0.25), "steel": mixh(PAL["sky"], PAL["offwhite"], 0.25), "glass": PAL["sky"],
-    "hose": PAL["teal"], "lead": mixh(PAL["sky"], v3.INK, 0.4),
+    "suit": mixh(PAL["offwhite"], PAL["brown"], 0.05), "stripe": PAL["teal"],
+    "skin": mixh(PAL["offwhite"], PAL["red"], 0.22), "skin_sh": mixh(PAL["offwhite"], PAL["red"], 0.40),
+    "cheek": mixh(PAL["offwhite"], PAL["red"], 0.50), "hair": PAL["mustard"], "brow": mixh(PAL["brown"], v3.INK, 0.3),
+    "eye": PAL["offwhite"], "iris": mixh(PAL["teal"], v3.INK, 0.35), "pupil": v3.INK,
+    "pack": PAL["red"], "cuff": PAL["mustard"], "brass": PAL["mustard"],
+    "glove": PAL["offwhite"], "boot": PAL["brown"], "sole": mixh(PAL["brown"], v3.INK, 0.45),
+    "belt": mixh(PAL["brown"], PAL["mustard"], 0.25), "steel": mixh(PAL["sky"], PAL["offwhite"], 0.25),
+    "hose": PAL["teal"], "joint": mixh(PAL["sky"], PAL["brown"], 0.30),
 }
+FAR_KEY = (0.8, (rgb(PAL["sky"]) * 0.55 + rgb(PAL["brown"]) * 0.25) * 0.08)     # the far limbs' paint: one step darker
 
 
 def mats(gp):
-    M = {"ink": G.mat(gp, "v5_ink", fill=None)}
+    """Per tone: flat paint under a pencil line, and _f the paint alone (a patch: a paint edge, no line). ln = the
+    pencil alone; glass = the bubble's flat tint; glint = its one flat highlight."""
+    M = {"ln": CEL.mat(gp, "v6_ln"),
+         "glass": CEL.mat(gp, "v6_glass", fill=PAL["sky"], line=False, alpha=0.22),
+         "glint": CEL.mat(gp, "v6_glint", fill=PAL["offwhite"], line=False, alpha=0.62)}
     for k, h in TONES.items():
-        M[k] = G.mat(gp, f"v5_{k}", fill=h)                      # fill + ink
-        M[k + "_f"] = G.mat(gp, f"v5_{k}_f", fill=h, ink=False)   # fill only
+        M[k] = CEL.mat(gp, f"v6_{k}", fill=h)
+        M[k + "_f"] = CEL.mat(gp, f"v6_{k}_f", fill=h, line=False)
     return M
 
 
-def C(cx, cy, r, n=28, ry=None, a0=0.0, a1=TAU):
-    ry = r if ry is None else ry
-    closed = abs(a1 - a0 - TAU) < 1e-6
-    k = n if closed else n + 1
-    return [(cx + r * math.cos(a0 + (a1 - a0) * i / n), cy + ry * math.sin(a0 + (a1 - a0) * i / n)) for i in range(k)]
+# ---------------------------------------------------------------- the parts (design px, y down, in their own canvas)
+PARTS = {}            # name -> (w, h, pivot (px), draw fn, band): design px; band = the flat shadow shape's depth (0: none)
+BACK = 1              # the shadow shape lies on each part's lower end and on its BACK edge (+1), the side that turns under
+#                       when a limb is raised forward. LEAD's ruling 11-09 14:5x: v5 characters are lit FROM ABOVE
 
 
-def hose(pts, w):
-    return G.hose_outline(pts, w)
-
-
-def taper(p0, p1, w0, w1, n=8, bulge=0.0):
-    """A limb segment's outline from p0 (width w0) to p1 (width w1), its sides gently bulged (a muscle / padded suit)."""
-    (x0, y0), (x1, y1) = p0, p1
-    L = math.hypot(x1 - x0, y1 - y0)
-    ux, uy = (x1 - x0) / L, (y1 - y0) / L
-    nx, ny = -uy, ux
-    left, right = [], []
-    for i in range(n + 1):
-        t = i / n
-        w = (w0 * (1 - t) + w1 * t) / 2 + bulge * math.sin(math.pi * t)
-        cx, cy = x0 + (x1 - x0) * t, y0 + (y1 - y0) * t
-        left.append((cx + nx * w, cy + ny * w))
-        right.append((cx - nx * w, cy - ny * w))
-    capb = C(x1, y1, w1 / 2, 8, a0=math.atan2(ny, nx), a1=math.atan2(ny, nx) - math.pi)
-    capa = C(x0, y0, w0 / 2, 8, a0=math.atan2(-ny, -nx), a1=math.atan2(-ny, -nx) - math.pi)
-    return left + capb[1:-1] + right[::-1] + capa[1:-1]
-
-
-# ---------------------------------------------------------------- painted shading (numpy, after the ink render)
-def _blur(a, r):
-    if r < 1:
-        return a
-    k = np.ones(2 * r + 1, np.float32) / (2 * r + 1)
-    a = np.apply_along_axis(lambda v: np.convolve(v, k, mode="same"), 0, a)
-    return np.apply_along_axis(lambda v: np.convolve(v, k, mode="same"), 1, a)
-
-
-LEAN = 0.15           # LEAD's ruling 14:5x: v5 characters are lit FROM ABOVE (the rig mirrors for left / right, so a side light
-#                       would swap sides at every turn), leaning at most slightly to the upper LEFT, the side the v3 props and
-#                       icons are lit from (they shade right / lower-right). LEAN = the sideways share of the shadow's offset
-
-
-def _shift(a, dy, dx):
-    """a moved dy rows down and dx columns right, zero-filled (np.roll would wrap the far edge back in)."""
-    out = np.zeros_like(a)
-    h, w = a.shape
-    ys, yd = (slice(0, h - dy), slice(dy, h)) if dy >= 0 else (slice(-dy, h), slice(0, h + dy))
-    xs, xd = (slice(0, w - dx), slice(dx, w)) if dx >= 0 else (slice(-dx, w), slice(0, w + dx))
-    out[yd, xd] = a[ys, xs]
-    return out
-
-
-BACK = 1              # round 2 (LEAD 18:0x (3)): the shadow band lies on each part's lower end and on its BACK edge (+1), the side
-#                       that turns under when a limb is raised forward (the jump's thigh, the dig's arms, a walk's swing), so the
-#                       band is a true underside in the poses. -1 puts it on the lower RIGHT as the v3 props shade (facing right);
-#                       then a raised limb carries its shadow on top. The sheet shows both (the last-but-one row); the rig
-#                       mirrors either way
-COOL_SHADE = (0.70, 0.77, 0.84)                   # the band's tint (a multiply): a clear cool step on suit, pack and boots
-SKIN_SHADE = (0.90, 0.76, 0.72)                   # on skin: one soft warm step
-
-
-def paint(u8, seed, band=6, glow=0.10, cast=None, soft=False, streak=0.012, grain=0.03, tint=COOL_SHADE, strength=0.8):
-    """Gouache shading on a rendered part, lit from above: ONE shadow band on the form's underside, `band` px deep (about
-    30 % of the part's width: LEAD 18:0x, visible at the game's zoom), a brushed edge (soft: a soft edge, for skin), a lit
-    rim along the top edges, the brush streaks (round 2: a third of round 1's contrast on the suit, none on skin - at 2x
-    they read as wood grain) and the paper grain. cast = (row0, row1): a shadow cast across the part there (under the
-    helmet's ring, under the belt)."""
-    rng = np.random.default_rng(seed)
-    f = u8.astype(np.float32) / 255.0
-    a = f[..., 3]
-    h, w = a.shape
-    d = max(2, int(round(band)))
-    shade = np.clip(a - _shift(a, -d, BACK * d), 0, 1)                          # the lower end and the back (BACK -1: right) edge
-    if cast is not None:
-        shade[cast[0]:cast[1]] = np.maximum(shade[cast[0]:cast[1]], a[cast[0]:cast[1]])
-    if soft:
-        shade = np.clip(_blur(shade, max(2, d // 2)) * 1.3, 0, 1) * a
-    else:
-        noise = _blur(rng.standard_normal((h, w)).astype(np.float32), 2)
-        noise /= max(float(noise.std()), 1e-3)
-        shade = np.clip((_blur(shade, 1) - 0.35 + 0.08 * noise) * 3.0, 0, 1) * a   # a brushed edge, one clear shape
-    dl = max(1, d // 3)
-    lit = np.clip(a - _shift(a, dl, -BACK * max(1, dl // 2)), 0, 1)             # the rim along the top (and front) edges
-    lit = np.clip(_blur(lit, 1) * 1.6 - 0.2, 0, 1) * a
-    ink = (f[..., :3].max(axis=2) < 0.22)                                       # leave the ink lines dark
-    out = f[..., :3].copy()
-    k = (strength * shade)[..., None]
-    out = out * (1 - k) + out * np.array(tint, np.float32) * k
-    out = out + (rgb(PAL["offwhite"]) - out) * (glow * lit)[..., None]
-    if streak > 0:
-        st = rng.standard_normal((h, w)).astype(np.float32)                     # brush texture: streaks along the rows
-        st = np.apply_along_axis(lambda v: np.convolve(v, np.ones(7, np.float32) / 7, mode="same"), 1, st)
-        st = (st - st.mean()) / max(float(st.std()), 1e-3)
-        out *= (1 + streak * st)[..., None]
-    out = np.where(ink[..., None], f[..., :3], out)
-    res = np.dstack([np.clip(out, 0, 1), a])
-    img = np.clip(np.rint(res * 255), 0, 255).astype(np.uint8)
-    return U.paper_grain(img, seed, grain)
-
-
-# ---------------------------------------------------------------- the parts (px, y down, in their own canvas)
-PARTS = {}            # name -> (w, h, pivot (px), draw fn, paint kwargs)
-
-
-def part(name, w, h, pivot, **kw):
+def part(name, w, h, pivot, band=0):
     def reg(fn):
-        PARTS[name] = (w, h, pivot, fn, kw)
+        PARTS[name] = (w, h, pivot, fn, band)
         return fn
     return reg
 
@@ -195,12 +118,12 @@ def m2p(v):
     return v * PX
 
 
-# Round 2 (LEAD 18:0x (1), (2)): chunky, still jointed. The round-1 drawings stay in their own coordinates and are widened /
-# enlarged in place by xf(), each on a canvas grown to hold it and the heavier line; the joints (pivots, bone lengths, the
-# 2.0 m height, the 0.61 m bubble) do not move, so the poses and the crouch's height hold
+# Round 2 (LEAD 11-09 18:0x (1), (2)): chunky, still jointed. The round-1 drawings stay in their own coordinates and are
+# widened / enlarged in place by xf(), each on a canvas grown to hold it; the joints (pivots, bone lengths, the 2.0 m
+# height, the 0.61 m bubble) do not move, so the poses and the crouch's height hold. Round 3 keeps all of it.
 WIDE = 1.35           # torso, hips and limbs: 35 % wider
 BIG = 1.25            # boots and gloves: 25 % larger
-HK = 1.2              # the head: 20 % larger in the same bubble (it filled 56 % of the glass; now about 70 %)
+HK = 1.2              # the head: 20 % larger in the same bubble
 
 
 def xf(d, cx=0.0, kx=1.0, cy=0.0, ky=1.0, dx=0.0, dy=0.0):
@@ -216,99 +139,113 @@ L_UA, L_FA, L_TH, L_SH = 0.28, 0.26, 0.34, 0.33
 @part("upper_arm", 48, 60, (24, 12), band=6)
 def upper_arm(d, M):
     d = xf(d, 20, WIDE, dx=4, dy=3)
-    G.stroke(d, taper((20, 9), (20, 9 + m2p(L_UA)), 15, 13, bulge=1.5), M["suit"], OUT, cyclic=True)
-    G.stroke(d, [(13, 18), (27, 16)], M["ink"], INN)                                               # a seam at the shoulder
+    y1 = 9 + m2p(L_UA)
+    S(d, taper((20, 9), (20, y1), 15, 13, bulge=1.5), M["suit"], OUT, cyclic=True)
+    F(d, M, [(14.6, y1 - 8.4), (18, y1 - 6.4), (22, y1 - 7)])                                        # one fold above the elbow
 
 
 @part("forearm", 48, 58, (24, 11), band=5.5)
 def forearm(d, M):
     d = xf(d, 20, WIDE, dx=4, dy=4)
     y1 = 7 + m2p(L_FA)
-    G.stroke(d, taper((20, 7), (20, y1), 13, 12, bulge=1.0), M["suit"], OUT, cyclic=True)
-    G.stroke(d, C(20, 9, 8.5, 14, ry=6.5), M["pad"], INN, cyclic=True)                              # the elbow pad
-    G.stroke(d, [(12.5, y1 - 8), (27.5, y1 - 8), (28.5, y1 + 2), (11.5, y1 + 2)], M["cuff"], OUT, cyclic=True)   # mustard cuff
+    S(d, taper((20, 7), (20, y1), 13, 12, bulge=1.0), M["suit"], OUT, cyclic=True)
+    F(d, M, [(14.6, 18.4), (18, 20.2), (22, 19.6)])                                                  # one fold below the elbow
+    S(d, C(20, 7.5, 9.6, 24, ry=7.6), M["joint"], OUT * 0.9, cyclic=True)                           # the elbow's cuff: a plain flat round
+    # shape ON the pivot (it hides the seam). Run 2 had one bowed rib line on it: a disc with one curve reads as a mouth
+    S(d, [(12.3, y1 - 8.5), (27.7, y1 - 8.5), (28.6, y1 + 2), (11.4, y1 + 2)], M["cuff"], OUT, cyclic=True, rnd=2.5)   # the wrist cuff
 
 
 @part("hand", 46, 44, (19, 8), band=5)
 def hand(d, M):
     d = xf(d, 16, BIG, 6, BIG, dx=3, dy=2)                                                           # 25 % larger about the wrist
-    G.stroke(d, [(10, 4), (22, 4), (25, 14), (26, 23), (21, 29), (12, 29), (8, 22), (8, 12)], M["glove"], OUT, cyclic=True)   # a mitt
-    G.stroke(d, hose([(24, 14), (30, 19), (29, 24)], 6.5), M["glove"], INN, cyclic=True)           # the thumb
-    for x in (13, 17.5):                                                                              # finger creases
-        G.stroke(d, [(x, 21), (x + 0.5, 28)], M["ink"], INN)
+    for x in (11.4, 16.3, 21.2):                                                                      # three fingers, a little curled
+        S(d, hose([(x, 17), (x + 0.3, 24), (x - 0.5, 28.2)], 5.4), M["glove"], OUT * 0.8, cyclic=True, gap=0)
+    S(d, [(10, 4), (22, 4), (25.4, 12), (25.6, 20.5), (17, 22.5), (8.4, 20.5), (8, 12)], M["glove"], OUT, cyclic=True, rnd=4)   # the back of the hand
+    S(d, hose([(23.6, 13), (29.6, 18), (29, 24.2)], 6.2), M["glove"], OUT * 0.8, cyclic=True, gap=0)   # the thumb
+    F(d, M, [(8.4, 8.4), (16, 9.4), (23.8, 8.4)])                                                    # the glove's cuff: one line
 
 
 @part("thigh", 56, 72, (28, 15), band=8)
 def thigh(d, M):
     d = xf(d, 24, WIDE, dx=4, dy=7)
-    G.stroke(d, taper((24, 8), (24, 8 + m2p(L_TH)), 20, 16, bulge=2.0), M["suit"], OUT, cyclic=True)
-    G.stroke(d, [(31, 18), (32, 40)], M["ink"], INN)                                                 # the side seam
+    y1 = 8 + m2p(L_TH)
+    S(d, taper((24, 8), (24, y1), 20, 16, bulge=2.0), M["suit"], OUT, cyclic=True)
+    F(d, M, [(16.5, y1 - 8.5), (20.5, y1 - 6.6), (25, y1 - 7.4)])                                    # two folds above the knee
+    F(d, M, [(19.5, y1 - 4.2), (23, y1 - 3), (26.6, y1 - 3.8)], 0.9)
 
 
 @part("shin", 52, 68, (26, 13), band=6.5)
 def shin(d, M):
     d = xf(d, 22, WIDE, dx=4, dy=7)
     y1 = 6 + m2p(L_SH)
-    G.stroke(d, taper((22, 6), (22, y1), 16, 13, bulge=1.2), M["suit"], OUT, cyclic=True)
-    G.stroke(d, C(24, 9, 9.5, 14, ry=7.5), M["pad"], INN, cyclic=True)                              # the knee pad
+    S(d, taper((22, 6), (22, y1), 16, 13, bulge=1.2), M["suit"], OUT, cyclic=True)
+    F(d, M, [(15.6, 19.4), (19.5, 21.4), (24, 20.6)])                                                # one fold below the knee
+    S(d, C(22.6, 7, 11.2, 26, ry=8.8), M["joint"], OUT * 0.9, cyclic=True)                          # the knee's cuff, on the pivot
 
 
 # the boot's sole, boot-local metres from the ankle: heel and toe (solve() stands the figure on them). Round 2 enlarges the
-# boot 25 % about the point of the sole under the ankle, so the sole keeps its 0.18 m under the joint (the 2.0 m height
-# holds), the shaft climbs the shin and the boot grows to heel and toe
+# boot 25 % about the point of the sole under the ankle, so the sole keeps its 0.18 m under the joint (the 2.0 m height holds)
 SOLE = ((-0.117, -0.18), (0.283, -0.18))
 
 
 @part("boot", 68, 40, (24, 13), band=6)
 def boot(d, M):
     d = xf(d, 20, BIG, 27, BIG, dx=4, dy=9)
-    G.stroke(d, [(12, 2), (28, 2), (30, 10), (46, 14), (50, 20), (49, 24), (8, 24), (8, 12)], M["boot"], OUT, cyclic=True)   # the boot
-    G.stroke(d, [(7, 22), (50, 22), (49, 27), (8, 27)], M["sole"], INN, cyclic=True)                # the sole
-    for x in (14, 22, 30, 38):                                                                       # treads
-        G.stroke(d, [(x, 27), (x + 2, 24.5)], M["ink"], INN)
-    G.stroke(d, [(11, 4), (29, 4)], M["ink"], INN)                                                   # the cuff line
-    G.stroke(d, [(31, 12), (36, 9)], M["ink"], INN)                                                  # a lace
+    S(d, [(12, 2), (28, 2), (30, 10), (40, 12.4), (47, 15), (50.4, 20), (49.4, 24), (8, 24), (8, 12)], M["boot"], OUT, cyclic=True, rnd=4)
+    S(d, [(7, 22), (50.4, 22), (49.6, 27), (8, 27)], M["sole"], OUT * 0.9, cyclic=True, rnd=2)      # the sole; its top edge is the sole line
+    F(d, M, [(10.8, 6.4), (20, 7.3), (29.4, 6.4)])                                                   # the turned cuff: one line
 
 
-@part("hips", 76, 38, (38, 10), band=8, cast=(14, 19))                                              # (the belt's shadow)
+@part("hips", 76, 38, (38, 10), band=8)
 def hips(d, M):
     d = xf(d, 30, WIDE, dx=8, dy=2)
-    G.stroke(d, [(9, 4), (51, 4), (54, 18), (48, 30), (12, 30), (6, 18)], M["suit"], OUT, cyclic=True)   # the seat of the suit
-    G.stroke(d, [(7, 3), (53, 3), (53, 11), (7, 11)], M["belt"], OUT, cyclic=True)                 # the belt
-    G.stroke(d, [(27, 2), (35, 2), (35, 12), (27, 12)], M["brass"], INN, cyclic=True)              # its buckle
-    G.stroke(d, [(40, 11), (51, 11), (50, 23), (41, 23)], M["belt"], INN, cyclic=True)            # a pouch
+    S(d, [(9, 4), (51, 4), (54, 18), (48, 30), (30, 31.5), (12, 30), (6, 18)], M["suit"], OUT, cyclic=True, rnd=8)   # the seat of the suit
+    F(d, M, [(30, 15), (30.4, 22), (29.8, 28.6)])                                                    # the centre seam
+    S(d, [(7, 3), (53, 3), (53, 11), (7, 11)], M["belt"], OUT, cyclic=True, rnd=1.5)                # the belt
+    S(d, [(40, 10), (51, 10), (50.4, 23), (41, 23)], M["belt"], OUT * 0.85, cyclic=True, rnd=2, gap=0)   # a pouch
+    F(d, M, [(40.6, 15.6), (45.6, 17.4), (50.6, 15.6)], 0.9)                                         # its flap
+    P_(d, [(26.6, 1.6), (35.4, 1.6), (35.4, 12.4), (26.6, 12.4)], M["brass_f"], rnd=1.2, under=False)   # the buckle: a flat shape
 
 
-@part("torso", 92, 88, (44, 78), band=16, cast=(13, 21))                                            # (the helmet's shadow on the shoulders)
+def _torso(d, ds, M, body, stripe, zx, bx, by):
+    """The chest, side and three-quarter: the suit, the MERIDIAN stripe as a paint patch (no line round it), the
+    compass badge, the zip and two folds."""
+    S(d, body, M["suit"], OUT, cyclic=True, rnd=9, keep="body")
+    P_(d, stripe, M["stripe_f"], sharp=True, clip="body")
+    F(d, M, [(zx, 50), (zx + 0.3, 60), (zx, 69)])                                                    # the zip
+    F(d, M, [(52, 30), (55.6, 34), (58.6, 33)], 0.9)                                                 # a fold under the arm
+    F(d, M, [(17, 60), (21, 63), (25, 62.4)], 0.9)                                                   # a fold at the waist
+    S(ds, C(bx, by, 8, 28), M["brass"], OUT * 0.8, cyclic=True, gap=0)                              # the compass badge
+    # its compass rose: a flat four-pointed star (run 2's single upright needle on a brass disc read as a cat's eye)
+    P_(ds, [(bx, by - 5.8), (bx + 1.3, by - 1.3), (bx + 4.4, by), (bx + 1.3, by + 1.3), (bx, by + 5.8), (bx - 1.3, by + 1.3),
+            (bx - 4.4, by), (bx - 1.3, by - 1.3)], M["stripe_f"], sharp=True)
+
+
+@part("torso", 92, 88, (44, 78), band=16)
 def torso(d, M):
     ds = xf(d, dx=8 + (44 - 36) * (WIDE - 1), dy=2)                                                  # the badge: round, at its widened place
     d = xf(d, 36, WIDE, dx=8, dy=2)
     body = [(20, 76), (54, 76), (60, 52), (61, 26), (56, 12), (46, 6), (26, 6), (16, 12), (13, 28), (14, 54)]
-    G.stroke(d, body, M["suit"], OUT, cyclic=True)                                                   # the chest (pivot: the hips)
-    G.stroke(d, [(47, 7), (55, 12), (22, 76), (13, 64), (14, 56)], M["stripe_f"], 0.0, cyclic=True)   # the MERIDIAN stripe
-    G.stroke(d, [(47, 7), (14, 56)], M["ink"], INN)
-    G.stroke(d, [(55, 12), (22, 76)], M["ink"], INN)
-    G.stroke(d, body, M["ink"], OUT, cyclic=True)
-    G.stroke(ds, C(44, 36, 8, 16), M["brass"], INN, cyclic=True)                                    # the compass badge
-    G.stroke(ds, [(44, 30.5), (45.8, 36), (44, 41.5), (42.2, 36)], M["stripe"], INN * 0.6, cyclic=True)
-    G.stroke(d, [(22, 4), (50, 4), (52, 10), (20, 10)], M["steel"], OUT, cyclic=True)              # the helmet's neck ring
-    G.stroke(d, [(28, 50), (28, 70)], M["ink"], INN)                                                 # a zip seam
+    _torso(d, ds, M, body, [(46.6, 5.6), (56.4, 11.6), (22.6, 77), (13.2, 64.4), (13.6, 56.6)], 28, 44, 36)
+    S(d, [(22, 4), (50, 4), (52, 10), (20, 10)], M["steel"], OUT, cyclic=True, rnd=2)               # the helmet's neck ring
 
 
 @part("pack", 48, 74, (38, 18), band=8)
 def pack(d, M):
     d = xf(d, 30, 1.25, dx=8, dy=2)                                                                  # 25 % deeper behind the wider back
-    G.stroke(d, hose([(26, 14), (28, 7), (34, 5)], 5.5), M["hose"], INN, cyclic=True)              # the air hose to the helmet (desk-check: its end was cut by the canvas top)
-    G.stroke(d, [(8, 12), (30, 12), (34, 18), (34, 62), (30, 68), (10, 68), (5, 62), (5, 18)], M["pack"], OUT, cyclic=True)   # the float pack
-    G.stroke(d, [(7, 46), (33, 46)], M["ink"], INN)                                                  # its lid
-    G.stroke(d, [(12, 20), (18, 20), (18, 40), (12, 40)], M["pack_sh"], INN, cyclic=True)        # a vent
+    S(d, hose([(26, 14), (28, 7), (34, 5)], 5.5), M["hose"], OUT * 0.8, cyclic=True, gap=0)         # the air hose to the helmet
+    S(d, [(8, 12), (30, 12), (34, 18), (34, 62), (30, 68), (10, 68), (5, 62), (5, 18)], M["pack"], OUT, cyclic=True, rnd=5, keep="pack")   # the float pack
+    for y in (22, 58):                                                                                # two straps: flat shapes on it
+        P_(d, [(3, y - 2.4), (36, y - 2.4), (36, y + 2.4), (3, y + 2.4)], M["belt_f"], sharp=True, clip="pack")
+    P_(d, [(24, 18.4), (30, 18.4), (30, 25.6), (24, 25.6)], M["brass_f"], rnd=1)                     # the upper strap's buckle
+    P_(d, C(14, 38, 6, 22), M["steel_f"])                                                            # the dial: a flat disc
+    F(d, M, [(14, 38.4), (17.6, 34.4)], 0.9, ends=(1, 1))                                            # its needle
+    F(d, M, [(7, 47), (20, 48), (33, 47)])                                                           # the lid's seam
 
 
-# The heads, round 2 (LEAD 18:0x (2), (3), (4)): each round-1 head drawn 20 % larger about its face's centre and 4 px lower, so
-# it fills about 70 % of the same 0.61 m bubble with its hair inside the glass; the eye 14 px wide on the 256 px figure
-# (7 px at the game's zoom; round 1: 5); clean skin (no streaks), one soft shadow shape, the blush. The side face - what the
-# player sees nearly all the time - has a rounded nose, a smile line from the profile, a bold eyebrow, and the ear as a
-# small plain C with one fold. The neck stays unscaled on the pivot.
+# The heads, round 2 (LEAD 11-09 18:0x (2), (3), (4)): each round-1 head drawn 20 % larger about its face's centre and 4 px
+# lower, so it fills about 70 % of the same 0.61 m bubble with its hair inside the glass; the eye 14 px wide on the 256 px
+# figure; clean skin, the blush. Round 3: the same face in pencil and flat paint; two strand flicks in the hair.
 EYE = (48.0, 28.0, 6.0, 7.6)                      # the side head's eye in the round-1 drawing space: centre x, y, radii
 EYE34 = ((31.0, 0.9), (47.0, 1.0))                # the front-3/4 head's eyes: centre x, scale (the far one narrower); y 28
 E34 = (5.6, 7.4)                                  # ... their radii at scale 1
@@ -323,65 +260,65 @@ def _h34(x, y):
     return 37 + (x - 37) * HK, 32 + (y - 32) * HK + 10
 
 
-@part("head", 72, 80, (32, 70), band=12, soft=True, streak=0.0, grain=0.012, tint=SKIN_SHADE, strength=0.7)
+@part("head", 72, 80, (32, 70))
 def head(d, M):
     dn = xf(d, dy=6)
     d = xf(d, 38, HK, 32, HK, dx=-1, dy=10)
-    G.stroke(dn, [(30, 56), (46, 56), (44, 64), (32, 64)], M["skin"], INN, cyclic=True)            # the neck (under the chin)
-    G.stroke(d, C(38, 32, 22, 32, ry=24), M["skin"], OUT, cyclic=True)                              # the face, in profile
-    G.stroke(d, C(60.5, 36, 4.6, 14, ry=4.0), M["skin"], OUT, cyclic=True)                          # a rounded nose (round 1: a
-    G.stroke(d, C(57, 36, 5.4, 12, ry=3.0), M["skin_f"], 0.0, cyclic=True)                          # pointed triangle), open into the face
-    G.stroke(d, hose([(24, 12), (32, 4), (44, 6), (50, 12)], 9), M["hair"], INN, cyclic=True)      # the hair tuft
-    G.stroke(d, hose([(44, 6), (49, 3.5), (53, 6.5)], 5), M["hair"], INN, cyclic=True)              # its cowlick (inside the glass)
+    S(dn, [(30, 56), (46, 56), (44, 64), (32, 64)], M["skin_sh"], OUT * 0.8, cyclic=True, rnd=1.5, gap=0)   # the neck, in the flat shadow tone
+    S(d, C(38, 32, 22, 40, ry=24), M["skin"], OUT, cyclic=True)                                     # the face, in profile
+    S(d, C(60.5, 36, 4.6, 18, ry=4.0), M["skin"], OUT * 0.9, cyclic=True, gap=0)                    # a rounded nose,
+    P_(d, C(57, 36, 5.4, 16, ry=3.0), M["skin_f"], under=False)                                      # open into the face
+    S(d, hose([(24, 12), (32, 4), (44, 6), (50, 12)], 9), M["hair"], OUT * 0.9, cyclic=True)        # the hair tuft
+    S(d, hose([(44, 6), (49, 3.5), (53, 6.5)], 5), M["hair"], OUT * 0.8, cyclic=True, gap=0)        # its cowlick (inside the glass)
+    F(d, M, [(28, 11.4), (34, 6.6), (41, 6)], 0.8)                                                   # two strands
+    F(d, M, [(37, 12), (43, 9.6), (48, 11)], 0.8)
     ex, ey, erx, ery = EYE
-    G.stroke(d, C(ex, ey, erx, 16, ry=ery), M["eye"], INN, cyclic=True)                             # an oval eye
-    G.stroke(d, C(ex + 1.6, ey + 0.8, 4.1, 12, ry=5.3), M["iris_f"], 0.0, cyclic=True)              # a large iris: a soft gaze (at
-    G.stroke(d, C(ex + 2.4, ey + 0.6, 2.2, 8), M["pupil_f"], 0.0, cyclic=True)                      # 3.4 px in so much white it stared)
-    G.stroke(d, C(ex + 3.8, ey - 1.6, 1.1, 6), M["eye_f"], 0.0, cyclic=True)                        # the catch-light
-    G.stroke(d, hose([(41.5, 18), (48, 15.5), (55, 18)], 3.0), M["brow"], 0.0, cyclic=True)         # the eyebrow
-    G.stroke(d, C(45.5, 41.5, 4.8, 12, ry=3), M["cheek_f"], 0.0, cyclic=True)                       # the blush
-    G.stroke(d, [(56.3, 46.4), (53.5, 47.9), (50, 47.3), (47.2, 44.8)], M["ink"], INN)               # the smile: from the profile
-    #                                                                                                 in, its corner turned up
-    G.stroke(d, C(28.5, 36.5, 3.6, 10, ry=5.0, a0=math.radians(55), a1=math.radians(305)), M["ink"], INN)   # the ear: a small
-    G.stroke(d, [(29.2, 34.8), (28.0, 36.6), (29.4, 38.2)], M["ink"], INN * 0.8)                     # plain C and one fold (round 1's
-    #                                                                                                 ring of the eye's size at the eye's
-    #                                                                                                 height read as a second, blank eye)
+    S(d, C(ex, ey, erx, 22, ry=ery), M["eye"], OUT * 0.6, cyclic=True, gap=0, keep="eye")           # an oval eye
+    P_(d, C(ex + 1.6, ey + 0.8, 4.1, 16, ry=5.3), M["iris_f"], clip="eye")                           # a large iris: a soft gaze
+    P_(d, C(ex + 2.4, ey + 0.6, 2.2, 12), M["pupil_f"], clip="eye")
+    P_(d, C(ex + 3.8, ey - 1.6, 1.1, 10), M["eye_f"])                                                # the catch-light
+    P_(d, hose([(41.5, 18), (48, 15.5), (55, 18)], 3.0), M["brow_f"])                                # the eyebrow
+    P_(d, C(45.5, 41.5, 4.8, 16, ry=3), M["cheek_f"])                                                # the blush: a paint patch
+    F(d, M, [(56.3, 46.4), (53.5, 47.9), (50, 47.3), (47.2, 44.8)], 0.9, ends=(1.5, 3))              # the smile: from the profile in
+    F(d, M, C(28.5, 36.5, 3.6, 12, ry=5.0, a0=math.radians(55), a1=math.radians(305)), 0.8)          # the ear: a small plain C
 
 
-@part("head34", 72, 80, (36, 70), band=12, soft=True, streak=0.0, grain=0.012, tint=SKIN_SHADE, strength=0.7)
+@part("head34", 72, 80, (36, 70))
 def head34(d, M):
     dn = xf(d, dy=6)
     d = xf(d, 37, HK, 32, HK, dy=10)
-    G.stroke(dn, [(28, 55), (46, 55), (44, 64), (30, 64)], M["skin"], INN, cyclic=True)            # the neck
-    G.stroke(d, C(14, 33, 4, 12, ry=5.5), M["skin"], INN, cyclic=True)                              # the far ear (behind the face)
-    G.stroke(d, C(37, 32, 23, 32, ry=24), M["skin"], OUT, cyclic=True)                              # the face, three-quarter
-    G.stroke(d, hose([(18, 14), (28, 4), (44, 4), (54, 12)], 10), M["hair"], INN, cyclic=True)
-    G.stroke(d, hose([(40, 4), (45.5, 2), (50, 4.5)], 5), M["hair"], INN, cyclic=True)
-    for cx, sc in EYE34:                                                                            # two oval eyes
-        G.stroke(d, C(cx, 28, E34[0] * sc, 16, ry=E34[1]), M["eye"], INN, cyclic=True)
-        G.stroke(d, C(cx + 0.9, 28.8, 3.5 * sc, 12, ry=4.6), M["iris_f"], 0.0, cyclic=True)
-        G.stroke(d, C(cx + 1.2, 28.6, 2.0, 8), M["pupil_f"], 0.0, cyclic=True)
-        G.stroke(d, C(cx + 2.4, 26.9, 1.1, 6), M["eye_f"], 0.0, cyclic=True)
-        # round 2b (LEAD 18:2x): both eyes wide open read startled - an upper lid across the top of each iris (a relaxed look):
-        # skin over the eye above the lid's line, then the line
+    S(dn, [(28, 55), (46, 55), (44, 64), (30, 64)], M["skin_sh"], OUT * 0.8, cyclic=True, rnd=1.5, gap=0)   # the neck
+    S(d, C(14, 33, 4, 14, ry=5.5), M["skin"], OUT * 0.8, cyclic=True, gap=0)                        # the far ear (behind the face)
+    S(d, C(37, 32, 23, 40, ry=24), M["skin"], OUT, cyclic=True, at=0.25)                            # the face, three-quarter (the
+    S(d, hose([(18, 14), (28, 4), (44, 4), (54, 12)], 10), M["hair"], OUT * 0.9, cyclic=True)       # line opens under the chin)
+    S(d, hose([(40, 4), (45.5, 2), (50, 4.5)], 5), M["hair"], OUT * 0.8, cyclic=True, gap=0)
+    F(d, M, [(22, 12.6), (29, 6.4), (36, 5.4)], 0.8)
+    F(d, M, [(36, 12), (43.6, 8.8), (50, 11)], 0.8)
+    for i, (cx, sc) in enumerate(EYE34):                                                            # two oval eyes
+        S(d, C(cx, 28, E34[0] * sc, 22, ry=E34[1]), M["eye"], OUT * 0.6, cyclic=True, gap=0, keep=f"eye{i}")
+        P_(d, C(cx + 0.9, 28.8, 3.5 * sc, 16, ry=4.6), M["iris_f"], clip=f"eye{i}")
+        P_(d, C(cx + 1.2, 28.6, 2.0, 12), M["pupil_f"], clip=f"eye{i}")
+        P_(d, C(cx + 2.4, 26.9, 1.1, 10), M["eye_f"])
+        # round 2b (LEAD 11-09 18:2x): an upper lid across the top of each iris (a relaxed look): skin over the eye above
+        # the lid's line, then the line
         rx, ry, lid = E34[0] * sc, E34[1], 0.42
         a = math.asin(lid)
-        G.stroke(d, C(cx, 28, rx - 1.1, 10, ry=ry - 1.1, a0=math.pi + a, a1=TAU - a), M["skin_f"], 0.0, cyclic=True)
+        P_(d, C(cx, 28, rx - 1.1, 12, ry=ry - 1.1, a0=math.pi + a, a1=TAU - a), M["skin_f"], sharp=True)
         x0 = (rx - 0.4) * math.cos(a)
-        G.stroke(d, [(cx - x0, 28 - lid * ry + 0.3), (cx, 28 - lid * ry - 0.5), (cx + x0, 28 - lid * ry + 0.3)], M["ink"], INN)
-        G.stroke(d, hose([(cx - 6 * sc, 18.6), (cx, 16.2), (cx + 6 * sc, 18.6)], 3.0), M["brow"], 0.0, cyclic=True)
-    G.stroke(d, hose([(40, 33), (43.5, 38), (40, 40.5)], 3.6), M["skin_sh_f"], 0.0, cyclic=True)    # the nose
-    G.stroke(d, C(26.5, 40.5, 4.2, 12, ry=2.8), M["cheek_f"], 0.0, cyclic=True)
-    G.stroke(d, C(51.5, 40.5, 4.8, 12, ry=3.0), M["cheek_f"], 0.0, cyclic=True)
-    G.stroke(d, [(33, 45.5), (39, 48.5), (46, 45.5)], M["ink"], INN)
+        F(d, M, [(cx - x0, 28 - lid * ry + 0.3), (cx, 28 - lid * ry - 0.5), (cx + x0, 28 - lid * ry + 0.3)], 0.8, ends=(1.5, 1.5))
+        P_(d, hose([(cx - 6 * sc, 18.6), (cx, 16.2), (cx + 6 * sc, 18.6)], 3.0), M["brow_f"])
+    P_(d, hose([(40, 33), (43.5, 38), (40, 40.5)], 3.6), M["skin_sh_f"])                             # the nose: a flat shadow shape
+    P_(d, C(26.5, 40.5, 4.2, 16, ry=2.8), M["cheek_f"])
+    P_(d, C(51.5, 40.5, 4.8, 16, ry=3.0), M["cheek_f"])
+    F(d, M, [(33, 45.5), (39, 48.5), (46, 45.5)], 0.9, ends=(2, 2))
 
 
-# The blink (LEAD 14:5x: ONE closed-eye swap part per facing now; the rest of the face-swap set after acceptance): a skin
-# patch the size of the open eye and its ink, the closed lid's line on it; shown on the head bone at BLINK's offset
+# The blink (LEAD 11-09 14:5x: ONE closed-eye swap part per facing now; the rest of the face-swap set after acceptance): a
+# skin patch the size of the open eye and its line, the closed lid's line on it; shown on the head bone at BLINK's offset
 @part("blink", 24, 28, (12, 14))
 def blink(d, M):
-    G.stroke(d, C(12, 14, EYE[2] * HK + 2.2, 18, ry=EYE[3] * HK + 2.1), M["skin_f"], 0.0, cyclic=True)
-    G.stroke(d, C(12, 14.5, 6.4, 8, ry=3.6, a0=math.radians(15), a1=math.radians(165)), M["ink"], INN)   # the lid, bowed down
+    P_(d, C(12, 14, EYE[2] * HK + 2.2, 24, ry=EYE[3] * HK + 2.1), M["skin_f"])
+    F(d, M, C(12, 14.5, 6.4, 10, ry=3.6, a0=math.radians(15), a1=math.radians(165)), 0.9, ends=(2, 2))   # the lid, bowed down
 
 
 _GAP34 = (EYE34[1][0] - EYE34[0][0]) * HK         # the two eyes' spacing on the enlarged head (px)
@@ -390,8 +327,8 @@ _GAP34 = (EYE34[1][0] - EYE34[0][0]) * HK         # the two eyes' spacing on the
 @part("blink34", 40, 28, (20, 14))
 def blink34(d, M):
     for cx, sc in ((20 - _GAP34 / 2, EYE34[0][1]), (20 + _GAP34 / 2, EYE34[1][1])):
-        G.stroke(d, C(cx, 14, E34[0] * sc * HK + 2.1, 18, ry=E34[1] * HK + 2.0), M["skin_f"], 0.0, cyclic=True)
-        G.stroke(d, C(cx, 14.5, 5.6 * sc, 8, ry=3.4, a0=math.radians(15), a1=math.radians(165)), M["ink"], INN)
+        P_(d, C(cx, 14, E34[0] * sc * HK + 2.1, 24, ry=E34[1] * HK + 2.0), M["skin_f"])
+        F(d, M, C(cx, 14.5, 5.6 * sc, 10, ry=3.4, a0=math.radians(15), a1=math.radians(165)), 0.9, ends=(2, 2))
 
 
 # the blink's part and its pivot's offset (m) from the head's pivot, per facing: the open eye's centre on the canvas against
@@ -400,80 +337,65 @@ BLINK = {"side": ("blink", ((_hs(EYE[0], EYE[1])[0] - 32) / PX, (70 - _hs(EYE[0]
          "front34": ("blink34", ((_h34((EYE34[0][0] + EYE34[1][0]) / 2, 28)[0] - 36) / PX, (70 - _h34(0, 28)[1]) / PX))}
 
 
-@part("helmet", 100, 100, (50, 92), depth=0.0, glow=0.0)
+@part("helmet", 100, 100, (50, 92))
 def helmet(d, M):
-    G.stroke(d, C(50, 52, 39, 48), M["ink"], OUT, cyclic=True)                                      # the bubble's rim (ink only; the glass
-    G.stroke(d, hose(C(50, 52, 37, 20, a0=math.radians(-128), a1=math.radians(-72)), 4.5), M["eye_f"], 0.0, cyclic=True)   # tint is numpy)
-    G.stroke(d, hose(C(50, 52, 32, 8, a0=math.radians(-112), a1=math.radians(-92)), 2.5), M["eye_f"], 0.0, cyclic=True)    # glints: on
-    #                                                               top of the bubble, a touch to its left (lit from above, LEAD 14:5x)
-    G.stroke(d, [(22, 86), (78, 86), (76, 94), (24, 94)], M["steel"], OUT, cyclic=True)            # the seal ring
+    P_(d, C(50, 52, 38.6, 72), M["glass"])                                                           # the glass: a flat tint
+    P_(d, CEL.crescent(50, 52, 34, math.radians(-162), math.radians(-102), 6.5), M["glint"], sharp=True)   # its ONE flat highlight
+    S(d, C(50, 52, 39, 72), M["ln"], OUT, cyclic=True, at=0.62, gap=7)                              # the bubble's rim: the line
+    S(d, [(22, 86), (78, 86), (76, 94), (24, 94)], M["steel"], OUT, cyclic=True, rnd=2)             # opens by the highlight; the seal ring
 
 
-@part("antenna", 34, 50, (17, 45), band=2)
+@part("antenna", 34, 50, (17, 45))
 def antenna(d, M):
-    db = xf(d, 15, 1.3, 9, 1.3, dx=2, dy=5)                                                          # the bob 30 % larger (it carries
-    d = xf(d, dx=2, dy=5)                                                                            # the heavier line)
-    G.stroke(d, hose([(15, 40), (14, 34), (16, 28), (14, 22), (16, 16)], 5.0), M["brass"], INN * 0.6, cyclic=True)   # a coiled spring
-    #                                               stalk, in the bob's brass under a thin line (round 2b, LEAD 18:2x: the dark
-    #                                               lead stalk was lost on a dug cell's wall)
-    G.stroke(d, [(15, 16), (15, 13)], M["ink"], INN)
-    G.stroke(db, [(9, 4), (21, 4), (15, 14)], M["brass"], OUT, cyclic=True)                         # the brass plumb bob on the spring
-    G.stroke(db, C(15, 4, 2.2, 8), M["brass"], INN, cyclic=True)
+    db = xf(d, 15, 1.3, 9, 1.3, dx=2, dy=5)                                                          # the bob 30 % larger
+    d = xf(d, dx=2, dy=5)
+    S(d, hose([(15, 40), (14, 34), (16, 28), (14, 22), (16, 16)], 4.4), M["brass"], OUT * 0.7, cyclic=True, gap=0)   # a springy stalk
+    F(d, M, [(15, 16), (15, 13)], 0.9, ends=(1, 1))
+    S(db, [(9, 4), (21, 4), (15, 14)], M["brass"], OUT * 0.9, cyclic=True, rnd=1.2, gap=0)          # the brass plumb bob on it
 
 
-@part("torso34", 96, 88, (48, 78), band=16, cast=(13, 21))
+@part("torso34", 96, 88, (48, 78), band=16)
 def torso34(d, M):
     ds = xf(d, dx=8 + (50 - 40) * (WIDE - 1), dy=2)
     d = xf(d, 40, WIDE, dx=8, dy=2)
     body = [(20, 76), (60, 76), (66, 52), (66, 26), (60, 12), (50, 6), (28, 6), (17, 12), (12, 28), (13, 54)]
-    G.stroke(d, body, M["suit"], OUT, cyclic=True)
-    G.stroke(d, [(50, 6), (60, 12), (28, 76), (18, 72), (16, 64)], M["stripe_f"], 0.0, cyclic=True)
-    G.stroke(d, [(50, 6), (16, 64)], M["ink"], INN)
-    G.stroke(d, [(60, 12), (28, 76)], M["ink"], INN)
-    G.stroke(d, body, M["ink"], OUT, cyclic=True)
-    G.stroke(ds, C(50, 38, 8, 16), M["brass"], INN, cyclic=True)
-    G.stroke(ds, [(50, 32.5), (51.8, 38), (50, 43.5), (48.2, 38)], M["stripe"], INN * 0.6, cyclic=True)
-    G.stroke(d, [(22, 4), (58, 4), (60, 10), (20, 10)], M["steel"], OUT, cyclic=True)
-    G.stroke(d, [(40, 46), (40, 72)], M["ink"], INN)
+    _torso(d, ds, M, body, [(49.6, 5.6), (61.4, 11.6), (28.6, 77), (17.4, 72.4), (15.4, 64.4)], 40, 50, 38)
+    S(d, [(22, 4), (58, 4), (60, 10), (20, 10)], M["steel"], OUT, cyclic=True, rnd=2)
 
 
-@part("hips34", 80, 38, (40, 10), band=8, cast=(14, 19))
+@part("hips34", 80, 38, (40, 10), band=8)
 def hips34(d, M):
     d = xf(d, 32, WIDE, dx=8, dy=2)
-    G.stroke(d, [(8, 4), (56, 4), (58, 18), (52, 30), (12, 30), (6, 18)], M["suit"], OUT, cyclic=True)
-    G.stroke(d, [(6, 3), (58, 3), (58, 11), (6, 11)], M["belt"], OUT, cyclic=True)
-    G.stroke(d, [(28, 2), (36, 2), (36, 12), (28, 12)], M["brass"], INN, cyclic=True)
-    G.stroke(d, [(43, 11), (54, 11), (53, 23), (44, 23)], M["belt"], INN, cyclic=True)
+    S(d, [(8, 4), (56, 4), (58, 18), (52, 30), (32, 31.5), (12, 30), (6, 18)], M["suit"], OUT, cyclic=True, rnd=8)
+    F(d, M, [(32, 15), (32.4, 22), (31.8, 28.6)])
+    S(d, [(6, 3), (58, 3), (58, 11), (6, 11)], M["belt"], OUT, cyclic=True, rnd=1.5)
+    S(d, [(43, 10), (54, 10), (53.4, 23), (44, 23)], M["belt"], OUT * 0.85, cyclic=True, rnd=2, gap=0)
+    F(d, M, [(43.6, 15.6), (48.6, 17.4), (53.6, 15.6)], 0.9)
+    P_(d, [(27.6, 1.6), (36.4, 1.6), (36.4, 12.4), (27.6, 12.4)], M["brass_f"], rnd=1.2, under=False)
 
 
 @part("boot34", 56, 42, (27, 13), band=6)
 def boot34(d, M):
     d = xf(d, 22, BIG, 28, BIG, dx=5, dy=9)                                                          # as the boot: about its sole
-    G.stroke(d, [(12, 2), (30, 2), (32, 10), (38, 16), (39, 22), (35, 25), (8, 25), (7, 14)], M["boot"], OUT, cyclic=True)
-    G.stroke(d, [(6, 23), (40, 23), (39, 28), (7, 28)], M["sole"], INN, cyclic=True)
-    G.stroke(d, [(11, 4), (31, 4)], M["ink"], INN)
+    S(d, [(12, 2), (30, 2), (32, 10), (38, 16), (39, 22), (35, 25), (8, 25), (7, 14)], M["boot"], OUT, cyclic=True, rnd=4)
+    S(d, [(6, 23), (40, 23), (39, 28), (7, 28)], M["sole"], OUT * 0.9, cyclic=True, rnd=2)
+    F(d, M, [(10.8, 6.4), (21, 7.3), (31.4, 6.4)])
 
 
-def render_part(name):
-    w, h, pivot, fn, kw = PARTS[name]
-    c = U.Canvas(w, h)
-    c.M.update(mats(c.gp))
-    fn(c.dm, c.M)
-    img = c.render(seed=31 + len(name))[0]
-    if name == "helmet":                                                       # the glass: a pale sky tint under the rim
-        a = np.zeros((h, w), np.float32)
-        yy, xx = np.mgrid[0:h, 0:w]
-        a[(xx + 0.5 - 50) ** 2 + (yy + 0.5 - 52) ** 2 < 38 ** 2] = 0.16
-        f = img.astype(np.float32) / 255.0
-        g = np.dstack([np.broadcast_to(rgb(TONES["glass"]), (h, w, 3)), a])
-        ia = f[..., 3:4]
-        out_a = ia + g[..., 3:4] * (1 - ia)
-        out = (f[..., :3] * ia + g[..., :3] * g[..., 3:4] * (1 - ia)) / np.maximum(out_a, 1e-4)
-        img = np.clip(np.rint(np.dstack([out, out_a]) * 255), 0, 255).astype(np.uint8)
-        return img
-    if name.startswith("blink"):                                               # a swap overlay: no form shading (a rim or a
-        return U.paper_grain(img, 101 + len(name), 0.012)                      # shade would outline the patch on the face)
-    return paint(img, 101 + len(name), **kw)
+STATS = {}            # part -> its pencil strokes' stats (cel_v6.render), filled by layers(): the sheet's printed numbers
+
+
+def layers(name, boil=0):
+    """One part's two cel layers at the large size: (paint with its flat shadow shape, the dried pencil line)."""
+    w, h, pivot, fn, band = PARTS[name]
+    c = CEL.Canvas(w, h, K, tag=name)
+    fn(c.dm, mats(c.gp))
+    paint, line, st = c.render(boil=boil)
+    if boil == 0:
+        STATS[name] = st
+    if band:
+        paint = CEL.shade(paint, band, K, BACK)
+    return paint, CEL.dry(line, (zlib.crc32(name.encode()) & 0xFFFF) + 977 * boil)
 
 
 # ---------------------------------------------------------------- the rig (metres; offsets from the parent's pivot at rest)
@@ -493,10 +415,7 @@ def bones(facing):
         ("pack", "pack", "torso", pack_off, 0.0, 0.0, 4),
         ("head", Hd, "torso", head_off, 0.0, 0.0, 14),
         ("helmet", "helmet", "head", (0.02, -0.06), 0.0, 0.0, 16),
-        ("antenna", "antenna", "helmet", (-0.04, 0.615), 0.0, 0.3, 17),    # over the bubble (it lies back across it in crouch);
-        #                                                                    round 2: its foot ON the rim's line (0.63 stood it
-        #                                                                    above the rim, and the heavier stalk took the crouch
-        #                                                                    from 0.97 to 0.98 m)
+        ("antenna", "antenna", "helmet", (-0.04, 0.615), 0.0, 0.3, 17),    # over the bubble (it lies back across it in crouch)
         ("upper_arm_b", "upper_arm", "torso", sh_b, 0.0, L_UA, 1),
         ("forearm_b", "forearm", "upper_arm_b", (0.0, -L_UA), 0.0, L_FA, 2),
         ("hand_b", "hand", "forearm_b", (0.0, -L_FA), 0.0, 0.12, 3),
@@ -515,30 +434,21 @@ def bones(facing):
 FAR = {"upper_arm_b", "forearm_b", "hand_b", "thigh_b", "shin_b", "boot_b"}
 
 POSES = {   # degrees counter-clockwise, added to rest; "lift" raises the root above the ground solve (m)
-    # desk-check 14:3x (forward kinematics by hand; the first set left a foot 6-10 px off the ground in crouch and dig, and the
-    # shovel out of both hands' reach): every pose has both soles level (a boot's world angle 0 = flat)
+    # desk-check 11-09 14:3x (forward kinematics by hand): every pose has both soles level (a boot's world angle 0 = flat)
     "idle": {"torso": -2, "head": 3, "upper_arm_f": 8, "forearm_f": 14, "upper_arm_b": -6, "forearm_b": 10,
              "thigh_f": 3, "shin_f": -3, "thigh_b": -3, "shin_b": -2, "boot_b": 5},
-    # LEAD 14:4x: the 1 m gap stays (terrain cells are 1 m), so the crouch stands <= 0.98 m: a deep forward tuck (hips 0.36 m,
-    # both ankles 0.18 m under the hip joints, the torso 76 deg forward, the helmet leading and tilted with the spine, hands to
-    # the ground), the springy antenna pressed back along the helmet, and a root squash of 0.92 (root_scale_z: a per-state root
-    # scale about the ground, in the bone JSON's "states" for U-199). By hand: the bubble's top 1.03 m and the antenna's foot
-    # 1.04 m unsquashed (the plumb bob 15 deg below level behind it) -> ~0.95 / ~0.96 m; the sheet measures the drawn top and
-    # draws the 1 m line
+    # LEAD 11-09 14:4x: the 1 m gap stays (terrain cells are 1 m), so the crouch stands <= 0.98 m: a deep forward tuck, the
+    # springy antenna pressed back along the helmet, and a root squash of 0.92 (root_scale_z: a per-state root scale about the
+    # ground, in the bone JSON's "states" for U-199); the sheet measures the drawn top and draws the 1 m line
     "crouch": {"torso": -76, "head": 58, "antenna": 123, "upper_arm_f": 45, "forearm_f": 90, "upper_arm_b": 38, "forearm_b": 94,
                "thigh_f": 115, "shin_f": -142, "boot_f": 27, "thigh_b": 95, "shin_b": -152, "boot_b": 57, "root_scale_z": 0.92},
-    # the 17:17 sheet: the near arm at 150 crossed the bubble and hid the face (the arms cannot reach over a 0.6 m bubble).
-    # Round 2 (LEAD 18:0x (5)): the counter-swing - the near arm forward and up, clear of the glass, the far arm back and down
+    # round 2 (LEAD 18:0x (5)): the counter-swing - the near arm forward and up, clear of the glass, the far arm back and down
     "jump": {"torso": -8, "head": 10, "upper_arm_f": 108, "forearm_f": 25, "upper_arm_b": -40, "forearm_b": 20,
              "thigh_f": 78, "shin_f": -96, "boot_f": 18, "thigh_b": 40, "shin_b": -104, "boot_b": 30, "lift": 0.42},
-    # a lunge on the shovel: the near hand on the D-grip at (0.33, 0.93) m from the hips' ground point, the shovel 48 deg
-    # down (DIG_AIM), its tip ~0.1 m in the ground 1.25 m ahead; the far hand on the haft 0.3 m down it; the back foot on its
-    # toe (round 2: 35.8 for 32, the longer boot's toe 0.283 m ahead of the ankle)
+    # a lunge on the shovel: the near hand on the D-grip, the shovel 48 deg down (DIG_AIM), the back foot on its toe
     "dig": {"torso": -24, "head": 18, "upper_arm_f": -18.8, "forearm_f": 121.6, "upper_arm_b": 35.3, "forearm_b": 41.3,
             "thigh_f": 40, "shin_f": -52, "boot_f": 12, "thigh_b": -25, "shin_b": -27, "boot_b": 35.8},
-    # round 2 (LEAD 18:0x (6)): one walk CONTACT pose - the near heel down ahead (its toe up 14 deg), the far foot behind on
-    # its toe (the heel up 22 deg), the arms swung against the legs. By hand: the heel at -0.844 m and the toe at -0.843 m
-    # under the hips' pivot
+    # round 2 (LEAD 18:0x (6)): one walk CONTACT pose - the near heel down ahead, the far foot behind on its toe
     "walk": {"torso": -4, "head": 4, "upper_arm_f": -24, "forearm_f": 16, "upper_arm_b": 26, "forearm_b": 24,
              "thigh_f": 27, "shin_f": -6, "boot_f": -7, "thigh_b": -20, "shin_b": -28, "boot_b": 26},
 }
@@ -547,14 +457,14 @@ DIG_AIM = -126.8      # the shovel's turn from the near hand's angle (the hand's
 
 
 def rig_json(parts_rects):
-    out = {"key": KEY, "style": "v5", "ppu": PX, "rect_origin": "bottom_left", "height_m": 2.0,
+    out = {"key": KEY, "style": "v6", "ppu": PX * K, "rect_origin": "bottom_left", "height_m": 2.0,
            "note": "B-231 DESIGN (C5): previews only until the owner's look-over (D-185); the contract's v4 rig schema follows it",
            "parts": [{"name": n, "rect": r, "pivot": p} for n, r, p in parts_rects], "facings": []}
     for facing in ("side", "front34"):
         out["facings"].append({
             "name": facing,
             "bones": [{"name": n, "part": p + ("_far" if n in FAR else ""), "parent": par, "offset_m": [round(o[0], 4), round(o[1], 4)], "rest_deg": r,
-                       "length_m": L, "order": order, "far": n in FAR} for n, p, par, o, r, L, order in bones(facing)],
+                       "length_m": L_, "order": order, "far": n in FAR} for n, p, par, o, r, L_, order in bones(facing)],
             "ik": [{"chain": ["upper_arm_f", "forearm_f"], "effector": "hand_f", "bend": "back"},
                    {"chain": ["upper_arm_b", "forearm_b"], "effector": "hand_b", "bend": "back"},
                    {"chain": ["thigh_f", "shin_f"], "effector": "boot_f", "bend": "forward"},
@@ -563,8 +473,8 @@ def rig_json(parts_rects):
                         "helmet_top": {"bone": "antenna", "offset_m": [0.0, 0.3]}},
             "swaps": {"blink": {"part": BLINK[facing][0], "bone": "head", "offset_m": [round(v, 4) for v in BLINK[facing][1]], "order": 14.5,
                                 "note": "shown over the head (under the helmet) while the eyes are closed; hidden otherwise"}}})
-    # per state (LEAD 14:4x, for U-199 to read, not guess): the root's scale [x, z] about the ground point (the crouch's 0.92
-    # squash), the root's lift, and the design pose in degrees added to each bone's rest angle (side facing)
+    # per state (LEAD 11-09 14:4x, for U-199 to read, not guess): the root's scale [x, z] about the ground point (the crouch's
+    # 0.92 squash), the root's lift, and the design pose in degrees added to each bone's rest angle (side facing)
     out["states"] = {k: {"root_scale": [1.0, v.get("root_scale_z", 1.0)], "lift_m": v.get("lift", 0.0),
                          "pose_deg": {b: a for b, a in v.items() if b not in ("lift", "root_scale_z")}} for k, v in POSES.items()}
     out["states_note"] = ("root_scale is applied to the rig's root about the ground point (z only: a cartoon squash); crouch must stand "
@@ -610,7 +520,7 @@ def solve(facing, pose):
     def go(name):
         if name in world:
             return world[name]
-        n, p, par, off, rest, L, order = B[name]
+        n, p, par, off, rest, L_, order = B[name]
         a_local = rest + pose.get(name, 0.0)
         if par is None:
             world[name] = (off[0], off[1], a_local)
@@ -653,58 +563,65 @@ def squash(img, ground, sz):
 
 
 def top_m(img, ground):
-    """The posed figure's height (m): its top-most drawn row above the ground row."""
+    """The posed figure's height (m) on a LARGE pose image: its top-most drawn row above the ground row (large px)."""
     rows = np.where(img[..., 3].max(axis=1) > 0.02)[0]
-    return (ground - rows[0]) / PX if len(rows) else 0.0
+    return (ground - rows[0]) / float(PX * K) if len(rows) else 0.0
 
 
-def pose_image(P, facing, pose, W=300, H=380, ground=350, cx=150, prop=None, blink=False):
-    """One posed figure on a transparent canvas (premultiplied float), the ground line at row `ground`; the pose's
+PW, PH, PG, PCX = 300, 380, 350, 150              # a pose cell in design px: width, height, the ground row, the feet's x
+
+
+def pose_image(P, facing, pose, prop=None, blink=False):
+    """One posed figure, LARGE (PW * K x PH * K, premultiplied float), the ground line at row PG * K; the pose's
     root_scale_z (the crouch's squash) applied about the ground. blink: the closed-eye swap shown on the head."""
-    dst = np.zeros((H, W, 4), np.float32)
+    k = PX * K
+    dst = np.zeros((PH * K, PW * K, 4), np.float32)
     world = solve(facing, pose)
-    for n, p, par, off, rest, L, order in sorted(bones(facing), key=lambda b: b[6]):
+
+    def at(x, z):
+        return (PCX * K + x * k, PG * K - z * k)
+    for n, p, par, off, rest, L_, order in sorted(bones(facing), key=lambda b: b[6]):
         if prop is not None and n == "upper_arm_f":                            # the held tool on the near hand's grip socket,
-            pimg, ppiv, aim = prop                                             # drawn over the body and the far hand, under the
-            x, z, a = world["hand_f"]                                          # near arm (its mitt closes over the D-grip)
+            pimg, ppiv, aim = prop                                             # over the body and the far hand, under the near arm
+            x, z, a = world["hand_f"]
             t = math.radians(a)
             gx, gz = x + GRIP[0] * math.cos(t) - GRIP[1] * math.sin(t), z + GRIP[0] * math.sin(t) + GRIP[1] * math.cos(t)
-            place(dst, pimg, ppiv, a + aim, (cx + gx * PX, ground - gz * PX))
+            place(dst, pimg, ppiv, a + aim, at(gx, gz))
         img, pivot = P[p + ("_far" if n in FAR else "")]
         x, z, a = world[n]
-        place(dst, img, pivot, a, (cx + x * PX, ground - z * PX))
+        place(dst, img, pivot, a, at(x, z))
         if blink and n == "head":                                              # the swap, over the head and under the helmet
             bp, (bx, bz) = BLINK[facing]
             t = math.radians(a)
-            place(dst, P[bp][0], P[bp][1], a, (cx + (x + bx * math.cos(t) - bz * math.sin(t)) * PX,
-                                               ground - (z + bx * math.sin(t) + bz * math.cos(t)) * PX))
-    return squash(dst, ground, pose.get("root_scale_z", 1.0))
+            place(dst, P[bp][0], P[bp][1], a, at(x + bx * math.cos(t) - bz * math.sin(t), z + bx * math.sin(t) + bz * math.cos(t)))
+    return squash(dst, PG * K, pose.get("root_scale_z", 1.0))
 
 
-def all_parts(back=1):
-    """Every part rendered and painted. back: paint()'s BACK (the shadow band on the back edge, or -1: on the right)."""
-    global BACK
-    P = {}
-    keep, BACK = BACK, back
-    try:
-        for name, (w, h, pivot, fn, kw) in PARTS.items():
-            img = render_part(name)
-            P[name] = (img, pivot)
-    finally:
-        BACK = keep
-    for name in ("upper_arm", "forearm", "hand", "thigh", "shin", "boot", "boot34"):  # the far limbs: one step darker
-        img = P[name][0].astype(np.float32) / 255.0
-        img[..., :3] = img[..., :3] * 0.8 + (rgb(PAL["sky"]) * 0.55 + rgb(PAL["brown"]) * 0.25) * 0.08
-        P[name + "_far"] = (np.clip(np.rint(img * 255), 0, 255).astype(np.uint8), P[name][1])
-    return P
+FAR_PARTS = ("upper_arm", "forearm", "hand", "thigh", "shin", "boot", "boot34")
+
+
+def all_parts(boil=0, paint_of=None):
+    """Every part as a finished cel at the large size: name -> (RGBA uint8, pivot in large px). boil: the line pass (0 =
+    the drawing; 1, 2 = alternate pencil passes for the 12 Hz boil). paint_of: pass 0's layers, so an alternate pass
+    draws only its line over the SAME paint. Returns (parts, layers)."""
+    P, LAY = {}, {}
+    for name, (w, h, pivot, fn, band) in PARTS.items():
+        paint, line = layers(name, boil)
+        if paint_of is not None:
+            paint = paint_of[name][0]
+        LAY[name] = (paint, line)
+        pv = (pivot[0] * K, pivot[1] * K)
+        P[name] = (CEL.compose(paint, line), pv)
+        if name in FAR_PARTS:                                                  # the far limbs: the paint re-keyed, the line kept
+            P[name + "_far"] = (CEL.compose(paint, line, FAR_KEY), pv)
+    return P, LAY
 
 
 def sheet(P, g=v3.GUTTER):
-    """Shelf-pack the parts onto one sheet -> (RGBA, [(name, rect bottom-left, pivot normalised)]). g: the gutter between
-    parts and around the sheet (11-10: the contract's 4 px, as ships/pilgrim/rig and the flora rig sets pack; rounds 1-2b
-    drew the sheet with 2 px, a layout difference only: no part's pixels change)."""
+    """Shelf-pack the LARGE parts onto one sheet (2048 wide) -> (RGBA, [(name, rect bottom-left, pivot normalised)]). g: the
+    gutter between parts and around the sheet (the contract's 4 px)."""
     names = sorted(P, key=lambda n: -P[n][0].shape[0])
-    W, x, y, row_h, placed = 512, g, g, 0, []
+    W, x, y, row_h, placed = 2048, g, g, 0, []
     for n in names:
         img = P[n][0]
         h, w = img.shape[:2]
@@ -723,147 +640,192 @@ def sheet(P, g=v3.GUTTER):
     return out, rects
 
 
-# ---------------------------------------------------------------- the design sheet
+# ---------------------------------------------------------------- the design sheet (round 3's plates)
+STAGE = np.array([0.665, 0.725, 0.571], np.float32)       # the plates' flat ground: a muted mid-value sage, about what a
+#                                                           painted backdrop puts behind the figure (a cel is judged on it)
+
+
 def preview(out, footnote=None):
     import time
     sys.path.insert(0, os.path.dirname(HERE))
     import review
-    P = all_parts()
+    t0 = time.time()
+    P, LAY = all_parts()
+    t_parts = time.time() - t0
+    t1 = time.time()
+    PB, _lay = all_parts(boil=1, paint_of=LAY)                                   # the second pencil pass over the same paint
+    t_boil = time.time() - t1
     sh, rects = sheet(P)
+    shb, _r = sheet(PB)
     paper = np.array(review.PAPER, np.float32)
     ground_col = rgb(PAL["green"]) * 0.5 + rgb(PAL["brown"]) * 0.5
-    shovel = os.path.join(ART, "props", "rig", "shovel_color.png")
+    W = 1920
+
+    def sprite0(key):
+        """An exported sprite's first frame (straight RGBA uint8) and its px per metre."""
+        base = os.path.join(ART, *key.split("/"))
+        if not os.path.isfile(base + "_color.png"):
+            return None, 64
+        im = pngio.read_png_np(base + "_color.png")
+        J = json.load(open(base + ".json", encoding="utf-8")) if os.path.isfile(base + ".json") else {}
+        if "frame_width" in J:
+            im = im[:J["frame_height"], :J["frame_width"]]
+        return im, J.get("ppu", 64)
+
+    def over(dst, img, x, y):
+        """A premultiplied float image over an opaque float canvas, its top-left at (x, y), clipped."""
+        h, w = img.shape[:2]
+        x0, y0, x1, y1 = max(x, 0), max(y, 0), min(x + w, dst.shape[1]), min(y + h, dst.shape[0])
+        if x1 <= x0 or y1 <= y0:
+            return
+        s = img[y0 - y:y1 - y, x0 - x:x1 - x]
+        dst[y0:y1, x0:x1] = s[..., :3] + dst[y0:y1, x0:x1] * (1 - s[..., 3:4])
+
+    def head(text, h=20):
+        hd = np.tile(paper, (h, W, 1)).astype(np.float32)
+        review._label(hd, text, 6, 4, scale=1)
+        return hd
+
+    def stage(h):
+        return np.tile(STAGE, (h, W, 1)).astype(np.float32)
+
+    shovel_u8, _ppu = sprite0("props/rig/shovel")
     prop = None
-    if os.path.isfile(shovel):
-        simg = pngio.read_png_np(shovel)
-        prop = (simg, (simg.shape[1] * 0.0667, simg.shape[0] * 0.5), DIG_AIM)   # B-226's shovel, pivot at the D-grip (PPU 128, as v5)
-    W = 1760                                                                     # (round 2: five poses in the pose row)
-    GROUND = 350                                                                 # pose_image's ground row
-
-    def tex(name):
-        p = os.path.join(ART, "terrain", "earth", name + "_color.png")
-        return pngio.read_png_np(p)[..., :3].astype(np.float32) / 255.0 if os.path.isfile(p) else None
-
-    def tiled(t, hh, ww):
-        return np.tile(t, (-(-hh // t.shape[0]), -(-ww // t.shape[1]), 1))[:hh, :ww]
-
-    def strip(cells, label, h=430, bg=None):
-        """cells: (name, premultiplied float image, its ground row[, a ceiling in m]): each stands on the strip's ground line; a
-        ceiling draws a red line that far above the ground across the cell (the crouch's 1 m gap, LEAD 14:4x). bg = (wall,
-        floor) textures: the strip is a dug cell at 1x - the tier's back wall behind the figures, its fill under their feet."""
-        r = np.tile(paper, (h, W, 1)).astype(np.float32)
-        r[h - 40:h - 36] = ground_col
-        if bg is not None and bg[0] is not None:
-            r[18:h - 40] = tiled(bg[0], h - 58, W)
-            if bg[1] is not None:
-                r[h - 40:h] = tiled(bg[1], 40, W)
-        review._label(r, label, 6, 4, scale=1)
-        x = 10
-        for name, img, g, *rest in cells:
-            ih, iw = img.shape[:2]
-            y = h - 40 - g                                                       # desk-check: the figures floated 28 px over the line
-            y0, y1 = max(y, 0), min(y + ih, h)
-            a = img[y0 - y:y1 - y, :, 3:4]
-            r[y0:y1, x:x + iw] = img[y0 - y:y1 - y, :, :3] + r[y0:y1, x:x + iw] * (1 - a)
-            if rest and rest[0]:
-                yc = h - 40 - int(round(rest[0] * PX))                           # the line's lower edge = the ceiling
-                r[yc - 2:yc, x:x + iw] = rgb(PAL["red"])
-                review._label(r, f"{rest[0]:g} m ceiling", x + iw - 96, yc - 16, scale=1)
-            review._label(r, name, x + 4, h - 30, scale=1)
-            x += iw + 12
-        return r
-    side = pose_image(P, "side", POSES["idle"])
-    turn = [("side, facing right (idle)", side, GROUND), ("the rig mirrored: facing left", side[:, ::-1].copy(), GROUND),
-            ("front 3/4 (idle)", pose_image(P, "front34", POSES["idle"]), GROUND)]
-    rows = [np.tile(paper, (28, W, 1)).astype(np.float32)]
-    review._label(rows[0], "B-231 the v5 surveyor (C5 design, D-185), ROUND 2: a rigged cut-out, jointed limbs, the props' line weight, one cool shadow band a part; 2.0 m = 256 px", 6, 8)
-    rows.append(strip(turn, "turnaround (posed from the rig): lit from above, the shadow band on each part's lower end and back edge, so the mirrored rig reads the same"))
-
-    def half(im):
-        """The game's zoom: the 256 px drawing at 1/2."""
-        return im[:im.shape[0] // 2 * 2, :im.shape[1] // 2 * 2].reshape(im.shape[0] // 2, 2, im.shape[1] // 2, 2, 4).mean(axis=(1, 3))
-
-    def prop1x(name):
-        """A v3 camp prop's first frame at 1x (premultiplied float), or None."""
-        try:
-            import build_title_v3 as TT
-            p = TT.prop_frame(name).astype(np.float32).copy()
-            p[..., :3] *= p[..., 3:4]
-            return p
-        except Exception:  # noqa: BLE001  (the row still shows the surveyors)
-            return None
-    one = []
-    v4 = os.path.join(ART, "characters", "surveyor", "side_color.png")
-    if os.path.isfile(v4):
-        s4 = pngio.read_png_np(v4).astype(np.float32) / 255.0
-        f4 = s4[:192, :192].copy()
-        f4[..., :3] *= f4[..., 3:4]
-        one.append(("v4 surveyor", f4, 192))                                     # its pivot: the frame's bottom row
-    one.append(("v5 facing right", half(side), GROUND // 2))
-    for pn, label in (("storage_crate", "crate (v3)"), ("smelter", "smelter (v3)")):
-        pr = prop1x(pn)
-        if pr is not None:
-            one.append((label, pr, pr.shape[0]))
-    one.append(("v5 facing left", half(side)[:, ::-1].copy(), GROUND // 2))
-    rows.append(strip(one, "at the game's zoom (1x): the v4 surveyor, v5 facing right, v3 camp props (lit from the upper left: they shade right / lower-right), v5 facing left", h=290))
-
-    def face(facing, closed):
-        """The head at 2x (a 112 px window on the bubble's centre), eyes open or with the blink swap."""
-        im = pose_image(P, facing, POSES["idle"], blink=closed)
-        hx, hz, ha = solve(facing, POSES["idle"])["helmet"]
-        t = math.radians(ha)
-        px_ = int(round(150 + (hx - 0.3125 * math.sin(t)) * PX))
-        py_ = int(round(GROUND - (hz + 0.3125 * math.cos(t)) * PX))
-        return np.repeat(np.repeat(im[max(py_ - 56, 0):py_ + 56, max(px_ - 56, 0):px_ + 56], 2, 0), 2, 1)
-    faces = [(f"{fc}: {'the blink swap' if cl else 'eyes open'}", face(fc, cl), None) for fc in ("side", "front34") for cl in (False, True)]
-    rows.append(strip([(n, im, im.shape[0]) for n, im, _g in faces], "the face at 2x: eyes open and the ONE blink swap part per facing (the rest of the face set after acceptance)", h=300))
-    pimg = {k: pose_image(P, "side", POSES[k]) for k in ("idle", "crouch", "jump")}
-    pimg["walk"] = pose_image(P, "side", POSES["walk"], W=340, cx=160)
-    pimg["dig"] = pose_image(P, "side", POSES["dig"], W=400, cx=120, prop=prop)                    # (wider: the shovel reaches 1.25 m)
-    csz, ctop = POSES["crouch"].get("root_scale_z", 1.0), top_m(pimg["crouch"], GROUND)
-    over = f", {100 * (ctop - 1.0):.0f} cm INTO THE 1 m LINE" if ctop > 1.0 else ""
-    poses = [("idle", pimg["idle"], GROUND), ("walk (contact)", pimg["walk"], GROUND),
-             (f"crouch x{csz:g}: top {ctop:.3f} m{over}", pimg["crouch"], GROUND, 1.0), ("jump", pimg["jump"], GROUND), ("dig", pimg["dig"], GROUND)]
-    rows.append(strip(poses, f"pose sheet (side): idle, a walk contact, crouch (a deep tuck under a 1 m gap, root squash {csz:g}, measured top {ctop:.3f} m), jump apex (knees tucked, the counter-swing), dig with B-226's shovel"))
+    if shovel_u8 is not None:                                                    # B-226's shovel (v3 art, PPU 128) on the large pose:
+        big = np.repeat(np.repeat(shovel_u8, K, 0), K, 1)                        # its pixels repeated here, then shrunk with the plate
+        prop = (big, (big.shape[1] * 0.0667, big.shape[0] * 0.5), DIG_AIM)       # (never shown larger than it was drawn)
     order = ("idle", "walk", "crouch", "jump", "dig")
-    rows.append(strip([(k, half(pimg[k]), GROUND // 2) for k in order],
-                      "the same poses at the game's zoom (1x): the shading is baked on each part at rest; the band on the back edge turns under on the jump's raised thigh and the dig's arms", h=260))
-    # LEAD 18:0x (6): the surveyor lives in holes - the 1x row inside a dug cell of Subsoil and of Stone (B-230's back wall
-    # behind, the tier's fill underfoot); here the far limbs' one-step-darker tone is judged too
-    for tname, t in (("Subsoil", 2), ("Stone", 3)):
-        cells = [("idle", half(side), GROUND // 2), ("facing left", half(side)[:, ::-1].copy(), GROUND // 2)]
-        cells += [(k, half(pimg[k]), GROUND // 2) for k in order[1:]]
-        rows.append(strip(cells, f"at the game's zoom (1x) in a dug cell of {tname}: terrain/earth/back_wall_t{t} behind (as exported; the game darkens it further with depth), ground_fill_t{t} underfoot",
-                          h=250, bg=(tex(f"back_wall_t{t}"), tex(f"ground_fill_t{t}"))))
-    # the band's side, both ways (see BACK): A as drawn in every other row, B on the lower right as the v3 props shade
-    PB = all_parts(back=-1)
-    alt = [("A idle: the band on the back edge", side, GROUND), ("A jump: it lies under the raised thigh and arm", pimg["jump"], GROUND),
-           ("B idle: the band on the lower right", pose_image(PB, "side", POSES["idle"]), GROUND),
-           ("B jump: it lies on top of them", pose_image(PB, "side", POSES["jump"]), GROUND)]
-    rows.append(strip(alt, "the shadow band's side: A (this sheet) on each part's back edge, B on the lower right as the v3 props are shaded; either mirrors with the rig"))
-    for k in order:                                                              # the measured heights, for the sheet's reader
-        w_ = solve("side", POSES[k])
-        hx, hz, ha = w_["helmet"]
-        top = hz + 0.3125 * math.cos(math.radians(ha)) + 0.305
-        print(f"{k}: hips {w_['hips'][1]:.2f} m, the bubble's top {top:.2f} m unscaled, drawn top {top_m(pimg[k], GROUND):.3f} m (root scale z "
-              f"{POSES[k].get('root_scale_z', 1.0):g}), soles f / b {sole_z(w_, 'boot_f'):+.3f} / {sole_z(w_, 'boot_b'):+.3f} m")
-    ps = np.tile(paper, (sh.shape[0] + 30, W, 1)).astype(np.float32)
-    review._label(ps, f"the part sheet characters/surveyor_v5/rig_color.png ({sh.shape[1]}x{sh.shape[0]}, {len(rects)} parts on pivots; far limbs a step darker)", 6, 4, scale=1)
-    f = sh.astype(np.float32) / 255.0
-    ps[24:24 + sh.shape[0], 10:10 + sh.shape[1]] = f[..., :3] * f[..., 3:4] + ps[24:24 + sh.shape[0], 10:10 + sh.shape[1]] * (1 - f[..., 3:4])
-    rows.append(ps)
-    img = np.vstack(rows)
-    review.draw(img, time.strftime("%m-%d %H:%M") + " " + (footnote or "B-231 design preview (lock-free, fakegp + numpy; not exported)"), 2, img.shape[0] - 14, (1.0, 1.0, 0.85))
+    pimg = {k: pose_image(P, "side", POSES[k], prop=prop if k == "dig" else None) for k in order}
+    front = pose_image(P, "front34", POSES["idle"])
+    blinkp = pose_image(P, "side", POSES["idle"], blink=True)
+    idle_b = pose_image(PB, "side", POSES["idle"])
+    rows = [np.tile(paper, (30, W, 1)).astype(np.float32)]
+    review._label(rows[0], "B-231 ROUND 3 in ART v6 (D-198 + D-199): the v5 surveyor as a CEL (a charcoal pencil line, flat paint), drawn at 512 px per metre. Every plate is that drawing SHRUNK; none enlarges a pixel. PREVIEW", 6, 8)
+
+    # ---- plate 1: the game's zoom (shrunk 8 times: 64 px per metre), beside the camp props and the v4 surveyor
+    rows.append(head("PLATE 1 - THE GAME'S ZOOM (1080p, 64 px per metre; the large drawing shrunk 8x): the v4 surveyor | v6 idle, walk, three-quarter, idle facing left, crouch, jump, dig | today's camp props (v3 art: the smelter, the lamp)"))
+    r = stage(230)
+    gy = 200
+    r[gy:gy + 3] = ground_col
+    x = 20
+    v4, _p = sprite0("characters/surveyor/side")
+    if v4 is not None:
+        over(r, CEL.premul(v4), x, gy - v4.shape[0])
+        x += v4.shape[1] + 10
+    small = {k: CEL.down(pimg[k], 8) for k in order}
+    sg = PG * K // 8                                                             # the ground row of a shrunk cell
+    for im in (small["idle"], small["walk"], CEL.down(front, 8), small["idle"][:, ::-1], small["crouch"], small["jump"], small["dig"]):
+        over(r, im, x, gy - sg)
+        x += im.shape[1] - 10
+    x += 30
+    for key in ("props/common/smelter", "props/common/lamp"):
+        im, ppu = sprite0(key)
+        if im is not None and ppu == 64:
+            over(r, CEL.premul(im), x, gy - im.shape[0])
+            x += im.shape[1] + 10
+    rows.append(r)
+
+    # ---- plate 2: the pose row at twice the game's zoom (shrunk 4 times)
+    rows.append(head("PLATE 2 - THE POSE ROW at 2x the game's zoom (shrunk 4x): idle | walk | crouch under the 1 m line | jump apex | dig (B-226's shovel, still v3 art, on the grip) | three-quarter idle"))
+    r = stage(PH + 20)
+    r[PG:PG + 3] = ground_col
+    crouch_top = top_m(pimg["crouch"], PG * K)
+    for i, k in enumerate(order + ("front",)):
+        im = CEL.down(front if k == "front" else pimg[k], 4)
+        over(r, im, i * PW + 10, 0)
+        review._label(r, k if k != "front" else "three-quarter", i * PW + 16, PG + 8, scale=1)
+        if k == "crouch":
+            yc = PG - int(round(1.0 * PX))
+            r[yc - 2:yc, i * PW + 10:i * PW + 10 + PW] = rgb(PAL["red"])
+            review._label(r, f"1 m ceiling; the crouch stands {crouch_top:.3f} m", i * PW + 30, yc - 16, scale=1)
+    rows.append(r)
+
+    # ---- plate 3: close-ups, each a window of the large drawing shrunk (4x zoom = shrunk 2x; 8x = the drawing itself)
+    w_idle = solve("side", POSES["idle"])
+
+    def crop(img, x0, z0, x1, z1):
+        """The LARGE pose image between two world points (m): x0 < x1, z0 < z1."""
+        k = PX * K
+        X0, X1 = int(PCX * K + x0 * k), int(PCX * K + x1 * k)
+        Y0, Y1 = int(PG * K - z1 * k), int(PG * K - z0 * k)
+        return img[max(Y0, 0):Y1, max(X0, 0):X1]
+
+    def on_stage(img):
+        return img[..., :3] + STAGE * (1 - img[..., 3:4])
+    hx, hz, _a = w_idle["hand_f"]
+    kx, kz, _a = w_idle["shin_f"]
+    bx, bz, _a = w_idle["boot_f"]
+    face = (-0.36, 1.36, 0.44, 2.02)
+    boxes = [("the face", face), ("a glove", (hx - 0.16, hz - 0.26, hx + 0.20, hz + 0.08)),
+             ("a knee cuff", (kx - 0.20, kz - 0.20, kx + 0.20, kz + 0.16)), ("a boot", (bx - 0.20, bz - 0.22, bx + 0.42, bz + 0.12))]
+    rows.append(head("PLATE 3 - CLOSE-UPS of the idle pose, each a window of the large drawing: at 2x the game's zoom (shrunk 4x) | at 4x (shrunk 2x) | at 8x (the drawing itself, as drawn)"))
+    crops = [(name, crop(pimg["idle"], *b)) for name, b in boxes]
+    for f, label in ((4, "2x"), (2, "4x"), (1, "8x")):
+        hmax = max(c.shape[0] for _n, c in crops) // f + 24
+        r = stage(hmax)
+        x = 10
+        for name, c in crops:
+            im = on_stage(CEL.down(c, f))
+            r[20:20 + im.shape[0], x:x + im.shape[1]] = im[:hmax - 20, :max(0, W - x)]
+            review._label(r, f"{name} at {label}", x, 4, scale=1)
+            x += im.shape[1] + 24
+        rows.append(r)
+
+    # ---- plate 4: the boil's two line passes, the blink, and the part sheet shrunk 4 times
+    rows.append(head("PLATE 4 - at 4x: the face in line pass A | in line pass B (the same paint, the pencil drawn again: the 12 Hz boil swaps them) | the blink swap ||| the part sheet, shrunk 4x"))
+    fa, fb = (on_stage(CEL.down(crop(im, *face), 2)) for im in (pimg["idle"], idle_b))
+    bl = on_stage(CEL.down(crop(blinkp, *face), 2))
+    shs = CEL.down(CEL.premul(sh), 4)
+    r = stage(max(fa.shape[0], shs.shape[0]) + 10)
+    x = 10
+    for im in (fa, fb, bl):
+        r[4:4 + im.shape[0], x:x + im.shape[1]] = im[:, :max(0, W - x)]
+        x += im.shape[1] + 12
+    over(r, shs[:, :max(0, W - x - 10)], x + 10, 4)
+    rows.append(r)
+
+    def figure(facing):
+        st = []
+        for n, p, *_rest in bones(facing):
+            st.extend(STATS[p])
+        return CEL.line_stats(st)
+    mean_w, min_w, max_w, n_lines = figure("side")
+    all_w = CEL.line_stats([s for st in STATS.values() for s in st])
+    dd = os.path.join(os.path.dirname(out), "b231")
+    os.makedirs(dd, exist_ok=True)
+    na = pngio.write_png(os.path.join(dd, "rig_color.png"), sh)                  # the large part sheet (pass A) and the bone
+    nb = pngio.write_png(os.path.join(dd, "rig_color_b.png"), shb)               # JSON beside the review (not exported)
+    shift = float(np.abs(pimg["idle"][..., 3] - idle_b[..., 3]).mean() / max(float(pimg["idle"][..., 3].mean()), 1e-6))
+    lines = [f"THE LINE at the game's zoom, measured along every pencil stroke of the side figure: mean {mean_w:.2f} px, from {min_w:.2f} px (a tapered end) to {max_w:.2f} px (full pressure); "
+             f"{n_lines} pencil strokes on the figure, charcoal {CEL.CHARCOAL}; all parts of both facings: mean {all_w[0]:.2f} px",
+             f"the crouch stands {crouch_top:.3f} m (the limit 0.98 m under a 1 m gap); the idle {top_m(pimg['idle'], PG * K):.3f} m to the plumb bob",
+             f"the part sheet: {sh.shape[1]}x{sh.shape[0]} px at {PX * K} px per metre, {len(rects)} parts on pivots (far limbs: the paint a step darker, the line the same), {na // 1024} KB; "
+             "the bones, pivots and poses are round 2b's, unchanged",
+             f"THE BOIL: a second pencil pass over the same paint took {t_boil:.0f} s more (the first pass with its paint {t_parts:.0f} s); as a second sheet of the same rects it is {nb // 1024} KB on disk "
+             f"and {sh.shape[1] * sh.shape[0] * 4 // (1024 * 1024)} MB more texture uncompressed; the two passes differ on {shift * 100:.1f} % of the figure's coverage (under a pixel at the game's zoom)",
+             f"this run: {time.time() - t0:.0f} s to draw, paint, pose and shrink everything"]
+    foot = np.tile(paper, (24 + 16 * len(lines), W, 1)).astype(np.float32)
+    for i, ln in enumerate(lines):
+        review._label(foot, ln[:300], 6, 6 + 16 * i, scale=1)
+    img = np.vstack(rows + [foot])
+    review.draw(img, time.strftime("%m-%d %H:%M") + " " + (footnote or "B-231 round 3 (v6 cel) design preview (lock-free, fakegp + numpy; not exported)"), 2, img.shape[0] - 14, (1.0, 1.0, 0.85))
     review.write(out, img)
     print("written", out, img.shape[1], "x", img.shape[0], f"| sheet {sh.shape[1]}x{sh.shape[0]}, {len(rects)} parts")
-    js = os.path.splitext(out)[0] + "_rig.json"                                  # the bone JSON beside the review (not exported)
-    with open(js, "w", encoding="utf-8", newline="\n") as fh:
+    for ln in lines:
+        print(ln)
+    for k in order:
+        w_ = solve("side", POSES[k])
+        print(f"{k}: drawn top {top_m(pimg[k], PG * K):.3f} m, soles f / b {sole_z(w_, 'boot_f'):+.3f} / {sole_z(w_, 'boot_b'):+.3f} m")
+    with open(os.path.join(dd, "rig.json"), "w", encoding="utf-8", newline="\n") as fh:
         json.dump(rig_json(rects), fh, indent=1)
         fh.write("\n")
-    print("rig json ->", js)
+    for name, c in crops:                                                        # the 8x windows as files, for the owner's page
+        u8 = np.clip(np.rint(np.dstack([on_stage(c), np.ones(c.shape[:2], np.float32)]) * 255), 0, 255).astype(np.uint8)
+        pngio.write_png(os.path.join(dd, "close_" + name.split()[-1] + "_8x.png"), u8)
+    print("part sheets (pass A, pass B) + rig.json + the 8x windows ->", dd)
 
 
-# ---------------------------------------------------------------- the export (WRITTEN 11-10 00:5x, NOT YET RUN)
+# ---------------------------------------------------------------- the export (written, NOT YET RUN)
 def export_checks(P, sh, rects):
     """What must hold before a file is written (contract 2 / 11.1 / 11.3): one line per problem."""
     out = []
@@ -896,8 +858,9 @@ def export_checks(P, sh, rects):
 def export(art):
     """ONLY after the owner's yes on the look-over (USER-39) and LEAD's word (B-231: no export before it): the part sheet
     and the bone JSON -> characters/surveyor_v5/rig_color.png + rig.json, through render.py's kit path (export / keys /
-    preview). The manifest row is added at that moment and not before, so no batch run can ship the design early."""
-    P = all_parts()
+    preview). The manifest row is added at that moment and not before, so no batch run can ship the design early. (The
+    boil's alternate line passes are a second sheet of the same rects; whether they ship is LEAD's call with U-199.)"""
+    P, _lay = all_parts()
     sh, rects = sheet(P)
     problems = export_checks(P, sh, rects)
     if problems:
