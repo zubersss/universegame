@@ -147,6 +147,11 @@ namespace Meridian.Player
             for (int i = 0; i < brackets.Length; i++) { brackets[i] = Child("ReticleBracket" + i, Meridian.View2D.SpriteCharacterView.SurveyorOrder + 1); brackets[i].enabled = false; }
             Swish = Child("ShovelSwish", Meridian.View2D.SpriteCharacterView.SurveyorOrder + 2);
             Beam.enabled = Ghost.enabled = Crack.enabled = Reticle.enabled = Glow.enabled = Fist.enabled = Pip.enabled = Swish.enabled = false;
+            var mg = new GameObject("DigCrackMask");
+            mg.transform.SetParent(transform, false);
+            CrackMask = mg.AddComponent<SpriteMask>();
+            CrackMask.sprite = MaskSquare;
+            CrackMask.enabled = false;
             var cg = new GameObject("BeamCable");
             cg.transform.SetParent(transform, false);
             Cable = cg.AddComponent<LineRenderer>();
@@ -664,7 +669,7 @@ namespace Meridian.Player
             ReticleOnArt = on && art;
             if (Reticle.enabled != (on && !art)) Reticle.enabled = on && !art;
             for (int i = 0; i < brackets.Length; i++) if (brackets[i].enabled != (on && art)) brackets[i].enabled = on && art;
-            if (!on) { if (Crack.enabled) Crack.enabled = false; if (Pip.enabled) Pip.enabled = false; CrackStage = 0; return; }
+            if (!on) { if (Crack.enabled) Crack.enabled = false; if (CrackMask.enabled) CrackMask.enabled = false; if (Pip.enabled) Pip.enabled = false; CrackStage = 0; return; }
             var stroke = input.Stroke;
             Vector2 at; bool diggable, clamped;
             if (stroke.Active) { at = stroke.Target; diggable = stroke.Diggable; clamped = stroke.Clamped; }
@@ -746,7 +751,7 @@ namespace Meridian.Player
             CrackStage = stage;
             bool crack = stage > 0;
             if (Crack.enabled != crack) Crack.enabled = crack;
-            if (!crack) return;
+            if (!crack) { if (CrackMask.enabled) CrackMask.enabled = false; return; }
             var chips = brush ? chipRound : chipCell;
             bool chipArt = chips != null && chips.Ready && chips.frames.Length >= DigStroke.ChipStages;
             CrackOnArt = chipArt;
@@ -759,8 +764,60 @@ namespace Meridian.Player
             // B-246: cream and ink, multiplied by the dug ground's tone as the clods are (D-190)
             var ink = chipArt ? Meridian.Mining.DigFeel.ToneAt(rig.terrain, at, rig.D1 ? Meridian.Mining.DigRun.TierAt(rig.terrain, at) : 0) : CrackInk;
             if (Crack.color != ink) Crack.color = ink;
-            Crack.transform.position = new Vector3(centre.x, centre.y, 0f);
+            // LEAD 07:1x: the round crack starts where the blade lands (the contact) and spreads into the ground: shown only on the
+            // ground's side of the face there (a mask over the half plane behind the face's own tangent at the contact, from the
+            // field's slope; not the ground's exact outline: past an outcrop's corner a line can show over open air). The cell's crack
+            // stays on its cell and my stand-in on the brush's centre.
+            bool clip = chipArt && brush;
+            CrackClipped = clip;
+            if (CrackMask.enabled != clip) CrackMask.enabled = clip;
+            var inside = clip ? SpriteMaskInteraction.VisibleInsideMask : SpriteMaskInteraction.None;
+            if (Crack.maskInteraction != inside) Crack.maskInteraction = inside;
+            if (clip)
+            {
+                if (at != crackAt) { crackAt = at; CrackInto = IntoGround(at, centre - at); }
+                var edge = at - CrackInto * CrackMaskBackM; // a hair on the open side: the origin itself is drawn
+                CrackMask.transform.SetPositionAndRotation(new Vector3(edge.x, edge.y, 0f), Quaternion.Euler(0f, 0f, Mathf.Atan2(CrackInto.y, CrackInto.x) * Mathf.Rad2Deg - 90f));
+                CrackMask.transform.localScale = new Vector3(CrackMaskWideM, CrackMaskDeepM, 1f);
+            }
+            Vector2 origin = clip ? at : centre;
+            Crack.transform.position = new Vector3(origin.x, origin.y, 0f);
             Crack.transform.localScale = Vector3.one * (chipArt ? (brush ? RigTools.BrushRadius / 0.9f : 1f) : (brush ? 2f * RigTools.BrushRadius : 1f) * CrackShare);
+        }
+
+        /// <summary>The crack's mask: a square over the ground's side of the face at the contact (its lower edge on the face's tangent).</summary>
+        public SpriteMask CrackMask { get; private set; }
+        public const float CrackMaskWideM = 4f, CrackMaskDeepM = 2.5f, CrackMaskBackM = 0.04f;
+        /// <summary>Tests: the crack is drawn from the contact, clipped to the ground's side; the direction into the ground there.</summary>
+        public bool CrackClipped { get; private set; }
+        public Vector2 CrackInto { get; private set; } = Vector2.down;
+        Vector2 crackAt = new Vector2(float.NaN, float.NaN);
+
+        /// <summary>The direction into the ground at a contact: up the drawn field's slope there (solid is the higher side); the stroke's
+        /// own line where the field is flat (a crystal, a built piece, a find standing in open air).</summary>
+        Vector2 IntoGround(Vector2 at, Vector2 line)
+        {
+            const float h = 0.2f;
+            var t = rig.terrain;
+            var slope = new Vector2(t.FieldAt(at + new Vector2(h, 0f)) - t.FieldAt(at - new Vector2(h, 0f)), t.FieldAt(at + new Vector2(0f, h)) - t.FieldAt(at - new Vector2(0f, h)));
+            if (slope.sqrMagnitude > 1e-6f) return slope.normalized;
+            return line.sqrMagnitude > 1e-8f ? line.normalized : Vector2.down;
+        }
+
+        static Sprite maskSquare;
+        /// <summary>A 1 m white square, its pivot the middle of its lower edge (the crack's mask), made once.</summary>
+        static Sprite MaskSquare
+        {
+            get
+            {
+                if (maskSquare == null)
+                {
+                    var white = Texture2D.whiteTexture;
+                    maskSquare = Sprite.Create(white, new Rect(0f, 0f, white.width, white.height), new Vector2(0.5f, 0f), white.width, 0, SpriteMeshType.FullRect);
+                    maskSquare.name = "DigCrackMask";
+                }
+                return maskSquare;
+            }
         }
 
         // ---------- B-246's dig fx (sheet 2), each a stand-in of mine until its sheet is in ----------

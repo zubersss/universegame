@@ -171,6 +171,21 @@ namespace Meridian.Tests
                 yield return null;
                 Assert.AreEqual(1, side.digFeel.Chips - chips, "the chip's crumbs flew");
                 Assert.Greater(view.CrackStage, 0, "the crack mark shows the work");
+                Assert.IsTrue(view.Crack.enabled);
+                if (view.CrackOnArt)
+                {
+                    // LEAD 07:1x: B-246's crack starts where the blade landed and spreads into the ground: its origin on the contact,
+                    // shown only behind the face (the wall right of the hollow: the ground is to the right)
+                    Assert.IsTrue(view.CrackClipped, "the crack is clipped to the ground's side of the face");
+                    Assert.Less(Vector2.Distance(view.Crack.transform.position, stroke.Target), 1e-3f, "its origin is the contact");
+                    Assert.AreEqual(SpriteMaskInteraction.VisibleInsideMask, view.Crack.maskInteraction);
+                    Assert.IsTrue(view.CrackMask.enabled, "the mask is on");
+                    Assert.Greater(view.CrackInto.x, 0.7f, "into the ground: to the right through the wall's face");
+                    Assert.IsTrue(rig.SolidAt(stroke.Target + view.CrackInto * 0.3f), "solid on the side the crack is shown");
+                    Assert.IsFalse(rig.SolidAt(stroke.Target - view.CrackInto * 0.3f), "open on the side it is hidden");
+                    Vector2 maskUp = view.CrackMask.transform.up;
+                    Assert.Greater(Vector2.Dot(maskUp, view.CrackInto), 0.999f, "the mask lies over the ground's side");
+                }
                 Assert.Greater(input.StrokeProgress, 0f);
                 yield return Rest();
                 Assert.AreEqual(1, stroke.Swings - swings, "held 7 frames: one swing");
@@ -604,7 +619,8 @@ namespace Meridian.Tests
 
         /// <summary>The swing's own machinery allocates nothing: three swings of chips against the same number of idle frames, the least
         /// of three rounds each (another system's one-off allocation in a span is not the swing's). The frame a cell OPENS allocates in
-        /// the terrain edit as before U-209 (the brush's cell list, new density blocks, the chunk's mesh): not measured here.</summary>
+        /// the terrain edit as before U-209 (the brush's cell list, new density blocks, the chunk's mesh): its bytes are read at the end, a
+        /// number for the perf report (P-U209-4), not a bar.</summary>
         [UnityTest, Timeout(300000)]
         public IEnumerator SwingingAllocatesNothingOverAnIdleFrame()
         {
@@ -642,6 +658,43 @@ namespace Meridian.Tests
                 Assert.AreEqual(0, input.Stroke.Opens - opens, "no cell opened in the measured spans");
                 Assert.GreaterOrEqual(input.Stroke.Contacts - contacts, 9, "the swings made their contacts");
                 Assert.LessOrEqual(swinging - idle, 0L, "0 B per swing: swinging allocates nothing an idle frame does not");
+
+                // P-U209-4 (LEAD 07:1x): the frame a cell OPENS, a number for the perf report (not a bar): the main thread's bytes in the
+                // span that holds the opening Update (the terrain edit) and in the ten frames after it (the chunk's mesh, the clods,
+                // the drops), three openings in topsoil with the shovel: the hollow's right wall, its left wall, its floor (one cell a
+                // line: the next face on a line is past the shovel's 2 m).
+                yield return StandAtDepth(x + 76f, 5f);
+                feet = player.Body.position;
+                int dug = 0, measured = 0;
+                System.Action<Vector2> onDug = p => dug++;
+                rig.Dug += onDug;
+                var rows = new System.Text.StringBuilder();
+                foreach (var aim in new[] { new Vector2(1.4f, 0.6f), new Vector2(-1.4f, 0.6f), new Vector2(0.2f, -0.6f) })
+                {
+                    input.AimAt(feet + aim);
+                    yield return Rest();
+                    input.Stroke.Reset();
+                    input.holdUse = true;
+                    long mark = System.GC.GetAllocatedBytesForCurrentThread();
+                    for (int f = 0; f < 60 * 4; f++)
+                    {
+                        int seen = dug;
+                        yield return null;
+                        long now = System.GC.GetAllocatedBytesForCurrentThread();
+                        long span = now - mark;
+                        mark = now;
+                        if (dug == seen) continue;
+                        input.holdUse = false; // the swing plays out; no second cell
+                        for (int i = 0; i < 10; i++) yield return null;
+                        rows.Append($" opening {++measured}: {span} B in its frame, {System.GC.GetAllocatedBytesForCurrentThread() - mark} B in the ten after;");
+                        break;
+                    }
+                    input.holdUse = false;
+                }
+                rig.Dug -= onDug;
+                Assert.AreEqual(3, measured, "three cells opened");
+                TestContext.Out.WriteLine($"[MERIDIAN] u209 the frame a cell opens (shovel, topsoil, the main thread; idle and swinging frames: {idle / Frames} B):{rows}");
+                yield return Rest();
                 LogAssert.NoUnexpectedReceived();
             }
             finally { Restore(); }
