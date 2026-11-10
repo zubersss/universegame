@@ -164,26 +164,31 @@ class Painting:
         self._dab(cx * q, cy * q, a * q, max(0.6, b * q), th, col, alpha, edge, streak, clip)
 
     def brush(self, under, where, n, size, aspect=(2.0, 4.0), angle=0.0, spread=0.3, alpha=(0.7, 1.0), jitter=0.05,
-              hue=0.012, edge=3.0, streak=0.25, clip=None):
+              hue=0.012, edge=3.0, streak=0.25, clip=None, win=None):
         """n dabs where `where` (0..1: how likely a dab lands there) allows. Each takes its colour from `under` (an
         underpainting, or one rgb) at its own centre, a little off in value (jitter) and hue; angle: radians, or a
-        function of the frame point (x, y). Dabs spill past the mask by their own size: that spill is the painted edge."""
+        function of the frame point (x, y). Dabs spill past the mask by their own size: that spill is the painted edge
+        (clip = a whole-picture mask they must stay on). win = (row slice, column slice): `where` and `under` are given
+        for that window of the picture only (a small thing in a large picture is not worth a pass over all of it)."""
         rng, q = self.rng, self.Q
-        p = self.full(where).astype(np.float64).ravel()
+        if win is None:
+            p, oy, ox, wpw = self.full(where).astype(np.float64).ravel(), 0, 0, self.pw
+        else:
+            p, oy, ox, wpw = np.asarray(where, np.float64).ravel(), win[0].start, win[1].start, where.shape[1]
         tot = p.sum()
         if tot <= 0 or n <= 0:
             return
         idx = np.clip(np.searchsorted(np.cumsum(p), rng.uniform(0, tot, n)), 0, p.size - 1)
-        ys, xs = idx // self.pw, idx % self.pw
+        ys, xs = idx // wpw, idx % wpw
         flat = np.ndim(under) == 1
-        if not flat:
+        if not flat and win is None:
             under = self.full(under)
         for cy, cx in zip(ys, xs):
             a = rng.uniform(*size) * q
             b = max(0.6, a / rng.uniform(*aspect))
-            th = (angle(cx / q, cy / q) if callable(angle) else angle) + rng.normal(0, spread)
+            th = (angle((cx + ox) / q, (cy + oy) / q) if callable(angle) else angle) + rng.normal(0, spread)
             col = (under if flat else under[cy, cx]) * (1 + rng.normal(0, jitter)) + rng.normal(0, hue, 3).astype(np.float32)
-            self._dab(cx + rng.uniform(-0.5, 0.5), cy + rng.uniform(-0.5, 0.5), a, b, th, np.clip(col, 0, 1), rng.uniform(*alpha), edge, streak, clip)
+            self._dab(cx + ox + rng.uniform(-0.5, 0.5), cy + oy + rng.uniform(-0.5, 0.5), a, b, th, np.clip(col, 0, 1), rng.uniform(*alpha), edge, streak, clip)
 
     def stroke(self, pts, w0, w1, col, edge=4.0, jitter=0.03):
         """A long brush stroke along a polyline (a root, a trunk's plane, a grass blade): dabs laid end to end, the width
