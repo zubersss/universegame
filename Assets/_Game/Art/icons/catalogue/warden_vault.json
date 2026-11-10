@@ -1,0 +1,13 @@
+{
+  "key": "icons/catalogue/warden_vault",
+  "style": "v3",
+  "width": 128,
+  "height": 128,
+  "palette": "mercury",
+  "ppu": 128,
+  "pivot": [
+    0.5,
+    0.5
+  ],
+  "note": "B-233: the catalogue's the Warden Vault (the stone arch, the round spoked door, the bell)"
+}

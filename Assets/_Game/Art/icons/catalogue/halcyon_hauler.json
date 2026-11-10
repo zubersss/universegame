@@ -1,0 +1,13 @@
+{
+  "key": "icons/catalogue/halcyon_hauler",
+  "style": "v3",
+  "width": 128,
+  "height": 128,
+  "palette": "mars",
+  "ppu": 128,
+  "pivot": [
+    0.5,
+    0.5
+  ],
+  "note": "B-233: the catalogue's the Halcyon Hauler (the crashed hull section in its regolith mound, a cargo hatch)"
+}

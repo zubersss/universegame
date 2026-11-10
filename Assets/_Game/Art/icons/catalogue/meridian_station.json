@@ -1,0 +1,13 @@
+{
+  "key": "icons/catalogue/meridian_station",
+  "style": "v3",
+  "width": 128,
+  "height": 128,
+  "palette": "venus",
+  "ppu": 128,
+  "pivot": [
+    0.5,
+    0.5
+  ],
+  "note": "B-233: the catalogue's the Meridian Station (the aerostat: the balloon, the hull pod, the deck, a cloud)"
+}

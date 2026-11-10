@@ -1,0 +1,13 @@
+{
+  "key": "icons/catalogue/survey_archive",
+  "style": "v3",
+  "width": 128,
+  "height": 128,
+  "palette": "earth",
+  "ppu": 128,
+  "pivot": [
+    0.5,
+    0.5
+  ],
+  "note": "B-233: the catalogue's the Survey Archive (the bunker front: the striped slab, the sign, the steel shutter)"
+}
