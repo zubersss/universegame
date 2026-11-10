@@ -1,4 +1,6 @@
-# MERIDIAN — Asset Contract v3.4 (+ D-165 fill_decor, D-166 island belly)
+# MERIDIAN — Asset Contract v3.5 (+ D-165 fill_decor, D-166 island belly; §12 a DRAFT for the v7 pilot)
+
+> **v3.5 (D-206, 2026-11-10): §12, art v7 pieces, a DRAFT that binds the pilot only (keys under `pilot_v7/`).** Two exceptions to §2 for `style: v7` assets: the colour map carries the painted light, and `ppu` is set per piece. Everything shipped today stays on §11.
 
 > **v3.4 (D-195, 2026-11-10):** §11.5.1, the giants' close view: no `disc_near` for a gas or ice giant; flat-toned geometry from `planets/<giant>/close.json` with tiling ink strips, a pigment tile per giant and a screen-space grain.
 
@@ -345,3 +347,30 @@ Tiling is checked before export by rendering two tiles side by side (p99 copy di
 - `island_end_l` / `island_end_r` the island's rounded shoulders (amended, D-166): cloud lobes that wrap the floe strip's end from the belly up to just under its top edge, so no vertical slab side shows, sorted above the strip and the belly; pivot on the underside outline row at the floe's end.
 - `under_haze_<deck>` 512×512, its own texture (Repeat, never in an atlas), in world space below the floe line wherever the deck's set has no paint: u = x / 8, v = y / 8; soft painted haze in the deck's palette, no ink lines and no hard edges, flat in tone; the darkening toward the deck's floor is UNITY's depth tint (a vertical multiply by y), so the tile never bands (D-166).
 - (v3.3, D-165) `fill_decor_<n>` the cutaway's spot features (fossils, bones, ice or glass lenses, nodules, solarite glints) as upright sprites, 32–128 px, pivot at the centre, scattered by UNITY in the solid by a position seed (sparse, ~1 per 6 m², never on the tile period); `ground_fill` itself keeps only strata, pebbles and stones so its 8 m period does not show.
+
+## 12. Art v7 pieces (v3.5, D-206; DRAFT, the pilot only)
+
+Lifted from `coordination/reports/blender/v7_piece_format.md` (BLENDER, 4075cb81) and `coordination/reports/unity/v7_piece_format_answer.md` (UNITY, daa78ab9), which hold the reasons. Where they and this section differ, this section wins. It becomes a full rule set only on the owner's yes to the pilot (STYLE_V7 §6).
+
+**12.1 Scope and keys.** A json with `"style": "v7"`. The pilot: every file under `Assets/_Game/Art/pilot_v7/`, keys `pilot_v7/camp/<piece>`; its own Addressables group and atlases (`pilot_v7_<layer>`), never `common`, left out of a release build; a test asserts both. After the pilot: `stage_v7/<planet>_<region>/<piece>`. Nothing is exported before LEAD's word (B-260 b).
+
+**12.2 Colour map (exception to §2).** 8-bit RGBA, straight alpha, sRGB, cropped to its content plus an 8 px transparent margin, colour bled 8 px under alpha 0, shipped with mips. It CARRIES THE PAINTED LIGHT. Conditions: one light key per region (the stage file's `light`), so a piece serves anywhere in its region; each piece rendered ALONE (its own form shadow only: no neighbour's shadow, no ground shadow; the contact shade on the ground is the game's).
+
+**12.3 Px per metre (exception to §2 and §11.1).** `"ppu"` per piece: rendered and painted at 384, shipped shrunk to **192** (near, play plane, figures), **128** (middle), **32-48** (a far veil strip, enlarged by the game). PROVISIONAL until B-263's price list and U-216's probe on the built player: texture memory decides.
+
+**12.4 Piece json.** `pivot` [x, y] 0..1 from the bottom-left = the ROOT (a hanging piece: its attachment); `width_m`, `height_m`, `under_m`; `motion`: `stands` | `sways` | `hangs`; `bend` {`from_m`, `to_m`, `power`} (weight = clamp((d - from) / (to - from), 0, 1) ^ power, d = metres from the pivot); `give_m` (the farthest tip's travel in a full gust); optional `spine_px`, and for `hangs` `half_width_px` and `free_end`; optional `parts` (information only). A `sways` piece is at most about 1024 px tall; a taller thing is a `stands` trunk plus its own swaying crowns. A part that moves on its own is its own piece.
+
+**12.5 Normal map.** §2's convention unchanged (camera space, OpenGL, (n+1)/2, linear, (128,128,255) where transparent, dilated 8 px), on the colour's layout; the painted surface's normal. No mask map in the pilot.
+
+**12.6 Atlases.** One per region and layer, rotation off, max page 2048; a far veil is its own unpacked texture, clamp.
+
+**12.7 Stage file.** `<stage>.json` beside the pieces, read by BLENDER's composer and by the game alike: `ground_y_m`, `spawn_x_m`, `haze_rgb`, `layers` {`far`, `middle`, `near`, `play_front`, `foreground`: each `parallax`, `haze`, optional `tint`}, `light`, `instances` [{`piece`, `layer`, `x_m`, `y_m`, `scale`, `flip`}]. Instance order inside a layer is the draw order. The surveyor and the animals draw in front of `near` and behind `play_front` and `foreground`.
+
+**12.8 Rules LEAD adds (D-206).**
+- `flip`: allowed only on `foreground` (a tinted silhouette) and `far` (haze) instances. A `middle`, `near` or `play_front` instance is never flipped: its painted light would come from the wrong side. A mirrored plant there is a second render.
+- `play_front`: low tufts on the ground's lip only, at most 0.30 m above the ground line; nothing in it may cover the surveyor's hands, the reticle or a find.
+- The stage never collides: no piece stops, slows or lifts the surveyor. The ground is the game's.
+- Never two instances of one piece inside one screen width on the same layer at the same scale.
+- §2's Legal row stands: every source CC0 or better, listed in `blender/vendor_cc0/MANIFEST.md` and the credits; raw scans never ship, only our renders of them; D-087 and D-101 hold.
+
+**12.9 Figures.** A frame sheet as §5 / §11 and B-250's json, with `<variant>_normal.png` on the same layout and `ppu` per sheet (192 proposed); the paint in the materials, so a held pose is the same picture frame after frame; pages by clip group; off the common atlas.
