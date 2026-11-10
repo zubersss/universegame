@@ -36,8 +36,18 @@ namespace Meridian.Transitions
         public InputActionAsset actions;
 
         public bool Busy { get; private set; }
-        /// <summary>Raised when a launch or entry finishes (SaveSystem autosaves here, Bible §10.7).</summary>
+        /// <summary>Raised when a launch or entry finishes: the iris has opened and the player has the controls.</summary>
         public event System.Action Completed;
+        /// <summary>U-211 (LEAD 11-10): raised when a launch's or an entry's new view is in place and still wholly covered, just before
+        /// its iris opens. SaveSystem autosaves HERE (Bible §10.7): on Completed the save ran in the first frame of play after the
+        /// iris, on the main thread, 37-62 ms of it (the Editor's Profiler, 11-10): two to four frames lost as the view came up.
+        /// A listener's exception is logged and the iris opens all the same.</summary>
+        public event System.Action BeforeReveal;
+        /// <summary>U-211: the longest frame (ms) in the first AfterWindowSeconds after the last transition ended, from the frame it
+        /// ended in. The memory probe's row against the Bible's 50 ms: where a hitch as the view comes up is judged.</summary>
+        public float LastAfterWorstMs { get; private set; }
+        public const float AfterWindowSeconds = 1f;
+        float afterLeft;
         /// <summary>U-124: the transition that last ran (and raised Completed) was an entry onto a planet, not a launch.</summary>
         public bool LastWasEntry { get; private set; }
         public float LastLaunchSeconds { get; private set; }
@@ -156,16 +166,37 @@ namespace Meridian.Transitions
             if (spaceCam != null) spaceCam.orthographicSize = SpaceDefaultSize;
             ResetCrossings();
 
+            RaiseBeforeReveal();
+            // One frame more behind the closed iris: the iris steps by the frame before's length, so the frame that held the save (and
+            // the new view's first frame) would otherwise be taken off the 0.35 s of its opening.
+            yield return null;
             yield return iris.Open(IrisWipe.ScreenCentre(spaceCam, spaceShip.Position), IrisSeconds); // iris-in on the ship in space
             LastLaunchSeconds = Time.realtimeSinceStartup - t0;
             Busy = false;
+            MarkEnded();
             Completed?.Invoke();
         }
+
+        void RaiseBeforeReveal()
+        {
+            try { BeforeReveal?.Invoke(); }
+            catch (System.Exception e) { Debug.LogException(e); } // a failed save must not leave the game behind a closed iris
+        }
+
+        void MarkEnded() { LastAfterWorstMs = 0f; afterLeft = AfterWindowSeconds; }
 
         // ---------- entry (§5.3) ----------
 
         void Update()
         {
+            // U-211: the frames of the first second after a transition (Time.unscaledDeltaTime here is the frame before's length, so
+            // the first reading is the frame the transition ended in)
+            if (afterLeft > 0f)
+            {
+                float dt = Time.unscaledDeltaTime;
+                if (dt * 1000f > LastAfterWorstMs) LastAfterWorstMs = dt * 1000f;
+                afterLeft -= dt;
+            }
             if (Busy || State == null || State.view != ViewMode.Space || spaceShip == null || spaceShip.world == null) return;
             var bodies = spaceShip.world.Bodies;
             if (prevDistance == null || prevDistance.Length != bodies.Count) ResetCrossings();
@@ -231,9 +262,14 @@ namespace Meridian.Transitions
 
             var sideNow = scenes.PlanetSide;
             var landed = sideNow != null && sideNow.ship != null ? sideNow.ship.transform.position : (sideNow != null && sideNow.player != null ? sideNow.player.transform.position : Vector3.zero);
+            RaiseBeforeReveal();
+            // One frame more behind the closed iris: the iris steps by the frame before's length, so the frame that held the save (and
+            // the new view's first frame) would otherwise be taken off the 0.35 s of its opening.
+            yield return null;
             yield return iris.Open(IrisWipe.ScreenCentre(sideNow != null ? sideNow.sideCamera : null, landed), IrisSeconds); // iris-in on the ship flying in
             LastEntrySeconds = Time.realtimeSinceStartup - t0;
             Busy = false;
+            MarkEnded();
             Completed?.Invoke();
         }
 

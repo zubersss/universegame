@@ -220,6 +220,7 @@ namespace Meridian.Tests
             timeout = Time.realtimeSinceStartup + 10f;
             while (save.SaveCount == beforeLaunch && Time.realtimeSinceStartup < timeout) yield return null;
             Assert.Greater(save.SaveCount, beforeLaunch, "autosave after the launch transition");
+            Assert.IsTrue(transitions.Busy, "U-211: the autosave is taken while the iris still covers the new view (TransitionDirector.BeforeReveal), not in the first frame of play");
             Assert.AreEqual("Space", SaveSystem.ReadState(save.SlotFolder).view);
         }
     }

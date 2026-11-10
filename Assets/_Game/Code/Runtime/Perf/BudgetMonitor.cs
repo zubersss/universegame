@@ -16,6 +16,10 @@ namespace Meridian.Perf
         // The one live measure: the main-thread figure that stood here until 0.6.2 (System.GC.GetAllocatedBytesForCurrentThread) reads
         // 0 B for any allocation in Unity's runtime and is gone.
         public long gcProfilerBytes;
+        // U-211 (LEAD 11-10): the window's FIRST frame on its own (its bytes and its length). After a transition that is the frame the
+        // transition ended in; the gate reports it apart from the arrival row, which reads from the second frame.
+        public long firstFrameGcBytes;
+        public float firstFrameMs;
         public int lightsVisible;         // 2D lights touching the camera view (global lights included)
         public int particlesAlive;
         public long systemMemoryMB, textureMemoryMB, audioMemoryMB; // -1 when the counter is unavailable
@@ -54,6 +58,7 @@ namespace Meridian.Perf
         readonly long[] gcProfiler = new long[Window];
         readonly float[] sortScratch = new float[Window];
         int head, count;
+        long firstGc; float firstMs; bool firstTaken;
 
         ProfilerRecorder draws, tris, casters, gcFrame, systemMem, textureMem, audioMem, meshMem;
         readonly List<Light2D> lights = new List<Light2D>();
@@ -88,12 +93,13 @@ namespace Meridian.Perf
         {
             frameMs[head] = Time.unscaledDeltaTime * 1000f;
             gcProfiler[head] = gcFrame.Valid ? gcFrame.LastValue : 0;
+            if (!firstTaken) { firstTaken = true; firstGc = gcProfiler[head]; firstMs = frameMs[head]; }
             head = (head + 1) % Window;
             if (count < Window) count++;
         }
 
         /// <summary>Forget earlier frames (e.g. after a load) so the next reading covers only what follows.</summary>
-        public void ResetWindow() { head = 0; count = 0; }
+        public void ResetWindow() { head = 0; count = 0; firstTaken = false; firstGc = 0; firstMs = 0f; }
 
         public int FramesRecorded => count;
 
@@ -132,6 +138,8 @@ namespace Meridian.Perf
             System.Array.Sort(sortScratch, 0, count);
             s.p99FrameMs = count > 0 ? sortScratch[Mathf.Min(count - 1, count * 99 / 100)] : 0f;
             s.gcProfilerBytes = gcp;
+            s.firstFrameGcBytes = firstGc;
+            s.firstFrameMs = firstMs;
             s.drawCalls = SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.Null ? -1 : (draws.Valid ? draws.LastValue : -1);
             s.triangles = s.drawCalls < 0 ? -1 : (tris.Valid ? tris.LastValue : -1);
             s.shadowCasters = s.drawCalls < 0 ? -1 : (casters.Valid ? casters.LastValue : -1);

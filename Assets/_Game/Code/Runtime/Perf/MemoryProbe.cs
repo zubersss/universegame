@@ -201,6 +201,7 @@ namespace Meridian.Perf
         {
             var monitor = BudgetMonitor.Instance;
             if (monitor == null) { lines.AppendLine($"{{\"leg\":\"{where}\",\"error\":\"no BudgetMonitor\"}}"); yield break; }
+            float legStart = Time.realtimeSinceStartup;
             // U-086 (Bible §11.1 Residency): the previous planet's handles should be gone within 5 s of the switch.
             int prevHandles = -1;
             float prevWait = 0f;
@@ -210,6 +211,15 @@ namespace Meridian.Perf
                 prevHandles = Residency.CountPlanet(prevGroup);
                 while (prevHandles > 0 && Time.realtimeSinceStartup - t0 < 5f) { yield return null; prevHandles = Residency.CountPlanet(prevGroup); }
                 prevWait = Time.realtimeSinceStartup - t0;
+            }
+            // U-211 (LEAD 11-10): the first second after a transition is the game's own (TransitionDirector.LastAfterWorstMs: the worst
+            // frame as the view comes up, judged against 50 ms); the probe's collection below would be that second's worst frame,
+            // so it waits the second out. -1 on the boot leg (no transition before it).
+            float afterWorstMs = -1f;
+            if (transitionSec >= 0f)
+            {
+                while (Time.realtimeSinceStartup - legStart < TransitionDirector.AfterWindowSeconds + 0.1f) yield return null;
+                afterWorstMs = transitions.LastAfterWorstMs;
             }
             GC.Collect();
             yield return Resources.UnloadUnusedAssets();
@@ -241,7 +251,7 @@ namespace Meridian.Perf
                              $"\"workingSetMB\":{s.workingSetMB},\"privateMB\":{s.privateMB},\"freeMB\":{ProcessMemory.FreeSystemMB()},\"meshMB\":{s.meshMemoryMB}," +
                              $"\"resident\":\"{Residency.ResidentGroups()}\",\"prevGroup\":\"{prevGroup}\",\"prevHandles\":{prevHandles},\"holders\":\"{holders}\",\"prevWait\":{prevWait.ToString("F1", ci)}," +
                              $"\"ownGroup\":\"{ownGroup}\",\"ownHandles\":{ownHandles},\"loadSec\":{loadSec.ToString("F2", ci)},\"transitionSec\":{transitionSec.ToString("F2", ci)}," +
-                             $"\"irisInWorstMs\":{transitions.LastIrisInWorstMs.ToString("F1", ci)},\"breakdown\":\"{breakdown}\"," +
+                             $"\"irisInWorstMs\":{transitions.LastIrisInWorstMs.ToString("F1", ci)},\"afterWorstMs\":{afterWorstMs.ToString("F1", ci)},\"breakdown\":\"{breakdown}\"," +
                              $"\"atlases\":{atlases},\"packedSprites\":{BudgetMonitor.PackedSprites()},\"mipActive\":{(s.mipStreaming ? 1 : 0)},\"mipBudgetMB\":{s.mipBudgetMB}," +
                              $"\"nonStreamingMB\":{(long)(Texture.nonStreamingTextureMemory / 1048576UL)},\"desiredMB\":{(long)(Texture.desiredTextureMemory / 1048576UL)},\"targetMB\":{(long)(Texture.targetTextureMemory / 1048576UL)}," +
                              $"\"monoUsedMB\":{monoUsedMB},\"monoHeapMB\":{monoHeapMB},\"allocMB\":{allocMB},\"reservedMB\":{reservedMB},\"unusedReservedMB\":{unusedMB}," +

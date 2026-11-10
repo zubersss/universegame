@@ -172,6 +172,13 @@ if ($runProbe) {
             if (-not $tok) { $memRed = $true }
             $rows += "| Transition $dot $($l.leg) (dev build) | $le 1.5 s (D-089) | $($l.transitionSec) s, worst iris-in frame $($l.irisInWorstMs) ms | $(if ($tok) { 'green' } else { 'red' }) |"
         }
+        # U-211 (LEAD 2026-11-10): the worst frame of the first second after the transition, from the frame it ended in: where a hitch
+        # as the view comes up is judged (the autosave ran in that frame until the build after 0.6.3). An older player has no figure.
+        if ($null -ne $l.afterWorstMs -and [double]$l.afterWorstMs -ge 0) {
+            $hok = ([double]$l.afterWorstMs -le 50)
+            if (-not $hok) { $memRed = $true }
+            $rows += "| Worst frame in the first second after the transition $dot $($l.leg) (dev build) | $le 50 ms (Bible 11.1; U-211) | $($l.afterWorstMs) ms | $(if ($hok) { 'green' } else { 'red' }) |"
+        }
         if ($null -ne $l.bundles) {
             $planetBundles = @([string]$l.bundles -split ', ' | Where-Object { $_ -like 'planet_*' -and $_ -notlike 'planet_space*' -and $_ -notlike 'planet_warden*' -and $_ -notlike 'planet_waystation*' -and $_ -notlike 'planet_rig*' -and $_ -notlike 'planet_dig*' })
             $foreign = @($planetBundles | Where-Object { (-not $l.ownGroup) -or (($_ -ne $l.ownGroup) -and ($_ -notlike "$($l.ownGroup)_*")) })

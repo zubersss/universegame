@@ -91,10 +91,14 @@ namespace Meridian.Save
             if (scenes == null) scenes = FindAnyObjectByType<SceneDirector>();
             if (time == null) time = FindAnyObjectByType<TimeSystem>();
             if (transitions == null) transitions = FindAnyObjectByType<TransitionDirector>();
-            if (transitions != null) transitions.Completed += OnTransitionCompleted;
+            if (transitions != null) transitions.BeforeReveal += OnBeforeReveal;
         }
 
-        void OnTransitionCompleted() { if (!Loading) Save(); }
+        /// <summary>The autosave after a launch or an entry (Bible §10.7), taken while the new view is still behind the iris (U-211:
+        /// it ran on TransitionDirector.Completed, in the first frame of play). The new view is already in place: after a launch
+        /// SceneDirector.PlanetSide is null (UnloadPlanetSide clears it at once), so the capture reads the space ship only; after
+        /// an entry the planet is loaded and the ship placed.</summary>
+        void OnBeforeReveal() { if (!Loading) Save(); }
 
         void Update()
         {

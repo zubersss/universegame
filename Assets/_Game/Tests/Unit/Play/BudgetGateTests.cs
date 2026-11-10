@@ -88,7 +88,9 @@ namespace Meridian.Tests
 #endif
             }
             var tail = m.Snapshot(view);
-            tailBytes[where] = (tail.gcProfilerBytes, tail.frames);
+            // LEAD 13:0x: the arrival row reads from the window's second frame; its first (the frame the transition ended in) is
+            // printed on its own line, bytes and length
+            tailBytes[where] = (tail.gcProfilerBytes - tail.firstFrameGcBytes, Mathf.Max(0, tail.frames - 1), tail.firstFrameGcBytes, tail.firstFrameMs);
 
             m.ResetWindow();
             for (int i = 0; i < Frames; i++)
@@ -121,7 +123,7 @@ namespace Meridian.Tests
         }
 
         /// <summary>The first window's bytes by scene (the transition's tail): an info row beside the steady GC row.</summary>
-        readonly Dictionary<string, (long bytes, int frames)> tailBytes = new Dictionary<string, (long, int)>();
+        readonly Dictionary<string, (long bytes, int frames, long firstBytes, float firstMs)> tailBytes = new Dictionary<string, (long, int, long, float)>();
         /// <summary>A body held still, and the terrain waited for, while the settled GC window is read (the ship after an entry).</summary>
         Rigidbody2D holdForSettled;
         Meridian.Terrain.TerrainStreamer settledTerrain;
@@ -154,7 +156,8 @@ namespace Meridian.Tests
             // arrival's bytes stay in sight (reported until LEAD sets its limit: a burst at arrival is where a hitch is felt).
             gcRows.Add((rows.Count, where, gc.gcProfilerBytes, gc.frames));
             rows.Add(new[] { $"GC per 300 frames, settled · {where}", GcLimit, "pending the floor", "pending" });
-            rows.Add(new[] { $"GC in the first 300 frames after the scene is ready · {where}", TailLimit, "pending the floor", "pending" });
+            rows.Add(new[] { $"GC on arrival (frames 1-299 after the scene is ready) · {where}", TailLimit, "pending the floor", "pending" });
+            rows.Add(new[] { $"The arrival's first frame · {where}", FirstFrameLimit, "pending the floor", "pending" });
             // D-036/D-058: memory is judged in the development build (unity_profile -Build); the Editor row is info only.
             bool memOk = Within(r.workingSetMB, BudgetMonitor.WorkingSetMB) && Within(r.textureMemoryMB, BudgetMonitor.TexturesMB) && Within(r.audioMemoryMB, BudgetMonitor.AudioMB);
             Info($"Memory · {where} (Editor)", "< 2.0 GB working set (warn 1.7), ≤ 512 MB textures, ≤ 150 MB audio; meshes reported (v4, D-089)",
@@ -168,7 +171,11 @@ namespace Meridian.Tests
         // it unjudged (410 KB to 9.6 MB per 300 frames). The row now judges Unity's own "GC Allocated In Frame" over the window, less
         // the Editor's and the test runner's own bytes, read at the end of this run with every root object of the scene inactive.
         const string GcLimit = "≤ 1 KB of the game's own (Unity's 'GC Allocated In Frame' over a steady window, 600 frames after the scene is ready, less the Editor's floor read in this run)";
-        const string TailLimit = "reported (U-211; LEAD sets the limit): the game's own bytes in the first window after the scene is ready, before the settled one";
+        /// <summary>LEAD 11-10 13:0x (U-211): the arrival row's limit, on the game's own bytes in frames 1-299 after the scene is ready;
+        /// a build is judged on the larger of two readings.</summary>
+        public const long ArrivalGcBytes = 16 * 1024;
+        const string TailLimit = "≤ 16 KB of the game's own in the 299 frames after the arrival's first (U-211, LEAD 11-10; the larger of two readings)";
+        const string FirstFrameLimit = "reported, no limit yet (LEAD sets one after U-214): the bytes and the length of the frame the transition ended in";
         readonly List<(int row, string where, long live, int frames)> gcRows = new List<(int, string, long, int)>();
 
         /// <summary>Reads the Editor's floor (after a control: the counter must show a known 64 KB array) and fills the GC rows in.</summary>
@@ -211,8 +218,14 @@ namespace Meridian.Tests
                 if (!ok && gates) failures.Add($"GC per 300 frames, settled · {g.where}: {measured} (limit {GcLimit})");
                 if (tailBytes.TryGetValue(g.where, out var tail))
                 {
-                    long tailShare = tail.frames > 0 ? floor * tail.frames / Frames : floor;
-                    rows[g.row + 1] = new[] { $"GC in the first 300 frames after the scene is ready · {g.where}", TailLimit, $"{tail.bytes - tailShare} B of the game's own ({tail.bytes} B in the window of {tail.frames} frames, the floor {tailShare} B)", "info (U-211: no limit yet)" };
+                    long tailShare = floor * tail.frames / Frames;
+                    long arrival = tail.bytes - tailShare;
+                    bool arrivalOk = live && arrival <= ArrivalGcBytes;
+                    string arrivalMeasured = $"{arrival} B of the game's own ({tail.bytes} B in {tail.frames} frames, the floor {tailShare} B)";
+                    rows[g.row + 1] = new[] { $"GC on arrival (frames 1-299 after the scene is ready) · {g.where}", TailLimit, arrivalMeasured, arrivalOk ? "green" : gates ? "RED" : "RED: U-211 (D-201: Earth's rows gate)" };
+                    if (!arrivalOk && gates) failures.Add($"GC on arrival · {g.where}: {arrivalMeasured} (limit {TailLimit})");
+                    long firstShare = floor / Frames;
+                    rows[g.row + 2] = new[] { $"The arrival's first frame · {g.where}", FirstFrameLimit, $"{tail.firstBytes - firstShare} B of the game's own ({tail.firstBytes} B, the floor {firstShare} B); {tail.firstMs:F1} ms (Editor batch frame, not the player's)", "info" };
                 }
             }
         }
