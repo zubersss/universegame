@@ -5,6 +5,8 @@ using NUnit.Framework;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Rendering.Universal;
+using UnityEngine.TestTools.Constraints; // AllocatingGCMemory on a constraint expression (Is.Not...)
+using Is = UnityEngine.TestTools.Constraints.Is;
 
 namespace Meridian.Tests
 {
@@ -146,10 +148,13 @@ namespace Meridian.Tests
                 lighting.view.transform.SetParent(root.transform);
                 lighting.ConfigureFor(planet);
                 for (int i = 0; i < 10; i++) { time.Advance(1f); lighting.Apply(); } // warm
-                long before = System.GC.GetAllocatedBytesForCurrentThread();
-                for (int i = 0; i < 300; i++) { time.Advance(4.1f); lighting.Apply(); } // a full Mars day
-                long bytes = System.GC.GetAllocatedBytesForCurrentThread() - before;
-                Assert.AreEqual(0, bytes, "0 B over 300 updates");
+                // The measure (08:1x, LEAD's ruling): the test framework's own (GC.Alloc samples on this thread), after a control.
+                // It was System.GC.GetAllocatedBytesForCurrentThread, which reads 0 B for any array in this runtime: its row proved nothing.
+                byte[] known = null;
+                Assert.That(() => { known = new byte[65536]; }, UnityEngine.TestTools.Constraints.Is.AllocatingGCMemory(), "the control: the measure sees a 64 KB array");
+                System.GC.KeepAlive(known);
+                Assert.That(() => { for (int i = 0; i < 300; i++) { time.Advance(4.1f); lighting.Apply(); } }, // a full Mars day
+                    UnityEngine.TestTools.Constraints.Is.Not.AllocatingGCMemory(), "no GC allocation over 300 updates");
                 Assert.AreEqual(DayNightMath.AmbientIntensity(PlanetId.Mars, lighting.LocalTime), lighting.ambient.intensity, 1e-5f);
             }
             finally

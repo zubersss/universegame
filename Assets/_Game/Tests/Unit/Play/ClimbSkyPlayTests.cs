@@ -5,6 +5,8 @@ using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
+using UnityEngine.TestTools.Constraints; // AllocatingGCMemory on a constraint expression (Is.Not...)
+using Is = UnityEngine.TestTools.Constraints.Is;
 
 namespace Meridian.Tests
 {
@@ -115,11 +117,15 @@ namespace Meridian.Tests
                 AssertColour(sky.TopColour, sky.FrameTop, "painted again on the ground");
 
                 // No per-frame allocation (the row colours reuse their array; the tile block moves in place).
+                // The measure (08:1x, LEAD's ruling): the test framework's own (GC.Alloc samples on this thread), after a control.
+                // It was System.GC.GetAllocatedBytesForCurrentThread, which reads 0 B for any array in this runtime: its row proved nothing.
                 sky.Place(half);
-                long before = System.GC.GetAllocatedBytesForCurrentThread();
-                for (int i = 0; i < 120; i++) sky.Place(half + i * 2f);
-                long bytes = System.GC.GetAllocatedBytesForCurrentThread() - before;
-                Assert.AreEqual(0, bytes, "Place allocates nothing");
+                byte[] known = null;
+                Assert.That(() => { known = new byte[65536]; }, UnityEngine.TestTools.Constraints.Is.AllocatingGCMemory(), "the control: the measure sees a 64 KB array");
+                System.GC.KeepAlive(known);
+                var skyNow = sky; float from = half;
+                Assert.That(() => { for (int i = 0; i < 120; i++) skyNow.Place(from + i * 2f); },
+                    Is.Not.AllocatingGCMemory(), "Place allocates nothing");
                 LogAssert.NoUnexpectedReceived();
             }
             finally

@@ -35,45 +35,58 @@ namespace Meridian.Tests
             var toolWas = SkillStats.ToolOverride;
             try
             {
-                player.externalInput = true; player.intent = default;
-                if (side.hazards != null) side.hazards.enabled = false;
-                side.creatures.autoSpawn = false;
-                side.creatures.DespawnAll();
-                SkillStats.ToolOverride = DigTool.Shovel;
                 var input = player.GetComponent<PlayerRigInput>();
-                input.module = RigModule.Beam;
-                input.holdUse = false;
                 for (int i = 0; i < 20; i++) yield return new WaitForFixedUpdate();
                 var view = input.ToolView;
                 timeout = Time.realtimeSinceStartup + 15f;
                 while ((view.Tool.sprite == null || view.Body == null) && Time.realtimeSinceStartup < timeout) yield return null;
                 Time.captureDeltaTime = 1f / 60f;
-                var feet = player.Body.position;
-                input.AimAt(feet + new Vector2(1.2f, -0.4f)); // the ground in front of the feet
-                for (int i = 0; i < 150; i++) yield return null; // settled; the shovel stowed
+                for (int i = 0; i < 150; i++) yield return null; // settled
 
                 using (var gc = Unity.Profiling.ProfilerRecorder.StartNew(Unity.Profiling.ProfilerCategory.Memory, "GC Allocated In Frame"))
                 {
                     Assert.IsTrue(gc.Valid, "Unity's 'GC Allocated In Frame' counter is there");
                     var log = new System.Text.StringBuilder();
                     long last = -1;
-                    const int Frames = 40;
+                    int frames = 40;
                     IEnumerator Row(string what)
                     {
                         for (int i = 0; i < 6; i++) yield return null;
                         long sum = 0, least = long.MaxValue, most = 0;
-                        for (int i = 0; i < Frames; i++)
+                        int above = 0;
+                        for (int i = 0; i < frames; i++)
                         {
                             yield return null;
                             long v = gc.LastValue;
                             sum += v; least = System.Math.Min(least, v); most = System.Math.Max(most, v);
+                            if (v > 400) above++;
                         }
-                        long avg = sum / Frames;
-                        log.Append($"\n  {avg,8} B a frame (least {least}, most {most}){(last >= 0 ? $", {avg - last:+0;-0;0} on the row before" : "")}: {what}");
+                        long avg = sum / frames;
+                        log.Append($"\n  {avg,8} B a frame (least {least}, most {most}, {above} of {frames} frames over 400 B){(last >= 0 ? $", {avg - last:+0;-0;0} on the row before" : "")}: {what}");
                         last = avg;
                     }
 
-                    yield return Row("as booted: Earth's surface, the dig slot at rest (the shovel stowed), the cursor still");
+                    // The game as it runs (TerrainStreamingTests' settled row, red on the live counter at 08:2x: 90 B a frame of the
+                    // game's own): 300 frames a row, then its creatures, its hazards and the player's own input taken away in turn.
+                    frames = 300;
+                    yield return Row("the game as it runs, settled: creatures, hazards, the player's own input (300 frames a row)");
+                    side.creatures.autoSpawn = false;
+                    side.creatures.DespawnAll();
+                    yield return Row("+ the creatures despawned, none spawning");
+                    if (side.hazards != null) side.hazards.enabled = false;
+                    yield return Row("+ the hazards off");
+                    player.externalInput = true; player.intent = default;
+                    yield return Row("+ the player's input scripted (externalInput), standing");
+                    frames = 40;
+
+                    SkillStats.ToolOverride = DigTool.Shovel;
+                    input.module = RigModule.Beam;
+                    input.holdUse = false;
+                    var feet = player.Body.position;
+                    input.AimAt(feet + new Vector2(1.2f, -0.4f)); // the ground in front of the feet
+                    for (int i = 0; i < 150; i++) yield return null; // the shovel stowed
+
+                    yield return Row("the shovel in the dig slot at rest (stowed), the cursor still, scripted (40 frames a row from here)");
                     input.holdUse = true;
                     yield return Row("the shovel swinging, held (the surface: cells open)");
                     input.holdUse = false;
@@ -110,7 +123,7 @@ namespace Meridian.Tests
                     yield return Row("+ every camera off (nothing drawn)");
                     foreach (var root in SceneManager.GetActiveScene().GetRootGameObjects()) root.SetActive(false);
                     yield return Row("+ every root object of the scene inactive (the Editor and the test runner alone)");
-                    TestContext.Out.WriteLine($"[MERIDIAN] alloc breakdown (Unity's 'GC Allocated In Frame', {Frames} frames a row, the Editor at a 60 fps step; each row holds the ones before it):{log}");
+                    TestContext.Out.WriteLine($"[MERIDIAN] alloc breakdown (Unity's 'GC Allocated In Frame', the Editor at a 60 fps step; each row holds the ones before it):{log}");
                 }
             }
             finally

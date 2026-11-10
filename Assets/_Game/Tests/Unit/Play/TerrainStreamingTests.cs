@@ -114,11 +114,39 @@ namespace Meridian.Tests
             yield return WaitSettled(side.terrain, 20f);
             for (int i = 0; i < 10; i++) yield return null;
 
-            long before = System.GC.GetAllocatedBytesForCurrentThread();
-            for (int i = 0; i < 300; i++) yield return null;
-            long allocated = System.GC.GetAllocatedBytesForCurrentThread() - before;
-            TestContext.Out.WriteLine($"[MERIDIAN] GC over 300 settled frames: {allocated} bytes");
-            Assert.LessOrEqual(allocated, 1024, "≤ 1 KB per 300 frames (Bible §11.1)");
+            // The measure (08:1x, LEAD's ruling): Unity's own "GC Allocated In Frame" (every thread; read a frame late), after a control.
+            // It was System.GC.GetAllocatedBytesForCurrentThread, which reads 0 B for any array in this runtime: its row proved
+            // nothing. The live counter holds the Editor's and the test runner's own bytes too (about 290 B a frame), which are not
+            // the game's: they are read in the same run with every root object of the scene inactive and taken off.
+            var off = new System.Collections.Generic.List<GameObject>();
+            try
+            {
+                using (var gc = Unity.Profiling.ProfilerRecorder.StartNew(Unity.Profiling.ProfilerCategory.Memory, "GC Allocated In Frame"))
+                {
+                    Assert.IsTrue(gc.Valid, "Unity's 'GC Allocated In Frame' counter is there");
+                    for (int i = 0; i < 3; i++) yield return null;
+                    var known = new byte[65536];
+                    long seenKnown = 0;
+                    for (int i = 0; i < 3; i++) { yield return null; seenKnown = System.Math.Max(seenKnown, gc.LastValue); }
+                    System.GC.KeepAlive(known);
+                    Assert.GreaterOrEqual(seenKnown, 65536L, "the control: the counter sees a 64 KB array in the frame it is made");
+
+                    long settled = 0, most = 0;
+                    for (int i = 0; i < 300; i++) { yield return null; long v = gc.LastValue; settled += v; most = System.Math.Max(most, v); }
+                    foreach (var root in UnityEngine.SceneManagement.SceneManager.GetActiveScene().GetRootGameObjects())
+                        if (root.activeSelf) { root.SetActive(false); off.Add(root); }
+                    for (int i = 0; i < 10; i++) yield return null;
+                    long floor = 0;
+                    for (int i = 0; i < 300; i++) { yield return null; floor += gc.LastValue; }
+                    long game = settled - floor;
+                    TestContext.Out.WriteLine($"[MERIDIAN] GC over 300 settled frames (Unity's 'GC Allocated In Frame'): {settled} bytes with the game running (the worst frame {most}), {floor} bytes with every root object inactive (the Editor and the test runner alone): the game's own {game} bytes");
+                    Assert.LessOrEqual(game, 1024, "≤ 1 KB per 300 frames over the Editor's own floor (Bible §11.1)");
+                }
+            }
+            finally
+            {
+                foreach (var root in off) if (root != null) root.SetActive(true);
+            }
         }
     }
 }

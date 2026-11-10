@@ -697,7 +697,9 @@ namespace Meridian.Tests
                     System.Action<Vector2> onDug = p => dug++;
                     rig.Dug += onDug;
                     var rows = new System.Text.StringBuilder();
-                    foreach (var aim in new[] { new Vector2(1.4f, 0.6f), new Vector2(-1.4f, 0.6f), new Vector2(0.2f, -0.6f) })
+                    // the three faces first, then the two corners between them (ground not yet dug, in chunks already rebuilt once): the
+                    // spread's cause is read from the row: the first opening of a chunk against a later one in it
+                    foreach (var aim in new[] { new Vector2(1.4f, 0.6f), new Vector2(-1.4f, 0.6f), new Vector2(0.2f, -0.6f), new Vector2(1.2f, -0.5f), new Vector2(-1.2f, -0.5f) })
                     {
                         input.AimAt(feet + aim);
                         yield return Rest();
@@ -712,13 +714,14 @@ namespace Meridian.Tests
                             yield return null;     // the opening frame is whole: its bytes
                             long open = gc.LastValue, after = 0;
                             for (int i = 0; i < 10; i++) { yield return null; after += gc.LastValue; }
-                            rows.Append($" opening {++measured}: {open} B in its frame, {after} B in the ten after;");
+                            var cell = RigTools.TileOf(input.Stroke.LastContactAt);
+                            rows.Append($" opening {++measured} (aim {aim.x:+0.0;-0.0}, {aim.y:+0.0;-0.0}; {rig.LastDugCells} cells; chunk {Mathf.FloorToInt(cell.x / (float)TerrainConstants.ChunkSize)}, {Mathf.FloorToInt(cell.y / (float)TerrainConstants.ChunkSize)}): {open} B in its frame, {after} B in the ten after;");
                             break;
                         }
                         input.holdUse = false;
                     }
                     rig.Dug -= onDug;
-                    Assert.AreEqual(3, measured, "three cells opened");
+                    Assert.GreaterOrEqual(measured, 3, "the three faces opened");
                     TestContext.Out.WriteLine($"[MERIDIAN] u209 the frame a cell opens (shovel, topsoil; Unity's 'GC Allocated In Frame'; an idle frame: {idle / Frames} B):{rows}");
                     yield return Rest();
                 }

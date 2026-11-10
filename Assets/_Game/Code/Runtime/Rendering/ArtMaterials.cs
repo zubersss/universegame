@@ -68,21 +68,23 @@ namespace Meridian.Rendering
             public float this[int i, int c] => values[i * stride + c];
         }
         public List<ArtSocket> sockets = new List<ArtSocket>();
-        static Dictionary<string, ArtSocket> socketLookup;
+        static Dictionary<(string, string), ArtSocket> socketLookup;
         static int socketLookupCount = -1;
 
-        /// <summary>A key's named socket, or null (no json field, or no registry).</summary>
+        /// <summary>A key's named socket, or null (no json field, or no registry). No allocation: the lookup's key is the pair itself
+        /// (it was the two joined into a new string each call: 88 B a frame from the Beam's cable alone, read every frame; found
+        /// by Unity's allocation counter, 08:2x).</summary>
         public static ArtSocket SocketFor(string key, string name)
         {
             var a = Active;
             if (a == null || a.sockets == null || key == null) return null;
             if (socketLookup == null || socketLookupCount != a.sockets.Count)
             {
-                socketLookup = new Dictionary<string, ArtSocket>(a.sockets.Count);
-                foreach (var s in a.sockets) if (s != null) socketLookup[s.key + "#" + s.name] = s;
+                socketLookup = new Dictionary<(string, string), ArtSocket>(a.sockets.Count);
+                foreach (var s in a.sockets) if (s != null) socketLookup[(s.key, s.name)] = s;
                 socketLookupCount = a.sockets.Count;
             }
-            return socketLookup.TryGetValue(key + "#" + name, out var found) ? found : null;
+            return socketLookup.TryGetValue((key, name), out var found) ? found : null;
         }
 
         /// <summary>A tool's [x, y] socket, or `fallback` where the json has none.</summary>
