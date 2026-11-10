@@ -38,7 +38,8 @@ from meridian import pngio, v3  # noqa: E402
 
 ART = os.path.normpath(os.path.join(HERE, "..", "..", "Assets", "_Game", "Art"))
 SWAP = 6.0                        # DiscSprite.NearAbove: screen px per far texel where the close view takes over
-INK_ROW, EDGE_ROW = 16, 12        # the limb band's ink row; the edge strips' cut row
+LIMB_H, LIMB_C = 16, 8.0          # the limb band: its height, and the ink's centre line (texel rows from its top)
+EDGE_ROW, RING_ROW = 12, 8        # the cut row of the 24-row edge strips, and of the 16-row ring edge
 SPACE = np.array([0.17, 0.20, 0.19], np.float32)       # the space behind the planet in the sheet: about the starfield's own
 #                                                         tone (the first run's was as dark as the ink: the outline vanished)
 
@@ -65,29 +66,27 @@ def _down(acc, W, H, S):
 
 # ---------------------------------------------------------------- the strips
 def limb_band():
-    """512x64, tiles in x: the outline's ink (2.5 px, +-20 % along its length, as the far disc's) on row INK_ROW, and below
-    it (inside the planet) one flat faint shade with a ragged foot (brown at alpha 0.10: NEW against the far disc, which
-    has none; LEAD to keep or drop). Transparent above."""
-    W, H, S = 512, 64, 4
+    """512x16, tiles in x: the outline's ink alone (2.5 px, +-20 % along its length, as the far disc's), its centre line on
+    LIMB_C with a waver under half a px; transparent either side. (B-240's first band was 64 rows with a faint inner shade;
+    LEAD 23:1x: dropped - the far disc has none, and nothing new should appear at the swap.)"""
+    W, H, S = 512, LIMB_H, 4
     n = W * S
     y = (np.arange(H * S) + 0.5)[:, None]
-    c = ((INK_ROW + 0.5) + 0.45 * pnoise(n, 9, 11)) * S
+    c = (LIMB_C + 0.45 * pnoise(n, 9, 11)) * S
     r = 1.25 * (1 + 0.2 * pnoise(n, 44, 12)) * S
     ink = (np.abs(y - c[None, :]) <= r[None, :]).astype(np.float32)
-    foot = (31 + 3.5 * pnoise(n, 13, 13) + 1.2 * pnoise(n, 37, 14)) * S
-    wash = ((y > c[None, :]) & (y < foot[None, :])).astype(np.float32) * 0.10 * (1 - ink)
     acc = np.zeros((H * S, n, 4), np.float32)
-    acc[..., :3] = D.PAL["ink"] * ink[..., None] + D.PAL["brown"] * wash[..., None]
-    acc[..., 3] = ink + wash
+    acc[..., :3] = D.PAL["ink"] * ink[..., None]
+    acc[..., 3] = ink
     return _down(acc, W, H, S)
 
 
-def _edge(W, cells, amp, seed, ink=False, streaks=0):
-    """An edge strip W x 24: RGB = the lower tone's share (0 above the ragged cut on row EDGE_ROW, 1 below), A = ink."""
-    H, S = 24, 4
+def _edge(W, cells, amp, seed, ink=False, streaks=0, H=24, row=EDGE_ROW, fine=0.8):
+    """An edge strip W x H: RGB = the lower tone's share (0 above the ragged cut on `row`, 1 below), A = ink."""
+    S = 4
     n = W * S
     y = (np.arange(H * S) + 0.5)[:, None]
-    b = (EDGE_ROW + amp * pnoise(n, cells, seed) + 0.8 * pnoise(n, cells * 3 - 7, seed + 1)) * S
+    b = (row + amp * pnoise(n, cells, seed) + fine * pnoise(n, cells * 3 - 7, seed + 1)) * S
     share = (y > b[None, :]).astype(np.float32)
     rng = np.random.default_rng(seed + 2)
     for _ in range(streaks):                                     # dry-brush streaks: one tone reaching a little into the other
@@ -100,7 +99,7 @@ def _edge(W, cells, amp, seed, ink=False, streaks=0):
     inkm = np.zeros((H * S, n), np.float32)
     if ink:                                                      # A: one thin ink LINE the strip's whole length, straight on
         r = 0.625 * (1 + 0.2 * pnoise(n, W // 12, seed + 3)) * S   # the cut row (1.25 px, +-20 %): an ink mark is a short ribbon
-        cl = (EDGE_ROW + 0.3 * pnoise(n, W // 60, seed + 4)) * S   # of it, laid where the far disc has its dash or hatch (the
+        cl = (row + 0.3 * pnoise(n, W // 60, seed + 4)) * S        # of it, laid where the far disc has its dash or hatch (the
         inkm = (np.abs(y - cl[None, :]) <= r[None, :]).astype(np.float32)   # first run's one dash per repeat sat on the
     #                                                              strip's own rhythm and crossed the Spot)
     sh = share.reshape(H, S, W, S).mean(axis=(1, 3))
@@ -114,6 +113,12 @@ def belt_edge(variant):
 
 def spot_rim():
     return _edge(512, 14, 1.8, 41)
+
+
+def ring_edge():
+    """512x16 (B-241): a ring's edge - a nearly clean cut on row RING_ROW (the rings are crisper than the belts) with the
+    interior ink line (1.25 px) in A, for Saturn's inner edge; the outer edge takes the limb band's ink."""
+    return _edge(512, 18, 0.7, 61, ink=True, H=16, row=RING_ROW, fine=0.3)
 
 
 def close_grain():
@@ -239,7 +244,15 @@ def close_view(J, T, m, centre, W=1920, H=540, frame=0, space=None):
         cosl = np.sqrt(np.maximum(1 - v ** 2, 1e-6))
         su = (np.arcsin(np.clip(u / cosl, -1, 1)) / math.pi + shift) % 1.0
         f, th = None, None
-        for b in st["blobs"]:
+        if "streak" in st:                                                   # a chain of blobs: one smooth streak (B-241: the
+            p0, p1, rad = st["streak"]["from"], st["streak"]["to"], st["streak"]["radius"]   # scallops read as a grub up close)
+            X = ((su - p0["lon_turns"] + 0.5) % 1.0 - 0.5) * math.pi * cosl
+            Y = v - p0["v"]
+            bx, by = (p1["lon_turns"] - p0["lon_turns"]) * math.pi * cosl, p1["v"] - p0["v"]
+            tt = np.clip((X * bx + Y * by) / np.maximum(bx * bx + by * by, 1e-12), 0, 1)
+            f = np.hypot(X - tt * bx, Y - tt * by) - rad
+            th = (tt * np.hypot(bx, by) + np.arctan2(Y - tt * by, X - tt * bx) * rad) * Rs
+        for b in ([] if f is not None else st["blobs"]):
             dls = ((su - b["lon_turns"] + 0.5) % 1.0 - 0.5) * math.pi * cosl
             fb = np.hypot(dls, v - b["v"]) - b["radius"]
             if f is None:
@@ -288,33 +301,102 @@ def close_view(J, T, m, centre, W=1920, H=540, frame=0, space=None):
                 continue
             ribbon(ink_a, to_px([uc - hl, uc + hl], [vc - hl, vc + hl]), E, sc)
     col = D.PAL["ink"] * ink_a[..., None] + col * (1 - ink_a[..., None])
-    out = np.where((r <= rim)[..., None], col, space)
+    base = np.broadcast_to(np.asarray(space, np.float32), col.shape).copy()
+    ring = ring_layer(J, T, u, v, Rs, sc) if "rings" in J else None          # Saturn: the back half (v > 0) goes under the
+    back = (v > 0)[..., None]                                                # globe, the front half over it and its outline
+    if ring is not None:
+        base = np.where(back, ring[0] + base * (1 - ring[1][..., None]), base)
+    out = np.where((r <= rim)[..., None], col, base)
     dl = (r - rim) * Rs                                                      # the limb band: px, + outside
     L = T["limb_band"]
     reps = max(1, round(2 * math.pi * Rs / (L.shape[1] * sc)))               # a whole number of repeats round the limb
-    nearl = (dl > -(L.shape[0] - INK_ROW) * sc) & (dl < INK_ROW * sc)
+    nearl = np.abs(dl) < (LIMB_H / 2) * sc
     la = np.zeros(vv.shape, np.float32)
-    t = samp(L, (ang[nearl] / (2 * math.pi)) * reps * L.shape[1], (INK_ROW + 0.5) - dl[nearl] / sc)
+    t = samp(L, (ang[nearl] / (2 * math.pi)) * reps * L.shape[1], LIMB_C - dl[nearl] / sc)
     out[nearl] = t[..., :3] * t[..., 3:4] + out[nearl] * (1 - t[..., 3:4])
     la[nearl] = t[..., 3]
+    if ring is not None:
+        out = np.where(back, out, ring[0] + out * (1 - ring[1][..., None]))
     return out.astype(np.float32), la, dl
 
 
-def far_view(name, m, centre, W=1920, H=540):
-    """The exported far disc's frame 0 magnified m times (bilinear, premultiplied), as the game draws a giant today."""
-    meta = json.load(open(os.path.join(ART, "planets", name, "disc.json"), encoding="utf-8"))
-    fw = meta["frame_width"]
-    fr = pngio.read_png_np(os.path.join(ART, "planets", name, "disc_color.png"))[:fw, :fw].astype(np.float32) / 255.0
-    fr[..., :3] *= fr[..., 3:4]
+def ring_layer(J, T, u, v, Rs, sc):
+    """Saturn's rings from close.json's "rings", both halves: -> (premultiplied RGB, alpha). Flat-toned bands in the ring's
+    own radius rr = hypot(u, v / tilt); ring_edge along every edge (a cut in tone where two bands touch, a cut in alpha at
+    the inner edge, the gap's two edges and the outer edge); ink on the inner edge (the strip's line) and on the outer edge
+    (the limb band's), as the far rings have. No grain: the far rings have none."""
+    rg = J["rings"]
+    rr = np.hypot(u, v / rg["tilt"])
+    gy, gx = np.gradient(rr)
+    gpx = np.maximum(np.hypot(gx, gy), 1e-9)                                 # ring radii per screen px
+    phi = np.arctan2(v / rg["tilt"], u)
+    bs = rg["bands"]
+    col = np.empty(u.shape + (3,), np.float32)
+    col[:] = rgb(bs[0]["tone_hex"])
+    for b0, b1 in zip(bs[:-1], bs[1:]):                                      # (a band across the gap takes over at mid-gap)
+        col[rr > (b0["r_out"] + b1["r_in"]) / 2] = rgb(b1["tone_hex"])
+    a = ((rr >= rg["inner"]) & (rr <= rg["outer"]) & ~((rr > rg["gap"][0]) & (rr < rg["gap"][1]))).astype(np.float32)
+    ink = np.zeros(u.shape, np.float32)
+    RE, LB = T["ring_edge"], T["limb_band"]
+
+    def edge(re):
+        dist = (rr - re) / gpx                                               # px, + outward
+        return dist, np.abs(dist) <= RING_ROW * sc, phi * re * Rs
+
+    for b0, b1 in zip(bs[:-1], bs[1:]):
+        if abs(b0["r_out"] - b1["r_in"]) < 1e-9:                             # two bands touching: a cut in tone
+            dist, near, s = edge(b1["r_in"])
+            if near.any():
+                sh = samp(RE, s[near] / sc, RING_ROW + dist[near] / sc)[..., :1]
+                col[near] = rgb(b0["tone_hex"]) * (1 - sh) + rgb(b1["tone_hex"]) * sh
+    for re, ring_inside, line in ((rg["inner"], False, "thin"), (rg["gap"][0], True, None), (rg["gap"][1], False, None),
+                                  (rg["outer"], True, "outline")):
+        dist, near, s = edge(re)
+        if not near.any():
+            continue
+        t = samp(RE, s[near] / sc, RING_ROW + dist[near] / sc)
+        a[near] = 1 - t[..., 0] if ring_inside else t[..., 0]
+        if line == "thin":
+            ink[near] = np.maximum(ink[near], t[..., 3])
+        elif line == "outline":
+            ink[near] = np.maximum(ink[near], samp(LB, s[near] / sc, LIMB_C - dist[near] / sc)[..., 3])
+    return D.PAL["ink"] * ink[..., None] + col * (a * (1 - ink))[..., None], np.maximum(a, ink)
+
+
+def _far_frame(name, variant, frame=0):
+    """One frame of an exported far sheet (premultiplied float) and its json."""
+    meta = json.load(open(os.path.join(ART, "planets", name, f"{variant}.json"), encoding="utf-8"))
+    sh = pngio.read_png_np(os.path.join(ART, "planets", name, f"{variant}_color.png")).astype(np.float32) / 255.0
+    if "frame_width" in meta:
+        fw, fh, g, c = meta["frame_width"], meta["frame_height"], meta.get("gutter", v3.GUTTER), meta["columns"]
+        sh = sh[(frame // c) * (fh + g):(frame // c) * (fh + g) + fh, (frame % c) * (fw + g):(frame % c) * (fw + g) + fw]
+    sh = sh.copy()
+    sh[..., :3] *= sh[..., 3:4]
+    return sh, meta
+
+
+def far_view(name, m, centre, W=1920, H=540, frame=0):
+    """The exported far disc's frame magnified m times (bilinear, premultiplied), as the game draws a giant today; Saturn
+    with its two ring parts, the back one under the globe and the front one over it."""
+    fr, meta = _far_frame(name, "disc", frame)
     Rf = meta["radius_px"]
     Rs = Rf * m
     yy, xx = np.mgrid[0:H, 0:W].astype(np.float64) + 0.5
     u = centre[0] + (xx - W / 2) / Rs
     v = centre[1] - (yy - H / 2) / Rs
-    t = samp(fr, u * Rf + fw / 2, fw / 2 - v * Rf, wrap_x=False)
-    inside = (np.abs(u * Rf) < fw / 2) & (np.abs(v * Rf) < fw / 2)
-    t = np.where(inside[..., None], t, 0.0)
-    return (t[..., :3] + SPACE * (1 - t[..., 3:4])).astype(np.float32)
+
+    def layer(im):
+        hh, ww = im.shape[:2]
+        t = samp(im, u * Rf + ww / 2, hh / 2 - v * Rf, wrap_x=False)
+        return np.where(((np.abs(u * Rf) < ww / 2) & (np.abs(v * Rf) < hh / 2))[..., None], t, 0.0)
+
+    parts = [layer(fr)]
+    if name == "saturn":
+        parts = [layer(_far_frame(name, "rings_back")[0]), parts[0], layer(_far_frame(name, "rings_front")[0])]
+    out = np.broadcast_to(SPACE, (H, W, 3)).astype(np.float32)
+    for t in parts:
+        out = t[..., :3] + out * (1 - t[..., 3:4])
+    return out.astype(np.float32)
 
 
 def seam(img):
@@ -328,14 +410,23 @@ VIEWS = {   # name -> [(label, m, centre)]: the swap, smoke_7's distance (0.6.1:
     "jupiter": [("the swap: 6 px per far texel", 6.0, (0.72, -0.36)), ("smoke_7's distance: 7.7", 7.7, (0.76, -0.34)),
                 ("the closest: 12 (until UNITY names the flight's limit)", 12.0, (0.80, -0.30)),
                 ("the night crescent's edge, at 6", 6.0, (-0.45, -0.45))],
+    # B-241 (LEAD 23:1x): each at the swap and at the closest zoom
+    "saturn": [("the swap, 6: the front ring over the globe and past its limb", 6.0, (0.72, -0.42)),
+               ("the swap, 6: the back ring coming out from behind the globe", 6.0, (0.90, 0.40)),
+               ("the closest, 12: the ring's inner edge crossing the limb", 12.0, (0.93, -0.25))],
+    "uranus": [("the swap, 6", 6.0, (0.55, 0.25)), ("the closest, 12", 12.0, (0.72, 0.28))],
+    "neptune": [("the swap, 6: the dark storm and its companion cloud", 6.0, (0.72, -0.20)),
+                ("the closest, 12", 12.0, (0.74, -0.19))],
 }
+CARD = {"jupiter": "b240"}                           # the preview folder and the sheet's tag per giant (the rest: b241)
 
 
 def preview(out, name="jupiter", footnote=None):
     import time
     sys.path.insert(0, os.path.dirname(HERE))
     import review
-    dd = os.path.join(os.path.dirname(out), "b240")
+    card = CARD.get(name, "b241")
+    dd = os.path.join(os.path.dirname(out), card)
     os.makedirs(dd, exist_ok=True)
     jp = os.path.join(dd, f"{name}_close.json")
     with open(jp, "w", encoding="utf-8", newline="\n") as fh:                # the draft, then read back: the view is drawn
@@ -345,7 +436,7 @@ def preview(out, name="jupiter", footnote=None):
     variant = 0 if name in ("jupiter", "saturn") else 1
     pig, far_size = pigment(name)
     S = {"limb_band": limb_band(), "belt_edge_0": belt_edge(0), "belt_edge_1": belt_edge(1), "spot_rim": spot_rim(),
-         "close_grain": close_grain(), f"{name}_pigment": pig}
+         "ring_edge": ring_edge(), "close_grain": close_grain(), f"{name}_pigment": pig}
     lines = []
     for k, im in S.items():
         n = pngio.write_png(os.path.join(dd, k + "_color.png"), im)
@@ -354,28 +445,29 @@ def preview(out, name="jupiter", footnote=None):
     lines[0] += f", palette {v3.palette_hits(S['limb_band'], 'earth')[0] * 100:.1f}% (its solid pixels: the ink)"
     f32 = {k: v.astype(np.float32) / 255.0 for k, v in S.items()}
     T = {"limb_band": f32["limb_band"], "belt_edge": f32[f"belt_edge_{variant}"], "spot_rim": f32["spot_rim"],
-         "grain": f32["close_grain"] * 2.0, "pigment": f32[f"{name}_pigment"] * 2.0, "far_size": far_size}
+         "ring_edge": f32["ring_edge"], "grain": f32["close_grain"] * 2.0, "pigment": f32[f"{name}_pigment"] * 2.0,
+         "far_size": far_size}
     paper = np.array(review.PAPER, np.float32)
     W = 1920
     rows = [np.tile(paper, (30, W, 1)).astype(np.float32)]
-    review._label(rows[0], f"B-240 {name}: the close view drawn from {name}_close.json + the strips (PREVIEW, nothing exported); each zoom over the far disc magnified the same", 6, 8)
-    st = np.tile(paper, (64 * 2 + 24 * 2 * 3 + 256 + 70, W, 1)).astype(np.float32)   # the strips
-    review._label(st, "the strips: limb_band 512x64 at 2x (ink on row 16, a faint inner shade below: new against the far disc) | belt_edge 0 and 1 and spot_rim at 2x (white = the lower tone's share, red = the ink line that marks are cut from) | close_grain and the pigment tile at 1x / 2x", 6, 4, scale=1)
+    review._label(rows[0], f"{card.upper().replace('B', 'B-')} {name}: the close view drawn from {name}_close.json + the strips (PREVIEW, nothing exported); each zoom over the far disc magnified the same", 6, 8)
+    st = np.tile(paper, (300, W, 1)).astype(np.float32)                      # the strips
+    review._label(st, f"the strips at 2x: limb_band 512x16 (the ink alone) | belt_edge 0 and 1 (white = the lower tone's share, red = the ink line that marks are cut from; {name} uses variant {variant}) | spot_rim | ring_edge 512x16 | close_grain at 1x | the pigment tile at 2x", 6, 4, scale=1)
 
     def put(im, x, y, k=2):
         f = np.repeat(np.repeat(im, k, 0), k, 1)
         st[y:y + f.shape[0], x:x + f.shape[1]] = f
 
+    def vis(e):
+        return e[..., :3] * (1 - e[..., 3:4]) + np.array([0.85, 0.15, 0.1], np.float32) * e[..., 3:4]
+
     lb = f32["limb_band"]
-    chk = (((np.arange(64)[:, None] // 8 + np.arange(512)[None, :] // 8) % 2) * 0.06 + 0.62)[..., None] * np.ones(3, np.float32)
+    chk = (((np.arange(LIMB_H)[:, None] // 8 + np.arange(512)[None, :] // 8) % 2) * 0.06 + 0.62)[..., None] * np.ones(3, np.float32)
     put(lb[..., :3] * lb[..., 3:4] + chk * (1 - lb[..., 3:4]), 10, 22)
-    y = 22 + 128 + 6
-    for k in ("belt_edge_0", "belt_edge_1"):
-        e = f32[k]
-        vis = e[..., :3] * (1 - e[..., 3:4]) + np.array([0.85, 0.15, 0.1], np.float32) * e[..., 3:4]
-        put(vis[:, :520], 10, y)                                             # (its first 520 px: the dash sits at 400-510)
-        y += 48 + 4
-    put(np.repeat(f32["spot_rim"][..., :3], 1, 0), 10, y)
+    y = 22 + 2 * LIMB_H + 6
+    for k in ("belt_edge_0", "belt_edge_1", "spot_rim", "ring_edge"):
+        put(vis(f32[k])[:, :520], 10, y)
+        y += 2 * f32[k].shape[0] + 4
     put(f32["close_grain"][..., :3], 1100, 22, k=1)
     put(f32[f"{name}_pigment"][..., :3], 1380, 22, k=2)
     rows.append(st)
@@ -395,12 +487,21 @@ def preview(out, name="jupiter", footnote=None):
         hd = np.tile(paper, (20, W, 1)).astype(np.float32)
         review._label(hd, f"TODAY: the far disc ({name}/disc frame 0) magnified {m:g}x, the same view", 6, 4, scale=1)
         rows += [hd, fv]
-        tag = f"{m:g}".replace(".", "_") + ("_night" if "night" in label else "")
+        tag = f"{m:g}".replace(".", "_") + ("_night" if "night" in label else "") + f"_{len(rows)}"
         pngio.write_png(os.path.join(dd, f"{name}_close_m{tag}.png"),
                         np.dstack([np.clip(np.rint(cv * 255), 0, 255).astype(np.uint8), np.full(cv.shape[:2], 255, np.uint8)]))
+    if name == "neptune":                                                    # B-241: the storm and its cloud are two shapes
+        hd = np.tile(paper, (20, W, 1)).astype(np.float32)                   # side by side: the face check, at 2x
+        review._label(hd, "the dark storm and its companion cloud at 2x (the face check: two shapes side by side): the close view | the far disc magnified, the same window", 6, 4, scale=1)
+        two = np.tile(paper, (400, W, 1)).astype(np.float32)
+        cv, _la, _dl = close_view(J, T, 6.0, (0.76, -0.19), W=480, H=200)
+        two[:, :960] = np.repeat(np.repeat(cv, 2, 0), 2, 1)
+        two[:, 960:] = np.repeat(np.repeat(far_view(name, 6.0, (0.76, -0.19), W=480, H=200), 2, 0), 2, 1)
+        rows += [hd, two]
+    zs = VIEWS[name][:3]
     ins = np.tile(paper, (20 + 300, W, 1)).astype(np.float32)                # the outline judged on paper (space is dark)
-    review._label(ins, "the limb's ink on PAPER at 2x (a 320 x 150 px window on the limb at each zoom): the swap, 6 | smoke_7's distance, 7.7 | the closest, 12", 6, 4, scale=1)
-    for i, (_label, m, centre) in enumerate(VIEWS[name][:3]):
+    review._label(ins, "the limb's ink on PAPER at 2x (a 320 x 150 px window on the limb), at: " + " | ".join(f"{z[1]:g} px per far texel" for z in zs), 6, 4, scale=1)
+    for i, (_label, m, centre) in enumerate(zs):
         cv, _la, _dl = close_view(J, T, m, (math.sqrt(max(1 - centre[1] ** 2, 0.0)), centre[1]), W=320, H=150, space=paper)
         ins[20:320, i * 640:i * 640 + 640] = np.repeat(np.repeat(cv, 2, 0), 2, 1)
     rows.append(ins)
@@ -408,12 +509,56 @@ def preview(out, name="jupiter", footnote=None):
     for i, ln in enumerate(lines):
         review._label(foot, ln[:300], 6, 6 + 16 * i, scale=1)
     img = np.vstack(rows + [foot])
-    review.draw(img, time.strftime("%m-%d %H:%M") + " " + (footnote or "B-240 close-view preview (numpy; not exported)"), 2, img.shape[0] - 14, (1.0, 1.0, 0.85))
+    review.draw(img, time.strftime("%m-%d %H:%M") + " " + (footnote or "close-view preview (numpy; not exported)"), 2, img.shape[0] - 14, (1.0, 1.0, 0.85))
     review.write(out, img)
     print("written", out, img.shape[1], "x", img.shape[0])
     for ln in lines:
         print(ln)
 
 
-if __name__ == "__main__":                       # python -I build_giant_close_v3.py <review png> [giant]
-    preview(sys.argv[1], sys.argv[2] if len(sys.argv) > 2 else "jupiter")
+def motion(out, name="jupiter", frames=(0, 3), m=6.0, centre=(0.72, -0.36)):
+    """B-241: the motion check B-240 left out - the close view at two frames of the idle loop, each over the far disc's OWN
+    frame magnified the same: the belts' edges, the storm and the ink dashes must have moved the same way in both."""
+    import time
+    sys.path.insert(0, os.path.dirname(HERE))
+    import review
+    J = D.close_draft(name)
+    J = json.loads(json.dumps(J))                                            # (as read from a file: lists, rounded hexes)
+    pig, far_size = pigment(name)
+    f32 = {k: v.astype(np.float32) / 255.0 for k, v in (("limb_band", limb_band()), ("belt_edge", belt_edge(0 if name in ("jupiter", "saturn") else 1)),
+                                                        ("spot_rim", spot_rim()), ("ring_edge", ring_edge()), ("grain", close_grain()), ("pigment", pig))}
+    T = dict(f32, grain=f32["grain"] * 2.0, pigment=f32["pigment"] * 2.0, far_size=far_size)
+    paper = np.array(review.PAPER, np.float32)
+    W = 1920
+    rows = [np.tile(paper, (30, W, 1)).astype(np.float32)]
+    review._label(rows[0], f"B-241 {name} in motion: the close view at frames {frames[0]} and {frames[1]} of its {J['loop_frames']}-frame loop, each over the far disc's own frame, at {m:g} px per far texel", 6, 8)
+    lines = []
+    prev = None
+    for f in frames:
+        cv, _la, _dl = close_view(J, T, m, centre, frame=f)
+        fv = far_view(name, m, centre, frame=f)
+        for what, im in ((f"CLOSE VIEW, frame {f}", cv), (f"TODAY: the far disc's frame {f} magnified {m:g}x", fv)):
+            hd = np.tile(paper, (20, W, 1)).astype(np.float32)
+            review._label(hd, what, 6, 4, scale=1)
+            rows += [hd, im]
+        if prev is not None:                                                 # how far the picture moved between the frames
+            for what, a, b in (("close view", prev[0], cv), ("far disc", prev[1], fv)):
+                lines.append(f"{what}: {100.0 * float((np.abs(a - b).max(axis=-1) > 0.12).mean()):.1f} % of the window's pixels changed "
+                             f"tone between frames {frames[0]} and {f}")
+        prev = (cv, fv)
+    foot = np.tile(paper, (24 + 16 * len(lines), W, 1)).astype(np.float32)
+    for i, ln in enumerate(lines):
+        review._label(foot, ln[:300], 6, 6 + 16 * i, scale=1)
+    img = np.vstack(rows + [foot])
+    review.draw(img, time.strftime("%m-%d %H:%M") + " B-241 motion check (numpy; not exported)", 2, img.shape[0] - 14, (1.0, 1.0, 0.85))
+    review.write(out, img)
+    print("written", out, img.shape[1], "x", img.shape[0])
+    for ln in lines:
+        print(ln)
+
+
+if __name__ == "__main__":                       # python -I build_giant_close_v3.py <review png> [giant] [--motion]
+    if "--motion" in sys.argv:
+        motion(sys.argv[1], sys.argv[2] if len(sys.argv) > 2 and not sys.argv[2].startswith("--") else "jupiter")
+    else:
+        preview(sys.argv[1], sys.argv[2] if len(sys.argv) > 2 else "jupiter")

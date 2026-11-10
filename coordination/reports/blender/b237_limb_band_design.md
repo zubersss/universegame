@@ -1,4 +1,9 @@
-# B-237 option C · The giants up close as a painted limb band: design note (BLENDER, 2026-11-09 22:0x)
+# B-237 option C · The giants up close as a painted limb band: design note (BLENDER, 2026-11-09 22:0x; updated 23:3x)
+
+**UPDATE 23:3x: sections 10 and 11 at the end carry LEAD's rulings and what the previews (B-240 Jupiter, B-241 Saturn /
+Uranus / Neptune) changed. Where they differ from sections 3 to 6, sections 10 and 11 stand.** In short: the limb band is
+512 x 16 (ink only); belt edges and storms are as below, but the ink marks are placed by `close.json`, not by the strips;
+each giant has a 128 x 128 pigment tile; the limb follows the far disc's lumpy rim; the contract text is section 11.
 
 Written files-only for LEAD to card (LEAD 21:5x): the art half, UNITY's half and the contract section. No drawing source
 exists and nothing here was rendered; every number is computed from the sources named, and the estimates say so.
@@ -151,3 +156,86 @@ edge strip, the storm rims, the terminator and the screen-space grain are new.
 3. BLENDER: Saturn (with rings, if ruled), Uranus, Neptune on the accepted look → LEAD → export.
 4. UNITY: `GiantCloseView`, its tests, the captures against the preview sheet.
 5. BLENDER: the art read of those captures (B-228's method).
+
+Done so far: step 1 (B-239, with the inner set in B-240 (1): all 16 exported pngs reproduced byte for byte), step 2
+(B-240, accepted), step 3's previews (B-241: Saturn accepted; Uranus and Neptune drawn). Nothing is exported until the
+UNITY half is carded (LEAD: after U-207 / U-197).
+
+## 10. Rulings and what the previews changed (23:3x)
+
+LEAD's rulings on section 8 (22:0x): (1) Saturn's rings are in the same card; (2) the grain is a screen-space tile; (4) the
+far / close swap is a cut on a 12 Hz tick; (3) how close the player gets is asked of UNITY: until it answers the previews
+use 12 px per far texel as the closest, and if the flight never passes about 12 the root-2 stepping and the 33x tests
+leave UNITY's half.
+
+What drawing the previews found, each ruled by LEAD (23:1x) unless marked:
+
+1. **The far limb is not a circle.** `Disc` draws a lumpy rim: r(angle) = 1 + 0.012 sin(3 angle + ph3) + 0.008 sin(5 angle
+   + ph5), two phases per body: up to 2 % of the radius, 38 px on screen at the swap. `close.json` carries it as `rim`
+   and the close view's limb and fill follow it. RULED: yes.
+2. **A pigment tile per giant** (`planets/<giant>/close_pigment`, 128 x 128, over the far frame's square, a multiplier):
+   the far disc's own slow tone variation (its coarse grain and pigment fields; its 0.8 px fibre is the screen grain's
+   job). Without it each belt's tone shifts by a few per cent at the swap. RULED: yes.
+3. **`limb_band` is 512 x 16, the ink alone.** Section 4's 64-row band with a rim wash is dropped: the far disc has no
+   inner shade, and nothing new should appear at the swap. RULED: drop.
+4. **The ink marks are placed by `close.json`, not by the strips.** The far disc's dashes are not on the belt edges: two
+   per listed edge at fixed places, each riding its own gentler wave (its `ink_marks.dashes`), plus two groups of three
+   hatches in the night crescent (`ink_marks.night_hatches`). A dash baked into the edge strip sat on the strip's rhythm
+   and crossed the Spot. So `belt_edge`'s A channel is a thin ink LINE its whole length, and a mark is a short ribbon of
+   it laid along the mark's own curve, over everything, as on the far disc. The far builder reads the same numbers
+   (`giants_v3.MARKS`); both proofs were re-run after that change.
+5. **The 2-3 px rule is the line's mean.** With root-2 zoom steps the limb's mean width stays 2.1-3.0 px; the far disc's
+   own hand jitter (plus or minus 20 %) rides on top, so single spots reach about 1.7 and 3.6 px at the worst step.
+   Measured in the previews: 2.34-2.59 px (Jupiter), 2.48-2.55 (Saturn), 2.49-2.53 (Neptune), 2.51 (Uranus). RULED:
+   accepted as built; 11.5.1 says "mean".
+6. **The outline's jump at the swap** (about 15 soft px for the far line magnified 6 times, to 2.5 crisp px; the dashes
+   7.5 to 1.25) is the same jump the inner planets' near frames make today. RULED: accepted.
+7. **Saturn's rings** (B-241, accepted): three flat-toned bands in the ring's own radius, the Cassini gap open to what is
+   behind it; `ring_edge` (512 x 16) along every edge: a cut in tone where two bands touch, a cut in alpha at the inner
+   edge and the gap's two edges; the thin ink line on the inner edge and the limb band's ink on the outer edge, as the far
+   ring parts have. The upper half goes under the globe, the lower half over the globe and its outline. No grain on the
+   rings (the far rings have none).
+8. **Neptune's companion cloud is ONE streak up close** (B-241; mine, not yet ruled). The far disc draws it as a chain of
+   17 small blobs; at the far size its scallops are under a pixel, but drawn crisply at the swap they made a segmented
+   grub beside the dark storm. `close.json` gives the storm a `streak` (a capsule from the first blob to the last, the
+   blobs' radius) and the close view draws that instead of the blobs. The far disc is untouched.
+9. **Uranus has no tilt in the art** (B-241; for LEAD's note): `build_discs_v3` draws its three belts level, so the close
+   view does too. A tilted Uranus would be a change to the far disc first.
+10. **The marks' and edges' strips are fixed to the planet**: u = arc length along the edge from the body's own left, with
+    a whole number of repeats round the limb, so nothing swims while the zoom holds inside one root-2 step.
+
+The key list as it now stands (previews in `blender/preview/b240/` and `b241/`; nothing exported):
+
+| Key | Size | What |
+|-----|------|------|
+| `planets/common/limb_band` | 512 x 16, tiles in x | the outline's ink alone, its centre line on row 8 (one band serves all four: every disc's ink is the same tone) |
+| `planets/common/belt_edge` (variants 0, 1) | 1024 x 24, tiles in x | RGB = the lower tone's share across a ragged cut on row 12; A = a thin ink line. 0 firm (Jupiter, Saturn), 1 faint and streaky (Uranus, Neptune) |
+| `planets/common/spot_rim` | 512 x 24, tiles in x | a storm's rim: the same kind of cut, rounder, no ink |
+| `planets/saturn/ring_edge` | 512 x 16, tiles in x | a ring edge: a nearly clean cut on row 8; A = the thin ink line |
+| `planets/common/close_grain` | 256 x 256, tiles both ways | the paper's fine grain, a multiply tile (value / 127.5), in screen space |
+| `planets/<giant>/close_pigment` (x4) | 128 x 128 | the far disc's slow tone variation over the far frame's square (value / 127.5) |
+| `planets/<giant>/close` (json, x4) | - | `radius_u`, `loop_frames`, `fps`, `belts` [{v_top, tone_hex, night_hex}], `edge_wobble`, `rim`, `night`, `storms` [{..., blobs, streak?}], `ink_marks` {dashes, night_hatches}, `rings` (Saturn), `swap` |
+
+About 0.21 megapixels in all (8,192 + 2 x 24,576 + 12,288 + 8,192 + 65,536 + 4 x 16,384 = 208,896). Section 4's table
+and its "0.29 megapixels" are superseded by this one.
+
+UNITY's half (section 5) stands with these changes: the limb and the fill's clip follow `rim`; the tone is multiplied by
+the pigment tile (sampled in the far frame's square) and the screen grain; ink marks are ribbons from `ink_marks`; Saturn
+adds the ring bands and their edges; a storm with a `streak` is a capsule. The working reference is
+`blender/scripts/build_giant_close_v3.close_view` and `ring_layer` (numpy, per pixel; UNITY's mesh is its own design).
+
+## 11. The contract section, as ruled (replaces section 6's draft)
+
+> **11.5.1 Giants' close view (D-128's painted close-up band).** A gas or ice giant has no `disc_near` frame. Above
+> DiscSprite's near zoom it is drawn from `planets/<giant>/close.json`, which holds the far disc's own facts: `belts`
+> (`v_top` from +1 north to -1 south, `tone_hex`, `night_hex`), `edge_wobble`, the lumpy limb `rim`, the `night` crescent,
+> `storms`, `ink_marks`, Saturn's `rings`, and the `swap` zooms. Belts, storms and ring bands are flat-toned geometry;
+> the hand-drawn part is tiling strips mapped at one strip texel per screen pixel within a root-2 zoom step:
+> `planets/common/limb_band` (512 x 16, the ink outline), `planets/common/belt_edge` (1024 x 24, two variants: RGB = the
+> lower tone's share, A = an ink line that marks are cut from), `planets/common/spot_rim` (512 x 24),
+> `planets/saturn/ring_edge` (512 x 16); the tone is multiplied by `planets/<giant>/close_pigment` (128 x 128, over the far
+> frame's square) and by the screen-space `planets/common/close_grain` (256 x 256). Every strip tiles in x with a seam
+> score <= 1.6. The limb's ink is 2-3 px wide as the line's MEAN at every zoom (the far disc's plus or minus 20 % hand
+> jitter rides on it). The close view adds nothing the far disc lacks and moves by the far disc's own formulas, so the
+> swap is a cut on a 12 Hz tick. No faces (D-101). The tones and numbers in `close.json` come from the table the far disc
+> is painted from (`giants_v3`); a change to either is proven by rebuilding the exported far discs byte for byte.

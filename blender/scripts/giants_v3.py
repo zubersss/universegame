@@ -134,6 +134,14 @@ def close_json(name, pal, to_hex, radius_u, loop_frames, fps, rim_phases=None):
                "blobs": [{"lon_turns": round(a, 4), "v": round(b, 4), "radius": c} for a, b, c in storm_blobs(s)],
                "note": "lon in turns of the body at frame 0 (it advances by drift_turns_per_loop * frame / loop_frames); "
                        "v and radius in disc radii"}
+        c = s.get("chain")
+        if c:                                          # B-241: up close a chain of blobs shows its scallops (a segmented
+            j1 = c["j1"] - 1                           # grub); at the far disc's own size they are under a pixel, so the
+            row["streak"] = {                          # close view draws ONE smooth streak from the first blob to the last
+                "from": {"lon_turns": round(c["lon0"] + c["dlon"] * c["j0"], 4), "v": round(c["lat0"] + c["dlat"] * c["j0"], 4)},
+                "to": {"lon_turns": round(c["lon0"] + c["dlon"] * j1, 4), "v": round(c["lat0"] + c["dlat"] * j1, 4)},
+                "radius": c["rad"],
+                "note": "the close view draws this capsule (in the blobs' own coordinates) instead of the blobs"}
         out["storms"].append(row)
     rg = g.get("rings")
     if rg:
