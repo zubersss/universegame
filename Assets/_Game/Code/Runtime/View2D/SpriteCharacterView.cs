@@ -137,6 +137,29 @@ namespace Meridian.View2D
             if (!HasClip(clip)) return false;
             Override(clip, seconds);
             Play(clip, true);
+            if (UsesAnimator) Animator.Update(0f); // drawn now: the tool reads this frame's glove (the Animator would show it a frame late)
+            return true;
+        }
+
+        /// <summary>Shows drawing `drawing` (0-based) of a stroke's clip of `length` drawings NOW and holds the clip for `seconds`: the
+        /// swing's own 12 Hz clock picks the drawing each frame, so the body and the tool in its glove step on the same frame (left to
+        /// its own clock the Animator starts a clip a frame after the call). False, and nothing changes, when the sheet has no such clip.</summary>
+        public bool ShowStroke(string clip, int drawing, int length, float seconds)
+        {
+            if (!HasClip(clip)) return false;
+            Override(clip, seconds);
+            Clip = clip;
+            clipTime = drawing / 12f;
+            hasCurrent = clips != null && clips.TryGet(clip, out current) && current.length > 0;
+            if (UsesAnimator)
+            {
+                int hash = UnityEngine.Animator.StringToHash(clip);
+                if (Animator.HasState(0, hash))
+                {
+                    Animator.Play(hash, 0, (drawing + 0.5f) / Mathf.Max(1, length)); // the drawing's middle: the frames between do not cross into the next
+                    Animator.Update(0f);
+                }
+            }
             return true;
         }
 

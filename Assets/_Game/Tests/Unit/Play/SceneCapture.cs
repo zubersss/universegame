@@ -6617,6 +6617,8 @@ namespace Meridian.Tests
                     yield return new WaitForFixedUpdate();
                     body.position = new Vector2(fx + 0.5f + ahead, fy + 0.05f); side.player.transform.position = body.position;
                     body.linearVelocity = Vector2.zero;
+                    body.simulated = true; // standing on the hollow's floor (held unsimulated it hangs in its fall pose)
+                    for (int k = 0; k < 40; k++) yield return new WaitForFixedUpdate();
                     for (int k = 0; k < 30; k++) yield return null;
                 }
                 // one strip: the tool, the cursor's point, the frames the button is held from the press

@@ -396,18 +396,22 @@ namespace Meridian.Player
                 body.StrokeFacing = toward;
                 if (toward != 0) body.SetFacing(toward);
             }
-            if (swing && stroke.Swings != swingSeen)
+            if (swing && input.StrokeStartFrame != swingSeen)
             {
-                // a new swing: the sheet's dig clip for its direction from its first drawing, where the sheet has one (B-246)
-                swingSeen = stroke.Swings;
+                // a new swing (by the frame it began: the stroke's own counters may be reset): the sheet's dig clip for its direction
+                // from its first drawing, where the sheet has one (B-246)
+                swingSeen = input.StrokeStartFrame;
                 SwingShownFrame = Time.frameCount;
                 strokeClip = SurveyorAnim.DigClipFor(toTarget);
                 if (strokeClip == SurveyorAnim.DigFwd || strokeClip == SurveyorAnim.DigFwdNear) strokeClip = ForwardClipFor(target, left) ?? strokeClip;
-                SwingOnClip = body != null && body.PlayStroke(strokeClip, DigStroke.SwingSeconds);
+                SwingOnClip = body != null && body.HasClip(strokeClip);
                 clipSlide = SlideMaxOf(strokeClip);
                 if (SwingOnClip && ArtMaterials.ClipsFor(DigSheetKey) is ArtClipSet set && set.TryGet(strokeClip, out var drawn)) clipSlide = drawn.slideMax; // the sheet's own number
             }
             if (!swing && !ray) { SwingOnClip = false; strokeClip = null; }
+            // the body's drawing by the stroke's own clock, shown now: the glove read below is this frame's (the Animator on its own
+            // clock runs a frame behind the tool)
+            if (swing && SwingOnClip) body.ShowStroke(strokeClip, drawing, DigStroke.Drawings, DigStroke.SwingSeconds - stroke.SwingTime + 0.05f);
             float lean = swing && !SwingOnClip ? SwingLean[drawing] * (left ? 1f : -1f) : 0f; // toward the target: clockwise facing right
             Vector2 shift = swing && !SwingOnClip ? line * SwingShift[drawing] : Vector2.zero;
             if (body != null) body.SetStrokePose(shift, lean);

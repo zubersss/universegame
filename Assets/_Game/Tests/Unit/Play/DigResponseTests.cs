@@ -228,7 +228,7 @@ namespace Meridian.Tests
                 yield return null; yield return null;
                 Assert.IsTrue(view.Carrying && !view.Stowed, "ready after the swing");
                 Assert.Less(Mathf.Abs(Mathf.DeltaAngle(view.CarryAngle(false), view.AimDegrees)), 1e-2f, "the ready pose: low, in front");
-                Assert.That(view.AimDegrees, Is.InRange(-45f, 10f), "low, ahead");
+                Assert.AreEqual(RigToolView.ReadyRadians * Mathf.Rad2Deg + RigToolView.ReadySwing * view.ArmDegrees, view.AimDegrees, 0.05f, "side_dig.json's ready angle and a quarter of the drawn arm's own (the held body here hangs in its fall pose, arm raised)");
                 Assert.AreEqual(Meridian.View2D.SpriteCharacterView.SurveyorOrder, view.Tool.sortingOrder);
                 Assert.AreEqual(view.Fist.sprite != null, view.Fist.enabled, "B-246's fist over the ready tool (where its sprite is in)");
                 input.AimAt(feet + new Vector2(-2f, 2f));
@@ -269,8 +269,8 @@ namespace Meridian.Tests
                 float reach = SkillStats.DigReach;
                 Assert.AreEqual(2f, reach, 1e-4f, "the shovel's reach by the tables");
 
-                // a click 7 m off, down and ahead: past reach
-                var far = feet + new Vector2(5f, -5f);
+                // a click 6 m off, steeply down and ahead: past reach, its line meeting the ground inside it whatever the slope here
+                var far = feet + new Vector2(2f, -6f);
                 input.AimAt(far);
                 yield return Rest();
                 yield return null;
@@ -479,10 +479,11 @@ namespace Meridian.Tests
                 Assert.Greater(view.BeamLength, 0.2f);
                 if (audio != null) Assert.IsTrue(audio.BeamHumOn, "the hum within a frame of the press");
                 // the tool turns to the aim over about 0.06 s, damped: not a snap, there within 0.3 s
-                float toAim = Mathf.Atan2(target.y - view.HandWorld.y, target.x - view.HandWorld.x) * Mathf.Rad2Deg;
+                // (the aim is the ray's contact on the wall's face, D-196b, not the cursor's point behind it)
+                float toAim = Mathf.Atan2(stroke.Target.y - view.HandWorld.y, stroke.Target.x - view.HandWorld.x) * Mathf.Rad2Deg;
                 float first = Mathf.Abs(Mathf.DeltaAngle(view.AimDegrees, toAim));
                 for (int i = 0; i < 18; i++) yield return null;
-                float later = Mathf.Abs(Mathf.DeltaAngle(view.AimDegrees, Mathf.Atan2(target.y - view.HandWorld.y, target.x - view.HandWorld.x) * Mathf.Rad2Deg));
+                float later = Mathf.Abs(Mathf.DeltaAngle(view.AimDegrees, Mathf.Atan2(stroke.Target.y - view.HandWorld.y, stroke.Target.x - view.HandWorld.x) * Mathf.Rad2Deg));
                 TestContext.Out.WriteLine($"[MERIDIAN] u209 Beam: press at frame {press}, the ray drawn in frame {view.RayShownFrame}, hum {(audio != null ? audio.BeamHumOn.ToString() : "no audio")}; the tool {first:0.0} deg off the aim one frame in, {later:0.0} deg 0.3 s later");
                 Assert.Greater(first, 1f, "damped: not on the aim in one frame");
                 Assert.Less(later, 2f, "on the aim within 0.3 s");
