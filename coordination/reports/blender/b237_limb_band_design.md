@@ -204,6 +204,13 @@ What drawing the previews found, each ruled by LEAD (23:1x) unless marked:
 10. **The marks' and edges' strips are fixed to the planet**: u = arc length along the edge from the body's own left, with
     a whole number of repeats round the limb, so nothing swims while the zoom holds inside one root-2 step.
 
+11. **The flight's closest zoom is known** (UNITY's reading, via LEAD 23:5x): 6.0 screen px per far texel at the wheel's
+    closest and 9.0 at the end of the entry's push-in; it never passes 12 in play. So the root-2 zoom stepping and the 33x
+    tests LEAVE UNITY's half: one strip scale serves 6 to 9 (a strip texel is 1 px at 6 and 1.5 px at 9 if the scale is
+    held, so the limb's mean ink runs 2.5 to 3.75 px; laid at 1.22 px per texel it runs 2.05 to 3.07 across the range).
+    The previews' 12 px views show more than the game will. Neptune's cloud (point 8) was since ruled: a tapered streak
+    with belt_edge's ragged edge (`streak.end_radius_share` 0.3), accepted.
+
 The key list as it now stands (previews in `blender/preview/b240/` and `b241/`; nothing exported):
 
 | Key | Size | What |

@@ -250,7 +250,8 @@ def close_view(J, T, m, centre, W=1920, H=540, frame=0, space=None):
             Y = v - p0["v"]
             bx, by = (p1["lon_turns"] - p0["lon_turns"]) * math.pi * cosl, p1["v"] - p0["v"]
             tt = np.clip((X * bx + Y * by) / np.maximum(bx * bx + by * by, 1e-12), 0, 1)
-            f = np.hypot(X - tt * bx, Y - tt * by) - rad
+            es = st["streak"].get("end_radius_share", 1.0)                   # tapered ends (LEAD 23:4x: a smooth-ended pill
+            f = np.hypot(X - tt * bx, Y - tt * by) - rad * (es + (1 - es) * np.sin(np.pi * tt) ** 0.6)   # is not a cirrus streak)
             th = (tt * np.hypot(bx, by) + np.arctan2(Y - tt * by, X - tt * bx) * rad) * Rs
         for b in ([] if f is not None else st["blobs"]):
             dls = ((su - b["lon_turns"] + 0.5) % 1.0 - 0.5) * math.pi * cosl
@@ -264,8 +265,8 @@ def close_view(J, T, m, centre, W=1920, H=540, frame=0, space=None):
         near = (np.abs(dist) <= EDGE_ROW * sc) & (r < rim)
         ins = (f < 0) & ~near
         day[ins], night[ins] = rgb(st["tone_hex"]), rgb(st["night_hex"])
-        if near.any():
-            sh = samp(T["spot_rim"], th[near] / sc, EDGE_ROW - dist[near] / sc)[..., :1]
+        if near.any():                                                       # (a streak's outline: belt_edge's ragged cut)
+            sh = samp(E if "streak" in st else T["spot_rim"], th[near] / sc, EDGE_ROW - dist[near] / sc)[..., :1]
             day[near] = day[near] * (1 - sh) + rgb(st["tone_hex"]) * sh
             night[near] = night[near] * (1 - sh) + rgb(st["night_hex"]) * sh
     nc = J["night"]                                                          # the night crescent, its edge brushed

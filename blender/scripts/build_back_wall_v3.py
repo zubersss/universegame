@@ -8,6 +8,9 @@
                                       T4 crystal seams + glints T5 dark glassy veins and a few embers
                                     Painted shapes with soft edges and paper grain; NO ink outline (it sits behind the fill;
                                     UNITY darkens it with depth and distance from the opening, U-196).
+  terrain/earth/back_wall_sand,     B-242: the same for the two surface-variant fills (ground_fill_sand: fine ripple bedding,
+  terrain/mars/back_wall_basalt     cross-bed ticks, shell fragments, pebbles; ground_fill_basalt: columnar joints, vesicles);
+                                    exported by their own manifest row (build_back_wall_variants_v3), sheet: --variants <png>
   (terrain/common/rim_shadow, a 256x64 ink fade for the dug edges, was exported with the walls and retired the same day:
    UNITY draws its own rim gradient. rim_shadow() below still paints it into the sheet's dug cells.)
 
@@ -53,8 +56,16 @@ def nearest(pal, c, avoid=()):
     return best
 
 
+VARIANTS = {"sand": "earth", "basalt": "mars"}       # B-242: the surface-variant fills that get their own wall: variant -> planet
+
+
+def variant_keys():
+    return [f"terrain/{p}/back_wall_{v}" for v, p in VARIANTS.items()]
+
+
 def fill_png(planet, t):
-    name = "ground_fill_color.png" if t == 1 else f"ground_fill_t{t}_color.png"
+    """The fill a wall goes behind: a tier (1..5) or a surface variant's name (B-242: 'sand', 'basalt')."""
+    name = f"ground_fill_{t}_color.png" if isinstance(t, str) else "ground_fill_color.png" if t == 1 else f"ground_fill_t{t}_color.png"
     p = os.path.join(ART, "terrain", planet, name)
     return pngio.read_png_np(p) if os.path.isfile(p) else None
 
@@ -191,6 +202,32 @@ def chip(mask, pts, val=1.0):
     mask[ix] = np.maximum(mask[ix], inside * val)
 
 
+def place_spots(rng, count, near, lvl_dy, lvl_dx, busy=None, clear=9, cell=None, cap=8000, up=None):
+    """`count` centres on the periodic 2x grid for pits, pebbles and the like (B-242; B-230's rule for the lifeless planets
+    as a function - the tiers' own inline code is left as it is, their tiles are exported): none within `near` px of
+    another, none level with another (within lvl_dy of its height and lvl_dx to its side: two dots side by side read as
+    a pair of eyes, D-101), none within `clear` px of a mark in `busy` (and `up` px above the centre, for a mark that
+    rises from it), at most one per `cell(cx, cy)`."""
+    up = clear if up is None else up
+    spots, used, tries = [], set(), 0
+    while len(spots) < count and tries < cap:
+        tries += 1
+        cx, cy = rng.uniform(0, N), rng.uniform(0, N)
+        if any(math.hypot(pdist(cx, x), pdist(cy, y)) < near or (abs(pdist(cy, y)) < lvl_dy and abs(pdist(cx, x)) < lvl_dx)
+               for x, y in spots):
+            continue
+        if busy is not None and busy[np.ix_(np.arange(int(cy) - up, int(cy) + clear + 1) % N,
+                                            np.arange(int(cx) - clear, int(cx) + clear + 1) % N)].max() > 0.25:
+            continue
+        if cell is not None:
+            c = cell(cx, cy)
+            if c in used:
+                continue
+            used.add(c)
+        spots.append((cx, cy))
+    return spots
+
+
 def crack_net(rng, n, w):
     """Polygonal cracks on the periodic grid: the borders of n random cells (where the nearest and the second-nearest of n
     seeds are almost equally far), about w px wide at 2x."""
@@ -267,7 +304,7 @@ def draw_tier(planet, t, grain=0.035):
     """-> (RGBA uint8 256x256, the roles used). grain: the paper grain's strength (0 = none: U-205's test tile, D-192;
     the exports use the default)."""
     pal, R, names = tier_colours(planet, t)
-    rng = np.random.default_rng(23000 + 100 * PLANETS.index(planet) + t)
+    rng = np.random.default_rng(23000 + 100 * PLANETS.index(planet) + (t if isinstance(t, int) else 50 + sorted(VARIANTS).index(t)))
     layers = []                                                          # (mask, colour) painted in order over the back tone
     if t == 1:                                                           # the top tier, per planet (LEAD 17:2x: roots are
         marks, cell_of = t1_marks(planet, rng, R)                        # Earth's alone; no roots on a lifeless planet)
@@ -349,6 +386,65 @@ def draw_tier(planet, t, grain=0.035):
                 ellipse(glints, cx, cy, r, 1.2, 0.0)                     # sky with constellations
                 ellipse(glints, cx, cy, 1.2, r, 0.0)
         layers += [(seams, R["bright"]), (glints, toward_ink(pal["offwhite"], 0.2))]
+    elif t == "sand":                                                    # B-242, Earth's sand fill: fine ripple bedding, sets of
+        Y, X = grid()                                                    # cross-bed ticks, a few shell fragments and pebbles
+        for k in range(9):                                               # nine fine bedding lines (about 1-1.5 px at 1x), pale
+            y0 = (k + rng.uniform(0.25, 0.75)) * N / 9                   # and dark by turns, each a long low ripple
+            wave = sum(rng.uniform(1.2, 3.0) * np.sin(2 * math.pi * (h * X / N + rng.uniform(0, 1))) for h in (2, 5, 9))
+            band = np.clip(1.5 - np.abs(pdist(Y, y0) - wave) / rng.uniform(0.9, 1.5), 0, 1) * (0.5 if k % 2 else 0.7)
+            layers.append((band, R["dark"] if k % 2 else R["light"]))
+        ticks = np.zeros((N, N), np.float32)
+        for _ in range(5):                                               # cross-bedding: short parallel slanted ticks in sets
+            cx, cy = rng.uniform(0, N), rng.uniform(0, N)
+            for j in range(int(rng.integers(4, 7))):
+                stroke(ticks, [(cx + 11 * j, cy + 9), (cx + 11 * j + 9, cy - 9)], 1.1, 0.7, val=0.55)
+        layers.append((ticks, R["dark"]))
+        shells, ribs, peb, lit = (np.zeros((N, N), np.float32) for _ in range(4))
+        for i, (cx, cy) in enumerate(place_spots(rng, 7, 90, 40, 180, busy=ticks, clear=16)):   # three shell fragments, four
+            if i < 3:                                                    # pebbles: B-230's spacing, clear of the tick sets
+                r, rot, a0, a1 = rng.uniform(18, 24), rng.uniform(-0.5, 0.5), rng.uniform(0.45, 0.75), rng.uniform(2.3, 2.7)
+                arc = [(cx + r * math.cos(a + rot), cy - r * math.sin(a + rot)) for a in np.linspace(a0, a1, 9)]   # a fragment of
+                hinge = (cx + 0.35 * r * math.sin(rot), cy + 0.35 * r * math.cos(rot))                               # a ribbed fan,
+                chip(shells, arc + [hinge], 0.95)                                                                    # its hinge down
+                for a in np.linspace(a0, a1, 6)[1:-1]:                   # (rev: 9-12 px at 1x; at 5-7 px the first run's
+                    stroke(ribs, [hinge, (cx + 0.92 * r * math.cos(a + rot), cy - 0.92 * r * math.sin(a + rot))], 0.9, val=0.7)   # were darts)
+            else:
+                rx, ry, rot = rng.uniform(8, 13), rng.uniform(6, 9), rng.uniform(-0.5, 0.5)
+                ellipse(peb, cx, cy, rx, ry, rot)
+                ellipse(lit, cx - rx * 0.15, cy - ry * 0.35, rx * 0.55, ry * 0.35, rot, val=0.45)
+        grey = R["accents"][1] if len(R["accents"]) > 1 else R["dark"]   # rev: the fill's grey-tan, as its own pebbles (the first
+        layers += [(shells, R["light"]), (ribs, R["dark"]), (peb, grey), (lit, R["light"])]   # accent, mustard, made gold beads)
+    elif t == "basalt":                                                  # B-242, Mars's basalt fill: columnar joints, vesicles
+        ncol = 6                                                         # six columns across the 4 m tile (about 0.65 m each)
+        joints, edge, cross = (np.zeros((N, N), np.float32) for _ in range(3))
+        ys = np.linspace(0, N, 49)
+        curves = []
+        for k in range(ncol):                                            # each joint a near-upright line, wandering a little,
+            x0 = (k + rng.uniform(0.15, 0.85)) * N / ncol                # periodic down the tile; the columns of unequal width
+            a1, a2, p1, p2 = rng.uniform(3, 7), rng.uniform(1.5, 3.5), rng.uniform(0, math.tau), rng.uniform(0, math.tau)
+            pts = [(x0 + a1 * math.sin(math.tau * y / N + p1) + a2 * math.sin(2 * math.tau * y / N + p2), y) for y in ys]
+            curves.append(pts)
+            stroke(joints, pts, 2.0)
+            stroke(edge, [(x + 3.0, y) for x, y in pts], 1.0, val=0.25)  # its lit side, faint (rev: at 0.5 with ringed pits
+            #                                                              the first run read as riveted steel plates)
+        for k in range(ncol):                                            # one curved cross-joint a column, staggered so no
+            y = ((k * 0.37) % 1.0 + rng.uniform(-0.06, 0.06)) * N        # two neighbours line up into a course of bricks
+            i = int((y % N) / N * 48)
+            xl, xr = curves[k][i][0], curves[(k + 1) % ncol][i][0] + (N if k == ncol - 1 else 0)
+            sag = rng.uniform(7, 14) * (1 if rng.uniform() < 0.5 else -1)   # curved, as a column's ball-and-socket joint
+            stroke(cross, [(xl, y), (xl + (xr - xl) * 0.25, y + sag * 0.75), ((xl + xr) / 2, y + sag),
+                           (xl + (xr - xl) * 0.75, y + sag * 0.75), (xr, y)], 1.4, val=0.8)
+        holes, lips = np.zeros((N, N), np.float32), np.zeros((N, N), np.float32)
+        for cx, cy in place_spots(rng, 6, 90, 40, 180, busy=np.maximum(joints, cross), clear=13, up=48,
+                                  cell=lambda x, y: int(x / (N / ncol)) % ncol):   # vesicles: clear of the joints, one a column
+            lean, r, x, y = rng.uniform(-0.45, 0.45), rng.uniform(4.6, 7.0), cx, cy   # rev: a rising trail of two to four
+            for _j in range(int(rng.integers(2, 5))):                    # bubbles, smaller upward, leaning up to 25 deg, no ring
+                ellipse(lips, x, y + 1.8, r, r * 0.8, val=0.55)          # (a ringed pit was a rivet; a trail stacked near
+                ellipse(holes, x, y, r, r * 0.8)                         # upright cannot be a pair of eyes); each a dark pit
+                step = rng.uniform(10, 17)                               # over a pale lower lip; rev 2: no two trails alike
+                x, y, r = x + step * math.sin(lean), y - step * math.cos(lean), r * rng.uniform(0.6, 0.8)   # (six identical
+                #                                                          three-dot trails read as a stamped glyph)
+        layers += [(joints, R["dark"]), (edge, R["light"]), (cross, R["dark"]), (lips, R["light"]), (holes, R["dark"])]
     else:                                                                # Core: dark glassy veins, a few embers
         veins, gloss, emb = np.zeros((N, N), np.float32), np.zeros((N, N), np.float32), np.zeros((N, N), np.float32)
         for _ in range(6):                                               # rev: straighter dark-teal glass with a thin lit edge
@@ -412,7 +508,126 @@ def export(art):
     return out
 
 
-# ---------------------------------------------------------------- the review sheet
+def export_variants(art):
+    """B-242: terrain/earth/back_wall_sand and terrain/mars/back_wall_basalt, as the tiers' tiles (256x256, tile both ways,
+    no ink outline, the fill's main tone mixed DARKEN toward ink), behind ground_fill_sand / ground_fill_basalt."""
+    out = []
+    for v, planet in VARIANTS.items():
+        img, R = draw_tier(planet, v)
+        sx, sy = seam_score(img)
+        if max(sx, sy) > 1.6:
+            raise ValueError(f"B-242 checks: {planet} {v} seam {sx:.2f} / {sy:.2f}")
+        base = os.path.join(art, "terrain", planet, f"back_wall_{v}")
+        n = pngio.write_png(base + "_color.png", img)
+        with open(base + ".json", "w", encoding="utf-8", newline="\n") as f:
+            json.dump({"key": f"terrain/{planet}/back_wall_{v}", "style": "v3", "width": S, "height": S, "ppu": 64, "palette": planet,
+                       "tile_x": True, "tile_y": True, "variant": v, "fill": f"ground_fill_{v}", "roles": R,
+                       "note": f"B-242: the dug cell's back face where the fill drawn is ground_fill_{v} (as the tiers' back_wall_t<n>, "
+                               "B-230): one step darker than the fill, no ink outline; UNITY darkens it with depth (U-196)"}, f, indent=2)
+            f.write("\n")
+        out.append((f"terrain/{planet}/back_wall_{v}", S, S, n))
+    return out
+
+
+def proof(art, out_dir):
+    """Every exported wall tile rebuilt and compared byte for byte with the file under art (after a change to this builder:
+    B-242 added the variants beside the tiers). Writes only into out_dir. -> (lines, how many differ)."""
+    import hashlib
+    os.makedirs(out_dir, exist_ok=True)
+    lines, bad = [], 0
+    for planet in PLANETS:
+        for t in range(1, 6):
+            ref = os.path.join(art, "terrain", planet, f"back_wall_t{t}_color.png")
+            new = os.path.join(out_dir, f"{planet}_back_wall_t{t}_color.png")
+            pngio.write_png(new, draw_tier(planet, t)[0])
+            a, b = (hashlib.sha1(open(p, "rb").read()).hexdigest() for p in (new, ref))
+            bad += a != b
+            lines.append(f"terrain/{planet}/back_wall_t{t}: rebuilt sha1 {a} | exported sha1 {b} | " + ("BYTE-IDENTICAL" if a == b else "DIFFERS"))
+    lines.append(f"RESULT: {'all 20 byte-identical' if not bad else str(bad) + ' DIFFER'}")
+    return lines, bad
+
+
+# ---------------------------------------------------------------- the review sheets
+def _tiled(img, h, w):
+    f = img[..., :3].astype(np.float32) / 255.0
+    return np.tile(f, (-(-h // f.shape[0]), -(-w // f.shape[1]), 1))[:h, :w]
+
+
+def _dug(prof, fill, wall, x0, y0, x1, y1, open_top=False):
+    """The hole (x0..x1, y0..y1) cut in the fill: the wall darkened with depth below the opening (y0) and away from the hole's
+    centre line (U-196's ambient, painted in roughly), the rim shadow (its profile `prof`) on every dug edge (not the open
+    top)."""
+    out = fill.copy()
+    H, Wd = fill.shape[:2]
+    yy = np.arange(H, dtype=np.float32)[:, None]
+    xx = np.arange(Wd, dtype=np.float32)[None, :]
+    depth = np.clip((yy - y0) / 64.0, 0, None)
+    side = np.abs(xx - (x0 + x1) / 2) / max((x1 - x0) / 2, 1)
+    dk = np.clip(1.0 - 0.075 * depth, 0.55, 1.0) * (1.0 - 0.12 * side)                 # U-196: to 55 % at 6 m
+    out[y0:y1, x0:x1] = (wall * dk[..., None])[y0:y1, x0:x1]
+    n, sh = len(prof), np.zeros((H, Wd), np.float32)
+    for k in range(n):
+        if x0 + k < x1:
+            sh[y0:y1, x0 + k] = np.maximum(sh[y0:y1, x0 + k], prof[k])
+        if x1 - 1 - k >= x0:
+            sh[y0:y1, x1 - 1 - k] = np.maximum(sh[y0:y1, x1 - 1 - k], prof[k])
+        if y1 - 1 - k >= y0:
+            sh[y1 - 1 - k, x0:x1] = np.maximum(sh[y1 - 1 - k, x0:x1], prof[k])
+        if not open_top and y0 + k < y1:
+            sh[y0 + k, x0:x1] = np.maximum(sh[y0 + k, x0:x1], prof[k])
+    out[y0:y1, x0:x1] *= (1 - sh[y0:y1, x0:x1, None])
+    return out
+
+
+def preview_variants(out, footnote=None):
+    """B-242's sheet: per variant, the wall tiled 2x2 beside its fill and a cell dug out of the fill; the whole tile at 3x
+    (the face look) beside a 10 m shaft dug from the surface through that fill."""
+    import time
+    sys.path.insert(0, os.path.dirname(HERE))
+    import review
+    paper = np.array(review.PAPER, np.float32)
+    W = 1600
+    prof = (rim_shadow().astype(np.float32) / 255.0)[..., 3].mean(axis=1)
+    rows, lines = [], []
+    head = np.tile(paper, (28, W, 1)).astype(np.float32)
+    review._label(head, "B-242: back walls for the two surface-variant fills (as B-230's tiles: the fill's main tone mixed 0.35 toward ink, no ink outline)", 6, 8)
+    rows.append(head)
+    for v, planet in VARIANTS.items():
+        img, R = draw_tier(planet, v)
+        sx, sy = seam_score(img)
+        lines.append(f"terrain/{planet}/back_wall_{v}: fill mostly {R['fill_main']}; wall = {R['wall']}; accents from {', '.join(R['accents']) or '-'}; bright {R['bright']}; seam x {sx:.2f} y {sy:.2f}")
+        fill = fill_png(planet, v)
+        r = np.tile(paper, (548, W, 1)).astype(np.float32)
+        review._label(r, f"{planet} {v}: the back wall 2x2 (8 m) | ground_fill_{v} | a 3 m x 5 m cell dug out of it", 6, 4, scale=1)
+        r[24:24 + 2 * S, 10:10 + 2 * S] = _tiled(img, 2 * S, 2 * S)
+        if fill is not None:
+            ft = _tiled(fill, 2 * S, 2 * S)
+            r[24:24 + 2 * S, 30 + 2 * S:30 + 4 * S] = ft
+            r[24:24 + 2 * S, 50 + 4 * S:50 + 6 * S] = _dug(prof, ft, _tiled(img, 2 * S, 2 * S), 160, 96, 352, 416)
+        rows.append(r)
+        r = np.tile(paper, (3 * S + 34, W, 1)).astype(np.float32)
+        review._label(r, f"{planet} {v}: the whole tile at 3x (the face look: no two pits, pebbles or shells within 45 px or level within 90 px) | a 10 m shaft, 2 m wide, dug from the surface through ground_fill_{v}", 6, 4, scale=1)
+        r[24:24 + 3 * S, 10:10 + 3 * S] = np.repeat(np.repeat(img[..., :3].astype(np.float32) / 255.0, 3, 0), 3, 1)
+        if fill is not None:
+            sw = W - 30 - 3 * S
+            sky = np.array(v3.hex_rgb(v3.PALETTES[planet]["sky"]), np.float32) / 255.0
+            scene = np.empty((3 * S, sw, 3), np.float32)
+            scene[:80] = sky
+            scene[80:] = _tiled(fill, 3 * S - 80, sw)
+            cx = sw // 2
+            r[24:24 + 3 * S, 20 + 3 * S:20 + 3 * S + sw] = _dug(prof, scene, _tiled(img, 3 * S, sw), cx - 64, 80, cx + 64, 720, open_top=True)
+        rows.append(r)
+    foot = np.tile(paper, (24 + 16 * len(lines), W, 1)).astype(np.float32)
+    for i, ln in enumerate(lines):
+        review._label(foot, ln, 6, 6 + 16 * i, scale=1)
+    img = np.vstack(rows + [foot])
+    review.draw(img, time.strftime("%m-%d %H:%M") + " " + (footnote or "B-242 design preview (numpy; not exported)"), 2, img.shape[0] - 14, (1.0, 1.0, 0.85))
+    review.write(out, img)
+    print("written", out, img.shape[1], "x", img.shape[0])
+    for ln in lines:
+        print(ln)
+
+
 def preview(out, planet="earth", footnote=None):
     import time
     sys.path.insert(0, os.path.dirname(HERE))
@@ -425,33 +640,10 @@ def preview(out, planet="earth", footnote=None):
     rows.append(head)
     prof = (rim_shadow().astype(np.float32) / 255.0)[..., 3].mean(axis=1)                 # the rim shadow's mean profile (64)
 
-    def tiled(img, h, w):
-        f = img[..., :3].astype(np.float32) / 255.0
-        return np.tile(f, (-(-h // f.shape[0]), -(-w // f.shape[1]), 1))[:h, :w]
+    tiled = _tiled                                                                       # (B-242: lifted to the module for
 
-    def dug(fill, wall, x0, y0, x1, y1, open_top=False):
-        """The hole (x0..x1, y0..y1) cut in the fill: the wall darkened with depth below the opening (y0) and away from the hole's
-        centre line (U-196's ambient, painted in roughly), the rim shadow on every dug edge (not the open top)."""
-        out = fill.copy()
-        H, Wd = fill.shape[:2]
-        yy = np.arange(H, dtype=np.float32)[:, None]
-        xx = np.arange(Wd, dtype=np.float32)[None, :]
-        depth = np.clip((yy - y0) / 64.0, 0, None)
-        side = np.abs(xx - (x0 + x1) / 2) / max((x1 - x0) / 2, 1)
-        dk = np.clip(1.0 - 0.075 * depth, 0.55, 1.0) * (1.0 - 0.12 * side)                 # U-196: to 55 % at 6 m
-        out[y0:y1, x0:x1] = (wall * dk[..., None])[y0:y1, x0:x1]
-        n, sh = len(prof), np.zeros((H, Wd), np.float32)
-        for k in range(n):
-            if x0 + k < x1:
-                sh[y0:y1, x0 + k] = np.maximum(sh[y0:y1, x0 + k], prof[k])
-            if x1 - 1 - k >= x0:
-                sh[y0:y1, x1 - 1 - k] = np.maximum(sh[y0:y1, x1 - 1 - k], prof[k])
-            if y1 - 1 - k >= y0:
-                sh[y1 - 1 - k, x0:x1] = np.maximum(sh[y1 - 1 - k, x0:x1], prof[k])
-            if not open_top and y0 + k < y1:
-                sh[y0 + k, x0:x1] = np.maximum(sh[y0 + k, x0:x1], prof[k])
-        out[y0:y1, x0:x1] *= (1 - sh[y0:y1, x0:x1, None])
-        return out
+    def dug(fill, wall, x0, y0, x1, y1, open_top=False):                                 # the variants' sheet; unchanged)
+        return _dug(prof, fill, wall, x0, y0, x1, y1, open_top)
 
     walls = {}
     for t in range(1, 6):
@@ -513,5 +705,11 @@ def test_tile(out, planet="earth", t=3):
 if __name__ == "__main__":                       # python -I build_back_wall_v3.py <review png> [planet]
     if sys.argv[1] == "--no-grain":              # python -I build_back_wall_v3.py --no-grain <out png> [planet] [tier]
         test_tile(sys.argv[2], sys.argv[3] if len(sys.argv) > 3 else "earth", int(sys.argv[4]) if len(sys.argv) > 4 else 3)
+    elif sys.argv[1] == "--variants":            # python -I build_back_wall_v3.py --variants <review png>     (B-242's sheet)
+        preview_variants(sys.argv[2])
+    elif sys.argv[1] == "--proof":               # python -I build_back_wall_v3.py --proof <art> <out dir>     (20 tiles, sha1)
+        _lines, _bad = proof(sys.argv[2], sys.argv[3])
+        print("\n".join(_lines[-1:] if not _bad else _lines))
+        sys.exit(1 if _bad else 0)
     else:
         preview(sys.argv[1], sys.argv[2] if len(sys.argv) > 2 else "earth")

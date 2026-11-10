@@ -104,6 +104,13 @@ one. All ten files BYTE-IDENTICAL, all five sheet jsons' text identical; nothing
 The near frames' jsons were not compared (their dict is built inline in `near_export`, which B-239 did not touch).
 With section 3 that is every file the disc builder exports: 16 pngs and 9 sheet jsons, all reproduced byte for byte.
 
+### Later re-runs of both proofs (each after a change to giants_v3.py or build_discs_v3.py)
+
+| When | What had changed | Giants (6 pngs, 4 jsons) | Inner set (10 pngs, 5 jsons) |
+|------|------------------|--------------------------|------------------------------|
+| 23:06 / 23:09 | B-240: the far disc's ink marks lifted into `giants_v3.MARKS` (read by `interior_marks`) | all byte-identical | all byte-identical |
+| 23:53 / 23:56 | B-241: `close_json` gained a storm's `streak` and its taper (the painting code untouched) | all byte-identical | all byte-identical |
+
 ## 6. Not done, not checked
 
 - Added since B-239 (B-240): the drafts gain `rim` (the far limb is lumpy, not a circle: r(angle) = 1 + 0.012 sin(3 angle +

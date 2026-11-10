@@ -140,8 +140,10 @@ def close_json(name, pal, to_hex, radius_u, loop_frames, fps, rim_phases=None):
             row["streak"] = {                          # close view draws ONE smooth streak from the first blob to the last
                 "from": {"lon_turns": round(c["lon0"] + c["dlon"] * c["j0"], 4), "v": round(c["lat0"] + c["dlat"] * c["j0"], 4)},
                 "to": {"lon_turns": round(c["lon0"] + c["dlon"] * j1, 4), "v": round(c["lat0"] + c["dlat"] * j1, 4)},
-                "radius": c["rad"],
-                "note": "the close view draws this capsule (in the blobs' own coordinates) instead of the blobs"}
+                "radius": c["rad"], "end_radius_share": 0.3,
+                "note": "the close view draws this streak (in the blobs' own coordinates) instead of the blobs: along it "
+                        "(t = 0 .. 1) its radius is radius * (s + (1 - s) * sin(pi * t) ^ 0.6), s = end_radius_share (tapered "
+                        "ends: a cirrus streak, LEAD 23:4x), and its outline takes belt_edge's ragged cut"}
         out["storms"].append(row)
     rg = g.get("rings")
     if rg:
