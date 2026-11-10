@@ -368,7 +368,8 @@ Lifted from `coordination/reports/blender/v7_piece_format.md` (BLENDER, 4075cb81
 
 **12.8 Rules LEAD adds (D-206).**
 - `flip`: allowed only on `foreground` (a tinted silhouette) and `far` (haze) instances. A `middle`, `near` or `play_front` instance is never flipped: its painted light would come from the wrong side. A mirrored plant there is a second render.
-- `play_front`: low tufts on the ground's lip only, at most 0.30 m above the ground line; nothing in it may cover the surveyor's hands, the reticle or a find.
+- `play_front`: low tufts on the ground's lip only, at most 0.30 m above the ground line; nothing in it may cover the surveyor's hands or a find (a find draws over it). The reticle sorts under the surveyor and so under `play_front` (D-206b).
+- `foreground` clears round the surveyor (D-206b): an instance fades to nothing within 2.5 m of the surveyor's x on screen, easing over 1 m more, and the whole layer fades out as the camera eases underground. The ground under the feet is where the dig lands: nothing hides it.
 - The stage never collides: no piece stops, slows or lifts the surveyor. The ground is the game's.
 - Never two instances of one piece inside one screen width on the same layer at the same scale.
 - §2's Legal row stands: every source CC0 or better, listed in `blender/vendor_cc0/MANIFEST.md` and the credits; raw scans never ship, only our renders of them; D-087 and D-101 hold.

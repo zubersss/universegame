@@ -72,8 +72,12 @@ ever overwritten.
    status file with the run it came from) may start at P + 0.35 GB free, with its watchdog
    at P + 0.2 GB; a job never measured keeps the 1.5 GB gate. While the top-ranked want is
    held back only by the RAM gate, a lower-ranked job that fits its own measured gate may run
-   ONE turn of ≤ 10 min under its lock; the top rank goes next. Nothing runs with less than
-   0.3 GB free, and a job stopped for memory twice goes back to the 1.5 GB gate (D-046).
+   ONE turn of ≤ 10 min under its lock; the top rank goes next. Nothing STARTS with less than
+   0.3 GB free (a start condition, not a floor during a run), and a job stopped for memory
+   twice goes back to the 1.5 GB gate (D-046). The P + 0.35 rule is for jobs that fit in
+   memory under a watchdog cap (Blender's pieces). Unity's Editor jobs page by nature (peaks
+   2.6-3.2 GB, D-209a): their gate stays 1.5 GB until UNITY's one trial start at 1.2 GB is
+   read.
    **Strict turns (D-037).** If another role's `want_*.lock` exists when you release, you
    may not start another heavy job until that role has run one job, removed its want file,
    or its want file is older than 30 min. This holds even while the waiter is blocked on
