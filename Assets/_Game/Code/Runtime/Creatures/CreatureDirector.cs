@@ -88,6 +88,7 @@ namespace Meridian.Creatures
             DespawnAll();
             ClearDens();
             nextSpawn = 0f;
+            boarding = FindAnyObjectByType<Meridian.Ship.ShipBoarding>(); boardingLooked = boarding != null; // U-192: found here, not inside the AI's frame
             for (int s = 0; s < SpeciesCount; s++)
             {
                 var spec = SpeciesSpec.Get((Species)s);
@@ -595,6 +596,23 @@ namespace Meridian.Creatures
                     return;
                 }
             }
+            if (spec.temper == Temper.Drifts)
+            {
+                // U-192: the veil serpent, a gentle drifter. It still recoils from cold; otherwise it meanders on, and inside senseRange of
+                // the Pilgrim (or of the surveyor on foot) it swerves away in height, its attack clip the swerve. It never chases: no bump.
+                if (now < c.fleeUntil) { c.State = CreatureState.Flee; if (now >= c.keepDirUntil) c.dir = dx > 0f ? -1 : 1; return; }
+                c.State = CreatureState.Wander;
+                Vector2 at = c.Body.position, to = PartedAround() - at;
+                if (to.sqrMagnitude < spec.senseRange * spec.senseRange)
+                {
+                    float want = at.y + (to.y >= 0f ? -DriftSwerveM : DriftSwerveM); // away from it: under what is above, over what is below
+                    if (spec.habitat == Habitat.Deck) want = Mathf.Clamp(want, VenusLandforms.DeckY - VenusLandforms.DeckHalfBand, VenusLandforms.DeckY + VenusLandforms.DeckHalfBand);
+                    c.altitude = want;
+                    if (now >= c.nextHuff) { c.nextHuff = now + DriftSwerveEvery; c.Rear(DriftSwerveSeconds); c.swerves++; }
+                }
+                else if (Hash01(c.serial * 31 + Mathf.FloorToInt(Time.time * 0.5f), 9) > 0.9f) c.dir = -c.dir;
+                return;
+            }
             bool hunts = spec.temper == Temper.Hunts || (spec.huntsDuringFlare && flare);
             if (now < c.fleeUntil) hunts = false; // the Veil Serpent recoils from cold
             if (!hunts)
@@ -613,6 +631,20 @@ namespace Meridian.Creatures
             c.State = r < 0.25f ? CreatureState.Idle : CreatureState.Wander;
             if (spec.Flies && c.State == CreatureState.Idle) c.State = CreatureState.Wander; // fliers keep moving
             if (r > 0.9f) c.dir = -c.dir;
+        }
+
+        /// <summary>U-192: a drifter's swerve: how far it moves off in height, how often it may start one, how long its attack clip plays as the swerve.</summary>
+        public const float DriftSwerveM = 4f, DriftSwerveEvery = 2.5f, DriftSwerveSeconds = 0.6f;
+        Meridian.Ship.ShipBoarding boarding;
+        bool boardingLooked;
+
+        /// <summary>U-192: what a drifter parts around: the Pilgrim while the surveyor is aboard (the surveyor's own body is switched off
+        /// where it boarded), else the surveyor.</summary>
+        public Vector2 PartedAround()
+        {
+            if (!boardingLooked) { boardingLooked = true; boarding = FindAnyObjectByType<Meridian.Ship.ShipBoarding>(); }
+            if (boarding != null && boarding.Aboard && boarding.ship != null && boarding.ship.Body != null) return boarding.ship.Body.position;
+            return player != null ? (Vector2)player.transform.position : Vector2.zero;
         }
 
         /// <summary>The terminator (Mercury): the zone where it stands, and when it crossed into night.</summary>

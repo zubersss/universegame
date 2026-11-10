@@ -111,6 +111,11 @@ namespace Meridian.Creatures
         internal int dir = 1;
         internal float nextThink, biteReady, hurtFor, attackFor, chillFor, fleeUntil, anim, altitude;
         internal int serial;
+        /// <summary>U-192: swerves a drifter has begun since it spawned (tests); the height it steers for now and whether its attack clip is playing.</summary>
+        internal int swerves;
+        public int Swerves => swerves;
+        public float SteersFor => altitude;
+        public bool AttackClipPlaying => attackFor > 0f;
         internal Sprite[] frames, nightFrames;
         internal ArtClipSet clips;
         internal int lastClip = -1;
@@ -191,6 +196,7 @@ namespace Meridian.Creatures
             hurtFor = attackFor = chillFor = anim = knockFor = flashFor = blockedFor = keepDirUntil = blockAnchorT = waitUntil = nextHuff = 0f;
             blockAnchorX = position.x;
             fleeUntil = 0f;
+            swerves = 0;
             lastClip = -1;
             altitude = position.y;
             NightfallAt = float.NegativeInfinity;

@@ -17,7 +17,7 @@ namespace Meridian.Survey
         public PlanetId planet;
         public string name;
         public int itemId;       // minerals: their item (icon); 0 otherwise
-        public string artKey;    // creatures: their sheet (first frame as the icon)
+        public string artKey;    // creatures: their sheet (first frame as the icon); sites: their icon (U-192: icons/catalogue/<label>)
         public int Datacores => Catalogue.Payout(kind);
     }
 
@@ -33,6 +33,10 @@ namespace Meridian.Survey
         public static string CreatureId(Species s) => "creature:" + SpeciesSpec.Get(s).artKey.Substring(SpeciesSpec.Get(s).artKey.LastIndexOf('/') + 1);
         public static string MineralId(int itemId) => "mineral:" + (ItemRegistry.Get(itemId)?.key ?? itemId.ToString());
         public static string SiteId(PoiDef poi) => "site:" + poi.id;
+        /// <summary>U-192 (D-187): a site's icon key, icons/catalogue/&lt;its label lowercased, spaces as _&gt;: from the label the entry is
+        /// named by, never the POI's id (MERIDIAN BEACON → meridian_beacon, SOLARITE → solarite; their ids are mercury_beacon and
+        /// solarite_field). B-223 drew the camp's, B-233 the other ten.</summary>
+        public static string SiteIconKey(string label) => "icons/catalogue/" + (label ?? "").Trim().ToLowerInvariant().Replace(' ', '_');
 
         static readonly Dictionary<PlanetId, List<CatalogueEntry>> cache = new Dictionary<PlanetId, List<CatalogueEntry>>();
 
@@ -66,7 +70,7 @@ namespace Meridian.Survey
                     list.Add(new CatalogueEntry { id = MineralId(def.id), kind = EntryKind.Mineral, planet = p, name = def.name, itemId = def.id });
             }
             foreach (var poi in PoiCatalog.For(p))
-                list.Add(new CatalogueEntry { id = SiteId(poi), kind = EntryKind.Site, planet = p, name = Pretty(poi.label.ToLowerInvariant()) });
+                list.Add(new CatalogueEntry { id = SiteId(poi), kind = EntryKind.Site, planet = p, name = Pretty(poi.label.ToLowerInvariant()), artKey = SiteIconKey(poi.label) });
             cache[p] = list;
             return list;
         }

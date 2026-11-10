@@ -29,7 +29,9 @@ namespace Meridian.Creatures
 
     /// <summary>What a creature does about the player.</summary>
     /// <summary>U-114: Territorial holds its ground (faces, rears, huffs) within senseRange and bolts when pushed inside CreatureDirector.PushRange.</summary>
-    public enum Temper { Flees, Hunts, Territorial }
+    /// <summary>U-192 (LEAD cycle 291, with B-224's passive redraw): Drifts meanders along its lane and parts around the Pilgrim (or the
+    /// surveyor on foot) inside senseRange, swerving away in height with its `attack` clip as the swerve; it never chases and never bumps.</summary>
+    public enum Temper { Flees, Hunts, Territorial, Drifts }
 
     public enum ActiveTime { Any, Day, Night }
 
@@ -152,8 +154,11 @@ namespace Meridian.Creatures
             new SpeciesSpec { id = Species.VentEel, planet = PlanetId.Venus, artKey = "creatures/venus/vent_eel", den = "props/venus/vent_mouth", size = new Vector2(2.0f, 0.55f), // U-125 (D-126): it peeks from its vent, a separate prop (B-154)
                 wanderSpeed = 1.6f, runSpeed = 6f, jumpSpeed = 5f, temper = Temper.Hunts, senseRange = 10f, time = ActiveTime.Any,
                 packMin = 1, packMax = 3, maxAlive = 5, placeholder = new Color(0.8f, 0.35f, 0.2f) },
-            new SpeciesSpec { id = Species.VeilSerpent, planet = PlanetId.Venus, artKey = "creatures/venus/veil_serpent", size = new Vector2(9.8f, 2.3f), artScale = 3f,
-                wanderSpeed = 2.5f, runSpeed = 6.5f, temper = Temper.Hunts, senseRange = 18f, time = ActiveTime.Any, habitat = Habitat.Deck,
+            // U-192 (G6, ruled 11-09): B-224's v3 sheet draws the serpent 224 px long at 64 px a metre: a 3.5 m serpent drawn at 1x (the game
+            // still drew it 3x, as for the v2 sheet: about 600 px on screen, its ink three times heavier than the station's and soft). With
+            // the redraw's passive look: a gentle drifter (Temper.Drifts) that parts around the ship inside 8 m; it hunted from 18 m.
+            new SpeciesSpec { id = Species.VeilSerpent, planet = PlanetId.Venus, artKey = "creatures/venus/veil_serpent", size = new Vector2(3.5f, 1.0f),
+                wanderSpeed = 2.5f, runSpeed = 6.5f, temper = Temper.Drifts, senseRange = 8f, time = ActiveTime.Any, habitat = Habitat.Deck,
                 packMin = 1, packMax = 1, maxAlive = 1, apex = true, placeholder = new Color(0.95f, 0.7f, 0.5f) },
             new SpeciesSpec { id = Species.Gull, planet = PlanetId.Earth, artKey = "creatures/earth/gull", size = new Vector2(0.7f, 0.5f),
                 wanderSpeed = 2.5f, runSpeed = 7f, temper = Temper.Flees, senseRange = 6f, time = ActiveTime.Day, habitat = Habitat.Air,

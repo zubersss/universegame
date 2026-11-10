@@ -135,25 +135,52 @@ namespace Meridian.UI
             enabled = false;
         }
 
+        /// <summary>An entry's icon: a mineral's item icon, a creature's first frame, a site's icons/catalogue/&lt;label&gt; (U-192, D-187:
+        /// B-223's camp and B-233's ten). Null while it loads, and for a site whose icon is not exported (the slot stays empty).</summary>
         Sprite IconOf(CatalogueEntry e)
         {
             if (e.kind == EntryKind.Mineral) return ItemIcons.Get(e.itemId, FindAnyObjectByType<Meridian.Terrain.TerrainStreamer>());
-            if (e.kind != EntryKind.Creature || string.IsNullOrEmpty(e.artKey)) return null;
+            if (string.IsNullOrEmpty(e.artKey)) return null;
             if (creatureIcons.TryGetValue(e.artKey, out var sp)) return sp;
             if (creatureRequested.Add(e.artKey))
             {
                 var key = e.artKey;
-                var h = ArtLoad.Asset<IList<Sprite>>(key);
-                handles.Add(h);
-                h.Completed += op =>
+                if (e.kind == EntryKind.Site)
                 {
-                    if (op.Status != AsyncOperationStatus.Succeeded || op.Result == null || op.Result.Count == 0) return;
-                    Sprite first = op.Result[0];
-                    foreach (var s in op.Result) if (s.name.EndsWith("_0")) first = s;
-                    creatureIcons[key] = first;
-                    dirty = true;
-                };
+                    // a key not exported yet is probed quietly (D-143): no error, the slot stays empty
+                    var loc = Addressables.LoadResourceLocationsAsync(key);
+                    loc.Completed += l =>
+                    {
+                        bool exists = l.Status == AsyncOperationStatus.Succeeded && l.Result != null && l.Result.Count > 0;
+                        ArtLoad.Release(l);
+                        if (exists && this != null) LoadIcon(key);
+                    };
+                }
+                else LoadIcon(key);
             }
+            return null;
+        }
+
+        void LoadIcon(string key)
+        {
+            var h = ArtLoad.Asset<IList<Sprite>>(key);
+            handles.Add(h);
+            h.Completed += op =>
+            {
+                if (op.Status != AsyncOperationStatus.Succeeded || op.Result == null || op.Result.Count == 0) return;
+                Sprite first = op.Result[0];
+                foreach (var s in op.Result) if (s.name.EndsWith("_0")) first = s;
+                creatureIcons[key] = first;
+                dirty = true;
+            };
+        }
+
+        /// <summary>The icon the cell of entry `id` shows now (null: none, or the entry is not on the shown planet); tests and captures.</summary>
+        public Sprite IconShownFor(string id)
+        {
+            var list = Catalogue.For(Shown);
+            for (int i = 0; i < list.Count && i < cells.Count; i++)
+                if (list[i].id == id) return cells[i].icon.enabled ? cells[i].icon.sprite : null;
             return null;
         }
 

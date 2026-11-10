@@ -188,6 +188,59 @@ namespace Meridian.Tests
             LogAssert.NoUnexpectedReceived();
         }
 
+        /// <summary>U-192 (LEAD cycle 291; G6 ruled 11-09): the veil serpent is a gentle drifter drawn at 1x of B-224's sheet (a 3.5 m
+        /// serpent; it was drawn 3x and hunted from 18 m). Far from the surveyor it meanders; inside 8 m it swerves away in height with
+        /// its attack clip as the swerve; it never chases and never bumps.</summary>
+        [UnityTest]
+        public IEnumerator TheVeilSerpentDriftsAndPartsAroundTheSurveyor()
+        {
+            yield return Boot(PlanetId.Venus);
+            var spec = SpeciesSpec.Get(Species.VeilSerpent);
+            Assert.AreEqual(Temper.Drifts, spec.temper, "a gentle drifter");
+            Assert.AreEqual(1f, spec.artScale, 1e-6f, "drawn at 1x of its sheet");
+            Assert.AreEqual(3.5f, spec.size.x, 1e-4f, "a 3.5 m serpent");
+            Assert.AreEqual(8f, spec.senseRange, 1e-4f, "it parts around what comes within 8 m");
+            var station = Meridian.Planet.POI.PoiCatalog.MeridianStation;
+            float until = Time.realtimeSinceStartup + 5f;
+            while (side.pois.Solids.Count < 5 && Time.realtimeSinceStartup < until) yield return null;
+            yield return PutAt(new Vector2(station.x + 10f, station.floatY + (336f - 62f) / 128f + 1.5f));
+            creatures.autoSpawn = false;
+            creatures.DespawnAll();
+            Vector2 p = player.Body.position;
+            Assert.Less(Vector2.Distance(creatures.PartedAround(), p), 0.5f, "on foot, it is the surveyor it parts around");
+            int bumps = creatures.Bumps;
+
+            // far off: it meanders on, no swerve
+            var far = creatures.Spawn(Species.VeilSerpent, p + new Vector2(22f, 5f));
+            Assert.NotNull(far);
+            for (int i = 0; i < 300 && far.Held; i++) yield return new WaitForFixedUpdate();
+            bool chased = false;
+            for (int i = 0; i < 100; i++) { chased |= far.State == CreatureState.Chase || far.State == CreatureState.Flee; yield return new WaitForFixedUpdate(); }
+            Assert.IsFalse(chased, "22 m off it neither chases nor flees");
+            Assert.AreEqual(0, far.Swerves, "and does not swerve");
+            Assert.AreEqual(1f, far.View.transform.localScale.x, 1e-4f, "the view at 1x");
+            Assert.That(far.View.bounds.size.x, Is.InRange(3f, 4.6f), "drawn about 4 m across (a 256 px frame at 64 px a metre), not 12");
+            creatures.Despawn(far);
+
+            // close, a little above the surveyor: it swerves off upward, its attack clip the swerve, and never comes at the surveyor
+            var near = creatures.Spawn(Species.VeilSerpent, p + new Vector2(4f, 1.5f));
+            Assert.NotNull(near);
+            for (int i = 0; i < 300 && near.Held; i++) yield return new WaitForFixedUpdate();
+            float gap0 = Mathf.Abs(near.Body.position.y - p.y);
+            bool clip = false; chased = false;
+            for (int i = 0; i < 150; i++) { chased |= near.State == CreatureState.Chase; clip |= near.AttackClipPlaying; yield return new WaitForFixedUpdate(); }
+            float gap1 = Mathf.Abs(near.Body.position.y - player.Body.position.y);
+            TestContext.Out.WriteLine($"[MERIDIAN] u192 serpent: swerves {near.Swerves}, the height between it and the surveyor {gap0:0.0} -> {gap1:0.0} m, steering for {near.SteersFor - player.Body.position.y:+0.0;-0.0} m, state {near.State}, bumps {creatures.Bumps - bumps}");
+            Assert.IsFalse(chased, "it never chases");
+            Assert.GreaterOrEqual(near.Swerves, 1, "inside 8 m it swerves");
+            Assert.IsTrue(clip, "its attack clip plays as the swerve");
+            Assert.Greater(near.SteersFor, player.Body.position.y + gap0, "it steers for a height further above the surveyor than it began");
+            Assert.Greater(gap1, gap0 + 0.5f, "and has moved off");
+            Assert.AreEqual(bumps, creatures.Bumps, "it never bumps the surveyor");
+            creatures.DespawnAll();
+            LogAssert.NoUnexpectedReceived();
+        }
+
         [UnityTest]
         public IEnumerator AiStaysUnderHalfAMillisecondWith20InnerCreatures()
         {

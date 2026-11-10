@@ -25,6 +25,36 @@ namespace Meridian.Tests
             foreach (var e in mars) Assert.IsTrue(ids.Add(e.id), "unique " + e.id);
         }
 
+        /// <summary>U-192 (D-187): every site entry carries its icon's key, icons/catalogue/&lt;the POI's label lowercased, spaces as _&gt;
+        /// (from the label the entry is named by, never the POI's id), and all eleven icons are in the art folder: B-223's camp and
+        /// B-233's ten.</summary>
+        [Test]
+        public void EverySiteHasItsIconByItsLabel()
+        {
+            Assert.AreEqual("icons/catalogue/meridian_beacon", Catalogue.SiteIconKey("MERIDIAN BEACON"), "the label, not the id mercury_beacon");
+            Assert.AreEqual("icons/catalogue/solarite", Catalogue.SiteIconKey("SOLARITE"), "not solarite_field");
+            Assert.AreEqual("icons/catalogue/camp", Catalogue.SiteIconKey("CAMP"), "not spawn_camp");
+            Assert.AreEqual("icons/catalogue/launch_complex", Catalogue.SiteIconKey("LAUNCH COMPLEX"), "not coastal_launch_complex");
+            var keys = new HashSet<string>();
+            foreach (PlanetId p in System.Enum.GetValues(typeof(PlanetId)))
+                foreach (var e in Catalogue.For(p))
+                {
+                    if (e.kind != EntryKind.Site) { if (e.kind == EntryKind.Mineral) Assert.IsNull(e.artKey, e.id + ": a mineral's icon is its item's"); continue; }
+                    StringAssert.StartsWith("icons/catalogue/", e.artKey, e.id);
+                    Assert.AreEqual(e.artKey, e.artKey.ToLowerInvariant(), e.id + ": lower case");
+                    Assert.IsFalse(e.artKey.Contains(" "), e.id + ": no spaces");
+                    Assert.IsTrue(System.IO.File.Exists($"Assets/_Game/Art/{e.artKey}_color.png"), $"{e.id}: the icon {e.artKey} is exported");
+                    Assert.IsTrue(System.IO.File.Exists($"Assets/_Game/Art/{e.artKey}.json"), $"{e.id}: {e.artKey}'s sidecar");
+                    keys.Add(e.artKey);
+                }
+            CollectionAssert.AreEquivalent(new[]
+            {
+                "icons/catalogue/camp", "icons/catalogue/survey_archive", "icons/catalogue/launch_complex", "icons/catalogue/halcyon_hauler",
+                "icons/catalogue/warden_outpost", "icons/catalogue/flare_shelter", "icons/catalogue/warden_vault", "icons/catalogue/meridian_beacon",
+                "icons/catalogue/solarite", "icons/catalogue/meridian_station", "icons/catalogue/vent_harvester",
+            }, keys, "the eleven site icons");
+        }
+
         [Test]
         public void FirstScanPaysOnceAndCompletionCounts()
         {
