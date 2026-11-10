@@ -8,9 +8,8 @@
                                       T4 crystal seams + glints T5 dark glassy veins and a few embers
                                     Painted shapes with soft edges and paper grain; NO ink outline (it sits behind the fill;
                                     UNITY darkens it with depth and distance from the opening, U-196).
-  terrain/common/rim_shadow         256x64, tileable in x: ink at alpha 0.55 on row 0 fading to 0 by row 63 with a gently
-                                    ragged foot; UNITY lays it along every dug edge, row 0 on the edge, pointing into the hole
-                                    (0.3 m = ~19 px of it reads strongly; the rest is the soft tail).
+  (terrain/common/rim_shadow, a 256x64 ink fade for the dug edges, was exported with the walls and retired the same day:
+   UNITY draws its own rim gradient. rim_shadow() below still paints it into the sheet's dug cells.)
 
   python -I build_back_wall_v3.py <review png> [planet]   the lock-free sheet per planet: each tier tiled 2x2 beside its
                                                           fill at 1x, and a 10 m shaft mock-up with the darkening painted in
@@ -35,7 +34,7 @@ N = S * SS
 
 
 def keys():
-    return [f"terrain/{p}/back_wall_t{t}" for p in PLANETS for t in range(1, 6)] + ["terrain/common/rim_shadow"]
+    return [f"terrain/{p}/back_wall_t{t}" for p in PLANETS for t in range(1, 6)]
 
 
 # ---------------------------------------------------------------- colours: the tier's fill snapped to the palette
@@ -407,16 +406,8 @@ def export(art):
                                    "outline; UNITY darkens it with depth and distance from the opening (U-196)"}, f, indent=2)
                 f.write("\n")
             out.append((f"terrain/{planet}/back_wall_t{t}", S, S, n))
-    rs = rim_shadow()
-    base = os.path.join(art, "terrain", "common", "rim_shadow")
-    os.makedirs(os.path.dirname(base), exist_ok=True)
-    n = pngio.write_png(base + "_color.png", rs)
-    with open(base + ".json", "w", encoding="utf-8", newline="\n") as f:
-        json.dump({"key": "terrain/common/rim_shadow", "style": "v3", "width": S, "height": 64, "ppu": 64, "tile_x": True,
-                   "note": "B-230 (D-183): ink at alpha 0.55 on row 0 fading to 0 by row ~46-63 (a ragged foot); row 0 on the dug edge, "
-                           "the strip pointing into the hole"}, f, indent=2)
-        f.write("\n")
-    out.append(("terrain/common/rim_shadow", S, 64, n))
+    # terrain/common/rim_shadow is no longer exported (LEAD 18:2x: UNITY keeps its own rim gradient, no draw call, so the strip
+    # was imported but unused); rim_shadow() stays for the sheet's mock-up of a dug cell
     return out
 
 

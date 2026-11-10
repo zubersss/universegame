@@ -1,9 +1,0 @@
-{
-  "key": "terrain/common/rim_shadow",
-  "style": "v3",
-  "width": 256,
-  "height": 64,
-  "ppu": 64,
-  "tile_x": true,
-  "note": "B-230 (D-183): ink at alpha 0.55 on row 0 fading to 0 by row ~46-63 (a ragged foot); row 0 on the dug edge, the strip pointing into the hole"
-}
