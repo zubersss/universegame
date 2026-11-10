@@ -179,7 +179,7 @@ namespace Meridian.Tests
                 BeginCapture();
                 yield return WaitBusyCycle(transitions, 10f);
                 yield return null;
-                EndCapture("the LAUNCH's last 300 frames, to one frame past its end (the frame the gate's Space window opens with)", 12, 4);
+                EndCapture("the LAUNCH's last 300 frames, to one frame past its end (the frame the gate's Space window opens with)", 12, 4, "Save.Write");
                 var spaceShip = director.Space.GetComponentInChildren<SpaceShip>();
                 spaceShip.externalInput = true;
                 spaceShip.intent = default;
@@ -188,7 +188,7 @@ namespace Meridian.Tests
                 spaceShip.Velocity = Vector2.zero;
                 BeginCapture();
                 for (int i = 0; i < Window; i++) yield return null;
-                EndCapture("Space, the gate's window (straight after the launch, parked outside Earth's well)");
+                EndCapture("Space, the gate's window (straight after the launch, parked outside Earth's well)", 14, 3, "Save.Write");
                 for (int i = 0; i < 300; i++) yield return null;
                 BeginCapture();
                 for (int i = 0; i < Window; i++) yield return null;
@@ -203,14 +203,14 @@ namespace Meridian.Tests
                 BeginCapture();
                 yield return WaitBusyCycle(transitions, 15f);
                 yield return null;
-                EndCapture("the ENTRY's last 300 frames, to one frame past its end", 12, 4);
+                EndCapture("the ENTRY's last 300 frames, to one frame past its end", 12, 4, "Save.Write");
                 side = director.PlanetSide;
                 Assert.NotNull(side, "entered a planet");
                 Assert.AreEqual(Meridian.Planets.PlanetId.Mars, side.Config.id);
                 while (!side.terrain.IsSettled) yield return null;
                 BeginCapture();
                 for (int i = 0; i < Window; i++) yield return null;
-                EndCapture("Mars, the gate's window (from the frame the terrain settles after the entry)");
+                EndCapture("Mars, the gate's window (from the frame the terrain settles after the entry)", 14, 3, "Save.Write");
                 for (int i = 0; i < 300; i++) yield return null;
                 BeginCapture();
                 for (int i = 0; i < Window; i++) yield return null;

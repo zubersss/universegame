@@ -111,9 +111,17 @@ namespace Meridian.Save
             sinceAutosave = 0f;
             var state = GameState.Instance;
             if (state == null) return;
+            // U-211: the save's steps named for the Profiler (compiled out of the release player): it runs on the main thread in the
+            // first frame after a transition's iris has opened, and every five minutes of play.
+            UnityEngine.Profiling.Profiler.BeginSample("Save.Write");
+            UnityEngine.Profiling.Profiler.BeginSample("Save.Capture");
             var data = Capture(state);
+            UnityEngine.Profiling.Profiler.EndSample();
+            UnityEngine.Profiling.Profiler.BeginSample("Save.Backups");
             Directory.CreateDirectory(SlotFolder);
             RotateBackups();
+            UnityEngine.Profiling.Profiler.EndSample();
+            UnityEngine.Profiling.Profiler.BeginSample("Save.Terrain");
             foreach (var kv in state.AllEdits)
             {
                 if (kv.Value.Count == 0) continue;
@@ -124,7 +132,11 @@ namespace Meridian.Save
             // Drop terrain files of planets whose edits are now empty.
             foreach (var f in Directory.GetFiles(SlotFolder, "terrain_*.bin"))
                 if (!data.terrainFiles.Contains(Path.GetFileName(f))) File.Delete(f);
+            UnityEngine.Profiling.Profiler.EndSample();
+            UnityEngine.Profiling.Profiler.BeginSample("Save.State");
             WriteAtomic(Path.Combine(SlotFolder, StateFile), JsonUtility.ToJson(data, true));
+            UnityEngine.Profiling.Profiler.EndSample();
+            UnityEngine.Profiling.Profiler.EndSample();
             SaveCount++;
         }
 
