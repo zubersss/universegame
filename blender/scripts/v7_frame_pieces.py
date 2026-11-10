@@ -563,6 +563,10 @@ def piece(ids, plain=False):
         if BUDGET_S and time.time() - T0 > BUDGET_S:                                        # a turn is <= 10 min: no new set is begun past the budget
             left += pids
             continue
+        # (Run 1, 16:02: four sets in ONE process crept from about 0.9 GB to 1136 MB and the watchdog stopped it inside
+        # the anthurium. A process keeps what the sets before left behind: call this with ONE OR TWO sets a run.)
+        import gc
+        gc.collect()
         scene = V.fresh()
         obs = V.load(asset)
         mats = materials(obs)

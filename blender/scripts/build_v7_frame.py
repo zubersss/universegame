@@ -74,7 +74,9 @@ STAGE = {
     "play_front": dict(haze=0.0, pieces=[("grass_mid", 3.3, -0.02, 0.42, False), ("grass_wide", 7.7, -0.03, 0.60, False),
                                          ("grass_seed", 9.25, -0.02, 0.40, False), ("grass_wide", 15.9, -0.02, 0.50, False)]),
     # the foreground: x from the VIEW's left edge (a negative x: from its right edge), so it frames both cameras
-    "foreground": dict(pieces=[("calathea_a", 0.5, -2.05, 2.6, True), ("fern_b", 2.3, -3.3, 2.2, False),
+    # D-206b (contract 12.8): the foreground CLEARS ROUND THE SURVEYOR (the game fades a foreground instance within 2.5 m
+    # of the surveyor's x): it stands at the frame's SIDES, never over the figure or the ground under its feet.
+    "foreground": dict(pieces=[("calathea_a", 0.5, -2.05, 2.6, True), ("fern_b", 1.4, -3.2, 1.5, False),
                                ("anthurium_a", -0.6, -2.3, 2.5, True), ("fern_c", -2.6, -3.5, 2.4, True)]),
 }
 # The layers' own numbers (B-260's stage format: the composer and the game read the same table). parallax = the share of
@@ -105,6 +107,17 @@ def check_stage():
             seen.setdefault((pid, round(scale, 3)), []).append(x_m)
             if layer == "play_front" and piece(pid)[1]["height_m"] * scale > 0.30:
                 bad.append(f"play_front: {pid} x{scale} stands {piece(pid)[1]['height_m'] * scale:.2f} m (over 0.30)")
+            if layer == "foreground":                                                        # D-206b: clear of the surveyor by 2.5 m, at both cameras
+                m = piece(pid)[1]
+                for ppm in (96, 128):
+                    s = scale * (96.0 / ppm) ** 0.5
+                    x0v = CX - W / (2.0 * ppm)
+                    xv = x0v + x_m if x_m >= 0 else x0v + W / float(ppm) + x_m
+                    wm = m["size_px"][0] / m["px_per_m"] * s
+                    piv = (1 - m["pivot"][0]) if flip else m["pivot"][0]
+                    lo_x, hi_x = xv - piv * wm, xv + (1 - piv) * wm
+                    if lo_x < SPAWN_X + 2.5 and hi_x > SPAWN_X - 2.5:
+                        bad.append(f"foreground: {pid} spans {lo_x:.1f}..{hi_x:.1f} m at {ppm} px per metre: within 2.5 m of the surveyor at {SPAWN_X}")
     if bad:
         raise SystemExit("build_v7_frame: the stage breaks D-206:\n  " + "\n  ".join(bad))
     return n
