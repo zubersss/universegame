@@ -6,11 +6,10 @@ Owner: LEAD (only the Lead edits this). Do the open items below, then tell the L
 
 ## Open
 
-### USER-47 — Your Canva image credits ran out, and the more detailed look needs them (2 min)
-You asked for a look that is a lot more detailed and as close to the film as we can get. The honest finding from today's test: plants and brush work painted by the AI in your Canva are far better drawn than anything our own code paints, so the detailed backgrounds have to be built mostly from AI-painted pieces. Four sheets were made today (three sheets of brush marks, one sheet of nine jungle plants). Then Canva refused the next two with "You have exceeded your credit quota".
-- If you do nothing: the surveyor gets its detail anyway (that is drawn by our code), and the backgrounds get as detailed as four sheets allow. They will fall short of what you asked for.
-- To get the backgrounds close: in Canva, look at your plan's AI image credits (Account settings, then Billing and plans). Tell the Lead "credits are back" when there are some. About twenty more sheets are wanted (ferns, grasses, palms, vines, tree trunks, logs, rocks, ground litter, misty far jungle).
-- Or say "use something else" if you would rather the Lead not spend Canva credits; the Lead will say what else is possible.
+### USER-47 — Your Canva image credits ran out (optional again, nothing waits on it)
+Four AI-painted sheets were made in your Canva today, then Canva refused more ("You have exceeded your credit quota"). After your last message the team changed method (real 3D models rendered as paintings in Blender), which does not need Canva. AI-painted pieces are now only an extra.
+- You need to do nothing.
+- If credits come back and you would like them used for extra painted plants, say "credits are back".
 
 ### USER-45 — Play Build 0.6.3: ten minutes of the rebuilt digging (10 min)
 You said digging felt disconnected from your clicks and from the surveyor. It has been rebuilt. The page with frame-by-frame pictures: https://claude.ai/artifact/TdyF9gzKsFWzXebcu5KUSm
