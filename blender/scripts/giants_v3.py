@@ -74,6 +74,17 @@ def storm_blobs(s):
 RIM = (0.012, 3, 0.008, 5)                             # the far disc's lumpy limb: r(angle) = 1 + a3 * sin(3 angle + ph3)
 #                                                         + a5 * sin(5 angle + ph5), the two phases drawn per body (Disc)
 
+# The far disc's interior ink marks (build_discs_v3.interior_marks; 1.25 px), B-240: lifted here so the close view can place
+# the same marks where the far disc has them (a mark on the strips' own rhythm would jump at the swap).
+#   hatch: in the night crescent, `count` short diagonal strokes per group: stroke j runs from (u0 + step j - L/2, v0 + step
+#          j - L/2) to (+ L/2, + L/2), L = max(length, 6 px on a small disc); skipped where u^2 + v^2 > limit
+#   dash:  near each of a giant's band_edges (v = vb), one per u0: from u = uu to uu + length, uu = u0 + drift * sin(ph +
+#          vb * drift_per_v), its height vb + wave_amp * sin(wave_freq * u + ph), ph = 2 pi frame / loop; skipped where
+#          (|uu| + length)^2 + vb^2 > limit. (It rides NEAR the belt's edge, on its own gentler wave, not on the edge.)
+MARKS = {"hatch": {"groups": ((-0.62, -0.42), (-0.30, -0.80)), "count": 3, "step": 0.06, "length": 0.10, "limit": 0.86},
+         "dash": {"u0": (-0.35, 0.25), "length": 0.22, "drift": 0.05, "drift_per_v": 7, "wave_amp": 0.04, "wave_freq": 4.0,
+                  "limit": 0.9, "points": 6}}
+
 
 def close_json(name, pal, to_hex, radius_u, loop_frames, fps, rim_phases=None):
     """The DRAFT of planets/<giant>/close.json (B-239: into blender/preview only; the close view is not carded as art).
@@ -96,7 +107,18 @@ def close_json(name, pal, to_hex, radius_u, loop_frames, fps, rim_phases=None):
         "edge_wobble": {"amp": g["wob"], "freq": g["freq"],
                         "formula": "edge y(x) = v_top - amp * sin(freq * pi * x + phase) * (1 - v_top^2); "
                                    "phase = 2 * pi * frame / loop_frames"},
-        "ink_dash_edges": list(g["band_edges"]),
+        "ink_marks": {
+            "width_px_far": 1.25,
+            "dashes": dict(MARKS["dash"], u0=list(MARKS["dash"]["u0"]), edges=list(g["band_edges"]),
+                           formula="per edge vb and per u0: uu = u0 + drift * sin(phase + vb * drift_per_v); the dash runs u = uu "
+                                   "... uu + length at v(u) = vb + wave_amp * sin(wave_freq * u + phase); skipped where "
+                                   "(|uu| + length)^2 + vb^2 > limit; phase = 2 * pi * frame / loop_frames"),
+            "night_hatches": dict(MARKS["hatch"], groups=[list(p) for p in MARKS["hatch"]["groups"]],
+                                  formula="stroke j (0 .. count - 1) of a group (u0, v0): from (u0 + step * j - length / 2, "
+                                          "v0 + step * j - length / 2) to (+ length / 2, + length / 2); skipped where "
+                                          "u^2 + v^2 > limit at its centre"),
+            "note": "drawn over everything, storms included, as on the far disc",
+        },
         "night": {"centre": list(NIGHT["centre"]), "radius": NIGHT["radius"], "toward_hex": to_hex(pal[SHADE[0]]), "t": SHADE[1],
                   "note": "the face outside this circle is the night crescent: each tone mixed t of the way to toward_hex "
                           "(night_hex per belt)"},

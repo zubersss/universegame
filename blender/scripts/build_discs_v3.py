@@ -273,20 +273,22 @@ def interior_marks(name, d, f, nf):
     giants a few short band-edge fragments that drift with the bands (in px at SS)."""
     k, c = d.R * SS, d.size * SS / 2
     marks = []
-    L = max(0.10, 6.0 / getattr(d, "R_base", d.R))   # at least ~6 px long on the small far discs (kept on near frames)
-    for (u0, v0) in ((-0.62, -0.42), (-0.30, -0.80)):
-        for j in range(3):
-            uu, vv = u0 + 0.06 * j, v0 + 0.06 * j
-            if uu * uu + vv * vv > 0.86:
+    hz, ds = GT.MARKS["hatch"], GT.MARKS["dash"]     # B-240: the marks' numbers from the shared table (the close view's too)
+    L = max(hz["length"], 6.0 / getattr(d, "R_base", d.R))   # at least ~6 px long on the small far discs (kept on near frames)
+    for (u0, v0) in hz["groups"]:
+        for j in range(hz["count"]):
+            uu, vv = u0 + hz["step"] * j, v0 + hz["step"] * j
+            if uu * uu + vv * vv > hz["limit"]:
                 continue
             marks.append((np.array([(c + (uu - L / 2) * k, c - (vv - L / 2) * k), (c + (uu + L / 2) * k, c - (vv + L / 2) * k)]), IN_PX))
     ph = 2 * np.pi * f / nf
     for vb in BAND_EDGES.get(name, ()):
-        for u0 in (-0.35, 0.25):
-            uu = u0 + 0.05 * math.sin(ph + vb * 7)
-            if (abs(uu) + 0.22) ** 2 + vb * vb > 0.9:
+        for u0 in ds["u0"]:
+            uu = u0 + ds["drift"] * math.sin(ph + vb * ds["drift_per_v"])
+            if (abs(uu) + ds["length"]) ** 2 + vb * vb > ds["limit"]:
                 continue
-            pts = [(c + (uu + t_) * k, c - (vb + 0.04 * math.sin(4.0 * (uu + t_) + ph)) * k) for t_ in np.linspace(0, 0.22, 6)]
+            pts = [(c + (uu + t_) * k, c - (vb + ds["wave_amp"] * math.sin(ds["wave_freq"] * (uu + t_) + ph)) * k)
+                   for t_ in np.linspace(0, ds["length"], ds["points"])]
             marks.append((np.array(pts), IN_PX))
     return marks
 
