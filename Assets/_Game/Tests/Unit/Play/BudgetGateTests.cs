@@ -110,13 +110,57 @@ namespace Meridian.Tests
                 Info($"Geometry · {where}", "≤ 500 k triangles, ≤ 150 shadow casters (v3)", "n/a (no graphics device)", "skipped");
             Row($"2D lights visible · {where}", "≤ 8 (hard cap 12)", r.lightsVisible.ToString(), r.lightsVisible <= BudgetMonitor.LightsTarget);
             Row($"Particles alive · {where}", "≤ 1500 (v3)", r.particlesAlive.ToString(), r.particlesAlive <= BudgetMonitor.ParticlesCap);
-            Row($"GC per 300 frames · {where}", "≤ 1 KB (main-thread managed allocations; P-16)",
-                $"{gc.gcBytesLast300} B (Unity GC counter incl. Editor: {gc.gcProfilerBytes / 1024} KB)", gc.gcBytesLast300 <= BudgetMonitor.GcBytesPer300);
+            // The GC row waits for the Editor's own floor, read once at the end of the run (FloorThenGcRows): its place is kept here.
+            gcRows.Add((rows.Count, where, gc.gcProfilerBytes, gc.frames));
+            rows.Add(new[] { $"GC per 300 frames · {where}", GcLimit, "pending the floor", "pending" });
             // D-036/D-058: memory is judged in the development build (unity_profile -Build); the Editor row is info only.
             bool memOk = Within(r.workingSetMB, BudgetMonitor.WorkingSetMB) && Within(r.textureMemoryMB, BudgetMonitor.TexturesMB) && Within(r.audioMemoryMB, BudgetMonitor.AudioMB);
             Info($"Memory · {where} (Editor)", "< 2.0 GB working set (warn 1.7), ≤ 512 MB textures, ≤ 150 MB audio; meshes reported (v4, D-089)",
                 $"working set {Mb(r.workingSetMB)}, system {Mb(r.systemMemoryMB)}, textures {Mb(r.textureMemoryMB)}, meshes {Mb(r.meshMemoryMB)}, audio {Mb(r.audioMemoryMB)} (Editor process: upper bound)",
                 memOk ? "info (within)" : "info (over; the dev-build row decides, D-058)");
+        }
+
+        // ---- the GC rows (08:3x) ----
+        // Until 0.6.2 the row judged BudgetMonitor's main-thread figure (P-16), System.GC.GetAllocatedBytesForCurrentThread, which reads
+        // 0 B for any allocation in Unity's runtime: the row was green on nothing in every gate, with the live counter printed beside
+        // it unjudged (410 KB to 9.6 MB per 300 frames). The row now judges Unity's own "GC Allocated In Frame" over the window, less
+        // the Editor's and the test runner's own bytes, read at the end of this run with every root object of the scene inactive.
+        const string GcLimit = "≤ 1 KB of the game's own (Unity's 'GC Allocated In Frame' over the window, less the Editor's floor read in this run)";
+        readonly List<(int row, string where, long live, int frames)> gcRows = new List<(int, string, long, int)>();
+
+        /// <summary>Reads the Editor's floor (after a control: the counter must show a known 64 KB array) and fills the GC rows in.</summary>
+        IEnumerator FloorThenGcRows()
+        {
+            long floor = 0, seenKnown = 0;
+            bool live;
+            var off = new List<GameObject>();
+            using (var rec = Unity.Profiling.ProfilerRecorder.StartNew(Unity.Profiling.ProfilerCategory.Memory, "GC Allocated In Frame"))
+            {
+                for (int i = 0; i < 3; i++) yield return null;
+                var known = new byte[65536];
+                for (int i = 0; i < 3; i++) { yield return null; seenKnown = Math.Max(seenKnown, rec.LastValue); }
+                GC.KeepAlive(known);
+                live = rec.Valid && seenKnown >= 65536;
+                foreach (var root in SceneManager.GetActiveScene().GetRootGameObjects())
+                    if (root.activeSelf) { root.SetActive(false); off.Add(root); }
+                for (int i = 0; i < 10; i++) yield return null;
+                for (int i = 0; i < Frames; i++) { yield return null; floor += rec.LastValue; }
+                foreach (var root in off) if (root != null) root.SetActive(true);
+                for (int i = 0; i < 10; i++) yield return null;
+            }
+            notes.Add($"GC rows: Unity's 'GC Allocated In Frame'; the control (a 65536 B array) read {seenKnown} B{(live ? "" : ": THE COUNTER IS NOT LIVE, the rows are not judged green")}; the Editor's and the test runner's own floor {floor} B per {Frames} frames ({floor / Math.Max(1, Frames)} B a frame), read with every root object inactive");
+            foreach (var g in gcRows)
+            {
+                long share = g.frames > 0 ? floor * g.frames / Frames : floor;
+                long game = g.live - share;
+                bool ok = live && game <= BudgetMonitor.GcBytesPer300;
+                // D-201 (LEAD 08:3x): Earth's rows gate the build (the owner's playtest is Earth's dig); a scene over on Mars or in
+                // Space is U-211's (first after 0.6.3): shown RED with its number, named, not a gate failure
+                bool gates = g.where.StartsWith("Earth", StringComparison.Ordinal);
+                string measured = $"{game} B of the game's own ({g.live} B in the window of {g.frames} frames, the floor {share} B)";
+                rows[g.row] = new[] { $"GC per 300 frames · {g.where}", GcLimit, measured, ok ? "green" : gates ? "RED" : "RED: U-211 (D-201: does not gate 0.6.3)" };
+                if (!ok && gates) failures.Add($"GC per 300 frames · {g.where}: {measured} (limit {GcLimit})");
+            }
         }
 
         static string Mb(long v) => v < 0 ? "n/a" : $"{v} MB";
@@ -305,6 +349,7 @@ namespace Meridian.Tests
             }
             finally { Meridian.View2D.CartoonStage.Enabled = wasCartoon; }
 
+            yield return FloorThenGcRows();
             StaticRows();
             WriteReport();
             Assert.IsEmpty(failures, "budgets over: " + string.Join("; ", failures));

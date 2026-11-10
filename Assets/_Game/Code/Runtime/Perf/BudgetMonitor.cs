@@ -12,8 +12,10 @@ namespace Meridian.Perf
         public int frames;
         public long drawCalls;            // last rendered frame; -1 when no graphics device
         public long triangles, shadowCasters; // U-077 (Bible §11.1 geometry row): last rendered frame; -1 when unavailable
-        public long gcBytesLast300;       // managed bytes allocated on the main thread (gameplay code) over the window
-        public long gcProfilerBytes;      // Unity "GC Allocated In Frame" counter over the window (in the Editor it includes Editor work)
+        // Unity's "GC Allocated In Frame" counter over the window (in the Editor it includes Editor work: BudgetGate takes the floor off).
+        // The one live measure: the main-thread figure that stood here until 0.6.2 (System.GC.GetAllocatedBytesForCurrentThread) reads
+        // 0 B for any allocation in Unity's runtime and is gone.
+        public long gcProfilerBytes;
         public int lightsVisible;         // 2D lights touching the camera view (global lights included)
         public int particlesAlive;
         public long systemMemoryMB, textureMemoryMB, audioMemoryMB; // -1 when the counter is unavailable
@@ -49,9 +51,7 @@ namespace Meridian.Perf
         public static BudgetMonitor Instance { get; private set; }
 
         readonly float[] frameMs = new float[Window];
-        readonly long[] gcBytes = new long[Window];
         readonly long[] gcProfiler = new long[Window];
-        long lastThreadBytes = -1;
         readonly float[] sortScratch = new float[Window];
         int head, count;
 
@@ -87,16 +87,13 @@ namespace Meridian.Perf
         void Update()
         {
             frameMs[head] = Time.unscaledDeltaTime * 1000f;
-            long now = System.GC.GetAllocatedBytesForCurrentThread();
-            gcBytes[head] = lastThreadBytes < 0 ? 0 : now - lastThreadBytes;
-            lastThreadBytes = now;
             gcProfiler[head] = gcFrame.Valid ? gcFrame.LastValue : 0;
             head = (head + 1) % Window;
             if (count < Window) count++;
         }
 
         /// <summary>Forget earlier frames (e.g. after a load) so the next reading covers only what follows.</summary>
-        public void ResetWindow() { head = 0; count = 0; lastThreadBytes = System.GC.GetAllocatedBytesForCurrentThread(); }
+        public void ResetWindow() { head = 0; count = 0; }
 
         public int FramesRecorded => count;
 
@@ -122,12 +119,11 @@ namespace Meridian.Perf
         {
             var s = new BudgetSnapshot { frames = count };
             float sum = 0f, max = 0f;
-            long gc = 0, gcp = 0;
+            long gcp = 0;
             for (int i = 0; i < count; i++)
             {
                 sum += frameMs[i];
                 if (frameMs[i] > max) max = frameMs[i];
-                gc += gcBytes[i];
                 gcp += gcProfiler[i];
                 sortScratch[i] = frameMs[i];
             }
@@ -135,7 +131,6 @@ namespace Meridian.Perf
             s.maxFrameMs = max;
             System.Array.Sort(sortScratch, 0, count);
             s.p99FrameMs = count > 0 ? sortScratch[Mathf.Min(count - 1, count * 99 / 100)] : 0f;
-            s.gcBytesLast300 = gc;
             s.gcProfilerBytes = gcp;
             s.drawCalls = SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.Null ? -1 : (draws.Valid ? draws.LastValue : -1);
             s.triangles = s.drawCalls < 0 ? -1 : (tris.Valid ? tris.LastValue : -1);

@@ -196,7 +196,7 @@ namespace Meridian.Rig
         /// past the reach). The blade lands there, the reticle sits there, the chips and the debris come from there, and the dig opens
         /// from there (DigPoint). Ground the line does not touch first is never dug: no bowl inside solid ground behind a face, no
         /// digging through a wall into a pocket. False: the line meets nothing inside the reach (the swing whiffs at `point`: the
-        /// cursor, or the reach's edge on the line). Reads only, no allocation: the reticle asks every frame.
+        /// cursor, or the reach's edge on the line). Reads only, no allocation. Always walked afresh: a stroke digs by it.
         /// </summary>
         public bool DigTarget(Vector2 aim, out Vector2 point, out bool clamped)
         {
@@ -229,6 +229,38 @@ namespace Meridian.Rig
             point = origin + dir * Mathf.Min(dist, reach);
             return false;
         }
+
+        /// <summary>
+        /// DigTarget for the eye (the reticle, which asks every frame): the last walk's answer while nothing it read can have changed:
+        /// the cursor and the shoulder within a millimetre, the same reach, no change to the ground since (TerrainStreamer.EditVersion),
+        /// and WalkKeepFrames at most (a base piece, a crystal or a find coming or going is not the ground's change: the mark may be
+        /// 0.1 s late on one). A walk is about 0.13 ms (08:4x, the Beam's 5 m); a kept answer nothing. A stroke never digs by this.
+        /// </summary>
+        public bool DigTargetKept(Vector2 aim, out Vector2 point, out bool clamped)
+        {
+            if (terrain == null || owner == null) return DigTarget(aim, out point, out clamped);
+            var origin = DigOrigin;
+            float reach = DigReach;
+            int version = terrain.EditVersion, frame = Time.frameCount;
+            if (ReferenceEquals(walkTerrain, terrain) && version == walkVersion && frame >= walkFrame && frame - walkFrame < WalkKeepFrames && reach == walkReach
+                && (aim - walkAim).sqrMagnitude < 1e-6f && (origin - walkOrigin).sqrMagnitude < 1e-6f)
+            {
+                point = walkPoint; clamped = walkClamped;
+                return walkFound;
+            }
+            walkFound = DigTarget(aim, out point, out clamped);
+            walkTerrain = terrain; walkVersion = version; walkFrame = frame; walkReach = reach; walkAim = aim; walkOrigin = origin;
+            walkPoint = point; walkClamped = clamped;
+            return walkFound;
+        }
+
+        /// <summary>The frames the reticle's aim line is kept at most with nothing moved (0.1 s at 60 fps).</summary>
+        public const int WalkKeepFrames = 6;
+        TerrainStreamer walkTerrain;
+        int walkVersion, walkFrame = int.MinValue / 2;
+        float walkReach;
+        Vector2 walkAim, walkOrigin, walkPoint;
+        bool walkClamped, walkFound;
 
         /// <summary>D-196b: where the dig for a contact opens: the contact itself for a workable or a block planet's cell (the cell the
         /// line stops on, a hair inside it), the brush's centre BrushPush into the ground along the line from the shoulder on a

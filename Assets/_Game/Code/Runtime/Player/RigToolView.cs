@@ -673,7 +673,7 @@ namespace Meridian.Player
             var stroke = input.Stroke;
             Vector2 at; bool diggable, clamped;
             if (stroke.Active) { at = stroke.Target; diggable = stroke.Diggable; clamped = stroke.Clamped; }
-            else diggable = rig.DigTarget(input.AimWorld, out at, out clamped);
+            else diggable = rig.DigTargetKept(input.AimWorld, out at, out clamped); // the eye's: walked when something moved, and ten times a second
             bool brush = rig.Brush;
             // D-196b: the reticle's mark is ON the contact; its brackets stand round what opens: the brush's own circle (its centre
             // pushed into the ground from the contact), on block ground the cell the line stops on

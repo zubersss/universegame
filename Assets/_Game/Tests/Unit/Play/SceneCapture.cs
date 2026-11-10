@@ -6759,6 +6759,109 @@ namespace Meridian.Tests
         }
 
         /// <summary>
+        /// U-209's own cost in a frame at Earth's camp on the cartoon path. BudgetGate's Earth C0 row is to stay within 0.3 ms of 0.6.2's
+        /// reading, which was taken another night; a figure from another hour is no baseline (D-191 as amended). So: ONE process, the
+        /// states interleaved, three rounds of 300 frames, every frame rendered at 1920 x 1080 as the gate renders, the whole frame
+        /// timed as the gate times it: the dig slot at rest as the game runs (the reticle asks the aim line every frame), the Survey
+        /// module in hand (no reticle, no dig stroke), the tool view off. And the aim line's own time (rig.DigTarget, 2 000 calls).
+        /// A reading: no picture.
+        /// </summary>
+        [UnityTest, Timeout(600000)]
+        public IEnumerator CaptureU209Cost()
+        {
+            var name = Environment.GetEnvironmentVariable(Variable);
+            if (string.IsNullOrEmpty(name)) Assert.Ignore($"Set {Variable} (tools/unity_capture.ps1).");
+            if (SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.Null)
+                Assert.Fail("No graphics device: run without -nographics.");
+            bool wasCartoon = Meridian.View2D.CartoonStage.Enabled;
+            Meridian.View2D.CartoonStage.Enabled = true;
+            var target = new RenderTexture(1920, 1080, 24, RenderTextureFormat.ARGB32);
+            try
+            {
+#if UNITY_EDITOR
+                yield return UnityEditor.SceneManagement.EditorSceneManager.LoadSceneAsyncInPlayMode(
+                    CorePath, new LoadSceneParameters(LoadSceneMode.Single));
+#endif
+                var director = UnityEngine.Object.FindAnyObjectByType<SceneDirector>();
+                float timeout = Time.realtimeSinceStartup + 30f;
+                while ((!director.IsReady || !director.PlanetSide.terrain.IsSettled) && Time.realtimeSinceStartup < timeout) yield return null;
+                var side = director.PlanetSide;
+                Assert.IsTrue(side.cartoon != null && side.cartoon.Active, "the cartoon path is on for Earth");
+                // as the gate's C0 row stands: the game as it runs, the flora in, then settled
+                float t0 = Time.realtimeSinceStartup;
+                while (side.cartoon.Flora != null && !side.cartoon.Flora.Ready && Time.realtimeSinceStartup - t0 < 15f) yield return null;
+                for (int i = 0; i < 120; i++) yield return null;
+                var input = side.player.GetComponent<Meridian.Player.PlayerRigInput>();
+                var view = input.ToolView;
+                var cam = side.sideCamera;
+                Assert.NotNull(view, "the tool view");
+
+                const int Frames = 300, Rounds = 3;
+                var ms = new float[Frames];
+                float lastAvg = 0f, lastP99 = 0f;
+                IEnumerator Measure()
+                {
+                    for (int i = 0; i < 20; i++) { cam.targetTexture = target; cam.Render(); cam.targetTexture = null; yield return null; }
+                    float sum = 0f;
+                    for (int i = 0; i < Frames; i++)
+                    {
+                        cam.targetTexture = target; cam.Render(); cam.targetTexture = null;
+                        yield return null;
+                        ms[i] = Time.unscaledDeltaTime * 1000f;
+                        sum += ms[i];
+                    }
+                    System.Array.Sort(ms);
+                    lastAvg = sum / Frames;
+                    lastP99 = ms[Frames * 99 / 100];
+                }
+                var states = new (string label, System.Action set)[]
+                {
+                    ("the dig slot at rest, as the game runs (the reticle on)", () => { view.enabled = true; input.module = Meridian.Rig.RigModule.Beam; }),
+                    ("the Survey module in hand (no reticle, no dig stroke)", () => { view.enabled = true; input.module = Meridian.Rig.RigModule.Survey; }),
+                    ("the tool view off (RigToolView disabled)", () => { input.module = Meridian.Rig.RigModule.Beam; view.enabled = false; }),
+                };
+                var avg = new float[states.Length, Rounds]; var p99 = new float[states.Length, Rounds];
+                for (int r = 0; r < Rounds; r++)
+                    for (int s = 0; s < states.Length; s++)
+                    {
+                        states[s].set();
+                        yield return Measure();
+                        avg[s, r] = lastAvg; p99[s, r] = lastP99;
+                    }
+                view.enabled = true; input.module = Meridian.Rig.RigModule.Beam;
+                for (int i = 0; i < 10; i++) yield return null;
+                var log = new System.Text.StringBuilder();
+                var mean = new float[states.Length];
+                for (int s = 0; s < states.Length; s++)
+                {
+                    float a = 0f, p = 0f;
+                    log.Append($"\n  {states[s].label}:");
+                    for (int r = 0; r < Rounds; r++) { a += avg[s, r]; p += p99[s, r]; log.Append($" round {r + 1} avg {avg[s, r]:F2} p99 {p99[s, r]:F2};"); }
+                    mean[s] = a / Rounds;
+                    log.Append($" MEAN avg {mean[s]:F2} ms, p99 {p / Rounds:F2} ms");
+                }
+                TestContext.Out.WriteLine($"[MERIDIAN] u209 cost at Earth's camp (cartoon path, the {side.rig.Tool} in the dig slot, the reticle {(view.ReticleDiggable ? "on ground" : "on nothing")} {Vector2.Distance(view.ReticleAt, side.rig.DigOrigin):F1} m from the shoulder; {Frames} frames a measure rendered at 1920 x 1080, {Rounds} rounds interleaved, the whole frame timed):{log}\n  the dig slot's own cost: {mean[0] - mean[1]:+0.00;-0.00} ms over the Survey module, {mean[0] - mean[2]:+0.00;-0.00} ms over no tool view");
+
+                // the aim line's own time: what the reticle asks once a frame at rest
+                var aim = input.AimWorld;
+                int found = 0;
+                for (int i = 0; i < 200; i++) if (side.rig.DigTarget(aim, out _, out _)) found++; // warm
+                var w = System.Diagnostics.Stopwatch.StartNew();
+                const int Calls = 2000;
+                for (int i = 0; i < Calls; i++) if (side.rig.DigTarget(aim + new Vector2(0.001f * (i & 7), 0f), out _, out _)) found++;
+                double micros = w.Elapsed.TotalMilliseconds * 1000.0 / Calls;
+                TestContext.Out.WriteLine($"[MERIDIAN] u209 the aim line (rig.DigTarget, the cursor {Vector2.Distance(aim, side.rig.DigOrigin):F1} m from the shoulder, reach {side.rig.DigReach:F1} m): {micros:F1} µs a call over {Calls} calls ({micros / 1000.0:F3} ms a frame at rest; {(found > 0 ? "the line meets ground" : "the line meets nothing: the whole reach is walked")})");
+                TestContext.Out.WriteLine($"[MERIDIAN] u209 cost screen: Game view {Screen.width} x {Screen.height}, {SystemInfo.graphicsDeviceName}, {SystemInfo.graphicsDeviceType}, quality '{QualitySettings.names[QualitySettings.GetQualityLevel()]}'");
+                LogAssert.NoUnexpectedReceived();
+            }
+            finally
+            {
+                Meridian.View2D.CartoonStage.Enabled = wasCartoon;
+                target.Release(); UnityEngine.Object.Destroy(target);
+            }
+        }
+
+        /// <summary>
         /// U-192 (BLENDER's 0.6.2 read: G1, G6, the catalogue's Site branch) → coordination/reports/unity/u192/: 2_catalogue_earth / _mars /
         /// _mercury / _venus (every entry surveyed: the eleven Site icons by their labels, B-223's camp and B-233's ten), 3_venus_serpent
         /// (the veil serpent at 1x beside the Meridian station, a gentle drifter 9 m off), 1_bay_docked (Earth's Waystation as the player

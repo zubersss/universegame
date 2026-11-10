@@ -98,6 +98,8 @@ namespace Meridian.Terrain
             while (pool.Count + resident.Count < needed) pool.Push(TerrainChunk.Create(transform));
             // U-073: block meshes with the planet's palette (one shared material instance per streamer).
             wallTops = null; // per-planet back-wall tops, recomputed lazily
+            curveKey = null; // and the curves kept from them
+            EditVersion++;
             var reg = Meridian.Rendering.ArtMaterials.Active;
             if (blockMaterial == null && reg != null && reg.terrainBlocks != null) blockMaterial = new Material(reg.terrainBlocks) { name = "Terrain_Blocks (planet)" };
             if (blockMaterial != null)
@@ -116,6 +118,7 @@ namespace Meridian.Terrain
                 blockMaterial.SetFloat(FringeLayerId, BlockMesher.SideLayer(TileId.Grass));
             }
             SmoothGround = config.worldType == WorldType.Solid && GroundField.Smooth(config.id); // U-156 (D-161 / D-162): the traced outline on a smooth planet
+            curveKey = null; // the pads count only on a smooth planet: no curve kept from before this line
             foreach (var c in pool) c.UseBlocks(this, blockMaterial, SmoothGround);
             foreach (var c in resident.Values) c.UseBlocks(this, blockMaterial, SmoothGround);
             started = true;
@@ -159,7 +162,25 @@ namespace Meridian.Terrain
         public int PadTop(int x) => SmoothGround && Config != null ? Meridian.Planet.POI.PoiStamp.PadAt(BaseGenerator, Config.datumY, Config.id, x) : int.MinValue;
 
         /// <summary>U-156: the drawn surface's height over column x's centre on a smooth planet (the outline's line where nothing is dug or built).</summary>
-        public float CurveAt(int x) => GroundField.Curve(x, originalTopOf ??= OriginalTop, padTopOf ??= PadTop);
+        public float CurveAt(int x)
+        {
+            // A column's curve is the planet's own (the original tops and the POIs' pads: nothing a dig or a build changes), so it is
+            // kept: a field read asks up to 32 curves a point, nine tops each (08:4x: U-209's reticle walks the aim line every frame:
+            // 147 µs a walk before this). Direct-mapped by the column as asked (unwrapped); cleared with the tops in Begin.
+            if (curveKey == null)
+            {
+                curveKey = new int[CurveSlots]; curveVal = new float[CurveSlots];
+                for (int i = 0; i < CurveSlots; i++) curveKey[i] = int.MinValue;
+            }
+            int slot = x & (CurveSlots - 1);
+            if (curveKey[slot] == x) return curveVal[slot];
+            float v = GroundField.Curve(x, originalTopOf ??= OriginalTop, padTopOf ??= PadTop);
+            curveKey[slot] = x; curveVal[slot] = v;
+            return v;
+        }
+        const int CurveSlots = 1024;
+        int[] curveKey;
+        float[] curveVal;
         // The two delegates, made once: passed as method groups each call made two objects (128 B), and a field read (FieldAt: up to
         // 32 curves a point) is asked hundreds of times a frame (U-209's reticle, 07:5x: 48-108 KB a frame at rest in the dig slot).
         System.Func<int, int> originalTopOf, padTopOf;
@@ -476,8 +497,13 @@ namespace Meridian.Terrain
             return true;
         }
 
+        /// <summary>Counts the changes to the ground (a tile set, a density block stored; a new planet): a reader that keeps an answer
+        /// about the ground (the dig's aim line) asks again when it has moved.</summary>
+        public int EditVersion { get; private set; }
+
         void RefreshAround(int x, int y)
         {
+            EditVersion++;
             touched.Clear();
             for (int dy = -1; dy <= 1; dy++)
             for (int dx = -1; dx <= 1; dx++)
