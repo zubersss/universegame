@@ -132,8 +132,24 @@ namespace Meridian.Tests
             yield return Until(() => side.player.Grounded, 10f, "surveyor on the ground");
             var player = side.player;
             int mx = Mathf.FloorToInt(player.Body.position.x) + 1, my = side.terrain.TopSolidY(mx);
+            byte tileBefore = side.terrain.GetTile(mx, my);
+            int editsBefore = state.EditsFor(PlanetId.Mars).Count;
             Assert.IsTrue(side.rig.Dig(new Vector2(mx + 0.5f, my + 0.5f)), "dig on Mars");
+            // 0.6.2's sweep (20:00): Run2 read tile 7 after the reload, with nothing in the log to say whether the stroke had opened it
+            // (alone, both runs pass and the tile goes 7 -> 0). Dig is true for a cut node or a fallen base piece too, with no ground
+            // opened, and the landing spot differs run to run: so the tile is checked BEFORE the save, after up to two more strokes at
+            // it. The reload's assert below then judges the save alone.
+            for (int again = 0; again < 2 && side.terrain.GetTile(mx, my) != TileId.Air; again++)
+            {
+                TestContext.Out.WriteLine($"[MERIDIAN] M1 Mars dig: the stroke left tile ({mx}, {my}) at {side.terrain.GetTile(mx, my)} ({side.rig.LastDugCells} cells opened): another stroke");
+                yield return null;
+                side.rig.Dig(new Vector2(mx + 0.5f, my + 0.5f));
+            }
+            Assert.AreEqual(TileId.Air, side.terrain.GetTile(mx, my), "the strokes opened the tile they aimed at, before the save");
+            // what the stroke did, said in the log
+            TestContext.Out.WriteLine($"[MERIDIAN] M1 Mars dig at ({mx}, {my}), the surveyor at ({player.Body.position.x:F2}, {player.Body.position.y:F2}): the tile was {tileBefore}, is {side.terrain.GetTile(mx, my)} after the stroke; {side.rig.LastDugCells} cell(s) opened with the {side.rig.Tool}; Mars edits {editsBefore} -> {state.EditsFor(PlanetId.Mars).Count}; the top solid tile of the column is now y {side.terrain.TopSolidY(mx)}");
             yield return Until(() => player.Grounded, 10f, "standing after the dig");
+            TestContext.Out.WriteLine($"[MERIDIAN] M1 Mars dig, once the surveyor stands again: tile ({mx}, {my}) is {side.terrain.GetTile(mx, my)}, Mars edits {state.EditsFor(PlanetId.Mars).Count}");
 
             // ---- Save, then a fresh boot and load ----
             var save = SaveSystem.Instance;
@@ -157,6 +173,7 @@ namespace Meridian.Tests
             Assert.AreEqual(expectHull, state.hull, 1e-3f, "hull");
             Assert.AreEqual(earthEdits, state.EditsFor(PlanetId.Earth).Count, "Earth diffs");
             Assert.AreEqual(marsEdits, state.EditsFor(PlanetId.Mars).Count, "Mars diffs");
+            TestContext.Out.WriteLine($"[MERIDIAN] M1 after the reload: tile ({mx}, {my}) is {side.terrain.GetTile(mx, my)}, the column's top solid tile y {side.terrain.TopSolidY(mx)}, Mars edits {state.EditsFor(PlanetId.Mars).Count}, the surveyor at ({side.player.Body.position.x:F2}, {side.player.Body.position.y:F2})");
             Assert.AreEqual(TileId.Air, side.terrain.GetTile(mx, my), "the Mars dig is still dug");
             Assert.AreEqual(expectPlayer.x, side.player.Body.position.x, 0.1f, "player x");
             Assert.AreEqual(expectPlayer.y, side.player.Body.position.y, 0.1f, "player y");

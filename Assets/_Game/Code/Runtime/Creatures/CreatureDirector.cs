@@ -325,8 +325,15 @@ namespace Meridian.Creatures
 
         // ---------- AI ----------
 
+        /// <summary>LEAD 19:5x (the AI worst-frame row, D-047 / D-188): what the last frame's AI allocated on the main thread, and
+        /// whether a gen-0 collection ran inside it. Two counter reads a frame; a test holds the AI to 0 B.</summary>
+        public long LastAiAllocBytes { get; private set; }
+        public int LastAiCollections { get; private set; }
+
         void Update()
         {
+            long alloc0 = System.GC.GetAllocatedBytesForCurrentThread();
+            int gc0 = System.GC.CollectionCount(0);
             watch.Restart();
             double spawnMs = 0; tickHolds = tickDespawns = tickCount = 0;
             if (Planet != null && terrain != null && terrain.Generator != null)
@@ -360,6 +367,8 @@ namespace Meridian.Creatures
                 UnityEngine.Profiling.Profiler.EndSample();
             }
             LastAiMs = watch.Elapsed.TotalMilliseconds;
+            LastAiAllocBytes = System.GC.GetAllocatedBytesForCurrentThread() - alloc0;
+            LastAiCollections = System.GC.CollectionCount(0) - gc0;
             if (LastAiMs > SpikeMs) // only then: the string allocates
                 LastSpikeNote = $"{LastAiMs:F2} ms at t {Time.time:F2} (dt {Time.deltaTime * 1000f:F0} ms, frame {Time.frameCount}): spawn tick {spawnMs:F2} ms, {tickCount} ticks {LastAiMs - spawnMs:F2} ms, holds {tickHolds}, despawns {tickDespawns}, GC gen0 {System.GC.CollectionCount(0)}";
         }

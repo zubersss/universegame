@@ -176,20 +176,89 @@ namespace Meridian.Tests
             }
             Assert.AreEqual(CreatureDirector.MaxCreatures, creatures.AliveCount);
             Assert.IsNull(creatures.Spawn(Species.Stag, OnSurface(px, Species.Stag)), "20 is the cap");
-            for (int i = 0; i < 30; i++) yield return null; // warm
-            var samples = new List<double>(300);
-            for (int i = 0; i < 300; i++) { yield return null; samples.Add(creatures.LastAiMs); }
+            yield return MeasureAi(creatures, "20 creatures");
+            LogAssert.NoUnexpectedReceived();
+        }
+
+        /// <summary>D-193 (LEAD 20:1x, on the diagnostic below: the one frame over 1 ms was the 56th after a 30-frame warm-up, in the first
+        /// run of a process only, with no allocation and no collection in it): the AI's budget read over steady frames. A warm-up of
+        /// AiWarmFrames after the spawn, whose own worst frame is logged and held to 2.0 ms (a real first-time hitch cannot hide there);
+        /// then AiMeasuredFrames with D-047's limits unchanged (median and p99 ≤ 0.5 ms, worst ≤ 1.0 ms), the average ≤ 0.5 ms, and two
+        /// new asserts: the AI allocates 0 B in every frame and no collection runs inside an AI frame. CreatureTests and
+        /// InnerCreatureTests both measure through here.</summary>
+        public const int AiWarmFrames = 150, AiMeasuredFrames = 300;
+        public static IEnumerator MeasureAi(CreatureDirector director, string label)
+        {
+            double warmWorst = 0; int warmWorstAt = -1;
+            for (int i = 0; i < AiWarmFrames; i++)
+            {
+                yield return null;
+                if (director.LastAiMs > warmWorst) { warmWorst = director.LastAiMs; warmWorstAt = i; }
+            }
+            var samples = new List<double>(AiMeasuredFrames);
+            double avg = 0; long bytes = 0; int allocFrames = 0, collections = 0;
+            for (int i = 0; i < AiMeasuredFrames; i++)
+            {
+                yield return null;
+                samples.Add(director.LastAiMs); avg += director.LastAiMs;
+                if (director.LastAiAllocBytes > 0) { allocFrames++; bytes += director.LastAiAllocBytes; }
+                collections += director.LastAiCollections;
+            }
+            avg /= AiMeasuredFrames;
             samples.Sort();
-            double avg = 0; foreach (var s in samples) avg += s; avg /= samples.Count;
-            double p99 = samples[(int)(samples.Count * 0.99) - 1], max = samples[samples.Count - 1];
-            double median = samples[samples.Count / 2];
-            TestContext.Out.WriteLine($"[MERIDIAN] AI with 20 creatures: avg {avg:F3} ms, median {median:F3} ms, p99 {p99:F3} ms, max {max:F3} ms");
-            // D-047 (extends D-035): the 0.5 ms budget (board U-027) holds for median and p99; one worst frame
-            // up to 2× is logged, not failed (batch-load spikes outside our code).
+            double median = samples[samples.Count / 2], p99 = samples[(int)(samples.Count * 0.99) - 1], max = samples[samples.Count - 1];
+            TestContext.Out.WriteLine($"[MERIDIAN] AI with {label}: steady avg {avg:F3} ms, median {median:F3}, p99 {p99:F3}, worst {max:F3} over {AiMeasuredFrames} frames; the warm-up's worst {warmWorst:F3} ms at frame {warmWorstAt} of {AiWarmFrames}; the AI allocated {bytes} B in {allocFrames} frame(s), {collections} collection(s) inside AI frames; spike note: {(string.IsNullOrEmpty(director.LastSpikeNote) ? "none" : director.LastSpikeNote)}");
+            Assert.LessOrEqual(warmWorst, 2.0, $"the warm-up's worst frame ≤ 2.0 ms (D-193): frame {warmWorstAt}");
+            Assert.LessOrEqual(avg, 0.5, "average ≤ 0.5 ms AI (D-193)");
             Assert.LessOrEqual(median, 0.5, "median ≤ 0.5 ms AI (U-027, D-047)");
             Assert.LessOrEqual(p99, 0.5, "p99 ≤ 0.5 ms AI (U-027, D-047)");
-            Assert.LessOrEqual(max, 1.0, "worst frame ≤ 2 × 0.5 ms (D-047)");
-            if (max > 0.5) TestContext.Out.WriteLine($"[MERIDIAN] AI worst frame {max:F3} ms over 0.5 ms: logged per D-047");
+            Assert.LessOrEqual(max, 1.0, "worst steady frame ≤ 2 × 0.5 ms (D-047, D-193)");
+            Assert.AreEqual(0, allocFrames, $"the AI allocates 0 B a frame (D-193): {bytes} B over {allocFrames} frame(s)");
+            Assert.AreEqual(0, collections, "no collection inside an AI frame (D-193)");
+        }
+
+        /// <summary>
+        /// LEAD 19:5x: the diagnostic for the AI worst-frame row (D-047's 1 ms bound read 1.68, 1.31, 1.000, 1.131 and a solo 1.014 over two
+        /// days). Six runs of the same 300 frames in one process: every frame's AI time, what the AI allocated and whether a gen-0
+        /// collection ran inside it; for each run the worst frame's index, the three worst frames with their collections and bytes,
+        /// and avg / p99 / worst. Its reading at 20:09 (the one frame over 1 ms: frame 56 of the first run only, 0 B, no collection)
+        /// became D-193; the on / off switch it had for U-204 F17's two lines measured them free and is gone (LEAD: a diagnostic's
+        /// tool does not ship). Asserts nothing about time; runs only when MERIDIAN_AI_DIAG is set.
+        /// </summary>
+        [UnityTest, Timeout(300000)]
+        public IEnumerator AiWorstFrameDiagnostic()
+        {
+            if (string.IsNullOrEmpty(System.Environment.GetEnvironmentVariable("MERIDIAN_AI_DIAG"))) Assert.Ignore("Set MERIDIAN_AI_DIAG to run the AI worst-frame diagnostic.");
+            yield return BootEarth();
+            side.dayNight.Override = 0.0f;
+            creatures.autoSpawn = false; creatures.DespawnAll();
+            float px = player.transform.position.x;
+            for (int i = 0; i < CreatureDirector.MaxCreatures; i++)
+            {
+                var s = i % 2 == 0 ? Species.Stag : Species.GreyWolf;
+                Assert.NotNull(creatures.Spawn(s, OnSurface(px - 18f + i * 1.9f, s)));
+            }
+            for (int i = 0; i < 30; i++) yield return null; // warm, as the gate's test
+            const int Frames = 300;
+            var ms = new double[Frames]; var bytes = new long[Frames]; var gcs = new int[Frames]; var order = new int[Frames];
+            {
+                for (int run = 0; run < 6; run++)
+                {
+                    for (int i = 0; i < Frames; i++)
+                    {
+                        yield return null;
+                        ms[i] = creatures.LastAiMs; bytes[i] = creatures.LastAiAllocBytes; gcs[i] = creatures.LastAiCollections; order[i] = i;
+                    }
+                    System.Array.Sort(order, (a, b) => ms[b].CompareTo(ms[a])); // worst first
+                    double avg = 0; long allocated = 0; int collections = 0, frameAllocs = 0;
+                    for (int i = 0; i < Frames; i++) { avg += ms[i]; allocated += bytes[i]; collections += gcs[i]; if (bytes[i] > 0) frameAllocs++; }
+                    avg /= Frames;
+                    double p99 = ms[order[Frames / 100]];
+                    string worst3 = "";
+                    for (int k = 0; k < 3; k++) worst3 += $"{(k > 0 ? "; " : "")}frame {order[k]}: {ms[order[k]]:F3} ms, {bytes[order[k]]} B, {gcs[order[k]]} gen-0 collection(s)";
+                    TestContext.Out.WriteLine($"[MERIDIAN] AI diag run {run + 1}: avg {avg:F3} ms, p99 {p99:F3}, worst {ms[order[0]]:F3} at frame {order[0]} of {Frames}; the three worst: {worst3}; over the run {allocated} B allocated by the AI in {frameAllocs} frame(s), {collections} gen-0 collection(s) inside AI frames");
+                }
+            }
             LogAssert.NoUnexpectedReceived();
         }
 

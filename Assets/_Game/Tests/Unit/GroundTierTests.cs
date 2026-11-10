@@ -12,6 +12,17 @@ namespace Meridian.Tests
     /// </summary>
     public class GroundTierTests
     {
+        /// <summary>LEAD 20:2x (a diagnostic's switch does not ship as a way to turn the game's drawing off): the perf probe's switches
+        /// on the ground are the probe's alone. Outside a capture the tier shader and the walls are on and no probe state is set
+        /// (as ShovelTests holds SkillStats.ToolOverride to null).</summary>
+        [Test]
+        public void ThePerfProbesSwitchesStandAtTheirDefaults()
+        {
+            Assert.IsTrue(SmoothGround.TierShader, "the tier shader draws the fill (U-182's A/B is the capture's)");
+            Assert.IsTrue(SmoothGround.WallsOn, "B-230's walls draw behind dug cells (U-196's A/B is the capture's)");
+            Assert.AreEqual(0, SmoothGround.WallProbe, "the walls' material carries the walls");
+        }
+
         [Test]
         public void TheTierShownAtAPointIsItsDepthsTier()
         {
