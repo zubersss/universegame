@@ -1,0 +1,34 @@
+{
+  "key": "terrain/earth/back_wall_sand",
+  "style": "v3",
+  "width": 256,
+  "height": 256,
+  "ppu": 64,
+  "palette": "earth",
+  "tile_x": true,
+  "tile_y": true,
+  "variant": "sand",
+  "fill": "ground_fill_sand",
+  "roles": {
+    "fill_main": "offwhite",
+    "wall": "offwhite with 0.30 mustard, mixed 0.35 toward ink",
+    "accents": [
+      "mustard",
+      "offwhite_shadow",
+      "mustard_shadow"
+    ],
+    "bright": "mustard",
+    "wall_mix": {
+      "tones": [
+        "offwhite",
+        "mustard"
+      ],
+      "shares": [
+        0.7,
+        0.3
+      ],
+      "toward_ink": 0.35
+    }
+  },
+  "note": "B-242: the dug cell's back face where the fill drawn is ground_fill_sand (as the tiers' back_wall_t<n>, B-230): one step darker than the fill, no ink outline; UNITY darkens it with depth (U-196)"
+}

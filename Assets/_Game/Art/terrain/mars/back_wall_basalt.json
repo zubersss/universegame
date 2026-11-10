@@ -1,0 +1,23 @@
+{
+  "key": "terrain/mars/back_wall_basalt",
+  "style": "v3",
+  "width": 256,
+  "height": 256,
+  "ppu": 64,
+  "palette": "mars",
+  "tile_x": true,
+  "tile_y": true,
+  "variant": "basalt",
+  "fill": "ground_fill_basalt",
+  "roles": {
+    "fill_main": "teal_deep",
+    "wall": "teal_deep mixed 0.35 toward ink",
+    "accents": [
+      "sky_deep",
+      "red_deep",
+      "brown"
+    ],
+    "bright": "red_deep"
+  },
+  "note": "B-242: the dug cell's back face where the fill drawn is ground_fill_basalt (as the tiers' back_wall_t<n>, B-230): one step darker than the fill, no ink outline; UNITY darkens it with depth (U-196)"
+}
