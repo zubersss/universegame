@@ -101,7 +101,13 @@ One region resident: the surveyor's whole set, the region's stage, its ground, t
 | E. the 128 camera with everything x2 over it (ppu 256), BC, trimmed | 92 | 69 | 62 (ppu 192) | **223 MB** | inside; 1.8x case D |
 | F. D at 24 drawings a second | 96 | 39 | 63 | **198 MB** | inside |
 
-- **v7 fits only compressed.** Uncompressed it is over the budget before any UI, effect or space texture. Whether
+- **D-207 (the owner on this list, 11-10 15:0x; Bible 5.4): for an art v7 planet the texture line is 1 024 MB loaded**,
+  bounded by the unchanged working set (2.0 GB, warning 1.7; 0.6.3's built player reads 0.89-0.99 GB today). Against
+  1 024 MB ALL SIX cases fit by the line alone (A 713, B 505, C 178, D 126, E 223, F 198); what case A leaves is 311 MB
+  for everything else on the planet, and the working set becomes the real bound. Where the allowance is spent is
+  UNITY's A/B (U-217): compressed wherever the paint survives, uncompressed only where it does not. The lines below
+  were written against 512 MB and stand as the reasoning for that order.
+- **Against the old 512 MB line, v7 fits only compressed.** Uncompressed it is over the budget before any UI, effect or space texture. Whether
   painted pictures survive BC7 without blocks is UNITY's A/B on one real piece (as U-207 did for walls, where D-197 kept
   RGBA32): the first thing to measure when the pilot's pieces are exported (B-260 b).
 - **The atlas count breaks first:** the surveyor alone is 13 pages at ppu 192 (7 trimmed) against "<= 8 sprite atlases
