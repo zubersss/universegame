@@ -1,8 +1,10 @@
 """B-233 (D-187; BLENDER's 12:2x proposal, accepted in cycle 297): the catalogue's site icons. CataloguePanel shows an entry's
 icon at 64 px and, until it is scanned, as a dark silhouette ("a shape to look for"), so each icon is the site's own silhouette
 taken from its props' art, in the style, size and ink weight of B-223's icons/catalogue/camp (B-199's item-icon contract:
-128x128 @ PPU 128, pivot centre, inside the 2 px margin), in its own planet's palette. No faces (one porthole per hull, never
-two side by side; the vault's hub is a plain nut); nothing weapon-like (D-087: the Warden sites are guarded survey posts).
+128x128 @ PPU 128, pivot centre, inside the 2 px margin), in its own planet's palette. No faces: no single round window or dial
+on a rounded body or a box (it is an eye: the 19:15 sheet's hauler, station pod, harvester box and beacon box), never two side by
+side; hatches, slots and rows of three instead; the vault's hub is a plain nut. Nothing weapon-like (D-087: the Warden sites are
+guarded survey posts).
 
   key = icons/catalogue/<PoiDef.label lowercased, spaces as _> (D-187). Two labels differ from the PoiDef ids the card lists:
   MERIDIAN BEACON (id mercury_beacon) -> meridian_beacon, SOLARITE (id solarite_field) -> solarite. NAMES holds them in one place.
@@ -12,8 +14,8 @@ two side by side; the vault's hub is a plain nut); nothing weapon-like (D-087: t
            launch_complex    the teal lattice gantry on its concrete pad: two red-striped service arms with their hoses, the
                              brass lift cab, the railed top deck and its red lamp; the red tower's bent stump beside it
                              (props/earth/launch_gantry, launch_tower_ruin)
-  mars     halcyon_hauler    the crashed hull: a butterscotch barrel section nose-up in a regolith mound, its cream stripe, one
-                             porthole, rust patches, the torn end (props/mars/hauler_hull_a)
+  mars     halcyon_hauler    the crashed hull: a butterscotch barrel section nose-up in a regolith mound, its cream stripe, a
+                             cargo hatch, rust patches, the torn end (props/mars/hauler_hull_a)
            warden_outpost    a Warden pylon (the cream taper, two teal panels, the brass signal cap with its arcs) and the small
                              tripod beacon on a levelled platform (props/mars/warden_pylon, meridian_beacon)
   mercury  flare_shelter     the low dome under three rows of gold heat shingles on its dark slab, the violet hatch, the T vent
@@ -21,12 +23,12 @@ two side by side; the vault's hub is a plain nut); nothing weapon-like (D-087: t
            warden_vault      the dark stone arch round the round teal vault door: six spokes, a brass hub nut, the brass bell on
                              the keystone (props/mercury/warden_vault_gate)
            meridian_beacon   the tripod beacon, big: the lantern under its cap, the banded mast, the brass instrument box with
-                             its dial, light ticks either side (props/mercury/meridian_beacon)
+                             its gauge slot, light ticks either side (props/mercury/meridian_beacon)
            solarite          the crystal field: three gold spires out of a dark rock, a small pair beside them, one glint
                              (props/mercury/solarite_cluster)
-  venus    meridian_station  the aerostat: the apricot balloon over a cream hull pod (brass bands, one porthole) on its railed
-                             deck, a cloud under it (props/venus/aerostat_balloon, station_hull_a, aerostat_deck)
-           vent_harvester    the tripod over a vent: the cream sampler box with its porthole under a brass plate, the dark hood,
+  venus    meridian_station  the aerostat: the apricot balloon over a cream hull pod (brass bands, three small portholes) on its
+                             railed deck, a cloud under it (props/venus/aerostat_balloon, station_hull_a, aerostat_deck)
+           vent_harvester    the tripod over a vent: the cream sampler box with its sight glass under a brass plate, the dark hood,
                              the teal hose, the vent's red mouth (props/venus/vent_harvester)
 
   python -I build_site_icons_v3.py <review png>    the lock-free sheet: the eleven site icons (B-223's camp included) at 128 / 48
@@ -126,9 +128,10 @@ def beacon(d, M, cx, z0, h, rays=False, detail=True):
     fill(d, M, box, "mustard")                                                                          # the instrument box
     fill(d, M, P(R(0.07, 0.30, 0.15, 0.48)), "mustard_sh")
     outline(d, M, box)
-    if detail:
-        inked(d, M, P(C(-0.02, 0.39, 0.055, 14)), "off", I)                                             # its dial
-        line(d, M, P([(-0.02, 0.36), (-0.02, 0.425)]))
+    if detail:                                                                                          # its gauge: a slot with two
+        inked(d, M, P(R(-0.10, 0.355, 0.03, 0.425)), "off", I)                                          # ticks (the 19:15 sheet at 2x:
+        for x in (-0.055, -0.015):                                                                      # a round dial in the box's
+            line(d, M, P([(x, 0.355), (x, 0.39)]), I * 0.8)                                             # middle was one eye)
     inked(d, M, P(R(-0.08, 0.78, 0.08, 0.90)), "mustard", I)                                            # the lantern, lit
     if detail:
         for x in (-0.027, 0.027):
@@ -244,13 +247,16 @@ def halcyon_hauler(d, M):
     fill(d, M, T(body), "mustard")                                                                      # the hull section
     fill(d, M, T([(-0.335, -0.09), (0.344, -0.09)] + arc(0.20, 0.0, 0.17, -32, -90, 6) + [(-0.36, -0.17), (-0.33, -0.10)]), "mustard_sh")
     fill(d, M, T([(-0.335, 0.03), (0.367, 0.03), (0.359, 0.06), (0.344, 0.09), (-0.375, 0.09)]), "off")  # the cream stripe
-    for cx, cz, rx, rz, seed in ((-0.22, 0.125, 0.05, 0.025, 41), (-0.02, -0.045, 0.045, 0.03, 42), (0.10, 0.13, 0.025, 0.018, 43)):
+    for cx, cz, rx, rz, seed in ((-0.22, 0.125, 0.05, 0.025, 41), (0.17, -0.06, 0.045, 0.03, 42), (0.10, 0.13, 0.025, 0.018, 43)):
         fill(d, M, T(IT.lump(cx, cz, rx, rz, seed, n=8)), "red")                                        # rust
     for x in (-0.14, 0.06):                                                                             # panel seams
         line(d, M, T([(x, 0.17), (x, -0.17)]))
     outline(d, M, T(body))
-    inked(d, M, T(C(0.22, 0.045, 0.07, 16)), "off", I)                                                  # the porthole (one)
-    inked(d, M, T(C(0.22, 0.045, 0.042, 14)), "teal", I)
+    inked(d, M, T(R(-0.105, -0.135, 0.015, -0.005)), "off", I)                                          # a cargo hatch between the seams
+    line(d, M, T([(-0.01, -0.095), (-0.01, -0.045)]))                                                   # and its handle (the 19:15 sheet
+    #                                                                                                     at 2x: one round porthole by
+    #                                                                                                     the rounded nose was the eye of
+    #                                                                                                     a grub lying on the mound)
     inked(d, M, [(-0.43, -0.33), (-0.41, -0.26), (-0.34, -0.19), (-0.26, -0.21), (-0.18, -0.17), (-0.08, -0.19), (0.02, -0.14),
                  (0.12, -0.145), (0.22, -0.11), (0.31, -0.15), (0.39, -0.24), (0.43, -0.33)], "red_sh")   # the regolith it ploughed up
     ground(d, M, "red_dp")
@@ -355,8 +361,10 @@ def meridian_station(d, M):
         for e in (-0.02, 0.02):
             line(d, M, [(x + e, dk), (x + e, -0.085)], I * 0.8)
     outline(d, M, hull)
-    inked(d, M, C(0.0, -0.175, 0.05, 16), "mustard", I)                                                 # the porthole (one)
-    inked(d, M, C(0.0, -0.175, 0.03, 12), "teal", I)
+    for x in (-0.068, 0.0, 0.068):                                                                      # three small portholes in a row:
+        inked(d, M, C(x, -0.175, 0.026, 12), "teal", I)                                                 # a gondola's windows (one large
+    #                                                                                                     ring in the pod's middle was a
+    #                                                                                                     one-eyed head under the balloon)
     deck = R(-0.39, -0.335, 0.39, dk)
     inked(d, M, deck, "mustard_sh")                                                                     # the deck
     for x in (-0.26, -0.13, 0.0, 0.13, 0.26):
@@ -376,7 +384,9 @@ def vent_harvester(d, M):
     fill(d, M, box, "off")                                                                              # the sampler box
     fill(d, M, R(0.06, 0.10, 0.13, 0.30), "off_sh")
     outline(d, M, box)
-    inked(d, M, C(-0.02, 0.20, 0.052, 16), "teal", I)                                                   # its porthole (one)
+    inked(d, M, R(-0.09, 0.135, -0.04, 0.265), "teal", I)                                               # its sight glass, two level
+    for z in (0.18, 0.22):                                                                              # ticks (a round porthole made
+        line(d, M, [(-0.09, z), (-0.065, z)], I * 0.8)                                                  # the box a one-eyed head on legs)
     inked(d, M, R(-0.17, 0.30, 0.17, 0.345), "mustard")                                                 # the brass plate
     inked(d, M, C(0.0, 0.37, 0.022, 10), "mustard", I)
 
@@ -386,7 +396,7 @@ def vent_harvester(d, M):
 SITES = (
     ("survey_archive", "earth", survey_archive, "the Survey Archive (the bunker front: the striped slab, the sign, the steel shutter)"),
     ("launch_complex", "earth", launch_complex, "the Launch Complex (the teal gantry on its pad, the striped arms, the cab; the red stump)"),
-    ("halcyon_hauler", "mars", halcyon_hauler, "the Halcyon Hauler (the crashed hull section in its regolith mound, one porthole)"),
+    ("halcyon_hauler", "mars", halcyon_hauler, "the Halcyon Hauler (the crashed hull section in its regolith mound, a cargo hatch)"),
     ("warden_outpost", "mars", warden_outpost, "the Warden Outpost (a pylon with its signal cap and the tripod beacon on a platform)"),
     ("flare_shelter", "mercury", flare_shelter, "the Flare Shelter (the shingled dome on its slab, the hatch, the T vent)"),
     ("warden_vault", "mercury", warden_vault, "the Warden Vault (the stone arch, the round spoked door, the bell)"),

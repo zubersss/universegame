@@ -2769,7 +2769,10 @@ def earth_sea_under(seed):
     rng = np.random.default_rng(seed)
     pal = _pal()
     out = []
-    water_top = BG._mix(pal["sky"], pal["offwhite"], 0.45)
+    water_top = BG._mix(pal["sky"], pal["offwhite"], 0.2)     # B-225 (the 19:07 preview at 1x): at 0.45 the column's top was as
+    #                                                           pale as the light on it - the ceiling's glow, the caustic net and
+    #                                                           the shafts all sank into it; the light is the ceiling's and the
+    #                                                           shafts' now, on plainer water
     water = BG._mix(pal["sky"], pal["teal"], 0.3)
     # layer0: the water column, its top on the surface: light near it with wavering shafts and ripples, plain water below
     H = 1024
@@ -2784,7 +2787,7 @@ def earth_sea_under(seed):
             half = w0 * (0.6 + 0.6 * t)
             xs = np.arange(int(x0 + lean * y - half), int(x0 + lean * y + half) + 1) % W
             shafts[y, xs] = np.maximum(shafts[y, xs], (1 - t) ** 1.5)
-    stack.append(tint(rng, H, shafts, pal["offwhite"], 0.5, var=0.03, edge_dark=0.0, bleed=12.0))   # B-225: bolder (0.35)
+    stack.append(tint(rng, H, shafts, pal["offwhite"], 0.62, var=0.03, edge_dark=0.0, bleed=12.0))   # B-225: bolder (0.35, 0.5)
     srng = np.random.default_rng(seed + 25)                                                   # B-225's bold shafts: their own stream,
     bold = np.zeros((H, W), np.float32)                                                       # so every draw after them stays put
     for _k in range(7):                                                                       # broad slanting shafts in the top 5-7 m
@@ -2794,7 +2797,7 @@ def earth_sea_under(seed):
             half = w0 * (0.5 + 0.5 * t)
             xs = np.arange(int(x0 + lean * y - half), int(x0 + lean * y + half) + 1) % W
             bold[y, xs] = np.maximum(bold[y, xs], (1 - t) ** 1.2)
-    stack.append(tint(srng, H, bold, BG._mix(pal["offwhite"], pal["sky"], 0.15), 0.45, var=0.02, edge_dark=0.0, bleed=8.0))
+    stack.append(tint(srng, H, bold, BG._mix(pal["offwhite"], pal["sky"], 0.15), 0.62, var=0.02, edge_dark=0.0, bleed=8.0))   # (0.45)
     del bold
     ys = np.arange(H)[:, None]
     rip = np.zeros((H, W), np.float32)
@@ -2884,10 +2887,11 @@ def earth_sea_under(seed):
     for k, (dy, a) in enumerate(((13, 1.0), (27, 0.82), (43, 0.62), (61, 0.44), (81, 0.28))):
         wk = wav + dy + BG.ridge(rng, [(9 + 2 * k, 0.6), (19 + 3 * k, 0.4)], base=0, amp=3 + k)
         gate = BG.ridge(rng, [(13 + k, 1.0)], base=0, amp=1) > -0.15
-        caus = np.maximum(caus, ((np.abs(ys - wk[None, :]) < 1.7 - 0.15 * k) & gate[None, :]).astype(np.float32) * a)
+        caus = np.maximum(caus, ((np.abs(ys - wk[None, :]) < 2.5 - 0.2 * k) & gate[None, :]).astype(np.float32) * a)   # (1.7 - 0.15 k:
+        #                                                                                       hair lines at 1x under the game's tint)
     stack = Stack()
     stack.append(tint(rng, H, glow.astype(np.float32), BG._mix(pal["offwhite"], pal["sky"], 0.2), 0.8, var=0.02, edge_dark=0.0, bleed=2.0))
-    stack.append(tint(rng, H, caus, pal["offwhite"], 0.75, var=0.0, edge_dark=0.0, bleed=0.8))
+    stack.append(tint(rng, H, caus, pal["offwhite"], 0.9, var=0.0, edge_dark=0.0, bleed=0.8))
     stack.append(wash32(rng, H, surf, pal["offwhite"], var=0.02, edge_dark=0.0, bleed=0.8))
     out.append(finish(stack, rng, H))
     del glow, surf, caus
