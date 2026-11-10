@@ -17,7 +17,7 @@ If you would rather not do downloads, say so and I will look for a route that ne
 
 ### USER-45 — Play Build 0.6.3: ten minutes of the rebuilt digging (10 min)
 You said digging felt disconnected from your clicks and from the surveyor. It has been rebuilt. The page with frame-by-frame pictures: https://claude.ai/artifact/TdyF9gzKsFWzXebcu5KUSm
-1. Double-click `C:\dev\universegame\Build\MERIDIAN_0.6.3\MERIDIAN.exe` and choose **NEW**.
+1. Double-click `C:\dev\universegame\Build\MERIDIAN_0.6.3\MERIDIAN.exe` and choose **NEW** (not Continue: see the note at the end).
 2. Click once, quickly, on the ground beside you: a whole swing plays and lands. Then click fast, then hold.
 3. Move the mouse without pressing: four brackets show where the next dig will land (mustard at the edge of your reach, red when there is nothing to dig).
 4. Dig straight down, into a wall beside you, and above your head in a tunnel.
@@ -25,6 +25,7 @@ You said digging felt disconnected from your clicks and from the surveyor. It ha
 6. Sell (G), buy The Beam (K, 250 Scrip) and dig with it.
 Then tell the Lead session: does a click feel connected to the dig now; do the surveyor and shovel look like they are doing the digging; are several hits on hard ground satisfying or tedious; and from last time: do the holes look right, is the shovel a good start, is 250 Scrip right for the Beam?
 Known already: the surveyor is still the round-headed one (the new look is on its own page, USER-44); the marker's small cross is being redrawn; upward digging in a low tunnel pushes the blade into the ceiling; Mars and Space may hitch slightly (a memory fault found today, fixed next); no collapse yet and the sounds are still synthesized.
+A NOTE ON YOUR SAVED GAME (found 12:00, our fault): the team's automatic test runs have been saving into your real save slot. Continue would load a test's game on Mars, and any progress you saved in an earlier build was overwritten by those runs. It is fixed from the next build. Nothing in your save folder has been touched by hand and nothing will be: if a NEW game ever shows something left over from that test state, tell the Lead and you decide whether the slot is cleared.
 
 
 
