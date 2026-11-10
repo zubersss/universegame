@@ -6,6 +6,15 @@ Owner: LEAD (only the Lead edits this). Do the open items below, then tell the L
 
 ## Open
 
+### USER-43 — Look over the new art style (5 min, no game needed)
+You asked for the art style of the 1967 film The Jungle Book. The first test of it is on this page: https://claude.ai/artifact/DfszsRAPjF6hwbjr5i36GX
+It shows one full picture of the Earth camp in the new look (with a button to flip to the game as it looks today) and the surveyor redrawn with fine pencil lines. Nothing in the game changes until you answer. Tell the Lead session:
+1. Is this the look? Yes, close but change something, or no.
+2. The surveyor: is the figure the right weight beside the crates and smelter, and do you like the face?
+3. The painted scenery: good enough to roll out as it is, or do you want real scanned brush strokes in it first?
+4. The colours underground: too dull, about right, or still too loud?
+A "yes" starts the surveyor being built as a moving, jointed figure, then Earth's scenery being repainted, then the other planets one at a time (weeks). A "change this" is about half an hour a round. Build 0.6.3 (the reworked digging) does not wait for this.
+
 ### USER-42 — Free about half a gigabyte of memory (2 min) — not blocking right now, but the margin is thin
 Thank you for restarting the three windows (00:50). Update 01:01: once the new windows settled, free memory rose to 1.9 GB and the team's builds and tests can start again. The laptop itself was not restarted (it has been on since yesterday 11:44) and builds need 1.5 GB free, so one busy app can stop them again. Either of these gives a safe margin:
 - **Quick:** close the **Copilot** app (it holds 0.4 GB), the **Xbox** app (0.3 GB) and the **Settings** window (0.2 GB). For Copilot and Xbox, look in the system tray by the clock (click the ^ arrow), right-click the icon and choose Quit or Close.
