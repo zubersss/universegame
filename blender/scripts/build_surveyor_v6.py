@@ -108,7 +108,7 @@ LAT = {"leg": 0.085, "arm": 0.205}                 # how far to the side the hip
 #            ground and widened by the same volume rule (a landing), or drawn out (a jump's take-off, above 1.0).
 # Poses may already carry these keys; with RHYTHM False they are ignored.
 RHYTHM = False
-BOW = {"thigh": 0.035, "shin": -0.03, "upper_arm": -0.02, "forearm": 0.025}    # the bow, as a share of the segment's length
+BOW = {"thigh": 0.05, "shin": -0.045, "upper_arm": -0.03, "forearm": 0.035}    # the bow, as a share of the segment's length
 
 
 def skeleton(p):
@@ -520,20 +520,20 @@ class Fig:
 # ---------------------------------------------------------------- the poses (degrees; twist and len_* are RHYTHM keys, ignored while it is off)
 POSES = {
     # the weight on the near leg, the far knee eased and its heel off the ground; the spine a little curved
-    "idle": {"twist": 4, "pelvis": -3, "chest": 4, "neck": 6, "head": 2, "th_n": 1, "kn_n": 2, "th_f": 12, "kn_f": 26, "ft_f": -16,
+    "idle": {"twist": 6, "pelvis": -3, "chest": 4, "neck": 6, "head": 2, "th_n": 1, "kn_n": 2, "th_f": 12, "kn_f": 26, "ft_f": -16,
              "ua_n": -7, "el_n": 14, "ua_f": 9, "el_f": 22},
     # a walk's contact: the near heel down ahead, the far foot pushing off its toes, the arms counter-swung
-    "walk": {"twist": -14, "pelvis": 2, "chest": 6, "neck": 4, "th_n": 27, "kn_n": 6, "ft_n": 17, "th_f": -20, "kn_f": 26, "ft_f": -32,
+    "walk": {"twist": -22, "pelvis": 2, "chest": 6, "neck": 4, "th_n": 27, "kn_n": 6, "ft_n": 17, "th_f": -20, "kn_f": 26, "ft_f": -32,
              "ua_n": -28, "el_n": 16, "ua_f": 26, "el_f": 34},
     # a deep crouch under the 1 m line: folded at hips and knees, the back level, the head ducked, a hand to the ground
     # (the antenna laid back along the pack: "ant")
     "crouch": {"pelvis": 64, "chest": 82, "neck": 64, "head": 50, "th_n": 118, "kn_n": 152, "ft_n": 0, "th_f": 100, "kn_f": 154, "ft_f": -26,
                "ua_n": 40, "el_n": 62, "ua_f": 30, "el_f": 70, "ant": -150},
     # a jump's apex: the knees tucked unevenly, one arm thrown up and forward, the other back
-    "jump": {"twist": 10, "len_arm_n": 1.06, "pelvis": 4, "chest": 8, "neck": -4, "th_n": 66, "kn_n": 98, "ft_n": -22, "th_f": 14, "kn_f": 72, "ft_f": -36,
+    "jump": {"twist": 14, "len_arm_n": 1.08, "len_leg_f": 1.05, "pelvis": 4, "chest": 8, "neck": -4, "th_n": 66, "kn_n": 98, "ft_n": -22, "th_f": 14, "kn_f": 72, "ft_f": -36,
              "ua_n": 128, "el_n": 26, "ua_f": -34, "el_f": 22, "lift": 0.32},
     # the dig's contact: a lunge, the weight over the front knee, both hands on the shovel (set by reach, below)
-    "dig": {"twist": 12, "pelvis": 16, "chest": 30, "neck": 16, "head": 14, "th_n": 50, "kn_n": 62, "th_f": -30, "kn_f": 22, "ft_f": -34},
+    "dig": {"twist": 18, "pelvis": 16, "chest": 30, "neck": 16, "head": 14, "th_n": 50, "kn_n": 62, "th_f": -30, "kn_f": 22, "ft_f": -34},
 }
 DIG_AIM = -47.0                                   # the shovel's angle at the dig's contact (deg from level)
 
@@ -682,5 +682,83 @@ def preview(out):
         print(ln)
 
 
-if __name__ == "__main__":
-    preview(sys.argv[1])
+def compare(out):
+    """LEAD 11-10 08:5x: ONE sheet to judge the rhythm rules by - the five poses with the rules OFF above and ON below
+    at 2x the game's size, then the side idle and the dig at 4x both ways. Nothing replaces the accepted sheet."""
+    global RHYTHM
+    sys.path.insert(0, os.path.dirname(HERE))
+    import review
+    t0 = time.time()
+    paper = np.array(review.PAPER, np.float32)
+    Wd = 1920
+
+    def head(text, h=20):
+        hd = np.tile(paper, (h, Wd, 1)).astype(np.float32)
+        review._label(hd, text, 6, 4, scale=1)
+        return hd
+
+    def over(dst, img, x, y):
+        h, w = img.shape[:2]
+        x0, y0, x1, y1 = max(x, 0), max(y, 0), min(x + w, dst.shape[1]), min(y + h, dst.shape[0])
+        if x1 > x0 and y1 > y0:
+            s = img[y0 - y:y1 - y, x0 - x:x1 - x]
+            dst[y0:y1, x0:x1] = s[..., :3] + dst[y0:y1, x0:x1] * (1 - s[..., 3:4])
+    names = ("idle", "walk", "crouch", "jump", "dig")
+    imgs, tops = {}, {}
+    keep = RHYTHM
+    try:
+        for on in (False, True):
+            RHYTHM = on
+            for name in names:
+                img, _st, _sec = figure(name, "side", **(dict(w=340, cx=130) if name == "dig" else {})).render()
+                imgs[(name, on)] = img
+                rows_on = np.where(img[..., 3].max(axis=1) > 0.02)[0]
+                tops[(name, on)] = (img.shape[0] - 20 * K - rows_on[0]) / float(PX * K)
+    finally:
+        RHYTHM = keep
+    rows = [np.tile(paper, (30, Wd, 1)).astype(np.float32)]
+    review._label(rows[0], "B-231 (D-200): THE RHYTHM RULES, for LEAD's judgement - the same five poses drawn with the rules OFF and ON (a twist of shoulders against hips, a bow along each limb, folds by each bend, stretch). PREVIEW", 6, 8)
+    RH = 370
+    for on in (False, True):
+        rows.append(head(("RULES ON" if on else "RULES OFF (the accepted model sheet's drawings)") + ", at 2x the game's size: idle | a walk's contact | the crouch | a jump's apex | the dig's contact"))
+        r = np.tile(STAGE, (RH, Wd, 1)).astype(np.float32)
+        gy = RH - 10 - 20
+        r[gy:gy + 2] = rgb(PAL["green"]) * 0.5 + rgb(PAL["brown"]) * 0.5
+        x = 10
+        for name in names:
+            im = CEL.down(imgs[(name, on)], 4)
+            over(r, im, x, RH - im.shape[0] - 10)
+            if name == "crouch":
+                yc = gy - PX
+                r[yc - 2:yc, x:x + im.shape[1]] = rgb(PAL["red"])
+                review._label(r, f"1 m; the crouch stands {tops[(name, on)]:.2f} m", x + 6, yc - 14, scale=1)
+            x += im.shape[1] + 16
+        rows.append(r)
+    rows.append(head("AT 4x: the side idle, rules off | on ||| the dig's contact, rules off | on"))
+    r = np.tile(STAGE, (720, Wd, 1)).astype(np.float32)
+    x = 10
+    for name in ("idle", "dig"):
+        for on in (False, True):
+            im = CEL.down(imgs[(name, on)], 2)
+            im = im[:, 60:420] if name == "idle" else im[:, 80:620]             # the figure's part of its cell (the row is 1920 wide)
+            over(r, im, x, 720 - im.shape[0] - 10)
+            x += im.shape[1] + 10
+    rows.append(r)
+    lines = ["the rules ON: twist (idle 6, walk -22, jump 14, dig 18 degrees), bow (thigh +5 %, shin -4.5 %, upper arm -3 %, forearm +3.5 % of each length), folds by bend, the jump's reaching arm 8 % and trailing leg 5 % longer",
+             "heights standing / crouched: off " + f"{tops[('idle', False)]:.2f} / {tops[('crouch', False)]:.2f} m, on {tops[('idle', True)]:.2f} / {tops[('crouch', True)]:.2f} m; this run {time.time() - t0:.0f} s"]
+    foot = np.tile(paper, (24 + 16 * len(lines), Wd, 1)).astype(np.float32)
+    for i, ln in enumerate(lines):
+        review._label(foot, ln[:300], 6, 6 + 16 * i, scale=1)
+    img = np.vstack(rows + [foot])
+    review.draw(img, time.strftime("%m-%d %H:%M") + " B-231 the rhythm rules, off and on (lock-free, fakegp + numpy; not exported)", 2, img.shape[0] - 14, (1.0, 1.0, 0.85))
+    review.write(out, img)
+    print("written", out, img.shape[1], "x", img.shape[0])
+    for ln in lines:
+        print(ln)
+
+
+if __name__ == "__main__":                       # <png> = the model sheet;  --rhythm <png> = the rules off and on
+    if sys.argv[1] == "--rhythm":
+        compare(sys.argv[2])
+    else:
+        preview(sys.argv[1])
