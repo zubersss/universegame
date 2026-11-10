@@ -172,6 +172,8 @@ namespace Meridian.Mining
         /// camera's kick (screen px, one frame), and the chip's pitch by depth tier (soft soil low, stone high).</summary>
         public const int ChipCrumbsMin = 1, ChipCrumbsMax = 2;
         public const float CrumbScale = 0.6f, CrumbSpeed = 0.65f, ChipKickPixels = 1f, ChipPitchBase = 0.85f, ChipPitchStep = 0.11f;
+        /// <summary>How far off the face a stroke's debris starts from its contact point (m).</summary>
+        public const float ContactMouthM = 0.12f;
         /// <summary>Tests: chips since load, the last one's crumbs, the swings whose whoosh sounded.</summary>
         public int Chips { get; private set; }
         public int LastChipCrumbs { get; private set; }
@@ -192,7 +194,8 @@ namespace Meridian.Mining
             int tier = t != null && rig.D1 ? DigRun.TierAt(t, at) : 0;
             Vector2 hand = HandOf(at);
             int crumbs = Random.Range(ChipCrumbsMin, ChipCrumbsMax + 1);
-            Throw(at, AxisFrom(at, hand), crumbs, tier, ToneAt(t, at, tier), CrumbScale, CrumbSpeed);
+            var axis = AxisFrom(at, hand);
+            Throw(at - axis * (MouthM - ContactMouthM), axis, crumbs, tier, ToneAt(t, at, tier), CrumbScale, CrumbSpeed); // from the contact, just off the face
             Chips++;
             LastChipCrumbs = crumbs;
             if (follow == null && side.sideCamera != null) follow = side.sideCamera.GetComponent<Meridian.Player.CameraFollow>();
@@ -245,8 +248,11 @@ namespace Meridian.Mining
             int tier = t != null && rig.D1 ? DigRun.TierAt(t, at) : 0;
             Vector2 hand = HandOf(at);
             // U-209: a stroke's debris flies along its follow-through (the axis the stroke told the rig), else back toward the hand and up
-            var axis = rig.StrokeAxis.sqrMagnitude > 1e-6f ? rig.StrokeAxis.normalized : AxisFrom(at, hand);
-            Throw(at, axis, ClodsFor(cells), tier, ToneAt(t, at, tier), 1f, 1f);
+            bool stroked = rig.StrokeAxis.sqrMagnitude > 1e-6f;
+            var axis = stroked ? rig.StrokeAxis.normalized : AxisFrom(at, hand);
+            // D-196b: a stroke's debris leaves the CONTACT point (the dig's own point lies in the ground behind it), just off the face
+            var thrownFrom = stroked ? rig.StrokeContact - axis * (MouthM - ContactMouthM) : at;
+            Throw(thrownFrom, axis, ClodsFor(cells), tier, ToneAt(t, at, tier), 1f, 1f);
             Bursts++;
             LastBurst = ClodsFor(cells);
             if (follow == null && side.sideCamera != null) follow = side.sideCamera.GetComponent<Meridian.Player.CameraFollow>();

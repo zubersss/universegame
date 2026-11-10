@@ -121,7 +121,8 @@ namespace Meridian.Player
             Vector2 hand = ToolView != null ? ToolView.HandWorld : rig.DigOrigin;
             Vector2 back = hand - point;
             rig.StrokeAxis = ((back.sqrMagnitude > 1e-6f ? back.normalized : Vector2.zero) + Vector2.up * 1.2f).normalized;
-            bool dug = rig.Dig(point);
+            rig.StrokeContact = point;
+            bool dug = rig.Dig(rig.DigPoint(point)); // D-196b: the dig opens from the contact (the brush's centre pushed into the ground)
             rig.StrokeAxis = Vector2.zero;
             return dug;
         }

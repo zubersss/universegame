@@ -66,13 +66,15 @@ namespace Meridian.Rig
 
         bool InReach(Vector2 point) => owner == null || (point - (Vector2)owner.position).sqrMagnitude <= Reach * Reach;
 
-        /// <summary>U-193: within the dig tool's reach (the shovel's 2 m, the Beam's Reach) of the owner's body (its Rigidbody2D: the transform
-        /// trails an interpolated body, and a body set while not simulated until the next physics step); building keeps Reach.</summary>
+        /// <summary>U-193 / D-196b: a point a Dig may open from: within the dig tool's reach (the shovel's 2 m, the Beam's Reach) of the
+        /// owner's SHOULDER, plus the way the dig's point lies past its contact (the brush's push into the ground; on a block planet a
+        /// cell's centre past its face). The body is its Rigidbody2D's (the transform trails an interpolated body, and a body set while
+        /// not simulated until the next physics step); building keeps Reach from the feet.</summary>
         bool InDigReach(Vector2 point)
         {
             if (owner == null) return true;
-            float r = Meridian.Progress.SkillStats.DigReach;
-            return (point - OwnerAt).sqrMagnitude <= r * r;
+            float r = Meridian.Progress.SkillStats.DigReach + (Brush ? BrushPush : 0.75f) + 0.02f;
+            return (point - DigOrigin).sqrMagnitude <= r * r;
         }
 
         /// <summary>U-193: the owner's position as physics holds it (its Rigidbody2D's, else the transform's).</summary>
@@ -135,8 +137,6 @@ namespace Meridian.Rig
         /// <summary>The shovel's blade tip from its grip (m) where the registry holds no blade_tip (props/rig/shovel.json: 1.33), and how far
         /// the body's lunge carries the grip toward a far target.</summary>
         public const float ShovelBladeM = 1.33f, ShovelLungeM = 0.25f;
-        /// <summary>The step of the search back along the aim line for something to dig (m).</summary>
-        public const float ClampStepM = 0.2f;
 
         /// <summary>The shovel's blade tip from its grip (m): shovel.json's blade_tip, read once per registry.</summary>
         public static float ShovelBlade
@@ -167,56 +167,84 @@ namespace Meridian.Rig
         /// <summary>The owner's shoulder as physics holds the body (the aim line's start).</summary>
         public Vector2 DigOrigin => owner != null ? OwnerAt + new Vector2(0f, ShoulderHeight) : Vector2.zero;
 
-        /// <summary>The dig tool's reach from the owner's body (the tables': the shovel's 2 m, the Beam's Reach; LEAD 02:0x: the shovel's
-        /// stays 2 m, B-246's poses reach it).</summary>
+        /// <summary>The dig tool's reach (the tables': the shovel's 2 m, the Beam's Reach), measured from the SHOULDER (D-196b, LEAD 06:1x:
+        /// B-246's poses reach it from there, not from the feet).</summary>
         public float DigReach => Meridian.Progress.SkillStats.DigReach;
 
-        /// <summary>Something a dig at p would work: a registered workable, or ground (on a smooth planet a solid tile within the brush or
-        /// drawn ground at the point; else the solid tile there). Reads only, no allocation.</summary>
-        public bool Workable(Vector2 p)
+        /// <summary>D-196b: the round brush opens from the contact, its centre this share of its radius into the ground along the aim
+        /// line. At 0.75 a stroke on a flat face opens the part of the brush's disc behind the face, 93 % of the whole disc a stroke
+        /// buried in the ground opens (the card: within 10 %).</summary>
+        public const float BrushPushShare = 0.75f;
+        public static float BrushPush => BrushRadius * BrushPushShare;
+        /// <summary>The step along the aim line in the search for its first solid point (m).</summary>
+        public const float RayStepM = 0.1f;
+
+        /// <summary>Something a dig would work stands at the point: a registered workable (a base piece, a crystal, a node), the drawn
+        /// ground on a smooth planet (inside its outline), the solid tile on a block one. Reads only, no allocation.</summary>
+        public bool SolidAt(Vector2 p)
         {
             if (terrain == null) return false;
             for (int i = 0; i < workables.Count; i++) if (workables[i](p)) return true;
-            if (!Brush) { var t = TileOf(p); return TileId.IsSolid(terrain.GetTile(t.x, t.y)); }
-            float r = BrushRadius, rr = r * r;
-            int x0 = Mathf.FloorToInt(p.x - r), x1 = Mathf.FloorToInt(p.x + r), y0 = Mathf.FloorToInt(p.y - r), y1 = Mathf.FloorToInt(p.y + r);
-            for (int y = y0; y <= y1; y++)
-                for (int x = x0; x <= x1; x++)
-                {
-                    float dx = x + 0.5f - p.x, dy = y + 0.5f - p.y;
-                    if (dx * dx + dy * dy <= rr && TileId.IsSolid(terrain.GetTile(x, y))) return true;
-                }
-            return terrain.FieldAt(p) >= GroundField.Iso; // D-168: a mound's skirt in tiles the grid holds open
+            if (Brush) return terrain.FieldAt(p) >= GroundField.Iso;
+            var t = TileOf(p);
+            return TileId.IsSolid(terrain.GetTile(t.x, t.y));
         }
 
         /// <summary>
-        /// U-209: where a dig aimed at `aim` lands. Inside the dig tool's reach (the tables', from the body) it is the aim itself. Past it
-        /// (`clamped`) it is the last point inside the reach on the aim line from the shoulder, or the nearest point back along that
-        /// line with something to dig: a click past reach digs there, never nothing. False: nothing to dig at the point (the swing
-        /// whiffs there). Reads only, no allocation: the reticle asks every frame.
+        /// U-209 (D-196b): where a dig aimed at `aim` lands: the CONTACT, the first solid point on the line from the shoulder toward the
+        /// cursor inside the dig tool's reach (the line runs on past a cursor that stands in open air; `clamped`: the cursor itself is
+        /// past the reach). The blade lands there, the reticle sits there, the chips and the debris come from there, and the dig opens
+        /// from there (DigPoint). Ground the line does not touch first is never dug: no bowl inside solid ground behind a face, no
+        /// digging through a wall into a pocket. False: the line meets nothing inside the reach (the swing whiffs at `point`: the
+        /// cursor, or the reach's edge on the line). Reads only, no allocation: the reticle asks every frame.
         /// </summary>
         public bool DigTarget(Vector2 aim, out Vector2 point, out bool clamped)
         {
             point = aim; clamped = false;
             if (terrain == null) return false;
-            if (owner == null) return Workable(aim);
-            if (InDigReach(aim)) return Workable(aim);
+            if (owner == null) return SolidAt(aim); // a rig with no owner (tests, scripted digs) works the point itself
             var origin = DigOrigin;
+            float reach = DigReach;
             var to = aim - origin;
             float dist = to.magnitude;
-            clamped = true;
-            var dir = dist > 1e-5f ? to / dist : Vector2.right;
-            bool placed = false;
-            for (float s = Mathf.Min(dist, DigReach + ShoulderHeight); s > 0.05f; s -= ClampStepM)
+            var dir = dist > 1e-5f ? to / dist : Vector2.down;
+            clamped = dist > reach;
+            float open = 0f;
+            for (float s = 0f; s <= reach + 1e-4f; s += RayStepM)
             {
-                var p = origin + dir * s;
-                if (!InDigReach(p)) continue;
-                if (!placed) { point = p; placed = true; } // where a whiff swings: the reach's edge on the aim line
-                if (Workable(p)) { point = p; return true; }
+                if (SolidAt(origin + dir * s))
+                {
+                    // the face lies between the last open sample and this one: halve the gap to about a centimetre
+                    float solid = s;
+                    for (int k = 0; k < 4 && solid - open > 0.01f; k++)
+                    {
+                        float mid = (open + solid) * 0.5f;
+                        if (SolidAt(origin + dir * mid)) solid = mid; else open = mid;
+                    }
+                    point = origin + dir * solid;
+                    return true;
+                }
+                open = s;
             }
-            if (!placed) point = origin;
+            point = origin + dir * Mathf.Min(dist, reach);
             return false;
         }
+
+        /// <summary>D-196b: where the dig for a contact opens: the contact itself for a workable or a block planet's cell (the cell the
+        /// line stops on, a hair inside it), the brush's centre BrushPush into the ground along the line from the shoulder on a
+        /// smooth planet.</summary>
+        public Vector2 DigPoint(Vector2 contact)
+        {
+            if (terrain == null || owner == null) return contact;
+            for (int i = 0; i < workables.Count; i++) if (workables[i](contact)) return contact;
+            var to = contact - DigOrigin;
+            float d = to.magnitude;
+            if (d < 1e-5f) return contact;
+            return contact + to / d * (Brush ? BrushPush : 0.02f);
+        }
+
+        /// <summary>The contact a stroke's Dig opened from (valid while StrokeAxis is set): the debris starts there.</summary>
+        [System.NonSerialized] public Vector2 StrokeContact;
 
         /// <summary>U-157: the Beam's round scoop: every solid tile within BrushRadius of the point, one outline rebuild per chunk.</summary>
         bool DigBrush(Vector2 p)

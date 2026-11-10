@@ -143,7 +143,8 @@ namespace Meridian.Player
             Reticle = Child("DigReticle", Meridian.View2D.SpriteCharacterView.SurveyorOrder);
             Glow = Child("BeamGlow", Meridian.View2D.SpriteCharacterView.SurveyorOrder + 1);
             Fist = Child("GripFist", Meridian.View2D.SpriteCharacterView.SurveyorOrder + 1); // over the tool
-            Beam.enabled = Ghost.enabled = Crack.enabled = Reticle.enabled = Glow.enabled = Fist.enabled = false;
+            Pip = Child("DigPip", Meridian.View2D.SpriteCharacterView.SurveyorOrder + 1);     // the reticle's mark on the contact point
+            Beam.enabled = Ghost.enabled = Crack.enabled = Reticle.enabled = Glow.enabled = Fist.enabled = Pip.enabled = false;
             var cg = new GameObject("BeamCable");
             cg.transform.SetParent(transform, false);
             Cable = cg.AddComponent<LineRenderer>();
@@ -344,7 +345,11 @@ namespace Meridian.Player
         public SpriteRenderer Reticle { get; private set; }
         public SpriteRenderer Crack { get; private set; }
         public SpriteRenderer Glow { get; private set; }
-        /// <summary>Where the reticle stands and what it says: something to dig there; the aim pulled in to the reach.</summary>
+        public SpriteRenderer Pip { get; private set; }
+        public const float PipSize = 0.16f;
+        /// <summary>The reticle: the contact its mark stands on (the whiff's point when there is nothing), the middle of its ring (the
+        /// brush's circle, or the cell), and what it says: something to dig there; the cursor past the reach.</summary>
+        public Vector2 ReticleCentre { get; private set; }
         public Vector2 ReticleAt { get; private set; }
         public bool ReticleDiggable { get; private set; }
         public bool ReticleClamped { get; private set; }
@@ -603,14 +608,24 @@ namespace Meridian.Player
         {
             on &= rig != null && rig.terrain != null;
             if (Reticle.enabled != on) Reticle.enabled = on;
-            if (!on) { if (Crack.enabled) Crack.enabled = false; CrackStage = 0; return; }
+            if (!on) { if (Crack.enabled) Crack.enabled = false; if (Pip.enabled) Pip.enabled = false; CrackStage = 0; return; }
             var stroke = input.Stroke;
             Vector2 at; bool diggable, clamped;
             if (stroke.Active) { at = stroke.Target; diggable = stroke.Diggable; clamped = stroke.Clamped; }
             else diggable = rig.DigTarget(input.AimWorld, out at, out clamped);
             bool brush = rig.Brush;
-            if (!brush) { var cell = RigTools.TileOf(at); at = new Vector2(cell.x + 0.5f, cell.y + 0.5f); }
-            ReticleAt = at; ReticleDiggable = diggable; ReticleClamped = clamped;
+            // D-196b: the reticle's mark is ON the contact; its ring is the brush's own circle (the centre pushed into the ground from
+            // the contact), on block ground the cell the line stops on
+            Vector2 centre = diggable ? rig.DigPoint(at) : at;
+            if (!brush) { var cell = RigTools.TileOf(centre); centre = new Vector2(cell.x + 0.5f, cell.y + 0.5f); }
+            ReticleAt = at; ReticleCentre = centre; ReticleDiggable = diggable; ReticleClamped = clamped;
+            if (Pip.enabled != diggable) Pip.enabled = diggable;
+            if (diggable)
+            {
+                if (Pip.sprite != GlowSprite) { Pip.sprite = GlowSprite; Pip.color = ReticleInReach; }
+                Pip.transform.position = new Vector3(at.x, at.y, 0f);
+                Pip.transform.localScale = Vector3.one * PipSize;
+            }
             var sprite = brush ? Ring : CellBox;
             if (Reticle.sprite != sprite) Reticle.sprite = sprite;
             var tint = !diggable ? ReticleNothing : clamped ? ReticleAtReach : ReticleInReach;
@@ -618,7 +633,7 @@ namespace Meridian.Player
             float size = brush ? 2f * RigTools.BrushRadius : 1f;
             if (!diggable) size *= NothingScale;
             else if (shovel && stroke.Phase == DigPhase.Swing && stroke.Drawing == DigStroke.ContactDrawing) size *= ContactPop; // the hit reads on the ring
-            Reticle.transform.position = new Vector3(at.x, at.y, 0f);
+            Reticle.transform.position = new Vector3(centre.x, centre.y, 0f);
             Reticle.transform.localScale = Vector3.one * size;
             // the crack: the work its target holds, in three stages
             int stage = diggable ? DigStroke.StageOf(stroke.WorkAt(at)) : 0;

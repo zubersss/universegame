@@ -39,6 +39,8 @@ namespace Meridian.Player
         public const float BufferSeconds = 0.15f, WorkKeepSeconds = 1.5f, BeamTapSeconds = 0.1f;
         /// <summary>Two aims this close are one target: the work goes on where it was (a cursor that drifts between swings).</summary>
         public const float SameTargetM = 0.5f;
+        /// <summary>A kept target still stands where it was when aiming at it lands this close to it (the contact is found to a centimetre).</summary>
+        public const float KeptSlackM = 0.03f;
         const float Eps = 1e-4f;
         const int Slots = 4;
 
@@ -163,7 +165,7 @@ namespace Meridian.Player
                 if (i >= 0)
                 {
                     var kept = slots[i].at;
-                    if (world.Target(kept, out var q, out bool pulled) && !pulled && (q - kept).sqrMagnitude < 1e-6f) p = kept;
+                    if (world.Target(kept, out var q, out bool pulled) && !pulled && (q - kept).sqrMagnitude < KeptSlackM * KeptSlackM) p = kept;
                     else slots[i].at = p; // the surveyor moved: the kept work follows the new point
                 }
             }

@@ -286,6 +286,30 @@ namespace Meridian.Tests
             Assert.AreEqual(hand.y - 0.43f, tip3.y, 1e-4f, "0.23 m past the contact");
         }
 
+        /// <summary>D-196b: the brush opens from the contact, its centre 0.75 of its radius into the ground along the line. On a flat face
+        /// that is the part of the disc behind the face; the bar is within 10 % of the tiles a whole disc (a stroke buried in the ground,
+        /// as before D-196b) opens. Counted on the tile grid over every place of the point and of the face against the grid.</summary>
+        [Test]
+        public void AStrokeOnAFlatFaceOpensWithinATenthOfTheWholeBrush()
+        {
+            float r = RigTools.BrushRadius, push = RigTools.BrushPush;
+            Assert.AreEqual(0.75f, RigTools.BrushPushShare, 1e-6f);
+            double whole = 0, faced = 0;
+            int n = 0;
+            for (float fx = 0f; fx < 1f; fx += 0.05f)
+                for (float fy = 0f; fy < 1f; fy += 0.05f)
+                {
+                    n++;
+                    whole += RigTools.BrushCells(new Vector2(10f + fx, 10f + fy)).Count;       // every tile round it solid
+                    float face = 10f + fx;                                                   // a wall: the tiles whose centres lie past x = face are solid
+                    foreach (var c in RigTools.BrushCells(new Vector2(face + push, 10f + fy)))
+                        if (c.x + 0.5f > face) faced++;
+                }
+            whole /= n; faced /= n;
+            TestContext.Out.WriteLine($"[MERIDIAN] u209 the brush from the contact (radius {r:0.00} m, pushed {push:0.000} m into the ground): {faced:0.00} tiles a stroke on a flat face, {whole:0.00} a whole disc: {faced / whole * 100:0.0} %");
+            Assert.That(faced / whole, Is.InRange(0.9, 1.1), "within 10 % of the tiles a stroke opened before");
+        }
+
         [Test]
         public void TheSwingsClipIsPickedByTheAimsDirection()
         {

@@ -148,7 +148,13 @@ namespace Meridian.Tests
                 Assert.AreEqual(press, startedFrame, "the swing starts in the frame that sees the press");
                 Assert.AreEqual(DigPhase.Swing, stroke.Phase);
                 Assert.AreEqual(press, input.StrokeStartFrame);
-                Assert.AreEqual(target, stroke.Target, "at the aim");
+                // D-196b: the swing's target is the CONTACT: the first solid point on the line from the shoulder toward the cursor
+                var shoulder = rig.DigOrigin;
+                var along = (target - shoulder).normalized;
+                Assert.Less(Mathf.Abs(Vector3.Cross(along, stroke.Target - shoulder).z), 0.02f, "the contact lies on the line from the shoulder to the cursor");
+                Assert.IsTrue(rig.SolidAt(stroke.Target + along * 0.05f), "solid just behind it");
+                Assert.IsFalse(rig.SolidAt(stroke.Target - along * 0.05f), "open just before it: the ground's face");
+                Assert.LessOrEqual(Vector2.Distance(stroke.Target, shoulder), SkillStats.DigReach + 1e-3f, "inside the reach from the shoulder");
                 yield return null;               // frame press + 1: what frame `press` drew is on the view
                 Assert.AreEqual(press, view.SwingShownFrame, "press -> the first visible change: the same frame (0 frames; the bar is 1)");
                 Assert.IsFalse(view.Carrying, "out of the carry pose");
@@ -268,10 +274,12 @@ namespace Meridian.Tests
                 input.AimAt(far);
                 yield return Rest();
                 yield return null;
-                Assert.IsTrue(view.ReticleClamped, "the reticle is pulled in to the reach");
-                Assert.IsTrue(view.ReticleDiggable, "onto ground");
-                Assert.LessOrEqual(Vector2.Distance(view.ReticleAt, feet), reach + 1e-3f, "inside the reach");
+                var shoulder = rig.DigOrigin;
+                Assert.IsTrue(view.ReticleClamped, "the cursor is past the reach");
+                Assert.IsTrue(view.ReticleDiggable, "the line meets ground inside it");
+                Assert.LessOrEqual(Vector2.Distance(view.ReticleAt, shoulder), reach + 1e-3f, "the contact inside the reach, from the shoulder (D-196b)");
                 Assert.AreEqual(RigToolView.ReticleAtReach, view.Reticle.color, "tinted as clamped");
+                Assert.AreEqual(RigTools.BrushPush, Vector2.Distance(view.ReticleCentre, view.ReticleAt), 0.02f, "the ring is the brush's circle: its middle pushed into the ground from the contact");
                 Vector2 dugAt = default;
                 bool dug = false;
                 System.Action<Vector2> onDug = p => { dug = true; dugAt = p; };
@@ -283,11 +291,11 @@ namespace Meridian.Tests
                 rig.Dug -= onDug;
                 Assert.IsTrue(dug, "a click past reach digs, never nothing");
                 Assert.IsTrue(stroke.Clamped);
-                Assert.LessOrEqual(Vector2.Distance(dugAt, feet), reach + 1e-3f, "at the clamp");
-                var shoulder = rig.DigOrigin;
+                Assert.LessOrEqual(Vector2.Distance(stroke.LastContactAt, shoulder), reach + 1e-3f, "the contact inside the reach");
+                Assert.AreEqual(RigTools.BrushPush, Vector2.Distance(dugAt, stroke.LastContactAt), 0.02f, "the dig opened from the contact, its centre pushed into the ground");
                 float off = Mathf.Abs(Vector3.Cross((far - shoulder).normalized, dugAt - shoulder).z);
                 Assert.Less(off, 0.02f, "on the aim line from the shoulder");
-                TestContext.Out.WriteLine($"[MERIDIAN] u209 past reach: the click {Vector2.Distance(far, feet):0.0} m off, dug {Vector2.Distance(dugAt, feet):0.00} m from the body, {off:0.000} m off the aim line");
+                TestContext.Out.WriteLine($"[MERIDIAN] u209 past reach: the click {Vector2.Distance(far, shoulder):0.0} m from the shoulder, the contact {Vector2.Distance(stroke.LastContactAt, shoulder):0.00} m, the dig's point {Vector2.Distance(dugAt, shoulder):0.00} m, {off:0.000} m off the aim line; {rig.LastDugCells} tiles opened");
                 yield return Rest();
 
                 // nothing to dig: straight up into the open air
@@ -320,47 +328,61 @@ namespace Meridian.Tests
             yield return Boot(DigTool.Shovel);
             try
             {
+                // Two hollows in Topsoil, 3 m wide and 2 m tall: in the middle of one (the wall's face 1.5 m ahead), and 0.6 m nearer
+                // the wall of the other (its face 0.9 m ahead: dig_fwd_near's reach). The aim's line from the shoulder meets the floor,
+                // the wall or the ceiling: that contact is what the blade must meet (D-196b).
                 float x = player.Body.position.x;
-                yield return StandOnSurface(x + 36f);
-                var feet = player.Body.position;
                 var stroke = input.Stroke;
-                var shoulder = rig.DigOrigin;
                 float blade = RigTools.ShovelBlade;
                 Assert.AreEqual(1.33f, blade, 0.02f, "shovel.json's blade_tip");
                 int held = 0, total = 0;
                 var log = new System.Text.StringBuilder();
-                foreach (var (name, deg) in new[] { ("down", -70f), ("forward", -8f), ("up", 62f) })
-                    foreach (float dist in new[] { 0.7f, 1.0f, 1.3f, 1.6f, 1.9f })
+                Vector2 shoulder = default;
+                foreach (var (stand, ahead) in new[] { ("mid-hollow", 0f), ("near the wall", 0.6f) })
+                {
+                    yield return StandAtDepth(x + 36f + (ahead > 0f ? 14f : 0f), 5f);
+                    // StandAtDepth's hollow is 3 m tall: fill its top row again so the ceiling stands 2 m over the floor
+                    var at0 = player.Body.position;
+                    int fx = Mathf.FloorToInt(at0.x), fy = Mathf.FloorToInt(at0.y);
+                    for (int c = fx - 1; c <= fx + 1; c++) t.SetTile(c, fy + 2, TileId.Soil);
+                    var b = player.Body;
+                    b.position = new Vector2(fx + 0.5f + ahead, fy + 0.05f); player.transform.position = b.position;
+                    for (int i = 0; i < 10; i++) yield return null;
+                    var feet = b.position;
+                    shoulder = rig.DigOrigin;
+                    foreach (float deg in ahead > 0f ? new[] { -30f, 0f, 25f } : new[] { -88f, -70f, -50f, -20f, 0f, 20f, 45f, 70f, 88f })
                     {
                         var dir = new Vector2(Mathf.Cos(deg * Mathf.Deg2Rad), Mathf.Sin(deg * Mathf.Deg2Rad));
-                        var target = shoulder + dir * dist;
-                        if (Vector2.Distance(target, feet) > SkillStats.DigReach) continue; // past the tables' reach from the body: clamped, not this row
-                        input.AimAt(target);
+                        input.AimAt(shoulder + dir * 1.2f);
                         yield return Rest();
-                        stroke.Reset(); // no kept work: a swing near the last target would go on working that one
+                        stroke.Reset(); // no kept work: a swing near the last contact would go on working that one
                         int contacts = stroke.Contacts;
                         input.holdUse = true; yield return null; input.holdUse = false;
                         for (int i = 0; i < 12 && stroke.Contacts == contacts; i++) yield return null;
-                        Assert.AreEqual(contacts + 1, stroke.Contacts, $"{name} {dist} m: the contact");
+                        Assert.AreEqual(contacts + 1, stroke.Contacts, $"{stand} {deg} deg: the contact");
                         yield return null; // the contact frame's drawing is on the view (the contact drawing lasts five frames)
                         Assert.AreEqual(DigStroke.ContactDrawing, stroke.Drawing, "still the contact drawing");
-                        Assert.Less(Vector2.Distance(stroke.Target, target), 1e-3f, $"{name} {dist} m: the swing's target is the aim");
-                        float gap = Vector2.Distance(view.TipWorld, target);
-                        float fromGlove = Vector2.Distance(view.HandWorld, target) + view.LungeNow; // the glove before the lunge
+                        Assert.IsTrue(stroke.Diggable, $"{stand} {deg} deg: the line meets the hollow's wall inside the reach");
+                        var contact = stroke.Target;
+                        Assert.Less(Mathf.Abs(Vector3.Cross(dir, contact - shoulder).z), 0.03f, $"{stand} {deg} deg: the contact on the aim's line");
+                        Assert.IsTrue(rig.SolidAt(contact + dir * 0.05f) && !rig.SolidAt(contact - dir * 0.05f), $"{stand} {deg} deg: the contact is the ground's face");
+                        float gap = Vector2.Distance(view.TipWorld, contact);
+                        float fromGlove = Vector2.Distance(view.HandWorld, contact) + view.LungeNow; // the glove before the lunge
                         DigPose.Span(blade, view.SlideMaxNow, RigTools.ShovelLungeM, out float nearest, out float farthest);
                         bool reachable = fromGlove >= nearest - 1e-3f && fromGlove <= farthest + 1e-3f;
                         total++;
-                        log.Append($"\n  {name} {dist:0.0} m from the shoulder ({fromGlove:0.00} m from the glove): tip {gap:0.000} m off, slide {view.SlideNow:0.00}, lunge {view.LungeNow:0.00}, miss {view.TipMiss:+0.00;-0.00;0.00}{(reachable ? "" : " (out of the pose's span)")}");
+                        log.Append($"\n  {stand}, aim {deg:+0;-0;0} deg: {view.Body.Clip}, the contact {Vector2.Distance(contact, shoulder):0.00} m from the shoulder and {fromGlove:0.00} m from the glove (the clip reaches {nearest:0.00}-{farthest:0.00}): tip {gap:0.000} m off, slide {view.SlideNow:0.00}, lunge {view.LungeNow:0.00}, miss {view.TipMiss:+0.00;-0.00;0.00}{(reachable ? "" : view.TipMiss < 0f ? " (nearer than the clip reaches: the blade buries)" : " (farther than the clip reaches: the tip stops short)")}");
                         if (reachable)
                         {
                             held++;
-                            Assert.LessOrEqual(gap, 0.08f, $"{name} {dist} m: the blade's tip within 0.08 m of the contact point");
+                            Assert.LessOrEqual(gap, 0.08f, $"{stand} {deg} deg: the blade's tip within 0.08 m of the contact point");
                         }
-                        else Assert.AreEqual(Mathf.Abs(view.TipMiss), gap, 0.02f, $"{name} {dist} m: out of the span, the tip is off by the pose's own miss");
-                        Assert.AreEqual(0f, view.ScoopArcDegrees, 0.5f, "turned along the line to the target on the contact drawing");
-                        Assert.IsTrue(view.Body.Renderer.flipX == (target.x < feet.x), "the surveyor faces the target");
+                        else Assert.AreEqual(Mathf.Abs(view.TipMiss), gap, 0.02f, $"{stand} {deg} deg: out of the clip's span, the tip is off by the pose's own miss");
+                        Assert.AreEqual(0f, view.ScoopArcDegrees, 0.5f, "turned along the line to the contact on the contact drawing");
+                        Assert.IsTrue(view.Body.Renderer.flipX == (contact.x < feet.x), "the surveyor faces the contact");
                     }
-                TestContext.Out.WriteLine($"[MERIDIAN] u209 blade tip on the contact drawing ({(view.SwingOnClip ? "the sheet's dig clips" : "the idle glove: no dig clip on the sheet yet")}, slide up to {view.SlideMaxNow} m, lunge up to {RigTools.ShovelLungeM} m): {held} of {total} targets inside the pose's span, all within 0.08 m:{log}");
+                }
+                TestContext.Out.WriteLine($"[MERIDIAN] u209 blade tip on the contact drawing ({(view.SwingOnClip ? "the sheet's dig clips" : "the idle glove: no dig clip on the sheet")}, the lunge up to {RigTools.ShovelLungeM} m): {held} of {total} contacts inside their clip's span and within 0.08 m:{log}");
                 Assert.Greater(held, 0, "the row is held where the pose reaches");
                 // facing: a target behind turns the surveyor for the swing and it stays turned after
                 input.AimAt(shoulder + new Vector2(-1.2f, -0.6f));
