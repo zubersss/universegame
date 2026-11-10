@@ -3619,7 +3619,7 @@ namespace Meridian.Tests
                 Meridian.View2D.SmoothGround.TierShader = false; ground.RedressWalls(); ground.RebuildNow();
                 yield return Measure("T3 room lit, at the end");
                 Meridian.View2D.SmoothGround.TierShader = true; ground.RebuildNow();
-                TestContext.Out.WriteLine($"[MERIDIAN] u182 perf screen: Game view {Screen.width} x {Screen.height}, display {Screen.currentResolution.width} x {Screen.currentResolution.height}, {SystemInfo.graphicsDeviceName}, quality '{QualitySettings.names[QualitySettings.GetQualityLevel()]}'");
+                TestContext.Out.WriteLine($"[MERIDIAN] u182 perf screen: Game view {Screen.width} x {Screen.height}, display {Screen.currentResolution.width} x {Screen.currentResolution.height}, {SystemInfo.graphicsDeviceName}, {SystemInfo.graphicsDeviceType} ({SystemInfo.graphicsDeviceVersion}), quality '{QualitySettings.names[QualitySettings.GetQualityLevel()]}'");
                 TestContext.Out.WriteLine($"[MERIDIAN] u182 perf room: back wall quads on the last build {ground.LastBackQuads}, the walls' material {(ground.WallMaterialNow != null ? ground.WallMaterialNow.name + " over " + ground.WallMaterialNow.mainTexture.name + " " + ground.WallMaterialNow.mainTexture.width + " px, " + ((Texture2D)ground.WallMaterialNow.mainTexture).format + ", mips " + ((Texture2D)ground.WallMaterialNow.mainTexture).mipmapCount : "none")}");
                 rt.Release(); UnityEngine.Object.Destroy(rt); UnityEngine.Object.Destroy(px);
                 LogAssert.NoUnexpectedReceived();
@@ -4553,7 +4553,7 @@ namespace Meridian.Tests
                 yield return Block("B, sustained, round 2", 30, 300);
                 yield return Pause(20f);
                 yield return Block("C, straight after a second 20 s pause (90 frames a row)", 8, 90);
-                TestContext.Out.WriteLine($"[MERIDIAN] u207 screen: Game view {Screen.width} x {Screen.height}, {SystemInfo.graphicsDeviceName}, quality '{QualitySettings.names[QualitySettings.GetQualityLevel()]}'");
+                TestContext.Out.WriteLine($"[MERIDIAN] u207 screen: Game view {Screen.width} x {Screen.height}, {SystemInfo.graphicsDeviceName}, {SystemInfo.graphicsDeviceType} ({SystemInfo.graphicsDeviceVersion}), quality '{QualitySettings.names[QualitySettings.GetQualityLevel()]}'");
                 rt.Release(); UnityEngine.Object.Destroy(rt);
                 if (side.dayNight != null) side.dayNight.Override = null;
                 LogAssert.NoUnexpectedReceived();
@@ -4562,6 +4562,142 @@ namespace Meridian.Tests
             {
                 foreach (var o in made) if (o != null) UnityEngine.Object.Destroy(o);
                 QualitySettings.vSyncCount = vsync; Application.targetFrameRate = target;
+                Meridian.View2D.CartoonStage.Enabled = wasCartoon;
+            }
+        }
+
+        /// <summary>U-207 (LEAD 23:1x, condition 3 of the trial): how DXT5 LOOKS on every planet's painted set. For each planet with a
+        /// cartoon stage, at its spawn: the frame with the set as imported (BC7), the same frame with DXT5 copies of its layers (made
+        /// here from the imported textures' own source PNGs, compressed in the Editor at Best: what the importer would store), and a
+        /// 4x crop of the frame's smoothest 480 x 270 window, BC7 left and DXT5 right (DXT's four colours a block is where banding
+        /// would show) → coordination/reports/unity/u207/sets/&lt;planet&gt;_bc7, _dxt5, _crop4x_bc7_dxt5. No art or import rule changed.</summary>
+        [UnityTest, Timeout(900000)]
+        public IEnumerator CaptureU207Sets()
+        {
+            var name = Environment.GetEnvironmentVariable(Variable);
+            if (string.IsNullOrEmpty(name)) Assert.Ignore($"Set {Variable} (tools/unity_capture.ps1).");
+            if (SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.Null)
+                Assert.Fail("No graphics device: run without -nographics.");
+            bool wasCartoon = Meridian.View2D.CartoonStage.Enabled;
+            Meridian.View2D.CartoonStage.Enabled = true;
+            var made = new System.Collections.Generic.List<UnityEngine.Object>();
+            try
+            {
+#if UNITY_EDITOR
+                yield return UnityEditor.SceneManagement.EditorSceneManager.LoadSceneAsyncInPlayMode(
+                    CorePath, new LoadSceneParameters(LoadSceneMode.Single));
+#endif
+                var director = UnityEngine.Object.FindAnyObjectByType<SceneDirector>();
+                float timeout = Time.realtimeSinceStartup + 30f;
+                while ((!director.IsReady || !director.PlanetSide.terrain.IsSettled) && Time.realtimeSinceStartup < timeout) yield return null;
+                var dir = "coordination/reports/unity/u207/sets";
+                Directory.CreateDirectory(dir);
+                var catalog = GameState.Instance.catalog;
+                foreach (Meridian.Planets.PlanetId id in Enum.GetValues(typeof(Meridian.Planets.PlanetId)))
+                {
+                    var config = catalog.Get(id);
+                    if (config == null) continue;
+                    string planet = id.ToString().ToLowerInvariant();
+                    if (id != Meridian.Planets.PlanetId.Earth) yield return director.LoadPlanetSide(config);
+                    var side = director.PlanetSide;
+                    if (side == null || side.cartoon == null || !side.cartoon.Active || side.cartoon.Layers == null) { TestContext.Out.WriteLine($"[MERIDIAN] u207 sets {planet}: no cartoon stage"); continue; }
+                    if (side.hazards != null) side.hazards.enabled = false;
+                    if (side.wardens != null) side.wardens.enabled = false;
+                    if (side.creatures != null) { side.creatures.autoSpawn = false; side.creatures.DespawnAll(); }
+                    var set = side.cartoon.Layers;
+                    var cam = side.sideCamera;
+                    timeout = Time.realtimeSinceStartup + 25f;
+                    while ((set.placeholders.Contains(true) || !side.terrain.IsSettled) && Time.realtimeSinceStartup < timeout) yield return null;
+                    for (int k = 0; k < 60; k++) yield return null;
+                    if (set.placeholders.Contains(true)) { TestContext.Out.WriteLine($"[MERIDIAN] u207 sets {planet}: {set.SceneKey} not painted in time"); continue; }
+
+                    int n = set.renderers.Count;
+                    var bc7 = new Sprite[n]; var dxt5 = new Sprite[n];
+                    var what = new System.Text.StringBuilder();
+                    bool ok = true;
+                    for (int i = 0; i < n && ok; i++)
+                    {
+                        var sr = set.renderers[i];
+                        bc7[i] = sr.sprite;
+                        dxt5[i] = bc7[i];
+                        if (!sr.enabled || bc7[i] == null || bc7[i].texture == null) continue;
+                        var ot = bc7[i].texture;
+                        string path = null;
+#if UNITY_EDITOR
+                        path = UnityEditor.AssetDatabase.GetAssetPath(ot);
+#endif
+                        if (string.IsNullOrEmpty(path) || !File.Exists(path)) { what.Append($" [layer{set.Layout.layers[i].n}: no source for {ot.name}]"); continue; }
+                        var tex = new Texture2D(2, 2, TextureFormat.RGBA32, false, false) { name = $"u207_{planet}_layer{i}_DXT5" };
+                        if (!tex.LoadImage(File.ReadAllBytes(path), false) || (tex.width & 3) != 0 || (tex.height & 3) != 0) { what.Append($" [layer{set.Layout.layers[i].n}: {path} {tex.width} x {tex.height} not copied]"); UnityEngine.Object.Destroy(tex); continue; }
+                        tex.wrapModeU = ot.wrapModeU; tex.wrapModeV = ot.wrapModeV; tex.filterMode = ot.filterMode; tex.anisoLevel = ot.anisoLevel;
+#if UNITY_EDITOR
+                        UnityEditor.EditorUtility.CompressTexture(tex, TextureFormat.DXT5, UnityEditor.TextureCompressionQuality.Best);
+#endif
+                        tex.Apply(false, true);
+                        var o = bc7[i];
+                        var sp = Sprite.Create(tex, o.rect, new Vector2(o.pivot.x / o.rect.width, o.pivot.y / o.rect.height), o.pixelsPerUnit, 0, SpriteMeshType.FullRect);
+                        sp.name = o.name + "_DXT5";
+                        made.Add(tex); made.Add(sp);
+                        dxt5[i] = sp;
+                        what.Append($" [layer{set.Layout.layers[i].n}: {ot.width} x {ot.height} {ot.format} -> {tex.format}]");
+                        yield return null;
+                    }
+
+                    yield return Save(cam, $"{name}_{planet}_bc7");
+                    File.Copy($"logs/capture_{name}_{planet}_bc7.png", $"{dir}/{planet}_bc7.png", true);
+                    for (int i = 0; i < n; i++) if (set.renderers[i] != null) set.renderers[i].sprite = dxt5[i];
+                    for (int k = 0; k < 6; k++) yield return null;
+                    yield return Save(cam, $"{name}_{planet}_dxt5");
+                    File.Copy($"logs/capture_{name}_{planet}_dxt5.png", $"{dir}/{planet}_dxt5.png", true);
+                    for (int i = 0; i < n; i++) if (set.renderers[i] != null) set.renderers[i].sprite = bc7[i];
+
+                    // the smoothest 480 x 270 window of the BC7 frame (the least change between pixels 8 apart), both frames cropped there at 4x
+                    var a = new Texture2D(2, 2, TextureFormat.RGBA32, false); var b = new Texture2D(2, 2, TextureFormat.RGBA32, false);
+                    a.LoadImage(File.ReadAllBytes($"{dir}/{planet}_bc7.png")); b.LoadImage(File.ReadAllBytes($"{dir}/{planet}_dxt5.png"));
+                    var pa = a.GetPixels32(); var pb = b.GetPixels32();
+                    int W = a.width, H = a.height, cw = 480, ch = 270, bestX = 0, bestY = 0; long best = long.MaxValue;
+                    for (int y0 = 0; y0 + ch <= H; y0 += 90)
+                        for (int x0 = 0; x0 + cw <= W; x0 += 120)
+                        {
+                            long score = 0;
+                            for (int y = y0; y < y0 + ch - 8; y += 8)
+                                for (int x = x0; x < x0 + cw - 8; x += 8)
+                                {
+                                    var p = pa[y * W + x]; var q = pa[y * W + x + 8]; var r = pa[(y + 8) * W + x];
+                                    score += Mathf.Abs(p.r - q.r) + Mathf.Abs(p.g - q.g) + Mathf.Abs(p.b - q.b) + Mathf.Abs(p.r - r.r) + Mathf.Abs(p.g - r.g) + Mathf.Abs(p.b - r.b);
+                                }
+                            if (score < best) { best = score; bestX = x0; bestY = y0; }
+                        }
+                    var crop = new Texture2D(cw * 8 + 16, ch * 4, TextureFormat.RGBA32, false);
+                    var pc = new Color32[crop.width * crop.height];
+                    long diff = 0; int worst = 0;
+                    for (int y = 0; y < ch * 4; y++)
+                        for (int x = 0; x < cw * 4; x++)
+                        {
+                            int src = (bestY + y / 4) * W + bestX + x / 4;
+                            pc[y * crop.width + x] = pa[src];
+                            pc[y * crop.width + cw * 4 + 16 + x] = pb[src];
+                        }
+                    for (int y = bestY; y < bestY + ch; y++)
+                        for (int x = bestX; x < bestX + cw; x++)
+                        {
+                            var p = pa[y * W + x]; var q = pb[y * W + x];
+                            int d = Mathf.Max(Mathf.Abs(p.r - q.r), Mathf.Max(Mathf.Abs(p.g - q.g), Mathf.Abs(p.b - q.b)));
+                            diff += d; if (d > worst) worst = d;
+                        }
+                    for (int y = 0; y < ch * 4; y++) for (int x = cw * 4; x < cw * 4 + 16; x++) pc[y * crop.width + x] = new Color32(255, 0, 255, 255); // the divider
+                    crop.SetPixels32(pc); crop.Apply(false, false);
+                    File.WriteAllBytes($"{dir}/{planet}_crop4x_bc7_dxt5.png", crop.EncodeToPNG());
+                    UnityEngine.Object.Destroy(a); UnityEngine.Object.Destroy(b); UnityEngine.Object.Destroy(crop);
+                    TestContext.Out.WriteLine($"[MERIDIAN] u207 sets {planet}: {set.SceneKey}, {n} layers:{what}; the smoothest window at ({bestX}, {H - bestY - ch}) from the top left, {cw} x {ch}; in it BC7 against DXT5 differ by {diff / (float)(cw * ch):0.00} of 255 a pixel on average, {worst} at most");
+                    foreach (var o in made) if (o != null) UnityEngine.Object.Destroy(o);
+                    made.Clear();
+                }
+                LogAssert.NoUnexpectedReceived();
+            }
+            finally
+            {
+                foreach (var o in made) if (o != null) UnityEngine.Object.Destroy(o);
                 Meridian.View2D.CartoonStage.Enabled = wasCartoon;
             }
         }
