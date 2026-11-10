@@ -1,0 +1,22 @@
+{
+  "key": "terrain/earth/back_wall_t4",
+  "style": "v3",
+  "width": 256,
+  "height": 256,
+  "ppu": 64,
+  "palette": "earth",
+  "tile_x": true,
+  "tile_y": true,
+  "tier": 4,
+  "tier_name": "Deep",
+  "roles": {
+    "fill_main": "teal_deep",
+    "wall": "teal_deep mixed 0.35 toward ink",
+    "accents": [
+      "sky_deep",
+      "brown"
+    ],
+    "bright": "mustard"
+  },
+  "note": "B-230 (D-183): the dug cell's back face as cut earth, one step darker than the tier's fill; no ink outline; UNITY darkens it with depth and distance from the opening (U-196)"
+}

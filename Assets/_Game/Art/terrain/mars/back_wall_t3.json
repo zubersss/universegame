@@ -1,0 +1,22 @@
+{
+  "key": "terrain/mars/back_wall_t3",
+  "style": "v3",
+  "width": 256,
+  "height": 256,
+  "ppu": 64,
+  "palette": "mars",
+  "tile_x": true,
+  "tile_y": true,
+  "tier": 3,
+  "tier_name": "Stone",
+  "roles": {
+    "fill_main": "teal_deep",
+    "wall": "teal_deep mixed 0.35 toward ink",
+    "accents": [
+      "brown",
+      "teal_shadow"
+    ],
+    "bright": "offwhite"
+  },
+  "note": "B-230 (D-183): the dug cell's back face as cut earth, one step darker than the tier's fill; no ink outline; UNITY darkens it with depth and distance from the opening (U-196)"
+}

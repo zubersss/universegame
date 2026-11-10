@@ -1,0 +1,23 @@
+{
+  "key": "terrain/venus/back_wall_t2",
+  "style": "v3",
+  "width": 256,
+  "height": 256,
+  "ppu": 64,
+  "palette": "venus",
+  "tile_x": true,
+  "tile_y": true,
+  "tier": 2,
+  "tier_name": "Subsoil",
+  "roles": {
+    "fill_main": "brown",
+    "wall": "brown mixed 0.35 toward ink",
+    "accents": [
+      "red_deep",
+      "teal_deep",
+      "mustard_deep"
+    ],
+    "bright": "mustard"
+  },
+  "note": "B-230 (D-183): the dug cell's back face as cut earth, one step darker than the tier's fill; no ink outline; UNITY darkens it with depth and distance from the opening (U-196)"
+}

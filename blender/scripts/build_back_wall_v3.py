@@ -177,13 +177,47 @@ def periodic_noise(rng, cells):
     return a * (1 - ty) + b * ty
 
 
-# ---------------------------------------------------------------- the tiers
-def draw_tier(planet, t):
-    """-> (RGBA uint8 256x256, the roles used)."""
-    pal, R, names = tier_colours(planet, t)
-    rng = np.random.default_rng(23000 + 100 * PLANETS.index(planet) + t)
-    layers = []                                                          # (mask, colour) painted in order over the back tone
-    if t == 1:                                                           # Topsoil: roots and worm holes
+def chip(mask, pts, val=1.0):
+    """A filled polygon (even-odd) on the periodic 2x grid: an angular fragment."""
+    xs_, ys_ = [p[0] for p in pts], [p[1] for p in pts]
+    x0, x1, y0, y1 = int(min(xs_)) - 1, int(max(xs_)) + 2, int(min(ys_)) - 1, int(max(ys_)) + 2
+    X = np.arange(x0, x1)[None, :] + 0.5
+    Y = np.arange(y0, y1)[:, None] + 0.5
+    inside = np.zeros((y1 - y0, x1 - x0), bool)
+    for (ax, ay), (bx, by) in zip(pts, pts[1:] + pts[:1]):
+        if ay == by:
+            continue
+        inside ^= ((ay > Y) != (by > Y)) & (X < ax + (Y - ay) * (bx - ax) / (by - ay))
+    ix = np.ix_(np.arange(y0, y1) % N, np.arange(x0, x1) % N)
+    mask[ix] = np.maximum(mask[ix], inside * val)
+
+
+def crack_net(rng, n, w):
+    """Polygonal cracks on the periodic grid: the borders of n random cells (where the nearest and the second-nearest of n
+    seeds are almost equally far), about w px wide at 2x."""
+    Y, X = grid()
+    d1 = np.full((N, N), 1e9, np.float32)
+    d2 = np.full((N, N), 1e9, np.float32)
+    seeds, tries = [], 0
+    while len(seeds) < n and tries < 4000:                               # no two seeds within 96 px (2x): the first run had a
+        tries += 1                                                       # near-coincident pair, and the whole cell between
+        sx, sy = rng.uniform(0, N), rng.uniform(0, N)                    # them filled as "crack" (a dark polygon every 4 m)
+        if all(math.hypot(pdist(sx, x), pdist(sy, y)) >= 96 for x, y in seeds):
+            seeds.append((sx, sy))
+    cell = np.zeros((N, N), np.int16)
+    for i, (sx, sy) in enumerate(seeds):
+        dd = np.hypot(pdist(X, sx), pdist(Y, sy))
+        d2 = np.minimum(d2, np.maximum(d1, dd))
+        cell[dd < d1] = i
+        d1 = np.minimum(d1, dd)
+    return np.clip(1.5 - (d2 - d1) / w, 0, 1), cell
+
+
+def t1_marks(planet, rng, R):
+    """The top tier's marks, per planet -> ([(mask, colour)], the crack polygons' cell index per pixel or None): Earth pale branching roots; Mars frost-crack polygons (some
+    stretches holding frost) and short dry cracks; Mercury breccia chips (angular fragments in the regolith's tones); Venus
+    thin sulfur threads. Earth's draws are in their accepted order (its tile is byte-identical)."""
+    if planet == "earth":
         roots = np.zeros((N, N), np.float32)
         for _ in range(9):
             x, y = rng.uniform(0, N), rng.uniform(0, N)
@@ -192,26 +226,87 @@ def draw_tier(planet, t):
             for j in range(2, len(main) - 4, 5):                          # side rootlets
                 bx, by = main[j]
                 stroke(roots, wander(rng, bx, by, rng.uniform(0, math.tau), 8, 5, 0.6), 1.8, 0.6)
-        holes, rims = np.zeros((N, N), np.float32), np.zeros((N, N), np.float32)
-        spots, tries = [], 0
+        return [(roots, R["light"])], None
+    if planet == "mars":
+        net, cell = crack_net(rng, 12, 2.2)
+        frost = np.clip(periodic_noise(rng, 6) * 1.5, 0, 1)
+        dry = np.zeros((N, N), np.float32)
+        for _ in range(5):
+            stroke(dry, wander(rng, rng.uniform(0, N), rng.uniform(0, N), rng.uniform(0, math.tau), 9, 8, 0.7), 1.8, 0.6)
+        return [(net * 0.85, R["dark"]), (net * frost, R["light"]), (dry, R["dark"])], cell
+    if planet == "mercury":
+        tones = [R["light"], R["light"]] + R["accents"][:2]
+        masks = [np.zeros((N, N), np.float32) for _ in tones]
+        placed, tries, i = [], 0, 0
+        while len(placed) < 22 and tries < 6000:                         # rev: larger (4-12 px at 1x; the first read as
+            tries += 1                                                   # confetti), four to six corners (a triangle is an
+            cx, cy, r = rng.uniform(0, N), rng.uniform(0, N), 8 + 16 * rng.uniform() ** 1.6   # arrowhead), none near another
+            i = len(placed) % len(tones)                                 # (two tip to tip made a bow), and no two DARK chips
+            dark = i >= 2                                                # within 60 px at 1x (two side by side over a pit: a face)
+            if any(math.hypot(pdist(cx, x), pdist(cy, y)) < max(r + q + 30, 120 if dark and d else 0) for x, y, q, d in placed):
+                continue
+            placed.append((cx, cy, r, dark))
+            k, a0 = int(rng.integers(4, 7)), rng.uniform(0, math.tau)
+            pts = []
+            for j in range(k):
+                a, rr = a0 + math.tau * j / k + rng.uniform(-0.3, 0.3), r * rng.uniform(0.55, 1.0)
+                pts.append((cx + rr * math.cos(a), cy + rr * math.sin(a)))
+            chip(masks[i % len(tones)], pts, 0.9)
+        return list(zip(masks, tones)), None
+    th = np.zeros((N, N), np.float32)                                    # venus
+    for _ in range(7):
+        pts = wander(rng, rng.uniform(0, N), rng.uniform(0, N), rng.uniform(-0.35, 0.35), 26, 11, 0.28)
+        stroke(th, pts, 1.5, 1.1)
+        if rng.uniform() < 0.5:                                          # a short side thread
+            bx, by = pts[int(rng.integers(6, 20))]
+            stroke(th, wander(rng, bx, by, rng.uniform(0.6, 1.2) * (1 if rng.uniform() < 0.5 else -1), 7, 8, 0.3), 1.1, 0.7)
+    return [(th, R["bright"])], None
+
+
+# ---------------------------------------------------------------- the tiers
+def draw_tier(planet, t):
+    """-> (RGBA uint8 256x256, the roles used)."""
+    pal, R, names = tier_colours(planet, t)
+    rng = np.random.default_rng(23000 + 100 * PLANETS.index(planet) + t)
+    layers = []                                                          # (mask, colour) painted in order over the back tone
+    if t == 1:                                                           # the top tier, per planet (LEAD 17:2x: roots are
+        marks, cell_of = t1_marks(planet, rng, R)                        # Earth's alone; no roots on a lifeless planet)
+        holes, rims = np.zeros((N, N), np.float32), np.zeros((N, N), np.float32)   # Earth: worm holes; elsewhere: vesicles
+        earth = planet == "earth"                                        # Earth's numbers are its accepted tile's (byte-identical)
+        near, lvl_dy, lvl_dx, count, cap = {"earth": (70, 26, 120, 9, 800),       # Venus: four, 75 px apart (kept off its threads,
+                                            "venus": (150, 40, 180, 4, 8000)}.get(planet, (90, 40, 180, 6, 8000))   # six bunched
+        #                                                                  in the one open patch: three in a triangle, a face)
+
         def too_near(cx, cy):
-            """Within 35 px (1x) of another hole, or level with one (within 13 px of its height and 60 px to its side):
-            two ringed dots side by side read as a pair of eyes (D-101). Distances wrap with the tile."""
+            """Earth: within 35 px (1x) of another hole, or level with one (within 13 px of its height and 60 px to its side):
+            two ringed dots side by side read as a pair of eyes (D-101). The lifeless planets: 45 px, 20 px and 90 px, and six
+            pits for nine (17:22's sheets at 3x: two level pits 62 px apart over a third read as a face). Distances wrap."""
             for x, y in spots:
                 dx, dy = abs((cx - x + N / 2) % N - N / 2), abs((cy - y + N / 2) % N - N / 2)
-                if math.hypot(dx, dy) < 70 or (dy < 26 and dx < 120):
+                if math.hypot(dx, dy) < near or (dy < lvl_dy and dx < lvl_dx):
                     return True
             return False
-        spots, tries = [], 0
-        while len(spots) < 9 and tries < 800:                             # rev 2 / 3 (the 17:03 and 17:04 sheets at 3x)
-            tries += 1
+        spots, tries, used = [], 0, set()
+        busy = None if earth else np.maximum.reduce([m for m, _ in marks])   # a pit on a crack's corner read as a rivet, on a
+        while len(spots) < count and tries < cap:                         # thread as a bead, beside a chip as an eye; two pits in
+            tries += 1                                                    # one crack polygon as eyes in a head
             cx, cy, r = rng.uniform(0, N), rng.uniform(0, N), rng.uniform(5, 10)
             if too_near(cx, cy):
                 continue
+            if busy is not None:                                          # clear of a crack by 4 px (1x), of a chip by 26 (a dark
+                k = int(r) + {"mercury": 52, "venus": 44}.get(planet, 9)   # chip beside a pit: a pair), of a thread by 22 (a pit
+                #                                                           between two threads: an eye)
+                if busy[np.ix_(np.arange(int(cy) - k, int(cy) + k + 1) % N, np.arange(int(cx) - k, int(cx) + k + 1) % N)].max() > 0.25:
+                    continue
+            if cell_of is not None:
+                c = int(cell_of[int(cy) % N, int(cx) % N])
+                if c in used:
+                    continue
+                used.add(c)
             spots.append((cx, cy))
             ellipse(rims, cx, cy, r + 3, r * 0.8 + 3, rng.uniform(0, 3))
             ellipse(holes, cx, cy, r, r * 0.8, rng.uniform(0, 3))
-        layers += [(roots, R["light"]), (rims, R["light"]), (holes, R["dark"])]
+        layers += marks + [(rims, R["light"]), (holes, R["dark"])]
     elif t == 2:                                                         # Subsoil: pebbles and ore flecks
         lit = np.zeros((N, N), np.float32)                               # rev: larger pebbles (5-11 px at 1x; the first read
         for k, col in enumerate(R["accents"][:3] + [R["light"]]):        # as a rash of specks), each with a lit top
@@ -382,7 +477,7 @@ def preview(out, planet="earth", footnote=None):
             r[24:24 + 2 * S, 50 + 4 * S:50 + 6 * S] = dug(ft, tiled(img, 2 * S, 2 * S), 160, 96, 352, 416)
         rows.append(r)
     r = np.tile(paper, (3 * S + 34, W, 1)).astype(np.float32)                                  # LEAD 17:1x: the pair check seen
-    review._label(r, "t1 at 3x, one whole tile: the worm holes (no two within 35 px, none level with another within 60 px: D-101) | t4 at 3x: every glint on a seam", 6, 4, scale=1)
+    review._label(r, "t1 at 3x, one whole tile: its marks (earth roots, mars frost-crack polygons, mercury breccia chips, venus sulfur threads) and pits (none within 35 px of another, none level within 60 px: D-101) | t4 at 3x: every glint on a seam", 6, 4, scale=1)
     for i, t in enumerate((1, 4)):
         big = np.repeat(np.repeat(walls[t][..., :3].astype(np.float32) / 255.0, 3, 0), 3, 1)
         r[24:24 + 3 * S, 10 + i * (3 * S + 14):10 + i * (3 * S + 14) + 3 * S] = big

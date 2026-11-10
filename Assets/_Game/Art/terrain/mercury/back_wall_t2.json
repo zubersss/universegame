@@ -1,0 +1,23 @@
+{
+  "key": "terrain/mercury/back_wall_t2",
+  "style": "v3",
+  "width": 256,
+  "height": 256,
+  "ppu": 64,
+  "palette": "mercury",
+  "tile_x": true,
+  "tile_y": true,
+  "tier": 2,
+  "tier_name": "Subsoil",
+  "roles": {
+    "fill_main": "offwhite_shadow",
+    "wall": "offwhite_shadow mixed 0.35 toward ink",
+    "accents": [
+      "sky_shadow",
+      "offwhite",
+      "offwhite_deep"
+    ],
+    "bright": "offwhite"
+  },
+  "note": "B-230 (D-183): the dug cell's back face as cut earth, one step darker than the tier's fill; no ink outline; UNITY darkens it with depth and distance from the opening (U-196)"
+}

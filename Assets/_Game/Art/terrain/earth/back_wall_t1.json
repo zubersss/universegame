@@ -1,0 +1,23 @@
+{
+  "key": "terrain/earth/back_wall_t1",
+  "style": "v3",
+  "width": 256,
+  "height": 256,
+  "ppu": 64,
+  "palette": "earth",
+  "tile_x": true,
+  "tile_y": true,
+  "tier": 1,
+  "tier_name": "Topsoil",
+  "roles": {
+    "fill_main": "mustard_deep",
+    "wall": "mustard_deep mixed 0.35 toward ink",
+    "accents": [
+      "red_deep",
+      "mustard_shadow",
+      "sky_shadow"
+    ],
+    "bright": "mustard_shadow"
+  },
+  "note": "B-230 (D-183): the dug cell's back face as cut earth, one step darker than the tier's fill; no ink outline; UNITY darkens it with depth and distance from the opening (U-196)"
+}
