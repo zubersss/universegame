@@ -10,9 +10,10 @@ screen, PPU 64: the docked Pilgrim at its side-view size) so the RawImage shows 
                                   Earth's near disc low in the porthole, Luna above it. Opaque
   backgrounds/waystation/layer1   the bay: a riveted cream wall under a brown ceiling truss and a steel gantry rail, a teal
                                   wainscot with the stencilled HALCYON FREIGHT, blue-grey deck plates; the big brass porthole on the
-                                  left, open (alpha 0) onto layer0, a faint glass glare; the Pilgrim (its rig's side plant) docked on
-                                  a hazard-striped cradle with two umbilicals to the wall; a crate on the gantry hook; crates behind
-                                  the market panel; a BAY 2 plate
+                                  left, open (alpha 0) onto layer0, a faint glass glare; an EMPTY hazard-striped cradle with the
+                                  bay's two docking clamps (LEAD 18:2x: the Pilgrim is not baked in - UNITY stands the ship's own
+                                  sprite on the anchor in layer1.json; round 1's umbilicals to the hull read as the rocket's
+                                  arms); a crate on the gantry hook; crates behind the market panel; a BAY 2 plate
   backgrounds/waystation/layer2   the near frame: a brass railing along the bottom, a hanging lamp top-left. Transparent elsewhere
   icons/catalogue/camp            128x128 @ PPU 128 (B-199's item-icon style; the catalogue shows it at 64): the spawn camp as the
                                   game builds it - the landing pad with a crate stack, a lamp post with a red pennant, a grass strip
@@ -104,12 +105,20 @@ def tile(dst, img, y):
         over(dst, p, x, y)
 
 
-def to_u8(p, seed, grain=0.035):
-    """Premultiplied float -> straight uint8 with the backdrops' paper grain."""
+def to_u8(p, seed, grain=0.035, q=1):
+    """Premultiplied float -> straight uint8 with the backdrops' paper grain. q > 1: every colour channel rounded to a
+    multiple of q afterwards (LEAD 18:2x: a full-screen layer stays under about 1.5 MB - the per-pixel grain is what a png
+    cannot pack; in steps of q it has a handful of values and the picture does not change to the eye)."""
     a = p[..., 3:4]
     rgb = np.where(a > 1e-5, p[..., :3] / np.maximum(a, 1e-5), 0.0)
     u8 = np.clip(np.rint(np.dstack([rgb, a]) * 255), 0, 255).astype(np.uint8)
-    return U.paper_grain(u8, seed, grain) if grain else u8
+    if grain:
+        u8 = U.paper_grain(u8, seed, grain)
+    if q > 1:
+        u8 = u8.copy()
+        u8[..., :3] = np.clip((u8[..., :3].astype(np.int32) + q // 2) // q * q, 0, 255).astype(np.uint8)
+        u8[..., :3][u8[..., 3] == 0] = 0
+    return u8
 
 
 def text_sprite(text, size, fill, seed, tracking=0.12):
@@ -263,13 +272,24 @@ def cradle(d, M, t):
         G.stroke(d, t(C(xx, PAD_TOP + 6, 2.5, 8)), M["brown"], I * 0.8, cyclic=True)
 
 
-def umbilicals(d, M, t):
-    for pts, w, tone, wall in ((((446, 660), (480, 700), (520, 724), (552, 714), (572, 700)), 16, "teal", (416, 640, 446, 680)),
-                               (((752, 640), (782, 676), (822, 688), (862, 664), (884, 622)), 14, "brown", (872, 590, 896, 624))):
-        G.stroke(d, t(R(*wall)), M["mustard"], O, cyclic=True)                                 # the wall socket
-        G.stroke(d, t(hose(list(pts), w)), M[tone], O, cyclic=True)                            # the hose
-        for (x, y) in (pts[0], pts[-1]):                                                       # brass couplings at both ends
-            G.stroke(d, t(C(x, y, w * 0.72, 14)), M["mustard"], I, cyclic=True)
+CLAMP_X, CLAMP_H = 196, 150                                # a docking clamp: its post's distance from the ship's centre line,
+#                                                            its height above the cradle's deck (px)
+
+
+def clamps(d, M, t):
+    """The bay's two docking clamps (LEAD 18:2x): short steel gantry arms up from the cradle's ends, each with a padded jaw
+    turned to the hull. Nothing grows from the ship: round 1's two umbilicals ran from wall sockets to the hull and read as
+    the rocket raising its arms. The jaws stop 128 px from the centre line, just outside the Pilgrim's landing fins there."""
+    for sg in (-1, 1):
+        xb = SHIP_X + sg * CLAMP_X
+        xj, yj = xb - sg * 60, PAD_TOP - CLAMP_H - 32
+        G.stroke(d, t(hose([(xb, PAD_TOP - 10), (xb, PAD_TOP - CLAMP_H)], 16)), M["sky"], O, cyclic=True)        # the post
+        G.stroke(d, t(hose([(xb + 4, PAD_TOP - 14), (xb + 4, PAD_TOP - CLAMP_H + 4)], 5)), M["sky_sh"], 0.0, cyclic=True)
+        G.stroke(d, t(hose([(xb, PAD_TOP - CLAMP_H), (xj + sg * 10, yj)], 13)), M["sky"], O, cyclic=True)       # the arm
+        G.stroke(d, t(R(xb - 20, PAD_TOP - 18, xb + 20, PAD_TOP)), M["mustard"], O, cyclic=True)                 # its foot
+        G.stroke(d, t(C(xb, PAD_TOP - CLAMP_H, 8, 14)), M["mustard"], I, cyclic=True)                            # the elbow's pin
+        G.stroke(d, t(R(xj - 9, yj - 26, xj + 9, yj + 26)), M["mustard"], O, cyclic=True)                        # the jaw
+        G.stroke(d, t(R(min(xj - sg * 9, xj - sg * 3), yj - 22, max(xj - sg * 9, xj - sg * 3), yj + 22)), M["brown"], I, cyclic=True)   # its pad
 
 
 def gantry(d, M, t):
@@ -352,11 +372,37 @@ def layer1():
         over(p, crate, x, y)
     over(p, *sprite(830, CEIL + 4, 930, 340, gantry, 21))
     over(p, crate, 875 - cw // 2, 334)
+    over(p, *sprite(SHIP_X - 230, PAD_TOP - CLAMP_H - 70, SHIP_X + 230, PAD_TOP + 2, clamps, 23))
     over(p, *sprite(SHIP_X - 230, PAD_TOP - 4, SHIP_X + 230, FLOOR + 6, cradle, 22))
-    rocket, (rgx, rgy) = TT.pilgrim()                                                          # the Pilgrim, docked (premultiplied)
-    over(p, rocket, SHIP_X - rgx, PAD_TOP - 6 - rgy)                                          # (B-221's offset: the feet on the deck)
-    over(p, *sprite(400, 580, 910, 740, umbilicals, 23))
-    return p
+    return p                                                                                   # the cradle stands EMPTY: UNITY places
+#                                                                                                the ship's own sprite on it (U-192)
+
+
+SHIP_GROUND = (SHIP_X, PAD_TOP - 6)                        # where the Pilgrim rig's ground point stands on the cradle (px from the
+#                                                            top-left; B-221's offset: its feet on the deck plate)
+
+
+def ship():
+    """The docked Pilgrim for the PREVIEW only (premultiplied float, x, y): LEAD 18:2x - it is not baked into layer1, so the
+    ship is never drawn twice and keeps its own looks; the layer's json names the cradle's anchor."""
+    rocket, (rgx, rgy) = TT.pilgrim()
+    return rocket, SHIP_GROUND[0] - rgx, SHIP_GROUND[1] - rgy
+
+
+def anchor_json():
+    """backgrounds/waystation/layer1.json: the cradle's anchor for U-192 (px from the layer's top-left and bottom-left, and
+    metres from the layer's centre at 64 px per metre, y up)."""
+    def m(x, y):
+        return [round((x - W / 2) / 64.0, 4), round((H / 2 - y) / 64.0, 4)]
+    return {"key": "backgrounds/waystation/layer1", "style": "v3", "width": W, "height": H, "ppu": 64,
+            "cradle": {"px": [SHIP_X, PAD_TOP], "px_from_bottom_left": [SHIP_X, H - PAD_TOP], "m": m(SHIP_X, PAD_TOP),
+                       "half_width_px": 220, "note": "the centre of the cradle's deck plate, its top edge"},
+            "ship_ground": {"px": list(SHIP_GROUND), "px_from_bottom_left": [SHIP_GROUND[0], H - SHIP_GROUND[1]], "m": m(*SHIP_GROUND),
+                            "note": "put the Pilgrim rig's ground point here (its feet stand on the deck plate), drawn over layer1 and under layer2"},
+            "clamps": {"jaw_px_from_centre_line": CLAMP_X - 60 - 9, "jaw_y_px": [PAD_TOP - CLAMP_H - 58, PAD_TOP - CLAMP_H - 6],
+                       "note": "the two jaws' inner faces; they stand just outside the docked Pilgrim's landing fins"},
+            "market_frame_px": list(MARKET),
+            "note": "B-223: the bay with its EMPTY cradle and clamps; the ship is not in the layer (LEAD 18:2x)"}
 
 
 def layer2():
@@ -367,7 +413,9 @@ def layer2():
 
 
 def layers():
-    return [to_u8(layer0(), 41), to_u8(layer1(), 42), to_u8(layer2(), 43)]
+    # the first run measured 2231 / 2352 / 87 KB. layer0 is composed of exported, already grained layers: no second grain,
+    # colours in steps of 4; layer1: a lighter grain (0.025 for 0.035) in steps of 4; layer2 is small as it is
+    return [to_u8(layer0(), 41, grain=0.0, q=4), to_u8(layer1(), 42, grain=0.025, q=4), to_u8(layer2(), 43)]
 
 
 # ---------------------------------------------------------------- the camp icon (icons, metres: 1 m = 128 px, centre origin)
@@ -417,6 +465,9 @@ def export(art):
         p = os.path.join(art, "backgrounds", "waystation", f"layer{n}_color.png")
         os.makedirs(os.path.dirname(p), exist_ok=True)
         out.append((f"backgrounds/waystation/layer{n}", W, H, pngio.write_png(p, u8)))
+    with open(os.path.join(art, "backgrounds", "waystation", "layer1.json"), "w", encoding="utf-8", newline="\n") as f:
+        json.dump(anchor_json(), f, indent=2)                                                  # the cradle's anchor (U-192)
+        f.write("\n")
     base = os.path.join(art, "icons", "catalogue", "camp")
     os.makedirs(os.path.dirname(base), exist_ok=True)
     nb = pngio.write_png(base + "_color.png", img)
@@ -439,9 +490,23 @@ def preview(out, footnote=None):
     from build_tool_icons_v3 import shrink
     L = layers()
     comp = np.zeros((H, W, 3), np.float32)
-    for u8 in L:                                                                               # stacked as DockingBay draws them
-        f = u8.astype(np.float32) / 255.0
+    rocket, rx_, ry_ = ship()
+    rx_, ry_ = int(round(rx_)), int(round(ry_))
+    for n, u8 in enumerate(L):                                                                 # stacked as DockingBay draws them,
+        f = u8.astype(np.float32) / 255.0                                                      # the ship's own sprite over layer1
         comp = f[..., :3] * f[..., 3:4] + comp * (1 - f[..., 3:4])
+        if n == 1:
+            rh, rw = rocket.shape[:2]
+            comp[ry_:ry_ + rh, rx_:rx_ + rw] = rocket[..., :3] + comp[ry_:ry_ + rh, rx_:rx_ + rw] * (1 - rocket[..., 3:4])
+    sizes = []
+    pd = os.path.join(os.path.dirname(out), "b223_layers")                                     # the layers as they would export
+    os.makedirs(pd, exist_ok=True)                                                             # (preview folder), for their sizes
+    for n, u8 in enumerate(L):
+        sizes.append(pngio.write_png(os.path.join(pd, f"layer{n}_color.png"), u8))
+    with open(os.path.join(pd, "layer1.json"), "w", encoding="utf-8", newline="\n") as fj:
+        json.dump(anchor_json(), fj, indent=2)
+        fj.write("\n")
+    print("layer png sizes (KB):", ", ".join(f"layer{n} {s // 1024}" for n, s in enumerate(sizes)))
     x0, y0, x1, y1 = MARKET                                                                    # the market panel's frame, outlined
     col = np.array([0.85, 0.2, 0.2], np.float32)
     comp[y0:y0 + 3, x0:x1] = col
@@ -449,6 +514,7 @@ def preview(out, footnote=None):
     comp[y0:y1, x0:x0 + 3] = col
     comp[y0:y1, x1 - 3:x1] = col
     review._label(comp, "the market panel (DockingBay) covers this", x0 + 12, y0 + 12, scale=2)
+    review._label(comp, "the Pilgrim is NOT in layer1: composed here as UNITY will place its sprite on the cradle's anchor", SHIP_X - 300, 40, scale=1)
     paper = np.array(review.PAPER, np.float32)
     strip = np.tile(paper, (330, W, 1)).astype(np.float32)
     review._label(strip, "the three layers at 1/4 (layer0 the view out, layer1 the bay with the porthole open, layer2 the near railing and lamp) | icons/catalogue/camp at 128 / 64 beside its catalogue neighbours", 6, 4, scale=1)
