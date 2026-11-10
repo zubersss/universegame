@@ -6556,6 +6556,144 @@ namespace Meridian.Tests
         }
 
         /// <summary>
+        /// U-192 (BLENDER's 0.6.2 read: G1, G6, the catalogue's Site branch) → coordination/reports/unity/u192/: 2_catalogue_earth / _mars /
+        /// _mercury / _venus (every entry surveyed: the eleven Site icons by their labels, B-223's camp and B-233's ten), 3_venus_serpent
+        /// (the veil serpent at 1x beside the Meridian station, a gentle drifter 9 m off), 1_bay_docked (Earth's Waystation as the player
+        /// sees it docked: the Pilgrim on the bay's cradle) and 1b_bay_ship_market_hidden (the same with the market panel off the cradle).
+        /// </summary>
+        [UnityTest, Timeout(360000)]
+        public IEnumerator CaptureU192()
+        {
+            var name = Environment.GetEnvironmentVariable(Variable);
+            if (string.IsNullOrEmpty(name)) Assert.Ignore($"Set {Variable} (tools/unity_capture.ps1).");
+            if (SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.Null)
+                Assert.Fail("No graphics device: run without -nographics.");
+            bool wasCartoon = Meridian.View2D.CartoonStage.Enabled;
+            Meridian.View2D.CartoonStage.Enabled = true;
+            try
+            {
+#if UNITY_EDITOR
+                yield return UnityEditor.SceneManagement.EditorSceneManager.LoadSceneAsyncInPlayMode(
+                    CorePath, new LoadSceneParameters(LoadSceneMode.Single));
+#endif
+                var director = UnityEngine.Object.FindAnyObjectByType<SceneDirector>();
+                float timeout = Time.realtimeSinceStartup + 30f;
+                while ((!director.IsReady || !director.PlanetSide.terrain.IsSettled) && Time.realtimeSinceStartup < timeout) yield return null;
+                var dir = "coordination/reports/unity/u192";
+                Directory.CreateDirectory(dir);
+                var side = director.PlanetSide;
+                if (side.hazards != null) side.hazards.enabled = false;
+                if (side.dayNight != null) side.dayNight.Override = 0.45f;
+                side.creatures.autoSpawn = false; side.creatures.DespawnAll();
+                var state = GameState.Instance;
+
+                // 2: the catalogue, a page a planet that has sites, every entry surveyed (an unsurveyed one shows its icon as a silhouette)
+                var catalogue = UnityEngine.Object.FindAnyObjectByType<Meridian.UI.CataloguePanel>();
+                Assert.NotNull(catalogue, "the catalogue panel");
+                catalogue.SetOpen(true);
+                int siteIcons = 0, sites = 0;
+                foreach (var planetId in new[] { Meridian.Planets.PlanetId.Earth, Meridian.Planets.PlanetId.Mars, Meridian.Planets.PlanetId.Mercury, Meridian.Planets.PlanetId.Venus })
+                {
+                    var entries = Meridian.Survey.Catalogue.For(planetId);
+                    foreach (var e in entries) if (!state.catalogue.Contains(e.id)) state.catalogue.Add(e.id);
+                    catalogue.Show(planetId);
+                    timeout = Time.realtimeSinceStartup + 6f;
+                    bool all = false;
+                    while (!all && Time.realtimeSinceStartup < timeout)
+                    {
+                        yield return null;
+                        catalogue.Show(planetId); // the icons arrive over a few frames
+                        all = true;
+                        foreach (var e in entries) if (e.kind == Meridian.Survey.EntryKind.Site && catalogue.IconShownFor(e.id) == null) all = false;
+                    }
+                    yield return new WaitForSeconds(0.5f);
+                    string label = "2_catalogue_" + planetId.ToString().ToLowerInvariant();
+                    yield return SaveWithUi(side.sideCamera, catalogue.EntryNames[0].canvas, $"{name}_{label}");
+                    File.Copy($"logs/capture_{name}_{label}.png", $"{dir}/{label}.png", true);
+                    var line = new System.Text.StringBuilder();
+                    foreach (var e in entries)
+                    {
+                        if (e.kind != Meridian.Survey.EntryKind.Site) continue;
+                        sites++;
+                        var shown = catalogue.IconShownFor(e.id);
+                        if (shown != null) siteIcons++;
+                        line.Append($" {e.name} = {(shown != null ? shown.name : "NO ICON")} ({e.artKey});");
+                    }
+                    TestContext.Out.WriteLine($"[MERIDIAN] u192 {label}: {entries.Count} entries;{line}");
+                }
+                TestContext.Out.WriteLine($"[MERIDIAN] u192 catalogue: {siteIcons} of {sites} Site icons shown");
+                catalogue.SetOpen(false);
+
+                // 3: the veil serpent at 1x beside Venus's Meridian station (9 m off: it meanders; inside 8 m it would swerve away)
+                yield return director.LoadPlanetSide(state.catalog.Get(Meridian.Planets.PlanetId.Venus));
+                side = director.PlanetSide;
+                if (side.hazards != null) side.hazards.enabled = false;
+                if (side.dayNight != null) side.dayNight.Override = 0.45f;
+                side.creatures.autoSpawn = false; side.creatures.DespawnAll();
+                var station = Meridian.Planet.POI.PoiCatalog.MeridianStation;
+                timeout = Time.realtimeSinceStartup + 10f;
+                while (side.pois.Solids.Count < 5 && Time.realtimeSinceStartup < timeout) yield return null;
+                var body = side.player.Body;
+                var feet = new Vector2(station.x + 10f, station.floatY + (336f - 62f) / 128f + 1.5f);
+                body.position = feet; side.player.transform.position = feet; body.linearVelocity = Vector2.zero;
+                yield return null;
+                timeout = Time.realtimeSinceStartup + 20f;
+                while (!side.terrain.IsSettled && Time.realtimeSinceStartup < timeout) yield return null;
+                for (int i = 0; i < 40; i++) yield return new WaitForFixedUpdate();
+                var follow = side.sideCamera.GetComponent<Meridian.Player.CameraFollow>();
+                if (follow != null) follow.SnapToTarget();
+                Vector2 p = body.position;
+                var serpent = side.creatures.Spawn(Meridian.Creatures.Species.VeilSerpent, p + new Vector2(9.5f, 2.5f));
+                Assert.NotNull(serpent, "the veil serpent spawns beside the station");
+                for (int i = 0; i < 300 && serpent.Held; i++) yield return new WaitForFixedUpdate();
+                for (int i = 0; i < 45; i++) yield return new WaitForFixedUpdate();
+                var spec = Meridian.Creatures.SpeciesSpec.Get(Meridian.Creatures.Species.VeilSerpent);
+                var drawn = serpent.GetComponentInChildren<Renderer>();
+                yield return Save(side.sideCamera, $"{name}_3_venus_serpent");
+                File.Copy($"logs/capture_{name}_3_venus_serpent.png", $"{dir}/3_venus_serpent.png", true);
+                TestContext.Out.WriteLine($"[MERIDIAN] u192 3_venus_serpent: {((Vector2)serpent.transform.position - (Vector2)body.position).magnitude:0.0} m from the surveyor, state {serpent.State}, temper {spec.temper}, art scale {spec.artScale:0.00}, size {spec.size.x:0.0} x {spec.size.y:0.0} m, drawn {(drawn != null ? $"{drawn.bounds.size.x:0.00} x {drawn.bounds.size.y:0.00} m" : "-")}, bumps {side.creatures.Bumps}");
+                side.creatures.DespawnAll();
+
+                // 1: Earth's Waystation, docked: the Pilgrim on the bay's cradle
+                director.SetView(ViewMode.Space);
+                for (int i = 0; i < 10; i++) yield return null;
+                var ship = director.Space.GetComponentInChildren<Meridian.Space.SpaceShip>();
+                var map = director.Space.GetComponentInChildren<Meridian.Space.SpaceHud>().Map;
+                ship.externalInput = true; ship.intent = default;
+                timeout = Time.realtimeSinceStartup + 10f;
+                while ((!map.Built || ship.Invulnerable) && Time.realtimeSinceStartup < timeout) yield return null;
+                var cam = director.Space.GetComponentInChildren<Camera>();
+                var bay = director.Space.GetComponent<Meridian.Trade.DockingBay>();
+                Assert.IsTrue(bay.Dock("earth"), "docked at Earth's Waystation");
+                timeout = Time.realtimeSinceStartup + 8f;
+                while (bay.ShipParts == 0 && Time.realtimeSinceStartup < timeout) yield return null;
+                yield return new WaitForSeconds(2f); // the bay's layers and the goods' icons
+                var bayCanvas = bay.MarketPanel.GetComponentInParent<Canvas>();
+                yield return SaveWithUi(cam, bayCanvas, $"{name}_1_bay_docked");
+                File.Copy($"logs/capture_{name}_1_bay_docked.png", $"{dir}/1_bay_docked.png", true);
+                bay.MarketPanel.gameObject.SetActive(false);
+                yield return null;
+                yield return SaveWithUi(cam, bayCanvas, $"{name}_1b_bay_ship_market_hidden");
+                File.Copy($"logs/capture_{name}_1b_bay_ship_market_hidden.png", $"{dir}/1b_bay_ship_market_hidden.png", true);
+                bay.MarketPanel.gameObject.SetActive(true);
+                float lowest = float.MaxValue, left = float.MaxValue, right = float.MinValue, top = float.MinValue;
+                if (bay.ShipRoot != null)
+                    foreach (var img in bay.ShipRoot.GetComponentsInChildren<UnityEngine.UI.Image>())
+                    {
+                        var rt = img.rectTransform;
+                        float y0 = rt.anchoredPosition.y - rt.pivot.y * rt.sizeDelta.y, x0 = rt.anchoredPosition.x - rt.pivot.x * rt.sizeDelta.x;
+                        lowest = Mathf.Min(lowest, y0); top = Mathf.Max(top, y0 + rt.sizeDelta.y);
+                        left = Mathf.Min(left, x0); right = Mathf.Max(right, x0 + rt.sizeDelta.x);
+                    }
+                TestContext.Out.WriteLine($"[MERIDIAN] u192 1_bay_docked: {bay.ShipParts} ship parts under {(bay.ShipRoot != null ? bay.ShipRoot.name : "-")}, the cradle's ground point {Meridian.Trade.DockingBay.ShipGroundPx} px; the parts span x {left:0}..{right:0}, y {lowest:0}..{top:0} px from that point (a part's unrotated box)");
+                bay.Undock();
+                yield return null;
+                LogAssert.NoUnexpectedReceived();
+            }
+            finally { Meridian.View2D.CartoonStage.Enabled = wasCartoon; }
+        }
+
+        /// <summary>
         /// U-125 (B-152 / B-153 / B-154): Venus on the cartoon stage at 1x in reports/unity/u125/: 1_deck_1x (the surveyor on the Meridian station's
         /// deck: the deck set off the cloud deck, the deck-plank strip, a Sulfur drifter), 2_surface_vent_1x (the first vent field: the surface set,
         /// the basalt crust, a Pressure crab and the Vent eel at its vent mouth).
