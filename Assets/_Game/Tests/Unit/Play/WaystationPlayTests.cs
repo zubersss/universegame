@@ -158,6 +158,59 @@ namespace Meridian.Tests
             LogAssert.NoUnexpectedReceived();
         }
 
+        /// <summary>U-192 (BLENDER's 0.6.2 read, G1: the player has just docked and their ship is not in its bay): the docked Pilgrim's rig
+        /// stands on the cradle, drawn between the bay's layer1 (the empty cradle) and layer2, its ground point on layer1.json's
+        /// ship_ground and centred over it.</summary>
+        [UnityTest]
+        public IEnumerator TheDockedPilgrimStandsOnTheCradle()
+        {
+#if UNITY_EDITOR
+            yield return UnityEditor.SceneManagement.EditorSceneManager.LoadSceneAsyncInPlayMode(
+                CorePath, new LoadSceneParameters(LoadSceneMode.Single));
+#endif
+            var director = Object.FindAnyObjectByType<SceneDirector>();
+            float timeout = Time.realtimeSinceStartup + 30f;
+            while (!director.IsReady && Time.realtimeSinceStartup < timeout) yield return null;
+            director.SetView(ViewMode.Space);
+            for (int i = 0; i < 10; i++) yield return null;
+            var bay = director.Space.GetComponent<DockingBay>();
+            Assert.NotNull(bay, "DockingBay on the Space root");
+            var ship = director.Space.GetComponentInChildren<SpaceShip>();
+            ship.externalInput = true;
+            Assert.IsTrue(bay.Dock("earth"));
+            timeout = Time.realtimeSinceStartup + 15f;
+            while (bay.ShipParts == 0 && Time.realtimeSinceStartup < timeout) yield return null;
+            yield return null;
+            Canvas.ForceUpdateCanvases();
+
+            Assert.NotNull(bay.ShipRoot, "the ship's place in the bay");
+            Assert.Greater(bay.ShipParts, 5, "the Pilgrim's rig parts are drawn (ships/pilgrim/rig)");
+            Assert.AreEqual(bay.ShipParts, bay.ShipRoot.childCount);
+            var bayRoot = bay.ShipRoot.parent;
+            int at = bay.ShipRoot.GetSiblingIndex();
+            Assert.AreEqual("BayLayer1", bayRoot.GetChild(at - 1).name, "over the bay with its empty cradle");
+            Assert.AreEqual("BayLayer2", bayRoot.GetChild(at + 1).name, "under the bay's near layer");
+            var layer = WorldRect((RectTransform)bayRoot.GetChild(at - 1));
+            float k = layer.width / 1920f; // the layers are 1920 x 1080 px on the canvas
+            float groundX = layer.xMin + DockingBay.ShipGroundPx.x * k, groundY = layer.yMin + DockingBay.ShipGroundPx.y * k;
+            float lowest = float.MaxValue, top = float.MinValue, left = float.MaxValue, right = float.MinValue;
+            foreach (RectTransform part in bay.ShipRoot)
+            {
+                var img = part.GetComponent<UnityEngine.UI.Image>();
+                Assert.IsTrue(img != null && img.enabled && img.sprite != null, $"{part.name}: an image with its sprite");
+                var r = WorldRect(part);
+                lowest = Mathf.Min(lowest, r.yMin); top = Mathf.Max(top, r.yMax); left = Mathf.Min(left, r.xMin); right = Mathf.Max(right, r.xMax);
+            }
+            TestContext.Out.WriteLine($"[MERIDIAN] u192 the docked Pilgrim: {bay.ShipParts} parts, {(right - left) / k:0} x {(top - lowest) / k:0} px on the 1920 x 1080 bay, its lowest point {(lowest - layer.yMin) / k:0} px up (ship_ground {DockingBay.ShipGroundPx.y:0}), its middle {((left + right) * 0.5f - layer.xMin) / k:0} px across (ship_ground {DockingBay.ShipGroundPx.x:0})");
+            Assert.AreEqual(groundY, lowest, 16f * k, "its pads stand on the cradle's deck plate");
+            Assert.AreEqual(groundX, (left + right) * 0.5f, 48f * k, "centred over the cradle");
+            Assert.Less(top, layer.yMax, "the whole ship inside the bay");
+            Assert.Greater(top - lowest, 200f * k, "a ship's height, not a speck");
+            bay.Undock();
+            yield return null;
+            LogAssert.NoUnexpectedReceived();
+        }
+
         static Rect WorldRect(RectTransform rt)
         {
             var c = new Vector3[4];

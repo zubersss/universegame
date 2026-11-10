@@ -98,6 +98,8 @@ namespace Meridian.Trade
             if (dock != null) dock.performed -= OnDockKey;
             ItemIcons.Loaded -= FillIcons;
             foreach (var h in handles) if (h.IsValid()) global::Meridian.Art.ArtLoad.Release(h);
+            if (shipJsonHandle.IsValid()) global::Meridian.Art.ArtLoad.Release(shipJsonHandle); // U-192: the docked ship's rig
+            if (shipSpritesHandle.IsValid()) global::Meridian.Art.ArtLoad.Release(shipSpritesHandle);
             if (Docked) AnyOpen = false;
         }
 
@@ -248,7 +250,10 @@ namespace Meridian.Trade
                 var layer = UiKit.Rect(root.transform, "BayLayer" + i, center, Vector2.zero, new Vector2(1920f, 1080f)).gameObject.AddComponent<RawImage>();
                 layer.enabled = false;
                 LoadLayer(i, layer);
+                // U-192 (G1): the docked Pilgrim stands on the cradle, over layer1 (the bay with its empty cradle) and under layer2
+                if (i == 1) ShipRoot = UiKit.Rect(root.transform, "BayShip", center, ShipGroundPx - new Vector2(960f, 540f), Vector2.zero);
             }
+            LoadShip();
             var frame = UiKit.Panel(root.transform, "MarketFrame", new Vector2(1f, 0.5f), new Vector2(-40f, 0f), new Vector2(964f, 984f), UiTheme.Accent(null) * new Color(1f, 1f, 1f, 0.6f));
             frame.rectTransform.pivot = new Vector2(1f, 0.5f);
             var panel = UiKit.Panel(frame.transform, "Market", center, Vector2.zero, new Vector2(960f, 980f), UiKit.PanelFill);
@@ -304,6 +309,53 @@ namespace Meridian.Trade
                 contractRows.Add((label, b));
             }
             root.SetActive(false);
+        }
+
+        // ---------- U-192 (BLENDER's 0.6.2 read, G1): the Pilgrim on the bay's cradle ----------
+
+        /// <summary>Where the Pilgrim's ground point stands in the bay: px from the bottom left of the 1920 x 1080 layers (B-223's
+        /// backgrounds/waystation/layer1.json "ship_ground": the cradle's deck plate; a test holds this to the json), at the layers'
+        /// 64 px a metre.</summary>
+        public static readonly Vector2 ShipGroundPx = new Vector2(660f, 186f);
+        public const float BayPxPerMetre = 64f;
+        /// <summary>The docked ship's parts stand under this (between BayLayer1 and BayLayer2); how many are drawn (0 until its rig is in).</summary>
+        public RectTransform ShipRoot { get; private set; }
+        public int ShipParts { get; private set; }
+        TextAsset shipJson;
+        IList<Sprite> shipSprites;
+        int shipPending;
+        AsyncOperationHandle<TextAsset> shipJsonHandle;
+        AsyncOperationHandle<IList<Sprite>> shipSpritesHandle;
+
+        /// <summary>The Pilgrim's drawn rig (ships/pilgrim/rig, plant pilgrim_side) in its rest pose, as images on the bay's canvas: its
+        /// rig origin (the ground line under the pads) on ShipGroundPx. Without the rig the cradle stays empty, as B-223 drew it.</summary>
+        void LoadShip()
+        {
+            shipPending = 2;
+            shipJsonHandle = ArtLoad.Asset<TextAsset>(ArtKeys.Ships.PilgrimRig + Meridian.Flora.FloraRigs.JsonSuffix);
+            shipJsonHandle.Completed += op => { if (this == null) return; if (op.Status == AsyncOperationStatus.Succeeded) shipJson = op.Result; ShipArrived(); };
+            shipSpritesHandle = ArtLoad.Asset<IList<Sprite>>(ArtKeys.Ships.PilgrimRig);
+            shipSpritesHandle.Completed += op => { if (this == null) return; if (op.Status == AsyncOperationStatus.Succeeded) shipSprites = op.Result; ShipArrived(); };
+        }
+
+        void ShipArrived()
+        {
+            if (--shipPending > 0 || ShipRoot == null || ShipParts > 0) return;
+            if (shipJson == null || shipSprites == null || shipSprites.Count == 0) return;
+            var set = Meridian.Flora.RigSet.Parse(shipJson.text, out _);
+            var def = set != null ? set.FindPlant(Meridian.Ship.ShipLegsView.SidePlant) ?? (set.plants != null && set.plants.Length > 0 ? set.plants[0] : null) : null;
+            if (def == null) return;
+            var sprites = Meridian.Flora.RigBuild.ByName(shipSprites);
+            var centre = new Vector2(0.5f, 0.5f);
+            foreach (var (part, at, _) in Meridian.Flora.RigBuild.BindPose(def)) // lowest order first: the canvas draws them in this sequence
+            {
+                if (!sprites.TryGetValue(part, out var sp) || sp == null) continue;
+                float k = BayPxPerMetre / sp.pixelsPerUnit; // 1 at the rig's own 64 px a metre
+                var img = UiKit.Panel(ShipRoot, part, centre, at * BayPxPerMetre, sp.rect.size * k, Color.white);
+                img.rectTransform.pivot = new Vector2(sp.pivot.x / sp.rect.width, sp.pivot.y / sp.rect.height);
+                img.sprite = sp;
+                ShipParts++;
+            }
         }
 
         void LoadLayer(int i, RawImage target)

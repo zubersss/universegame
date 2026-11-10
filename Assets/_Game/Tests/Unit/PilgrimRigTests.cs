@@ -51,6 +51,44 @@ namespace Meridian.Tests
             Assert.AreEqual("pilgrim_side_fin_wobble", RigSet.StateName("pilgrim_side", "fin_wobble"));
         }
 
+        /// <summary>U-192 (G1): the docking bay draws the Pilgrim's rig in its rest pose on its canvas. RigBuild.BindPose lists the parts
+        /// as Build places them (bones at their offsets, the bell and porthole slots, lowest order first); the pose stands on the rig
+        /// origin (the ground line under the pads); and the bay's ship_ground is the one in B-223's layer1.json.</summary>
+        [Test]
+        public void TheBindPoseStandsOnTheBaysShipGround()
+        {
+            var set = RigSet.Parse(File.ReadAllText(JsonPath), out var error);
+            Assert.NotNull(set, error);
+            var side = set.FindPlant("pilgrim_side");
+            var pose = RigBuild.BindPose(side);
+            Assert.GreaterOrEqual(pose.Count, 6, "the hull, the nose, the fins, the hatch, the bell and the porthole");
+            for (int i = 1; i < pose.Count; i++) Assert.GreaterOrEqual(pose[i].order, pose[i - 1].order, "lowest order first");
+            float lowest = float.MaxValue, highest = float.MinValue, left = float.MaxValue, right = float.MinValue;
+            var log = new System.Text.StringBuilder();
+            foreach (var (sprite, at, order) in pose)
+            {
+                var part = System.Array.Find(set.parts, p => p.name == sprite);
+                Assert.NotNull(part, $"{sprite}: a part of the sheet");
+                float w = part.rect[2] / 64f, h = part.rect[3] / 64f;
+                float px = part.pivot != null && part.pivot.Length == 2 ? part.pivot[0] : 0.5f, py = part.pivot != null && part.pivot.Length == 2 ? part.pivot[1] : 0.5f;
+                lowest = Mathf.Min(lowest, at.y - py * h); highest = Mathf.Max(highest, at.y + (1f - py) * h);
+                left = Mathf.Min(left, at.x - px * w); right = Mathf.Max(right, at.x + (1f - px) * w);
+                log.Append($" {sprite}@({at.x:0.00}, {at.y:0.00}) order {order};");
+            }
+            TestContext.Out.WriteLine($"[MERIDIAN] u192 the Pilgrim's bind pose: {pose.Count} parts, {right - left:0.00} x {highest - lowest:0.00} m, from {lowest:0.00} to {highest:0.00} m over the rig origin:{log}");
+            Assert.That(lowest, Is.InRange(-0.25f, 0.25f), "the pads stand on the rig origin's ground line");
+            Assert.That(highest - lowest, Is.InRange(4f, 13.5f), "a ship's height that fits the bay (its ground point 186 px up a 1080 px layer at 64 px a metre)");
+            Assert.That((left + right) * 0.5f, Is.InRange(-0.6f, 0.6f), "centred on the rig origin");
+            // the bay's constants are the json's
+            string bayJson = File.ReadAllText("Assets/_Game/Art/backgrounds/waystation/layer1.json");
+            var m = System.Text.RegularExpressions.Regex.Match(bayJson, "\"ship_ground\"\\s*:\\s*\\{[^}]*\"px_from_bottom_left\"\\s*:\\s*\\[\\s*(\\d+)\\s*,\\s*(\\d+)");
+            Assert.IsTrue(m.Success, "layer1.json states ship_ground.px_from_bottom_left");
+            Assert.AreEqual(float.Parse(m.Groups[1].Value), Meridian.Trade.DockingBay.ShipGroundPx.x, "ship_ground x");
+            Assert.AreEqual(float.Parse(m.Groups[2].Value), Meridian.Trade.DockingBay.ShipGroundPx.y, "ship_ground y");
+            StringAssert.Contains("\"ppu\": 64", bayJson, "the bay's layers are 64 px a metre");
+            Assert.AreEqual(64f, Meridian.Trade.DockingBay.BayPxPerMetre);
+        }
+
         [Test]
         public void ParseFindsAPlantByItsExactNameWhateverTheKeyOrder()
         {

@@ -100,6 +100,44 @@ namespace Meridian.Flora
             return inst;
         }
 
+        /// <summary>
+        /// U-192: a rig's bind pose as flat draw items, for a place that cannot hold the renderers Build makes (the docking bay's canvas):
+        /// each bone's part and each non-replacing slot's first state with its position from the rig origin (m, as Build places it) and
+        /// its draw order, lowest order first (ties in the rig's own sequence). Pure over the definition.
+        /// </summary>
+        public static List<(string sprite, Vector2 at, int order)> BindPose(RigSet.Plant def)
+        {
+            var items = new List<(string sprite, Vector2 at, int order, int seq)>();
+            if (def == null || def.bones == null) return new List<(string, Vector2, int)>();
+            var pos = new Vector2[def.bones.Length];
+            for (int i = 0; i < def.bones.Length; i++)
+            {
+                var b = def.bones[i];
+                Vector2 p = Vector2.zero;
+                float up = 0f;
+                if (!string.IsNullOrEmpty(b.parent))
+                {
+                    int pi = def.BoneIndex(b.parent);
+                    if (pi >= 0 && pi < i) { p = pos[pi]; up = def.bones[pi].length; }
+                }
+                pos[i] = p + (b.offset_m != null && b.offset_m.Length == 2 ? new Vector2(b.offset_m[0], b.offset_m[1]) : new Vector2(0f, up));
+                if (!string.IsNullOrEmpty(b.part)) items.Add((b.part, pos[i], b.order >= 0 ? b.order : i, items.Count));
+            }
+            if (def.slots != null)
+                foreach (var s in def.slots)
+                {
+                    if (s == null || s.replaces_part || string.IsNullOrEmpty(s.slot)) continue;
+                    if (def.swaps == null || !def.swaps.TryGetValue(s.slot, out var states) || states.Length == 0) continue;
+                    int bi = def.BoneIndex(s.bone);
+                    var at = (bi >= 0 ? pos[bi] : Vector2.zero) + (s.offset_m != null && s.offset_m.Length == 2 ? new Vector2(s.offset_m[0], s.offset_m[1]) : Vector2.zero);
+                    items.Add((states[0], at, Mathf.Max(0, s.order), items.Count));
+                }
+            items.Sort((a, b) => a.order != b.order ? a.order.CompareTo(b.order) : a.seq.CompareTo(b.seq));
+            var pose = new List<(string, Vector2, int)>(items.Count);
+            foreach (var it in items) pose.Add((it.sprite, it.at, it.order));
+            return pose;
+        }
+
         static SpriteRenderer Renderer(GameObject go, Sprite sprite, int layer, int order, Material material)
         {
             var sr = go.AddComponent<SpriteRenderer>();
