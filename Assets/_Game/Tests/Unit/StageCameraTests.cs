@@ -266,5 +266,106 @@ namespace Meridian.Tests
             Assert.GreaterOrEqual((n - 1) * 32f, ship, "a strip kept within half a tile of the camera covers the 60 m frame");
             Assert.AreEqual(3, Meridian.View2D.ParallaxLayers.TilesFor(ship, 0f), "no width: the old 3");
         }
+
+        // ---------- U-213 (3) (D-202 (3)): the close camera ----------
+
+        /// <summary>96 px a metre on foot at the surface is 2/3 of the shipped frame (16.875 m becomes 11.25 m), 128 is half of it; the
+        /// shipped 64 underground; the switch a built player takes.</summary>
+        [Test]
+        public void U213_TheCloseCamerasSharesAndItsSwitch()
+        {
+            const float shipped = 1080f / 64f;
+            Assert.AreEqual(2f / 3f, StageZoom.Share(96f), 1e-6f);
+            Assert.AreEqual(11.25f, shipped * StageZoom.Share(96f), 1e-4f, "1080 px at 96 px a metre");
+            Assert.AreEqual(8.4375f, shipped * StageZoom.Share(128f), 1e-4f, "1080 px at 128 px a metre");
+            Assert.AreEqual(1f, StageZoom.Share(64f), 1e-6f, "the shipped frame");
+            Assert.AreEqual(1f, StageZoom.Share(10f), 1e-6f, "never wider than the shipped frame");
+            bool was = StageZoom.Enabled; float ppm = StageZoom.SurfacePxPerMetre;
+            try
+            {
+                StageZoom.Enabled = false;
+                Assert.AreEqual(1f, StageZoom.SurfaceShare, "the flag off: the shipped frame everywhere");
+                Assert.AreEqual(1f, StageZoom.GoalShare(false));
+                StageZoom.Enabled = true; StageZoom.SurfacePxPerMetre = 96f;
+                Assert.AreEqual(2f / 3f, StageZoom.GoalShare(false), 1e-6f, "at the surface");
+                Assert.AreEqual(1f, StageZoom.GoalShare(true), "underground");
+            }
+            finally { StageZoom.Enabled = was; StageZoom.SurfacePxPerMetre = ppm; }
+            Assert.IsFalse(StageZoom.ReadSwitch(new[] { "MERIDIAN.exe", "-screen-width", "1920" }, out float asked), "no switch: off");
+            Assert.AreEqual(96f, asked);
+            Assert.IsTrue(StageZoom.ReadSwitch(new[] { "MERIDIAN.exe", StageZoom.Switch }, out asked));
+            Assert.AreEqual(96f, asked, "the switch alone: 96");
+            Assert.IsTrue(StageZoom.ReadSwitch(new[] { "MERIDIAN.exe", StageZoom.Switch, "128", "-x" }, out asked));
+            Assert.AreEqual(128f, asked);
+            Assert.IsTrue(StageZoom.ReadSwitch(new[] { StageZoom.Switch, "-meridianSaveRoot" }, out asked));
+            Assert.AreEqual(96f, asked, "another switch after it is not its number");
+            Assert.IsTrue(StageZoom.ReadSwitch(new[] { StageZoom.Switch, "4000" }, out asked));
+            Assert.AreEqual(96f, asked, "a number out of range is not taken");
+        }
+
+        /// <summary>Underground is 3 m or more under the ground's surface, or under a roof of ground at any depth; half a metre of
+        /// hysteresis on the way back up.</summary>
+        [Test]
+        public void U213_UndergroundIsThreeMetresDownOrUnderARoof()
+        {
+            Assert.IsFalse(StageZoom.Underground(false, 0f, false), "on the surface");
+            Assert.IsFalse(StageZoom.Underground(false, 2.9f, false), "in a pit 2.9 m deep under the open sky");
+            Assert.IsTrue(StageZoom.Underground(false, 3f, false), "3 m down");
+            Assert.IsTrue(StageZoom.Underground(true, 2.6f, false), "climbing back: still underground at 2.6 m");
+            Assert.IsFalse(StageZoom.Underground(true, 2.4f, false), "out above 2.5 m");
+            Assert.IsTrue(StageZoom.Underground(false, 0.5f, true), "under a roof of ground at any depth: a dug room, a tunnel");
+        }
+
+        /// <summary>The frame eases to the close camera's share in about a second and back, never a cut; the ground keeps its share of the
+        /// frame; with no zoom asked (the flag off) nothing moves.</summary>
+        [Test]
+        public void U213_TheCloseCameraEasesInAboutASecondAndNeverCuts()
+        {
+            const float shipped = 1080f / 64f, close = shipped * 2f / 3f, floor = 320f, dt = 1f / 60f;
+            StageInput At(float zoom) { var i = Standing(100f, floor); i.baseFrame = shipped; i.dt = dt; i.zoom = zoom; return i; }
+            var cam = new StageCamera();
+            cam.Snap(At(1f));
+            Assert.AreEqual(shipped, cam.Frame, 1e-4f);
+            float groundShare = (floor - (cam.Y - cam.Frame * 0.5f)) / cam.Frame;
+            Assert.AreEqual(StageCamera.FloorBelow / shipped, groundShare, 1e-4f, "3 m of ground under the floor: 17.8 % of the shipped frame");
+            // no zoom asked: the frame and the height stand still
+            float y0 = cam.Y;
+            for (int k = 0; k < 120; k++) cam.Step(At(0f));
+            Assert.AreEqual(shipped, cam.Frame, 1e-5f); Assert.AreEqual(y0, cam.Y, 1e-5f, "the flag off: no change to play");
+            // to the surface share
+            float last = cam.Frame, lastY = cam.Y, worstStep = 0f, worstY = 0f;
+            int within = -1;
+            for (int k = 1; k <= 180; k++)
+            {
+                cam.Step(At(2f / 3f));
+                Assert.LessOrEqual(cam.Frame, last + 1e-5f, $"step {k}: the frame only closes in");
+                worstStep = Mathf.Max(worstStep, last - cam.Frame); worstY = Mathf.Max(worstY, Mathf.Abs(cam.Y - lastY));
+                last = cam.Frame; lastY = cam.Y;
+                if (within < 0 && cam.Frame - close <= 0.02f * (shipped - close)) within = k;
+            }
+            TestContext.Out.WriteLine($"[MERIDIAN] u213 ease in: within 2 % of the way after {within} frames ({within * dt:0.00} s); the largest step {worstStep:0.000} m of frame a frame, {worstY:0.000} m of height");
+            Assert.AreEqual(close, cam.Frame, 1e-3f, "11.25 m: 96 px a metre");
+            Assert.That(within * dt, Is.InRange(0.8f, 1.2f), "about a second");
+            Assert.Less(worstStep, 0.25f, "never a cut: under a quarter metre of frame a frame (1.5 % of it)");
+            Assert.Less(worstY, 0.12f, "and the height follows as smoothly");
+            Assert.AreEqual(groundShare, (floor - (cam.Y - cam.Frame * 0.5f)) / cam.Frame, 2e-3f, "the ground keeps its share of the frame: the same composition, closer");
+            // and back out underground
+            last = cam.Frame; worstStep = 0f; within = -1;
+            for (int k = 1; k <= 180; k++)
+            {
+                cam.Step(At(1f));
+                Assert.GreaterOrEqual(cam.Frame, last - 1e-5f, $"step {k}: the frame only opens");
+                worstStep = Mathf.Max(worstStep, cam.Frame - last);
+                last = cam.Frame;
+                if (within < 0 && shipped - cam.Frame <= 0.02f * (shipped - close)) within = k;
+            }
+            Assert.AreEqual(shipped, cam.Frame, 1e-3f, "back to the shipped 64 px a metre");
+            Assert.That(within * dt, Is.InRange(0.8f, 1.2f));
+            Assert.Less(worstStep, 0.25f);
+            // a snap lands on the share asked
+            cam.Snap(At(2f / 3f));
+            Assert.AreEqual(close, cam.Frame, 1e-4f);
+            Assert.AreEqual(2f / 3f, cam.Zoom, 1e-6f);
+        }
     }
 }

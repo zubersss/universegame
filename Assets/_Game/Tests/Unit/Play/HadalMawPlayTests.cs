@@ -46,13 +46,21 @@ namespace Meridian.Tests
             int shore = start;
             while (shore < start + len && creatures.SiteAt(shore, y).aboveTile != TileId.Water) shore++;
             Assert.Less(shore, start + len, "the ocean band has water");
-            int deep = shore;
-            while (deep < shore + 400 && creatures.SiteAt(deep, y).waterDepth < spec.WaterDepthNeeded) deep++;
-            Assert.Less(deep, shore + 400, $"deep water ({spec.WaterDepthNeeded} m) within 400 columns of the shore");
-            TestContext.Out.WriteLine($"[MERIDIAN] maw: ocean band {start}+{len}, shore {shore}, deep column {deep} ({creatures.SiteAt(deep, y).waterDepth} m of water)");
-            // The surveyor on the shore's last land column (the camera and the chunks follow), then the deep column's collision.
-            int land = shore - 1;
-            var stand = new Vector2(land + 0.5f, side.terrain.TopSolidY(land) + 1.1f);
+            int firstDeep = shore;
+            while (firstDeep < shore + 400 && creatures.SiteAt(firstDeep, y).waterDepth < spec.WaterDepthNeeded) firstDeep++;
+            Assert.Less(firstDeep, shore + 400, $"deep water ({spec.WaterDepthNeeded} m) within 400 columns of the shore");
+            // U-212 (7): the Maw's water is also its keep off the shore (67 m: out of every frame the painted shallows show in)
+            int deep = firstDeep;
+            while (deep < shore + 400 && (creatures.SiteAt(deep, y).waterDepth < spec.WaterDepthNeeded || CreatureDirector.TooNearShore(spec.shoreKeep, creatures.ShoreAt(deep + 0.5f, spec.shoreKeep)))) deep++;
+            Assert.Less(deep, shore + 400, $"deep water {spec.shoreKeep} m off the shore within 400 columns of it");
+            TestContext.Out.WriteLine($"[MERIDIAN] maw: ocean band {start}+{len}, shore {shore}, first deep column {firstDeep} ({creatures.ShoreAt(firstDeep + 0.5f, spec.shoreKeep):0.0} m off the shore), the Maw's first column {deep} ({creatures.SiteAt(deep, y).waterDepth} m of water, {creatures.ShoreAt(deep + 0.5f, spec.shoreKeep):0.0} m off the shore)");
+            Assert.Greater(deep, firstDeep, "the coast is deep enough for the Maw nearer than its keep (the case the rule is for)");
+            // (the director measures from the world's own sea columns; this test's shore is the first column with water over it: a column apart)
+            Assert.GreaterOrEqual(creatures.ShoreAt(deep + 0.5f, spec.shoreKeep), spec.shoreKeep, "its first column lies its keep out");
+            Assert.GreaterOrEqual(deep - shore, Mathf.FloorToInt(spec.shoreKeep) - 2, "about 67 columns from the first water");
+            // The surveyor held in the water 30 m shoreward of that column (the camera and the chunks follow), then the column's collision.
+            side.player.Body.simulated = false;
+            var stand = new Vector2(deep - 30 + 0.5f, side.Config.datumY - 1f);
             side.player.Body.position = stand; side.player.transform.position = stand; side.player.Body.linearVelocity = Vector2.zero;
             var follow = Object.FindAnyObjectByType<Meridian.Player.CameraFollow>();
             if (follow != null) follow.SnapToTarget();
@@ -60,6 +68,7 @@ namespace Meridian.Tests
             while (!(side.terrain.IsSettled && side.terrain.IsCollisionReady(deep, side.terrain.TopSolidY(deep))) && Time.realtimeSinceStartup < until) yield return null;
             Assert.IsTrue(side.terrain.IsCollisionReady(deep, side.terrain.TopSolidY(deep)), "the deep column's chunk streamed in");
             float py = side.player.Body.position.y;
+            Assert.IsNull(creatures.SpawnAt(Species.HadalMaw, firstDeep, py), "U-212 (7): no Maw in deep water inside its keep off the shore");
             var maw = creatures.SpawnAt(Species.HadalMaw, deep, py);
             Assert.NotNull(maw, "the Maw spawns in the deep");
             Assert.AreEqual(Species.HadalMaw, maw.Spec.id);

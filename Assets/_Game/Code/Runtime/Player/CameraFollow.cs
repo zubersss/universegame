@@ -215,8 +215,62 @@ namespace Meridian.Player
             {
                 playerX = feet.x, playerY = feet.y, facing = player.Facing, speedX = v.x, speedY = v.y,
                 grounded = player.Grounded, floorY = FloorUnder(feet),
-                baseFrame = BaseFrame, dt = dt,
+                baseFrame = BaseFrame, dt = dt, zoom = ZoomGoal(feet),
             };
+        }
+
+        // ---- U-213 (3) (D-202 (3)): the close camera at the surface, the shipped frame underground ----
+
+        /// <summary>The surveyor counts as underground (StageZoom's rule; always false with the flag off) and how deep under the ground's
+        /// own surface the feet were at the last look (m; tests and captures read both).</summary>
+        public bool Underground { get; private set; }
+        public float DepthNow { get; private set; }
+        int zoomLookedFrame = int.MinValue / 2;
+
+        /// <summary>The frame's share for the walking surveyor: 1 with the flag off or off the cartoon frame; else the surface share, or 1
+        /// underground. The world is asked once in StageZoom.CheckEveryFrames frames (a curve read and one ray up): no allocation.</summary>
+        float ZoomGoal(Vector2 feet)
+        {
+            if (!StageZoom.Enabled || !Cartoon) { Underground = false; return 1f; }
+            if (Time.frameCount - zoomLookedFrame >= StageZoom.CheckEveryFrames || Time.frameCount < zoomLookedFrame)
+            {
+                zoomLookedFrame = Time.frameCount;
+                DepthNow = DepthUnder(feet);
+                Underground = StageZoom.Underground(Underground, DepthNow, Roofed(feet));
+            }
+            return StageZoom.GoalShare(Underground);
+        }
+
+        /// <summary>How far the feet are under the ground's own surface in their column (m; 0 at or above it, and on a world with no
+        /// ground surface: the giants' floes).</summary>
+        public float DepthUnder(Vector2 feet)
+        {
+            if (terrain == null || terrain.Config == null) return 0f;
+            if (terrain.SmoothGround) return Mathf.Max(0f, terrain.SurfaceAt(feet.x) - feet.y);
+            var gen = terrain.Generator;
+            if (gen == null || terrain.Config.worldType != Meridian.Planets.WorldType.Solid) return 0f; // the giants' floes have no ground surface
+            return Mathf.Max(0f, gen.SurfaceHeight(terrain.WrapX(Mathf.FloorToInt(feet.x))) + 1f - feet.y);
+        }
+
+        /// <summary>The surveyor's head height over the feet for the roof's ray (m).</summary>
+        public const float HeadM = 1.9f;
+
+        /// <summary>Ground stands over the head within StageZoom.RoofScanM: a dug room, a tunnel, a cave.</summary>
+        public bool Roofed(Vector2 feet)
+        {
+            if (terrain == null || terrain.Config == null) return false;
+            var head = feet + Vector2.up * HeadM;
+            if (terrain.SmoothGround)
+            {
+                int hitCount = Physics2D.Raycast(head, Vector2.up, ContactFilter2D.noFilter, floorHits, StageZoom.RoofScanM);
+                for (int i = 0; i < hitCount; i++)
+                    if (floorHits[i].collider is EdgeCollider2D && floorHits[i].collider.GetComponent<TerrainChunk>() != null) return true;
+                return false;
+            }
+            int x = Mathf.FloorToInt(head.x), y0 = Mathf.FloorToInt(head.y);
+            for (int y = y0; y <= y0 + Mathf.CeilToInt(StageZoom.RoofScanM); y++)
+                if (TileId.IsSolid(terrain.GetTile(x, y))) return true;
+            return false;
         }
 
         /// <summary>The stage floor: the top of the first solid tile under the feet (digs included); the feet when none is near.</summary>

@@ -745,11 +745,13 @@ namespace Meridian.Player
                 int boil = (int)(Time.time * ReticleBoilHz) & 1;
                 float gap = (!diggable ? NothingGapM : clamped ? ClampedGapM : 0f) + (hit ? ContactGapM : 0f);
                 var piece = reticleSheet.frames[(brush ? 0 : 2) + boil];
+                var markSize = Vector3.one * MarkScale; // U-213 (3): the marks keep their size on the screen under the close camera
                 for (int i = 0; i < brackets.Length; i++)
                 {
                     var b = brackets[i];
                     if (b.sprite != piece) b.sprite = piece;
                     if (b.color != tint) b.color = tint;
+                    if (b.transform.localScale != markSize) b.transform.localScale = markSize;
                     if (brush)
                     {
                         // an arc sits ON the circle: its pivot on the line, the circle's middle straight below the frame as drawn
@@ -772,7 +774,7 @@ namespace Meridian.Player
                     if (Pip.sprite != cross) Pip.sprite = cross;
                     if (Pip.color != tint) Pip.color = tint;
                     Pip.transform.position = new Vector3(at.x, at.y, markZ);
-                    Pip.transform.localScale = Vector3.one;
+                    Pip.transform.localScale = markSize;
                 }
             }
             else
@@ -836,6 +838,20 @@ namespace Meridian.Player
             Crack.transform.position = new Vector3(origin.x, origin.y, markZ);
             Crack.transform.localScale = Vector3.one * (chipArt ? (brush ? RigTools.BrushRadius / 0.9f : 1f) : (brush ? 2f * RigTools.BrushRadius : 1f) * CrackShare);
         }
+
+        /// <summary>U-213 (3) (D-202 (3): the reticle unchanged in screen size): the brackets' and the pip's own drawn size under the close
+        /// camera: the stage camera's share of the shipped frame (2/3 at 96 px a metre, 1 underground and with the flag off), so a
+        /// bracket is as many screen pixels long as at 64 px a metre. Where they stand is the world's: the brush's circle, the cell.</summary>
+        public float MarkScale
+        {
+            get
+            {
+                if (!Meridian.CameraRig.StageZoom.Enabled) return 1f;
+                if (zoomFollow == null && input != null && input.view != null) zoomFollow = input.view.GetComponent<CameraFollow>();
+                return zoomFollow != null ? zoomFollow.Stage.Zoom : 1f;
+            }
+        }
+        CameraFollow zoomFollow;
 
         /// <summary>U-212: the reticle's marks (brackets, pip, the stand-in ring) under the drawn surveyor and its stowed tool, the crack under them.</summary>
         public const int ReticleOrder = Meridian.View2D.SpriteCharacterView.SurveyorOrder - 2, CrackOrder = Meridian.View2D.SpriteCharacterView.SurveyorOrder - 3; // -1 is the stowed tool, behind the body

@@ -65,6 +65,27 @@ namespace Meridian.Tests
             Assert.AreEqual(20f, spec.WaterDepthNeeded, 1e-4f, "the depth the Maw's own water has");
         }
 
+        /// <summary>U-212 (7; BLENDER's read of 0.6.3's smoke_43, H6: the Maw's head stood over sea_under's painted shallow seabed, a giant
+        /// fish half sunk in a sand flat): the Maw keeps a distance off the shore that leaves it out of every walking frame in which the
+        /// painted shallows show, whatever the real depth by the shore.</summary>
+        [Test]
+        public void TheMawKeepsOffTheShoreWhereThePaintedShallowsShow()
+        {
+            var spec = SpeciesSpec.Get(Species.HadalMaw);
+            Assert.AreEqual(67f, spec.shoreKeep, 1e-4f, "the shallows' 40 m + half a 20 m frame + half the 34 m rig");
+            Assert.IsTrue(CreatureDirector.TooNearShore(spec.shoreKeep, 20f), "20 m out (the coast is 20 m deep there): too near");
+            Assert.IsTrue(CreatureDirector.TooNearShore(spec.shoreKeep, 66.5f));
+            Assert.IsFalse(CreatureDirector.TooNearShore(spec.shoreKeep, 67f), "at its keep: free");
+            Assert.IsFalse(CreatureDirector.TooNearShore(spec.shoreKeep, 68f), "no land within its reach (reach + 1): free");
+            Assert.IsFalse(CreatureDirector.TooNearShore(0f, 1f), "a species with no keep (the shark, the squid) swims to the shore as before");
+            foreach (var s in new[] { Species.Shark, Species.Squid, Species.Pike }) Assert.AreEqual(0f, SpeciesSpec.Get(s).shoreKeep, s.ToString());
+            // the distance the rule is fed: land at column 99 and below, the sea from 100 on
+            System.Func<int, bool> sea = x => x >= 100;
+            Assert.AreEqual(0f, Meridian.View2D.CartoonStage.ShoreDistance(99.5f, 67, sea), "on land");
+            Assert.AreEqual(20.5f, Meridian.View2D.CartoonStage.ShoreDistance(120.5f, 67, sea), 1e-4f, "20.5 m out");
+            Assert.AreEqual(68f, Meridian.View2D.CartoonStage.ShoreDistance(300.5f, 67, sea), 1e-4f, "out at sea: reach + 1");
+        }
+
         [Test]
         public void TheRigSetHasSixBonesTheLureSwapsAndAFourBeatSway()
         {

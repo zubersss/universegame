@@ -6759,6 +6759,488 @@ namespace Meridian.Tests
         }
 
         /// <summary>
+        /// U-212 → coordination/reports/unity/u212/: the dig as the next smoke stages it (BuildSmoke.ShovelShots / BeamShot: one staging for
+        /// the player's smoke and for this capture), the Rig's owner ON. Each picture is its frame as the frame's last LateUpdate left
+        /// it (LateFrameHook), at 1920 x 1080, with a second file cut 1280 x 960 from a 2x render round the reticle's mark (real pixels,
+        /// twice the game's). 1_shovel_contact / 2_shovel_follow_through (a new surveyor at the camp, beside a first scoop),
+        /// 3_beam_mid_dig, 4_reticle_at_rest (the brackets under the surveyor, no pip), 5_landing_squash (the stowed tool in the squash
+        /// frame), then Mercury's block ground: 6_mercury_rest (the cell's brackets in front of the block mesh), 7_mercury_contact /
+        /// 8_mercury_follow_through.
+        /// </summary>
+        [UnityTest, Timeout(600000)]
+        public IEnumerator CaptureU212()
+        {
+            var name = Environment.GetEnvironmentVariable(Variable);
+            if (string.IsNullOrEmpty(name)) Assert.Ignore($"Set {Variable} (tools/unity_capture.ps1).");
+            if (SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.Null)
+                Assert.Fail("No graphics device: run without -nographics.");
+            bool wasCartoon = Meridian.View2D.CartoonStage.Enabled;
+            Meridian.View2D.CartoonStage.Enabled = true;
+            var toolWas = Meridian.Progress.SkillStats.ToolOverride;
+            const int CutW = 1280, CutH = 960;
+            var frame = new RenderTexture(1920, 1080, 24, RenderTextureFormat.ARGB32);
+            var full = new RenderTexture(3840, 2160, 24, RenderTextureFormat.ARGB32);
+            var frameTex = new Texture2D(1920, 1080, TextureFormat.RGB24, false);
+            var fullTex = new Texture2D(3840, 2160, TextureFormat.RGB24, false);
+            var cutTex = new Texture2D(CutW, CutH, TextureFormat.RGB24, false);
+            LateFrameHook hook = null;
+            Meridian.Player.PlayerRigInput input = null;
+            Application.LogCallback relay = (message, stack, type) => { if (message.StartsWith("[MERIDIAN] smoke ", StringComparison.Ordinal)) TestContext.Out.WriteLine("u212 " + message); };
+            Application.logMessageReceived += relay;
+            try
+            {
+#if UNITY_EDITOR
+                yield return UnityEditor.SceneManagement.EditorSceneManager.LoadSceneAsyncInPlayMode(
+                    CorePath, new LoadSceneParameters(LoadSceneMode.Single));
+#endif
+                hook = new GameObject("U212FrameGrab").AddComponent<LateFrameHook>();
+                var director = UnityEngine.Object.FindAnyObjectByType<SceneDirector>();
+                float timeout = Time.realtimeSinceStartup + 30f;
+                while ((!director.IsReady || !director.PlanetSide.terrain.IsSettled) && Time.realtimeSinceStartup < timeout) yield return null;
+                var dir = "coordination/reports/unity/u212";
+                Directory.CreateDirectory(dir);
+                Directory.CreateDirectory("logs");
+                Time.captureDeltaTime = 1f / 60f;
+
+                PlanetSideRoot side = null;
+                Camera cam = null;
+                Meridian.Rig.RigTools rig = null;
+                Rigidbody2D body = null;
+                Meridian.Terrain.TerrainStreamer t = null;
+                Meridian.Player.CameraFollow follow = null;
+                Meridian.Player.RigToolView view = null;
+                void Bind()
+                {
+                    side = director.PlanetSide;
+                    cam = side.sideCamera; rig = side.rig; body = side.player.Body; t = side.terrain;
+                    input = side.player.GetComponent<Meridian.Player.PlayerRigInput>();
+                    follow = cam.GetComponent<Meridian.Player.CameraFollow>();
+                    if (side.hazards != null) side.hazards.enabled = false;
+                    if (side.wardens != null) side.wardens.enabled = false;
+                    if (side.dayNight != null) side.dayNight.Override = 0.45f;
+                    side.creatures.autoSpawn = false; side.creatures.DespawnAll();
+                    side.player.externalInput = true; side.player.intent = default;
+                    cam.aspect = 1920f / 1080f;
+                }
+
+                // a picture: taken at the end of the frame's last LateUpdate (the tool's pose and the debris of ONE frame)
+                string pending = null;
+                void Read(RenderTexture from, Texture2D into)
+                {
+                    cam.targetTexture = from; cam.Render(); cam.targetTexture = null;
+                    var prev = RenderTexture.active;
+                    RenderTexture.active = from;
+                    into.ReadPixels(new Rect(0, 0, from.width, from.height), 0, 0);
+                    into.Apply();
+                    RenderTexture.active = prev;
+                }
+                hook.late = () =>
+                {
+                    if (pending == null || cam == null) return;
+                    string label = pending;
+                    pending = null;
+                    Read(frame, frameTex);
+                    File.WriteAllBytes($"logs/capture_{name}_{label}.png", frameTex.EncodeToPNG());
+                    File.Copy($"logs/capture_{name}_{label}.png", $"{dir}/{label}.png", true);
+                    // the cut: round the middle between the shoulder and the reticle's mark, from a 2x render
+                    view = input != null ? input.ToolView : null;
+                    Vector2 mid = body.position + new Vector2(0f, 0.9f);
+                    if (view != null && view.Bracket(0) != null && (view.Bracket(0).enabled || view.Reticle.enabled)) mid = (mid + view.ReticleAt) * 0.5f;
+                    Read(full, fullTex);
+                    var vp = cam.WorldToViewportPoint(mid);
+                    int cx = Mathf.Clamp(Mathf.RoundToInt(vp.x * full.width) - CutW / 2, 0, full.width - CutW);
+                    int cy = Mathf.Clamp(Mathf.RoundToInt(vp.y * full.height) - CutH / 2, 0, full.height - CutH);
+                    cutTex.SetPixels(fullTex.GetPixels(cx, cy, CutW, CutH));
+                    cutTex.Apply();
+                    File.WriteAllBytes($"{dir}/{label}_cut2x.png", cutTex.EncodeToPNG());
+                    string stow = view != null ? $"; the tool stowed {view.Stowed}, on the stow table {view.StowOnTable}" : "";
+                    string marks = view != null ? $"; reticle strength {view.ReticleStrength:0.00}, diggable {view.ReticleDiggable}, pip {(view.Pip.enabled ? "on" : "off")}, crack stage {view.CrackStage}, marks at order {view.Bracket(0).sortingOrder} and z {view.Bracket(0).transform.position.z:0.00} (the surveyor's order {Meridian.View2D.SpriteCharacterView.SurveyorOrder})" : "";
+                    TestContext.Out.WriteLine($"[MERIDIAN] u212 {label}: the Rig's owner {(rig.owner != null ? "on" : "OFF")}, tool {rig.Tool}{marks}{stow}");
+                };
+                IEnumerator Shot(string label) { pending = label; yield return null; }
+
+                float GroundAt(float x) => t.SmoothGround ? t.SurfaceAt(x) + 0.05f : t.TopSolidY(Mathf.FloorToInt(x)) + 1.05f;
+                IEnumerator Stand(float x)
+                {
+                    var feet = new Vector2(x, GroundAt(x));
+                    body.position = feet; side.player.transform.position = feet; body.linearVelocity = Vector2.zero;
+                    yield return null;
+                    float until = Time.realtimeSinceStartup + 20f;
+                    while (!t.IsSettled && Time.realtimeSinceStartup < until) yield return null;
+                    feet = new Vector2(x, GroundAt(x));
+                    body.position = feet; side.player.transform.position = feet; body.linearVelocity = Vector2.zero;
+                    for (int k = 0; k < 40; k++) yield return new WaitForFixedUpdate();
+                    if (follow != null) { follow.enabled = true; follow.SnapToTarget(); }
+                    for (int k = 0; k < 60; k++) yield return null;
+                }
+                var shovelLine = new System.Text.RegularExpressions.Regex(@"^\[MERIDIAN\] smoke shovel:");
+                var beamLine = new System.Text.RegularExpressions.Regex(@"^\[MERIDIAN\] smoke beam:");
+
+                // ---- Earth: a new surveyor's shovel at the camp, beside the smoke's first scoop ----
+                Bind();
+                Meridian.Progress.SkillStats.ToolOverride = Meridian.Rig.DigTool.Shovel;
+                float tx = side.spawnX + 14.5f;
+                yield return Stand(tx);
+                {
+                    var owner = rig.owner; rig.owner = null; // the staging's scoop, 2 m off: the reach lifted for the call
+                    try { rig.Dig(new Vector2(tx + 2f, t.SurfaceAt(tx + 2f) - 0.25f)); } finally { rig.owner = owner; }
+                }
+                yield return new WaitForSeconds(1f);
+                LogAssert.Expect(LogType.Log, shovelLine);
+                yield return BuildSmoke.ShovelShots(side, new Vector2(tx + 1.3f, t.SurfaceAt(tx + 1.3f) - 0.5f), Shot, "1_shovel_contact", "2_shovel_follow_through");
+                BuildSmoke.FreeAim();
+
+                // 3: the Beam mid-dig on fresh ground west of the scoop
+                Meridian.Progress.SkillStats.ToolOverride = Meridian.Rig.DigTool.Beam;
+                yield return Stand(tx);
+                LogAssert.Expect(LogType.Log, beamLine);
+                yield return BuildSmoke.BeamShot(side, new Vector2(tx - 3f, t.SurfaceAt(tx - 3f) - 0.6f), Shot, "3_beam_mid_dig");
+                BuildSmoke.FreeAim();
+
+                // 4: at rest, the smoke's own aim (the ground ahead of the feet): the reticle idle, no pip, under the surveyor
+                Meridian.Progress.SkillStats.ToolOverride = Meridian.Rig.DigTool.Shovel;
+                yield return Stand(tx - 9f);
+                input.AimAt(body.position + new Vector2(side.player.Facing * BuildSmoke.AimAheadM, -BuildSmoke.AimUnderM));
+                yield return new WaitForSeconds(2.5f);
+                yield return Shot("4_reticle_at_rest");
+
+                // 5: a hard landing, the squash frame (the smoke's smoke_3d): the stowed tool rides the body
+                {
+                    var up = body.position + new Vector2(0f, 3.5f);
+                    body.position = up; side.player.transform.position = up; body.linearVelocity = Vector2.zero;
+                    float until = Time.realtimeSinceStartup + 6f;
+                    while (side.player.Grounded && Time.realtimeSinceStartup < until) yield return new WaitForFixedUpdate();
+                    while (!side.player.Grounded && Time.realtimeSinceStartup < until) yield return new WaitForFixedUpdate();
+                    yield return Shot("5_landing_squash");
+                    for (int k = 0; k < 60; k++) yield return null;
+                }
+
+                // ---- Mercury: block ground (H7: the cell's brackets were drawn behind the block mesh) ----
+                yield return director.LoadPlanetSide(GameState.Instance.catalog.Get(Meridian.Planets.PlanetId.Mercury));
+                timeout = Time.realtimeSinceStartup + 30f;
+                while ((!director.IsReady || !director.PlanetSide.terrain.IsSettled) && Time.realtimeSinceStartup < timeout) yield return null;
+                Bind();
+                float mx = side.spawnX + 6.5f;
+                yield return Stand(mx);
+                var ahead = body.position + new Vector2(side.player.Facing * BuildSmoke.AimAheadM, -BuildSmoke.AimUnderM);
+                input.module = Meridian.Rig.RigModule.Beam;
+                input.AimAt(ahead);
+                yield return new WaitForSeconds(1f);
+                yield return Shot("6_mercury_rest");
+                LogAssert.Expect(LogType.Log, shovelLine);
+                yield return BuildSmoke.ShovelShots(side, ahead, Shot, "7_mercury_contact", "8_mercury_follow_through");
+                BuildSmoke.FreeAim();
+                LogAssert.NoUnexpectedReceived();
+            }
+            finally
+            {
+                Application.logMessageReceived -= relay;
+                Time.captureDeltaTime = 0f;
+                BuildSmoke.FreeAim();
+                if (input != null) { input.holdUse = false; input.externalAim = false; }
+                Meridian.Progress.SkillStats.ToolOverride = toolWas;
+                Meridian.View2D.CartoonStage.Enabled = wasCartoon;
+                if (hook != null) UnityEngine.Object.Destroy(hook.gameObject);
+                UnityEngine.Object.Destroy(frameTex); UnityEngine.Object.Destroy(fullTex); UnityEngine.Object.Destroy(cutTex);
+                frame.Release(); full.Release();
+            }
+        }
+
+        /// <summary>
+        /// U-213 (3) (D-202 (3)) → coordination/reports/unity/u213/: the close camera on today's art, each frame with the HUD as the game
+        /// draws it (its size on the screen does not change). 1_camp_64 (the flag off: the shipped frame), 2_camp_96 (the flag on, on
+        /// foot at the surface), 3_camp_128 (the closer trial LEAD asked for), 4_shaft_floor_64 (the floor of a 10 m shaft: eased back
+        /// to the shipped 64), 5_shaft_mouth_96 (beside the shaft's mouth at the surface). The reticle rests on the ground ahead of the
+        /// feet in every frame (its marks keep their screen size).
+        /// </summary>
+        [UnityTest, Timeout(600000)]
+        public IEnumerator CaptureU213Camera()
+        {
+            var name = Environment.GetEnvironmentVariable(Variable);
+            if (string.IsNullOrEmpty(name)) Assert.Ignore($"Set {Variable} (tools/unity_capture.ps1).");
+            if (SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.Null)
+                Assert.Fail("No graphics device: run without -nographics.");
+            bool wasCartoon = Meridian.View2D.CartoonStage.Enabled, wasZoom = Meridian.CameraRig.StageZoom.Enabled;
+            float wasPpm = Meridian.CameraRig.StageZoom.SurfacePxPerMetre;
+            Meridian.View2D.CartoonStage.Enabled = true;
+            Meridian.CameraRig.StageZoom.Enabled = false;
+            var toolWas = Meridian.Progress.SkillStats.ToolOverride;
+            Meridian.Player.PlayerRigInput input = null;
+            Meridian.Rig.RigTools rig = null; Transform owner = null;
+            try
+            {
+                Meridian.Progress.SkillStats.ToolOverride = Meridian.Rig.DigTool.Shovel;
+#if UNITY_EDITOR
+                yield return UnityEditor.SceneManagement.EditorSceneManager.LoadSceneAsyncInPlayMode(
+                    CorePath, new LoadSceneParameters(LoadSceneMode.Single));
+#endif
+                var director = UnityEngine.Object.FindAnyObjectByType<SceneDirector>();
+                float timeout = Time.realtimeSinceStartup + 30f;
+                while ((!director.IsReady || !director.PlanetSide.terrain.IsSettled) && Time.realtimeSinceStartup < timeout) yield return null;
+                var dir = "coordination/reports/unity/u213";
+                Directory.CreateDirectory(dir);
+                var side = director.PlanetSide;
+                if (side.hazards != null) side.hazards.enabled = false;
+                if (side.dayNight != null) side.dayNight.Override = 0.45f;
+                side.creatures.autoSpawn = false; side.creatures.DespawnAll();
+                var t = side.terrain;
+                var cam = side.sideCamera;
+                var follow = cam.GetComponent<Meridian.Player.CameraFollow>();
+                var player = side.player;
+                var body = player.Body;
+                player.externalInput = true; player.intent = default;
+                input = player.GetComponent<Meridian.Player.PlayerRigInput>();
+                input.module = Meridian.Rig.RigModule.Beam;
+                rig = side.rig; owner = rig.owner;
+                var hud = side.sideHud.RankSlot.canvas;
+
+                IEnumerator Stand(Vector2 feet)
+                {
+                    body.position = feet; player.transform.position = feet; body.linearVelocity = Vector2.zero;
+                    yield return null;
+                    float until = Time.realtimeSinceStartup + 20f;
+                    while (!t.IsSettled && Time.realtimeSinceStartup < until) yield return null;
+                    for (int k = 0; k < 40; k++) yield return new WaitForFixedUpdate();
+                }
+                // a frame once the camera has eased and the stage has laid out at it
+                IEnumerator Shot(string label)
+                {
+                    input.AimAt(body.position + new Vector2(player.Facing * BuildSmoke.AimAheadM, -BuildSmoke.AimUnderM));
+                    yield return new WaitForSeconds(3f);
+                    yield return SaveWithUi(cam, hud, $"{name}_{label}");
+                    File.Copy($"logs/capture_{name}_{label}.png", $"{dir}/{label}.png", true);
+                    var view = input.ToolView;
+                    TestContext.Out.WriteLine($"[MERIDIAN] u213 {label}: frame {follow.Stage.Frame:0.000} m = {1080f / follow.Stage.Frame:0.0} px a metre (share {follow.Stage.Zoom:0.000}); the camera {cam.transform.position.y - follow.FloorUnder(body.position):+0.00;-0.00} m over the floor, the frame's bottom {follow.FloorUnder(body.position) - (cam.transform.position.y - follow.Stage.Frame * 0.5f):0.00} m under it; depth {follow.DepthNow:0.00} m, underground {follow.Underground}; the reticle's marks at scale {view.MarkScale:0.000}");
+                }
+
+                float sx = side.spawnX + 14.5f;
+                var camp = new Vector2(sx, t.SurfaceAt(sx) + 0.05f);
+                yield return Stand(camp);
+                follow.SnapToTarget();
+                yield return Shot("1_camp_64");
+
+                Meridian.CameraRig.StageZoom.Enabled = true;
+                Meridian.CameraRig.StageZoom.SurfacePxPerMetre = 96f;
+                yield return Shot("2_camp_96");
+                Meridian.CameraRig.StageZoom.SurfacePxPerMetre = 128f;
+                yield return Shot("3_camp_128");
+                Meridian.CameraRig.StageZoom.SurfacePxPerMetre = 96f;
+
+                // a 10 m shaft east of the camp's first-dig spot
+                float ax = sx + 6f, top = t.SurfaceAt(ax), bottom = Mathf.Floor(top) - 10f;
+                rig.owner = null; // the staging's reach, for these digs alone
+                int bored = 0;
+                for (float y = bottom + 0.7f; y <= top + 0.5f + 1e-3f; y += 0.5f)
+                    foreach (float dx in new[] { -1.1f, -0.55f, 0f, 0.55f, 1.1f })
+                        if (rig.Dig(new Vector2(ax + dx, y))) bored++;
+                rig.owner = owner;
+                yield return new WaitForFixedUpdate();
+                var drops = rig.drops; // the dug pieces off the frame
+                if (drops != null) for (int k = drops.Live.Count - 1; k >= 0; k--) drops.Collect(drops.Live[k]);
+                yield return Stand(new Vector2(ax, bottom + 1.2f));
+                yield return Shot("4_shaft_floor_64");
+                TestContext.Out.WriteLine($"[MERIDIAN] u213 the shaft: {bored} strokes, its floor {top - follow.FloorUnder(body.position):0.0} m under the surface");
+                yield return Stand(new Vector2(ax - 3f, t.SurfaceAt(ax - 3f) + 0.05f));
+                player.Face(1);
+                yield return Shot("5_shaft_mouth_96");
+                LogAssert.NoUnexpectedReceived();
+            }
+            finally
+            {
+                Meridian.CameraRig.StageZoom.Enabled = wasZoom; Meridian.CameraRig.StageZoom.SurfacePxPerMetre = wasPpm;
+                Meridian.View2D.CartoonStage.Enabled = wasCartoon;
+                Meridian.Progress.SkillStats.ToolOverride = toolWas;
+                if (rig != null) rig.owner = owner;
+                if (input != null) { input.holdUse = false; input.externalAim = false; }
+            }
+        }
+
+        /// <summary>
+        /// U-216 (the living stage, on stand-in pieces) → coordination/reports/unity/u216/, at the camp under U-213's close camera (96 px
+        /// a metre), every frame as its last LateUpdate left it. 1_on_96 / 2_off_96 (the same view with the flag on and off),
+        /// 3_strip_10s (twelve frames 0.83 s apart over 10 s at a fixed 60 fps step, 960 x 540 each, four a row: the gusts crossing,
+        /// the vine, the motes, the shafts breathing, the cloud's shadow), 4_bend_pair_2x (one fern in a lull and on a gust's crest,
+        /// cut from a 2x render), 5_push_2x (the surveyor standing among the plants: they part to either side).
+        /// Pictures of stand-ins: what is judged is the motion and the layering, not the drawing.
+        /// </summary>
+        [UnityTest, Timeout(600000)]
+        public IEnumerator CaptureU216Living()
+        {
+            var name = Environment.GetEnvironmentVariable(Variable);
+            if (string.IsNullOrEmpty(name)) Assert.Ignore($"Set {Variable} (tools/unity_capture.ps1).");
+            if (SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.Null)
+                Assert.Fail("No graphics device: run without -nographics.");
+            bool wasCartoon = Meridian.View2D.CartoonStage.Enabled, wasZoom = Meridian.CameraRig.StageZoom.Enabled, wasLiving = Meridian.View2D.Living.LivingStage.Enabled;
+            float wasPpm = Meridian.CameraRig.StageZoom.SurfacePxPerMetre;
+            Meridian.View2D.CartoonStage.Enabled = true;
+            const int TileW = 960, TileH = 540, Cols = 4, Tiles = 12, Cut = 960;
+            var frame = new RenderTexture(1920, 1080, 24, RenderTextureFormat.ARGB32);
+            var small = new RenderTexture(TileW, TileH, 24, RenderTextureFormat.ARGB32);
+            var full = new RenderTexture(3840, 2160, 24, RenderTextureFormat.ARGB32);
+            var frameTex = new Texture2D(1920, 1080, TextureFormat.RGB24, false);
+            var smallTex = new Texture2D(TileW, TileH, TextureFormat.RGB24, false);
+            var fullTex = new Texture2D(3840, 2160, TextureFormat.RGB24, false);
+            var strip = new Texture2D(TileW * Cols, TileH * (Tiles / Cols), TextureFormat.RGB24, false);
+            var pair = new Texture2D(Cut * 2, Cut, TextureFormat.RGB24, false);
+            LateFrameHook hook = null;
+            try
+            {
+#if UNITY_EDITOR
+                yield return UnityEditor.SceneManagement.EditorSceneManager.LoadSceneAsyncInPlayMode(
+                    CorePath, new LoadSceneParameters(LoadSceneMode.Single));
+#endif
+                hook = new GameObject("U216FrameGrab").AddComponent<LateFrameHook>();
+                var director = UnityEngine.Object.FindAnyObjectByType<SceneDirector>();
+                float timeout = Time.realtimeSinceStartup + 30f;
+                while ((!director.IsReady || !director.PlanetSide.terrain.IsSettled) && Time.realtimeSinceStartup < timeout) yield return null;
+                var dir = "coordination/reports/unity/u216";
+                Directory.CreateDirectory(dir);
+                Directory.CreateDirectory("logs");
+                var side = director.PlanetSide;
+                if (side.hazards != null) side.hazards.enabled = false;
+                if (side.dayNight != null) side.dayNight.Override = 0.45f;
+                side.creatures.autoSpawn = false; side.creatures.DespawnAll();
+                var t = side.terrain;
+                var cam = side.sideCamera;
+                var player = side.player;
+                var body = player.Body;
+                player.externalInput = true; player.intent = default;
+                cam.aspect = 1920f / 1080f;
+                var follow = cam.GetComponent<Meridian.Player.CameraFollow>();
+                Meridian.CameraRig.StageZoom.Enabled = true;
+                Meridian.CameraRig.StageZoom.SurfacePxPerMetre = 96f;
+                Time.captureDeltaTime = 1f / 60f;
+
+                IEnumerator Stand(float x)
+                {
+                    var feet = new Vector2(x, t.SurfaceAt(x) + 0.05f);
+                    body.position = feet; player.transform.position = feet; body.linearVelocity = Vector2.zero;
+                    yield return null;
+                    float until = Time.realtimeSinceStartup + 20f;
+                    while (!t.IsSettled && Time.realtimeSinceStartup < until) yield return null;
+                    for (int k = 0; k < 40; k++) yield return new WaitForFixedUpdate();
+                    if (follow != null) follow.SnapToTarget();
+                    for (int k = 0; k < 120; k++) yield return null; // the close camera eases in
+                }
+                void Read(RenderTexture from, Texture2D into)
+                {
+                    cam.targetTexture = from; cam.Render(); cam.targetTexture = null;
+                    var prev = RenderTexture.active;
+                    RenderTexture.active = from;
+                    into.ReadPixels(new Rect(0, 0, from.width, from.height), 0, 0);
+                    into.Apply();
+                    RenderTexture.active = prev;
+                }
+                // what the hook takes at the end of the next frame's LateUpdate: 0 nothing, 1 a full frame to a file, 2 a strip tile, 3 a 2x cut into the pair
+                int take = 0, slot = 0; string label = null; Vector2 cutAt = default;
+                hook.late = () =>
+                {
+                    int what = take; take = 0;
+                    if (what == 1)
+                    {
+                        Read(frame, frameTex);
+                        File.WriteAllBytes($"logs/capture_{name}_{label}.png", frameTex.EncodeToPNG());
+                        File.Copy($"logs/capture_{name}_{label}.png", $"{dir}/{label}.png", true);
+                    }
+                    else if (what == 2)
+                    {
+                        Read(small, smallTex);
+                        strip.SetPixels((slot % Cols) * TileW, strip.height - TileH * (slot / Cols + 1), TileW, TileH, smallTex.GetPixels());
+                    }
+                    else if (what == 3)
+                    {
+                        Read(full, fullTex);
+                        var vp = cam.WorldToViewportPoint(cutAt);
+                        int cx = Mathf.Clamp(Mathf.RoundToInt(vp.x * full.width) - Cut / 2, 0, full.width - Cut);
+                        int cy = Mathf.Clamp(Mathf.RoundToInt(vp.y * full.height) - Cut / 2, 0, full.height - Cut);
+                        pair.SetPixels(slot * Cut, 0, Cut, Cut, fullTex.GetPixels(cx, cy, Cut, Cut));
+                    }
+                };
+                IEnumerator Frame(string file) { label = file; take = 1; yield return null; }
+
+                float sx = side.spawnX + 14.5f;
+                yield return Stand(sx);
+
+                // 2: the flag off (taken first: the stage is not there yet)
+                Meridian.View2D.Living.LivingStage.Enabled = false;
+                for (int k = 0; k < 10; k++) yield return null;
+                yield return Frame("2_off_96");
+
+                // 1: the flag on
+                Meridian.View2D.Living.LivingStage.Enabled = true;
+                float by = Time.realtimeSinceStartup + 10f;
+                while ((Meridian.View2D.Living.LivingStage.Instance == null || !Meridian.View2D.Living.LivingStage.Instance.Built) && Time.realtimeSinceStartup < by) yield return null;
+                var stage = Meridian.View2D.Living.LivingStage.Instance;
+                Assert.IsTrue(stage != null && stage.Built, "the living stage builds at the camp");
+                for (int k = 0; k < 180; k++) yield return null; // 3 s of wind
+                yield return Frame("1_on_96");
+                int pieces = 0, vertices = 0;
+                for (int l = 0; l < Meridian.View2D.Living.LivingStage.Layers; l++) { pieces += stage.InstanceCount((Meridian.View2D.Living.LivingStage.Layer)l); vertices += stage.VertexCount((Meridian.View2D.Living.LivingStage.Layer)l); }
+                TestContext.Out.WriteLine($"[MERIDIAN] u216 the stage at the camp: {pieces} pieces, {vertices} vertices, {stage.DrawCalls} draw calls added; the lamp reads the normal map: {stage.LampUsesNormals}; frame {follow.Stage.Frame:0.00} m ({1080f / follow.Stage.Frame:0} px a metre)");
+                // the stand-in page itself (what the pieces are cut from), and the frame's place
+                {
+                    Meridian.View2D.Living.LivingPlaceholders.Paint(Meridian.View2D.Living.LivingStage.Seed, out var page, out var pageNormal, true);
+                    File.WriteAllBytes($"{dir}/0_placeholder_page.png", page.EncodeToPNG());
+                    UnityEngine.Object.Destroy(page); UnityEngine.Object.Destroy(pageNormal);
+                    float halfH = cam.orthographicSize, halfW = halfH * cam.aspect;
+                    var c = cam.transform.position;
+                    TestContext.Out.WriteLine($"[MERIDIAN] u216 the frame: x {c.x - halfW:0.0}..{c.x + halfW:0.0}, y {c.y - halfH:0.0}..{c.y + halfH:0.0}, camera z {c.z:0.0}, near {cam.nearClipPlane:0.00}, far {cam.farClipPlane:0}; the surveyor's feet ({body.position.x:0.0}, {body.position.y:0.0})");
+                }
+
+                // 3: ten seconds, a tile every 50 frames
+                for (int f = 0; f < 600; f++)
+                {
+                    if (f % 50 == 0) { slot = f / 50; take = 2; }
+                    yield return null;
+                }
+                strip.Apply();
+                File.WriteAllBytes($"{dir}/3_strip_10s.png", strip.EncodeToPNG());
+                TestContext.Out.WriteLine($"[MERIDIAN] u216 3_strip_10s: twelve frames 50 frames apart at a fixed 1/60 s step, left to right, top row first; the vine's free end {stage.Chain.Swing:+0.00;-0.00} m off plumb at the end");
+
+                // 4: one fern in a lull and on a crest (the play layer's first swaying piece east of the surveyor)
+                var roots = new System.Collections.Generic.List<Vector4>();
+                stage.MeshOf(Meridian.View2D.Living.LivingStage.Layer.Play).GetUVs(1, roots);
+                Vector2 fern = new Vector2(sx + 3f, t.SurfaceAt(sx + 3f)); float give = 0f;
+                foreach (var v in roots) if (v.z > 0.99f && v.w > 0.15f && v.x > sx + 1.5f && v.x < sx + 8f) { fern = new Vector2(v.x, v.y); give = v.w; break; }
+                cutAt = fern + Vector2.up * 0.8f;
+                float lull = 0f, crest = 0f;
+                by = Time.realtimeSinceStartup + 60f;
+                while (stage.Wind.Gust(fern.x) > 0.3f && Time.realtimeSinceStartup < by) yield return null;
+                lull = stage.Wind.Gust(fern.x); slot = 0; take = 3; yield return null;
+                while (stage.Wind.Gust(fern.x) < 0.9f && Time.realtimeSinceStartup < by) yield return null;
+                crest = stage.Wind.Gust(fern.x); slot = 1; take = 3; yield return null;
+                pair.Apply();
+                File.WriteAllBytes($"{dir}/4_bend_pair_2x.png", pair.EncodeToPNG());
+                TestContext.Out.WriteLine($"[MERIDIAN] u216 4_bend_pair_2x: a piece rooted at x {fern.x:0.0} with a give of {give:0.00} m: left in a lull (gust {lull:0.00}), right on a crest (gust {crest:0.00}); its tip stands {stage.Wind.Offset(fern, 1f, give, 0f).x:+0.00;-0.00} m downwind now");
+
+                // 5: the surveyor among the plants
+                yield return Stand(fern.x - 0.45f);
+                for (int k = 0; k < 60; k++) yield return null;
+                cutAt = (Vector2)body.position + Vector2.up * 0.8f; slot = 0; take = 3; yield return null;
+                Meridian.View2D.Living.LivingStage.WindOn = false; // the same plants with nobody pushing and no wind, for the pair's other half
+                for (int k = 0; k < 30; k++) yield return null;
+                slot = 1; take = 3; yield return null;
+                Meridian.View2D.Living.LivingStage.WindOn = true;
+                pair.Apply();
+                File.WriteAllBytes($"{dir}/5_push_2x.png", pair.EncodeToPNG());
+                TestContext.Out.WriteLine($"[MERIDIAN] u216 5_push_2x: the surveyor 0.45 m west of that piece: left as it stands in the wind with them beside it, right in still air with no push");
+                LogAssert.NoUnexpectedReceived();
+            }
+            finally
+            {
+                Time.captureDeltaTime = 0f;
+                Meridian.View2D.Living.LivingStage.WindOn = true;
+                Meridian.View2D.Living.LivingStage.Enabled = wasLiving;
+                if (!wasLiving && Meridian.View2D.Living.LivingStage.Instance != null) UnityEngine.Object.Destroy(Meridian.View2D.Living.LivingStage.Instance.gameObject);
+                Meridian.CameraRig.StageZoom.Enabled = wasZoom; Meridian.CameraRig.StageZoom.SurfacePxPerMetre = wasPpm;
+                Meridian.View2D.CartoonStage.Enabled = wasCartoon;
+                if (hook != null) UnityEngine.Object.Destroy(hook.gameObject);
+                UnityEngine.Object.Destroy(frameTex); UnityEngine.Object.Destroy(smallTex); UnityEngine.Object.Destroy(fullTex); UnityEngine.Object.Destroy(strip); UnityEngine.Object.Destroy(pair);
+                frame.Release(); small.Release(); full.Release();
+            }
+        }
+
+        /// <summary>
         /// U-209's own cost in a frame at Earth's camp on the cartoon path. BudgetGate's Earth C0 row is to stay within 0.3 ms of 0.6.2's
         /// reading, which was taken another night; a figure from another hour is no baseline (D-191 as amended). So: ONE process, the
         /// states interleaved, three rounds of 300 frames, every frame rendered at 1920 x 1080 as the gate renders, the whole frame

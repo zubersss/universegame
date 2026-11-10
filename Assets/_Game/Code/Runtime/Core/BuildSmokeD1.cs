@@ -33,13 +33,14 @@ namespace Meridian.Core
             if (f != null) { f.enabled = true; f.SnapToTarget(); }
         }
 
-        /// <summary>Beam strokes from y0 up to y1 across a 3 m column centred on x (the caller lifts the Rig's reach). Returns the strokes that dug.</summary>
+        /// <summary>Beam strokes from y0 up to y1 across a 3 m column centred on x, with the Rig's reach lifted for the call. Returns the strokes that dug.</summary>
         static int Bore(Meridian.Rig.RigTools rig, float x, float y0, float y1)
         {
             int n = 0;
-            for (float y = y0; y <= y1 + 1e-3f; y += 0.5f)
-                foreach (float dx in new[] { -1.1f, -0.55f, 0f, 0.55f, 1.1f })
-                    if (rig.Dig(new Vector2(x + dx, y))) n++;
+            using (new Unreached(rig)) // U-212 (1): the staging's reach, for this call alone
+                for (float y = y0; y <= y1 + 1e-3f; y += 0.5f)
+                    foreach (float dx in new[] { -1.1f, -0.55f, 0f, 0.55f, 1.1f })
+                        if (rig.Dig(new Vector2(x + dx, y))) n++;
             return n;
         }
 
@@ -88,11 +89,10 @@ namespace Meridian.Core
             if (t == null || rig == null || hud == null || state == null || player == null || !t.SmoothGround) yield break;
             var input = player.GetComponent<Meridian.Player.PlayerRigInput>();
             var hints = hud.Hints;
-            var owner = rig.owner;
             bool ext = player.externalInput, haz = side.hazards != null && side.hazards.enabled, spawn = side.creatures != null && side.creatures.autoSpawn;
             var blocked = HintCards.Blocked;
             HintCards.Blocked = () => true; // the run puts each card up itself
-            rig.owner = null;
+            // U-212 (1): the Rig's owner stays ON through the run; Bore and the first scoop take it off for their own call
             player.externalInput = true; player.intent = default;
             if (side.hazards != null) side.hazards.enabled = false;
             if (side.creatures != null) { side.creatures.autoSpawn = false; side.creatures.DespawnAll(); }
@@ -110,38 +110,21 @@ namespace Meridian.Core
                 Put(side, new Vector2(tx, t.SurfaceAt(tx) + 0.05f));
                 yield return Settle(side);
                 yield return Staged(side);
-                rig.Dig(new Vector2(tx + 2f, t.SurfaceAt(tx + 2f) - 0.25f));
+                using (new Unreached(rig)) rig.Dig(new Vector2(tx + 2f, t.SurfaceAt(tx + 2f) - 0.25f));
                 if (hints != null) hints.Show(HintCards.DigDown);
                 yield return Wait(1.2f);
                 yield return Shot(folder, "smoke_47_d1_first_dig_dig_down.png");
                 if (hints != null) hints.Dismiss();
 
-                // smoke_65 / 66 (U-194, D-182): a new surveyor's held shovel stroke beside the first scoop: mid-swing, then the dirt flick;
-                // the HUD's tool slot reads SHOVEL.
+                // smoke_65 / 66 (U-194, D-182; U-212 (2)): a new surveyor's shovel on fresh ground inside its reach beside the first
+                // scoop: the CONTACT drawing of the first swing, then the follow-through of the swing that opens the ground; the HUD's
+                // tool slot reads SHOVEL.
                 if (input != null)
                 {
-                    var aim = new Vector2(tx + 1.3f, t.SurfaceAt(tx + 1.3f) - 0.5f);
-                    input.module = Meridian.Rig.RigModule.Beam;
-                    input.AimAt(aim);
-                    yield return Wait(0.5f);
-                    bool dug = false;
-                    System.Action<Vector2> onDug = _ => dug = true;
-                    rig.Dug += onDug;
-                    try
-                    {
-                        input.holdUse = true;
-                        float until = Time.realtimeSinceStartup + 10f;
-                        while (input.StrokeProgress < 0.5f && Time.realtimeSinceStartup < until) yield return null;
-                        yield return Shot(folder, "smoke_65_d1_shovel_midswing.png");
-                        until = Time.realtimeSinceStartup + 10f;
-                        while (!dug && Time.realtimeSinceStartup < until) yield return null;
-                        input.holdUse = false;
-                        yield return Wait(0.12f);
-                        yield return Shot(folder, "smoke_66_d1_shovel_flick.png");
-                    }
-                    finally { rig.Dug -= onDug; input.holdUse = false; }
-                    Debug.Log($"[MERIDIAN] smoke shovel: tool {rig.Tool}, dug {dug}, slot '{(hud.ToolSlot != null ? hud.ToolSlot.Name.text : "-")}'");
-                    input.externalAim = false;
+                    yield return ShovelShots(side, new Vector2(tx + 1.3f, t.SurfaceAt(tx + 1.3f) - 0.5f), name => Shot(folder, name),
+                        "smoke_65_d1_shovel_contact.png", "smoke_66_d1_shovel_follow_through.png");
+                    Debug.Log($"[MERIDIAN] smoke shovel slot: '{(hud.ToolSlot != null ? hud.ToolSlot.Name.text : "-")}'");
+                    FreeAim();
                 }
 
                 // smoke_48: 2 m under the Surface Line in a pit beside the camp: the line in the cutaway, its card.
@@ -250,7 +233,7 @@ namespace Meridian.Core
                     var aim = new Vector2(ax - 2.1f, hands.y + 14.7f);
                     foreach (var h in Physics2D.RaycastAll(new Vector2(ax, hands.y + 10f), Vector2.left, 6f))
                         if (h.collider is EdgeCollider2D && h.collider.GetComponent<Meridian.Terrain.TerrainChunk>() != null) { aim = h.point + new Vector2(-0.3f, 0f); break; }
-                    input.AimAt(aim);
+                    PinAim(input, aim);
                     input.holdUse = true;
                     for (int k = 0; k < 150 && !input.Grapple.Attached; k++) yield return new WaitForFixedUpdate();
                     for (int k = 0; k < 400 && input.Grapple.Attached && player.Body.position.y < shaftFloor + 4f; k++) yield return new WaitForFixedUpdate();
@@ -259,7 +242,7 @@ namespace Meridian.Core
                     input.holdUse = false;
                     player.LetGo();
                     input.module = module;
-                    input.externalAim = false;
+                    FreeAim();
                 }
 
                 // smoke_59 / 60: topside at the camp, the Sell panel over a pack of Earth's materials; then the Skill Tree with Beam Power I bought.
@@ -296,20 +279,26 @@ namespace Meridian.Core
                     if (input != null)
                     {
                         input.module = Meridian.Rig.RigModule.Beam;
-                        input.AimAt(new Vector2(sx + 3.5f, t.SurfaceAt(sx + 3.5f) - 0.4f));
+                        PinAim(input, new Vector2(sx + 3.5f, t.SurfaceAt(sx + 3.5f) - 0.4f));
                         yield return Wait(1f);
                         yield return Shot(folder, "smoke_67_d1_tool_slot_beam.png");
                         Debug.Log($"[MERIDIAN] smoke tool slot: '{(hud.ToolSlot != null ? hud.ToolSlot.Name.text : "-")}' {(hud.ToolSlot != null ? hud.ToolSlot.IconKey : "-")}, tool {rig.Tool}");
-                        input.externalAim = false;
+                        // smoke_68 (U-212 (2)): the Beam mid-dig on fresh ground west of the first scoop: the ray on its contact, the spark,
+                        // the crack growing under the brackets.
+                        Put(side, new Vector2(tx, t.SurfaceAt(tx) + 0.05f));
+                        yield return Settle(side);
+                        for (int k = 0; k < 30; k++) yield return new WaitForFixedUpdate();
+                        yield return BeamShot(side, new Vector2(tx - 3f, t.SurfaceAt(tx - 3f) - 0.6f), name => Shot(folder, name), "smoke_68_d1_beam_mid_dig.png");
+                        FreeAim();
                     }
                 }
                 yield return Wait(0.3f);
             }
             finally
             {
-                rig.owner = owner;
                 player.externalInput = ext; player.intent = default;
-                if (input != null) { input.holdUse = false; input.externalAim = false; }
+                if (input != null) input.holdUse = false;
+                FreeAim();
                 HintCards.Blocked = blocked;
                 if (side.hazards != null) side.hazards.enabled = haz;
                 if (side.creatures != null) side.creatures.autoSpawn = spawn;
@@ -321,9 +310,7 @@ namespace Meridian.Core
         {
             var rig = side.rig;
             if (rig == null || side.terrain == null || side.player == null) yield break;
-            var owner = rig.owner;
-            bool haz = side.hazards != null && side.hazards.enabled;
-            rig.owner = null;
+            bool haz = side.hazards != null && side.hazards.enabled; // U-212 (1): the owner stays on (Room's Bore lifts the reach itself)
             if (side.hazards != null) side.hazards.enabled = false;
             try
             {
@@ -332,9 +319,90 @@ namespace Meridian.Core
             }
             finally
             {
-                rig.owner = owner;
                 if (side.hazards != null) side.hazards.enabled = haz;
             }
+        }
+
+        /// <summary>The follow-through's drawing a shot waits for (the swing's five: 0 the wind-up, 1 the contact, 2-4 the follow-through).</summary>
+        public const int FollowDrawing = 3;
+
+        /// <summary>
+        /// U-212 (2): the shovel's stroke as play shows it, on its own moments. The Rig's owner is ON and the cursor is pinned on `aim`
+        /// (fresh ground inside the reach): `contactName` is taken in the first swing's CONTACT drawing (the blade on the ground, the
+        /// crack, the crumbs leaving the face, the brackets on the contact), `followName` in the follow-through of the swing that opens
+        /// the ground (the clods in the air). `shot` takes a picture by name: the player's screenshot here, a capture's own grab in
+        /// the Editor (SceneCapture.CaptureU212), so both show one staging. The caller frees the aim.
+        /// </summary>
+        public static IEnumerator ShovelShots(PlanetSideRoot side, Vector2 aim, System.Func<string, IEnumerator> shot, string contactName, string followName)
+        {
+            var input = side != null && side.player != null ? side.player.GetComponent<Meridian.Player.PlayerRigInput>() : null;
+            var rig = side != null ? side.rig : null;
+            if (input == null || rig == null) yield break;
+            var stroke = input.Stroke;
+            input.module = Meridian.Rig.RigModule.Beam; // the dig slot: the shovel until The Beam is bought
+            input.holdUse = false;
+            PinAim(input, aim);
+            float until = Time.realtimeSinceStartup + 3f;
+            while (stroke.Active && Time.realtimeSinceStartup < until) yield return null;
+            yield return Wait(0.5f); // at rest: the tool carried, the reticle on the next contact
+            bool found = rig.DigTarget(aim, out var lands, out bool pulled);
+            float from = (lands - rig.DigOrigin).magnitude;
+            int opens = stroke.Opens, contacts = stroke.Contacts;
+            input.holdUse = true;
+            until = Time.realtimeSinceStartup + 10f;
+            while (!(stroke.Phase == Meridian.Player.DigPhase.Swing && stroke.ContactDone && stroke.Drawing == Meridian.Player.DigStroke.ContactDrawing) && Time.realtimeSinceStartup < until) yield return null;
+            // up to two frames on while the contact drawing still stands: the crumbs are off the face
+            for (int k = 0; k < 2; k++)
+            {
+                if (stroke.Phase != Meridian.Player.DigPhase.Swing || stroke.SwingTime + Time.deltaTime >= 2f * Meridian.Player.DigStroke.ContactSeconds) break;
+                yield return null;
+            }
+            var first = stroke.LastContact;
+            int drawing = stroke.Drawing, crack = input.ToolView != null ? input.ToolView.CrackStage : -1;
+            yield return shot(contactName);
+            // held on to the swing that opens the ground; that swing is committed, so the button comes up and it runs out
+            until = Time.realtimeSinceStartup + 10f;
+            while (stroke.Opens == opens && Time.realtimeSinceStartup < until) yield return null;
+            input.holdUse = false;
+            while (stroke.Phase == Meridian.Player.DigPhase.Swing && stroke.Drawing < FollowDrawing && Time.realtimeSinceStartup < until) yield return null;
+            int followOn = stroke.Drawing;
+            yield return shot(followName);
+            Debug.Log($"[MERIDIAN] smoke shovel: tool {rig.Tool}; the aim {(found ? "lands" : "finds NOTHING")} {from:0.00} m from the shoulder (reach {rig.DigReach:0.0} m{(pulled ? ", pulled in" : "")}); {contactName} on drawing {drawing}, first contact {first}, crack stage {crack}; {followName} on drawing {followOn}; contacts {stroke.Contacts - contacts}, opened {stroke.Opens - opens}; the Rig's owner {(rig.owner != null ? "on" : "OFF")}");
+            until = Time.realtimeSinceStartup + 3f;
+            while (stroke.Active && Time.realtimeSinceStartup < until) yield return null;
+        }
+
+        /// <summary>
+        /// U-212 (2): the Beam mid-dig, the owner ON and the cursor pinned on `aim` (fresh ground inside the reach): the ray on its
+        /// contact, the spark there, the crack at its second or third stage (the work between 0.35 and 0.9 of the cell's). A cell that
+        /// opens before a frame lands in that window is no loss: the ray works on into the next and the shot is taken there.
+        /// </summary>
+        public static IEnumerator BeamShot(PlanetSideRoot side, Vector2 aim, System.Func<string, IEnumerator> shot, string name)
+        {
+            var input = side != null && side.player != null ? side.player.GetComponent<Meridian.Player.PlayerRigInput>() : null;
+            var rig = side != null ? side.rig : null;
+            if (input == null || rig == null) yield break;
+            var stroke = input.Stroke;
+            var view = input.ToolView;
+            input.module = Meridian.Rig.RigModule.Beam;
+            input.holdUse = false;
+            PinAim(input, aim);
+            float until = Time.realtimeSinceStartup + 5f;
+            while ((stroke.Active || view == null || view.Tool == null || view.Tool.sprite == null || !view.RayReady) && Time.realtimeSinceStartup < until) { view = input.ToolView; yield return null; }
+            yield return Wait(0.5f);
+            bool found = rig.DigTarget(aim, out var lands, out bool pulled);
+            float from = (lands - rig.DigOrigin).magnitude;
+            int opens = stroke.Opens;
+            input.holdUse = true;
+            until = Time.realtimeSinceStartup + 10f;
+            while (!(stroke.Phase == Meridian.Player.DigPhase.Beam && stroke.Diggable && input.StrokeProgress >= 0.35f && input.StrokeProgress <= 0.9f) && Time.realtimeSinceStartup < until) yield return null;
+            float work = input.StrokeProgress;
+            var phase = stroke.Phase;
+            yield return shot(name);
+            input.holdUse = false;
+            Debug.Log($"[MERIDIAN] smoke beam: tool {rig.Tool}; the aim {(found ? "lands" : "finds NOTHING")} {from:0.00} m from the shoulder (reach {rig.DigReach:0.0} m{(pulled ? ", pulled in" : "")}); {name} in phase {phase} with the cell's work at {work:0.00} (crack stage {Meridian.Player.DigStroke.StageOf(work)}); cells opened before it {stroke.Opens - opens}; the Rig's owner {(rig.owner != null ? "on" : "OFF")}");
+            until = Time.realtimeSinceStartup + 3f;
+            while (stroke.Active && Time.realtimeSinceStartup < until) yield return null;
         }
 
         /// <summary>smoke_62 / 63 (U-184): the ship off Earth's well, the minimap over the flight HUD, then the system map (M) open.</summary>

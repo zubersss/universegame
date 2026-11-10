@@ -105,6 +105,10 @@ namespace Meridian.Creatures
         /// <summary>U-118: how far from its den a den species still counts as at it (the peek clip), metres.</summary>
         public float denRange = 2.5f;
         public bool HasDen => !string.IsNullOrEmpty(den);
+        /// <summary>U-212 (7): the least distance from the shore (m) the species spawns at or swims to (0: none). The Hadal Maw's: sea_under's
+        /// painted shallows show while the camera is within 40 m of the shore, whatever the real depth there, the walking frame is 20 m
+        /// wide and the rig reaches 17 m either side of its body: 40 + 10 + 17.</summary>
+        public float shoreKeep;
 
         public bool Flies => habitat != Habitat.Ground;
 
@@ -182,7 +186,7 @@ namespace Meridian.Creatures
             // sense of following: it holds 14 m off and startles with its react (D-087: no attack); the water it needs (5 + 15 m) keeps it out of the camp's pools.
             new SpeciesSpec { id = Species.HadalMaw, planet = PlanetId.Earth, artKey = "creatures/earth/hadal_maw", rig = true, size = new Vector2(16f, 5f), floorClearance = 15f,
                 wanderSpeed = 1.5f, runSpeed = 3.5f, temper = Temper.Hunts, senseRange = 40f, followDistance = 14f, reactRadius = 12f, time = ActiveTime.Any, habitat = Habitat.Water,
-                packMin = 1, packMax = 1, maxAlive = 1, placeholder = new Color(0.12f, 0.2f, 0.26f) },
+                packMin = 1, packMax = 1, maxAlive = 1, placeholder = new Color(0.12f, 0.2f, 0.26f), shoreKeep = 67f },
             // U-118 (B-142, D-126): the lava-tube lurker — a shy peeker at its mound over the tubes (idle = the peek at the den, idle_open away from it); the polar crawler — slow and armoured on the ice caps.
             new SpeciesSpec { id = Species.TubeLurker, planet = PlanetId.Mars, artKey = "creatures/mars/tube_lurker", den = "props/mars/tube_mound", size = new Vector2(1.2f, 0.7f),
                 wanderSpeed = 1.0f, runSpeed = 4.5f, jumpSpeed = 4f, temper = Temper.Flees, senseRange = 6f, time = ActiveTime.Any,

@@ -16,6 +16,9 @@ namespace Meridian.CameraRig
         public bool vehicle;
         /// <summary>U-148: aboard, the skids' height over the ground (m; 0 on the pad, +∞ with no ground under them): the pad framing fades out with it.</summary>
         public float altitude;
+        /// <summary>U-213 (3): on foot, the frame's share of baseFrame the camera eases toward (StageZoom: 64 / 96 at the surface with the
+        /// close camera on, 1 underground); 0 = 1, the shipped frame.</summary>
+        public float zoom;
     }
 
     /// <summary>
@@ -76,6 +79,12 @@ namespace Meridian.CameraRig
         public float X { get; private set; }
         public float Y { get; private set; }
         public float Frame { get; private set; } = DefaultFrame;
+        /// <summary>U-213 (3): the on-foot frame's share of the player's zoom now (1: the shipped frame), eased toward StageInput.zoom with
+        /// StageZoom.EaseTime: never a cut. The frame's bottom keeps its share of the frame under the stage floor (FloorBelow x Zoom), so
+        /// the close frame is the shipped composition seen closer, not a taller slab of ground.</summary>
+        public float Zoom { get; private set; } = 1f;
+        float zoomVel;
+        static float ZoomGoal(in StageInput i) => i.zoom > 0f ? i.zoom : 1f;
         public Vector2 Shake { get; private set; }
         /// <summary>True while a fall longer than LongFall is being followed with the 0.4 s follow.</summary>
         public bool FallFollowing { get; private set; }
@@ -99,11 +108,12 @@ namespace Meridian.CameraRig
         public void Snap(in StageInput i)
         {
             float baseF = i.baseFrame > 0f ? i.baseFrame : DefaultFrame;
-            Frame = i.vehicle ? ShipFrameFor(baseF, Speed(i)) : baseF; frameVel = 0f; frameEasing = false;
+            Zoom = i.vehicle ? 1f : ZoomGoal(i); zoomVel = 0f;
+            Frame = i.vehicle ? ShipFrameFor(baseF, Speed(i)) : baseF * Zoom; frameVel = 0f; frameEasing = false;
             look = 0f; lookVel = 0f; rel = 0f; relVel = 0f; relY = 0f;
             X = i.playerX;
             floorS = i.floorY; floorVel = 0f; haveFloor = true; heldFloor = floorS;
-            Y = floorS - FloorBelow + Frame * 0.5f; yVel = 0f; wasVehicle = i.vehicle;
+            Y = floorS - FloorBelow * Zoom + Frame * 0.5f; yVel = 0f; wasVehicle = i.vehicle;
             if (i.vehicle) { VehicleGoal(i, out rel, out relY); X = i.playerX + rel; Y = i.playerY + relY; } // U-148: where the ship rules settle
             FallFollowing = false; landedFollow = false; fallTop = i.playerY;
             Shake = Vector2.zero; shakeT = 0f; shakeAmp = 0f; shakeDur = ShakeTime;
@@ -139,7 +149,14 @@ namespace Meridian.CameraRig
             }
             // U-148: aboard, the frame follows the wheel base and the speed (SmoothDamp 0.8 s); on foot the wheel zoom applies at once (D-087),
             // except while the frame eases back from the ship frame.
-            float goalF = i.vehicle ? ShipFrameFor(baseF, Speed(i)) : baseF;
+            // U-213 (3): the close camera's share eases (aboard it eases back to 1 under the ship's own frame)
+            float zoomGoal = i.vehicle ? 1f : ZoomGoal(i);
+            if (Zoom != zoomGoal)
+            {
+                Zoom = Mathf.SmoothDamp(Zoom, zoomGoal, ref zoomVel, StageZoom.EaseTime, Mathf.Infinity, dt);
+                if (Mathf.Abs(Zoom - zoomGoal) < 1e-4f) { Zoom = zoomGoal; zoomVel = 0f; }
+            }
+            float goalF = i.vehicle ? ShipFrameFor(baseF, Speed(i)) : baseF * Zoom;
             if (frameEasing || i.vehicle)
             {
                 Frame = Mathf.SmoothDamp(Frame, goalF, ref frameVel, frameEasing ? BoardFrameTime : ShipFrameTime, Mathf.Infinity, dt);
@@ -241,7 +258,7 @@ namespace Meridian.CameraRig
                 Y = Mathf.SmoothDamp(Y, pc, ref yVel, FallFollowTime, Mathf.Infinity, dt);
                 return;
             }
-            float yFloor = floorS - FloorBelow + Frame * 0.5f;
+            float yFloor = floorS - FloorBelow * Zoom + Frame * 0.5f;
             float half = MiddleBand * 0.5f * Frame;
             float goal = Y;
             // The stage floor rule sets the frame from the floor (rising ground, zoom changes, a long fall's landing); a

@@ -256,6 +256,7 @@ namespace Meridian.Creatures
             var spec = SpeciesSpec.Get(species);
             var site = SiteAt(tx, playerY);
             if (!spec.Allows(site)) return null;
+            if (spec.shoreKeep > 0f && TooNearShore(spec.shoreKeep, ShoreAt(tx + 0.5f, spec.shoreKeep))) return null; // U-212 (7): the Maw keeps out of the shallows
             if (spec.habitat == Habitat.Ground && site.waterDepth > 0) return null; // U-188: no land creature on a seabed
             Vector2 at;
             if (spec.habitat == Habitat.Deck)
@@ -556,6 +557,25 @@ namespace Meridian.Creatures
             return want;
         }
 
+        /// <summary>U-212 (7; BLENDER's read of 0.6.3's smoke_43, H6: the Hadal Maw's head stood over sea_under's shallow seabed, a giant
+        /// fish half sunk in a sand flat): the painted shallows show while the camera is within 40 m of the shore, whatever the real
+        /// depth there (the coast drops 20 m in about 20). A species with a shoreKeep neither spawns nor swims nearer the shore than
+        /// that. Pure: `shore` is how far the column asked is out from the nearest land.</summary>
+        public static bool TooNearShore(float shoreKeep, float shore) => shoreKeep > 0f && shore < shoreKeep;
+
+        Meridian.Terrain.SolidWorldGenerator shoreWorld;
+        System.Func<int, bool> shoreSea; // one delegate for the planet's visit (no allocation a think)
+
+        /// <summary>How far x is out from the nearest land column (m), read up to `reach` columns either way: 0 on land, reach + 1 where
+        /// none lies that near; float.MaxValue on a world with no solid generator. A few dozen array reads at most.</summary>
+        public float ShoreAt(float x, float reach)
+        {
+            var world = terrain != null ? terrain.BaseGenerator as Meridian.Terrain.SolidWorldGenerator : null;
+            if (world == null) return float.MaxValue;
+            if (!ReferenceEquals(world, shoreWorld)) { shoreWorld = world; shoreSea = column => world.SeaAt(column); }
+            return Meridian.View2D.CartoonStage.ShoreDistance(x, Mathf.CeilToInt(reach), shoreSea);
+        }
+
         /// <summary>Seconds between two bumps by one creature.</summary>
         public const float BumpEvery = 1.2f;
         /// <summary>U-099: a creature that wanted to move but stood still this long is blocked by something the tiles do not show.</summary>
@@ -578,7 +598,8 @@ namespace Meridian.Creatures
                 // floor clearance here (a hunter only: the others never chase; a few tile reads a think, inside the AI budget)
                 int here = Mathf.FloorToInt(c.Body.position.x);
                 int ahead = here + (dx > 0f ? 1 : -1) * Mathf.Max(1, Mathf.CeilToInt(spec.size.x * 0.5f));
-                c.shallowAhead = WaterDepthAbove(ahead, terrain.TopSolidY(ahead)) < spec.WaterDepthNeeded;
+                c.shallowAhead = WaterDepthAbove(ahead, terrain.TopSolidY(ahead)) < spec.WaterDepthNeeded
+                    || (spec.shoreKeep > 0f && TooNearShore(spec.shoreKeep, ShoreAt(ahead + 0.5f, spec.shoreKeep))); // U-212 (7): nor inside its keep off the shore
                 c.swimFloor = terrain.TopSolidY(here) + 1f + spec.floorClearance + spec.size.y * 0.5f;
             }
 
@@ -631,6 +652,13 @@ namespace Meridian.Creatures
             c.State = r < 0.25f ? CreatureState.Idle : CreatureState.Wander;
             if (spec.Flies && c.State == CreatureState.Idle) c.State = CreatureState.Wander; // fliers keep moving
             if (r > 0.9f) c.dir = -c.dir;
+            // U-212 (7): a wanderer whose way leads inside its keep off the shore turns toward the open sea
+            if (spec.shoreKeep > 0f)
+            {
+                int col = Mathf.FloorToInt(c.Body.position.x), half = Mathf.Max(1, Mathf.CeilToInt(spec.size.x * 0.5f));
+                if (TooNearShore(spec.shoreKeep, ShoreAt(col + c.dir * half + 0.5f, spec.shoreKeep)))
+                    c.dir = ShoreAt(col + half + 0.5f, spec.shoreKeep) >= ShoreAt(col - half + 0.5f, spec.shoreKeep) ? 1 : -1;
+            }
         }
 
         /// <summary>U-192: a drifter's swerve: how far it moves off in height, how often it may start one, how long its attack clip plays as the swerve.</summary>
