@@ -6,8 +6,8 @@ Owner: LEAD (only the Lead edits this). Do the open items below, then tell the L
 
 ## Open
 
-### USER-42 — Free about half a gigabyte of memory (2 min) — builds and tests are blocked until then
-Thank you for restarting the three windows (00:50). The laptop itself was not restarted (it has been on since yesterday 11:44), and at 00:56 it still has only 0.9 GB of memory free; builds, tests and the heavier renders need 1.5 GB. File-only work continues in all three windows; nothing heavy can start. Either of these fixes it:
+### USER-42 — Free about half a gigabyte of memory (2 min) — not blocking right now, but the margin is thin
+Thank you for restarting the three windows (00:50). Update 01:01: once the new windows settled, free memory rose to 1.9 GB and the team's builds and tests can start again. The laptop itself was not restarted (it has been on since yesterday 11:44) and builds need 1.5 GB free, so one busy app can stop them again. Either of these gives a safe margin:
 - **Quick:** close the **Copilot** app (it holds 0.4 GB), the **Xbox** app (0.3 GB) and the **Settings** window (0.2 GB). For Copilot and Xbox, look in the system tray by the clock (click the ^ arrow), right-click the icon and choose Quit or Close.
 - **Thorough:** close the three Claude windows (the Lead's last), restart the laptop, open the three windows again and paste the usual resume message into each.
 Then tell the Lead session "done: USER-42". Nothing is lost either way: everything is in the project files.
