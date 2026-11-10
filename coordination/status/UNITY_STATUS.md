@@ -1,57 +1,63 @@
 # UNITY STATUS
-Updated: 2026-11-10 15:58 · Session: 14 (the laptop rebooted 14:18; this window's address zuber-30, LEAD zuber-4a, BLENDER zuber-59; Fable 5.2; everything before 14:30 today: coordination/status/archive/UNITY_2026-11-10.md)
+Updated: 2026-11-10 17:18 · Session: 14 (the laptop rebooted 14:18; this window's address zuber-30, LEAD zuber-4a, BLENDER zuber-59; Fable 5.2; everything before 14:30 today: coordination/status/archive/UNITY_2026-11-10.md)
 
-## NOW (15:58): U-212 part 2, U-213 (3) and U-216's code are checked, captured and pushed (126df701); with LEAD for its 4x look. Nothing of mine is uncommitted. No lock, no want
-- CHECK 15:35-15:53: compile 0 errors / 0 warnings; EditMode 536/536 (+13); PlayMode HadalMaw | DigResponse | ShovelPlay | DigFeel | SeaUnder | ShoreCreature | StageZoom | StageCamera | LivingStage 28/30 at 15:40 (both reds faults of my NEW tests: the first water tile is a column from the world's own sea columns; a wait counted in frames where a batch run draws hundreds a second), the two classes re-run 2/2 (15:41), LivingStage 1/1 after a scatter change (15:53). NOT run: the smoke (it rides 0.6.4), any built-player price of U-216.
-- CAPTURES in coordination/reports/unity/: u212/ (8 frames, each with a _cut2x), u213/ (camp at 64 / 96 / 128, the shaft's floor at 64, its mouth at 96), u216/ (1_on_96, 2_off_96, 3_strip_10s, 4_bend_pair_2x, 5_push_2x, 0_placeholder_page). Run again with `tools/unity_capture.ps1 -Name u212 -Test CaptureU212` (u213 / CaptureU213Camera, u216 / CaptureU216Living): about 1.2 min each.
-- ASKED OF LEAD 15:57: (1) play_front (order 19, over the surveyor) against "the reticle always over play_front" (the reticle sorts under the surveyor since U-212 (3)): which gives; (2) my reading of D-209's "nothing runs with less than 0.3 GB free" as a START condition (see the peaks).
+## PAUSED BY THE OWNER 17:18 (LEAD's relay of "Pause all work"). I take no further turns until the owner or LEAD says resume
+- Stopped cleanly: no Unity job was running, no lock and no want of mine, no Unity process, no Assets/InitTestScene*. Nothing was cut mid-job.
+- Everything checked is pushed: 426404c1 (U-216: the foreground clears round the surveyor and fades underground; the dev player's probe leg that prices the living stage, with its report rows) on top of 126df701 (U-212 part 2, U-213 (3), U-216's code).
+- UNCOMMITTED, UNFINISHED, IN THE TREE (written 17:16-17:17, NOT compiled, NOT run): F1's flora half, two files:
+  - Assets/_Game/Code/Runtime/Flora/FloraRigs.cs: HookDigs(rig) / OnDug / Uproot(at, reach) / Grounded(root) / Remove(plant), the counter Uprooted, RigPlant.groundChecked, and in LateUpdate's ranking pass a once-only ground look at each plant within 30 m of the camera on settled ground (a plant sown over an old hole after a reload goes); OnDestroy unhooks.
+  - Assets/_Game/Code/Runtime/View2D/CartoonStage.cs: one line, `Flora.HookDigs(side.rig)` in ConfigureFor.
+  No test for it is written yet. Editor churn also in the tree as always (AddressableAssetSettings.asset, common.asset, link.xml, UnderwaterTint.mat, MERIDIAN_SETUP.md, Generated/*): never staged.
 
-## What is in 126df701
-- U-212 part 2: BuildSmoke / BuildSmokeD1 keep the Rig's owner ON (the Unreached scope takes it off for one staging call); every shot logs the owner's state ("OWNER OFF" is the report's grep); on foot the smoke points the Rig at the ground 0.84 m ahead of the feet, a staging pins its own aim; BuildSmoke.ShovelShots / BeamShot stage smoke_65_d1_shovel_contact, smoke_66_d1_shovel_follow_through and the new smoke_68_d1_beam_mid_dig for the player's smoke AND for CaptureU212 (the smoke is 80 shots: tools/unity_smoke.ps1); the G5 probe reads 8 m.
-- The Hadal Maw (P-U212-1, LEAD: yes): SpeciesSpec.shoreKeep 67 m; no spawn, no swim nearer the shore (CreatureDirector.TooNearShore / ShoreAt). Its first legal column at the coast: 68 m out (the first deep column is 34.5 m out). CaptureU119Maw and CaptureU128Shore still spawn it inside the keep: re-stage when next touched.
-- U-213 (3): Camera/StageZoom.cs (off; "-meridianCloseCamera" or "-meridianCloseCamera 128"); StageCamera.Zoom eases (within 2 % after 0.99 s in and 1.00 s out, measured in the test; the largest step 0.03 m of frame a frame); underground = 3 m under the ground's own surface (out above 2.5 m) or ground within 6 m over the head, asked 10 times a second; the frame's bottom keeps the ground's share (P-U213-1, accepted as built); RigToolView.MarkScale keeps the brackets' and the pip's screen size.
-- U-216: Code/Runtime/View2D/Living/ (LivingWind: the field and the shader's constants; LivingMesh: one mesh a layer, a 0.2 m grid a swaying piece, uv1 = root + weight + give, uv2 = phase + the normal's x sign; VineChain: a 60 Hz position chain; LivingPlaceholders: a code-painted 1024 x 512 page + normals; LivingStage: the flag "-meridianLivingStage", the four switches WindOn / AirOn / VineOn / LightOn, near / play / play_front / foreground at orders -1 / 0 / 19 / 60, the dig removal), Shaders/LivingStage.shader + LivingWind.hlsl (the wind in the vertex stage; lit only with LIVING_LIT), Settings/Resources/LivingStage.mat + LivingStageLit.mat. At the camp: 144 pieces, about 11 000 vertices, 8 draw calls added. The lamp's normal-map quality has no setter in URP 17.6: set by reflection (LampUsesNormals says whether it took). A dig asks every piece its distance and reads the ground for the near ones (LastDigAsked / LastDigRead).
+## FIRST STEPS ON RESUME, in order
+1. F1 (LEAD's three rules, 17:1x): (a) finish the flora half: a PlayMode row (at the camp nothing is uprooted on untouched ground for 3 s; a dig under one plant's root takes that plant and no other; `Uprooted` counts it) and the rule "no plant is placed over open ground when a chunk loads or streams in" (the ranking pass's once-only look does this as a plant comes within 30 m: say so, or move it to Populate if LEAD wants it at load); (b) a decorative POI prop settles onto the new ground under it or goes with a puff when none is within reach (PoiPlacer: props are SpriteRenderers under a POI root that the world wrap moves; solid ones own a BoxCollider2D laid from the art; some carry a model swap: NOT started; my estimate is over an hour); (c) NOTHING THE PLAYER USES GOES WITH A PUFF: for the Pilgrim and its pad, the camp's stations (sell, craft, the Skill Tree's place), a vault door, a placed ladder or winch, a Warden: read what the game does today under each (settles, or its footing cannot be dug), keep that, and write one test for the Pilgrim's pad and one for the sell point. NOT started.
+2. The 128 camera's frame drop (LEAD: YES, before 0.6.4, behind the close camera's flag): StageInput gains the dig point's depth under the feet; the frame's bottom eases down to keep 1.2 m of ground under that point while the aim is down, back when the tool rests; an EditMode row for no cut. NOT started.
+3. F2, the hole's right lip (the grass strip cut on a slant, a tan wedge, a triangle of the wall's shade above the ground line where a hole meets the surface on its right: u212/1, 2, 3 and the shaft's top right corner in u213/4): NOT looked at yet; it is in SmoothGround's rim. Fix if under an hour, else one line to LEAD on why not.
+4. ONE check for 1-3 when the gate reads 1.5 GB in its own call (compile + EditMode, then PlayMode DigResponse | ShovelPlay | DigFeel | RigFlora | PoiPlay | StageZoom | StageCamera | LivingStage and the new rows), by the locks (BLENDER had a want at 17:15). Commit.
+5. U-220 the ceiling probe ("-meridianCeilingProbe", dev player only), then U-218 (the importer slices by "cuts" and moves each pivot; ArtImporterTests on a synthetic sheet), then U-217's importer case and stage-file reader.
+6. Two BudgetGate readings (reading 6 at 13:53 was red on Earth's frame p99 21.58 ms and chunk generation 5/400 over 2 ms, cause not established; if a red stays, one reading with RigToolView at 16bf8110). Then BUILD 0.6.4: dev build, the probe read twice (U-216's four prices and the ceiling probe ride it; no control row, D-203a), release build, the 80-shot smoke with -meridianSaveRoot.
+7. After: U-214, U-215, U-197, U-198, U-210, U-208; open under U-211: the AI's first-time frame named, CreatureDirector.LastAiAllocBytes on the live counter, the cell-open frame re-read; the next shaft capture 3 m deeper (the Topsoil to Subsoil blend band, the "smear" in u213/4). U-219 is Blocked on BLENDER's rig.
 
-## MEASURED PEAKS (D-209; the Editor WITH its workers, logs/unity_peaks.log; set MERIDIAN_WATCH_CAP_MB to log one)
-| Job | Peak | Free RAM at its lowest | Run |
+## Where the cards stand
+- U-212: ACCEPTED on the captures (LEAD 16:01), open until 0.6.4's smoke. P-U212-1 ruled yes (the Hadal Maw 67 m off the shore; re-stage CaptureU119Maw and CaptureU128Shore when next touched).
+- U-213 (3) the close camera: ACCEPTED on the captures; the frame drop at 128 owed (step 2).
+- U-216: its code, tests and captures are in; the clearing accepted (LEAD 17:1x); D-206b: play_front stays over the surveyor with the reticle under both; a find still draws over play_front (not checked in code yet). Its four prices are a probe leg that has NOT run on a player.
+- v7 pages: the piece format (D-206), live-or-sheets (D-208: sheets, trimmed; U-218 mine; U-219 the impostor, Blocked).
+
+## MEASURED PEAKS (D-209 / D-209a; the Editor WITH its workers, logs/unity_peaks.log; set MERIDIAN_WATCH_CAP_MB to log one, and NO free-RAM floor)
+| Job | Peak | Free RAM at its lowest | Runs |
 |---|---|---|---|
-| compile (after a reboot, new scripts and a shader) | 2.75 GB (the Editor 0.73) | 20 MB | 15:35 |
-| EditMode 536 tests | 3.16 GB (the Editor 1.52) | 32 MB | 15:36 |
+| compile | 2.06-2.75 GB (the larger after a reboot with new scripts and a shader) | 20-76 MB | 15:35, 17:11 |
+| EditMode 536-537 tests | 2.44-3.16 GB | 9-32 MB | 15:36, 17:12 |
 | PlayMode slice, 9 classes | 2.80 GB | 152 MB | 15:40 |
-| PlayMode, 1-2 classes | 2.58-2.64 GB | 20-103 MB | 15:41, 15:53 |
-| a capture (one test, graphics on) | 2.75-2.96 GB | 11-102 MB | 15:43-15:57 |
-Every one is over 1.15 GB, so each keeps the 1.5 GB gate; each takes the machine to the page file while it runs (as before today: 0.14-0.17 GB under my locks). The 15:32 compile was STOPPED by a 100 MB free-RAM floor I had set on the watchdog myself (99 MB at 76 s); re-run once with no floor (D-046): clean. Not measured yet: BudgetGate, a build, the probe, the smoke.
-
-## NEXT, in order
-1. LEAD's rulings on the captures and the two questions; a fault it finds comes first.
-2. U-216's four prices: probe rows in unity_profile for the dev player (the stage on, then each of wind / air / vine / light off: ms a frame and draw calls) with the pilot's density; a short clip only if a tool for it is already on the machine.
-3. U-220 the ceiling probe ("-meridianCeilingProbe", dev player only; rides 0.6.4), then U-218 (the importer slices by "cuts" and moves each pivot; ArtImporterTests on a synthetic sheet), then U-217's importer case and stage-file reader (contract §12).
-4. Two BudgetGate readings (reading 6 at 13:53 was red on Earth's frame p99 21.58 ms and chunk generation 5/400 over 2 ms, cause not established: readings 3-5 of the same timing code read p99 15.2 / 7.9 / 9.7 ms; if a red stays, one reading with RigToolView at 16bf8110). Then BUILD 0.6.4: dev build, probe (no control row, D-203a; absolute limits, read twice), release build, the 80-shot smoke with -meridianSaveRoot.
-5. After: U-214, U-215, U-197, U-198, U-210, U-208. Open under U-211: the AI's first-time frame named, CreatureDirector.LastAiAllocBytes on the live counter, the cell-open frame re-read. U-219 (the live impostor) is Blocked on BLENDER's rig.
+| PlayMode, 1-2 classes | 2.39-2.64 GB | 20-103 MB | 15:41, 15:53, 17:13 |
+| a capture (one test, graphics on) | 2.40-2.96 GB | 11-102 MB | 15:43-17:15 |
+My gate stays 1.5 GB at the START (LEAD, D-209a: 0.3 GB is a start condition, never a floor during a run; Editor jobs page by nature). ONE trial owed when free memory sits between 1.2 and 1.5 GB for ten minutes with my want on file: one compile + EditMode started there, timed against the same job started at 1.5 or more (2.3-2.4 min); within 1.3 times and not stopped: the gate becomes 1.2. The 15:32 compile was stopped by a 100 MB floor I had set myself; re-run once (D-046): clean. Not measured yet: BudgetGate, a build, the probe, the smoke.
 
 ## What a new window must know (kept)
 - THE OWNER'S SAVE SLOT (D-203): never write under AppData\LocalLow\Zubers\MERIDIAN\saves; tests run on SaveSystem.FallbackRoot; a driven player takes "-meridianSaveRoot <folder>"; unity_smoke / unity_profile refuse a player without the switch (0.6.3's two).
 - THE ALLOCATION COUNTER: GC.GetAllocatedBytesForCurrentThread reads 0 in Unity; use ProfilerRecorder "GC Allocated In Frame" after a 64 KB control, less the Editor's floor, or Is.Not.AllocatingGCMemory().
 - THE GAME LOADS NO SPRITE ATLAS (EditorSettings m_SpritePackerMode 0; the probe's "atlases":0): a sheet ships as written, megabytes bind (D-208).
-- One lock over several calls: a scratchpad wrapper takes the lock on the first part, sets MERIDIAN_LOCK_HELD = 1 round each tool, releases on the last or on a red part. unity_check runs the whole PlayMode unless -SkipPlayMode / -PlayFilter.
+- One lock over several calls: a scratchpad wrapper (job_part.ps1: -First takes the lock, sets MERIDIAN_LOCK_HELD = 1 round each tool, -Last or a red part releases it). unity_check runs the whole PlayMode unless -SkipPlayMode / -PlayFilter. Captures: `tools/unity_capture.ps1 -Name u212 -Test CaptureU212` (u213 / CaptureU213Camera, u216 / CaptureU216Living), about 1.2 min each.
 - A batch PlayMode run draws hundreds of frames a second: wait by Time.time, not by frame counts. Venus' deck wind pushes a grounded surveyor (disable Planet/Weather/VenusWind in such a test).
+- The camp's whole flat ground counts as "pad" (TerrainStreamer.PadTop): a scatter that skips pad columns skips the camp.
 - A gate run rewrites coordination/reports/unity/perf_2026-11-10.md (0.6.3's report): copy the result to u211/gate_readingN.md and `git checkout --` the report.
-- A shell heredoc eats backticked words: write status text with the Write tool.
+- A shell heredoc eats backticked words and breaks on an apostrophe: write status text and C# snippets with the Write tool.
 
 ## Last completed (all pushed)
-126df701 (U-212 part 2, U-213 (3), U-216's code) · 18cc9350 (the v7 live-or-sheets page → D-208) · daa78ab9 (the v7 piece format answered → D-206) · de36b4f1 (U-212 part 1) · 16bf8110 (U-211 (a), (b)).
+426404c1 (U-216: the clearing, the probe leg) · 126df701 (U-212 part 2, U-213 (3), U-216's code) · 18cc9350 (the v7 live-or-sheets page → D-208) · daa78ab9 (the v7 piece format answered → D-206) · de36b4f1 (U-212 part 1) · 16bf8110 (U-211 (a), (b)).
 
 ## Ready for review
-U-212 (parts 1 and 2: captures u212/; the smoke itself with 0.6.4). U-213 (3) (captures u213/; the 128 frame is the closer trial). U-216 (code and captures u216/; its built-player prices owed). Earlier, still unjudged: U-129 slice 1, U-130 slice 1, U-133 slice 1, U-146, U-144.
+U-216's prices when 0.6.4's dev player exists. Earlier, still unjudged: U-129 slice 1, U-130 slice 1, U-133 slice 1, U-146, U-144.
 ## Handoffs
 (none open)
 ## Blockers
-(none)
+The owner's pause (17:18).
 ## Proposals
-- P-U216-1: play_front draws over the surveyor (19) and the reticle under both (16); "the reticle always over play_front" would put the marks over the surveyor again. Built the first way; LEAD to rule.
+(none open: P-U212-1, P-U213-1 and P-U216-1 are ruled)
 ## For USER_ACTIONS
 (none new)
 ## Housekeeping
-Editor churn in the tree (Generated/Models *.mat, regenerated animator.controller files, common.asset's line endings, link.xml and its meta, UnderwaterTint.mat, MERIDIAN_SETUP.md): never staged; commits list files explicitly.
+Editor churn in the tree (see the pause block): never staged; commits list files explicitly.
 ## HeavyJobLock
 none held; no want. No background waiters.
