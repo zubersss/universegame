@@ -67,6 +67,13 @@ ever overwritten.
    (`(Get-CimInstance Win32_OperatingSystem).FreePhysicalMemory / 1MB`). One heavy job
    holds the lock ≤ 20 min. UNITY batches checks: one compile + EditMode + PlayMode run
    per task hand-off, not after every edit.
+   **Measured gates and smallest fit (D-209, the owner 2026-11-10: use the laptop to its
+   limit).** A job whose peak memory has been measured on this machine at P (written in your
+   status file with the run it came from) may start at P + 0.35 GB free, with its watchdog
+   at P + 0.2 GB; a job never measured keeps the 1.5 GB gate. While the top-ranked want is
+   held back only by the RAM gate, a lower-ranked job that fits its own measured gate may run
+   ONE turn of ≤ 10 min under its lock; the top rank goes next. Nothing runs with less than
+   0.3 GB free, and a job stopped for memory twice goes back to the 1.5 GB gate (D-046).
    **Strict turns (D-037).** If another role's `want_*.lock` exists when you release, you
    may not start another heavy job until that role has run one job, removed its want file,
    or its want file is older than 30 min. This holds even while the waiter is blocked on
@@ -96,8 +103,10 @@ ever overwritten.
 7. **Accepted work stays accepted.** Don't re-polish Done tasks unless LEAD reopens them.
 8. **Stay inside the repo.** No system installs, no registry/settings changes; list those
    in your status file for USER_ACTIONS.
-9. **Budgets are requirements** (Bible §11): 60 FPS at 1080p on integrated graphics,
-   < 2 GB RAM in play (D-089), and the dev workflow must fit 8 GB.
+9. **Budgets are requirements** (Bible §11): 60 FPS at 1080p on integrated graphics, and
+   the game's memory inside this laptop's MEASURED ceiling (D-209: found by the ceiling probe
+   on the built player, U-220; until it is read, < 2 GB in play and ≤ 1,024 MB of textures
+   for art v7), and the dev workflow must fit 8 GB.
 10. **Status after every task.** Your status file is how the others trust you and how a
     fresh session resumes. Update it when you start a task, finish one, hand off, or block.
     Keep it to the current session and under 12 KB (D-113): `Ready for review` lists only
