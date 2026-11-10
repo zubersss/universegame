@@ -479,6 +479,75 @@ namespace Meridian.Tests
             finally { Restore(); }
         }
 
+        /// <summary>P-U209-3 (LEAD 07:1x; D1 §5, dig_rhythm_1: "each consecutive stroke on the same face -10 % time (max -30 %)"): the Beam
+        /// held on one face opens each cell in the tables' time with the node not bought, and in 1, 0.9, 0.8 of it with Rhythm I.</summary>
+        [UnityTest, Timeout(300000)]
+        public IEnumerator TheRhythmNodeShortensConsecutiveCellsOnTheSameFace()
+        {
+            yield return Boot(DigTool.Beam);
+            var nodes = GameState.Instance.skillNodes;
+            bool had = nodes.Contains("dig_rhythm_1");
+            try
+            {
+                const int Cells = 3;
+                float x = player.Body.position.x;
+                var stroke = input.Stroke;
+                var log = new System.Text.StringBuilder();
+                int spot = 0;
+                foreach (bool bought in new[] { false, true })
+                {
+                    if (bought) nodes.Add("dig_rhythm_1"); else nodes.Remove("dig_rhythm_1");
+                    SkillStats.Recompute(GameState.Instance);
+                    SkillStats.ToolOverride = DigTool.Beam; // the node's own tool, whatever else the tree holds
+                    rig.BeamPower = 1f;
+                    Assert.AreEqual(bought ? 0.1f : 0f, SkillStats.RhythmStep, 1e-6f, "the node's step, read from the tree");
+                    Assert.AreEqual(bought ? 0.3f : 0f, SkillStats.RhythmMax, 1e-6f, "and its most");
+                    yield return StandAtDepth(x + 70f + 12f * spot++, 56f);
+                    var feet = player.Body.position;
+                    input.AimAt(feet + new Vector2(0.2f, -0.6f)); // down through the floor: three cells of one face inside the Beam's 5 m
+                    yield return Rest();
+                    stroke.Reset();
+                    int opens = 0;
+                    System.Action<Vector2> onDug = p => opens++;
+                    rig.Dug += onDug;
+                    input.holdUse = true;
+                    yield return null; // the press' frame: the ray is on, its work runs from the next
+                    log.Append(bought ? "\n  Rhythm I bought:" : "\n  not bought:");
+                    for (int k = 0; k < Cells; k++)
+                    {
+                        int frames = 0, before = opens;
+                        float need = 0f;
+                        while (opens == before && frames < 60 * 20)
+                        {
+                            frames++;
+                            yield return null;
+                            if (frames == 1)
+                            {
+                                Assert.IsTrue(stroke.Diggable, $"cell {k + 1}: the ray rests on the face behind the last cell");
+                                need = rig.StrokeSeconds(stroke.Target);
+                            }
+                        }
+                        Assert.AreEqual(before + 1, opens, $"cell {k + 1} opens");
+                        float share = bought ? 1f - Mathf.Min(0.1f * k, 0.3f) : 1f;
+                        float took = frames * Step;
+                        log.Append($" cell {k + 1} {took:0.00} s (the tables' {need:0.00} s x {share:0.0})");
+                        Assert.AreEqual(need * share, took, 3f * Step, $"{(bought ? "Rhythm I" : "not bought")}, cell {k + 1}: the tables' {need:0.00} s x {share:0.0}");
+                    }
+                    input.holdUse = false;
+                    rig.Dug -= onDug;
+                    yield return Rest();
+                }
+                TestContext.Out.WriteLine($"[MERIDIAN] u209 rhythm (dig_rhythm_1), the Beam held on one face, three cells in a row at a 60 fps step (power 1):{log}");
+                LogAssert.NoUnexpectedReceived();
+            }
+            finally
+            {
+                if (had) nodes.Add("dig_rhythm_1"); else nodes.Remove("dig_rhythm_1");
+                SkillStats.Recompute(GameState.Instance);
+                Restore();
+            }
+        }
+
         [UnityTest, Timeout(300000)]
         public IEnumerator TheBeamsRayGlowAndHumAnswerThePress()
         {

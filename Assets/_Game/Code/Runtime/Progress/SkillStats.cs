@@ -92,6 +92,10 @@ namespace Meridian.Progress
         /// <summary>U-193: the dig tool's reach (m): the shovel's from the tables (2 m), the Beam's RigTools.Reach.</summary>
         public static float DigReach => DigTool == Meridian.Rig.DigTool.Beam ? Meridian.Rig.RigTools.Reach : D1Tables.Current.shovelReachM;
         public static float BrushRadius => Value("brush_radius", 0.9f);
+        /// <summary>U-209 (P-U209-3): the Rhythm nodes (dig_rhythm_1: 0.1 a stroke up to 0.3; dig_rhythm_2: up to 0.5): the share of the
+        /// stroke time each consecutive stroke on the same face takes off, and the most (DigStroke.Rhythm). 0 until bought.</summary>
+        public static float RhythmStep => Value("rhythm_step", 0f);
+        public static float RhythmMax => Value("rhythm_max", 0f);
         public static float PackKg => Value("pack_kg", D1Tables.Current.packLimitKg);
         public static int DirtStore => Mathf.RoundToInt(Value("dirt_store", D1Tables.Current.dirtStoreStart));
         public static float LoadK => Value("load_k", D1Tables.Current.loadK);

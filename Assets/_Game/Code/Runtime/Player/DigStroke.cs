@@ -15,6 +15,10 @@ namespace Meridian.Player
         float StrokeSeconds(Vector2 point);
         /// <summary>Opens the ground at `point` (RigTools.Dig). False: nothing was dug.</summary>
         bool Open(Vector2 point);
+        /// <summary>The Rhythm nodes (dig_rhythm_1 / _2): the share of the stroke time each consecutive stroke on the same face takes off,
+        /// and the most a run takes off (0, 0: not bought).</summary>
+        float RhythmStep { get; }
+        float RhythmMax { get; }
     }
 
     public enum DigPhase { Idle, Swing, Beam }
@@ -28,8 +32,8 @@ namespace Meridian.Player
     /// contact on drawing ContactDrawing); each contact adds SwingSeconds ÷ the D1 stroke time of work to its target, so a cell opens in
     /// the tables' time to within one swing; a contact that does not open it is a chip; a target's work is kept WorkKeepSeconds after its
     /// last contact, then heals. The Beam is on from the press' own frame for at least BeamTapSeconds and its work accrues by the second
-    /// while the ray rests on a target; the cell opens the frame the work completes. No Unity objects and no allocation: PlayerRigInput
-    /// steps it once a frame, the views read it.
+    /// while the ray rests on a target; the cell opens the frame the work completes. The Rhythm nodes shorten each consecutive stroke
+    /// on the same face (Rhythm). No Unity objects and no allocation: PlayerRigInput steps it once a frame, the views read it.
     /// </summary>
     public sealed class DigStroke
     {
@@ -84,6 +88,34 @@ namespace Meridian.Player
         readonly Slot[] slots = new Slot[Slots];
         float beamUntil = -1f;
 
+        // ---- the rhythm (P-U209-3, LEAD 07:1x; D1 §5: "each consecutive stroke on the same face -10 % time (max -30 %)") ----
+
+        /// <summary>A stroke this far from the last one is on another face: the run starts again (a cell's opening moves the face back
+        /// about 1.75 brush radii: 1.6 m, 2.3 m with both brush nodes).</summary>
+        public const float SameFaceM = 3f;
+        const int RhythmCap = 100;
+        /// <summary>The strokes made in the run so far: a shovel's contact that does work, a cell the Beam opens. The next stroke's time
+        /// is the tables' x RhythmOf(Rhythm, step, max). The run ends on a whiff, when a stroke lands SameFaceM from the last one, and
+        /// when the tool has rested WorkKeepSeconds (as the kept work heals).</summary>
+        public int Rhythm { get; private set; }
+        /// <summary>The share of the tables' stroke time the last stroke took (1: no rhythm; 0.7 at dig_rhythm_1's most).</summary>
+        public float RhythmFactor { get; private set; } = 1f;
+        Vector2 rhythmAt;
+        float rhythmLast = -99f;
+
+        /// <summary>The share of the stroke time left after `strokes` consecutive strokes: 1 - min(strokes x step, max).</summary>
+        public static float RhythmOf(int strokes, float step, float max) => 1f - Mathf.Clamp(Mathf.Min(Mathf.Max(0, strokes) * step, max), 0f, 0.9f);
+
+        /// <summary>The tables' `need` at the stroke's target with the run's rhythm; called as a stroke works there (it keeps the run).</summary>
+        float Paced(IDigWorld world, float need)
+        {
+            if (Rhythm > 0 && (Clock - rhythmLast >= WorkKeepSeconds || (Target - rhythmAt).sqrMagnitude > SameFaceM * SameFaceM)) Rhythm = 0;
+            rhythmAt = Target;
+            rhythmLast = Clock;
+            RhythmFactor = RhythmOf(Rhythm, world.RhythmStep, world.RhythmMax);
+            return need * RhythmFactor;
+        }
+
         /// <summary>The work a point holds (0..1): its own target's, or a kept one's within SameTargetM.</summary>
         public float WorkAt(Vector2 p)
         {
@@ -107,6 +139,8 @@ namespace Meridian.Player
             for (int i = 0; i < Slots; i++) slots[i].used = false;
             Swings = Contacts = Opens = Chips = Whiffs = 0;
             LastStage = 0;
+            Rhythm = 0;
+            RhythmFactor = 1f;
         }
 
         /// <summary>Stops the swing or the ray (the dig tool was put away); kept work stays and heals in its time.</summary>
@@ -180,9 +214,10 @@ namespace Meridian.Player
             if (!Diggable) { Whiff(); return; }
             int i = Find(Target);
             if (i < 0) i = Add(Target);
-            float need = world.StrokeSeconds(Target);
+            float need = Paced(world, world.StrokeSeconds(Target));
             slots[i].work += need > Eps ? SwingSeconds / need : 1f;
             slots[i].last = Clock;
+            if (Rhythm < RhythmCap) Rhythm++; // a stroke of the run
             if (slots[i].work + Eps >= 1f) { Open(world, i); return; }
             Chips++;
             LastContact = DigContact.Chip;
@@ -190,19 +225,21 @@ namespace Meridian.Player
             Contacted?.Invoke(DigContact.Chip, Target, LastStage);
         }
 
-        void Open(IDigWorld world, int slot)
+        bool Open(IDigWorld world, int slot)
         {
             slots[slot].used = false;
             LastContactAt = Target;
-            if (!world.Open(Target)) { Whiff(); return; } // the ground went meanwhile
+            if (!world.Open(Target)) { Whiff(); return false; } // the ground went meanwhile
             Opens++;
             LastContact = DigContact.Open;
             LastStage = 0;
             Contacted?.Invoke(DigContact.Open, Target, 0);
+            return true;
         }
 
         void Whiff()
         {
+            Rhythm = 0; // the run is broken
             Whiffs++;
             LastContact = DigContact.Whiff;
             LastStage = 0;
@@ -221,11 +258,11 @@ namespace Meridian.Player
             if (!Diggable) return;
             int i = Find(Target);
             if (i < 0) i = Add(Target);
-            float need = world.StrokeSeconds(Target);
+            float need = Paced(world, world.StrokeSeconds(Target));
             if (need <= Eps) slots[i].work = 1f;                 // not a D1 planet: a stroke a frame, as before
             else if (!first) slots[i].work += dt / need;         // the press' own frame lights the ray; the work runs from the next
             slots[i].last = Clock;
-            if (slots[i].work + Eps >= 1f) Open(world, i);
+            if (slots[i].work + Eps >= 1f && Open(world, i) && Rhythm < RhythmCap) Rhythm++; // the Beam's stroke is a cell opened
         }
 
         int Find(Vector2 p)

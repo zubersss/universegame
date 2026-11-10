@@ -4455,8 +4455,10 @@ namespace Meridian.Tests
 
                 // the three sets of sprites: as imported, and DXT5 / RGBA32 copies from the source PNGs with the imported textures' sampler settings
                 int n = set.renderers.Count;
-                var bc7 = new Sprite[n]; var dxt5 = new Sprite[n]; var rgba = new Sprite[n];
-                long bytesBc7 = 0, bytesDxt5 = 0, bytesRgba = 0, texels = 0;
+                // LEAD's cause hunt (D-197: the Editor's BC7 penalty is unexplained): a fourth set, BC7 COMPRESSED HERE from the same PNGs.
+                // It costs what the imported BC7 costs: the format on this GPU; what the RGBA32 copy costs: something in the import.
+                var bc7 = new Sprite[n]; var dxt5 = new Sprite[n]; var rgba = new Sprite[n]; var bc7Made = new Sprite[n];
+                long bytesBc7 = 0, bytesDxt5 = 0, bytesRgba = 0, bytesBc7Made = 0, texels = 0;
                 var what = new System.Text.StringBuilder();
                 for (int i = 0; i < n; i++)
                 {
@@ -4466,7 +4468,7 @@ namespace Meridian.Tests
                     string path = Path.GetFullPath(Path.Combine(Application.dataPath, "_Game", "Art", set.SceneKey, $"layer{set.Layout.layers[i].n}_color.png"));
                     Assert.IsTrue(File.Exists(path), $"the layer's source at {path}");
                     var bytes = File.ReadAllBytes(path);
-                    foreach (var fmt in new[] { TextureFormat.DXT5, TextureFormat.RGBA32 })
+                    foreach (var fmt in new[] { TextureFormat.DXT5, TextureFormat.RGBA32, TextureFormat.BC7 })
                     {
                         var tex = new Texture2D(2, 2, TextureFormat.RGBA32, false, false) { name = $"u207_layer{i}_{fmt}" };
                         Assert.IsTrue(tex.LoadImage(bytes, false), path);
@@ -4480,14 +4482,17 @@ namespace Meridian.Tests
                         sp.name = o.name + "_" + fmt;
                         made.Add(tex); made.Add(sp);
                         long size = UnityEngine.Profiling.Profiler.GetRuntimeMemorySizeLong(tex);
-                        if (fmt == TextureFormat.DXT5) { dxt5[i] = sp; bytesDxt5 += size; } else { rgba[i] = sp; bytesRgba += size; }
-                        what.Append(fmt == TextureFormat.DXT5 ? $" [layer{set.Layout.layers[i].n}: {ot.width} x {ot.height} {ot.format} as imported, {ot.filterMode}, {ot.wrapModeU} / {ot.wrapModeV}; copies {tex.width} x {tex.height} {tex.format}" : $" and {tex.format}]");
+                        if (fmt == TextureFormat.DXT5) { dxt5[i] = sp; bytesDxt5 += size; }
+                        else if (fmt == TextureFormat.RGBA32) { rgba[i] = sp; bytesRgba += size; }
+                        else { bc7Made[i] = sp; bytesBc7Made += size; }
+                        what.Append(fmt == TextureFormat.DXT5 ? $" [layer{set.Layout.layers[i].n}: {ot.width} x {ot.height} {ot.format} as imported, {ot.filterMode}, {ot.wrapModeU} / {ot.wrapModeV}, mips {ot.mipmapCount}, aniso {ot.anisoLevel}; copies {tex.width} x {tex.height} {tex.format}"
+                            : fmt == TextureFormat.RGBA32 ? $", {tex.format}" : $" and {tex.format} (mips {tex.mipmapCount})]");
                     }
                     bytesBc7 += UnityEngine.Profiling.Profiler.GetRuntimeMemorySizeLong(ot);
                     texels += (long)ot.width * ot.height;
                     yield return null;
                 }
-                TestContext.Out.WriteLine($"[MERIDIAN] u207 set {set.SceneKey}: {n} layers:{what}; resident as loaded: BC7 {bytesBc7 / 1048576f:F2} MB, DXT5 {bytesDxt5 / 1048576f:F2} MB, RGBA32 {bytesRgba / 1048576f:F2} MB ({texels / 1e6f:F2} M texels)");
+                TestContext.Out.WriteLine($"[MERIDIAN] u207 set {set.SceneKey}: {n} layers:{what}; resident as loaded: BC7 {bytesBc7 / 1048576f:F2} MB, DXT5 {bytesDxt5 / 1048576f:F2} MB, RGBA32 {bytesRgba / 1048576f:F2} MB, BC7 made here {bytesBc7Made / 1048576f:F2} MB ({texels / 1e6f:F2} M texels)");
 
                 var rt = new RenderTexture(1920, 1080, 24, RenderTextureFormat.ARGB32);
                 var px = new Texture2D(1, 1, TextureFormat.RGBA32, false);
@@ -4516,7 +4521,7 @@ namespace Meridian.Tests
                     TestContext.Out.WriteLine($"[MERIDIAN] u207 {block} | {state}: avg {avg:F2} ms, p50 {sorted[frames / 2]:F2}, p99 {sorted[(int)(frames * 0.99f)]:F2}, max {sorted[frames - 1]:F2} ({frames} frames at t {Time.realtimeSinceStartup:F0} s)");
                 }
                 void Use(Sprite[] sprites) { set.gameObject.SetActive(true); for (int i = 0; i < n; i++) set.renderers[i].sprite = sprites[i]; }
-                var states = new (string label, Sprite[] sprites)[] { ("the backdrop as imported, BC7", bc7), ("the backdrop as DXT5", dxt5), ("the backdrop as RGBA32", rgba) };
+                var states = new (string label, Sprite[] sprites)[] { ("the backdrop as imported, BC7", bc7), ("the backdrop as DXT5", dxt5), ("the backdrop as RGBA32", rgba), ("the backdrop as BC7 compressed here from the PNGs", bc7Made) };
                 IEnumerator Block(string block, int settle, int frames)
                 {
                     set.gameObject.SetActive(false);
@@ -4528,7 +4533,7 @@ namespace Meridian.Tests
                     yield return Measure(block, "marker after (the backdrop off)", settle, frames);
                     float m1 = lastAvg;
                     Use(bc7);
-                    TestContext.Out.WriteLine($"[MERIDIAN] u207 {block} SUMMARY: marker {m0:F2} -> {m1:F2} ms ({(Mathf.Abs(m1 - m0) <= 0.1f * Mathf.Min(m0, m1) ? "one level" : "THE LEVEL MOVED INSIDE THE BLOCK")}); BC7 {avgs[0]:F2}, DXT5 {avgs[1]:F2} ({avgs[1] / avgs[0]:F2} of BC7), RGBA32 {avgs[2]:F2} ({avgs[2] / avgs[0]:F2} of BC7); the backdrop's own cost over the marker: BC7 {avgs[0] - (m0 + m1) * 0.5f:+0.00;-0.00}, DXT5 {avgs[1] - (m0 + m1) * 0.5f:+0.00;-0.00}, RGBA32 {avgs[2] - (m0 + m1) * 0.5f:+0.00;-0.00} ms");
+                    TestContext.Out.WriteLine($"[MERIDIAN] u207 {block} SUMMARY: marker {m0:F2} -> {m1:F2} ms ({(Mathf.Abs(m1 - m0) <= 0.1f * Mathf.Min(m0, m1) ? "one level" : "THE LEVEL MOVED INSIDE THE BLOCK")}); BC7 {avgs[0]:F2}, DXT5 {avgs[1]:F2} ({avgs[1] / avgs[0]:F2} of BC7), RGBA32 {avgs[2]:F2} ({avgs[2] / avgs[0]:F2} of BC7), BC7 made here {avgs[3]:F2} ({avgs[3] / avgs[0]:F2} of the imported BC7); the backdrop's own cost over the marker: BC7 {avgs[0] - (m0 + m1) * 0.5f:+0.00;-0.00}, DXT5 {avgs[1] - (m0 + m1) * 0.5f:+0.00;-0.00}, RGBA32 {avgs[2] - (m0 + m1) * 0.5f:+0.00;-0.00}, BC7 made here {avgs[3] - (m0 + m1) * 0.5f:+0.00;-0.00} ms");
                 }
                 IEnumerator Pause(float seconds)
                 {
@@ -4536,8 +4541,8 @@ namespace Meridian.Tests
                     while (Time.realtimeSinceStartup < until) yield return null; // the Editor's own Game view only: no 1080p render
                 }
 
-                // the same frame in the three formats, for the 4x side-by-side (before any timing)
-                for (int s = 0; s < states.Length; s++)
+                // the same frame in the three formats, for the 4x side-by-side (before any timing; the BC7 made here has no picture)
+                for (int s = 0; s < 3; s++)
                 {
                     Use(states[s].sprites);
                     for (int k = 0; k < 10; k++) yield return null;

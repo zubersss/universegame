@@ -20,8 +20,10 @@ namespace Meridian.Tests
         sealed class FakeWorld : IDigWorld
         {
             public DigTool tool = DigTool.Shovel;
-            public float strokeSeconds = 1f, reach = 2f;
+            public float strokeSeconds = 1f, reach = 2f, rhythmStep, rhythmMax;
             public bool ground = true;
+            public float RhythmStep => rhythmStep;
+            public float RhythmMax => rhythmMax;
             public Vector2 origin;
             public readonly List<Vector2> opened = new List<Vector2>(256);
             public DigTool Tool => tool;
@@ -252,6 +254,91 @@ namespace Meridian.Tests
             long allocated = System.GC.GetAllocatedBytesForCurrentThread() - before;
             Assert.AreEqual(0L, allocated, "20 swings of chips: 0 B");
             Assert.GreaterOrEqual(contacts, 20);
+        }
+
+        // ---------- the rhythm (P-U209-3; D1 §5: "each consecutive stroke on the same face -10 % time (max -30 %)") ----------
+
+        /// <summary>The Beam held on one face: its cells open in the tables' time x 1, 0.9, 0.8, 0.7, 0.7 with Rhythm I, x 0.5 at the end
+        /// with Rhythm II, and in the tables' time every time with neither.</summary>
+        [Test]
+        public void TheRhythmNodeShortensEachConsecutiveCellOfTheBeamUpToItsMost()
+        {
+            foreach (var (step, max, name) in new[] { (0f, 0f, "not bought"), (0.1f, 0.3f, "Rhythm I"), (0.1f, 0.5f, "Rhythm II") })
+            {
+                var w = new FakeWorld { tool = DigTool.Beam, strokeSeconds = 1f, reach = 5f, rhythmStep = step, rhythmMax = max };
+                var s = new DigStroke();
+                s.Step(w, Dt, true, true, Aim);
+                for (int cell = 0; cell < 7; cell++)
+                {
+                    int frames = 0;
+                    while (w.opened.Count == cell && frames < 2000) { frames++; s.Step(w, Dt, false, true, Aim); }
+                    float share = 1f - Mathf.Min(cell * step, max);
+                    Assert.AreEqual(share, DigStroke.RhythmOf(cell, step, max), 1e-6f);
+                    Assert.AreEqual(1f * share, frames * Dt, Dt * 1.01f, $"{name}: cell {cell + 1} opens in {share:0.0} of the tables' second");
+                    Assert.AreEqual(share, s.RhythmFactor, 1e-6f, $"{name}: cell {cell + 1}'s share");
+                }
+                Assert.AreEqual(7, s.Rhythm, "seven strokes in the run");
+            }
+        }
+
+        /// <summary>The shovel: each contact of a run takes its share off, so hard ground opens in fewer swings (a 4 s cell: 10 contacts,
+        /// 8 with Rhythm I) and the run carries to the next cell of the face.</summary>
+        [Test]
+        public void TheRhythmNodeShortensTheShovelsContactsOnTheSameFace()
+        {
+            int Contacts(float step, float max, out DigStroke stroke, out FakeWorld world)
+            {
+                world = new FakeWorld { strokeSeconds = 4f, rhythmStep = step, rhythmMax = max };
+                stroke = new DigStroke();
+                stroke.Step(world, Dt, true, true, Aim);
+                for (int f = 0; world.opened.Count == 0 && f < 2000; f++) stroke.Step(world, Dt, false, true, Aim);
+                return stroke.Contacts;
+            }
+            Assert.AreEqual(10, Contacts(0f, 0f, out _, out _), "not bought: ceil(4 / 0.4167)");
+            Assert.AreEqual(10, DigStroke.ContactsToOpen(4f));
+            int rhythm = Contacts(0.1f, 0.3f, out var s, out var w);
+            // the same sum by hand: a contact adds swing / (4 s x its share)
+            float work = 0f; int expect = 0;
+            while (work + 1e-4f < 1f) { work += DigStroke.SwingSeconds / (4f * DigStroke.RhythmOf(expect, 0.1f, 0.3f)); expect++; }
+            Assert.AreEqual(expect, rhythm);
+            Assert.AreEqual(8, rhythm, "Rhythm I: two swings fewer on a 4 s cell");
+            Assert.AreEqual(8, s.Rhythm, "the run goes on to the next cell of the face");
+            // the next cell (the same aim: the face behind) starts at the run's most: 0.7 of the time a contact
+            for (int f = 0; w.opened.Count == 1 && f < 2000; f++) s.Step(w, Dt, false, true, Aim);
+            Assert.AreEqual(8 + Mathf.CeilToInt(4f * 0.7f / DigStroke.SwingSeconds - 1e-4f), s.Contacts, "the second cell: every contact at 0.7");
+        }
+
+        /// <summary>The run ends on a whiff, on a stroke 3 m from the last (another face), and when the tool has rested 1.5 s; a stroke
+        /// nearer than that, begun sooner, keeps it.</summary>
+        [Test]
+        public void TheRhythmsRunEndsOnAWhiffAJumpAndARest()
+        {
+            var w = new FakeWorld { strokeSeconds = 100f, reach = 50f, rhythmStep = 0.1f, rhythmMax = 0.3f };
+            var s = new DigStroke();
+            void Swing(Vector2 at) { s.Step(w, Dt, true, false, at); for (int f = 0; f < 25; f++) s.Step(w, Dt, false, false, at); }
+            Swing(Aim); Swing(Aim); Swing(Aim);
+            Assert.AreEqual(3, s.Rhythm);
+            Assert.AreEqual(0.8f, s.RhythmFactor, 1e-6f, "the third stroke took 0.8 of the time");
+            Swing(Aim + new Vector2(DigStroke.SameFaceM - 0.2f, 0f)); // along the face: the run goes on
+            Assert.AreEqual(4, s.Rhythm);
+            Assert.AreEqual(0.7f, s.RhythmFactor, 1e-6f);
+            Swing(Aim + new Vector2(2f * DigStroke.SameFaceM + 1f, 0f)); // another face
+            Assert.AreEqual(1, s.Rhythm, "a jump starts the run again");
+            Assert.AreEqual(1f, s.RhythmFactor, 1e-6f);
+            var there = Aim + new Vector2(2f * DigStroke.SameFaceM + 1f, 0f);
+            Swing(there);
+            Assert.AreEqual(2, s.Rhythm);
+            w.ground = false; Swing(there); w.ground = true;
+            Assert.AreEqual(0, s.Rhythm, "a whiff ends it");
+            Swing(there); Swing(there);
+            Assert.AreEqual(2, s.Rhythm);
+            float last = s.Clock;
+            while (s.Clock - last < DigStroke.WorkKeepSeconds + 0.2f) s.Step(w, Dt, false, false, there); // the tool rests
+            Swing(there);
+            Assert.AreEqual(1, s.Rhythm, "a rest of 1.5 s ends it");
+            Assert.AreEqual(1f, s.RhythmFactor, 1e-6f);
+            s.Reset();
+            Assert.AreEqual(0, s.Rhythm);
         }
 
         // ---------- DigPose: the blade's tip on the contact point ----------

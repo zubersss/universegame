@@ -123,6 +123,8 @@ namespace Meridian.Player
         DigTool IDigWorld.Tool => rig.Tool;
         bool IDigWorld.Target(Vector2 aim, out Vector2 point, out bool clamped) => rig.DigTarget(aim, out point, out clamped);
         float IDigWorld.StrokeSeconds(Vector2 point) => rig.StrokeSeconds(point);
+        float IDigWorld.RhythmStep => Meridian.Progress.SkillStats.RhythmStep;
+        float IDigWorld.RhythmMax => Meridian.Progress.SkillStats.RhythmMax;
         bool IDigWorld.Open(Vector2 point)
         {
             // the debris flies along the stroke's follow-through: from the contact back toward the hand and up (DigFeel.Burst's axis)

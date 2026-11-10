@@ -820,7 +820,7 @@ MonoBehaviour:
       length: 5
       loop: 0
       contact: 1
-      slideMax: 0.55
+      slideMax: 0.75
     - name: dig_fwd_near
       start: 15
       length: 5
