@@ -43,7 +43,7 @@ def mix(a, b, t):
 
 
 def shade(c):
-    return mix(c, PAL["brown"], 0.3)          # the one shadow tone (v3.shadow_of)
+    return mix(c, PAL[GT.SHADE[0]], GT.SHADE[1])   # the one shadow tone (v3.shadow_of): 0.3 of the way to brown
 
 
 def noise2(rng, n, sigma):
@@ -202,10 +202,21 @@ def blobs(d, pts, su):
     return m
 
 
+def paint_giant(name, d, t):
+    """A giant's face from giants_v3.GIANTS (B-239: the one table the close view will read too): flat belts with wobbling
+    edges, then its storms in the table's order, each drifting with the body's turn."""
+    g = GT.GIANTS[name]
+    rgb = bands(d, [(vt, GT.tone(r, PAL)) for vt, r in g["belts"]], 2 * np.pi * t, wob=g["wob"], freq=g["freq"])
+    for s in g["storms"]:
+        rgb[blobs(d, GT.storm_blobs(s), sphere_u(d, t * s["drift"]))] = GT.tone(s["tone"], PAL)
+    return rgb
+
+
 def paint(name, d, f, nf):
     t = f / nf
     rng = np.random.default_rng(91 + zlib.crc32(name.encode()) % 7)
-    nightm = d.inside & (np.hypot(d.u - 0.30, d.v - 0.30) > 1.06)  # curved terminator: night crescent lower left
+    nightm = d.inside & (np.hypot(d.u - GT.NIGHT["centre"][0], d.v - GT.NIGHT["centre"][1]) > GT.NIGHT["radius"])   # curved
+    #                                                                                 terminator: night crescent lower left
     extra_ink, extra_rgba = [], []
     if name == "mercury":
         base = mix(PAL["brown"], PAL["offwhite"], 0.55)
@@ -246,39 +257,15 @@ def paint(name, d, f, nf):
         rgb[blobs(d, [(0.1, 0.2, 0.25), (0.35, -0.2, 0.3), (0.62, 0.1, 0.22), (0.85, -0.3, 0.2)], su)] = shade(base)
         rgb[d.v > 0.80] = PAL["offwhite"]
         rgb[d.v < -0.88] = mix(PAL["offwhite"], base, 0.3)
-    elif name == "jupiter":
-        ph = 2 * np.pi * t
-        spec = [(1.1, mix(PAL["offwhite"], PAL["mustard"], 0.3)), (0.62, mix(PAL["brown"], PAL["mustard"], 0.45)),
-                (0.42, PAL["offwhite"]), (0.18, mix(PAL["mustard"], PAL["red"], 0.25)), (-0.05, PAL["offwhite"]),
-                (-0.25, mix(PAL["brown"], PAL["red"], 0.35)), (-0.52, mix(PAL["offwhite"], PAL["mustard"], 0.4)),
-                (-0.75, mix(PAL["brown"], PAL["mustard"], 0.5))]
-        rgb = bands(d, spec, ph, wob=0.045, freq=4.0)
-        su = sphere_u(d, t * 0.35)
-        spot = blobs(d, [(0.25, -0.38, 0.13)], su)
-        rgb[spot] = PAL["red"]
-    elif name == "saturn":
-        spec = [(1.1, mix(PAL["mustard"], PAL["offwhite"], 0.6)), (0.5, mix(PAL["mustard"], PAL["offwhite"], 0.3)),
-                (0.15, mix(PAL["mustard"], PAL["offwhite"], 0.55)), (-0.2, mix(PAL["mustard"], PAL["brown"], 0.15)),
-                (-0.6, mix(PAL["mustard"], PAL["offwhite"], 0.5))]
-        rgb = bands(d, spec, 2 * np.pi * t, wob=0.025, freq=3.0)
-    elif name == "uranus":
-        rgb = bands(d, [(1.1, mix(PAL["sky"], PAL["teal"], 0.2)), (0.3, mix(PAL["sky"], PAL["offwhite"], 0.3)),
-                        (-0.3, mix(PAL["sky"], PAL["teal"], 0.3))], 2 * np.pi * t, wob=0.02)
-    elif name == "neptune":
-        rgb = bands(d, [(1.1, PAL["teal"]), (0.35, mix(PAL["teal"], PAL["sky"], 0.4)), (-0.1, PAL["teal"]),
-                        (-0.5, mix(PAL["teal"], PAL["brown"], 0.25))], 2 * np.pi * t, wob=0.03)
-        rgb[blobs(d, [(0.22, -0.25, 0.12)], sphere_u(d, t * 0.4))] = shade(PAL["teal"])
-        # no face (D-101): a bright companion cloud trails the dark storm as both drift
-        rgb[blobs(d, [(0.30 + 0.011 * j, -0.12 + 0.004 * j, 0.032) for j in range(-8, 9)], sphere_u(d, t * 0.4))] = \
-            mix(PAL["offwhite"], PAL["sky"], 0.3)
+    elif name in GT.GIANTS:                    # jupiter, saturn, uranus, neptune: B-239, from the shared table (their belts,
+        rgb = paint_giant(name, d, t)          # Jupiter's Red Spot, Neptune's dark storm and its companion cloud: no face, D-101)
     rgb = np.asarray(rgb, np.float32)
     rgb[nightm] = shade(rgb[nightm])
     extra_ink = list(extra_ink) + interior_marks(name, d, f, nf)
     return rgb, extra_ink, extra_rgba
 
 
-BAND_EDGES = {"jupiter": (0.62, 0.42, 0.18, -0.05, -0.25, -0.52), "saturn": (0.5, 0.15, -0.2),
-              "uranus": (0.3, -0.3), "neptune": (0.35, -0.1)}
+BAND_EDGES = {n: g["band_edges"] for n, g in GT.GIANTS.items()}       # B-239: from the shared table
 
 
 def interior_marks(name, d, f, nf):
@@ -335,10 +322,14 @@ def soft_limb(img, width=LIMB_PX, solid=250):
     return out
 
 
-def saturn_rings(R, tilt=0.30, limb=False):       # limb: B-143's soft limb, SHELVED by D-128's amendment (see build_disc)
+def saturn_rings(R, tilt=None, limb=False):       # limb: B-143's soft limb, SHELVED by D-128's amendment (see build_disc)
     """Rings as two static parts (back = the half behind the body, front = in front): bands
-    1.24-2.27 R with the Cassini gap, ink on the outer and inner edges. -> (back, front) uint8."""
-    Rr = 2.27 * R
+    1.24-2.27 R with the Cassini gap, ink on the outer and inner edges. -> (back, front) uint8.
+    B-239: the radii, the gap, the three bands' tones and the tilt come from giants_v3.GIANTS["saturn"]["rings"]."""
+    rg = GT.GIANTS["saturn"]["rings"]
+    tilt = rg["tilt"] if tilt is None else tilt
+    r_in, r_out, (gap0, gap1), rb = rg["inner"], rg["outer"], rg["gap"], rg["bands"]
+    Rr = r_out * R
     W = int(2 * Rr + 24)
     W += (-W) % 4
     H = int(2 * Rr * tilt + 24)
@@ -348,14 +339,14 @@ def saturn_rings(R, tilt=0.30, limb=False):       # limb: B-143's soft limb, SHE
     u = (xx - n_w / 2) / (R * SS)
     v = (yy - n_h / 2) / (R * SS * tilt)
     rr = np.hypot(u, v)
-    ring = (rr >= 1.24) & (rr <= 2.27) & ~((rr > 1.95) & (rr < 2.03))
+    ring = (rr >= r_in) & (rr <= r_out) & ~((rr > gap0) & (rr < gap1))
     col = np.zeros((n_h, n_w, 3), np.float32)
-    col[:] = mix(PAL["mustard"], PAL["offwhite"], 0.55)
-    col[(rr > 1.55) & (rr < 1.95)] = mix(PAL["mustard"], PAL["offwhite"], 0.25)
-    col[(rr > 2.03)] = mix(PAL["brown"], PAL["mustard"], 0.5)
+    col[:] = GT.tone(rb[0][2], PAL)
+    col[(rr > rb[1][0]) & (rr < rb[1][1])] = GT.tone(rb[1][2], PAL)
+    col[(rr > rb[2][0])] = GT.tone(rb[2][2], PAL)
     acc = np.dstack([col * ring[..., None], ring.astype(np.float32)])
     t = np.linspace(0, 2 * np.pi, 220, endpoint=False)
-    for i, rad in enumerate((2.27, 1.24)):
+    for i, rad in enumerate((r_out, r_in)):
         px = n_w / 2 + np.cos(t) * rad * R * SS
         py = n_h / 2 + np.sin(t) * rad * R * SS * tilt
         xz = np.c_[px, -py] / (SS * 64.0)
@@ -767,7 +758,8 @@ def b143(art, preview_dir, report, write=True):
     return rows, out
 
 
-PAINT_FROM_TABLE = False         # B-239: False while paint() still holds the giants' numbers inline (the BEFORE run)
+PAINT_FROM_TABLE = True          # B-239: paint(), BAND_EDGES, the night crescent, shade() and saturn_rings() read giants_v3
+#                                  (it was False for the BEFORE run of 22:13, commit a1935c8b: the numbers still inline)
 
 
 def b239(art, out_dir):

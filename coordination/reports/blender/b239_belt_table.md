@@ -1,0 +1,92 @@
+# B-239 · The giants' belt table: one source for the far discs and the close view (BLENDER, 2026-11-09)
+
+Card: lift the four giants' belt tables out of `build_discs_v3.paint` into ONE table both builders read; prove the far
+discs BYTE-IDENTICAL after it; draft `planets/<giant>/close.json` per giant into blender/preview only. No new art, no
+export. The design it serves: `b237_limb_band_design.md` (LEAD ruled its four points 22:0x).
+
+## 1. What changed in the source
+
+- **New: `blender/scripts/giants_v3.py`** (no imports, no drawing): `GIANTS` holds, per giant, the belts as (v_top, tone
+  recipe), the edge wobble (wob, freq), the storms (Jupiter's Red Spot; Neptune's dark storm and its companion cloud),
+  the edges that carry ink dashes, and Saturn's rings (tilt, inner, outer, the Cassini gap, three bands); `NIGHT` (the
+  night crescent's circle) and `SHADE` (the one shadow tone: 0.3 of the way to brown); `tone()`, `storm_blobs()`, and
+  `close_json()` for the close view's draft.
+- **`blender/scripts/build_discs_v3.py`** reads it: the four `elif name == <giant>` branches of `paint()` are one
+  `paint_giant()`; `BAND_EDGES`, the night crescent's test, `shade()` and `saturn_rings()` take their numbers from the
+  table. The inner planets' branches are untouched.
+- **The proof command:** `build_discs_v3.py --b239 <art> <out dir>` rebuilds the four far discs and Saturn's two ring
+  parts, writes each into the out dir, compares each written file's sha1 with the exported file's (and the sheet json's
+  text), then writes the four `close.json` drafts there. It writes nothing under the art folder and exits 1 on any
+  difference.
+
+## 2. A finding on the way: the shelved soft limb was still the builder's default
+
+The first proof run (22:07, the painting code untouched) DIFFERED from every exported file: 36,081 pixels on Jupiter's
+sheet (about 4,000 a frame: the limb's ring), 32,391 on Saturn's, 26,028 / 25,464 on Uranus's / Neptune's, about 9,550
+on each ring part. Cause: `build_disc(name, limb=True)` and `saturn_rings(..., limb=True)` still defaulted to B-143's
+soft alpha limb, which D-128's amendment shelved ("code kept, never run", c43c8da3, 11-07). The exported far discs have
+no soft limb. So `export()` and the review, both on the default, would have re-drawn every far disc's limb at the next
+re-export of the disc set, against the ruling.
+
+Fixed in step A: both defaults are `limb=False`; only `b143()` (the shelved soft-limb run itself) asks for the limb. It
+is a change of a default in my builder, made because the ruling and the exported files both say so; LEAD may want it
+noted beside D-128.
+
+## 3. The proof (hashes before / after)
+
+Three runs of the same command, each in my lock (numpy, about 3 minutes, peak about 360 MB):
+
+| Run | Code state | Result |
+|-----|-----------|--------|
+| 22:07:14-22:10:17 | paint untouched, the soft limb still the default | 6 of 6 files DIFFER (section 2) |
+| 22:13:26-22:16:19 (BEFORE) | paint untouched (its numbers inline), no soft limb; commit a1935c8b | 6 of 6 BYTE-IDENTICAL, 4 of 4 json texts identical |
+| 22:28:30-22:31:23 (AFTER) | paint, BAND_EDGES, the night crescent, shade() and saturn_rings() read `giants_v3.GIANTS` | 6 of 6 BYTE-IDENTICAL, 4 of 4 json texts identical |
+
+BEFORE, sha1 of the rebuilt file = sha1 of the exported file:
+
+| File | Size | sha1 (rebuilt = exported) |
+|------|------|---------------------------|
+| planets/jupiter/disc_color.png (1976 x 1976, 9 frames) | 1,753,456 bytes | 91b43c2526d50762cb4b7cfd0c04aa72deb60d24 |
+| planets/saturn/disc_color.png (1796 x 1796, 9 frames) | 1,232,774 | 39629e39c22a59ff40c68119f6639a53ba6b2b2a |
+| planets/uranus/disc_color.png (1836 x 1100, 12 frames) | 482,187 | e55e55a70725dc3fd3fca1e6757fa9617ea0233b |
+| planets/neptune/disc_color.png (1796 x 1076, 12 frames) | 474,902 | 180e4a9f2ba4f2883109bc33536463e1053c6502 |
+| planets/saturn/rings_back_color.png (1332 x 416) | 10,776 | 55aaaa8b729d17248415365153630b4edac1f165 |
+| planets/saturn/rings_front_color.png (1332 x 416) | 11,348 | 102c349eb3f003c78515fd5437732ea7d879864f |
+
+AFTER (22:28, from the shared table): the same six sha1 values, file for file, and the same sizes. The run's own line for
+each reads "rebuilt sha1 X | exported sha1 X | BYTE-IDENTICAL"; its last line, "RESULT: all byte-identical"; exit 0. The
+rebuilt files are in `blender/preview/b239/` (and the BEFORE run's in `blender/preview/b239_before/`).
+
+So: before = after = exported, for the four giants' far discs, their sheet jsons and Saturn's two ring parts.
+
+## 4. The close.json drafts
+
+Written by the AFTER run into `blender/preview/b239/` (preview only, `"draft": true`, not exported): `jupiter_close.json`,
+`saturn_close.json`, `uranus_close.json`, `neptune_close.json`. Each is filled from the table by `giants_v3.close_json()`,
+so its numbers are the far disc's.
+
+| Giant | radius_u | loop_frames | belts | storms | rings |
+|-------|----------|-------------|-------|--------|-------|
+| Jupiter | 106 | 9 | 8 | red_spot (1 blob: lon 0.25 turns, v -0.38, radius 0.13; drift 0.35 turns a loop) | - |
+| Saturn | 96 | 9 | 5 | - | tilt 0.30, 1.24-2.27 radii, the gap 1.95-2.03, 3 bands |
+| Uranus | 57 | 12 | 3 | - | - |
+| Neptune | 56 | 12 | 4 | dark_storm (1 blob) and companion_cloud (17 small blobs in a chain), both drifting 0.4 turns a loop | - |
+
+Fields (I read Jupiter's draft whole; the other three by their counts and tones): `belts` [{v_top, tone_hex, night_hex}]
+from the north down (the first v_top is 1.1, above the pole; the last belt runs to the south pole); `edge_wobble` {amp,
+freq, the formula}; `ink_dash_edges`; `night` {centre, radius, toward_hex, t}; `storms` [{name, tone_hex, night_hex,
+drift_turns_per_loop, blobs}]; `rings` (Saturn); `swap` (DiscSprite's 6 / 5).
+
+Two differences from the design note's sketch of this json, both because the far disc does it this way: the night side is
+a mix toward brown (`toward_hex` + `t`, with `night_hex` given per belt), not a multiply colour; and a storm is a list of
+blobs, because Neptune's cloud is a chain of seventeen.
+
+## 5. Not done, not checked
+
+- The four inner planets, Luna and the near frames were not rebuilt in this proof (their code is untouched but for
+  `shade()` and the night crescent's test, which now read the table's 0.3 and (0.30, 0.30, 1.06)).
+- No art was drawn and nothing was exported; `git status` shows no change under Assets/_Game/Art/planets.
+- The drafts' hex tones were not compared against pixels of the exported discs by a separate check; they are computed
+  from the same recipes the byte-identical painting uses.
+- One slip of mine at 22:32: a shell line ended in a bare `python` call that hung and went to the background; I stopped
+  it at once (no python or Blender process left, checked). No lock was on file when it started.
