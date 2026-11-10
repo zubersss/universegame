@@ -2,7 +2,7 @@
 Updated: 2026-11-10 00:1x · Session: 12 (resumed 11-09 14:03; THIS SESSION = zuber-4d; LEAD = zuber-d1, UNITY = zuber-a0; a restart of all three windows and the laptop is asked of the owner, USER-42) · older: coordination/status/archive/BLENDER_2026-11-09.md (session 12's closed entries), BLENDER_2026-11-08.md, BLENDER_2026-11-07.md
 
 ## Current task
-**00:1x — RESUME HERE: B-242 (the card on the board), its revised sheet is WITH LEAD; export only on LEAD's ACCEPTED.**
+**00:1x — RESUME HERE: NOTHING IS ASSIGNED. B-242 is EXPORTED (068a2918, 00:08; LEAD accepted the revised sheet; UNITY has the two keys) and waits for UNITY's import.** Next work comes from: the owner's answer to USER-39 (B-231, the v5 surveyor: a yes = export the part sheet + bone JSON and B-234 / B-235 / B-236 promoted; a "change X" = round 3 on that point), LEAD carding the giants' close view's UNITY half (then my strips export), or a new card. On resume: read LEAD's messages and the board's top queue lines first. For reference, B-242 as it was worked (its steps below are DONE):
 - B-242 = back walls for the two surface-variant fills, as B-230's tiles: terrain/earth/back_wall_sand and terrain/mars/back_wall_basalt. Sheet: blender/preview/review_b242_back_wall_variants_preview.png (00:05, the fourth run) + crop_b242_{sand,basalt}_{row,3x,shaft}.png. It carries LEAD's two changes (00:0x): the sand wall's base is the fill's two main tones (offwhite with 0.30 mustard) mixed 0.35 toward ink (a warm tan; json roles.wall_mix); the basalt's joints are broken into stacked column segments (runs of 1.33 m, a sideways step and a curved cross-joint at each break).
 - If the sheet was not yet sent when you read this: look at both 3x tiles for faces, then send LEAD the two rows and the 3x tiles.
 - On ACCEPTED: list the locks folder, read RAM (each its own call), then `tools/blender_render.ps1 terrain/common/back_walls_variants` holding heavy_blender.lock by hand around it (a kit row takes the wrapper's light path); `git status` must show ONLY four new files (terrain/earth/back_wall_sand.json + _color.png, terrain/mars/back_wall_basalt.json + _color.png); commit by explicit list, 0 .meta, check git show --stat; tell UNITY the two keys (json "variant", "fill", roles.wall_mix) and LEAD the hash.
@@ -19,30 +19,30 @@ How I run: locks listed, then RAM read, each in its own call; `tools/blender_loc
 - **Rule (LEAD, D-087):** the Beam reads as a mining tool, never a gun. Waiting on others: B-207 on PawsOnTheGround; B-204 on UNITY's capture; B-172 on U-151.
 
 ## Last completed
-- 11-10 00:03-00:05: B-242 rev 3 (the warm sand wall, the basalt's stacked segments), the 20-tile proof again → to LEAD.
+- 11-10 00:07-00:09: **B-242 EXPORTED** 068a2918 (terrain/earth/back_wall_sand, terrain/mars/back_wall_basalt: 4 files, 0 .meta; the tiers' tiles not rewritten).
+- 11-10 00:03-00:05: B-242 rev 3 (the warm sand wall, the basalt's stacked segments), the 20-tile proof again → ACCEPTED.
 - 11-09 23:57 to 11-10 00:01: B-242's source, proof and first three runs (187dc733).
 - 11-09 23:26-23:56: B-241 (Saturn with rings, Uranus, Neptune's tapered streak, Jupiter's motion check: all accepted as previews), the design note's sections 10-11, both far-disc proofs again (b11032ac, 187dc733).
 - 11-09 22:03-23:13: B-239 Done, B-240 Done (the shared belt table; far discs byte-identical; Jupiter's close view).
 - Earlier on 11-09 (B-220, B-223, B-224, B-225, B-228, B-229, B-230, B-232, B-233, B-238 exported or Done; the 0.6.2 smoke read; B-231 rounds 2 / 2b): coordination/status/archive/BLENDER_2026-11-09.md.
 
 ## Ready for review
-- With LEAD: B-242's revised sheet.
 - With the owner: B-231 (blender/preview/review_b231_surveyor_v5_design.png and the crop_b231_* crops; LEAD's C5 page, USER-39).
-- In Review until UNITY's import and captures: B-224, B-223, B-225, B-233.
+- In Review until UNITY's import and captures: B-224, B-223, B-225, B-233, B-242.
 - B-189 / B-185 (waiting on U-159's captures): review_b141_mars_{canyon,storm,plains}(_dip).png, review_b152_venus_surface(_dip).png, review_b149_mercury_{day,twilight,night}_dip.png.
 
 ## Handoffs (unrouted only)
-- -> UNITY (B-242, at its export): terrain/earth/back_wall_sand goes behind ground_fill_sand, terrain/mars/back_wall_basalt behind ground_fill_basalt; json "variant" and "fill" name them; mapped as the tiers' walls.
+- -> UNITY (B-242, 068a2918; sent to UNITY and LEAD 00:09): terrain/earth/back_wall_sand goes behind ground_fill_sand, terrain/mars/back_wall_basalt behind ground_fill_basalt; json "variant" and "fill" name them; mapped as the tiers' walls.
 - -> UNITY (the giants' close view, when carded): blender/preview/b240/jupiter_close.json and b241/*_close.json are the drafts of what it reads; the mapping is the design note's sections 5 and 10 and build_giant_close_v3.close_view / ring_layer.
 - -> UNITY (B-220, in reports/blender/b220_continue_rows.md): venus/deck layer2's y_m is -1.5; Neptune storm / spot layer0's core under the rim at the tile's x 1024.
 - -> UNITY (U-164 / U-159): continue_rows 64 = a layer's bottom 64 rows tile vertically; the ground-set depths (480 at y_m -2.0; 544 at y_m -3.0 with ground_row 352); the variant band, fill and lip keys.
 - -> UNITY (U-150): vapor_cone / shock_ring pivots = the ship's centre of mass; speed_lines 128x360 for the LEFT edge; puff_boost a drop-in for ships/pilgrim/puff.
 
 ## Blockers
-none. Waiting on: LEAD's judgement of B-242; the owner's word on B-231 (USER-39) and the restart (USER-42); U-151 (B-172's export), U-152 (B-174).
+none. Waiting on: the owner's word on B-231 (USER-39) and the restart (USER-42); U-151 (B-172's export), U-152 (B-174).
 
 ## Proposals (undecided only)
-- B-242 (to LEAD with the sheet): the basalt's curved cross-joints can read as shingles; a flatter curve is one number.
+- none open.
 
 ## Rules I keep (from slips)
 - One lock <= 15 min; a painted planet with more than 8 scenes gets its own lock.
@@ -60,4 +60,4 @@ none. Waiting on: LEAD's judgement of B-242; the owner's word on B-231 (USER-39)
 none of mine (LEAD's: USER-39 the C5 surveyor look-over, USER-41 Build 0.6.2, USER-42 the restart).
 
 ## HeavyJobLock
-none held (last: 00:04:11-00:05:06, B-242's proof, sheet rev 3 and crops). No want on file. No background waiters.
+none held (last: 00:07:42-00:08:13, B-242's export; 00:04:11-00:05:06 its proof, sheet rev 3 and crops). No want on file. No background waiters.
