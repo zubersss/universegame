@@ -35,7 +35,7 @@
       "length": 5,
       "loop": false,
       "contact": 1,
-      "slide_max": 0.55
+      "slide_max": 0.75
     },
     {
       "name": "dig_fwd_near",

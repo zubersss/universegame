@@ -61,7 +61,11 @@ SHOVEL_LEN = 1.33                       # props/rig/shovel: the blade tip from t
 # its D-grip end going back along its own line - so UNITY can put the blade tip ON a contact nearer than the shovel's
 # length. dig_fwd_near is the mid-shaft hold for a face at the nose; dig_fwd and dig_up take a slide too so the ranges
 # meet (reach_lines prints them). dig_down has none: a spade driven in up to 0.24 m is right (LEAD).
-SLIDE_MAX = {"dig_fwd": 0.70, "dig_up": 0.55, "dig_fwd_near": 0.95}
+# 11-10 06:4x (LEAD, from U-209's strips): dig_up 0.55 -> 0.75. The contact glove stands 1.44 m up, so at 0.55 the tip of
+# an upward stroke stood 2.10-2.21 m up (58-80 deg): 0.1-0.2 m into a 2 m tunnel's ceiling. At 0.75 it stands 1.93-2.01 m.
+# The glove's centre is then 0.75 m from the grip, its edge at about 0.82 m: still on the haft, short of the ferrule
+# (0.85 m) and the blade's socket; 0.78 is the largest slide that keeps the whole glove on the haft.
+SLIDE_MAX = {"dig_fwd": 0.70, "dig_up": 0.75, "dig_fwd_near": 0.95}
 CHEST = (0.0, 0.9)                      # the body's middle, for the reach numbers
 ROLES = ("wind-up", "CONTACT", "follow-through", "settle", "recover")
 DEFAULT_OUT = os.path.join(os.path.dirname(HERE), "sources", "characters", "surveyor_side_dig.blend")
