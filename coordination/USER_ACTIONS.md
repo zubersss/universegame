@@ -21,15 +21,6 @@ At 18:52 the laptop has 0.12 GB of memory free and no build or render can start 
 If you are using Ollama for something of your own, say so instead and the team will wait or work around it. You can start it again whenever the team is idle.
 Update 18:59: the memory came back on its own at about 18:57 (Ollama let go of its 4.2 GB; it is still running, at 0.06 GB) and the team is working again. The ask stands, less urgently: while Ollama runs, it can take those 4 GB back at any moment and stop a build halfway; quitting it for the evening avoids that.
 
-### USER-39 — Look over the new surveyor design (5 min, no game needed)
-The first design for the new-look surveyor you asked for after 0.6.0 is on this page: https://claude.ai/artifact/Ts7md2pqMrMby3hnTGZdiq
-It is drawings only; nothing in the game changes until you answer. Open the page, look at the pictures, then tell the Lead session:
-1. Is this the look? Yes, close but change something, or no.
-2. Is the figure the right weight beside the camp's crate and smelter?
-3. Do you like the face side-on?
-4. Do the crouch, the jump and the dig read the way you pictured them?
-A "yes" starts the surveyor being built as a moving rig in the game (about a day to a test scene you can play). A "change this" is about half a day a round.
-
 ### USER-38 — (folded into USER-41 at 21:5x: play 0.6.2 instead; it includes 0.6.1b) Play Build 0.6.1b: ten minutes with the shovel (10 min)
 Your shovel ask is in. The page with pictures: https://claude.ai/artifact/JQ1uqincAcQRRt1yFqrT5w
 Use the fixed build 0.6.1b (16:0x), not 0.6.1.
@@ -48,6 +39,7 @@ If you get too many "allow this command?" prompts, tell the Lead "approve PowerS
 allow rules" and accept the edit when Claude Code asks you. Otherwise skip this.
 
 ## Done
+- 2026-11-10 06:1x · USER-39 answered: the owner on the new surveyor design: "Polish up the surveyor a bit more then that I want fine lines that dont render into pixels" → D-198 (the v5 line is fine and drawn large enough never to show pixels), B-231 round 3; a new look-over page follows when round 3's plates pass the Lead. Read as: the design's direction stands, the finish and the line change. Not answered: the figure's weight beside the camp props, the face side-on, the poses (asked again on the new page).
 - 2026-11-10 01:1x · USER-41 done: the owner played 0.6.2: "The digging is wacky it feels disconnected from clicks and the avatar smoothen that out to the max like a pro make the animations and the connections incredible" → D-196 (the dig as one motion), U-209, B-246; Build 0.6.3 is for it. Not yet answered from USER-41 / USER-38: do the holes look right, is the shovel a good start, does the Beam feel like a reward, is 250 Scrip right (asked again with 0.6.3).
 - 2026-11-09 13:5x · USER-36 done: the owner played 0.6.0: "I like the digging so far"; make digging more satisfying and rewarding (a dirt animation), the dug part should look like a hole rather than an opaque part, dirt should collapse when dug all the way under; then the big one: keep the cartoon but much higher quality, a modern hand-drawn or painted look rather than 1930s animation, never digital or 3D-cartoony; better art and more moving parts for the animals and characters, especially the surveyor, with crouching and jumps with knees that bend; and much better audio → D-183 / D-184 / D-185 / D-186; U-195..U-199, B-230..B-232; milestone C5 (the v5 style test) before any redraw.
 - 2026-11-09 12:5x · USER-37 done: the ChatGPT app is closed (it held 1.27 GB); free RAM 1.99 GB at 12:51 and UNITY's U-193 check started. You can reopen it when the team is idle.
