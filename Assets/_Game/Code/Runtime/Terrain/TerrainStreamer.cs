@@ -97,7 +97,12 @@ namespace Meridian.Terrain
             int needed = (2 * R + 1) * (2 * R + 1) + 2 * R + 1;
             while (pool.Count + resident.Count < needed) pool.Push(TerrainChunk.Create(transform));
             // U-073: block meshes with the planet's palette (one shared material instance per streamer).
-            wallTops = null; // per-planet back-wall tops, recomputed lazily
+            // The planet's back-wall tops: the array made (or taken back) HERE, behind the transition's cover, its columns still worked
+            // out lazily. Made at the first WallTop it was 484 KB in one frame of play some seconds after an entry (Mars is 121 000
+            // columns wide; U-211, the Profiler's capture).
+            if (wallTops != null) spareTops = wallTops;
+            wallTops = null;
+            if (config.worldType == WorldType.Solid) EnsureWallTops();
             curveKey = null; // and the curves kept from them
             EditVersion++;
             var reg = Meridian.Rendering.ArtMaterials.Active;
@@ -267,20 +272,31 @@ namespace Meridian.Terrain
             return f > wallTop ? f : wallTop;
         }
 
+        /// <summary>The last streamer's tops array, handed back when it stops: the next planet of the same width takes it instead of
+        /// making its own (a planet side has its own streamer: an array a visit otherwise).</summary>
+        static int[] spareTops;
+
+        /// <summary>The tops array for this planet (every column unknown) and its stamped POIs' pads; Begin calls it behind the cover.</summary>
+        void EnsureWallTops()
+        {
+            if (wallTops != null && wallTops.Length == Config.worldWidth) return;
+            UnityEngine.Profiling.Profiler.BeginSample("Terrain.WallTops");
+            wallTops = spareTops != null && spareTops.Length == Config.worldWidth ? spareTops : new int[Config.worldWidth];
+            spareTops = null;
+            for (int i = 0; i < wallTops.Length; i++) wallTops[i] = WallUnknown;
+            var list = new List<Meridian.Planet.POI.PoiDef>();
+            foreach (var p in Meridian.Planet.POI.PoiCatalog.For(Config.id)) if (!p.Floating && p.stamp != null) list.Add(p);
+            wallPois = list.ToArray();
+            wallPoiPad = new int[wallPois.Length];
+            for (int i = 0; i < wallPois.Length; i++) wallPoiPad[i] = Meridian.Planet.POI.PoiStamp.GroundY(wallPois[i], BaseGenerator, Config.datumY);
+            UnityEngine.Profiling.Profiler.EndSample();
+        }
+
         int TerrainChunk.IBlockWorld.WallTop(int x)
         {
             if (Config == null || Config.worldType != WorldType.Solid) return int.MinValue;
             int wx = WrapX(x);
-            if (wallTops == null || wallTops.Length != Config.worldWidth)
-            {
-                wallTops = new int[Config.worldWidth];
-                for (int i = 0; i < wallTops.Length; i++) wallTops[i] = WallUnknown;
-                var list = new List<Meridian.Planet.POI.PoiDef>();
-                foreach (var p in Meridian.Planet.POI.PoiCatalog.For(Config.id)) if (!p.Floating && p.stamp != null) list.Add(p);
-                wallPois = list.ToArray();
-                wallPoiPad = new int[wallPois.Length];
-                for (int i = 0; i < wallPois.Length; i++) wallPoiPad[i] = Meridian.Planet.POI.PoiStamp.GroundY(wallPois[i], BaseGenerator, Config.datumY);
-            }
+            EnsureWallTops();
             int top = wallTops[wx];
             if (top != WallUnknown) return top;
             top = BaseGenerator.SurfaceHeight(wx);
@@ -343,7 +359,9 @@ namespace Meridian.Terrain
             if (ccx != lastCx || ccy != lastCy)
             {
                 lastCx = ccx; lastCy = ccy;
+                UnityEngine.Profiling.Profiler.BeginSample("Terrain.Retarget");
                 Retarget(ccx, ccy);
+                UnityEngine.Profiling.Profiler.EndSample();
             }
             ApplyReady();
             firstPass = true;
@@ -402,8 +420,19 @@ namespace Meridian.Terrain
                     continue;
                 }
                 double before = watch.Elapsed.TotalMilliseconds;
-                if (nextRow < C) inProgressChunk.ApplyRows(inProgress, tileSet, nextRow, solidScratch, liquidScratch, Config.worldWidth);
-                else inProgressChunk.FinishCollision(); // one extra step after the last band
+                // (the Profiler's samples: U-211 reads the streamer's allocation by step; compiled out of a release build)
+                if (nextRow < C)
+                {
+                    UnityEngine.Profiling.Profiler.BeginSample("Terrain.ApplyRows");
+                    inProgressChunk.ApplyRows(inProgress, tileSet, nextRow, solidScratch, liquidScratch, Config.worldWidth);
+                    UnityEngine.Profiling.Profiler.EndSample();
+                }
+                else
+                {
+                    UnityEngine.Profiling.Profiler.BeginSample("Terrain.FinishCollision");
+                    inProgressChunk.FinishCollision(); // one extra step after the last band
+                    UnityEngine.Profiling.Profiler.EndSample();
+                }
                 double cost = watch.Elapsed.TotalMilliseconds - before;
                 step = System.Math.Max(step, cost);
                 if (cost > MaxBandMs) MaxBandMs = cost;
@@ -599,6 +628,7 @@ namespace Meridian.Terrain
             foreach (var c in resident.Values) { c.Clear(); pool.Push(c); }
             resident.Clear();
             tileSet?.Dispose();
+            if (wallTops != null) { spareTops = wallTops; wallTops = null; } // for the next planet of this width
         }
 
         void OnDestroy() => Stop();

@@ -147,11 +147,21 @@ namespace Meridian.Space
             if (p == PlanetId.Earth) return true;
             if (s == null) return false;
             if (s.currentPlanet == p) return true;
-            string n = p.ToString().ToLowerInvariant();
-            return s.HasFlag("landed:" + n) || s.HasFlag("beacon:" + n);
+            return s.HasFlag(LandedFlag(p)) || s.HasFlag(FlagOf(beaconFlags, "beacon:", p));
         }
 
-        public static string LandedFlag(PlanetId p) => "landed:" + p.ToString().ToLowerInvariant();
+        public static string LandedFlag(PlanetId p) => FlagOf(landedFlags, "landed:", p);
+
+        // A planet's flag names, made once: the minimap asks Landed for every landable mark in its porthole every frame, and the
+        // name was built anew each time (an enum's ToString, its lower case, two joins: 161 B a frame parked by Earth; U-211,
+        // found by AllocByTypeTests: Space's one steady allocator).
+        static readonly string[] landedFlags = new string[32], beaconFlags = new string[32];
+        static string FlagOf(string[] kept, string prefix, PlanetId p)
+        {
+            int i = (int)p;
+            if (i < 0 || i >= kept.Length) return prefix + p.ToString().ToLowerInvariant();
+            return kept[i] ??= prefix + p.ToString().ToLowerInvariant();
+        }
 
         static bool OnMaps(BodyInfo b) => b.isSun || b.parent == null || b.name == "luna";
         static string Display(string name) => Names.TryGetValue(name, out var n) ? n : name;

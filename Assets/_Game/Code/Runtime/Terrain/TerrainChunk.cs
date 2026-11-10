@@ -211,6 +211,8 @@ namespace Meridian.Terrain
                 OutlineBuilt?.Invoke(this);
                 return;
             }
+            // (the Profiler's samples below: U-211 reads the outline's allocation by step; compiled out of a release build)
+            UnityEngine.Profiling.Profiler.BeginSample("Terrain.Outline.Nodes");
             int r = GroundField.CurveKernel.Length / 2;
             nodes ??= new float[(C + 1) * (C + 1)];
             tops ??= new int[C + 1 + 2 * r];
@@ -243,8 +245,12 @@ namespace Meridian.Terrain
                 }
             }
             outlineLevelled = levelled;
+            UnityEngine.Profiling.Profiler.EndSample();
+            UnityEngine.Profiling.Profiler.BeginSample("Terrain.Outline.Contour");
             if (levelled) { FillSubNodes(x0, y0); contour.Build(nodes, C, new Vector2(-0.5f, -0.5f), GroundField.Iso, subNodes, subCells); }
             else contour.Build(nodes, C, new Vector2(-0.5f, -0.5f));
+            UnityEngine.Profiling.Profiler.EndSample();
+            UnityEngine.Profiling.Profiler.BeginSample("Terrain.Outline.Colliders");
             int lines = contour.Lines;
             while (edges.Count < lines) edges.Add(gameObject.AddComponent<EdgeCollider2D>());
             int used = 0;
@@ -270,7 +276,10 @@ namespace Meridian.Terrain
                 used++;
             }
             OutlineColliders = used;
+            UnityEngine.Profiling.Profiler.EndSample();
+            UnityEngine.Profiling.Profiler.BeginSample("Terrain.Outline.Views");
             OutlineBuilt?.Invoke(this);
+            UnityEngine.Profiling.Profiler.EndSample();
         }
 
         // U-157 (D-168): the quarter-metre sub-node values of this chunk's brushed tiles, shared by every chunk (the outline is built on the main

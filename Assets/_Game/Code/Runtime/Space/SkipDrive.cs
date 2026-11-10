@@ -56,10 +56,18 @@ namespace Meridian.Space
         {
             why = "";
             if (ship == null || ship.Destroyed) { why = "NO SHIP"; return false; }
-            if (ship.InWellOf != null) { why = $"SKIP DISABLED: {ship.InWellOf.ToUpperInvariant()} GRAVITY WELL"; return false; }
+            if (ship.InWellOf != null)
+            {
+                // the line is made once a well, not once a physics step (U-211: FixedUpdate asks every step, key held or not: 116 B a
+                // step in any gravity well; found by the Profiler's capture in Space)
+                if (wellLineOf != ship.InWellOf) { wellLineOf = ship.InWellOf; wellLine = $"SKIP DISABLED: {ship.InWellOf.ToUpperInvariant()} GRAVITY WELL"; }
+                why = wellLine;
+                return false;
+            }
             if (Current == Mode.Idle && Cooldown > 0f) { why = "SKIP DRIVE COOLING"; return false; }
             return true;
         }
+        string wellLineOf, wellLine;
 
         void FixedUpdate()
         {
