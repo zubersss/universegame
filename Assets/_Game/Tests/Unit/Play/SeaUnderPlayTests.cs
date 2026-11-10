@@ -32,6 +32,39 @@ namespace Meridian.Tests
             Assert.AreEqual(0f, CartoonStage.SeaShare(98.4f, sea), "1.5 m out: land");
         }
 
+        /// <summary>U-205 (B-225): a shore layer (sea_under's shallow seabed, shore_m 40) is whole to 32 m out and gone from 40 m; the distance
+        /// is to the nearest land column's edge on either side.</summary>
+        [Test]
+        public void TheShallowsShowByTheShoreOnly()
+        {
+            System.Func<int, bool> sea = x => x >= 100 && x < 400; // land up to 99, the sea, land again from 400
+            Assert.AreEqual(0f, CartoonStage.ShoreDistance(99.5f, 40, sea), "on land");
+            Assert.AreEqual(0.5f, CartoonStage.ShoreDistance(100.5f, 40, sea), 1e-4f, "half a metre out from the land column's edge at 100");
+            Assert.AreEqual(10.25f, CartoonStage.ShoreDistance(110.25f, 40, sea), 1e-4f);
+            Assert.AreEqual(5.5f, CartoonStage.ShoreDistance(394.5f, 40, sea), 1e-4f, "the far shore's edge at 400");
+            Assert.AreEqual(41f, CartoonStage.ShoreDistance(250f, 40, sea), 1e-4f, "no land within reach: reach + 1");
+            Assert.AreEqual(1f, CartoonStage.ShallowsWeight(0f, 40f));
+            Assert.AreEqual(1f, CartoonStage.ShallowsWeight(32f, 40f), 1e-4f, "whole to shore_m less the fade");
+            Assert.AreEqual(0.5f, CartoonStage.ShallowsWeight(36f, 40f), 1e-4f);
+            Assert.AreEqual(0f, CartoonStage.ShallowsWeight(40f, 40f));
+            Assert.AreEqual(0f, CartoonStage.ShallowsWeight(41f, 40f));
+            Assert.AreEqual(1f, CartoonStage.ShallowsWeight(500f, 0f), "a layer with no shore_m is not a shore layer");
+        }
+
+        /// <summary>U-205 (B-225): sea_under's shallow seabed (layer4, draw_before 3) draws over the two seabeds and under the surface seen from
+        /// below; a set that states no draw_before draws by n exactly as before.</summary>
+        [Test]
+        public void TheShallowSeabedDrawsBeforeTheSurfaceLayer()
+        {
+            var sea = SceneLayout.Parse("{\"layers\":[{\"n\":0},{\"n\":1},{\"n\":2},{\"n\":3},{\"n\":4,\"shore_m\":40.0,\"draw_before\":3}]}").layers;
+            Assert.AreEqual(5, sea.Length);
+            Assert.AreEqual(40f, sea[4].shore_m); Assert.AreEqual(3, sea[4].draw_before);
+            int[] want = { 0, 1, 2, 4, 3 };
+            for (int i = 0; i < sea.Length; i++) Assert.AreEqual(want[i], SceneLayout.DrawOrder(sea, i), $"layer {sea[i].n}");
+            var plain = SceneLayout.Parse("{\"layers\":[{\"n\":0},{\"n\":2},{\"n\":4}]}").layers;
+            for (int i = 0; i < plain.Length; i++) Assert.AreEqual(plain[i].n, SceneLayout.DrawOrder(plain, i), "no draw_before: by n");
+        }
+
         [UnityTest, Timeout(300000)]
         public IEnumerator UnderTheSeaNoLandSetPixelShows()
         {
@@ -106,6 +139,43 @@ namespace Meridian.Tests
                 yield return Hold(new Vector2(deep + 0.5f, water - 3f));
                 Assert.AreEqual(0f, stage.Layers.nearAlpha, 1e-4f);
                 Assert.IsTrue(stage.SeaUnder.gameObject.activeSelf);
+
+                // U-205 (B-225): the set's json now carries five layers. The surface seen from below (layer3) is 2 m tall with its top on the
+                // water line; the shallow seabed (layer4: shore_m 40, draw_before 3) shows by the shore only, under layer3 and over the seabeds.
+                var seaSet = stage.SeaUnder;
+                Assert.AreEqual(5, seaSet.Layout.layers.Length, "sea_under's five layers (B-225)");
+                SpriteRenderer LayerOf(int n) { for (int i = 0; i < seaSet.Layout.layers.Length; i++) if (seaSet.Layout.layers[i].n == n) return seaSet.renderers[i]; return null; }
+                var surface = LayerOf(3); var shallows = LayerOf(4);
+                Assert.NotNull(surface); Assert.NotNull(shallows);
+                Assert.AreEqual(2f, surface.size.y, 0.01f, "the surface seen from below is 128 px: a light ceiling 2 m deep");
+                Assert.AreEqual(water, surface.bounds.max.y, 0.05f, "its top row on the water line");
+                Assert.AreEqual(ParallaxLayers.BackOrder + CartoonStage.SeaUnderOrder + 3, shallows.sortingOrder, "the shallow seabed over the near seabed");
+                Assert.AreEqual(ParallaxLayers.BackOrder + CartoonStage.SeaUnderOrder + 4, surface.sortingOrder, "the surface layer over the shallow seabed");
+                Assert.AreEqual(ParallaxLayers.BackOrder + CartoonStage.SeaUnderOrder + 2, LayerOf(2).sortingOrder, "the near seabed where it was");
+                int first = os - 12;
+                while (first < os + len && !gen.SeaAt(first)) first++;
+                Assert.IsTrue(gen.SeaAt(first) && !gen.SeaAt(first - 1), "the shore's first sea column");
+                // 10 m out, 3 m under: whole
+                yield return Hold(new Vector2(first + 10.5f, water - 3f));
+                TestContext.Out.WriteLine($"[MERIDIAN] u205 shallows at {first} + 10.5: shore distance {stage.ShoreDistanceNow:0.00} m, layer4 alpha {seaSet.LayerAlphaOf(4):0.00} x the set's {seaSet.alpha:0.00}, drawn {shallows.enabled}, colour a {shallows.color.a:0.00}");
+                Assert.AreEqual(10.5f, stage.ShoreDistanceNow, 0.01f);
+                Assert.AreEqual(1f, seaSet.LayerAlphaOf(4), 1e-4f, "the shallow seabed whole 10 m out");
+                Assert.IsTrue(shallows.enabled, "drawn");
+                Assert.AreEqual(seaSet.alpha, shallows.color.a, 0.01f);
+                Assert.IsFalse(seaSet.placeholders.Contains(true), "all five layers' art in (layer4 imported)");
+                // 36 m out: fading
+                yield return Hold(new Vector2(first + 36f, water - 3f));
+                Assert.AreEqual(36f, stage.ShoreDistanceNow, 0.01f);
+                Assert.AreEqual(0.5f, seaSet.LayerAlphaOf(4), 0.01f, "half gone 36 m out");
+                Assert.AreEqual(seaSet.alpha * 0.5f, shallows.color.a, 0.02f);
+                // 45 m out: not drawn at all, nor its continued strip
+                yield return Hold(new Vector2(first + 45.5f, water - 3f));
+                TestContext.Out.WriteLine($"[MERIDIAN] u205 shallows at {first} + 45.5: shore distance {stage.ShoreDistanceNow:0.00} m, layer4 alpha {seaSet.LayerAlphaOf(4):0.00}, drawn {shallows.enabled}");
+                Assert.Greater(stage.ShoreDistanceNow, 40f);
+                Assert.AreEqual(0f, seaSet.LayerAlphaOf(4), 1e-4f, "gone past 40 m");
+                Assert.IsFalse(shallows.enabled, "not drawn out at sea");
+                int shallowOrder = ParallaxLayers.BackOrder + CartoonStage.SeaUnderOrder + 3;
+                foreach (var r in seaSet.GetComponentsInChildren<SpriteRenderer>()) if (r.enabled) Assert.AreNotEqual(shallowOrder, r.sortingOrder, $"{r.name}: nothing of the shallow seabed draws out at sea");
 
                 // the shore above the water: untouched
                 int shore = os - 12;

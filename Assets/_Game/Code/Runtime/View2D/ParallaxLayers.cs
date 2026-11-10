@@ -12,7 +12,29 @@ namespace Meridian.View2D
     public sealed class SceneLayout
     {
         /// <summary>One layer: U-103 (D-108) adds `tile` / `tile_y` (a repeating tile in x / and y), `height_px` and `role` (starfield, nebula) for the Space scene; the side scenes ignore them.</summary>
-        [System.Serializable] public sealed class Layer { public int n; public float parallax; public float y_m; public bool tile, tile_y; public int height_px; public string role; public Pulse pulse; public int ground_row, continue_rows; }
+        /// <summary>U-205 (B-225's sea_under layer4, the shallow seabed): `shore_m` (the layer shows only within that many metres of the shore, 0: everywhere)
+        /// and `draw_before` (the layer draws just before layer k, 0: by its n).</summary>
+        [System.Serializable] public sealed class Layer { public int n; public float parallax; public float y_m; public bool tile, tile_y; public int height_px; public string role; public Pulse pulse; public int ground_row, continue_rows; public float shore_m; public int draw_before; }
+        /// <summary>U-205 (B-225): a layer's place in its set's draw order. A set with no `draw_before` draws by n, as always. Where a layer
+        /// states draw_before k (sea_under's shallow seabed: 3, under the surface seen from below), the orders are the layers' ranks by
+        /// (k − ½ for such a layer, n for the others). 0 is "none" (JsonUtility's default): a layer cannot ask to draw before layer 0. Pure.</summary>
+        public static int DrawOrder(Layer[] layers, int index)
+        {
+            if (layers == null || index < 0 || index >= layers.Length) return 0;
+            bool any = false;
+            for (int j = 0; j < layers.Length; j++) if (layers[j].draw_before > 0) { any = true; break; }
+            if (!any) return layers[index].n;
+            float key = DrawKey(layers[index]);
+            int rank = 0;
+            for (int j = 0; j < layers.Length; j++)
+            {
+                if (j == index) continue;
+                float kj = DrawKey(layers[j]);
+                if (kj < key || (kj == key && j < index)) rank++;
+            }
+            return rank;
+        }
+        static float DrawKey(Layer l) => l.draw_before > 0 ? l.draw_before - 0.5f : l.n;
         /// <summary>U-164 (D-169): the rows a layer's continuation repeats: its json continue_rows (default DefaultContinueRows), never rows above its
         /// painted ground line (height − ground_row) when the json states one, at least 2. Pure.</summary>
         public const int DefaultContinueRows = 64;
@@ -146,6 +168,30 @@ namespace Meridian.View2D
         public bool UsedFallback { get; private set; }
         float appliedAlpha = -1f;
 
+        /// <summary>U-205 (B-225): one layer's own alpha on top of the set's (sea_under's shallow seabed fades out by its shore_m), by layer n;
+        /// 1 until set and after each rebuild. At 0 the layer and its continued strip are not drawn at all.</summary>
+        readonly List<float> layerAlpha = new List<float>(5);
+        public void SetLayerAlpha(int n, float a)
+        {
+            for (int i = 0; i < renderers.Count && i < Layout.layers.Length; i++)
+            {
+                if (Layout.layers[i].n != n) continue;
+                while (layerAlpha.Count <= i) layerAlpha.Add(1f);
+                if (layerAlpha[i] == a) return;
+                layerAlpha[i] = a;
+                appliedAlpha = -1f; // LateUpdate re-tints
+                if (renderers[i] != null && (onlyLayer < 0 || n == onlyLayer)) renderers[i].enabled = a > 0f;
+                return;
+            }
+        }
+        /// <summary>Layer n's own alpha (1 when never set or the set has no such layer); tests read it.</summary>
+        public float LayerAlphaOf(int n)
+        {
+            for (int i = 0; i < Layout.layers.Length; i++) if (Layout.layers[i].n == n) return LayerAlphaAt(i);
+            return 1f;
+        }
+        float LayerAlphaAt(int i) => i < layerAlpha.Count ? layerAlpha[i] : 1f;
+
         readonly List<AsyncOperationHandle> handles = new List<AsyncOperationHandle>(6);
         static Sprite white;
 
@@ -196,7 +242,7 @@ namespace Meridian.View2D
         void Build(SceneLayout layout)
         {
             foreach (var r in renderers) if (r != null) Destroy(r.gameObject);
-            renderers.Clear(); placeholders.Clear(); tileW.Clear(); tileN.Clear();
+            renderers.Clear(); placeholders.Clear(); tileW.Clear(); tileN.Clear(); layerAlpha.Clear();
             Layout = layout;
             for (int i = 0; i < layout.layers.Length; i++)
             {
@@ -204,7 +250,7 @@ namespace Meridian.View2D
                 var go = new GameObject("Layer" + l.n);
                 go.transform.SetParent(transform, false);
                 var sr = go.AddComponent<SpriteRenderer>();
-                sr.sortingOrder = BackOrder + orderOffset + l.n;
+                sr.sortingOrder = BackOrder + orderOffset + SceneLayout.DrawOrder(layout.layers, i); // by n, unless the json states draw_before (U-205)
                 SetPlaceholder(sr, l.n);
                 sr.flipX = mirrorX; // U-144
                 renderers.Add(sr);
@@ -222,6 +268,7 @@ namespace Meridian.View2D
                     tileN[index] = TilesFor(FrameWidth(), tileW[index]);
                     sr.size = new Vector2(tileW[index] * tileN[index], op.Result.bounds.size.y);
                     placeholders[index] = false;
+                    appliedAlpha = -1f; // the nearest layer's and a layer's own alpha go back on at the next LateUpdate
                 });
             }
             appliedAlpha = -1f;
@@ -381,7 +428,7 @@ namespace Meridian.View2D
             var tint = new Color(1f, 1f, 1f, alpha * nearAlpha); // U-171: the near layer's strip fades with it
             if (fill.color != tint) fill.color = tint;
             fill.flipX = near.flipX;
-            fill.sortingOrder = BackOrder + orderOffset + l.n;
+            fill.sortingOrder = BackOrder + orderOffset + SceneLayout.DrawOrder(Layout.layers, k);
             float stripH = nearFill.bounds.size.y;
             int strips = Mathf.Max(1, Mathf.CeilToInt(ContinueDepth / stripH));
             var size = new Vector2(near.size.x, strips * stripH);
@@ -434,10 +481,10 @@ namespace Meridian.View2D
                 }
                 var strip = layerFillSprite[i];
                 if (f.sprite != strip) { f.sprite = strip; f.drawMode = SpriteDrawMode.Tiled; }
-                var tint = new Color(1f, 1f, 1f, alpha);
+                var tint = new Color(1f, 1f, 1f, alpha * LayerAlphaAt(i)); // U-205: a layer's strip fades with it
                 if (f.color != tint) f.color = tint;
                 f.flipX = r.flipX;
-                f.sortingOrder = BackOrder + orderOffset + l.n;
+                f.sortingOrder = BackOrder + orderOffset + SceneLayout.DrawOrder(Layout.layers, i);
                 float stripH = strip.bounds.size.y;
                 var size = new Vector2(r.size.x, Mathf.Max(1, Mathf.CeilToInt(ContinueDepth / stripH)) * stripH);
                 if (f.size != size) f.size = size;
@@ -468,7 +515,7 @@ namespace Meridian.View2D
             if (alpha != appliedAlpha || nearAlpha != appliedNear)
             {
                 int near = NearestIndex();
-                for (int i = 0; i < renderers.Count; i++) { var r = renderers[i]; if (r == null) continue; var col = r.color; col.a = alpha * (i == near ? nearAlpha : 1f); r.color = col; }
+                for (int i = 0; i < renderers.Count; i++) { var r = renderers[i]; if (r == null) continue; var col = r.color; col.a = alpha * (i == near ? nearAlpha : 1f) * LayerAlphaAt(i); r.color = col; }
                 appliedAlpha = alpha; appliedNear = nearAlpha;
             }
             float frameW = FrameWidth();
@@ -519,7 +566,7 @@ namespace Meridian.View2D
         public void SetOrderOffset(int offset)
         {
             orderOffset = offset;
-            for (int i = 0; i < renderers.Count && i < Layout.layers.Length; i++) if (renderers[i] != null) renderers[i].sortingOrder = BackOrder + offset + Layout.layers[i].n;
+            for (int i = 0; i < renderers.Count && i < Layout.layers.Length; i++) if (renderers[i] != null) renderers[i].sortingOrder = BackOrder + offset + SceneLayout.DrawOrder(Layout.layers, i);
         }
 
         /// <summary>U-128: drops the art and the renderers (the outgoing set after a crossfade); ConfigureFor builds anew.</summary>

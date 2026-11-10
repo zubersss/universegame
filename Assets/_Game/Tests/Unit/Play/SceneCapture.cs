@@ -3462,7 +3462,7 @@ namespace Meridian.Tests
 
         /// <summary>U-182: the tier shader's cost, A/B in one session (BudgetGate's rows swing run to run on this machine): Earth at the camp
         /// (the surface view) and in a T3 room, 300 frames each with the tier shader, the plain lit fill, the tier shader again.</summary>
-        [UnityTest, Timeout(300000)]
+        [UnityTest, Timeout(420000)]
         public IEnumerator CaptureU182Perf()
         {
             var name = Environment.GetEnvironmentVariable(Variable);
@@ -3487,6 +3487,7 @@ namespace Meridian.Tests
                 side.creatures.DespawnAll();
                 var ground = UnityEngine.Object.FindAnyObjectByType<Meridian.View2D.SmoothGround>();
                 var times = new float[300];
+                float lastAvg = 0f; // the last Measure's average (U-205's ratios)
 
                 // As BudgetGate: the side view rendered at 1920x1080 each frame; a one-pixel read-back waits for the GPU, so each time is the
                 // render's own cost (CPU and GPU), the ground's fill shader in it.
@@ -3513,6 +3514,7 @@ namespace Meridian.Tests
                     stats = $"; the frame's draw calls {UnityEditor.UnityStats.drawCalls}, set passes {UnityEditor.UnityStats.setPassCalls}, triangles {UnityEditor.UnityStats.triangles}";
 #endif
                     TestContext.Out.WriteLine($"[MERIDIAN] u182 perf {label}: avg {avg:F2} ms, p50 {sorted[times.Length / 2]:F2}, p99 {sorted[(int)(times.Length * 0.99f)]:F2}, max {sorted[times.Length - 1]:F2} (tier shader {Meridian.View2D.SmoothGround.TierShader}, walls {Meridian.View2D.SmoothGround.WallsOn && ground.WallArt}); chunk meshes rebuilt meanwhile {ground.ChunksBuilt - built0}{stats}");
+                    lastAvg = avg;
                 }
 
                 IEnumerator AB(string where)
@@ -3548,24 +3550,58 @@ namespace Meridian.Tests
                 // frame's GPU work, the Game view's UI included).
                 // 19:00 and 19:11 answered: no chunk mesh rebuilds meanwhile, the canvases and the Editor's Game view (640 x 480) cost
                 // nothing in the measure, a second material alone costs nothing; the walls' own textures at their own scale cost ~2 ms.
-                // What is left to tell apart: the wall ART from the SCALE it is read at. Each state twice, interleaved.
-                Meridian.View2D.SmoothGround.TierShader = true;
-                var probes = new (bool walls, int probe, string label)[]
+                // 19:2x answered the scale: the wall tiles cost ~2 ms at world / 4 and ~1.3 at world / 8, the fill's own textures on the
+                // second material nothing at either scale (those two / 8 states are retired from the run).
+                // U-205 (D-192's question: is the wall's cost its paper grain?): BLENDER's two test tiles (Earth's back_wall_t3 drawn again
+                // with its grain and with the grain at 0: blender/preview, never imported) and a flat tile of the grained one's mean colour
+                // stand in for tier 3's wall, with the exported wall's own sampler settings and format. The room is all tier 3. Each state
+                // twice, interleaved, the lit fill among them: every ratio is from this one loop.
+                Meridian.View2D.SmoothGround.TierShader = true; ground.RedressWalls(); ground.RebuildNow();
+                yield return null;
+                var wallT3 = ground.WallMaterialNow != null ? ground.WallMaterialNow.GetTexture("_Tier3Tex") as Texture2D : null;
+                var grainTile = LoadTestTile("test_u205_earth_t3_no_grain_with_grain.png", wallT3, out var mean);
+                var plainTile = LoadTestTile("test_u205_earth_t3_no_grain.png", wallT3, out _);
+                var flatTile = grainTile != null ? FlatTile(mean, wallT3) : null;
+                // 22:06 read the grain as the cost (with grain 1.71, without 1.43, the fill alone 1.41). A noisy tile can only cost more than a
+                // quiet one of its size and format through the format's decode or the cache: the grained tile again in three other formats.
+                var grainRgba = LoadTestTile("test_u205_earth_t3_no_grain_with_grain.png", wallT3, out _, TextureFormat.RGBA32);
+                var grainDxt5 = LoadTestTile("test_u205_earth_t3_no_grain_with_grain.png", wallT3, out _, TextureFormat.DXT5);
+                var grainDxt1 = LoadTestTile("test_u205_earth_t3_no_grain_with_grain.png", wallT3, out _, TextureFormat.DXT1);
+                TestContext.Out.WriteLine($"[MERIDIAN] u205 tiles: the exported wall {Describe(wallT3)}; with grain {Describe(grainTile)}; no grain {Describe(plainTile)}; flat {Describe(flatTile)} of colour {mean}; with grain in other formats: {Describe(grainRgba)}; {Describe(grainDxt5)}; {Describe(grainDxt1)}");
+                var probes = new (bool tier, bool walls, int probe, Texture2D tile, string label)[]
                 {
-                    (false, 0, "the walls off (one material, the fill shaded)"),
-                    (true, 0, "the walls on (the wall tiles at world / 4)"),
-                    (true, 1, "a second material, the fill's textures at world / 8"),
-                    (true, 2, "a second material, the fill's textures at world / 4"),
-                    (true, 3, "a second material, the wall tiles at world / 8 (a half-resolution wall's density)"),
+                    (false, true, 0, null, "the lit fill (no tier shader)"),
+                    (true, false, 0, null, "the walls off (one material, the fill shaded)"),
+                    (true, true, 0, null, "the walls on (the exported wall tiles)"),
+                    (true, true, 2, null, "a second material, the fill's textures at world / 4"),
+                    (true, true, 0, grainTile, "tier 3's wall = the test tile with its grain"),
+                    (true, true, 0, plainTile, "tier 3's wall = the test tile without grain"),
+                    (true, true, 0, flatTile, "tier 3's wall = a flat tile"),
+                    (true, true, 0, grainRgba, "tier 3's wall = the grained test tile, uncompressed RGBA32"),
+                    (true, true, 0, grainDxt5, "tier 3's wall = the grained test tile, DXT5"),
+                    (true, true, 0, grainDxt1, "tier 3's wall = the grained test tile, DXT1"),
                 };
+                var sums = new float[probes.Length];
                 for (int round = 0; round < 2; round++)
-                    foreach (var (wallsOn, probe, label) in probes)
+                    for (int i = 0; i < probes.Length; i++)
                     {
-                        Meridian.View2D.SmoothGround.WallsOn = wallsOn;
-                        Meridian.View2D.SmoothGround.WallProbe = probe;
+                        var s = probes[i];
+                        if (i >= 4 && s.tile == null) continue; // a test tile is missing: its state would only repeat "the walls on"
+                        Meridian.View2D.SmoothGround.TierShader = s.tier;
+                        Meridian.View2D.SmoothGround.WallsOn = s.walls;
+                        Meridian.View2D.SmoothGround.WallProbe = s.probe;
+                        Meridian.View2D.SmoothGround.WallProbeTexture = s.tile;
                         ground.RedressWalls(); ground.RebuildNow();
-                        yield return Measure($"T3 room tier, {label}");
+                        yield return Measure($"T3 room {(s.tier ? "tier" : "lit")}, {s.label}");
+                        sums[i] += lastAvg;
                     }
+                Meridian.View2D.SmoothGround.WallProbeTexture = null;
+                float lit = sums[0] / 2f;
+                for (int i = 0; i < probes.Length; i++)
+                    if (sums[i] > 0f) TestContext.Out.WriteLine($"[MERIDIAN] u205 ratio: {probes[i].label}: {sums[i] / 2f:F2} ms, / lit {sums[i] / 2f / lit:F2}");
+                if (sums[5] > 0f && sums[6] > 0f)
+                    TestContext.Out.WriteLine($"[MERIDIAN] u205 verdict rows: the fill alone {sums[1] / 2f / lit:F2}, the exported walls {sums[2] / 2f / lit:F2}, with grain {sums[4] / 2f / lit:F2}, without grain {sums[5] / 2f / lit:F2}, flat {sums[6] / 2f / lit:F2}; without grain minus the fill alone {(sums[5] - sums[1]) / 2f / lit:+0.00;-0.00} (D-192: within 0.05 means the grain is the cost)");
+                foreach (var tile in new[] { grainTile, plainTile, flatTile, grainRgba, grainDxt5, grainDxt1 }) if (tile != null) UnityEngine.Object.Destroy(tile);
                 Meridian.View2D.SmoothGround.WallsOn = true; Meridian.View2D.SmoothGround.WallProbe = 0;
                 Meridian.View2D.SmoothGround.TierShader = false; ground.RedressWalls(); ground.RebuildNow();
                 yield return Measure("T3 room lit, at the end");
@@ -3580,10 +3616,60 @@ namespace Meridian.Tests
                 Meridian.View2D.SmoothGround.TierShader = true;
                 Meridian.View2D.SmoothGround.WallsOn = true;
                 Meridian.View2D.SmoothGround.WallProbe = 0;
+                Meridian.View2D.SmoothGround.WallProbeTexture = null;
                 QualitySettings.vSyncCount = vsync; Application.targetFrameRate = target;
                 Meridian.View2D.CartoonStage.Enabled = wasCartoon;
             }
         }
+
+        /// <summary>U-205: a test tile from blender/preview (never imported) as a texture with the exported wall's sampler settings and
+        /// format; `mean` is its mean colour (the flat tile's).</summary>
+        static Texture2D LoadTestTile(string file, Texture2D like, out Color32 mean, TextureFormat? format = null)
+        {
+            mean = new Color32(128, 128, 128, 255);
+            string path = Path.GetFullPath(Path.Combine(Application.dataPath, "..", "blender", "preview", file));
+            if (!File.Exists(path)) { TestContext.Out.WriteLine($"[MERIDIAN] u205: no test tile at {path}"); return null; }
+            var tex = new Texture2D(2, 2, TextureFormat.RGBA32, false, false) { name = Path.GetFileNameWithoutExtension(file) };
+            if (!tex.LoadImage(File.ReadAllBytes(path), false)) { UnityEngine.Object.Destroy(tex); TestContext.Out.WriteLine($"[MERIDIAN] u205: {file} did not load"); return null; }
+            var px = tex.GetPixels32();
+            long r = 0, g = 0, b = 0, a = 0;
+            foreach (var p in px) { r += p.r; g += p.g; b += p.b; a += p.a; }
+            mean = new Color32((byte)(r / px.Length), (byte)(g / px.Length), (byte)(b / px.Length), (byte)(a / px.Length));
+            if (format.HasValue) tex.name += "_" + format.Value;
+            return DressLike(tex, like, format);
+        }
+
+        /// <summary>U-205: a 256 px tile of one colour, dressed as the exported wall.</summary>
+        static Texture2D FlatTile(Color32 colour, Texture2D like)
+        {
+            var tex = new Texture2D(256, 256, TextureFormat.RGBA32, false, false) { name = "u205_flat" };
+            var px = new Color32[256 * 256];
+            for (int i = 0; i < px.Length; i++) px[i] = colour;
+            tex.SetPixels32(px);
+            tex.Apply(false, false);
+            return DressLike(tex, like);
+        }
+
+        /// <summary>The exported wall's wrap, filter and (in the Editor) compressed format on a test tile, then uploaded. `format`: that
+        /// format instead of the wall's (RGBA32: left as loaded, uncompressed).</summary>
+        static Texture2D DressLike(Texture2D tex, Texture2D like, TextureFormat? format = null)
+        {
+            tex.wrapMode = like != null ? like.wrapMode : TextureWrapMode.Repeat;
+            tex.filterMode = like != null ? like.filterMode : FilterMode.Bilinear;
+            tex.anisoLevel = like != null ? like.anisoLevel : 1;
+#if UNITY_EDITOR
+            var want = format ?? (like != null ? like.format : tex.format);
+            if (want != tex.format && want != TextureFormat.RGBA32)
+            {
+                try { UnityEditor.EditorUtility.CompressTexture(tex, want, UnityEditor.TextureCompressionQuality.Best); }
+                catch (Exception e) { TestContext.Out.WriteLine($"[MERIDIAN] u205: {tex.name} stays {tex.format} ({e.Message})"); }
+            }
+#endif
+            tex.Apply(false, true);
+            return tex;
+        }
+
+        static string Describe(Texture2D t) => t == null ? "none" : $"{t.name} {t.width} x {t.height} {t.format}, mips {t.mipmapCount}, {t.filterMode}, {t.wrapMode}";
 
         /// <summary>U-182 (D1; B-203): the fill by depth tier at 1x → coordination/reports/unity/u182/: Earth T1..T5 (a room dug at 5, 25, 70,
         /// 150, 230 m under the Surface Line by the camp), the T1 / T2 border on Earth's steepest nearby slope (the band follows the tilted

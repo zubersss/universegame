@@ -128,7 +128,10 @@ namespace Meridian.View2D
         Material wallMaterial;
         /// <summary>A wall tile's side in metres (the fills' is 8).</summary>
         public const float WallTileM = 4f;
-        static readonly int TileTexelsId = Shader.PropertyToID("_TileTexels");
+        /// <summary>U-205 (G4): each 4 m row of the wall is read this share of a tile further along (the shader's _RowShift), so a tile's
+        /// pebble does not stand on one line down a tall shaft: 0.37 of a tile is 1.48 m a row and does not come round for 100 rows.</summary>
+        public const float WallRowShift = 0.37f;
+        static readonly int TileTexelsId = Shader.PropertyToID("_TileTexels"), RowShiftId = Shader.PropertyToID("_RowShift");
         /// <summary>The back wall draws B-230's tiles (false: the fill shaded, as before the art and where a planet has no walls).</summary>
         public bool WallArt => wallMaterial != null && walls[0] != null;
         /// <summary>Tier `tier`'s wall (1..5) is in.</summary>
@@ -145,6 +148,11 @@ namespace Meridian.View2D
         /// cost of a second material apart from the wall tiles'); 2 the fill's textures at the walls' scale (world / 4); 3 the walls'
         /// textures at the fill's scale (world / 8: half the texel density, what a half-resolution wall tile would sample).</summary>
         public static int WallProbe;
+        /// <summary>The perf probe's third A/B (U-205, D-192's "is it the grain?"), never set in play: a texture drawn in place of tier
+        /// WallProbeTier's wall tile (1..5; the capture's test tiles from blender/preview, loaded with the exported wall's own sampler
+        /// settings and format). Null: the walls as built.</summary>
+        public static Texture2D WallProbeTexture;
+        public static int WallProbeTier = 3;
         static bool ProbeFillTextures => WallProbe == 1 || WallProbe == 2;
         static float ProbeTileM => WallProbe == 1 || WallProbe == 3 ? 8f : WallTileM;
         /// <summary>The perf probe: the walls' material dressed again after WallProbe changes.</summary>
@@ -165,18 +173,20 @@ namespace Meridian.View2D
             if (m == null || walls[0] == null || walls[0].texture == null) return;
             bool copy = ProbeFillTextures && fill != null && fill.texture != null; // the perf probe: the fill's own textures on this material
             var baseTex = copy ? fill.texture : walls[0].texture;
-            m.mainTexture = baseTex;
+            var over = copy ? null : WallProbeTexture; // U-205's probe: one tier's wall replaced by the capture's test tile
+            m.mainTexture = over != null && WallProbeTier == 1 ? over : baseTex;
             var t = Meridian.Mining.D1Tables.Current;
             var from = Vector4.zero;
             for (int k = 0; k < 4; k++)
             {
                 var s = copy ? tierFills[k] : walls[k + 1];
-                m.SetTexture(TierIds[k], s != null ? s.texture : baseTex);
+                m.SetTexture(TierIds[k], over != null && WallProbeTier == k + 2 ? over : s != null ? s.texture : baseTex);
                 from[k] = s != null && t.tiers.Length > k + 1 ? t.tiers[k + 1].fromM : 1e6f; // a tier without its wall keeps the one over it
             }
             m.SetVector(TierFromId, from);
             m.SetVector(TierBlendId, new Vector4(TierTransition, TierTransition, TierTransition, TierTransition));
             m.SetFloat(TileTexelsId, baseTex.width);
+            m.SetFloat(RowShiftId, copy ? 0f : WallRowShift); // the perf probe's fill copies draw the fill as the fill's own material does
             if (lineTex != null) { m.SetTexture(LineTexId, lineTex); m.SetVector(LineParamsId, new Vector4(1f / lineTex.width, ProbeTileM, lineBase, lineSpan)); }
         }
 
@@ -760,6 +770,8 @@ namespace Meridian.View2D
         {
             Release();
             EnsureScratch();
+            if (terrain != null) terrain.TileChanged -= OnTileChanged;
+            if (t != null) t.TileChanged += OnTileChanged; // U-205: a column opened to the sky re-shades the chunks under it
             terrain = t; strips = g; planet = id.ToString().ToLowerInvariant();
             planetId = id;
             variantKey = VariantKeys(id);
@@ -804,11 +816,38 @@ namespace Meridian.View2D
             Active = false;
             if (Current == this) Current = null;
             TerrainChunk.OutlineBuilt -= OnOutline;
+            if (terrain != null) terrain.TileChanged -= OnTileChanged;
             foreach (var kv in meshes) if (kv.Value != null) kv.Value.gameObject.SetActive(false);
             Release();
         }
 
-        void OnDestroy() { if (Current == this) Current = null; TerrainChunk.OutlineBuilt -= OnOutline; Release(); if (lineTex != null) Destroy(lineTex); }
+        void OnDestroy() { if (Current == this) Current = null; TerrainChunk.OutlineBuilt -= OnOutline; if (terrain != null) terrain.TileChanged -= OnTileChanged; Release(); if (lineTex != null) Destroy(lineTex); }
+
+        /// <summary>U-205 (BLENDER's 0.6.2 read, G3): a dug cell that opens its column to the sky lights the air under it, and that air may
+        /// lie in chunks under the one dug (a shaft bored from below, as the smoke stages it; a breakthrough into a room): those chunks
+        /// re-shade over the next frames, or their wall kept its closed-room shade up to a hard edge at the chunk's top. Any other dug
+        /// cell costs one tile read here.</summary>
+        void OnTileChanged(int x, int y, byte old, byte id)
+        {
+            if (!Active || terrain == null || !TileId.IsSolid(old) || TileId.IsSolid(id)) return;
+            if (TileId.IsSolid(terrain.GetTile(x, y - 1))) return; // nothing open under it
+            float surface = terrain.SurfaceAt(x);
+            for (int wy = y + 1, n = 0; wy < surface; wy++, n++)
+                if (n >= LitScan || TileId.IsSolid(terrain.GetTile(x, wy))) return; // the column is still shut above
+            const int C = TerrainConstants.ChunkSize;
+            int cx = WorldNoise.FloorDiv(x, C), last = WorldNoise.FloorDiv(y, C); // the dug cell's own chunk rebuilds with its outline
+            for (int wy = y - 1, n = 0; n < LitScan && wy >= 0 && !TileId.IsSolid(terrain.GetTile(x, wy)); wy--, n++)
+            {
+                int row = WorldNoise.FloorDiv(wy, C);
+                if (row == last) continue;
+                last = row;
+                foreach (var kv in meshes)
+                {
+                    var c = kv.Key;
+                    if (c != null && c.cx == cx && c.cy == row && c.smooth && !rebuildQueue.Contains(c)) rebuildQueue.Enqueue(c);
+                }
+            }
+        }
 
         void Release()
         {
@@ -1153,7 +1192,11 @@ namespace Meridian.View2D
         /// triangles: no texture sample, no draw call added.</summary>
         public const float DepthShadeM = 6f, DepthShadeFloor = 0.55f, AirFalloffM = 3f, AirShadeFloor = 0.8f, RimShadowM = 0.3f, RimShadowInk = 0.5f;
         /// <summary>The shading grid's ring round the chunk (cells) and how far over the grid a column is searched for the open sky.</summary>
-        public const int AirRing = 4, LitScan = 12;
+        /// <summary>U-205 (BLENDER's 0.6.2 read, G3): LitScan was 12. A shaft open to the sky is lit all the way down, but a chunk whose top
+        /// lay more than 12 cells under the natural surface read every column as shut, so the wall went a fifth darker in one hard step at
+        /// that chunk's top edge (smoke_54-58, 16 m down a 22 m shaft). The scan stops at the first solid cell, so only an open column
+        /// pays for its height: a 4-wide shaft 300 m deep is ~1200 tile reads on a rebuild of its deepest chunk.</summary>
+        public const int AirRing = 4, LitScan = 512;
 
         /// <summary>The depth term: 1 at the natural surface, DepthShadeFloor from DepthShadeM down. Pure.</summary>
         public static float DepthShade(float depth) => Mathf.Lerp(1f, DepthShadeFloor, Mathf.Clamp01(depth / DepthShadeM));

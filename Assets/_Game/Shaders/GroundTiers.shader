@@ -17,6 +17,7 @@ Shader "MERIDIAN/GroundTiers"
         _TierFrom("Tiers 2-5 from (m under the line)", Vector) = (10, 40, 100, 200)
         _TierBlend("Tiers 2-5 transition (m)", Vector) = (1, 1, 1, 1)
         _TileTexels("A fill tile's texels across", Float) = 512
+        _RowShift("A tile row's shift along u (the back walls; 0 on the fills)", Float) = 0
         _MaskTex("Mask", 2D) = "white" {}
         _NormalMap("Normal Map", 2D) = "bump" {}
         [MaterialToggle] _ZWrite("ZWrite", Float) = 0
@@ -83,6 +84,7 @@ Shader "MERIDIAN/GroundTiers"
                 float4 _TierFrom;
                 float4 _TierBlend;
                 float _TileTexels;
+                float _RowShift;
             CBUFFER_END
 
             #include "GroundTiers.hlsl"
@@ -148,6 +150,7 @@ Shader "MERIDIAN/GroundTiers"
                 float4 _TierFrom;
                 float4 _TierBlend;
                 float _TileTexels;
+                float _RowShift;
             CBUFFER_END
 
             Varyings NormalsRenderingVertex(Attributes input)
@@ -203,6 +206,7 @@ Shader "MERIDIAN/GroundTiers"
                 float4 _TierFrom;
                 float4 _TierBlend;
                 float _TileTexels;
+                float _RowShift;
             CBUFFER_END
 
             #include "GroundTiers.hlsl"

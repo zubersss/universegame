@@ -860,6 +860,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f59a902c398b33e42ab11e92d1aea2c0
+    m_Address: backgrounds/earth/sea_under/layer4
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: f6a5a279e5d677940978741e39495c16
     m_Address: backgrounds/earth/layer0
     m_ReadOnly: 0

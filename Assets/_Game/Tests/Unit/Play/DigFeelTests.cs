@@ -274,11 +274,90 @@ namespace Meridian.Tests
             Assert.AreEqual(wall.mainTexture.width, wall.GetFloat("_TileTexels"), 1e-4f, "the wall's texels a tile");
             Assert.AreEqual(body.GetVector("_TierFrom"), wall.GetVector("_TierFrom"), "the walls change at the fills' depths");
             Assert.AreEqual(TextureWrapMode.Repeat, wall.mainTexture.wrapMode, "the wall tiles");
+            // U-205 (G4): each 4 m row of the wall is read 0.37 of a tile further along (no pebble on one line down a shaft); the fills are not shifted
+            Assert.AreEqual(Meridian.View2D.SmoothGround.WallRowShift, wall.GetFloat("_RowShift"), 1e-5f, "the wall's rows are shifted");
+            Assert.AreEqual(0f, body.GetFloat("_RowShift"), "the fill's rows are not");
 
             var fx = Object.FindAnyObjectByType<Meridian.FX.SideFx>();
             Assert.AreEqual(DigFeel.PuffTone(PlanetId.Earth, 0, false), fx.LastPuffTint, "the camp's dust: Topsoil's fill tone");
             Assert.AreEqual(DigFeel.PuffToneAt(side.terrain, at, 0), fx.LastPuffTint);
             yield return null;
+            LogAssert.NoUnexpectedReceived();
+        }
+
+        /// <summary>U-205 (BLENDER's 0.6.2 read, G3): a shaft open to the sky is lit all the way down. Its back wall carries the depth term
+        /// alone (55 % of its shade from 6 m under the natural surface), in every chunk it crosses: the sky scan stopped 12 cells over a
+        /// chunk's top, so a chunk lying deeper read the shaft as shut and its wall went a fifth darker in one hard step at its top edge
+        /// (smoke_54-58). The shaft here is 56 m deep, so a chunk's top edge lies between 16 and 48 m down it wherever the ground stands.</summary>
+        [UnityTest, Timeout(300000)]
+        public IEnumerator ADeepOpenShaftsWallIsLitAllTheWayDown()
+        {
+            PlanetSideRoot side = null;
+            yield return Boot(s => side = s);
+            var smooth = side.cartoon != null ? side.cartoon.Smooth : null;
+            Assert.NotNull(smooth, "the smooth ground on Earth");
+            float until = Time.realtimeSinceStartup + 20f;
+            while (!smooth.WallTier(1) && Time.realtimeSinceStartup < until) yield return null;
+            var t = side.terrain;
+            var body = side.player.Body;
+            float ax = side.spawnX + 19.5f, top = t.SurfaceAt(ax), bottom = Mathf.Floor(top) - 56f; // the smoke's shaft column, deeper
+            body.simulated = false;
+            var mid = new Vector2(ax, (top + bottom) * 0.5f);
+            body.position = mid; side.player.transform.position = mid;
+            var follow = side.sideCamera.GetComponent<Meridian.Player.CameraFollow>();
+            if (follow != null) follow.SnapToTarget();
+            yield return null;
+            until = Time.realtimeSinceStartup + 30f;
+            while (!t.IsSettled && Time.realtimeSinceStartup < until) yield return null;
+            int strokes = 0;
+            var owner = side.rig.owner; side.rig.owner = null;
+            try
+            {
+                for (float y = bottom + 0.7f; y <= top + 0.5f + 1e-3f; y += 0.5f)
+                    foreach (float dx in new[] { -1.1f, -0.55f, 0f, 0.55f, 1.1f })
+                        if (side.rig.Dig(new Vector2(ax + dx, y))) strokes++;
+            }
+            finally { side.rig.owner = owner; }
+            Assert.Greater(strokes, 100, "the shaft is bored");
+            var drops = side.rig.drops;
+            if (drops != null) for (int k = drops.Live.Count - 1; k >= 0; k--) drops.Collect(drops.Live[k]);
+            for (int i = 0; i < 40; i++) yield return null; // the chunks' meshes after the last stroke
+            until = Time.realtimeSinceStartup + 20f;
+            while (!t.IsSettled && Time.realtimeSinceStartup < until) yield return null;
+            for (int i = 0; i < 10; i++) yield return null;
+
+            // the back wall's vertices down the shaft's middle, 7 m and more under the natural surface (the depth term is at its floor there)
+            const int C = Meridian.Terrain.TerrainConstants.ChunkSize;
+            float lo = float.MaxValue, hi = float.MinValue, loY = 0f, hiY = 0f, deepest = float.MaxValue, highest = float.MinValue;
+            int n = 0;
+            var chunksHit = new System.Collections.Generic.HashSet<int>();
+            foreach (var chunk in Object.FindObjectsByType<Meridian.Terrain.TerrainChunk>())
+            {
+                MeshFilter mf = null;
+                foreach (var f in chunk.GetComponentsInChildren<MeshFilter>()) if (f.name == "SmoothGround") mf = f;
+                if (mf == null || mf.sharedMesh == null || mf.sharedMesh.subMeshCount == 0) continue;
+                var vs = mf.sharedMesh.vertices; var cs = mf.sharedMesh.colors;
+                if (cs == null || cs.Length != vs.Length) continue;
+                var tri = mf.sharedMesh.GetTriangles(0); // SmoothGround's submesh 0: the back wall (and the rim's ink shadow over it)
+                foreach (int vi in tri)
+                {
+                    var col = cs[vi];
+                    if (col.a < 0.99f || col.r + col.g + col.b <= 0f) continue; // the rim shadow's ink
+                    Vector3 w = mf.transform.TransformPoint(vs[vi]);
+                    if (Mathf.Abs(w.x - ax) > 0.6f || w.y < bottom + 1.5f) continue;
+                    if (t.SurfaceAt(w.x) - w.y < 7f) continue;
+                    n++;
+                    chunksHit.Add(chunk.cy);
+                    if (col.r < lo) { lo = col.r; loY = w.y; }
+                    if (col.r > hi) { hi = col.r; hiY = w.y; }
+                    deepest = Mathf.Min(deepest, w.y); highest = Mathf.Max(highest, w.y);
+                }
+            }
+            TestContext.Out.WriteLine($"[MERIDIAN] u205 open shaft at x {ax:0.0}: top {top:0.0}, floor {bottom:0.0}, {strokes} strokes; {n} back-wall vertices down its middle from {highest:0.0} to {deepest:0.0} in {chunksHit.Count} chunk rows (a chunk's edge every {C} m); shade {lo:0.000} at y {loY:0.0} .. {hi:0.000} at y {hiY:0.0}");
+            Assert.Greater(n, 100, "the shaft's back wall is drawn down its middle");
+            Assert.GreaterOrEqual(chunksHit.Count, 2, "the shaft crosses a chunk's edge more than 7 m down");
+            Assert.LessOrEqual(hi / Mathf.Max(lo, 1e-4f), 1.03f, $"one shade down the open shaft (the old step was 1.25: {hi:0.000} at y {hiY:0.0} against {lo:0.000} at y {loY:0.0})");
+            body.simulated = true;
             LogAssert.NoUnexpectedReceived();
         }
 

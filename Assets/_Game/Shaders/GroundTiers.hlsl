@@ -33,16 +33,20 @@ half4 GroundTierColor(float2 uv)
     // samples (full rate on the iGPU, where explicit-gradient samples ran at a fraction of it: the perf probe's T3 room).
     float2 dx = ddx(uv) * _TileTexels, dy = ddy(uv) * _TileTexels;
     float lod = 0.5 * log2(max(max(dot(dx, dx), dot(dy, dy)), 1e-8));
+    // U-205 (BLENDER's 0.6.2 read, G4): a wall tile repeats every 4 m, and down a tall shaft the same pebble stood on one line. Each tile
+    // row is read _RowShift of a tile further along u (0 on the fills: nothing changes there). The world point and the mip level above
+    // come from the unshifted uv, so the tier borders stay where they are.
+    float2 st = float2(uv.x + _RowShift * floor(uv.y), uv.y);
     half4 c;
-    UNITY_BRANCH if (k.w >= 1.0) c = SAMPLE_TEXTURE2D_LOD(_Tier5Tex, sampler_Tier5Tex, uv, lod);
-    else UNITY_BRANCH if (k.z >= 1.0) c = SAMPLE_TEXTURE2D_LOD(_Tier4Tex, sampler_Tier4Tex, uv, lod);
-    else UNITY_BRANCH if (k.y >= 1.0) c = SAMPLE_TEXTURE2D_LOD(_Tier3Tex, sampler_Tier3Tex, uv, lod);
-    else UNITY_BRANCH if (k.x >= 1.0) c = SAMPLE_TEXTURE2D_LOD(_Tier2Tex, sampler_Tier2Tex, uv, lod);
-    else c = SAMPLE_TEXTURE2D_LOD(_MainTex, sampler_MainTex, uv, lod);
-    UNITY_BRANCH if (k.x > 0.0 && k.x < 1.0) c = lerp(c, SAMPLE_TEXTURE2D_LOD(_Tier2Tex, sampler_Tier2Tex, uv, lod), k.x);
-    else UNITY_BRANCH if (k.y > 0.0 && k.y < 1.0) c = lerp(c, SAMPLE_TEXTURE2D_LOD(_Tier3Tex, sampler_Tier3Tex, uv, lod), k.y);
-    else UNITY_BRANCH if (k.z > 0.0 && k.z < 1.0) c = lerp(c, SAMPLE_TEXTURE2D_LOD(_Tier4Tex, sampler_Tier4Tex, uv, lod), k.z);
-    else UNITY_BRANCH if (k.w > 0.0 && k.w < 1.0) c = lerp(c, SAMPLE_TEXTURE2D_LOD(_Tier5Tex, sampler_Tier5Tex, uv, lod), k.w);
+    UNITY_BRANCH if (k.w >= 1.0) c = SAMPLE_TEXTURE2D_LOD(_Tier5Tex, sampler_Tier5Tex, st, lod);
+    else UNITY_BRANCH if (k.z >= 1.0) c = SAMPLE_TEXTURE2D_LOD(_Tier4Tex, sampler_Tier4Tex, st, lod);
+    else UNITY_BRANCH if (k.y >= 1.0) c = SAMPLE_TEXTURE2D_LOD(_Tier3Tex, sampler_Tier3Tex, st, lod);
+    else UNITY_BRANCH if (k.x >= 1.0) c = SAMPLE_TEXTURE2D_LOD(_Tier2Tex, sampler_Tier2Tex, st, lod);
+    else c = SAMPLE_TEXTURE2D_LOD(_MainTex, sampler_MainTex, st, lod);
+    UNITY_BRANCH if (k.x > 0.0 && k.x < 1.0) c = lerp(c, SAMPLE_TEXTURE2D_LOD(_Tier2Tex, sampler_Tier2Tex, st, lod), k.x);
+    else UNITY_BRANCH if (k.y > 0.0 && k.y < 1.0) c = lerp(c, SAMPLE_TEXTURE2D_LOD(_Tier3Tex, sampler_Tier3Tex, st, lod), k.y);
+    else UNITY_BRANCH if (k.z > 0.0 && k.z < 1.0) c = lerp(c, SAMPLE_TEXTURE2D_LOD(_Tier4Tex, sampler_Tier4Tex, st, lod), k.z);
+    else UNITY_BRANCH if (k.w > 0.0 && k.w < 1.0) c = lerp(c, SAMPLE_TEXTURE2D_LOD(_Tier5Tex, sampler_Tier5Tex, st, lod), k.w);
     return c;
 }
 

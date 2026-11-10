@@ -251,8 +251,35 @@ namespace Meridian.View2D
         public const float ShoreBlend = 3f;
         /// <summary>U-188: the water tiles' alpha out at sea while sea_under shows (TerrainChunk.WaterAlpha elsewhere).</summary>
         public const float SeaWaterAlpha = 0.2f;
-        /// <summary>sea_under's layers that continue down (B-202's json gives them continue_rows 64): the water column, the far and the near seabed.</summary>
-        static readonly int[] SeaContinues = { 0, 1, 2 };
+        /// <summary>sea_under's layers that continue down (B-202's json gives them continue_rows 64): the water column, the far and the near seabed,
+        /// and B-225's shallow seabed (layer4); the surface seen from below (layer3) does not.</summary>
+        static readonly int[] SeaContinues = { 0, 1, 2, 4 };
+        /// <summary>U-205 (B-225): a layer with a json shore_m (sea_under's shallow seabed: 40) shows only that far out from the shore, fading
+        /// out over the last ShallowsFade metres (BLENDER's preview: 8).</summary>
+        public const float ShallowsFade = 8f;
+        /// <summary>How far the camera is out from the shore now (m; 0 on land), read up to the set's largest shore_m; tests read it.</summary>
+        public float ShoreDistanceNow { get; private set; }
+        System.Func<int, bool> seaAt; // one delegate for the planet's visit (no allocation a frame)
+
+        /// <summary>U-205: how far x is out from the nearest land column's edge (m): 0 on land; `reach` + 1 where no land lies within `reach`
+        /// columns either way. Pure over `sea`.</summary>
+        public static float ShoreDistance(float x, int reach, System.Func<int, bool> sea)
+        {
+            int c = Mathf.FloorToInt(x);
+            if (!sea(c)) return 0f;
+            float frac = x - c, best = reach + 1f;
+            for (int k = 1; k <= reach; k++)
+            {
+                if (!sea(c - k)) best = Mathf.Min(best, frac + k - 1f); // the land column's right edge
+                if (!sea(c + k)) best = Mathf.Min(best, k - frac);      // the land column's left edge
+                if (best <= k) break; // land found: nothing farther out is nearer
+            }
+            return best;
+        }
+
+        /// <summary>U-205: a shore layer's weight `d` metres out from the shore: whole up to shoreM − ShallowsFade, gone from shoreM on; 1 for a
+        /// layer with no shore_m. Pure.</summary>
+        public static float ShallowsWeight(float d, float shoreM) => shoreM <= 0f ? 1f : Mathf.Clamp01((shoreM - d) / ShallowsFade);
         /// <summary>The sea weight at the camera now (0 over land, 1 out at sea): sea_under's alpha; the land set's nearest layer fades by 1 − it.</summary>
         public float SeaWeight { get; private set; }
         float waterLine = float.NegativeInfinity;
@@ -269,9 +296,11 @@ namespace Meridian.View2D
         void ConfigureSea(PlanetSideRoot side, Meridian.Planets.PlanetConfig config)
         {
             seaWorld = config.id == Meridian.Planets.PlanetId.Earth && side.terrain != null && side.terrain.SmoothGround ? side.terrain.BaseGenerator as Meridian.Terrain.SolidWorldGenerator : null;
-            SeaWeight = 0f;
+            SeaWeight = 0f; ShoreDistanceNow = 0f;
             Meridian.Terrain.TerrainChunk.LiquidAlpha = Meridian.Terrain.TerrainChunk.WaterAlpha; // U-188: each planet starts with the plain tint
-            if (seaWorld == null) { if (SeaUnder != null) { SeaUnder.Release(); SeaUnder.gameObject.SetActive(false); } waterLine = float.NegativeInfinity; return; }
+            if (seaWorld == null) { if (SeaUnder != null) { SeaUnder.Release(); SeaUnder.gameObject.SetActive(false); } waterLine = float.NegativeInfinity; seaAt = null; return; }
+            var world = seaWorld;
+            seaAt = x => world.SeaAt(x);
             waterLine = config.datumY + 1f; // PlanetBackdrop's sea level: the water fills the datum row
             if (SeaUnder == null) { var g = new GameObject("CartoonSeaUnder"); g.transform.SetParent(transform, false); SeaUnder = g.AddComponent<ParallaxLayers>(); }
             SeaUnder.gameObject.SetActive(false); // until the camera is out at sea and under the surface
@@ -291,7 +320,7 @@ namespace Meridian.View2D
             if (seaWorld == null || Layers == null || Layers.view == null) { SeaWeight = 0f; Meridian.Terrain.TerrainChunk.LiquidAlpha = Meridian.Terrain.TerrainChunk.WaterAlpha; return; }
             var cam = Layers.view;
             var c = cam.transform.position;
-            float w = SeaShare(c.x, x => seaWorld.SeaAt(x));
+            float w = SeaShare(c.x, seaAt);
             SeaWeight = w;
             Layers.nearAlpha = 1f - w;
             if (Incoming != null) Incoming.nearAlpha = 1f - w;
@@ -304,6 +333,14 @@ namespace Meridian.View2D
             if (!under) return;
             if (!seaConfigured) { SeaUnder.ConfigureFor("earth", "sea_under", waterLine); SeaUnder.anchorY = waterLine; seaConfigured = true; }
             SeaUnder.alpha = w;
+            // U-205 (B-225): the shallow seabed (the set's json: shore_m 40) shows by the shore only and fades out over its last 8 m.
+            var layers = SeaUnder.Layout.layers;
+            float reach = 0f;
+            for (int i = 0; i < layers.Length; i++) reach = Mathf.Max(reach, layers[i].shore_m);
+            if (reach <= 0f) { ShoreDistanceNow = 0f; return; }
+            ShoreDistanceNow = ShoreDistance(c.x, Mathf.CeilToInt(reach), seaAt);
+            for (int i = 0; i < layers.Length; i++)
+                if (layers[i].shore_m > 0f) SeaUnder.SetLayerAlpha(layers[i].n, ShallowsWeight(ShoreDistanceNow, layers[i].shore_m));
         }
         /// <summary>The incoming set's alpha `t` seconds into a border crossfade (a smooth step over CrossfadeSeconds). Pure.</summary>
         public static float CrossfadeAlpha(float t, float seconds) { float k = seconds > 0f ? Mathf.Clamp01(t / seconds) : 1f; return k * k * (3f - 2f * k); }
