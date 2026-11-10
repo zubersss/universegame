@@ -277,6 +277,7 @@ namespace Meridian.Core
                 side.bases.Place(new Vector2(sx + 1.5f, t.TopSolidY(sx + 1) + 1.5f), Meridian.Building.PieceKind.Lamp);
                 if (side.dayNight != null) side.dayNight.Override = 0f;
                 yield return Wait(1f);
+                LogSmallThingsNearTheSurveyor("G5", 3f); // U-205: the two soft ground pieces beside the surveyor in this shot
                 yield return Shot(folder, "smoke_18_mars_shelter_night_lamp.png");
                 if (side.dayNight != null) side.dayNight.Override = 0.45f;
             }
@@ -751,6 +752,36 @@ namespace Meridian.Core
                 found++;
             }
             Debug.Log($"[MERIDIAN] smoke F14: {found} small drawn thing(s) within 9 m of the landed Pilgrim");
+        }
+
+        /// <summary>U-205 (BLENDER's read of 0.6.2's smoke_18, G5: beside the surveyor a dark rounded lump and a tan grooved mound are
+        /// drawn soft, their edges stepping in 4-5 px blocks, while the surveyor and the lamp are crisp): every small drawn thing round
+        /// the surveyor is named in the log with its texture's size, the mip it is drawn from (a streamed map still at a low mip is a
+        /// low-resolution copy) and its scale, so the two objects and the reason can be told from the next smoke.</summary>
+        static void LogSmallThingsNearTheSurveyor(string tag, float reach)
+        {
+            var director = FindAnyObjectByType<SceneDirector>();
+            var side = director != null ? director.PlanetSide : null;
+            if (side == null || side.player == null) return;
+            Vector2 at = side.player.transform.position;
+            int found = 0;
+            foreach (var r in FindObjectsByType<Renderer>(FindObjectsInactive.Exclude))
+            {
+                if (!r.enabled) continue;
+                var b = r.bounds;
+                if (Mathf.Abs(b.center.x - at.x) > reach || b.center.y < at.y - 1.5f || b.center.y > at.y + 2.5f) continue;
+                if (b.size.x > 2.5f || b.size.y > 2.5f || b.size.x < 0.15f) continue;
+                if (r.transform.IsChildOf(side.player.transform)) continue; // the surveyor's own parts
+                var sr = r as SpriteRenderer;
+                string path = r.name;
+                for (var up = r.transform.parent; up != null && path.Length < 160; up = up.parent) path = up.name + "/" + path;
+                var tex = (sr != null ? (sr.sprite != null ? sr.sprite.texture : null) : (r.sharedMaterial != null ? r.sharedMaterial.mainTexture : null)) as Texture2D;
+                string drawn = sr != null ? (sr.sprite != null ? sr.sprite.name : "NO SPRITE") : (r.sharedMaterial != null ? r.sharedMaterial.name : "no material");
+                string map = tex != null ? $"{tex.name} {tex.width} x {tex.height} {tex.format}, {tex.mipmapCount} mip(s), drawn from mip {tex.loadedMipmapLevel} (asked {tex.requestedMipmapLevel}, streamed {tex.streamingMipmaps})" : "no texture";
+                Debug.Log($"[MERIDIAN] smoke {tag} near the surveyor: {path}: {r.GetType().Name} {b.size.x:0.00} x {b.size.y:0.00} m at ({b.center.x - at.x:+0.0;-0.0}, {b.center.y - at.y:+0.0;-0.0}), drawing {drawn} on {map}, scale {r.transform.lossyScale.x:0.00}, order {r.sortingOrder}");
+                found++;
+            }
+            Debug.Log($"[MERIDIAN] smoke {tag}: {found} small drawn thing(s) within {reach:0} m of the surveyor");
         }
 
         static IEnumerator Wait(float seconds)

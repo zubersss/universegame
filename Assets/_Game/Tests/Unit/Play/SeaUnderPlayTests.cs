@@ -49,12 +49,13 @@ namespace Meridian.Tests
             Assert.AreEqual(0f, CartoonStage.ShallowsWeight(40f, 40f));
             Assert.AreEqual(0f, CartoonStage.ShallowsWeight(41f, 40f));
             Assert.AreEqual(1f, CartoonStage.ShallowsWeight(500f, 0f), "a layer with no shore_m is not a shore layer");
-            // LEAD 11-09 23:0x: a backdrop for the shallows only: gone 2 m under its painted ground line
-            Assert.AreEqual(1f, CartoonStage.ShallowsDepthWeight(5f, 0f), "the camera above the layer's ground line");
-            Assert.AreEqual(1f, CartoonStage.ShallowsDepthWeight(0f, 0f), "at the line");
-            Assert.AreEqual(0.5f, CartoonStage.ShallowsDepthWeight(-1f, 0f), 1e-5f, "1 m under: half");
-            Assert.AreEqual(0f, CartoonStage.ShallowsDepthWeight(-2f, 0f), "2 m under: gone");
-            Assert.AreEqual(0f, CartoonStage.ShallowsDepthWeight(-9f, 0f));
+            // LEAD 11-09 23:2x: a backdrop for the shallows only: whole while the camera is 2 m or more over its painted ground line,
+            // gone at the line (the swimmer the camera follows is then never under the line while the layer is whole)
+            Assert.AreEqual(1f, CartoonStage.ShallowsDepthWeight(5f, 0f), "the camera well above the layer's ground line");
+            Assert.AreEqual(1f, CartoonStage.ShallowsDepthWeight(2f, 0f), "2 m above: still whole");
+            Assert.AreEqual(0.5f, CartoonStage.ShallowsDepthWeight(1f, 0f), 1e-5f, "1 m above: half");
+            Assert.AreEqual(0f, CartoonStage.ShallowsDepthWeight(0f, 0f), "at the line: gone");
+            Assert.AreEqual(0f, CartoonStage.ShallowsDepthWeight(-9f, 0f), "and under it");
         }
 
         /// <summary>U-205 (B-225): sea_under's shallow seabed (layer4, draw_before 3) draws over the two seabeds and under the surface seen from
@@ -182,10 +183,10 @@ namespace Meridian.Tests
                 // LEAD 11-09 23:0x (u205/3_sea_10m: a flat sand wall behind the surveyor): by the shore but deep, the camera well under the
                 // layer's painted ground line: the shallow seabed is not drawn
                 Assert.IsFalse(float.IsNaN(stage.ShallowsGroundY), "the shallow seabed's ground line is placed");
-                Assert.Greater(cam.transform.position.y, stage.ShallowsGroundY, "3 m under, the camera is over the layer's ground line");
+                Assert.GreaterOrEqual(cam.transform.position.y, stage.ShallowsGroundY + CartoonStage.ShallowsDepthFade, "3 m under, the camera on the swimmer is 2 m or more over the layer's ground line");
                 yield return HoldSwim(new Vector2(first + 19.5f, water - 12f));
                 TestContext.Out.WriteLine($"[MERIDIAN] u205 shallows 19.5 m out, 12 m under: the camera at {cam.transform.position.y - water:0.0} m, the layer's ground line at {stage.ShallowsGroundY - water:0.0} m, layer4 alpha {seaSet.LayerAlphaOf(4):0.00}, drawn {shallows.enabled}");
-                Assert.Less(cam.transform.position.y, stage.ShallowsGroundY - CartoonStage.ShallowsDepthFade, "the camera more than 2 m under the layer's ground line");
+                Assert.Less(cam.transform.position.y, stage.ShallowsGroundY, "the camera under the layer's ground line");
                 Assert.AreEqual(0f, seaSet.LayerAlphaOf(4), 1e-4f, "deep by the shore: the shallow seabed is gone");
                 Assert.IsFalse(shallows.enabled, "and not drawn");
                 // 36 m out: fading

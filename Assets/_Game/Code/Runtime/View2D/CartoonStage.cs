@@ -281,12 +281,14 @@ namespace Meridian.View2D
         /// layer with no shore_m. Pure.</summary>
         public static float ShallowsWeight(float d, float shoreM) => shoreM <= 0f ? 1f : Mathf.Clamp01((shoreM - d) / ShallowsFade);
         /// <summary>U-205 (LEAD 11-09 23:0x, on u205/3_sea_10m: 10 m under, the shallow seabed's sand stood as a flat wall behind the
-        /// surveyor): a shore layer is a backdrop for the shallows only. It fades out over ShallowsDepthFade metres as the camera sinks
-        /// under the layer's painted ground line (its json ground_row).</summary>
+        /// surveyor): a shore layer is a backdrop for the shallows only. It fades out over the last ShallowsDepthFade metres as the
+        /// camera comes down to the layer's painted ground line (its json ground_row). LEAD 23:2x, on u205/3b: gone AT the line (it was
+        /// whole there and gone 2 m under): the camera follows the swimmer, so the swimmer is never under the line while the layer is
+        /// whole and never floats in front of a field of sand.</summary>
         public const float ShallowsDepthFade = 2f;
-        /// <summary>A shore layer's weight for a camera at cameraY over a painted ground line at groundY: whole at and above the line, gone
-        /// ShallowsDepthFade under it. Pure.</summary>
-        public static float ShallowsDepthWeight(float cameraY, float groundY) => Mathf.Clamp01(1f - (groundY - cameraY) / ShallowsDepthFade);
+        /// <summary>A shore layer's weight for a camera at cameraY over a painted ground line at groundY: whole ShallowsDepthFade or more
+        /// above the line, gone at and under it. Pure.</summary>
+        public static float ShallowsDepthWeight(float cameraY, float groundY) => Mathf.Clamp01((cameraY - groundY) / ShallowsDepthFade);
         /// <summary>The shore layer's painted ground line (world y) on the last frame it was placed; NaN before (tests read it).</summary>
         public float ShallowsGroundY { get; private set; } = float.NaN;
         /// <summary>The sea weight at the camera now (0 over land, 1 out at sea): sea_under's alpha; the land set's nearest layer fades by 1 − it.</summary>

@@ -195,6 +195,68 @@ namespace Meridian.View2D
         readonly List<AsyncOperationHandle> handles = new List<AsyncOperationHandle>(6);
         static Sprite white;
 
+        // ---------- U-207's trial (LEAD 11-09 23:1x): the backdrop uncompressed in the same binary ----------
+
+        /// <summary>The launch flag of U-207's trial: `-meridianBackdropTrial rgba32` or `-meridianBackdropTrial dxt5`. It exists in
+        /// development builds and the Editor only (compiled out of a release build, LEAD's condition) and is off unless given. The
+        /// Editor capture read the painted backdrop at 9-14 ms a frame in BC7 and 1-2.5 ms as RGBA32 or DXT5 on the integrated GPU
+        /// (perf_2026-11-09.md): with the flag the dev player's probe reads the same binary both ways.</summary>
+        public const string TrialArg = "-meridianBackdropTrial";
+        /// <summary>The trial's formats: off (the layers as imported, BC7), RGBA32 (four times the layer's memory), DXT5 (the same
+        /// size as BC7; compressed at load by Texture2D.Compress, not by the importer).</summary>
+        public enum TrialFormat { Off, Rgba32, Dxt5 }
+        /// <summary>Parses the flag's value ("rgba32", "dxt5"; anything else: off). Pure.</summary>
+        public static TrialFormat ParseTrial(string value) =>
+            value == "rgba32" ? TrialFormat.Rgba32 : value == "dxt5" ? TrialFormat.Dxt5 : TrialFormat.Off;
+#if DEVELOPMENT_BUILD || UNITY_EDITOR
+        /// <summary>True where the trial is compiled in (a development build, the Editor).</summary>
+        public const bool TrialCompiled = true;
+        /// <summary>The trial's switch, never on in play: each layer is copied to a texture of this format as it loads and the copy
+        /// is drawn; the import rule and the art are untouched.</summary>
+        public static TrialFormat Trial = TrialFormat.Off;
+        /// <summary>Layers converted since the launch (the probe's log).</summary>
+        public static int TrialConverted { get; private set; }
+        readonly List<Object> trialMade = new List<Object>(12);
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+        static void ReadTrialFlag()
+        {
+            var args = System.Environment.GetCommandLineArgs();
+            int at = System.Array.IndexOf(args, TrialArg);
+            if (at < 0 || at + 1 >= args.Length) return;
+            Trial = ParseTrial(args[at + 1]);
+            if (Trial != TrialFormat.Off) Debug.Log($"[MERIDIAN] U-207 trial: the painted backdrops are copied to {Trial} as they load ({TrialArg} {args[at + 1]}).");
+        }
+
+        /// <summary>The layer's sprite on a copy of its texture in the trial's format (the imported texture is not readable: it is
+        /// drawn into a render texture and read back; DXT5 is then compressed on the CPU), with the same rect, pivot, size and sampler
+        /// settings; the sprite itself when the copy cannot be made.</summary>
+        Sprite TrialCopy(Sprite s)
+        {
+            var src = s != null ? s.texture : null;
+            if (src == null) return s;
+            var rt = RenderTexture.GetTemporary(src.width, src.height, 0, RenderTextureFormat.ARGB32, RenderTextureReadWrite.sRGB);
+            Graphics.Blit(src, rt);
+            var prev = RenderTexture.active;
+            RenderTexture.active = rt;
+            var dst = new Texture2D(src.width, src.height, TextureFormat.RGBA32, false, false)
+            { name = src.name + "_" + Trial, wrapModeU = src.wrapModeU, wrapModeV = src.wrapModeV, filterMode = src.filterMode, anisoLevel = src.anisoLevel };
+            dst.ReadPixels(new Rect(0, 0, src.width, src.height), 0, 0, false);
+            RenderTexture.active = prev;
+            RenderTexture.ReleaseTemporary(rt);
+            if (Trial == TrialFormat.Dxt5) dst.Compress(true);
+            dst.Apply(false, true); // uploaded, the CPU copy dropped
+            var copy = Sprite.Create(dst, s.rect, new Vector2(s.pivot.x / s.rect.width, s.pivot.y / s.rect.height), s.pixelsPerUnit, 0, SpriteMeshType.FullRect);
+            copy.name = s.name;
+            trialMade.Add(dst); trialMade.Add(copy);
+            TrialConverted++;
+            if (TrialConverted <= 12) Debug.Log($"[MERIDIAN] U-207 trial: {src.name} {src.width} x {src.height} {src.format} -> {dst.format}");
+            return copy;
+        }
+#else
+        public const bool TrialCompiled = false;
+#endif
+
         /// <summary>U-122 (D-135): the camera height the layers follow: the camera from the anchor up, the anchor itself below it (a dig, a pool, a
         /// trench), so the layers never cross — the ground hides them there anyway. Pure.</summary>
         public static float FollowY(float cameraY, float anchorY) => Mathf.Max(cameraY, anchorY);
@@ -261,12 +323,16 @@ namespace Meridian.View2D
                 Probe<Sprite>(LayerKey(l.n), h => h.Completed += op =>
                 {
                     if (this == null || index >= renderers.Count || renderers[index] != sr || op.Status != AsyncOperationStatus.Succeeded || op.Result == null) return;
+                    var layerSprite = op.Result;
+#if DEVELOPMENT_BUILD || UNITY_EDITOR
+                    if (Trial != TrialFormat.Off) layerSprite = TrialCopy(layerSprite); // U-207's trial only
+#endif
                     sr.color = new Color(1f, 1f, 1f, alpha);
                     sr.drawMode = SpriteDrawMode.Tiled;
-                    sr.sprite = op.Result;
-                    tileW[index] = op.Result.bounds.size.x;
+                    sr.sprite = layerSprite;
+                    tileW[index] = layerSprite.bounds.size.x;
                     tileN[index] = TilesFor(FrameWidth(), tileW[index]);
-                    sr.size = new Vector2(tileW[index] * tileN[index], op.Result.bounds.size.y);
+                    sr.size = new Vector2(tileW[index] * tileN[index], layerSprite.bounds.size.y);
                     placeholders[index] = false;
                     appliedAlpha = -1f; // the nearest layer's and a layer's own alpha go back on at the next LateUpdate
                 });
@@ -558,6 +624,10 @@ namespace Meridian.View2D
         {
             foreach (var h in handles) if (h.IsValid()) ArtLoad.Release(h);
             handles.Clear();
+#if DEVELOPMENT_BUILD || UNITY_EDITOR
+            foreach (var o in trialMade) if (o != null) Destroy(o); // U-207's trial copies go with the set
+            trialMade.Clear();
+#endif
             nearFillFrom = null; nearFill = null;
             DropOthers();
         }

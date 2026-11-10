@@ -22,6 +22,27 @@ namespace Meridian.Tests
             Assert.IsTrue(SmoothGround.WallsOn, "B-230's walls draw behind dug cells (U-196's A/B is the capture's)");
             Assert.AreEqual(0, SmoothGround.WallProbe, "the walls' material carries the walls");
             Assert.IsNull(SmoothGround.WallProbeTexture, "no test tile stands in for a wall (U-205's A/B is the capture's)");
+            // U-207's trial (LEAD 23:2x): a launch flag that exists in development builds and the Editor only, off unless given
+            Assert.AreEqual(ParallaxLayers.TrialFormat.Off, ParallaxLayers.Trial, "the backdrops draw as imported");
+            Assert.AreEqual(ParallaxLayers.TrialFormat.Rgba32, ParallaxLayers.ParseTrial("rgba32"));
+            Assert.AreEqual(ParallaxLayers.TrialFormat.Dxt5, ParallaxLayers.ParseTrial("dxt5"));
+            Assert.AreEqual(ParallaxLayers.TrialFormat.Off, ParallaxLayers.ParseTrial("bc7"), "any other value: off");
+            Assert.AreEqual(ParallaxLayers.TrialFormat.Off, ParallaxLayers.ParseTrial(null));
+            Assert.IsTrue(ParallaxLayers.TrialCompiled, "compiled in here (the Editor)");
+            // a release build compiles it out: the switch, the flag's reader and the copy all sit inside the development-only block
+            string source = System.IO.File.ReadAllText("Assets/_Game/Code/Runtime/View2D/ParallaxLayers.cs");
+            int open = source.IndexOf("#if DEVELOPMENT_BUILD || UNITY_EDITOR", System.StringComparison.Ordinal);
+            int elseAt = source.IndexOf("#else", open, System.StringComparison.Ordinal);
+            Assert.Greater(open, 0); Assert.Greater(elseAt, open);
+            foreach (string inside in new[] { "public static TrialFormat Trial", "static void ReadTrialFlag()", "Sprite TrialCopy(Sprite s)" })
+            {
+                int at = source.IndexOf(inside, System.StringComparison.Ordinal);
+                Assert.IsTrue(at > open && at < elseAt, $"'{inside}' is inside the development-only block");
+            }
+            StringAssert.Contains("public const bool TrialCompiled = false;", source.Substring(elseAt), "a release build has no trial");
+            int uses = 0;
+            for (int at = source.IndexOf("TrialCopy(", System.StringComparison.Ordinal); at >= 0; at = source.IndexOf("TrialCopy(", at + 1, System.StringComparison.Ordinal)) uses++;
+            Assert.AreEqual(2, uses, "the copy is declared once and called once (inside its own development-only guard)");
         }
 
         [Test]
