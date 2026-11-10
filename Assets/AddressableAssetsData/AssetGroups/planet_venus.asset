@@ -440,6 +440,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: af00832a58da6b6449220d077e6d4806
+    m_Address: creatures/venus/veil_serpent/animator
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: b2a35b74d8b50734faedd7b43a6bc3b2
     m_Address: terrain/venus/ground_band_vent
     m_ReadOnly: 0

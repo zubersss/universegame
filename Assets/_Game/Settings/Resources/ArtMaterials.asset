@@ -302,7 +302,6 @@ MonoBehaviour:
   - creatures/mercury/cinderhulk_day
   - creatures/mercury/cinderhulk_night
   - creatures/space/ringmite
-  - creatures/venus/veil_serpent
   - fx/beam_ray/base
   - fx/crush_pulse/base
   - fx/diamond_rain/base
@@ -1446,7 +1445,7 @@ MonoBehaviour:
       length: 12
       loop: 1
   - key: creatures/venus/veil_serpent
-    fps: 10
+    fps: 12
     clips:
     - name: idle
       start: 0

@@ -335,6 +335,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 6d0e6b4a225e0be49a35ff17f8d257b5
+    m_Address: icons/catalogue/camp
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 6e9810b653ff8974f89de23c3d5d7e89
     m_Address: icons/skip_drive_mk2/base
     m_ReadOnly: 0
