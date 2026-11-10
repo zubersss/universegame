@@ -6,6 +6,15 @@ Owner: LEAD (only the Lead edits this). Do the open items below, then tell the L
 
 ## Open
 
+### USER-39 — Look over the new surveyor design (5 min, no game needed)
+The first design for the new-look surveyor you asked for after 0.6.0 is on this page: https://claude.ai/artifact/Ts7md2pqMrMby3hnTGZdiq
+It is drawings only; nothing in the game changes until you answer. Open the page, look at the pictures, then tell the Lead session:
+1. Is this the look? Yes, close but change something, or no.
+2. Is the figure the right weight beside the camp's crate and smelter?
+3. Do you like the face side-on?
+4. Do the crouch, the jump and the dig read the way you pictured them?
+A "yes" starts the surveyor being built as a moving rig in the game (about a day to a test scene you can play). A "change this" is about half a day a round.
+
 ### USER-38 — Play Build 0.6.1b: ten minutes with the shovel (10 min)
 Your shovel ask is in. The page with pictures: https://claude.ai/artifact/JQ1uqincAcQRRt1yFqrT5w
 Use the fixed build 0.6.1b (16:0x), not 0.6.1.
