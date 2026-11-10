@@ -6,6 +6,14 @@ Owner: LEAD (only the Lead edits this). Do the open items below, then tell the L
 
 ## Open
 
+### USER-40 — Free the laptop's memory: quit Ollama (1 min) — the team is blocked on this
+At 18:52 the laptop has 0.12 GB of memory free and no build or render can start (they need 1.5 GB). The biggest holder is the **Ollama** app: 4.2 GB, running since 11:47 this morning. It is not part of the game team.
+1. Look in the system tray (the small icons by the clock, bottom right; click the ^ arrow if it is hidden) for the Ollama llama icon.
+2. Right-click it and choose **Quit Ollama**.
+3. If you are not using them, also close the **Xbox** app and any Chrome windows you don't need.
+4. Tell the Lead session "done: USER-40".
+If you are using Ollama for something of your own, say so instead and the team will wait or work around it. You can start it again whenever the team is idle.
+
 ### USER-39 — Look over the new surveyor design (5 min, no game needed)
 The first design for the new-look surveyor you asked for after 0.6.0 is on this page: https://claude.ai/artifact/Ts7md2pqMrMby3hnTGZdiq
 It is drawings only; nothing in the game changes until you answer. Open the page, look at the pictures, then tell the Lead session:
