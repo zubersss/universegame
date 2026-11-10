@@ -6,8 +6,8 @@ five and a half heads tall, lean, BUILT (a skull and a jaw; shoulders, a rib cag
 hands with a palm, a thumb and fingers; boots on a foot), with small features, hair as a designed mass, a thin sure line.
 OUR OWN character and costume (no character of any film): a lean young field surveyor, mustard hair swept back, an
 off-white jumpsuit with rolled sleeves, the teal MERIDIAN sash and the brass compass badge, a brown belt with a pouch,
-brown boots, the red float pack with its plumb-bob antenna - and NO bubble helmet: on Earth a close helmet with a visor
-hangs on the pack (worn on airless worlds: one small drawing).
+brown boots, the red float pack with its plumb-bob antenna - and NO bubble helmet: on Earth no helmet at all (a close helmet with a visor
+stays in the ship and is worn on airless worlds: one small drawing).
 
 Figures now ship as DRAWN FRAMES, not a runtime cut-out rig (STYLE_V6 4a.7): this file is a parametric FIGURE - a
 skeleton posed by angles, turned to a view (side, three-quarter front, front), and every frame drawn fresh from it as a
@@ -134,9 +134,11 @@ def ik(root, target, l1, l2):
 
 
 # ---------------------------------------------------------------- shapes (metres, z up)
-def seg(a, b, wa, wb, bulge=0.0, n=8, cap0=0.0):
+def seg(a, b, wa, wb, bulge=0.0, n=8, cap0=0.0, peak=0.5):
     """A limb segment a -> b as four runs of points: one side a -> b, the cap round b, the other side b -> a, the cap
-    round a (its radius less cap0)."""
+    round a (its radius less cap0). bulge: how much fuller than a straight taper, fullest at `peak` of its length (a
+    thigh, a calf, a forearm: fuller above, tapering to the joint below)."""
+    e = math.log(0.5) / math.log(peak)
     (x0, z0), (x1, z1) = a, b
     ln = math.hypot(x1 - x0, z1 - z0) or 1e-6
     ux, uz = (x1 - x0) / ln, (z1 - z0) / ln
@@ -144,7 +146,7 @@ def seg(a, b, wa, wb, bulge=0.0, n=8, cap0=0.0):
     left, right = [], []
     for i in range(n + 1):
         t = i / n
-        w = (wa * (1 - t) + wb * t) / 2 + bulge * math.sin(math.pi * t)
+        w = (wa * (1 - t) + wb * t) / 2 + bulge * math.sin(math.pi * t ** e)
         cx, cz = x0 + (x1 - x0) * t, z0 + (z1 - z0) * t
         left.append((cx + nx * w, cz + nz * w))
         right.append((cx - nx * w, cz - nz * w))
@@ -170,8 +172,13 @@ class Fig:
 
     # ---- projection
     def pr(self, q, lat=0.0):
-        """A point of the body's plane, `lat` to the near side of it -> the drawing (metres)."""
-        return (q[0] * self.cs - lat * self.sn, q[1])
+        """A point of the body's plane, `lat` to the near side of it -> the drawing (metres). Seen from the front the
+        idle's weight shows as a sway: the hips over the standing leg, the shoulders coming back toward the middle."""
+        z = q[1]
+        sway = 0.0
+        if self.view == "front":
+            sway = -0.045 * (min(z, 0.95) / 0.95 if z <= 0.95 else max(0.25, 1 - 0.75 * (z - 0.95) / 0.5))
+        return (q[0] * self.cs - lat * self.sn + sway, z)
 
     def aw(self, w, dep):
         """A form w wide (side to side) and dep deep (front to back): how wide it is seen from this view."""
@@ -182,8 +189,9 @@ class Fig:
 
     # ---- limbs
     def lower(self, a, b, wa, wb, bulge, tone, far):
-        """A lower limb: its paint runs up under the joint and its line is open across it (no line crosses the bend)."""
-        o = seg(a, b, wa, wb, bulge, cap0=0.004)
+        """A lower limb: its paint runs up under the joint and its line is open across it (no line crosses the bend);
+        fullest a third of the way down (a calf, a forearm)."""
+        o = seg(a, b, wa, wb, bulge, cap0=0.004, peak=0.3)
         P_(self.d, o[0] + o[1] + o[2] + o[3], self.tone(tone + "_f", far), under=False)
         S(self.d, o[0] + o[1] + o[2], self.M["ln"], LINE, ends=(3, 3))
 
@@ -192,9 +200,9 @@ class Fig:
         lat = LAT["leg"] * (-1 if far else 1)
         hip, knee, ank = (self.pr(self.J[k + s], lat) for k in ("hip_", "knee_", "ank_"))
         d, M = self.d, self.M
-        th = seg(hip, knee, self.aw(0.165, 0.19), self.aw(0.115, 0.125), 0.006)
+        th = seg(hip, knee, self.aw(0.165, 0.19), self.aw(0.112, 0.12), 0.013, peak=0.3)      # a thigh: full above, lean at the knee
         S(d, th[0] + th[1] + th[2] + th[3], self.tone("suit", far), LINE, cyclic=True)
-        self.lower(knee, ank, self.aw(0.112, 0.122), self.aw(0.085, 0.09), 0.007, "suit", far)
+        self.lower(knee, ank, self.aw(0.108, 0.116), self.aw(0.08, 0.085), 0.016, "suit", far)   # a calf
         kn = self.p.get("kn_" + s, 0.0)
         ux, uz = (ank[0] - knee[0]), (ank[1] - knee[1])
         ln = math.hypot(ux, uz) or 1e-6
@@ -249,7 +257,7 @@ class Fig:
         d, M = self.d, self.M
         ua = seg(sh, elb, self.aw(0.105, 0.115), self.aw(0.086, 0.092), 0.004)
         S(d, ua[0] + ua[1] + ua[2] + ua[3], self.tone("suit", far), LINE, cyclic=True)
-        self.lower(elb, wr, self.aw(0.08, 0.086), self.aw(0.056, 0.06), 0.006, "skin", far)
+        self.lower(elb, wr, self.aw(0.076, 0.082), self.aw(0.054, 0.058), 0.012, "skin", far)   # a forearm: full below the elbow
         ang = math.atan2(wr[0] - elb[0], -(wr[1] - elb[1])) + math.radians(self.p.get("wr_" + s, 0.0))
         self.hand(wr, ang, self.grip[1 if far else 0], far, -1 if (self.view == "front" and far) else 1)
         ux, uz = elb[0] - sh[0], elb[1] - sh[1]                                 # the rolled sleeve: a thick roll over the elbow
@@ -333,7 +341,7 @@ class Fig:
         S(self.d, c[0] + c[2], self.M["suit"], LINE * 0.85, cyclic=True, rnd=0.006, gap=0)
 
     def pack(self):
-        """The float pack on the back, its plumb-bob antenna, and the close helmet hung on it (worn on airless worlds)."""
+        """The float pack on the back and its plumb-bob antenna."""
         if self.view == "front":
             return
         d, M, J = self.d, self.M, self.J
@@ -344,9 +352,8 @@ class Fig:
         q = lambda a, b: self.pr(add(c, add(mul(n, a / max(self.cs, 0.35) * 1.0), mul(u, b))))   # noqa: E731
         k = hw
         box = [q(-k, -0.19), q(k, -0.19), q(k, 0.17), q(k * 0.6, 0.2), q(-k * 0.7, 0.2), q(-k, 0.15)]
-        hang = self.pr(add(c, add(mul(n, -(0.085 + 0.06)), mul(u, -0.13))))       # the helmet, hooked low on the pack's back
-        S(d, [(hang[0] + 0.105 * math.cos(t), hang[1] + 0.115 * math.sin(t)) for t in np.linspace(0, 2 * math.pi, 22, endpoint=False)], M["steel"], LINE * 0.9, cyclic=True, gap=0, keep="helm")
-        P_(d, [(hang[0] - 0.02, hang[1] + 0.06), (hang[0] + 0.12, hang[1] + 0.06), (hang[0] + 0.12, hang[1] - 0.045), (hang[0] - 0.02, hang[1] - 0.045)], M["visor_f"], rnd=0.02, clip="helm")
+        # (LEAD 08:2x: no helmet on the pack on Earth - hung there it read as a pale ball behind the hip; it stays in the
+        # ship. The bust shows it worn.)
         top = q(-k * 0.75, 0.19)                                                # the antenna: a thin straight whip at the pack's
         aa = ch + math.radians(self.p.get("ant", 0.0))                          # back corner and the brass bob ("ant" bends it back:
         au, an_ = (math.sin(aa) * self.cs, math.cos(aa)), (math.cos(aa), -math.sin(aa) * self.cs)   # a crouch lays it along the pack).
@@ -555,7 +562,7 @@ def preview(out):
         pngio.write_png(os.path.join(dd, f"head_{view}_8x.png"), u8)
     rows = [np.tile(paper, (30, Wd, 1)).astype(np.float32)]
     review._label(rows[0], "B-231 (D-200): THE SURVEYOR REDESIGNED - a model sheet. Our own character, drawn as a built figure: every drawing here is made fresh from a posed skeleton (no cut-out parts). PREVIEW, nothing exported", 6, 8)
-    rows.append(head("THE TURN at 2x the game's size: side | three-quarter front | front ||| the side view at 4x ||| the close helmet for airless worlds, worn (at 4x); on Earth it hangs on the pack"))
+    rows.append(head("THE TURN at 2x the game's size: side | three-quarter front | front ||| the side view at 4x ||| the close helmet for airless worlds, worn (at 4x); on Earth it stays in the ship"))
     r = np.tile(STAGE, (600, Wd, 1)).astype(np.float32)
     x = 10
     for view in ("side", "three-quarter", "front"):

@@ -138,7 +138,7 @@ class Painting:
         col = colour if np.ndim(colour) == 1 else self.full(colour)[y0:y1, x0:x1]
         self.img[y0:y1, x0:x1] = self.img[y0:y1, x0:x1] * (1 - m) + col * m
 
-    def _dab(self, cx, cy, a, b, th, col, alpha, edge, streak):
+    def _dab(self, cx, cy, a, b, th, col, alpha, edge, streak, clip=None):
         """ONE stroke of the brush, in pixels: a flat oval of one colour, half-length a along th, half-width b."""
         R = int(math.ceil(max(a, b))) + 1
         x0, x1, y0, y1 = max(int(cx) - R, 0), min(int(cx) + R + 1, self.pw), max(int(cy) - R, 0), min(int(cy) + R + 1, self.ph)
@@ -151,18 +151,20 @@ class Painting:
         m = np.clip((1 - (u * u + v * v)) * edge, 0, 1)
         if streak:
             m = m * (1 - streak * (0.5 + 0.5 * np.sin(v * 8.0 + cx * 0.7)) * np.clip(u + 0.4, 0, 1))
+        if clip is not None:                                    # a stroke that must stay ON a form (bark on a trunk, a leaf)
+            m = m * clip[y0:y1, x0:x1]
         m = (m * alpha)[..., None]
         sub = self.img[y0:y1, x0:x1]
         self.img[y0:y1, x0:x1] = sub * (1 - m) + col * m
         self.count += 1
 
-    def dab(self, cx, cy, a, b, th, col, alpha=1.0, edge=3.0, streak=0.25):
+    def dab(self, cx, cy, a, b, th, col, alpha=1.0, edge=3.0, streak=0.25, clip=None):
         """One dab in frame units. edge: 1 = soft and wet, 5 = crisp; streak: how dry its tail and bristles are."""
         q = self.Q
-        self._dab(cx * q, cy * q, a * q, max(0.6, b * q), th, col, alpha, edge, streak)
+        self._dab(cx * q, cy * q, a * q, max(0.6, b * q), th, col, alpha, edge, streak, clip)
 
     def brush(self, under, where, n, size, aspect=(2.0, 4.0), angle=0.0, spread=0.3, alpha=(0.7, 1.0), jitter=0.05,
-              hue=0.012, edge=3.0, streak=0.25):
+              hue=0.012, edge=3.0, streak=0.25, clip=None):
         """n dabs where `where` (0..1: how likely a dab lands there) allows. Each takes its colour from `under` (an
         underpainting, or one rgb) at its own centre, a little off in value (jitter) and hue; angle: radians, or a
         function of the frame point (x, y). Dabs spill past the mask by their own size: that spill is the painted edge."""
@@ -181,7 +183,7 @@ class Painting:
             b = max(0.6, a / rng.uniform(*aspect))
             th = (angle(cx / q, cy / q) if callable(angle) else angle) + rng.normal(0, spread)
             col = (under if flat else under[cy, cx]) * (1 + rng.normal(0, jitter)) + rng.normal(0, hue, 3).astype(np.float32)
-            self._dab(cx + rng.uniform(-0.5, 0.5), cy + rng.uniform(-0.5, 0.5), a, b, th, np.clip(col, 0, 1), rng.uniform(*alpha), edge, streak)
+            self._dab(cx + rng.uniform(-0.5, 0.5), cy + rng.uniform(-0.5, 0.5), a, b, th, np.clip(col, 0, 1), rng.uniform(*alpha), edge, streak, clip)
 
     def stroke(self, pts, w0, w1, col, edge=4.0, jitter=0.03):
         """A long brush stroke along a polyline (a root, a trunk's plane, a grass blade): dabs laid end to end, the width
