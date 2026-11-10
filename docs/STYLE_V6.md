@@ -113,6 +113,65 @@ it is DRAWN, from a second look at the stills (twelve of twenty-two viewed).
 5. **Ground cover.** The ground is covered: leaves, litter, low plants, stones half in the earth, light and
    shadow across them.
 
+## 4b. Detail: as close to the reference as we can get (D-204, the owner's third word)
+
+The owner, after the forest frame and the first frame sets: "I don't like the art style actually. Can you make it a
+lot more detailed, as close as your system can handle, as close to the reference as possible." Sections 2 to 4a
+stand as the METHOD (a pencil-line cel on a painting). What failed is the AMOUNT: our frame is sparse and flat
+beside any still. This section sets the amount, from two stills looked at again beside our frame
+(blender/preview/b251/forest_frame_96_plates.png). Where it disagrees with an earlier section, this one wins.
+Still true: technique only; no character, design, composition or frame of the film is copied or traced.
+
+**What our frame lacks, named**
+- Figure: a thick, even outline round tube limbs; a cream suit with almost nothing drawn inside it; one face.
+- Scenery: one flat mid-green; the same few plants repeated with gaps between; far trees as hard-edged cut-outs;
+  the ground and the earth as flat bands with grey polygons for stones.
+- Props (the crates, the smelter): flat toy shapes with no construction.
+
+**Figures (cels)**
+1. **A scratchy pencil line, thin and dark warm grey.** The mean width stays 1.5 px at the game's zoom (D-198),
+   but the line is SKETCHED: it varies from a hair to twice the mean, breaks, overshoots a corner a little, and is
+   doubled or tripled where the hand searched (hair, a shoulder, a fold). §2 rule 2 ("few lines") is withdrawn:
+   few lines is not few details.
+2. **Drawn inside the silhouette.** Anatomy shows through: the collar bone and neck cords, the shoulder and
+   elbow, the wrist bone, knuckles and finger joints, the knee cap, the ankle. Cloth is cloth: folds where it
+   bends (armpit, elbow, waist, crotch, knee, ankle), seams, a collar, cuffs, pocket flaps, buttons or buckles,
+   boot welts, laces and soles. Kit is built: straps with buckles, stitched panels, dents, a coiled wire.
+3. **Hair in loose overlapping tufts** with strand flicks and stray hairs breaking the outline.
+4. **A face that acts.** Brows, upper lids, pupils that look somewhere, a nose with a nostril, an ear with its
+   inner line, a mouth that opens with teeth. At least five expressions tied to what the body does (rest, effort
+   at the dig's contact, strain on the lever, surprise, pleased).
+5. **Organic shapes.** Limbs swell and taper with muscle and bone; no limb is a tube of one width; the two sides of
+   a form are never parallel. The silhouette of every drawing is asymmetrical.
+6. **Still flat paint** (that is the cel): no gradient, no texture; one flat shadow shape at most.
+7. **Measure:** the idle drawing carries at least three times the interior line length of slice 1's (B-250);
+   state both numbers.
+
+**Scenery (paintings)**
+1. **Every near and middle plant is modelled.** A leaf has three to five values, a light midrib and side veins, a
+   lit edge the light comes through, and a dark brushed contour on its shade side (4a's "painted accents" are now
+   the rule, not the exception). Near leaves are big: up to a metre.
+2. **Trunks are portraits.** Bark pattern wrapped round the form (rings, scars, flakes, cracks), moss and lichen
+   in yellow-green and pink-grey patches, roots that grip the ground, vines with their own leaves.
+3. **Far layers are airbrushed.** Two or three veils of mist with soft-edged silhouettes of palms and fronds,
+   each paler and bluer; no hard-edged cut-out shape behind the middle layer.
+4. **The ground is littered and lit.** A warm pool of light where the figures act, cool shadow under the trees,
+   and across both: fallen leaves, twigs, pebbles, grass tufts, low seedlings, each with its own small shadow.
+   Underground the same care: strata with broken edges, roots, stones turned by three or four values, pockets of
+   darker loam; no flat band anywhere.
+5. **Colour variety.** Yellow-green in light, blue-green in shade, lavender shadow on trunks, and accents of
+   new red-pink foliage, yellow leaves and pale blossoms. Never one green.
+6. **Measure:** at 96 px per metre no 200 × 200 px square of the near or middle layer is one flat tone; the
+   lightest, quietest area is still the stage where the figures act.
+
+**Props and acting objects (cels)**: drawn with their construction: planks with grain flicks and nail heads, rope
+and strap, dents and scuffs, rivet rows and seams on metal, soot round a flue. No flat toy shape.
+
+**How it is made:** code alone reaches its ceiling early (B-251 showed a painted plate is better drawn than any
+rule). So scenery is assembled from PAINTED MATERIAL (whole plants, trunks, ground patches, far veils made with an
+image generator and credited, D-202), placed, re-keyed and lit by code; code-only painting fills what no plate
+covers. Figures stay drawn by code from poses (they must move), with the detail above built into the drawing.
+
 ## 5. What v6 does not change
 
 Original designs only (D-087, D-101: no faces on plants or objects). No combat. The solar system, the digging game,
