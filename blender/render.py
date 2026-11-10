@@ -730,6 +730,9 @@ def do_v3_sheet(entry, preview):
                       "loop": bool(c.get("loop", False))})
         if c.get("loop"):
             clips[-1]["loop_from"] = int(c.get("loop_from", 0))
+        for extra_key in ("contact", "slide_max"):   # B-246 (D-196): a dig clip's contact drawing and how far the tool may
+            if extra_key in c:                       # slide through the glove; a row without them writes what it always wrote
+                clips[-1][extra_key] = c[extra_key]
         for k in range(int(c["frames"])):
             f = markers[mname] + k
             for sname, xy in sock_src.get(str(f), {}).items():
@@ -754,7 +757,8 @@ def do_v3_sheet(entry, preview):
             "squash_root": bool(entry.get("squash_root", True))}
     if sockets and all(len(v) == len(frames) for v in sockets.values()):
         meta["sockets"] = sockets
-        meta["sockets_units"] = "metres in sprite space from the pivot, one [x, y] per frame in sheet order"
+        meta["sockets_units"] = entry.get("sockets_units", "metres in sprite space from the pivot, one [x, y] per frame in sheet order")
+    meta.update(entry.get("json_extra", {}))        # B-246: top-level fields a sheet carries for UNITY (side_dig: carry, ready)
     if entry.get("hitbox") == "measure":            # B-224: a v2 sheet's "hitbox" carried over, measured on the new frames
         import numpy as _np
         sel = [i for c in clips if c["name"] in ("idle", "walk") for i in range(c["start"], c["start"] + c["length"])] or list(range(len(frames)))

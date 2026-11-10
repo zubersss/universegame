@@ -279,7 +279,10 @@ def hand_sockets():
 # body. Two candidates for LEAD's pick (rev 2): "low" = the blade ahead and a little down (sheet 1: it read as a lance, and
 # a tip 0.04 m over the ground meets every rising slope); "shouldered" = the glove where it is, the shaft leaning back over
 # the shoulder behind the body, the blade up behind the helmet. The Beam's carry (a short tool, low at the side) is UNITY's.
-CARRY = {"low": (-0.25, 0.25, False), "shouldered": (math.radians(110.0), 0.08, True)}
+# RULED (LEAD 02:1x): both, as two states. "carry" = STOWED: behind the body at 125 deg (at 110 the blade showed through the
+# helmet's glass at idle), swing 0.08. "ready" = the low pose, in front, swing 0.25: UNITY holds it 1.5 s after the last
+# swing, then stows. The dict keeps rev 2's names for the sheet's two rows.
+CARRY = {"low": (-0.25, 0.25, False), "shouldered": (math.radians(125.0), 0.08, True)}
 SIDE_CLIPS = (("idle", 0, 10, SV.idle_pose), ("walk", 10, 12, SV.walk_pose), ("run", 72, 12, SV.run_pose))
 
 
@@ -364,7 +367,7 @@ def sockets():
 # where it has one, "slide_max" (m); a top-level "carry": {"angle": radians} (the carried tool rides the idle glove)
 SOCKETS_UNITS = ("per frame in sheet order: [x, z] metres from the pivot to the front glove's centre (x right, z up, facing "
                  "right) and the tool's direction on that drawing (radians, counter-clockwise from +x)")
-CARRY_PICK = "low"                      # until LEAD picks between rev 2's two carry rows
+FIST_KEY = "props/rig/grip_fist"
 
 
 def clip_fields(c):
@@ -376,11 +379,17 @@ def clip_fields(c):
     return out
 
 
-def carry_json(kind):
-    a, swing, behind = CARRY[kind]
-    return {"angle": round(a, 4), "swing": swing, "behind": behind,
-            "note": "the tool at rest on side's idle / walk / run glove: its direction (radians, CCW from +x) plus swing x the "
-                    "front arm's own angle; behind = sorted behind the body"}
+def json_extra():
+    """side_dig.json's top-level "carry" (stowed) and "ready" (LEAD 02:1x): the shovel at rest rides side's idle / walk /
+    run glove (props/rig/hand_socket.json's own table); its direction = angle + swing x the front arm's own angle."""
+    (ra, rs, _rb), (ca, cs, cb) = CARRY["low"], CARRY["shouldered"]
+    return {"carry": {"angle": round(ca, 4), "swing": cs, "behind": cb,
+                      "note": "STOWED: the tool's direction (radians, counter-clockwise from +x) on side's idle / walk / run glove, "
+                              "plus swing x the front arm's own angle; sorted BEHIND the body (the shaft hidden by the torso, the "
+                              "blade up behind the helmet); no fist over it"},
+            "ready": {"angle": round(ra, 4), "swing": rs,
+                      "note": "the low pose in front of the body, held for 1.5 s after the last swing, then stowed; the fist "
+                              "(props/rig/grip_fist) over the tool"}}
 
 
 def build(out=DEFAULT_OUT):
@@ -404,10 +413,10 @@ ENTRY = {"key": KEY, "style": "v3", "palette_tints": [["sky", 0.25]],
          "frame": [FW, FH], "pivot": [0.5, 0.0], "facing": "right", "squash_root": True, "planet": "earth", "seed": SEED,
          "beside": "characters/surveyor/side", "review_name": "b246_surveyor_side_dig",
          "clips": [dict({"name": c, "frames": n, "loop": lp}, **clip_fields(c)) for c, n, lp in CLIPS],
-         "sockets_units": SOCKETS_UNITS, "json_extra": {"carry": carry_json(CARRY_PICK)},
+         "sockets_units": SOCKETS_UNITS, "json_extra": json_extra(),
          "note": "B-246 (D-196): the dig as one motion - dig_down / dig_fwd / dig_up / dig_fwd_near (5 each, contact on drawing "
                  "1, slide_max where the glove may grip the shaft) and the Beam's five aim holds (2 each); the front hand empty, "
-                 "a socket [x, z, angle] per frame; side and side_b untouched. NOT in the manifest until LEAD's ACCEPTED"}
+                 "a socket [x, z, angle] per frame; side and side_b untouched. LEAD's ACCEPTED on rev 2, 11-10 02:1x"}
 
 
 # ---------------------------------------------------------------- lock-free preview (sheet 1)
@@ -424,6 +433,56 @@ def grip_frame():
         G.seam(d, G.bowed_line((x, 0.062), (x + 0.012, -0.055), bow=0.12, n=4), M["ink"])
     img, _w = GR.render_frame(fakegp.strokes_of(d, gp), 32, 32, PPU, (0.5, 0.5), ss=2, seed=SEED * 1000 + 900)
     return img
+
+
+def fist_export(art):
+    """props/rig/grip_fist (LEAD 02:1x: YES, on every dig clip, the aim holds and the ready pose; not when stowed)."""
+    from meridian import pngio, v3
+    img = grip_frame()
+    m = v3.EDGE_MARGIN
+    problems = []
+    if img[:m, :, 3].any() or img[-m:, :, 3].any() or img[:, :m, 3].any() or img[:, -m:, 3].any():
+        problems.append(f"touches the {m} px edge")
+    if v3.palette_hits(img, "earth")[0] < 0.995:
+        problems.append("palette")
+    if problems:
+        raise ValueError(f"B-246 {FIST_KEY}: " + "; ".join(problems))
+    base = os.path.join(art, *FIST_KEY.split("/"))
+    os.makedirs(os.path.dirname(base), exist_ok=True)
+    n = pngio.write_png(base + "_color.png", img)
+    meta = {"key": FIST_KEY, "style": "v3", "width": img.shape[1], "height": img.shape[0], "palette": "earth", "ppu": PPU,
+            "pivot": [0.5, 0.5],
+            "note": "B-246 (D-196): the surveyor's front glove as a fist round a shaft. Its pivot (the sprite's centre) sits ON the "
+                    "shaft's centre line at the hand socket (the glove's centre), the shaft running along the sprite's +x: lay "
+                    "it OVER the tool at characters/surveyor/side_dig's socket, turned to the tool's angle, on every dig clip, "
+                    "the aim holds and the ready pose; not when the tool is stowed. Not tinted (the suit's own glove)"}
+    with open(base + ".json", "w", encoding="utf-8", newline="\n") as fh:
+        json.dump(meta, fh, indent=2)
+        fh.write("\n")
+    return [(FIST_KEY, img.shape[1], img.shape[0], n)]
+
+
+def fist_review(out, footnote=None, art=None):
+    """The exported fist read back: at 1x and 6x on paper, and over the game's shovel at 2x; stamped."""
+    import time
+    import numpy as np
+    sys.path.insert(0, os.path.dirname(HERE))
+    import review
+    from meridian import pngio
+    art = art or review.ART
+    paper = np.array(review.PAPER, np.float32)
+    img = pngio.read_png_np(os.path.join(art, *FIST_KEY.split("/")) + "_color.png")
+    f = img.astype(np.float32) / 255.0
+    on = np.tile(paper * 0.8, (img.shape[0], img.shape[1], 1)).astype(np.float32)
+    on = f[..., :3] * f[..., 3:4] + on * (1 - f[..., 3:4])
+    sheet = np.tile(paper, (260, 640, 1)).astype(np.float32)
+    review._label(sheet, f"{FIST_KEY} as exported ({img.shape[1]}x{img.shape[0]}, pivot centre, the shaft along +x): 1x, 6x", 6, 6, scale=1)
+    sheet[30:30 + img.shape[0], 10:10 + img.shape[1]] = on
+    big = np.repeat(np.repeat(on, 6, 0), 6, 1)
+    sheet[30:30 + big.shape[0], 60:60 + big.shape[1]] = big
+    review.draw(sheet, time.strftime("%m-%d %H:%M") + " " + (footnote or "B-246 grip_fist read-back"), 2, sheet.shape[0] - 14, (1.0, 1.0, 0.85))
+    review.write(out, sheet)
+    print("written", out)
 
 
 def _frame(pose, f, draw=None):
@@ -685,10 +744,14 @@ def preview(out, footnote=None, rev2=True):
         s += n
     meta = {"key": KEY, "style": "v3", "frame_width": FW, "frame_height": FH, "columns": sheet_cols, "gutter": gg,
             "frames": len(frames), "fps": v3.FPS, "pivot": [0.5, 0.0], "facing": "right", "ppu": PPU, "animations": anims,
-            "squash_root": True, "sockets": {"hand": hands}, "sockets_units": SOCKETS_UNITS, "carry": carry_json(CARRY_PICK)}
+            "squash_root": True, "sockets": {"hand": hands}, "sockets_units": SOCKETS_UNITS}
+    meta.update(json_extra())
     problems = v3.validate_sheet(meta, sheet.shape)
     if json.dumps(meta).count('"hand"') != 1:
         problems.append('the json names "hand" more than once (UNITY\'s socket reader finds the array by that name)')
+    mrow = manifest_row_problem()
+    if mrow:
+        problems.append(mrow)
     m = v3.EDGE_MARGIN
     clipped = [i for i, im in enumerate(frames) if im[:m, :, 3].any() or im[:, :m, 3].any() or im[:, -m:, 3].any()]
     if clipped:
@@ -740,5 +803,20 @@ def preview(out, footnote=None, rev2=True):
         print("  " + c + ": " + " | ".join(f"({h[0]:+.2f}, {h[1]:.2f}, {math.degrees(h[2]):+.0f})" for h in hands[s0:s0 + n]))
 
 
-if __name__ == "__main__":                       # python -I build_surveyor_side_dig.py <review png> [--full]
-    preview(sys.argv[1], rev2="--full" not in sys.argv)
+def manifest_row_problem():
+    """The manifest's row for KEY against ENTRY (the row is pasted from --entry, so the two cannot drift unseen)."""
+    with open(os.path.join(os.path.dirname(HERE), "manifest.json"), encoding="utf-8") as fh:
+        rows = json.load(fh)["assets"]
+    row = next((r for r in rows if r.get("key") == KEY), None)
+    if row is None:
+        return "no manifest row yet"
+    want = json.loads(json.dumps(ENTRY))
+    diff = sorted(k for k in set(row) | set(want) if row.get(k) != want.get(k))
+    return ("the manifest row differs from ENTRY in " + ", ".join(diff)) if diff else None
+
+
+if __name__ == "__main__":                       # python -I build_surveyor_side_dig.py <review png> [--full] | --entry
+    if "--entry" in sys.argv:                    # the manifest row, as one line of JSON
+        print("ROW " + json.dumps(ENTRY))
+    else:
+        preview(sys.argv[1], rev2="--full" not in sys.argv)

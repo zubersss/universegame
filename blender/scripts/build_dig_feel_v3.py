@@ -144,15 +144,16 @@ def chip_frame(size, stage, seed, n, Lmax):
     frac = {1: 0.45, 2: 0.75, 3: 1.0}[stage]
     rng = np.random.default_rng(seed + 50)
     flakes = []
-    for (pts, _br) in S:                                                 # each crack's two flakes, fixed for all stages
-        for _f in range(2):
-            k = int(rng.integers(1, max(2, len(pts))))
+    for (pts, _br) in S:                                                 # each crack's two flakes, fixed for all stages: uneven
+        for _f in range(2):                                              # four-cornered slivers, each its own length and turn
+            k = int(rng.integers(1, max(2, len(pts))))                   # (run 1's three-cornered ones read as little arrowheads)
             px, py = pts[min(k, len(pts) - 1)]
-            off, fa, fr = float(rng.uniform(3.5, 6.0)), float(rng.uniform(0, TAU)), float(rng.uniform(2.2, 3.4))
-            sides = int(rng.integers(3, 5))
-            flakes.append((k, [(px + off * math.cos(fa) + fr * float(rng.uniform(0.7, 1.2)) * math.cos(fa + TAU * q / sides + 0.4),
-                                py + off * math.sin(fa) + fr * float(rng.uniform(0.6, 1.0)) * math.sin(fa + TAU * q / sides + 0.4))
-                               for q in range(sides)]))
+            off, fa = float(rng.uniform(3.5, 6.0)), float(rng.uniform(0, TAU))
+            L, w, turn = float(rng.uniform(2.6, 4.6)), float(rng.uniform(1.2, 2.0)), float(rng.uniform(0, TAU))
+            quad = [(L * float(rng.uniform(0.8, 1.1)), 0.0), (0.2 * L, w * float(rng.uniform(0.7, 1.2))),
+                    (-L * float(rng.uniform(0.6, 1.0)), 0.3 * w), (-0.1 * L, -w * float(rng.uniform(0.7, 1.2)))]
+            ct, st_ = math.cos(turn), math.sin(turn)
+            flakes.append((k, [(px + off * math.cos(fa) + x * ct - y * st_, py + off * math.sin(fa) + x * st_ + y * ct) for x, y in quad]))
 
     def fn(d, M):
         def at(pts):
@@ -176,13 +177,13 @@ def chip_frame(size, stage, seed, n, Lmax):
             if ci >= count:
                 continue
             keep = max(2, int(math.ceil(len(pts) * frac)))
-            crack(pts[:keep], 1.5 if stage == 3 else 1.2, 0.6)
+            crack(pts[:keep], {1: 1.5, 2: 1.7, 3: 2.0}[stage], 0.7)      # heavier at the contact: the stage must read at 1x
             for bi, (k, bp) in enumerate(branches):
                 if k < keep and (stage == 3 or (stage == 2 and bi == 0)):
-                    crack(bp if stage == 3 else bp[:max(2, len(bp) // 2 + 1)], 0.9, 0.5)
-            if stage >= 2:
+                    crack(bp if stage == 3 else bp[:max(2, len(bp) // 2 + 1)], 1.0, 0.5)
+            if stage == 3:                                               # flakes only on the last stage, one a crack
                 for qi, (k, poly) in enumerate(mine):
-                    if k < keep and (stage == 3 or qi == 0):
+                    if k < keep and qi == 0:
                         if all(math.hypot(x, y) < R_lim for x, y in poly):
                             G.stroke(d, at(poly), M["offwhite"], I * 0.7, cyclic=True)
     return frame(size, size, fn, seed + stage)
@@ -269,7 +270,7 @@ def kit():
         {"pivot": [0.5, 0.5], "stages": 3,
          "note": "B-246: three crack stages from the contact point for the brush (frame = stage - 1; a stage keeps the one before "
                  "and grows it); cream + ink: tint by the dug cell's tone_hex as the clods (D-190)"})
-    add("fx/dig_chip/cell", [chip_frame(64, s, 3300, 6, 26.0) for s in (1, 2, 3)],
+    add("fx/dig_chip/cell", [chip_frame(64, s, 3300, 5, 25.0) for s in (1, 2, 3)],
         {"pivot": [0.5, 0.5], "stages": 3,
          "note": "B-246: the same three stages inside one 1 m cell (nothing crosses its edge); cream + ink: tint by tone_hex"})
     add("fx/beam_contact/base", [contact_frame(k) for k in range(6)],
@@ -500,6 +501,8 @@ def preview(out, footnote=None):
             on[int(SWC[1]) - 3:int(SWC[1]) + 4, int(SWC[0])] = (0.85, 0.15, 0.1)
             on[int(SWC[1]), int(SWC[0]) - 3:int(SWC[0]) + 4] = (0.85, 0.15, 0.1)
             cells.append(zoom(on, k))
+    rows.append(row(cells, gap=6))                                       # (run 1: one row for both overflowed the sheet)
+    cells = []
     b246 = os.path.join(os.path.dirname(out), "b246")
     dig_png, dig_js = os.path.join(b246, "side_dig_color.png"), os.path.join(b246, "side_dig.json")
     shovel_p = os.path.join(ART, "props", "rig", "shovel_color.png")
@@ -523,7 +526,8 @@ def preview(out, footnote=None):
                 place(cell, sw[sj], SWC, math.degrees(hc[2]) + SW_END, ((1.5 + hc[0]) * 128, (3.0 - hc[1]) * 128), k=2)
             place(cell, shovel, (0.0667 * shovel.shape[1], shovel.shape[0] * 0.5), math.degrees(ha), at)
             cells.append(cell)
-    rows.append(row(cells, gap=6))
+    if cells:
+        rows.append(row(cells, gap=6))
     lines = [f"{key}: sheet {sheet.shape[1]}x{sheet.shape[0]}, {len(frames)} frames of {frames[0].shape[1]}x{frames[0].shape[0]}, palette {v3.palette_hits(sheet, 'earth')[0] * 100:.1f}%"
              for key, (sheet, _e, frames) in K.items()]
     lines.append("problems: " + ("; ".join(problems) if problems else "none"))
