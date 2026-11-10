@@ -6,6 +6,17 @@ Owner: LEAD (only the Lead edits this). Do the open items below, then tell the L
 
 ## Open
 
+### USER-45 — Play Build 0.6.3: ten minutes of the rebuilt digging (10 min)
+You said digging felt disconnected from your clicks and from the surveyor. It has been rebuilt. The page with frame-by-frame pictures: https://claude.ai/artifact/TdyF9gzKsFWzXebcu5KUSm
+1. Double-click `C:\dev\universegame\Build\MERIDIAN_0.6.3\MERIDIAN.exe` and choose **NEW**.
+2. Click once, quickly, on the ground beside you: a whole swing plays and lands. Then click fast, then hold.
+3. Move the mouse without pressing: four brackets show where the next dig will land (mustard at the edge of your reach, red when there is nothing to dig).
+4. Dig straight down, into a wall beside you, and above your head in a tunnel.
+5. Go deeper: hard ground takes several hits, each leaving a crack.
+6. Sell (G), buy The Beam (K, 250 Scrip) and dig with it.
+Then tell the Lead session: does a click feel connected to the dig now; do the surveyor and shovel look like they are doing the digging; are several hits on hard ground satisfying or tedious; and from last time: do the holes look right, is the shovel a good start, is 250 Scrip right for the Beam?
+Known already: the surveyor is still the round-headed one (the new look is on its own page, USER-44); the marker's small cross is being redrawn; upward digging in a low tunnel pushes the blade into the ceiling; Mars and Space may hitch slightly (a memory fault found today, fixed next); no collapse yet and the sounds are still synthesized.
+
 ### USER-44 — Second look at the new art style (5 min, no game needed)
 You liked the colours of the first test and not the drawing ("still looks like a 1930s cartoon, big circle head and eyes"). The second test is on the same page: https://claude.ai/artifact/DfszsRAPjF6hwbjr5i36GX
 It shows the surveyor redrawn with natural proportions, and Earth's forest edge painted plant by plant, at two camera distances with a button to flip to today's game. It also says plainly where this still falls short of the film. Nothing in the game changes until you answer. Tell the Lead session:
