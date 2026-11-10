@@ -167,9 +167,9 @@ def greens(near, pale=0.0, dark=0.0):
 
 
 # ---------------------------------------------------------------- the kinds, each about its own foot (0, 0); y up is negative
-def emergent_into(P, tf, s=1.0, pale=0.0):
+def emergent_into(P, tf, s=1.0, pale=0.0, trunk_pale=None):
     """An emergent tree about 7.5 m tall: a pale trunk rising clear, four buttress roots as thin planes, a small high crown."""
-    bark = hz(("#57504C", "#7C7468", "#A69C88", "#CFC5AC"), pale)
+    bark = hz(("#57504C", "#7C7468", "#A69C88", "#CFC5AC"), pale if trunk_pale is None else trunk_pale)   # (a far one: its trunk may be paler than its crown)
     leafs = hz(("#4E6A49", "#6C8B58", "#93AE6E", "#BACB8A"), pale)
     T = lambda pts: [tf(*p) for p in pts]                                      # noqa: E731
     fl = flipped(tf)

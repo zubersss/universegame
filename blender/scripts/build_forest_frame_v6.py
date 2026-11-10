@@ -268,9 +268,10 @@ def paint(ppm, x0, gy):
     P.img[:] = air
     P.brush(air, above, 1600, (40 * s, 110 * s), (3.0, 5.5), 0.0, 0.1, (0.5, 0.9), 0.02, 0.006, 1.5, 0.15)
     # ---- FAR: hazy forest silhouettes, two ranks, soft
-    for z_top, col, amp in ((7.6, "#A9BEB3", 1.3), (5.4, "#96AE9C", 1.1)):
+    span = np.clip((xx - fx(6.5)) / (2.5 * ppm), 0, 1) * np.clip((fx(22.5) - xx) / (2.5 * ppm), 0, 1)   # behind the clearing
+    for z_top, col, amp, keep in ((7.6, "#A9BEB3", 1.3, 1.0), (5.4, "#96AE9C", 1.1, 0.25)):   # behind the clearing the nearer band gives way to the drawn ranks below
         line = fy(z_top) + amp * ppm * (0.6 * P.line1(190 * s) + 0.4 * P.line1(40 * s))
-        m = P.below(line, 10 * s) * above
+        m = P.below(line, 10 * s) * above * (1 - (1 - keep) * span)
         u = lerp(rgb(col), rgb("#D5D9C0"), np.clip((yy - fy(z_top)) / (z_top * ppm), 0, 1) * 0.8)
         P.lay(u, m * 0.92)
         P.brush(u, m, 1500, (12 * s, 34 * s), (1.2, 2.2), 0.0, 1.2, (0.4, 0.8), 0.03, 0.008, 1.5, 0.1)
@@ -303,21 +304,61 @@ def paint(ppm, x0, gy):
 
     # THE FAR RANKS AS HAZE (LEAD 09:1x): behind the clearing a soft mass with a few lights in it - not small pale copies of
     # the near kinds; trunks only hinted; two emergent trees rise out of it as pale shapes
-    line = fy(4.7) + 1.2 * ppm * (0.6 * P.line1(150 * s) + 0.4 * P.line1(36 * s))
-    span = np.clip((xx - fx(6.5)) / (2.5 * ppm), 0, 1) * np.clip((fx(22.5) - xx) / (2.5 * ppm), 0, 1)
-    mh = P.below(line, 16 * s) * above * span
-    uh = lerp(rgb("#8FAA98"), rgb("#C6D0B6"), np.clip((yy - fy(4.7)) / (4.7 * ppm), 0, 1) ** 0.8)   # (run 4: too pale, it read as mist; more body at its top)
-    P.lay(uh, mh * 0.9)
-    P.brush(uh, mh, int(1500 * s), (14 * s, 40 * s), (1.2, 2.2), 0.0, 1.2, (0.35, 0.7), 0.03, 0.008, 1.4, 0.1)
-    for x in (8.6, 10.6, 13.2, 15.2, 17.9, 20.2):                               # (run 4: nine thin ones read as poles; fewer, broad, soft)
-        P.stroke([(fx(x), fy(0.4)), (fx(x + rng.uniform(-0.2, 0.2)), fy(2.0)), (fx(x + rng.uniform(-0.3, 0.3)), fy(3.6))], 13 * s, 8 * s, rgb("#86A090"), 1.2)
-    for x, z, rx, rz in ((10.4, 2.6, 1.3, 1.6), (13.9, 3.1, 1.0, 1.9), (15.6, 1.9, 1.4, 1.2), (18.3, 2.8, 1.1, 1.7), (12.2, 1.4, 1.6, 0.9)):
-        P.lay(rgb("#E9E6C4"), P.blob(fx(x), fy(z), rx * ppm, rz * ppm, 0.8, 0.3) * 0.42)                 # a few lights in it
-    del mh
+    # (Runs 4-5 made it an even band of mist with dark trunk smears: fog where version 4 had forest. LEAD 09:2x: FOREST
+    # SEEN THROUGH HAZE - a silhouette of crowns along its top (lobed, uneven, a palm head or two and two emergent crowns
+    # breaking it), two pale ranks (a bluer one behind a greener one), each fading into mist toward the ground, a few
+    # lights in it, and NOTHING in it darker than the mass: no trunk strokes.)
+    # (Runs 6-7: big soft lobes on a band of their own value read as CLOUD. Run 8: every crown is a dome of small lobes with
+    # a scalloped, fairly crisp edge on a rounded body; the old nearer band is paled behind the clearing so the silhouette
+    # has paler air behind it; the light touches each crown's upper right; pale gaps stand for the spaces between trunks.)
+    def far_crown(x, z, w, h, z_body):
+        """One far crown's silhouette (m; w, h = half sizes): a dome of lobes on a rounded body down to its rank."""
+        m = np.maximum(P.blob(fx(x), fy(z), 0.62 * w * ppm, 0.7 * h * ppm, 0.12, 0.22),
+                       P.blob(fx(x), fy((z + z_body) / 2), 0.72 * w * ppm, max(0.1, (z - z_body) * 0.62) * ppm, 0.12, 0.2))
+        for i in range(6):
+            a = math.radians(200 - 44 * i + rng.uniform(-10, 10))
+            r = rng.uniform(0.32, 0.46) * w
+            m = np.maximum(m, P.blob(fx(x + 0.72 * w * math.cos(a)), fy(z + 0.62 * h * math.sin(a)), r * ppm, 0.85 * r * ppm, 0.12, 0.22))
+        return m
+
+    def far_rank(z_body, crowns, c_top, c_mist, extra=None):
+        m = P.below(fy(z_body) + 0.12 * ppm * P.line1(40 * s), 5 * s)
+        lit = None
+        for x, z, w, h in crowns:
+            m = np.maximum(m, far_crown(x, z, w, h, z_body))
+            b = P.blob(fx(x + 0.3 * w), fy(z + 0.3 * h), 0.5 * w * ppm, 0.45 * h * ppm, 0.7, 0.3)
+            lit = b if lit is None else np.maximum(lit, b)
+        if extra is not None:
+            m = np.maximum(m, extra)
+        m = m * above * span
+        top = max(z + h for _, z, _, h in crowns)
+        u = lerp(rgb(c_top), rgb(c_mist), np.clip((yy - fy(top)) / (top * ppm), 0, 1) ** 1.2)   # fading into mist toward the ground
+        P.lay(u, m * 0.95)
+        P.brush(u, m, int(700 * s), (8 * s, 20 * s), (1.2, 2.0), 0.0, 1.2, (0.3, 0.6), 0.02, 0.006, 2.5, 0.1, clip=m)
+        P.lay(lerp(u, rgb(c_mist), 0.38), lit * m * 0.6)                        # the light on each crown: paler, never darker
+
+    ex, ez = 15.2, 5.5                                                          # a far emergent crown on its stem, breaking the top (run 8: at 5.9 on a long bare stem it was a lollipop)
+    palms = ((12.8, 4.3), (19.5, 4.4))                                          # two palm heads breaking the nearer rank's top
+    far_rank(3.5, ((7.3, 4.1, 1.2, 0.7), (9.4, 4.9, 1.4, 0.85), (10.9, 4.0, 0.8, 0.5), (12.7, 4.7, 1.3, 0.75), (14.6, 4.1, 1.0, 0.55), (16.6, 4.5, 1.4, 0.7),
+                   (18.5, 5.0, 1.1, 0.8), (19.8, 4.1, 0.9, 0.5), (21.5, 4.6, 1.3, 0.8)), "#8EABAD", "#C9D5C8",
+             np.maximum(far_crown(ex, ez, 1.0, 0.42, ez - 0.25), P.blob(fx(ex), fy(4.7), 0.1 * ppm, 0.9 * ppm, 0.3, 0.1)))
+    far_rank(2.5, ((7.9, 3.1, 1.1, 0.6), (9.6, 3.7, 1.0, 0.7), (11.9, 3.0, 1.4, 0.55), (13.5, 3.6, 0.9, 0.65), (15.6, 3.1, 1.3, 0.6), (16.9, 3.5, 0.9, 0.6),
+                   (18.7, 3.1, 1.0, 0.55), (20.6, 3.6, 1.3, 0.7), (22.2, 3.0, 0.9, 0.6)), "#80A389", "#CCD6BC",
+             np.maximum(*[P.blob(fx(x), fy((z + 2.6) / 2), 0.055 * ppm, (z - 2.6) * 0.53 * ppm, 0.4, 0.05) for x, z in palms]))   # their stems are of the mass (run 8: a stroke showed darker inside it)
+    green_ = rgb("#80A389")
+    for x, z in palms:                                                          # the heads, in the rank's own value
+        for i in range(9):
+            a = math.radians(-172 + 164 * i / 8)
+            ln = rng.uniform(0.85, 1.15) * ppm
+            P.stroke([(fx(x), fy(z)), (fx(x) + math.cos(a) * ln * 0.5, fy(z) + math.sin(a) * ln * 0.5), (fx(x) + math.cos(a) * ln, fy(z) + math.sin(a) * ln + 0.5 * ln * abs(math.cos(a)))],
+                     6 * s, 1.2 * s, green_, 2.5)
+    for x, z, rx, rz in ((10.4, 2.2, 1.2, 1.2), (15.9, 1.9, 1.4, 1.1), (19.0, 2.4, 1.0, 1.3),                 # a few lights in it ...
+                         (9.0, 1.7, 0.2, 1.2), (13.9, 1.8, 0.26, 1.4), (17.0, 1.7, 0.22, 1.3), (20.4, 1.6, 0.2, 1.1)):   # ... and pale gaps between trunks
+        P.lay(rgb("#E6E6C8"), P.blob(fx(x), fy(z), rx * ppm, rz * ppm, 0.8, 0.3) * span * 0.32)
     for c in range(3):
-        P.img[..., c] = P.box(P.img[..., c], 2.0 * s)
-    put(E_, 11.5, 0.5, 0.66, 0.66)
-    put(E_, 16.6, 0.5, 0.6, 0.68)
+        P.img[..., c] = P.box(P.img[..., c], 1.6 * s)
+    put(E_, 11.5, 0.5, 0.74, 0.66, trunk_pale=0.82)                             # the two pale emergent trees before it (LEAD: they stay;
+    put(E_, 17.9, 0.5, 0.68, 0.68, trunk_pale=0.84)                             # their trunks no darker than their crowns)
     # THE SIDES, two ranks; TANGLE (LEAD 09:1x): plants half hidden behind others and cut by the frame's edges (placed
     # from this camera's own edges), each throwing its shade on what is behind it
     for kind, x, k, pale, lean in ((E_, 4.4, 0.9, 0.34, 0.0), ("tree", 3.5, 0.8, 0.34, 0), ("palm", 5.6, 0.9, 0.3, 0), ("tree", 5.1, 0.86, 0.3, 0), (BA, 6.3, 0.82, 0.32, 0.0),
