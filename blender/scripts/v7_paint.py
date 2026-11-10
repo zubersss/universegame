@@ -121,24 +121,33 @@ GREY = np.array([0.50, 0.50, 0.50], np.float32)   # the mannequin: neutral, for 
 def mannequin(img, k, fx, fy, colour=GREY):
     """A plain neutral-grey figure 1.84 m tall, side view, facing right, for SCALE only (no design: capsules and an
     oval head). Drawn into img (opaque RGB) at k px per metre, its feet at pixel (fx, fy)."""
-    bx0, by0 = int(fx - 0.45 * k), int(fy - 1.90 * k)
-    bw, bh = int(0.9 * k), int(1.95 * k)
+    capsules(img, k, fx, fy, ((0.0, 1.50, 0.0, 1.02, 0.135, 0.12), (0.0, 1.02, 0.0, 0.92, 0.125, 0.12),            # chest, hips
+                              (0.01, 1.60, 0.02, 1.52, 0.055, 0.06),                                              # neck
+                              (-0.02, 0.92, -0.07, 0.50, 0.085, 0.060), (-0.07, 0.50, -0.10, 0.07, 0.058, 0.042),  # the back leg
+                              (0.03, 0.92, 0.09, 0.50, 0.085, 0.060), (0.09, 0.50, 0.10, 0.07, 0.058, 0.042),      # the front leg
+                              (-0.11, 0.035, 0.03, 0.035, 0.035, 0.035), (0.09, 0.035, 0.24, 0.035, 0.035, 0.035),  # feet
+                              (0.0, 1.46, 0.02, 1.17, 0.052, 0.042), (0.02, 1.17, 0.10, 0.92, 0.042, 0.036)),      # the arm
+             colour, ovals=((0.025, 1.725, 0.098, 0.115),))                                                        # the head: 0.23 m
+
+
+def capsules(img, k, fx, fy, caps, colour=GREY, ovals=()):
+    """Capsules [(ax, ay, bx, by, ra, rb)] and ovals [(cx, cy, rx, ry)], metres from the pixel (fx, fy) (x right, y up),
+    filled with ONE flat colour into img (opaque RGB) at k px per metre: the grey mannequin's parts."""
+    xs = [v for c in caps for v in (c[0] - max(c[4], c[5]), c[2] - max(c[4], c[5]), c[0] + max(c[4], c[5]), c[2] + max(c[4], c[5]))] + \
+         [v for o in ovals for v in (o[0] - o[2], o[0] + o[2])]
+    ys = [v for c in caps for v in (c[1] - max(c[4], c[5]), c[3] - max(c[4], c[5]), c[1] + max(c[4], c[5]), c[3] + max(c[4], c[5]))] + \
+         [v for o in ovals for v in (o[1] - o[3], o[1] + o[3])]
+    bx0, by0 = int(fx + (min(xs) - 0.02) * k), int(fy - (max(ys) + 0.02) * k)
+    bw, bh = int((max(xs) - min(xs) + 0.04) * k) + 2, int((max(ys) - min(ys) + 0.04) * k) + 2
     xm = ((np.arange(bx0, bx0 + bw, dtype=np.float32) + 0.5 - fx) / k)[None, :]
     ym = ((fy - (np.arange(by0, by0 + bh, dtype=np.float32) + 0.5)) / k)[:, None]
     d = np.full((bh, bw), 9.0, np.float32)
-
-    def cap(ax, ay, bx_, by_, ra, rb):
+    for ax, ay, bx_, by_, ra, rb in caps:
         vx, vy = bx_ - ax, by_ - ay
         t = np.clip(((xm - ax) * vx + (ym - ay) * vy) / max(vx * vx + vy * vy, 1e-6), 0, 1)
-        return np.hypot(xm - (ax + t * vx), ym - (ay + t * vy)) - (ra + (rb - ra) * t)
-    for c in ((0.0, 1.50, 0.0, 1.02, 0.135, 0.12), (0.0, 1.02, 0.0, 0.92, 0.125, 0.12),            # chest, hips
-              (0.01, 1.60, 0.02, 1.52, 0.055, 0.06),                                              # neck
-              (-0.02, 0.92, -0.07, 0.50, 0.085, 0.060), (-0.07, 0.50, -0.10, 0.07, 0.058, 0.042),  # the back leg
-              (0.03, 0.92, 0.09, 0.50, 0.085, 0.060), (0.09, 0.50, 0.10, 0.07, 0.058, 0.042),      # the front leg
-              (-0.11, 0.035, 0.03, 0.035, 0.035, 0.035), (0.09, 0.035, 0.24, 0.035, 0.035, 0.035),  # feet
-              (0.0, 1.46, 0.02, 1.17, 0.052, 0.042), (0.02, 1.17, 0.10, 0.92, 0.042, 0.036)):      # the arm
-        d = np.minimum(d, cap(*c))
-    d = np.minimum(d, np.hypot((xm - 0.025) / 0.098, (ym - 1.725) / 0.115) * 0.098 - 0.098)        # the head: 0.23 m
+        d = np.minimum(d, np.hypot(xm - (ax + t * vx), ym - (ay + t * vy)) - (ra + (rb - ra) * t))
+    for cx, cy, rx, ry in ovals:
+        d = np.minimum(d, np.hypot((xm - cx) / rx, (ym - cy) / ry) * min(rx, ry) - min(rx, ry))
     a = np.clip(0.5 - d * k, 0, 1)
     x0, y0, x1, y1 = max(bx0, 0), max(by0, 0), min(bx0 + bw, img.shape[1]), min(by0 + bh, img.shape[0])
     if x1 > x0 and y1 > y0:
